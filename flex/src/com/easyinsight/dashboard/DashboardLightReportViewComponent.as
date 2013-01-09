@@ -17,25 +17,24 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
-import mx.containers.Box;
+import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
-import mx.controls.Alert;
 import mx.controls.Label;
 
-public class DashboardReportViewComponent extends VBox implements IDashboardViewComponent  {
+public class DashboardLightReportViewComponent extends Canvas implements IDashboardViewComponent  {
 
     public var dashboardReport:DashboardReport;
     private var viewFactory:EmbeddedViewFactory;
 
     private var report:AnalysisDefinition;
 
-    public function DashboardReportViewComponent() {
+    public function DashboardLightReportViewComponent() {
         super();        
         //setStyle("cornerRadius", 10);
         setStyle("horizontalAlign", "center");
         setStyle("verticalAlign", "middle");
-        setStyle("verticalGap", 5);
+        setStyle("verticalGap", 0);
         setStyle("paddingLeft", 0);
         setStyle("paddingRight", 0);
         setStyle("paddingTop", 0);
@@ -49,23 +48,6 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     }
     
     private var alteredHeight:int = -1;
-
-    override protected function commitProperties():void {
-        super.commitProperties();
-        var sizeInfo:SizeInfo = obtainPreferredSizeInfo();
-        if (sizeInfo.preferredWidth > 0) {
-            width = dashboardReport.preferredWidth;
-        } else {
-            percentWidth = 100;
-        }
-        if (!sizeInfo.autoCalcHeight && sizeInfo.preferredHeight > 0) {
-            height = dashboardReport.preferredHeight;
-        } else if (dashboardEditorMetadata.dashboard.absoluteSizing) {
-            height = 400;
-        } else {
-            percentHeight = 100;
-        }
-    }
 
     protected override function createChildren():void {
         super.createChildren();
@@ -81,8 +63,6 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         }
         if (sizeInfo.preferredHeight > 0) {
             height = dashboardReport.preferredHeight;
-        } else if (dashboardEditorMetadata.dashboard.absoluteSizing) {
-            height = 400;
         } else {
             percentHeight = 100;
         }
@@ -99,24 +79,8 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         viewFactory.reportID = dashboardReport.report.id;
         viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
         viewFactory.dashboardID = dashboardEditorMetadata.dashboardID;
-        viewFactory.spaceSides = false;
-        if (dashboardReport.showLabel) {
-            var blah:Box = new Box();
-            blah.height = 24;
-            blah.setStyle("backgroundColor", 0xDDDDDD);
-            blah.setStyle("borderThickness", 1);
-            blah.setStyle("borderStyle", "solid");
-            blah.percentWidth = 100;
-            blah.setStyle("horizontalAlign", "center");
-            var label:Label = new Label();
-            label.setStyle("fontSize", 14);
-            label.text = dashboardReport.report.name;
-            blah.addChild(label);
-            addChild(blah);
-            addChild(viewFactory);
-        } else {
-            addChild(viewFactory);
-        }
+        viewFactory.spaceSides = dashboardReport.spaceSides;
+        addChild(viewFactory);
 
         viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onReportSetup);
         viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, onData);
@@ -133,9 +97,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     private function sizeOverride(event:SizeOverrideEvent):void {
         event.stopPropagation();
         if (event.height != -1) {
-            this.percentHeight = NaN;
-            //Alert.show("setting size to " + event.height);
-            var h:int = event.height + (this.transformContainer ? this.transformContainer.height : 0) + 10 + (dashboardReport.showLabel ? 30 : 0);
+            var h:int = event.height + 20;
             this.height = h;
             alteredHeight = h;
             dispatchEvent(new SizeOverrideEvent(-1, h));
@@ -178,12 +140,9 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         return filterColl;
     }
 
-    private var transformContainer:TransformContainer;
-
     public var elementID:String;
 
     private function transformsUpdated(event:Event):void {
-        filterMap[elementID] = transformContainer.getFilterDefinitions();
         updateAdditionalFilters(filterMap);
         refresh();
     }
@@ -191,13 +150,6 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     public var dashboardEditorMetadata:DashboardEditorMetadata;
 
     public function toggleFilters(showFilters:Boolean):void {
-        if (hasFilters) {
-            if (!showFilters) {
-                removeChild(transformContainer);
-            } else {
-                addChildAt(transformContainer, dashboardReport.showLabel ? 1 : 0);
-            }
-        }
     }
 
     private var hasFilters:Boolean = false;
@@ -208,10 +160,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         if (event.reportInfo.report.filterDefinitions.length > 0) {
 
             var parentFilters:ArrayCollection = createAdditionalFilters(filterMap);
-            transformContainer = new TransformContainer();
-            transformContainer.report = event.reportInfo.report;
 
-            transformContainer.filterEditable = false;
             var myFilterColl:ArrayCollection = new ArrayCollection();
             var visibleFilters:int = 0;
             for each (var filterDefinition:FilterDefinition in filterDefinitions) {
@@ -228,37 +177,6 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                     visibleFilters++;
                 }
                 myFilterColl.addItem(filterDefinition);
-            }
-            var index:int = dashboardReport.showLabel ? 1 : 0;
-            if (myFilterColl.length > 0) {
-
-                hasFilters = true;
-                transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
-                transformContainer.dashboardID = dashboardEditorMetadata.dashboardID;
-                transformContainer.existingFilters = myFilterColl;
-                filterMap[elementID] = myFilterColl;
-                updateAdditionalFilters(filterMap);
-                transformContainer.percentWidth = 100;
-                transformContainer.setStyle("paddingLeft", 10);
-                transformContainer.setStyle("paddingRight", 10);
-                transformContainer.setStyle("paddingTop", 10);
-                transformContainer.setStyle("paddingBottom", 10);
-                transformContainer.reportView = true;
-                transformContainer.role = dashboardEditorMetadata.role;
-                transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-                if (visibleFilters > 0) {
-                    addChildAt(transformContainer, index++);
-                }
-            }
-            if (event.reportInfo.report.adHocExecution) {
-                var executeButton:SaveButton = new SaveButton();
-                executeButton.label = "Run the Report";
-                executeButton.addEventListener(MouseEvent.CLICK, runReport);
-                var runBox:HBox = new HBox();
-                runBox.setStyle("horizontalAlign", "center");
-                runBox.percentWidth = 100;
-                runBox.addChild(executeButton);
-                addChildAt(runBox, index);
             }
         }
         viewFactory.additionalFilterDefinitions = createAdditionalFilters(filterMap);

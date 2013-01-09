@@ -53,6 +53,51 @@ public class Dashboard implements Cloneable, Serializable {
     private int folder;
     private boolean absoluteSizing;
     private boolean reportAccessProblem;
+    private int stackFill1Start;
+    private int stackFill1SEnd;
+    private int stackFill2Start;
+    private int stackFill2End;
+    private boolean fillStackHeaders;
+
+    public boolean isFillStackHeaders() {
+        return fillStackHeaders;
+    }
+
+    public void setFillStackHeaders(boolean fillStackHeaders) {
+        this.fillStackHeaders = fillStackHeaders;
+    }
+
+    public int getStackFill1Start() {
+        return stackFill1Start;
+    }
+
+    public void setStackFill1Start(int stackFill1Start) {
+        this.stackFill1Start = stackFill1Start;
+    }
+
+    public int getStackFill1SEnd() {
+        return stackFill1SEnd;
+    }
+
+    public void setStackFill1SEnd(int stackFill1SEnd) {
+        this.stackFill1SEnd = stackFill1SEnd;
+    }
+
+    public int getStackFill2Start() {
+        return stackFill2Start;
+    }
+
+    public void setStackFill2Start(int stackFill2Start) {
+        this.stackFill2Start = stackFill2Start;
+    }
+
+    public int getStackFill2End() {
+        return stackFill2End;
+    }
+
+    public void setStackFill2End(int stackFill2End) {
+        this.stackFill2End = stackFill2End;
+    }
 
     public boolean isReportAccessProblem() {
         return reportAccessProblem;

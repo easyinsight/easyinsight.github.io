@@ -49,7 +49,10 @@ public class DashboardElementFactory {
         return null;
     }
 
-    public static function createViewUIComponent(element:DashboardElement, dashboardEditorMetadata:DashboardEditorMetadata):UIComponent {
+    public static function createViewUIComponent(element:DashboardElement, dashboardEditorMetadata:DashboardEditorMetadata, parent:DashboardElement):UIComponent {
+        if (parent != null) {
+            element.dashboardLevel = parent.dashboardLevel + 1;
+        }
         if (element is DashboardGrid) {
             var gridComp:DashboardGridViewComponent = new DashboardGridViewComponent();
             gridComp.dashboardGrid = element as DashboardGrid;

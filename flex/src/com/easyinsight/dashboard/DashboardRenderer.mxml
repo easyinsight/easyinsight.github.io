@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*" width="100%"
-         height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" horizontalScrollPolicy="off"
+         paddingLeft="10" paddingRight="10" paddingBottom="10" horizontalScrollPolicy="off"
         verticalGap="0">
     <mx:Script><![CDATA[
         import com.easyinsight.filtering.AnalysisItemFilterDefinition;
@@ -41,35 +41,35 @@
         }
 
         public function createDashboard(width:int = 0, height:int = 0):IDashboardViewComponent {
-            var primary:VBox = new VBox();
+            /*var primary:VBox = new VBox();
             primary.percentHeight = 100;
             primary.percentWidth = 100;
             primary.setStyle("verticalGap", 0);
-            primary.setStyle("horizontalAlign", "center");
+            primary.setStyle("horizontalAlign", "center");*/
 
             if (!_fixedID) {
-                dashboardStyleArea.setStyle("paddingLeft", dashboard.padding);
+                /*dashboardStyleArea.setStyle("paddingLeft", dashboard.padding);
                 dashboardStyleArea.setStyle("paddingRight", dashboard.padding);
                 dashboardStyleArea.setStyle("paddingTop", dashboard.padding);
-                dashboardStyleArea.setStyle("paddingBottom", dashboard.padding);
+                dashboardStyleArea.setStyle("paddingBottom", dashboard.padding);*/
             } else {
                 removeChild(filterViewStack);
-                setStyle("paddingTop", 0);
+                /*setStyle("paddingTop", 0);
                 setStyle("paddingLeft", 0);
                 setStyle("paddingRight", 0);
-                setStyle("paddingBottom", 0);
+                setStyle("paddingBottom", 0);*/
             }
 
-            if (ApplicationSkin.instance() != null && ApplicationSkin.instance().reportHeader && dashboard.borderThickness > 0) {
+            /*if (ApplicationSkin.instance() != null && ApplicationSkin.instance().reportHeader && dashboard.borderThickness > 0) {
                 dashboardStyleArea.setStyle("backgroundColor", ApplicationSkin.instance().headerBackgroundColor);
             } else {
                 dashboardStyleArea.setStyle("backgroundColor", dashboard.backgroundColor);
-            }
+            }*/
 
-            if (dashboard.backgroundColor == 0xFFFFFF) {
+            /*if (dashboard.backgroundColor == 0xFFFFFF) {
                 setStyle("backgroundColor", 0xFFFFFF);
-            }
-
+            }*/
+            dashboardStyleArea.setStyle("backgroundColor", 0xFFFFFF);
             dashboardStyleArea.setStyle("borderThickness", dashboard.borderThickness);
             if (dashboard.borderThickness > 0) {
                 dashboardStyleArea.setStyle("cornerRadius", 8);
@@ -83,6 +83,10 @@
             var toUse:ArrayCollection = new ArrayCollection();
             var fToAdd:Object = new Object();
             if (_initialFilters != null) {
+                // Christina Devormer
+                // Christina Devormer
+
+                //
                 for each (var eFilter:FilterDefinition in _initialFilters) {
                     if (eFilter.getType() == FilterDefinition.ANALYSIS_ITEM) {
                         paramObj[eFilter.filterName] = eFilter;
@@ -116,7 +120,7 @@
             for each (var remainingFilter:FilterDefinition in fToAdd) {
                 toUse.addItem(remainingFilter);
             }
-            
+
             var visibleCount:int = 0;
             for each (var visibleFilter:FilterDefinition in toUse) {
                 if (visibleFilter.showOnReportView) {
@@ -128,6 +132,12 @@
 
             filterIndex = (visibleCount > 0) ? 1 : 0;
 
+            if (!dashboard.absoluteSizing) {
+                percentHeight = 100;
+                dashboardCanvas.percentHeight = 100;
+                dashboardStyleArea.percentHeight = 100;
+            }
+
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
             dashboardEditorMetadata.dataSourceID = dataSourceID;
             dashboardEditorMetadata.dashboardID = dashboard.id;
@@ -137,7 +147,7 @@
             dashboardEditorMetadata.borderThickness = dashboard.borderThickness;
             dashboardEditorMetadata.dashboard = dashboard;
             dashboardEditorMetadata.dashboardView = this;
-            rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata) as IDashboardViewComponent;
+            rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata, null) as IDashboardViewComponent;
             Container(rootView).verticalScrollPolicy = "off";
             Container(rootView).horizontalScrollPolicy = "off";
             Container(dashboardStyleArea).horizontalScrollPolicy = "off";
@@ -223,12 +233,10 @@
                                           reportView="true" dashboardID="{_dashboardID}" updatedTransforms="transformsUpdated(event)"/>
 
     </mx:ViewStack>
-    <mx:VBox width="100%" height="100%" backgroundAlpha="1" borderColor="0" id="dashboardStyleArea">
-        <mx:Canvas width="100%" height="100%" horizontalScrollPolicy="off">
-            <mx:Canvas id="dashboardCanvas" width="100%" height="100%" horizontalScrollPolicy="off"/>
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" id="loadingBox">
-                <mx:ProgressBar indeterminate="true" label="Loading the dashboard..."/>
-            </mx:Box>
-        </mx:Canvas>
-    </mx:VBox>
+    <mx:Canvas width="100%" backgroundAlpha="1" borderColor="0" id="dashboardStyleArea">
+        <mx:Canvas id="dashboardCanvas" width="100%" horizontalScrollPolicy="off"/>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" id="loadingBox">
+            <mx:ProgressBar indeterminate="true" label="Loading the dashboard..."/>
+        </mx:Box>
+    </mx:Canvas>
 </mx:VBox>

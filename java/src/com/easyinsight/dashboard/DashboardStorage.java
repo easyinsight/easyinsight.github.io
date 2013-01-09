@@ -230,8 +230,9 @@ public class DashboardStorage {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD (DASHBOARD_NAME, URL_KEY, " +
                     "ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE, UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, TEMPORARY_DASHBOARD," +
                     "PUBLIC_VISIBLE, border_color, border_thickness, background_color, padding," +
-                    "recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    "recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing," +
+                    "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             insertStmt.setString(1, dashboard.getName());
             insertStmt.setString(2, dashboard.getUrlKey());
             insertStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -253,6 +254,11 @@ public class DashboardStorage {
             insertStmt.setString(19, dashboard.getMarmotScript());
             insertStmt.setInt(20, dashboard.getFolder());
             insertStmt.setBoolean(21, dashboard.isAbsoluteSizing());
+            insertStmt.setInt(22, dashboard.getStackFill1Start());
+            insertStmt.setInt(23, dashboard.getStackFill1SEnd());
+            insertStmt.setInt(24, dashboard.getStackFill2Start());
+            insertStmt.setInt(25, dashboard.getStackFill2End());
+            insertStmt.setBoolean(26, dashboard.isFillStackHeaders());
             insertStmt.execute();
             dashboard.setId(Database.instance().getAutoGenKey(insertStmt));
             insertStmt.close();
@@ -260,7 +266,8 @@ public class DashboardStorage {
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET DASHBOARD_NAME = ?," +
                     "URL_KEY = ?, ACCOUNT_VISIBLE = ?, UPDATE_DATE = ?, DESCRIPTION = ?, EXCHANGE_VISIBLE = ?, AUTHOR_NAME = ?, TEMPORARY_DASHBOARD = ?," +
                     "PUBLIC_VISIBLE = ?, border_color = ?, border_thickness = ?, background_color = ?, padding = ?," +
-                    "recommended_exchange = ?, ytd_date = ?, ytd_override = ?, marmotscript = ?, folder = ?, absolute_sizing = ? WHERE DASHBOARD_ID = ?");
+                    "recommended_exchange = ?, ytd_date = ?, ytd_override = ?, marmotscript = ?, folder = ?, absolute_sizing = ?," +
+                    "stack_fill1_start = ?, stack_fill1_end = ?, stack_fill2_start = ?, stack_fill2_end = ?, stack_fill_enabled = ? WHERE DASHBOARD_ID = ?");
             updateStmt.setString(1, dashboard.getName());
             updateStmt.setString(2, dashboard.getUrlKey());
             updateStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -280,7 +287,12 @@ public class DashboardStorage {
             updateStmt.setString(17, dashboard.getMarmotScript());
             updateStmt.setInt(18, dashboard.getFolder());
             updateStmt.setBoolean(19, dashboard.isAbsoluteSizing());
-            updateStmt.setLong(20, dashboard.getId());
+            updateStmt.setInt(20, dashboard.getStackFill1Start());
+            updateStmt.setInt(21, dashboard.getStackFill1SEnd());
+            updateStmt.setInt(22, dashboard.getStackFill2Start());
+            updateStmt.setInt(23, dashboard.getStackFill2End());
+            updateStmt.setBoolean(24, dashboard.isFillStackHeaders());
+            updateStmt.setLong(25, dashboard.getId());
             updateStmt.executeUpdate();
             updateStmt.close();
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ?");
@@ -338,7 +350,8 @@ public class DashboardStorage {
         Dashboard dashboard;
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, URL_KEY, ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE," +
                     "UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, temporary_dashboard, public_visible, border_color, border_thickness," +
-                "background_color, padding, recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                "background_color, padding, recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing," +
+                "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled FROM DASHBOARD WHERE DASHBOARD_ID = ?");
         queryStmt.setLong(1, dashboardID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -365,6 +378,11 @@ public class DashboardStorage {
             dashboard.setMarmotScript(rs.getString(19));
             dashboard.setFolder(rs.getInt(20));
             dashboard.setAbsoluteSizing(rs.getBoolean(21));
+            dashboard.setStackFill1Start(rs.getInt(22));
+            dashboard.setStackFill1SEnd(rs.getInt(23));
+            dashboard.setStackFill2Start(rs.getInt(24));
+            dashboard.setStackFill2End(rs.getInt(25));
+            dashboard.setFillStackHeaders(rs.getBoolean(26));
             PreparedStatement findElementsStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, ELEMENT_TYPE FROM " +
                     "DASHBOARD_ELEMENT, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ? AND DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID = DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID");
             findElementsStmt.setLong(1, dashboardID);

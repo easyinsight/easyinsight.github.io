@@ -29,12 +29,8 @@ import mx.managers.PopUpManager;
 
 public class SearchButton extends Button {
 
-    [Embed(source="../../../../assets/find.png")]
-    private var findIcon:Class;
-
     public function SearchButton() {
-        setStyle("icon", findIcon);
-        setStyle("labelPlacement", "right");
+        styleName = "altGrayButton";
         label = "Search";
         addEventListener(MouseEvent.CLICK, onClick);
     }

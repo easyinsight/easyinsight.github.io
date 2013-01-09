@@ -16,7 +16,7 @@ import mx.events.FlexEvent;
 public class GridCheckbox extends UIComponent implements IListItemRenderer {
 
 
-    private var checkbox:CheckBox;
+    protected var checkbox:CheckBox;
 
     public function GridCheckbox() {
         super();

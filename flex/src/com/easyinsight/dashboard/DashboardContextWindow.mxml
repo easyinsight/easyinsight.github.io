@@ -12,9 +12,11 @@
             _dashboardDescriptor = value;
         }
 
+        [Bindable]
         [Embed(source="../../../../assets/businessman_edit.png")]
         public var adminIcon:Class;
 
+        [Bindable]
         [Embed(source="../../../../assets/media_play_green.png")]
         public var playIcon:Class;
 

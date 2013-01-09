@@ -21,14 +21,15 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
     private function dashboardPopulate(event:DashboardPopulateEvent):void {
         var box:DashboardBox = event.dashboardBox;
         var index:int = viewChildren.getItemIndex(box);
+        var pos:int = index * 2 + 1;
         if (box.element == null) {
-            (getButtonsBox().getChildAt(index))["label"] = "Stack Item " + index;
+            (getButtonsBox().getChildAt(pos))["label"] = "Stack Item " + index;
         } else if (box.element is DashboardReport) {
-            (getButtonsBox().getChildAt(index))["label"] = DashboardReport(box.element).report.name;
+            (getButtonsBox().getChildAt(pos))["label"] = DashboardReport(box.element).report.name;
         } else if (box.element.label != null && box.element.label != "") {
-            (getButtonsBox().getChildAt(index))["label"] = box.element.label;
+            (getButtonsBox().getChildAt(pos))["label"] = box.element.label;
         } else {
-            (getButtonsBox().getChildAt(index))["label"] = "Stack Item " + index;
+            (getButtonsBox().getChildAt(pos))["label"] = "Stack Item " + index;
         }  
     }
 
@@ -98,10 +99,10 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }*/
-        var button:Button = new Button();
+        /*var button:Button = new Button();
         button.label = "Add";
         button.addEventListener(MouseEvent.CLICK, addStackElement);
-        getButtonsBox().addChild(button);
+        getButtonsBox().addChild(button);*/
          /*else {
             recreateStructure();
         }*/
@@ -111,9 +112,9 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
     private function deletePage(event:DashboardStackEvent):void {
         var button:UIComponent = event.currentTarget as UIComponent;
         dashboardStack.count--;
-        var index:int = getButtonsBox().getChildIndex(button);
+        var index:int = button["data"];
         dashboardStack.gridItems.removeItemAt(index);
-        getButtonsBox().removeChildAt(index);
+        getButtonsBox().removeChildAt(getButtonsBox().getChildIndex(button));
         viewStack.removeChildAt(index);
         viewChildren.removeItemAt(index);
     }
@@ -128,11 +129,11 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         return topButton;
     }
 
-    private function addStackElement(event:MouseEvent):void {
+    public function addStackElement():void {
         dashboardStack.count++;
         var stackItem:DashboardStackItem = new DashboardStackItem();
         dashboardStack.gridItems.addItem(stackItem);
-        addStackChild(stackItem, dashboardStack.gridItems.getItemIndex(stackItem));
+        addStackChild(stackItem, dashboardStack.gridItems.length - 1);
     }
 
     private function onDimensions(event:GridDimensionEvent):void {

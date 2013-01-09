@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
-         width="100%" borderStyle="none" xmlns:easyinsight="com.easyinsight.*" horizontalGap="0" verticalAlign="middle"
-        creationComplete="setup()" height="68" implements="com.easyinsight.listing.IHeaderBar">
+         width="100%" xmlns:easyinsight="com.easyinsight.*" horizontalGap="0" verticalGap="0" top="0" bottom="0"
+         height="38" implements="com.easyinsight.listing.IHeaderBar" paddingTop="0" paddingBottom="0" paddingLeft="0"
+         paddingRight="0"
+         styleName="gradientBackgroundX" borderThickness="0" borderStyle="solid" horizontalAlign="center">
     <mx:Metadata>
         [Event(name="listingChange", type="com.easyinsight.listing.ListingChangeEvent")]
         [Event(name="launchQuickSearch", type="com.easyinsight.listing.LaunchQuickSearchEvent")]
@@ -9,182 +11,88 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.ModulePerspective;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
+        import com.easyinsight.listing.HeaderListingOption;
+        import com.easyinsight.listing.IPerspective;
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.preferences.UIOption;
 
         import com.easyinsight.skin.ApplicationSkin;
 
         import mx.binding.utils.BindingUtils;
-        import mx.states.RemoveChild;
-        import mx.states.State;
+        import mx.events.ItemClickEvent;
 
-        private function setup():void {
-            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loginEvent);
-            User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
-            User.getEventNotifier().addEventListener("uiChange", uiChangeEvent);
-            if (User.getInstance().uiConfiguration != null) {
-                createState(User.getInstance().uiConfiguration);
-            }
-            if (ApplicationSkin.instance().headerBarLogo != null) {
-                logoImage.source = ApplicationSkin.instance().headerBarLogo;
-            }
-        }
-
-        private function loginEvent(event:LoginEvent):void {
-            if (event.type == LoginEvent.LOGIN) {
-                if (User.getInstance().uiConfiguration != null) {
-                    createState(User.getInstance().uiConfiguration);
-                }
-            }
-        }
-
-        private function uiChangeEvent(event:Event):void {
-            if (User.getInstance().uiConfiguration != null) {
-                createState(User.getInstance().uiConfiguration);
-            }
-        }
 
         public function set headerBarBackgroundColor(value:uint):void {
-            setStyle("backgroundColor", value);
+            //setStyle("backgroundColor", value);
         }
 
         protected override function createChildren():void {
             super.createChildren();
-            BindingUtils.bindProperty(this, "headerBarBackgroundColor", ApplicationSkin.instance(), "headerBarBackgroundColor");
-            BindingUtils.bindProperty(this, "headerBarLogo", ApplicationSkin.instance(), "headerBarLogo");
+            /*BindingUtils.bindProperty(this, "headerBarBackgroundColor", ApplicationSkin.instance(), "headerBarBackgroundColor");
+             BindingUtils.bindProperty(this, "headerBarLogo", ApplicationSkin.instance(), "headerBarLogo");*/
         }
-
-        private var _headerBarLogo:Object;
-
-        public function set headerBarLogo(value:Object):void {
-            _headerBarLogo = value;
-            if (value is Bitmap) {
-                var bitmap:Bitmap = ApplicationSkin.instance().headerBarLogo as Bitmap;
-                logoImage.source = new Bitmap(bitmap.bitmapData);
-            } else {
-                logoImage.source = logo;
-            }
-        }
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/house.png")]
-        private var homeIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/shopping_bag.png")]
-        private var catalogIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/calendar.png")]
-        private var scheduleIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/components.png")]
-        private var solutionsIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/user.png")]
-        private var accountIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/help.png")]
-        private var helpIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/logo2.PNG")]
-        private var logo:Class;
 
         [Bindable]
         private var loggedIn:Boolean = false;
 
-        private function onListingChange(event:ListingChangeEvent):void {
-            //dispatchEvent(event);
-        }
-
-        private function findNode(targetPage:String, items:Array):ListingOption {
-            for each (var obj:Object in items) {
-                if (obj is ListingOption) {
-                    var listingOption:ListingOption = obj as ListingOption;
-                    if (listingOption.displayName == targetPage) {
-                        return listingOption;
-                    }
+        private static function findNode(targetPage:String, items:ArrayCollection):HeaderListingOption {
+            for each (var obj:HeaderListingOption in items) {
+                if (obj.label == targetPage) {
+                    return obj;
                 }
             }
             return null;
         }
 
+        private var perspectiveMap:Object = new Object();
+
+        private function getPerspective(type:int):IPerspective {
+            var perspective:IPerspective = perspectiveMap[String(type)];
+            if (perspective == null) {
+                perspective = new ModulePerspective(new PerspectiveInfo(type));
+                perspectiveMap[type] = perspective;
+            }
+            return perspective;
+        }
+
         public function explicitChange(targetPage:String, properties:Object):void {
-            var listingOption:ListingOption = findNode(targetPage, getChildren());
+
+            var listingOption:HeaderListingOption = findNode(targetPage, nodes);
             if (listingOption != null) {
-                dispatchEvent(new ListingChangeEvent(listingOption.perspective, properties));
-            }
-        }
-
-        private function createState(config:UIConfiguration):void {
-            currentState = "";
-            var ops:Array = [];
-            //evaluate(apiListingOption, UIConfiguration.SHOW_APIS, config, ops);
-            evaluate(accountsOption, UIConfiguration.SHOW_ACCOUNT, config, ops);
-            evaluate(connectionsOption, UIConfiguration.SHOW_CONNECTIONS, config, ops);
-            evaluate(exchangeOption, UIConfiguration.SHOW_EXCHANGE, config, ops);
-            if (ops.length > 0) {
-                var state:State = new State();
-                state.overrides = ops;
-                state.name = "Persona";
-                states = [ state ];
-                currentState = "Persona";
+                toggleBar.selectedIndex = nodes.getItemIndex(listingOption);
+                dispatchEvent(new ListingChangeEvent(getPerspective(listingOption.perspective), properties));
             }
 
         }
 
-        private function evaluate(listingOption:ListingOption, key:String, uiConfig:UIConfiguration, ops:Array):void {
-            var uiOption:UIOption = uiConfig.getConfiguration(key);
-            if (!uiOption.selected) {
-                var removeChild:RemoveChild = new RemoveChild();
-                removeChild.target = listingOption;
-                ops.push(removeChild);
-            }
+        private function choseButton(event:ItemClickEvent):void {
+            var option:HeaderListingOption = event.item as HeaderListingOption;
+            dispatchEvent(new ListingChangeEvent(getPerspective(option.perspective)));
         }
-		]]>
+        ]]>
     </mx:Script>
-    <mx:Image source="{logo}" id="logoImage" maxWidth="180" maxHeight="50"/>
-    <mx:Spacer width="10"/>
-    <listing:ListingOption perspectiveClass="{PerspectiveInfo.HOME_PAGE}" displayName="Home" listingChange="onListingChange(event)" width="85">
-        <mx:Image source="{homeIcon}" id="homeImage"/>
-        <mx:Label text="Home" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-    </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{PerspectiveInfo.CONNECTIONS}" displayName="Connections" listingChange="onListingChange(event)"
-            id="connectionsOption" width="85">
-        <mx:Image source="{solutionsIcon}" id="solutionsImage"/>
-        <mx:Label text="Connections" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-    </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{PerspectiveInfo.EXCHANGE}" displayName="Exchange" listingChange="onListingChange(event)"
-            id="exchangeOption" width="85">
-        <mx:Image source="{catalogIcon}" id="catalogImage"/>
-        <mx:Label text="Exchange" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-    </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{PerspectiveInfo.SCHEDULING}" displayName="Scheduling" listingChange="onListingChange(event)"
-            id="scheduleOption" width="85">
-        <mx:Image source="{scheduleIcon}" id="scheduleImage"/>
-        <mx:Label text="Scheduling" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-    </listing:ListingOption>
-    <!--<listing:ListingOption perspectiveClass="{PerspectiveInfo.API}" displayName="Developers" listingChange="onListingChange(event)" id="apiListingOption" width="85">
-        <mx:Image source="{apiIcon}" id="apiImage"/>
-        <mx:Label text="Developers" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-    </listing:ListingOption>-->
-    <listing:ListingOption perspectiveClass="{PerspectiveInfo.ACCOUNT}" displayName="Accounts" listingChange="onListingChange(event)"
-            id="accountsOption" width="85">
-        <mx:Image source="{accountIcon}" id="accountImage"/>
-        <mx:Label text="Account" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-    </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{PerspectiveInfo.HELP}" displayName="Help" listingChange="onListingChange(event)" width="85">
-        <mx:Image source="{helpIcon}" id="helpImage"/>
-        <mx:Label text="Help" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-    </listing:ListingOption>
-    <mx:Spacer width="100%"/>
-    <listing:SearchButton/>
-    <mx:Spacer width="10"/>
-    <easyinsight:LoggedOnStatus/>
+    <mx:ArrayCollection id="nodes">
+        <mx:Array>
+            <listing:HeaderListingOption label="Home" perspective="{PerspectiveInfo.HOME_PAGE}"/>
+            <listing:HeaderListingOption label="Connections" perspective="{PerspectiveInfo.CONNECTIONS}"/>
+            <listing:HeaderListingOption label="Exchange" perspective="{PerspectiveInfo.EXCHANGE}"/>
+            <listing:HeaderListingOption label="Scheduling" perspective="{PerspectiveInfo.SCHEDULING}"/>
+            <listing:HeaderListingOption label="Account" perspective="{PerspectiveInfo.ACCOUNT}"/>
+            <listing:HeaderListingOption label="Help" perspective="{PerspectiveInfo.HELP}"/>
+        </mx:Array>
+    </mx:ArrayCollection>
+    <mx:HBox width="1000" verticalAlign="middle">
+
+        <mx:ToggleButtonBar buttonStyleName="topGrayButton" dataProvider="{nodes}" itemClick="choseButton(event)"
+                            fontSize="24" height="38" selectedButtonTextStyleName="headerSelected"
+                            top="0" bottom="0" id="toggleBar">
+        </mx:ToggleButtonBar>
+        <mx:Spacer width="100%"/>
+        <listing:SearchButton/>
+        <!--<easyinsight:NewLoggedOnStatus/>-->
+        <easyinsight:AltLoggedOnStatus/>
+    </mx:HBox>
 </mx:HBox>

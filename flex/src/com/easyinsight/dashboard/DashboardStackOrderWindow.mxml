@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="500">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _dashboardStack:DashboardStack;
+
+        [Bindable]
+        private var stackChildren:ArrayCollection;
+
+        public function set dashboardStack(value:DashboardStack):void {
+            _dashboardStack = value;
+            stackChildren = _dashboardStack.gridItems;
+            var index:int = 1;
+            for each (var item:DashboardStackItem in stackChildren) {
+                var label:String;
+                if (item.dashboardElement is DashboardReport) {
+                    label = DashboardReport(item.dashboardElement).report.name;
+                } else {
+                    label = "Stack Item " + index;
+                }
+                item.stackLabel = label;
+                index++;
+            }
+        }
+        ]]></mx:Script>
+    <mx:DataGrid dataProvider="{stackChildren}" dragEnabled="true" dropEnabled="true" dragMoveEnabled="true" headerHeight="0" width="100%">
+        <mx:columns>
+            <mx:DataGridColumn dataField="stackLabel" sortable="false"/>
+        </mx:columns>
+    </mx:DataGrid>
+</mx:VBox>

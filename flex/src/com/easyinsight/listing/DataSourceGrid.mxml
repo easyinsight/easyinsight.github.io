@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center" initialize="onCreation()">
     <mx:Script><![CDATA[
+        import com.easyinsight.feedassembly.CompositeCreator;
         import com.easyinsight.framework.User;
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.solutions.DataSourceDescriptor;
 
         import mx.collections.ArrayCollection;
@@ -101,14 +103,31 @@
             }
         }
 
+        private function createCompositeFeed():void {
+            var descriptors:ArrayCollection = new ArrayCollection();
+            var creator:CompositeCreator = new CompositeCreator(this);
+            creator.dataSources = descriptors;
+            creator.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
+            creator.start();
+        }
+
+        private function onAnalyze(event:AnalyzeEvent):void {
+            dispatchEvent(event);
+        }
+
         private function onDismissed(event:Event):void {
             removeChild(DisplayObject(event.currentTarget));
         }
         ]]></mx:Script>
-    <mx:HBox paddingLeft="20" paddingRight="20"
+    <mx:HBox width="680" verticalAlign="middle">
+        <mx:Label text="Data Sources" fontSize="20" maxWidth="300"/>
+        <mx:Spacer width="100%"/>
+        <mx:LinkButton label="Join data sources" click="createCompositeFeed()" fontSize="12"/>
+    </mx:HBox>
+    <mx:HBox paddingLeft="10" paddingRight="10"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
-         horizontalGap="20"
-         backgroundColor="#FFFFFF" paddingTop="20" paddingBottom="20">
+         backgroundColor="#FFFFFF" paddingTop="5" paddingBottom="5">
+
         <mx:DataGrid fontSize="12" horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
             verticalGridLines="true" id="dataSourceGrid" horizontalScrollPolicy="off" verticalScrollPolicy="off" selectable="false"
                 dataProvider="{dataProvider}" rowHeight="24">

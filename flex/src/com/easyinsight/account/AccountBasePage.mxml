@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
                       implements="com.easyinsight.listing.IPerspective"
-                      xmlns:listing="com.easyinsight.listing.*" xmlns:account="com.easyinsight.account.*"
+                      xmlns:account="com.easyinsight.account.*"
                       creationComplete="setupListeners()" top="0"
                       xmlns:skin="com.easyinsight.skin.*">
     <mx:Script>
@@ -23,12 +23,6 @@
         private var _targetName:String;
 
         private var _connectionName:String;
-
-        protected override function commitProperties():void {
-            super.commitProperties();
-            centerPage.setStyle("backgroundColor", ApplicationSkin.instance().centerCanvasBackgroundColor);
-            centerPage.setStyle("backgroundAlpha", ApplicationSkin.instance().centerCanvasBackgroundAlpha);
-        }
 
         [Bindable(event="destinationURLChanged")]
         public function get destinationURL():String {
@@ -101,10 +95,5 @@
         }
 		]]>
     </mx:Script>
-    <mx:ViewStack width="1000" paddingLeft="20" resizeToContent="true"
-                  paddingRight="20" paddingTop="5" paddingBottom="20" id="centerPage" creationPolicy="all"
-                  selectedIndex="{stackIndex}">
-        <mx:Box/>
-        <account:AccountSummary id="accountSummary"/>
-    </mx:ViewStack>
+    <account:AccountSummary id="accountSummary"/>
 </skin:BackgroundImage>

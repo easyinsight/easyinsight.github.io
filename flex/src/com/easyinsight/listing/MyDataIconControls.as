@@ -19,6 +19,7 @@ import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.controls.Button;
+import mx.controls.LinkButton;
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
 import mx.events.FlexEvent;
@@ -34,9 +35,9 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
 
 
 
-    private var adminButton:Button;
-    private var analyzeButton:Button;
-    private var deleteButton:Button;
+    private var adminButton:LinkButton;
+
+
 
     private var _analyzeTooltip:String = "Analyze...";
     private var _analyzeVisible:Boolean = true;
@@ -68,21 +69,12 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
 
     override protected function createChildren():void {
         super.createChildren();
-        if (_showAnalyze) {
-            if (analyzeButton == null) {
-                analyzeButton = new Button();
-                analyzeButton.setStyle("icon", playIcon);
-                BindingUtils.bindProperty(analyzeButton, "toolTip", this, "analyzeTooltip");
-                BindingUtils.bindProperty(analyzeButton, "visible", this, "analyzeVisible");
-                analyzeButton.addEventListener(MouseEvent.CLICK, analyzeCalled);
-            }
-            addChild(analyzeButton);
-        }
 
         if (_showAdmin) {
             if (adminButton == null) {
-                adminButton = new Button();
-                adminButton.setStyle("icon", ImageConstants.EDIT_ICON);
+                adminButton = new LinkButton();
+                adminButton.label = "Edit...";
+                //adminButton.setStyle("icon", ImageConstants.EDIT_ICON);
                 BindingUtils.bindProperty(adminButton, "toolTip", this, "adminTooltip");
                 BindingUtils.bindProperty(adminButton, "visible", this, "adminVisible");
                 adminButton.addEventListener(MouseEvent.CLICK, adminCalled);
@@ -90,7 +82,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             addChild(adminButton);
         }
 
-        if (_showDelete) {
+        /*if (_showDelete) {
             if (deleteButton == null) {
                 deleteButton = new Button();
                 deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
@@ -99,30 +91,25 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteCalled);
             }
             addChild(deleteButton);
-        }
+        }*/
     }
 
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
-        var buttonWidth:int = 40;
+        var buttonWidth:int = 80;
         var buttonHeight:int = 22;
         var padding:int = 5;
         var i:int = 1;
-        if (analyzeButton != null) {
-            analyzeButton.move((padding * i),0);
-            analyzeButton.setActualSize(buttonWidth, buttonHeight);
-            i++;
-        }
         if (adminButton != null) {
-            adminButton.move((padding * i) + (buttonWidth * (i - 1)),0);
+            adminButton.move((padding * i),0);
             adminButton.setActualSize(buttonWidth, buttonHeight);
             i++;
         }
-        if (deleteButton != null) {
+        /*if (deleteButton != null) {
             deleteButton.move((padding * i) + (buttonWidth * (i - 1)),0);
             deleteButton.setActualSize(buttonWidth, buttonHeight);
             i++;
-        }
+        }*/
     }
 
     [Bindable(event="analyzeTooltipChanged")]

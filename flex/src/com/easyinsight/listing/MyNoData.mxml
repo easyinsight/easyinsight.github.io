@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" verticalGap="0" width="100%" height="100%">
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+                      xmlns:skin="com.easyinsight.skin.*">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
@@ -9,19 +10,20 @@
         public var connectionsIcon:Class;
 
         ]]></mx:Script>
-    <mx:Box height="40%" width="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000">
-        <mx:Text text="You don't have any data yet.&#13;Let's get started!" fontSize="28" color="#FFFFFF"
-                selectable="false" textAlign="center"/>
+    <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+        <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="8" backgroundColor="#FFFFFF" dropShadowEnabled="true" paddingBottom="40"
+                 paddingLeft="40" paddingRight="40" paddingTop="40" horizontalAlign="center" verticalGap="50">
+            <mx:Text text="You don't have any data yet.&#13;Let's get started!" fontSize="28" color="#000000"
+                     selectable="false" textAlign="center"/>
+            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true" backgroundColor="#FFFFFF" height="170"
+                     width="350" cornerRadius="8" buttonMode="true" id="connectionsBox" mouseOver="connectionsBox.setStyle('backgroundColor', 0xDDDDDD)"
+                     mouseOut="connectionsBox.setStyle('backgroundColor', 0xFFFFFF)" click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Connections'))"
+                     mouseChildren="false">
+                <mx:Image source="{connectionsIcon}"/>
+                <mx:Text text="Add Your Own Data" fontSize="24" selectable="false"/>
+                <mx:TextArea text="You don't have any data sources yet. Click here to get started!"
+                             fontSize="18" backgroundAlpha="0" editable="false" selectable="false" height="70" width="310" textAlign="center"/>
+            </mx:VBox>
+         </mx:VBox>
     </mx:Box>
-    <mx:HBox height="60%" width="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF">
-        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true" backgroundColor="#FFFFFF" height="170"
-                width="350" cornerRadius="8" buttonMode="true" id="connectionsBox" mouseOver="connectionsBox.setStyle('backgroundColor', 0xDDDDDD)"
-                mouseOut="connectionsBox.setStyle('backgroundColor', 0xFFFFFF)" click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Connections'))"
-                mouseChildren="false">
-            <mx:Image source="{connectionsIcon}"/>
-            <mx:Text text="Add Your Own Data" fontSize="24" selectable="false"/>
-            <mx:TextArea text="You don't have any data sources yet. Click here to get started!"
-                    fontSize="18" backgroundAlpha="0" editable="false" selectable="false" height="70" width="310" textAlign="center"/>
-        </mx:VBox>
-    </mx:HBox>
-</mx:VBox>
+</skin:BackgroundImage>

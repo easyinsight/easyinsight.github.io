@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:datasources="com.easyinsight.datasources.*" width="100%"
          height="100%"
-         creationComplete="addEventListener(AnalyzeEvent.ANALYZE, onAnalyze2)"
+         creationComplete="addEventListener(AnalyzeEvent.ANALYZE, onAnalyze2); onCreation()"
         doubleClickEnabled="true" implements="com.easyinsight.listing.IDataSourceSpecificList">
     <mx:Metadata>
         [Event(name="backToDataSources", type="flash.events.Event")]
@@ -10,6 +10,7 @@
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.dashboard.DashboardDescriptor;
+        import com.easyinsight.datasources.DataSourceBehavior;
         import com.easyinsight.etl.LookupTableDescriptor;
         import com.easyinsight.etl.LookupTableSource;
         import com.easyinsight.framework.DataFolder;
@@ -22,6 +23,7 @@
         import com.easyinsight.solutions.CustomFolder;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.RolloverLabelEvent;
 
         import mx.collections.ArrayCollection;
         import mx.collections.HierarchicalData;
@@ -29,9 +31,34 @@
         import mx.collections.Sort;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.events.ListEvent;
+        import mx.states.RemoveChild;
+        import mx.states.State;
         import mx.utils.ObjectUtil;
 
         private var _dataSourceDescriptor:DataSourceDescriptor;
+
+        private function onCreation():void {
+            addEventListener(RolloverLabelEvent.ROLLOVER_LABEL, onRolloverLabelEvent);
+        }
+
+        private function onRolloverLabelEvent(event:RolloverLabelEvent):void {
+            var analyzeSource:PerspectiveInfo = null;
+            var selectedObject:Object = event.data;
+            if (selectedObject is DataSourceDescriptor) {
+                var descriptor:DataSourceDescriptor = selectedObject as DataSourceDescriptor;
+                analyzeSource = new DescriptorAnalyzeSource(descriptor.id);
+                dispatchEvent(new AnalyzeEvent(analyzeSource));
+            } else if (selectedObject is LookupTableDescriptor) {
+                dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(selectedObject).id)));
+            } else if (selectedObject is DashboardDescriptor) {
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(selectedObject).id})));
+            } else if (selectedObject is ScorecardDescriptor) {
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID:ScorecardDescriptor(selectedObject).id})));
+            } else if (selectedObject is InsightDescriptor) {
+                analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));
+                dispatchEvent(new AnalyzeEvent(analyzeSource));
+            }
+        }
 
         [Bindable]
         private var dataSourceName:String;
@@ -56,19 +83,8 @@
         [Bindable]
         private var hierarchicalData:HierarchicalData;
 
-        [Embed(source="../../../../assets/businessman_edit.png")]
-        public var adminIcon:Class;
-
-
-        [Bindable]
-        private var admin:Boolean;
-
         [Bindable]
         private var realDataSource:Boolean;
-
-        private function moved():void {
-
-        }
 
         override public function set data(val:Object):void {
             if (val != null) {
@@ -78,10 +94,10 @@
                     dataSourceChanged = true;
                 }
                 if (dataSourceDescriptor != this.dataSourceDescriptor) {
-                    admin = false;
                     realDataSource = false;
                     dataSourceInvalidate = true;
                     this.dataSourceDescriptor = dataSourceDescriptor;
+                    showRefresh = DataSourceBehavior.pullDataSource(dataSourceDescriptor.dataSourceBehavior);
                     dataSourceName = _dataSourceDescriptor.name;
                     dataSourceID = _dataSourceDescriptor.id;
                     invalidateProperties();
@@ -104,17 +120,38 @@
             dispatchEvent(new Event("dataSourceDescriptorChanged"));
         }
 
+        [Bindable]
+        private var showRefresh:Boolean;
+
         override protected function commitProperties():void {
             super.commitProperties();
 
             if (dataSourceInvalidate) {
-                if (_dataSourceDescriptor.role <= 2) {
-                    admin = true;
-                }
+
                 if (_dataSourceDescriptor.role <= 3) {
                     realDataSource = true;
                 }
-                showScorecard = realDataSource && ApplicationSkin.instance().myDataNewScorecard;
+
+                var ops:Array = [];
+                if (!showBack) {
+                    var removeBack:RemoveChild = new RemoveChild();
+                    removeBack.target = backToListButton;
+                    ops.push(removeBack);
+                    var removeBackRule:RemoveChild = new RemoveChild();
+                    removeBackRule.target = backToListRule;
+                    ops.push(removeBackRule);
+                }
+                if (!realDataSource || !showRefresh) {
+                    var removeRefresh:RemoveChild = new RemoveChild();
+                    removeRefresh.target = refreshButton;
+                    ops.push(removeRefresh);
+                }
+                var state:State = new State();
+                state.overrides = ops;
+                state.name = "override";
+                this.states = [ state ];
+                this.currentState = "override";
+
                 var dataSourceChildren:ArrayCollection = _dataSourceDescriptor.children;
                 mainViewsFolder = new DataFolder("Main Views", 1);
                 var mainViewsChildren:ArrayCollection = new ArrayCollection();
@@ -196,7 +233,6 @@
 
         public function updateUI(event:Event = null):void {
             columnsInvalid = true;
-            showScorecard = realDataSource && ApplicationSkin.instance().myDataNewScorecard;
             invalidateDisplayList();
         }
 
@@ -204,21 +240,18 @@
 
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
             super.updateDisplayList(unscaledWidth, unscaledHeight);
-            if (dataChanged) {
+            /*if (dataChanged) {
                 if (!dataSourceChanged) {
                     preserveOpenState();
                     var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
                 }
-            }
+            }*/
             if (columnsInvalid || uploadGrid.columns == null || uploadGrid.columns.length == 0) {
-                if (admin) {
-                    uploadGrid.groupItemRenderer = nameRenderer;
-                }
                 var columns:Array = [];
                 var nameColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                 nameColumn.dataField = "name";
                 nameColumn.headerText = "Name";
-                uploadGrid.groupItemRenderer = new ClassFactory(MyDataIndividualParentRenderer);
+                nameColumn.itemRenderer = new ClassFactory(ReportRolloverLabel);
                 nameColumn.sortCompareFunction = nameSort;
 
                 columns.push(nameColumn);
@@ -229,7 +262,7 @@
                 uploadGrid.dataProvider = hierarchicalData;
                 existingData = displayTreeData;
                 if (!dataSourceChanged) {
-                    displayTreeData.sort = sort;
+                    //displayTreeData.sort = sort;
                 }
                 displayTreeData.refresh();
                 if (!dataSourceChanged) {
@@ -391,28 +424,20 @@
             var name2:String = obj2.name;
             return ObjectUtil.stringCompare(name1, name2, true);
         }
-
-        [Bindable]
-        private var showScorecard:Boolean = false;
         ]]></mx:Script>
-    <mx:HBox paddingLeft="20" paddingRight="20"
-         borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
-         horizontalGap="20"
-         backgroundColor="#FFFFFF" paddingTop="5" paddingBottom="5" width="100%" verticalAlign="middle">
-        <mx:VBox height="100%">
-            <mx:Spacer height="100%"/>
-            <mx:LinkButton label="Back to Data Sources" textDecoration="underline" click="dispatchEvent(new Event('backToDataSources'))" fontSize="12"
-                    visible="{showBack}"/>
-            <mx:Spacer height="100%"/>
-        </mx:VBox>
-        <mx:Image/>
-        <mx:Spacer width="100%"/>
-        <mx:VBox horizontalAlign="center" height="100%" id="nameVBox">
-            <mx:Label text="{dataSourceName}" fontSize="20" maxWidth="300"/>
-        </mx:VBox>
-        <mx:Spacer width="100%"/>
-        <datasources:MyDataDataSourceDisplay dataSource="{dataSourceDescriptor}" visible="{realDataSource}"/>
-    </mx:HBox>
+    <mx:VBox
+
+            horizontalGap="20"
+            backgroundColor="#FFFFFF" width="100%" horizontalAlign="center" verticalGap="5">
+        <mx:Label text="{dataSourceName}" fontSize="20" maxWidth="300"/>
+        <mx:HBox verticalAlign="middle" width="100%">
+            <mx:LinkButton label="Back to list" click="dispatchEvent(new Event('backToDataSources'))" fontSize="12"
+                           visible="{showBack}" id="backToListButton"/>
+            <mx:VRule height="10" strokeColor="#CCCCCC" id="backToListRule"/>
+            <datasources:MyDataDataSourceDisplay dataSource="{dataSourceDescriptor}" visible="{realDataSource}"
+                                                 buttonClass="mx.controls.LinkButton" id="refreshButton"/>
+        </mx:HBox>
+    </mx:VBox>
     <mx:VBox paddingLeft="10" paddingRight="10"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
          horizontalGap="20"
@@ -420,7 +445,7 @@
         <mx:AdvancedDataGrid id="uploadGrid" horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
                              verticalGridLines="true" selectable="false"
                              fontSize="12"
-                                             groupItemRenderer="com.easyinsight.listing.MyDataIndividualParentRenderer" headerStyleName="BlueHeader"
+                                             headerStyleName="BlueHeader"
                                              iconFunction="simpleIconFunction" width="100%" height="100%" rowHeight="24">
         </mx:AdvancedDataGrid>
     </mx:VBox>

@@ -52,7 +52,12 @@ public class StyleConfiguration {
         items.addItem(new NumericReportFormItem("Border Thickness", "borderThickness", dashboard.borderThickness, dashboard, 0, 100));
         items.addItem(new ColorReportFormItem("Border Color", "borderColor",  dashboard.borderColor, dashboard));
         items.addItem(new ColorReportFormItem("Background Color", "backgroundColor",  dashboard.backgroundColor, dashboard));
+        items.addItem(new ColorReportFormItem("Stack 1 Fill Start", "stackFill1Start",  dashboard.stackFill1Start, dashboard));
+        items.addItem(new ColorReportFormItem("Stack 1 Fill End", "stackFill1SEnd",  dashboard.stackFill1SEnd, dashboard));
+        items.addItem(new ColorReportFormItem("Stack 2 Fill Start", "stackFill2Start",  dashboard.stackFill2Start, dashboard));
+        items.addItem(new ColorReportFormItem("Stack 2 Fill End", "stackFill2End",  dashboard.stackFill2End, dashboard));
         items.addItem(new CheckBoxReportFormItem("Absolute Height", "absoluteSizing",  dashboard.absoluteSizing, dashboard));
+        items.addItem(new CheckBoxReportFormItem("Stack Fill Headers", "fillStackHeaders",  dashboard.fillStackHeaders, dashboard));
         return items;
     }
 

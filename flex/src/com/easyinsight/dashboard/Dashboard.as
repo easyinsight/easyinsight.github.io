@@ -39,6 +39,12 @@ public class Dashboard {
     public var absoluteSizing:Boolean;
     public var reportAccessProblem:Boolean;
 
+    public var fillStackHeaders:Boolean;
+    public var stackFill1Start:int;
+    public var stackFill1SEnd:int;
+    public var stackFill2Start:int;
+    public var stackFill2End:int;
+
     public function Dashboard() {
     }
 }

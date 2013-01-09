@@ -81,6 +81,7 @@
 
         public var browserManager:IBrowserManager;
 
+
         private var registry:TORegistry;
 
         [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf", fontName="Lucida Grande", fontStyle="normal")]
@@ -209,7 +210,7 @@
                             navigation(new NavigationEvent("Connections"));
                             break;
                         case "account":
-                            navigation(new NavigationEvent("Accounts"));
+                            navigation(new NavigationEvent("Account"));
                             break;
                     }
                 } else {
@@ -244,9 +245,9 @@
                 if (headerBar != null && headerBar.parent == coreVBox) {
                     coreVBox.removeChild(headerBar);
                 }
-                if (highBar != null && highBar.parent == coreVBox) {
+                /*if (highBar != null && highBar.parent == coreVBox) {
                     coreVBox.removeChild(highBar);
-                }
+                }*/
                 if (coreSpace != null && coreSpace.parent == coreVBox) {
                     coreVBox.removeChild(coreSpace);
                 }
@@ -273,7 +274,7 @@
             fullScreenPage = null;
             dataAnalysis = null;
             coreVBox.addChild(headerBar);
-            coreVBox.addChild(highBar);
+            //coreVBox.addChild(highBar);
             coreVBox.addChild(coreSpace);
             if (this.perspective == null) {
                 navigation(new NavigationEvent("Home"));
@@ -301,7 +302,7 @@
                     dataAnalysis = null;
                     fullScreenPage = null;
                     coreVBox.addChild(headerBar);
-                    coreVBox.addChild(highBar);
+                    //coreVBox.addChild(highBar);
                     coreVBox.addChild(coreSpace);
                 }
                 if (coreSpace.getChildren().length > 0) {
@@ -543,7 +544,7 @@
         }
 
         public function set dividerColor(value:uint):void {
-            highBar.setStyle("backgroundColor", value);
+            //highBar.setStyle("backgroundColor", value);
         }
 
         private function limitedMain():void {
@@ -559,20 +560,20 @@
             } else {
                 headerBar = new SimplifiedHeaderBar();
             }
-            headerBar.percentWidth = 100;
-            headerBar.setStyle("paddingTop", 5);
+            //headerBar.percentWidth = 100;
+            /*headerBar.setStyle("paddingTop", 5);
             headerBar.setStyle("paddingBottom", 5);
             headerBar.setStyle("paddingLeft", 10);
-            headerBar.setStyle("paddingRight", 10);
+            headerBar.setStyle("paddingRight", 10);*/
             headerBar.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
             masterCanvas.addChild(headerBar);
-            var box:Box = new Box();
+            /*var box:Box = new Box();
             box.percentWidth = 100;
             box.height = 5;
-            box.y = 68;
-            masterCanvas.addChild(box);
+            box.y = 38;
+            masterCanvas.addChild(box);*/
             var hbox:HBox = new HBox();
-            hbox.y = 73;
+            hbox.y = 38;
             hbox.percentWidth = 100;
             hbox.percentHeight = 100;
             hbox.setStyle("paddingLeft", 0);
@@ -581,7 +582,7 @@
             masterCanvas.addChild(hbox);
             coreVBox = masterCanvas;
             this.headerBar = headerBar;
-            this.highBar = box;
+            //this.highBar = box;
             this.coreSpace = hbox;
             BindingUtils.bindProperty(this, "dividerColor", ApplicationSkin.instance(), "headerBarDividerColor");
         }
@@ -589,7 +590,7 @@
         private var coreVBox:Canvas;
         private var headerBar:UIComponent;
         private var coreSpace:HBox;
-        private var highBar:Box;
+        //private var highBar:Box;
 
         private function pageLoginHandler(event:LoginEvent):void {
             quietLogin(event.authResponse, false);

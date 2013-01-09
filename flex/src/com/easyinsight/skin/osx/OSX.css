@@ -115,7 +115,7 @@ TextArea {
 Button {
     fontFamily: "Lucida Grande";
     fontWeight: normal;
-   cornerRadius: 12;
+   cornerRadius: 10;
     highlightAlphas: 1, 0.32;
   fillAlphas: 1, 1, 1, 1;
    fillColors: #cccccc, #ffffff, #cccccc, #ffffff;
@@ -155,6 +155,72 @@ ToggleButtonBar {
     textRollOverColor: #dddddd;
     textSelectedColor: #dddddd;
     borderColor: #333333;
+    dropShadow: true;
+    shadowDistance: 3;
+    fontSize: 11;
+    fontWeight: normal;
+}
+
+.altGrayButton {
+    cornerRadius: 5;
+    highlightAlphas: 0.2, 0.1;
+    fillColors: #333333, #333333, #333333, #333333;
+    fillAlphas: 1, 1, 1, 1;
+    color: #ffffff;
+    textRollOverColor: #dddddd;
+    textSelectedColor: #dddddd;
+    borderColor: #333333;
+    dropShadow: true;
+    shadowDistance: 3;
+    fontSize: 14;
+    fontWeight: normal;
+}
+
+.topGrayButton {
+    cornerRadius: 0;
+    backgroundAlpha: 0;
+    highlightAlphas: 0, 0;
+    fillColors: #770000, #440000;
+    fillAlphas: 1, 1;
+    color: #ffffff;
+    textRollOverColor: #dddddd;
+    textSelectedColor: #dddddd;
+    borderColor: #333333;
+    borderThickness: 0;
+    borderStyle: none;
+    fontSize: 14;
+    fontWeight: normal;
+}
+
+.headerSelected {
+    color: #ffffff;
+    fillAlphas: 1, 1, 1, 1;
+}
+
+.lightGrayButton {
+    cornerRadius: 5;
+    highlightAlphas: 0.5, 0.1;
+    fillColors: #353333, #353333, #353333, #353333;
+    fillAlphas: 1, 1, 1, 1;
+    color: #ffffff;
+    textRollOverColor: #dfdddd;
+    textSelectedColor: #dfdddd;
+    borderColor: #353333;
+    dropShadow: true;
+    shadowDistance: 3;
+    fontSize: 11;
+    fontWeight: normal;
+}
+
+.grayButton2 {
+    cornerRadius: 5;
+    highlightAlphas: 0.3, 0.3;
+    fillColors: #008033, #008033, #008033, #008033;
+    fillAlphas: 1, 1, 1, 1;
+    color: #fff3f3;
+    textRollOverColor: #dddddd;
+    textSelectedColor: #dddddd;
+    borderColor: #008033;
     dropShadow: true;
     shadowDistance: 3;
     fontSize: 11;
@@ -455,4 +521,64 @@ TransformContainer {
     dropShadowEnabled: true;
     backgroundColor: #FFFFFF;
     backgroundAlpha: 1;
+}
+
+.gradientBackgroundX {
+    border-skin: ClassReference("com.easyinsight.util.GradientBackground");
+    fillColors: #770000, #440000;
+}
+
+.dashboardStackGradientBackground {
+    border-skin: ClassReference("com.easyinsight.util.DashboardGradientBackground");
+    fillColors: #848080, #545050;
+    cornerRadius: 8;
+    bottomCornerRadius: 0;
+}
+
+.dashboardStackGradientBackground2 {
+    border-skin: ClassReference("com.easyinsight.util.DashboardGradientBackground2");
+    fillColors: #494444, #343030;
+    cornerRadius: 8;
+    bottomCornerRadius: 0;
+}
+
+.topDashboardButton {
+      cornerRadius: 0;
+      backgroundAlpha: 0;
+      highlightAlphas: 0, 0;
+      fillColors: #848080, #545050;
+      fillAlphas: 1, 1;
+      color: #ffffff;
+      textRollOverColor: #dddddd;
+      textSelectedColor: #dddddd;
+      borderColor: #333333;
+      borderThickness: 0;
+      borderStyle: none;
+      fontSize: 14;
+      fontWeight: normal;
+}
+
+.normalButton {
+    backgroundAlpha: 0;
+    highlightAlphas: 0, 0;
+    fillAlphas: 0, 0;
+    color: #ffffff;
+    borderColor: #848080;
+    dropShadow: false;
+}
+
+.topDashboardButton2 {
+    cornerRadius: 0;
+    backgroundAlpha: 0;
+    highlightAlphas: 0, 0;
+    fillColors: #494444, #343030;
+    fillAlphas: 1, 1;
+    color: #ffffff;
+    textRollOverColor: #dddddd;
+    textSelectedColor: #dddddd;
+    borderColor: #333333;
+    borderThickness: 0;
+    borderStyle: none;
+    fontSize: 14;
+    fontWeight: normal;
 }

@@ -10,6 +10,7 @@ public class MyDataTree {
     public var reportCount:int;
     public var dashboardCount:int;
     public var dataSourceCount:int;
+    public var accountOverSize:Boolean;
 
     public function MyDataTree() {
     }

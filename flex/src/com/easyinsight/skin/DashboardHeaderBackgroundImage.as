@@ -6,18 +6,13 @@ import flash.geom.Rectangle;
 import mx.binding.utils.BindingUtils;
 import mx.binding.utils.ChangeWatcher;
 import mx.containers.Canvas;
-
 import mx.controls.Image;
 import mx.core.Container;
 import mx.graphics.BitmapFill;
 
-public class BackgroundImage extends Canvas {
+public class DashboardHeaderBackgroundImage extends Canvas {
 
     private var backgroundImage:Image;
-
-    [Bindable]
-    [Embed(source="../../../../assets/bgnoise.png")]
-    private var bgNoise:Class;
 
     private var _backgroundImageSource:Object;
 
@@ -33,7 +28,7 @@ public class BackgroundImage extends Canvas {
 
     private var _applyCenterScreenLogic:Boolean = true;
 
-    public function BackgroundImage() {
+    public function DashboardHeaderBackgroundImage() {
         super();
         this.percentHeight = 100;
         this.percentWidth = 100;
@@ -43,28 +38,20 @@ public class BackgroundImage extends Canvas {
         _applyCenterScreenLogic = value;
     }
 
-    private var fill:BitmapFill;
-
     override protected function createChildren():void {
         super.createChildren();
-        if (fill == null) {
-            fill = new BitmapFill();
-            fill.source = bgNoise;
-            fill.repeat = true;
-
-            /*backgroundImage = new Image();
-            backgroundImage.source = fill;
+        if (backgroundImage == null) {
+            backgroundImage = new Image();
             backgroundImage.percentHeight = 100;
             backgroundImage.percentWidth = 100;
             backgroundImage.maintainAspectRatio = false;
-            backgroundImage.visible = true;*/
         }
         if (_applyCenterScreenLogic) {
             centerScreen = getChildAt(0) as Container;
             /*if (centerScreen.width == 0) centerScreen.width = 100;*/
             centerScreen.percentHeight = 100;
         }
-        //addChildAt(backgroundImage, 0);
+        addChildAt(backgroundImage, 0);
         createBindings();
     }
 
@@ -131,15 +118,8 @@ public class BackgroundImage extends Canvas {
 
     protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
-        var rc:Rectangle = new Rectangle(0, 0, unscaledWidth, unscaledHeight);
-        fill.begin(graphics, rc);
-        graphics.lineTo(rc.right,rc.top);
-        graphics.lineTo(rc.right,rc.bottom);
-        graphics.lineTo(rc.left,rc.bottom);
-        graphics.lineTo(rc.left,rc.top);
-        fill.end(graphics);
         if (_applyCenterScreenLogic) {
-            if (getChildren().length == 1) {
+            if (getChildren().length == 2) {
                 var margin:int = 200;
                 var centerWidth:int = unscaledWidth - margin;
                 if (centerWidth < _minCenterWidth) {
@@ -147,7 +127,7 @@ public class BackgroundImage extends Canvas {
                     margin -= (_minCenterWidth - centerWidth);
                     centerWidth = _minCenterWidth;
                 }
-                var content:DisplayObject = getChildren()[0];
+                var content:DisplayObject = getChildren()[1];
                 content.width = centerWidth;
                 content.x = unscaledWidth / 2 - (centerWidth / 2);
             }
@@ -161,20 +141,19 @@ public class BackgroundImage extends Canvas {
     public function set centerCanvasBackgroundColor(value:uint):void {
         _centerCanvasBackgroundColor = value;
         if (centerScreen != null) {
-            //centerScreen.setStyle("backgroundColor", value);
+            centerScreen.setStyle("backgroundColor", value);
         }
     }
 
     public function set centerCanvasBackgroundAlpha(value:Number):void {
         _centerCanvasBackgroundAlpha = value;
         if (centerScreen != null) {
-            //centerScreen.setStyle("backgroundAlpha", value);
-            //centerScreen.setStyle("backgroundAlpha", 0);
+            centerScreen.setStyle("backgroundAlpha", value);
         }
     }
 
     public function set backgroundImageSource(value:Object):void {
-        /*if (_backgroundImageSource == value) return;
+        if (_backgroundImageSource == value) return;
         _backgroundImageSource = value;
         if (value == null) {
             backgroundImage.source = null;
@@ -187,13 +166,13 @@ public class BackgroundImage extends Canvas {
                 backgroundImage.source = value;
             }
             backgroundImage.visible = true;
-        }*/
+        }
     }
 
     public function set skinBackgroundColor(value:uint):void {
-        /*if (_skinBackgroundColor == value) return;
+        if (_skinBackgroundColor == value) return;
         _skinBackgroundColor = value;
-        setStyle("backgroundColor", value);*/
+        setStyle("backgroundColor", value);
     }
 }
 }

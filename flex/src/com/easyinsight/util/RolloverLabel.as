@@ -11,18 +11,21 @@ import flash.events.MouseEvent;
 import mx.controls.advancedDataGridClasses.AdvancedDataGridItemRenderer;
 
 public class RolloverLabel extends AdvancedDataGridItemRenderer {
+
     public function RolloverLabel() {
-        addEventListener(MouseEvent.ROLL_OVER, onRollover);
-        addEventListener(MouseEvent.ROLL_OUT, onRollout);
-        addEventListener(MouseEvent.CLICK, onClick);
+        super();
     }
 
     private function onRollover(event:MouseEvent):void {
-        setStyle("textDecoration", "underline");
+        if (parent) {
+            setStyle("textDecoration", "underline");
+        }
     }
 
     private function onRollout(event:MouseEvent):void {
-        setStyle("textDecoration", "none");
+        if (parent) {
+            setStyle("textDecoration", "none");
+        }
     }
 
     private function onClick(event:MouseEvent):void {
@@ -31,8 +34,30 @@ public class RolloverLabel extends AdvancedDataGridItemRenderer {
 
     private var obj:Object;
 
+    private var hasLinks:Boolean = false;
+
+    protected function isLinkable(value:Object):Boolean {
+        return false;
+    }
+
+    override public function get data():Object {
+        return this.obj;
+    }
+
     override public function set data(value:Object):void {
         super.data = value;
+        var linkable:Boolean = isLinkable(value);
+        if (linkable && !hasLinks) {
+            hasLinks = true;
+            addEventListener(MouseEvent.ROLL_OVER, onRollover);
+            addEventListener(MouseEvent.ROLL_OUT, onRollout);
+            addEventListener(MouseEvent.CLICK, onClick);
+        } else if (!linkable && hasLinks) {
+            hasLinks = false;
+            removeEventListener(MouseEvent.ROLL_OVER, onRollover);
+            removeEventListener(MouseEvent.ROLL_OUT, onRollout);
+            removeEventListener(MouseEvent.CLICK, onClick);
+        }
         this.obj = value;
     }
 }

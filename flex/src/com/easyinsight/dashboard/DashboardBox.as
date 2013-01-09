@@ -100,7 +100,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         labelText.setStyle("textAlign", "center");
         labelText.setStyle("fontSize", 10);
         topCanvas.addChild(labelText);
-        var topBox:HBox = new HBox();
+        topBox = new HBox();
         topBox.setStyle("horizontalAlign", "right");
         topBox.setStyle("verticalAlign", "middle");
         topBox.setStyle("paddingRight", 5);
@@ -135,6 +135,13 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         dropBox.setStyle("horizontalAlign", "center");
         addChild(dropBox);
         if (element != null) {
+            if (element instanceof DashboardStack) {
+                addButton = new LinkButton();
+                addButton.label = "Add";
+                addButton.addEventListener(MouseEvent.CLICK, stackAdd);
+                addButton.setStyle("fontSize", 10);
+                topBox.addChildAt(addButton, 0);
+            }
             updateText();
             dropBox.setStyle("backgroundColor", 0xEEEEEE);
             if (editorComp == null) {
@@ -176,6 +183,10 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         }
     }
 
+    private function stackAdd(event:MouseEvent):void {
+        DashboardStackEditorComponent(editorComp).addStackElement();
+    }
+
     private function onEdit(event:MouseEvent):void {
         if (element != null) {
             IDashboardEditorComponent(dropBox.getChildAt(0)).edit();
@@ -188,6 +199,10 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
             labelText.text = "";
             element = null;
             editorComp = null;
+            if (addButton) {
+                topBox.removeChild(addButton);
+                addButton = null;
+            }
             buttonsVisible = false;
             dropBox.removeAllChildren();
             dropBox.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
@@ -267,6 +282,13 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         clearValidation();
         errorString = null;
         editorComp = IDashboardEditorComponent(DashboardElementFactory.createEditorUIComponent(element, dashboardEditorMetadata));
+        if (element instanceof DashboardStack) {
+            addButton = new LinkButton();
+            addButton.label = "Add";
+            addButton.addEventListener(MouseEvent.CLICK, stackAdd);
+            addButton.setStyle("fontSize", 10);
+            topBox.addChildAt(addButton, 0);
+        }
         EventDispatcher(editorComp).addEventListener(DashboardPopulateEvent.DASHBOARD_POPULATE, propagate);
         editorComp.initialRetrieve();
         dropBox.addChild(DisplayObject(editorComp));
@@ -277,6 +299,9 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         dispatchEvent(new DashboardChangedEvent());
 
     }
+
+    private var topBox:HBox;
+    private var addButton:LinkButton;
 
     private function propagate(event:DashboardPopulateEvent):void {
         dispatchEvent(new DashboardPopulateEvent(event.type, this));

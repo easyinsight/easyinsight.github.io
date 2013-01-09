@@ -6,6 +6,8 @@ public class DashboardStackItem extends DashboardElement {
     public var dashboardElement:DashboardElement;
     public var position:int;
 
+    public var stackLabel:String;
+
     public function DashboardStackItem() {
     }
 }

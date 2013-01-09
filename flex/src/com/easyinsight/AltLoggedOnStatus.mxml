@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" verticalAlign="middle" height="100%">
+	<mx:Script>
+		<![CDATA[
+        import com.easyinsight.framework.Constants;
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.util.AsyncResponderAlert;
+        import com.easyinsight.util.CookieUtil;
+
+        import mx.messaging.config.ServerConfig;
+        import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncToken;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+
+        [Bindable]
+        private var message:String;
+
+        private var _textColor:int;
+
+
+        [Bindable(event="textColorChanged")]
+        public function get textColor():int {
+            return _textColor;
+        }
+
+        public function set textColor(value:int):void {
+            if (_textColor == value) return;
+            _textColor = value;
+            dispatchEvent(new Event("textColorChanged"));
+        }
+
+        public function logout():void {
+            User.destroy();
+            CookieUtil.deleteCookie("eisession");
+            CookieUtil.deleteCookie("eiRememberMe");
+            CookieUtil.deleteCookie("eiUserName");
+            var token:AsyncToken = ServerConfig.getChannelSet(authService.destination).logout();
+            AsyncResponderAlert.alert(this, "Logging out...", token);
+            token.addResponder(new AsyncResponder(logoutResultEvent, logoutFaultEvent));
+        }
+
+        private function logoutResultEvent(event:ResultEvent, token:Object = null):void {
+            User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
+        }
+
+        private function logoutFaultEvent(event:FaultEvent, token:Object = null):void {
+        }
+        ]]>
+	</mx:Script>
+	<mx:RemoteObject id="authService" destination="login">
+	</mx:RemoteObject>
+	<mx:Button label="Log Out" click="logout()" styleName="altGrayButton"/>
+</mx:HBox>

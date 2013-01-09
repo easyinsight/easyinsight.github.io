@@ -38,7 +38,7 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
                 }
                 var childSizeInfo:SizeInfo = IDashboardViewComponent(gridItem.getChildAt(0)).obtainPreferredSizeInfo();
                 if (childSizeInfo.preferredWidth != 0) {
-                    gridItem.width = childSizeInfo.preferredWidth + dashboardGrid.paddingLeft + dashboardGrid.paddingRight;
+                    //gridItem.width = childSizeInfo.preferredWidth + dashboardGrid.paddingLeft + dashboardGrid.paddingRight;
                     gridItem.percentWidth = NaN;
                 } else {
                     gridItem.width = NaN;
@@ -59,12 +59,16 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
 
     protected override function createChildren():void {
         super.createChildren();
+        var gridAbsoluteHeight:Boolean = false;
         if (dashboardEditorMetadata != null && dashboardEditorMetadata.borderThickness == 0) {
             verticalScrollPolicy = "off";
             horizontalScrollPolicy = "off";
+            if (dashboardEditorMetadata.dashboard.absoluteSizing) {
+                gridAbsoluteHeight = true;
+            }
         }
-        var gridAbsoluteHeight:Boolean = false;
-        for (var i1:int = 0; i1 < dashboardGrid.rows; i1++) {
+
+        /*for (var i1:int = 0; i1 < dashboardGrid.rows; i1++) {
             for (var j1:int = 0; j1 < dashboardGrid.columns; j1++) {
                 var e1:DashboardGridItem = findItem(i1, j1);
                 var child1:UIComponent = DashboardElementFactory.createViewUIComponent(e1.dashboardElement, dashboardEditorMetadata);
@@ -76,7 +80,7 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
                     gridAbsoluteHeight = true;
                 }
             }
-        }
+        }*/
         setStyle("backgroundColor", dashboardGrid.backgroundColor);
         setStyle("backgroundAlpha", dashboardGrid.backgroundAlpha);
         viewChildren = new ArrayCollection();
@@ -88,24 +92,43 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
             gridRow.setStyle("paddingTop", 0);
             gridRow.setStyle("paddingBottom", 0);
             addChild(gridRow);
+            var gridHeight:Boolean = false;
             for (var j:int = 0; j < dashboardGrid.columns; j++) {
                 var e:DashboardGridItem = findItem(i, j);
                 var gridItem:GridItem = new GridItem();
                 //gridItem.setStyle("backgroundColor", 0);
 
-                var child:UIComponent = DashboardElementFactory.createViewUIComponent(e.dashboardElement, dashboardEditorMetadata);
+                var child:UIComponent = DashboardElementFactory.createViewUIComponent(e.dashboardElement, dashboardEditorMetadata, dashboardGrid);
                 var childSizeInfo:SizeInfo = IDashboardViewComponent(child).obtainPreferredSizeInfo();
                 if (childSizeInfo.preferredWidth == 0) {
                     gridItem.percentWidth = 100;
+                } else {
+                    gridItem.percentWidth = NaN;
+                    //gridItem.width = childSizeInfo.preferredWidth;
                 }
                 if (gridAbsoluteHeight) {
+                    if (childSizeInfo.preferredHeight == 0 && !childSizeInfo.autoCalcHeight) {
+                        gridItem.height = 400;
+                        childSizeInfo.preferredHeight = 400;
+                    } else {
+                        //gridItem.height = childSizeInfo.preferredHeight;
+                    }
+                } else {
+                    if (childSizeInfo.preferredHeight == 0 && !childSizeInfo.autoCalcHeight) {
+                        gridItem.percentHeight = 100;
+                    } else {
+                        gridHeight = true;
+                        gridItem.percentHeight = NaN;
+                    }
+                }
+                /*if (gridAbsoluteHeight) {
                     if (childSizeInfo.preferredHeight == 0 && !childSizeInfo.autoCalcHeight) {
                         gridRow.height = 400;
                         childSizeInfo.preferredHeight = 400;
                     }
                 } else {
                     gridItem.percentHeight = 100; 
-                }
+                }*/
 
                 if (e.dashboardElement is DashboardReport || e.dashboardElement is DashboardTextElement) {
                     gridItem.setStyle("paddingLeft", 3);
@@ -113,6 +136,7 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
                     gridItem.setStyle("paddingTop", 3);
                     gridItem.setStyle("paddingBottom", 3);
                 }
+                gridItem.setStyle("horizontalAlign", "center");
 
                 viewChildren.addItem(child);
                 gridItem.addChild(child);
@@ -120,7 +144,7 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
             }
 
             gridRow.percentWidth = 100;
-            if (!gridAbsoluteHeight) {
+            if (!gridHeight && !gridAbsoluteHeight) {
                 gridRow.percentHeight = 100;
             }
         }

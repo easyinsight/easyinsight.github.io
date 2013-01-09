@@ -30,11 +30,11 @@ public class MyDataDataSourceDisplay extends VBox {
 
     public function MyDataDataSourceDisplay() {
         super();
-        setStyle("horizontalAlign", "center");
+        /*setStyle("horizontalAlign", "center");
         setStyle("paddingLeft", 5);
         setStyle("paddingRight", 5);
         setStyle("paddingTop", 5);
-        setStyle("paddingBottom", 5);
+        setStyle("paddingBottom", 5);*/
     }
 
     [Bindable(event="labelTextChanged")]
@@ -94,13 +94,26 @@ public class MyDataDataSourceDisplay extends VBox {
         labelText = updateValue(date);
     }
 
-    private var form:Form;
+    //private var form:Form;
 
     private var button:Button;
 
+    private var _buttonClass:Class;
+
+    public function set buttonClass(value:Class):void {
+        _buttonClass = value;
+    }
+
+    private var _buttonStyle:String;
+
+
+    public function set buttonStyle(value:String):void {
+        _buttonStyle = value;
+    }
+
     override protected function createChildren():void {
         super.createChildren();
-        if (form == null) {
+        /*if (form == null) {
             form = new Form();
             var lastDataItem:FormItem = new FormItem();
             lastDataItem.label = "Last Data Time:";
@@ -110,12 +123,13 @@ public class MyDataDataSourceDisplay extends VBox {
             form.addChild(lastDataItem);
             form.visible = false;
         }
-        addChild(form);
+        addChild(form);*/
         if (button == null) {
-            button = new Button();
+            button = new _buttonClass();
             button.label = "Refresh the data source";
-            button.styleName = "grayButton";
-            button.setStyle("icon", refreshIcon);
+            button.styleName = _buttonStyle;
+            button.setStyle("fontSize", 12);
+            //button.setStyle("icon", refreshIcon);
             button.addEventListener(MouseEvent.CLICK, onClick);
             button.visible = false;
         }
@@ -135,10 +149,10 @@ public class MyDataDataSourceDisplay extends VBox {
                 if (dataSource.lastDataTime != null) {
                     updateString(dataSource.lastDataTime);
                 }
-                form.visible = true;
+                //form.visible = true;
                 button.visible = true;
             } else {
-                form.visible = false;
+                //form.visible = false;
                 button.visible = false;
             }
             dataSourceChanged = false;

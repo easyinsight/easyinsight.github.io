@@ -39,6 +39,7 @@
                     item.save();
                 }
             }
+            dispatchEvent(new Event(Event.CHANGE));
             PopUpManager.removePopUp(this);
         }
 

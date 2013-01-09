@@ -7,6 +7,7 @@ import com.easyinsight.framework.LoginEvent;
 import com.easyinsight.framework.User;
 import com.easyinsight.report.TempReportExportWindow;
 import com.easyinsight.skin.BackgroundImage;
+import com.easyinsight.skin.DashboardHeaderBackgroundImage;
 import com.easyinsight.skin.ImageLoadEvent;
 import com.easyinsight.skin.ImageLoader;
 import com.easyinsight.util.CookieUtil;
@@ -23,11 +24,16 @@ import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.ComboBox;
+import mx.controls.LinkButton;
+import mx.controls.Spacer;
+import mx.controls.ToggleButtonBar;
 import mx.core.Container;
 import mx.core.UIComponent;
 import mx.effects.Effect;
+import mx.events.ItemClickEvent;
 import mx.managers.PopUpManager;
 import mx.messaging.config.ServerConfig;
 import mx.rpc.AsyncResponder;
@@ -59,7 +65,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     protected var viewChildren:ArrayCollection;
 
-    private function onChange(targetIndex:int):void {
+    protected function onChange(targetIndex:int):void {
         var currentComp:UIComponent = viewStack.selectedChild;
         var newComp:UIComponent = viewStack.getChildAt(targetIndex) as UIComponent;
         if (targetIndex > viewStack.selectedIndex) {
@@ -81,6 +87,16 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         }
     }
 
+    private var selectedButton:DashboardButton;
+
+    protected function onCustomButtonClick(event:Event):void {
+        selectedButton.selected = false;
+        var targetIndex:int = event.currentTarget.data as int;
+        DashboardButton(event.currentTarget).selected = true;
+        selectedButton = DashboardButton(event.currentTarget);
+        onChange(targetIndex);
+    }
+
     protected function onButtonClick(event:Event):void {
         var targetIndex:int = event.currentTarget.data as int;
         onChange(targetIndex);
@@ -98,6 +114,11 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     protected override function createChildren():void {
         super.createChildren();
+        setStyle("paddingLeft", 0);
+        setStyle("paddingTop", 0);
+        setStyle("paddingRight", 0);
+        setStyle("paddingBottom", 0);
+        setStyle("verticalGap", 0);
         if (dashboardStack.forceScrollingOff) {
             verticalScrollPolicy = "off";
             horizontalScrollPolicy = "off";
@@ -117,21 +138,42 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             headerHBox.addChild(buttonsBox);
             addChild(headerHBox);
         } else {
-            var headerArea:Canvas = new Canvas();
+            var headerArea:Canvas;
+            if (dashboardEditorMetadata.dashboard.fillStackHeaders && dashboardStack.dashboardLevel == 0 && dashboardStack.gridItems.length > 1) {
+                headerArea = new HeaderCanvas();
+                headerArea.setStyle("fillColors", [dashboardEditorMetadata.dashboard.stackFill1Start, dashboardEditorMetadata.dashboard.stackFill1SEnd]);
+                headerArea.height = 30;
+            } else if (dashboardEditorMetadata.dashboard.fillStackHeaders && dashboardStack.dashboardLevel == 1 && dashboardStack.gridItems.length > 1) {
+                headerArea = new HeaderCanvas2();
+                headerArea.setStyle("fillColors", [dashboardEditorMetadata.dashboard.stackFill2Start, dashboardEditorMetadata.dashboard.stackFill2End]);
+                headerArea.height = 30;
+            } else {
+                headerArea = new Canvas();
+            }
             defaultButtonsBox = styleHeaderArea(headerArea);
             addChild(headerArea);
         }
         viewStack = new ViewStack();
-        if (dashboardStack.preferredHeight > 0) {
-            this.height = dashboardStack.preferredHeight;
+        viewStack.setStyle("paddingLeft", 0);
+        viewStack.setStyle("paddingTop", 0);
+        viewStack.setStyle("paddingRight", 0);
+        viewStack.setStyle("paddingBottom", 0);
+        if (dashboardEditorMetadata.dashboard.absoluteSizing) {
             this.percentWidth = 100;
-            viewStack.percentHeight = 100;
             viewStack.percentWidth = 100;
+            viewStack.resizeToContent = true;
         } else {
-            this.percentWidth = 100;
-            this.percentHeight = 100;
-            viewStack.percentHeight = 100;
-            viewStack.percentWidth = 100;
+            if (dashboardStack.preferredHeight > 0) {
+                this.height = dashboardStack.preferredHeight;
+                this.percentWidth = 100;
+                viewStack.percentHeight = 100;
+                viewStack.percentWidth = 100;
+            } else {
+                this.percentWidth = 100;
+                this.percentHeight = 100;
+                viewStack.percentHeight = 100;
+                viewStack.percentWidth = 100;
+            }
         }
         /*viewStack.percentHeight = 100;
         viewStack.percentWidth = 100;*/
@@ -178,7 +220,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         _consolidateHeader = value;
     }
 
-    private function styleHeaderArea(headerArea:Container):Container {
+    private function imagedHeaderArea(headerArea:Container):Container {
         headerArea.setStyle("backgroundColor", dashboardStack.headerBackgroundColor);
         headerArea.setStyle("backgroundAlpha", dashboardStack.headerBackgroundAlpha);
         headerArea.setStyle("horizontalAlign", "center");
@@ -206,6 +248,37 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         headerbar.setStyle("paddingBottom", 5);
         headerBackgroundImage.addChild(headerbar);
         headerCentering.addChild(headerBackgroundImage);
+        headerArea.addChild(headerCentering);
+        if (dashboardStack.headerBackground != null && dashboardEditorMetadata.fixedID) {
+            shareButton = new Button();
+            shareButton.label = "Share";
+            shareButton.styleName = "grayButton";
+            shareButton.addEventListener(MouseEvent.CLICK, share);
+            headerArea.addChild(shareButton);
+
+            logoutButton = new Button();
+            logoutButton.label = "Log Out";
+            logoutButton.styleName = "grayButton";
+            logoutButton.addEventListener(MouseEvent.CLICK, logout);
+            headerArea.addChild(logoutButton);
+        }
+        return headerbar;
+    }
+
+    private function styleHeaderArea(headerArea:Container):Container {
+        // Rebecca from Ecoxotic, vendor form, 760-634-1857 email to rebecca@ecoxotic.com, w9
+        headerArea.setStyle("horizontalAlign", "center");
+        headerArea.percentWidth = 100;
+        var headerCentering:Box = new Box();
+        headerCentering.percentWidth = 100;
+        headerCentering.percentHeight = 100;
+        headerCentering.setStyle("horizontalAlign", "center");
+        var headerbar:HBox = new HBox();
+        headerbar.percentWidth = 100;
+        headerbar.percentHeight = 100;
+        headerbar.setStyle("horizontalAlign", dashboardStack.headerBackground != null ? "right" : "center");
+        headerbar.setStyle("verticalAlign", "middle");
+        headerCentering.addChild(headerbar);
         headerArea.addChild(headerCentering);
         if (dashboardStack.headerBackground != null && dashboardEditorMetadata.fixedID) {
             shareButton = new Button();
@@ -276,6 +349,32 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     }
     
     protected function createStackButton(index:int, label:String):UIComponent {
+        if (dashboardEditorMetadata.dashboard.fillStackHeaders && (dashboardStack.dashboardLevel == 0 || dashboardStack.dashboardLevel == 1)) {
+            return createHeaderLink(index, label);
+        } else {
+            return createHeaderButton(index, label);
+        }
+
+    }
+
+    private function createHeaderLink(index:int, label:String):UIComponent {
+        var topButton:DashboardButton = new DashboardButton();
+        topButton.addEventListener(ItemClickEvent.ITEM_CLICK, onCustomButtonClick);
+        if (dashboardStack.dashboardLevel == 0) {
+            topButton.setStyle("fontSize", 16);
+        } else {
+            topButton.setStyle("fontSize", 14);
+        }
+        if (index == 0) {
+            topButton.selected = true;
+            selectedButton = topButton;
+        }
+        topButton.data = index;
+        topButton.text = label;
+        return topButton;
+    }
+
+    private function createHeaderButton(index:int, label:String):UIComponent {
         var topButton:Button = new Button();
         topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
         topButton.styleName = "grayButton";
@@ -286,7 +385,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     protected function addStackChild(stackItem:DashboardStackItem, index:int):void {
         var topButton:UIComponent = createStackButton(index,  "Stack Item " + index);
-        getButtonsBox().addChildAt(topButton, index);
+        getButtonsBox().addChild(topButton);
         var comp:UIComponent = createComp(null, index);
         viewChildren.addItem(comp);
         viewStack.addChild(comp);
@@ -298,6 +397,11 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     }
 
     private function createStackChildren(headerbar:Container):void {
+        if (dashboardStack.selectionType == 'Buttons' && dashboardStack.count > 1) {
+            var s1:Spacer = new Spacer();
+            s1.percentWidth = 100;
+            headerbar.addChild(s1);
+        }
         for (var i:int = 0; i < dashboardStack.gridItems.length; i++) {
             var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
             var report:DashboardElement = stackItem.dashboardElement;
@@ -321,7 +425,10 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                 var topButton:UIComponent = createStackButton(i, label);
 
                 if (editMode() || dashboardStack.count > 1) {
-                    headerbar.addChildAt(topButton, i);
+                    headerbar.addChild(topButton);
+                    var s2:Spacer = new Spacer();
+                    s2.percentWidth = 100;
+                    headerbar.addChild(s2);
                 }
             }
             var comp:UIComponent = createComp(report, i);
@@ -334,7 +441,22 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             childComboBox.dataProvider = dashboardStack.gridItems;
             childComboBox.addEventListener(Event.CHANGE, onComboBoxChange);
             headerbar.addChild(childComboBox);
-        }
+        } /*else if (dashboardStack.selectionType == 'Buttons') {
+            var toggleBar:ToggleButtonBar = new ToggleButtonBar();
+            toggleBar.labelFunction = comboBoxLabelFunction;
+            toggleBar.setStyle("fontSize", 16);
+            toggleBar.height = 28;
+            toggleBar.dataProvider = dashboardStack.gridItems;
+            toggleBar.addEventListener(ItemClickEvent.ITEM_CLICK, onComboBoxChange);
+            if (dashboardStack.dashboardLevel == 0) {
+                toggleBar.setStyle("buttonStyleName", "topDashboardButton");
+                toggleBar.setStyle("selectedButtonTextStyleName", "headerSelected");
+            } else if (dashboardStack.dashboardLevel == 1) {
+                toggleBar.setStyle("buttonStyleName", "topDashboardButton2");
+                toggleBar.setStyle("selectedButtonTextStyleName", "headerSelected");
+            }
+            headerbar.addChild(toggleBar);
+        }*/
     }
 
     protected function stackChildSize():int {
@@ -346,7 +468,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     }
 
     protected function createComp(element:DashboardElement, i:int):UIComponent {
-        var comp:UIComponent = DashboardElementFactory.createViewUIComponent(element, dashboardEditorMetadata);
+        var comp:UIComponent = DashboardElementFactory.createViewUIComponent(element, dashboardEditorMetadata, dashboardStack);
         if (comp is DashboardStackViewComponent) {
             DashboardStackViewComponent(comp).stackFilterMap = this.stackFilterMap;
         } else if (comp is DashboardReportViewComponent) {
@@ -374,7 +496,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         if (report is DashboardReport) {
             return DashboardReport(report).report.name;
         } else {
-            if (report.label != null && report.label != "") {
+            if (report != null && report.label != null && report.label != "") {
                 return report.label;
             } else {
                 return "(Unlabeled)";

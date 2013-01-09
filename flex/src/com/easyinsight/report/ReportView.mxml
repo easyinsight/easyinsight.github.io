@@ -6,7 +6,7 @@
                      width="100%" height="100%"
                      creationComplete="onCreation()"
                      implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
-                     styleName="screenBackground" verticalGap="0">
+                     verticalGap="0">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;

@@ -14,10 +14,7 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
 
     public function DashboardReportEditorComponent() {
         super();
-        setStyle("verticalAlign", "middle");
-        setStyle("horizontalAlign", "center");
         this.percentWidth = 100;
-        this.percentHeight = 100;
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {

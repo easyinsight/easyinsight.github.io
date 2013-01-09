@@ -245,10 +245,12 @@
         <mx:method name="deleteUserUpload" result="deleted()"/>
     </mx:RemoteObject>
     <skin:BackgroundImage width="100%" height="100%" id="centerCanvas" minCenterWidth="1000">
-        <mx:HBox horizontalGap="0">
+        <mx:HBox backgroundColor="#FFFFFF" paddingTop="5" paddingBottom="10" paddingLeft="10" paddingRight="10" cornerRadius="5" borderStyle="solid" borderThickness="1" verticalGap="10"
+                top="10">
+
             <listing:MyDataButton uiChange="updateUI()" id="buttonBox" />
             <mx:Canvas width="100%" height="100%" horizontalScrollPolicy="off">
-                <mx:VBox paddingLeft="0" paddingRight="10" paddingTop="10" paddingBottom="10" width="100%"
+                <mx:VBox paddingLeft="0" paddingRight="10" paddingBottom="10" width="100%"
                         height="100%" id="blah" verticalScrollPolicy="auto" horizontalScrollPolicy="off">
                 </mx:VBox>
 

@@ -16,6 +16,7 @@
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
+        import mx.graphics.BitmapFill;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -41,6 +42,32 @@
         public var originalExchangeItem:EIDescriptor;
 
         public function gotFocus():void {
+        }
+
+        private var fill:BitmapFill;
+
+        [Bindable]
+        [Embed(source="../../../../assets/bgnoise.png")]
+        private var bgNoise:Class;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (fill == null) {
+                fill = new BitmapFill();
+                fill.source = bgNoise;
+                fill.repeat = true;
+            }
+        }
+
+        protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            var rc:Rectangle = new Rectangle(0, 0, unscaledWidth, unscaledHeight);
+            fill.begin(graphics, rc);
+            graphics.lineTo(rc.right,rc.top);
+            graphics.lineTo(rc.right,rc.bottom);
+            graphics.lineTo(rc.left,rc.bottom);
+            graphics.lineTo(rc.left,rc.top);
+            fill.end(graphics);
         }
 
         protected function keepEntity():void {

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                   xmlns:filtering="com.easyinsight.filtering.*"
-        creationComplete="populateData()">
+                   xmlns:filtering="com.easyinsight.filtering.*" xmlns:dashboard="com.easyinsight.dashboard.*"
+                   creationComplete="populateData()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.ReportFormItem;
         import com.easyinsight.analysis.StyleConfiguration;
@@ -15,6 +15,7 @@
 
         import mx.managers.PopUpManager;
 
+        [Bindable]
         private var _dashboardStack:DashboardStack;
 
         private var commandProcessor:CommandProcessor;
@@ -105,11 +106,13 @@
                 _dashboardStack.filters = transformContainer.getFilterDefinitions();
                 dispatchEvent(new GridDimensionEvent(0, 0));
                 PopUpManager.removePopUp(this);
+                //
             }
         }
         ]]></mx:Script>
     <mx:VBox horizontalAlign="center">
         <mx:TabNavigator resizeToContent="true" id="tabNavigator" creationPolicy="all">
+            <dashboard:DashboardStackOrderWindow id="orderWindow" dashboardStack="{_dashboardStack}" label="Contents"/>
             <mx:Box label="Stack Properties" paddingLeft="5" paddingTop="5" paddingBottom="5"
                 horizontalAlign="center" height="300" updateComplete="onEvent(event)" width="800" verticalScrollPolicy="on">
                 <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
