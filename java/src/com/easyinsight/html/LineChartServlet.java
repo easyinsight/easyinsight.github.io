@@ -3,6 +3,7 @@ package com.easyinsight.html;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSTwoAxisDefinition;
 import com.easyinsight.core.DateValue;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
@@ -39,14 +40,17 @@ public class LineChartServlet extends HtmlServlet {
                 labelArray.put(measure.toDisplay());
                 blahArray.put(measureArray);
                 for (IRow row : dataSet.getRows()) {
-                    DateValue dateValue = (DateValue) row.getValue(date);
-                    JSONArray values = new JSONArray();
-                    measureArray.put(values);
-                    values.put(dateFormat.format(dateValue.getDate()));
-                    if (row.getValue(measure).toDouble() == 0) {
-                        values.put(1);
-                    } else {
-                        values.put(row.getValue(measure).toDouble());
+                    Value v = row.getValue(date);
+                    if (!(v instanceof EmptyValue)) {
+                        DateValue dateValue = (DateValue) v;
+                        JSONArray values = new JSONArray();
+                        measureArray.put(values);
+                        values.put(dateFormat.format(dateValue.getDate()));
+                        if (row.getValue(measure).toDouble() == 0) {
+                            values.put(1);
+                        } else {
+                            values.put(row.getValue(measure).toDouble());
+                        }
                     }
                 }
             }
@@ -104,7 +108,6 @@ public class LineChartServlet extends HtmlServlet {
                 blahArray.put(array);
             }
         }
-
 
 
         // object.put("ticks", ticks);

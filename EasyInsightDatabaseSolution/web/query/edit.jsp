@@ -2,6 +2,8 @@
 <%@ page import="com.easyinsight.connections.database.DataConnection" %>
 <%@ page import="com.easyinsight.connections.database.data.Query" %>
 <%@ page import="sun.misc.Regexp" %>
+<%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
+<%@ page import="net.minidev.json.JSONObject" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -17,16 +19,17 @@
     Session dataSession = DataConnection.getSession();
     try {
         Query q = (Query) dataSession.get(Query.class, Long.parseLong(request.getParameter("id")));
+        JSONObject j = new JSONObject();
+        j.put("id", q.getId());
+        j.put("name", q.getName());
+        j.put("connectionId", q.getConnectionInfo().getId());
+        j.put("query", q.getQuery());
+        j.put("dataSource", q.getDataSource());
+        j.put("schedule", q.isSchedule());
+        j.put("append", q.isAppend());
         %>
-            {
-                "id": <%= q.getId() %>,
-                "name": "<%= q.getName() %>",
-                "connectionId": <%= q.getConnectionInfo().getId() %>,
-                "query": "<%= q.getQuery().replace("\n", "\\n") %>",
-                "dataSource": "<%= q.getDataSource() %>",
-                "schedule": <%= q.isSchedule() %>,
-                "append": <%= q.isAppend() %>
-            }
+
+        <%= j %>
         <%
     } finally {
         dataSession.close();
