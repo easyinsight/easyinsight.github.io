@@ -192,7 +192,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
     private function onEdit(event:MouseEvent):void {
         if (element != null) {
             IDashboardEditorComponent(dropBox.getChildAt(0)).edit();
-            editorComp = null;
+            //editorComp = null;
         }
     }
 
