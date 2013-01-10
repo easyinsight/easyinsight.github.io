@@ -139,7 +139,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         if (event.height != -1) {
             this.percentHeight = NaN;
             //Alert.show("setting size to " + event.height);
-            var h:int = event.height + (this.transformContainer ? this.transformContainer.height : 0) + 10 + (dashboardReport.showLabel ? 30 : 0);
+            var h:int = event.height + (this.transformContainer ? this.transformContainer.height : 0) + 20 + (dashboardReport.showLabel ? 30 : 0);
             this.height = h;
             alteredHeight = h;
             //Alert.show("setting to " + h);

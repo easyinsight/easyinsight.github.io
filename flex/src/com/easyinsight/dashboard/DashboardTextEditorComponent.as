@@ -4,7 +4,6 @@ import com.easyinsight.util.AutoSizeTextArea;
 
 import mx.collections.ArrayCollection;
 import mx.containers.VBox;
-import mx.controls.TextArea;
 import mx.managers.PopUpManager;
 
 public class DashboardTextEditorComponent extends VBox implements IDashboardEditorComponent {
@@ -49,8 +48,7 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
         dashboardText.text = textArea.text;
     }
 
-    public function validate():String {
-        return null;
+    public function validate(results:Array):void {
     }
 
     public function edit():void {

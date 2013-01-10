@@ -50,6 +50,8 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         setStyle("borderStyle", "solid");
         setStyle("borderThickness", 1);
         setStyle("verticalGap", 0);
+        horizontalScrollPolicy = "off";
+        verticalScrollPolicy = "off";
         this.percentWidth = 100;
         this.percentHeight = 100;
     }
@@ -125,10 +127,10 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         topCanvas.addChild(topBox);
         addChild(topCanvas);
         dropBox = new Box();
-        dropBox.setStyle("paddingLeft", 5);
+        /*dropBox.setStyle("paddingLeft", 5);
         dropBox.setStyle("paddingRight", 5);
         dropBox.setStyle("paddingBottom", 5);
-        dropBox.setStyle("paddingTop", 5);
+        dropBox.setStyle("paddingTop", 5);*/
         dropBox.percentHeight = 100;
         dropBox.percentWidth = 100;
         dropBox.setStyle("verticalAlign", "middle");
@@ -225,14 +227,14 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         DragManager.showFeedback(DragManager.MOVE);
     }
 
-    public function validate():String {
+    public function validate(results:Array):void {
         if (dropBox.getChildren().length == 0 || !(dropBox.getChildAt(0) is IDashboardEditorComponent)) {
-            return "You need to add at least one element to the dashboard.";
+            results.push("You need to add at least one element to the dashboard.");
         } else {
             errorString = null;
         }
         var comp:IDashboardEditorComponent = dropBox.getChildAt(0) as IDashboardEditorComponent;
-        return comp.validate();
+        return comp.validate(results);
     }
 
     public function save():void {

@@ -185,8 +185,9 @@
 
         private function save(saveHandler:Function = null):void {
             var box:DashboardBox = dashboardCanvas.getChildAt(0) as DashboardBox;
-            var message:String = box.validate();
-            if (message == null) {
+            var results:Array = [];
+            box.validate(results);
+            if (results.length == 0) {
                 box.save();
                 _dashboard.rootElement = box.element;
                 _dashboard.dataSourceID = dataSourceID;
@@ -201,7 +202,7 @@
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
             } else {
-                Alert.show(message);
+                Alert.show(results[0]);
             }
         }
 
@@ -391,7 +392,7 @@
 
         override protected function measure():void {
             super.measure();
-            vbox.width =  Application(Application.application).width - controls.width - 50;
+            vbox.width =  Application(Application.application).width - controls.width - 30;
             vbox.maxHeight = Application(Application.application).height - headers.height - filtersBox.height - 20;
             lastFiltersHeight = filtersBox.height;
         }

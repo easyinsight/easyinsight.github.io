@@ -5,9 +5,7 @@ import com.easyinsight.skin.ImageUploadEvent;
 import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
-
 import mx.containers.VBox;
-import mx.controls.Label;
 
 public class DashboardImageEditorComponent extends VBox implements IDashboardEditorComponent {
 
@@ -46,14 +44,14 @@ public class DashboardImageEditorComponent extends VBox implements IDashboardEdi
         image.imageDescriptor = imageBox.imageDescriptor;
     }
 
-    public function validate():String {
+    public function validate(results:Array):void {
         if (image.imageDescriptor == null) {
             setStyle("borderColor", "red");
             setStyle("borderThickness", 2);
             setStyle("borderStyle", "solid");
             dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            results.push("You need to add an image.");
         }
-        return "You need to add an image.";
     }
 
     public function edit():void {

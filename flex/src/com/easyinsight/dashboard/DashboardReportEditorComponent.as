@@ -15,6 +15,8 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
     public function DashboardReportEditorComponent() {
         super();
         this.percentWidth = 100;
+        horizontalScrollPolicy = "off";
+        verticalScrollPolicy = "off";
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
@@ -34,8 +36,8 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
     public function save():void {
     }
 
-    public function validate():String {
-        return null;
+    public function validate(results:Array):void {
+
     }
 
     public function edit():void {

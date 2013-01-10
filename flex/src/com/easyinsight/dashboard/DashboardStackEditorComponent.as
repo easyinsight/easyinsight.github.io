@@ -5,7 +5,6 @@ import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
-import mx.controls.Button;
 import mx.core.Container;
 import mx.core.UIComponent;
 import mx.managers.PopUpManager;
@@ -156,26 +155,25 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         }
     }
 
-    public function validate():String {
-        var valid:String = null;
+    public function validate(results:Array):void {
+        var valid:Boolean = false;
         var comps:ArrayCollection = stackComponents();
         if (comps.length != dashboardStack.count) {
             this.errorString = "You need to configure all children of this stack.";
             dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
-            valid = "You need to configure all children of this stack.";
+            results.push("You need to configure all children of this stack.");
         }
-        if (valid) {
+        if (!valid) {
             for each (var box:DashboardBox in comps) {
                 if (box.element == null) {
                     box.errorString = "You need to configure this section of the grid.";
                     box.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
-                    valid = "You need to configure all children of this stack.";
+                    results.push("You need to configure all children of this stack.");
                 } else {
-                    valid = valid && box.validate();
+                    box.validate(results);
                 }
             }
         }
-        return valid;
     }
 
     public function edit():void {

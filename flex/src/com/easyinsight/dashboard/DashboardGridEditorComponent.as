@@ -18,6 +18,8 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         super();
         this.percentWidth = 100;
         this.percentHeight = 100;
+        horizontalScrollPolicy = "off";
+        verticalScrollPolicy = "off";
         addEventListener(SizeOverrideEvent.SIZE_OVERRIDE, onSizeOverride);
     }
 
@@ -78,12 +80,14 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
                         gridItem.width = NaN;
                         gridItem.percentWidth = 100;
                     }
-                    if (childSizeInfo.preferredHeight != 0) {
-                        gridItem.height = childSizeInfo.preferredHeight + dashboardGrid.paddingTop + dashboardGrid.paddingBottom;
-                        gridItem.percentHeight = NaN;
-                    } else {
-                        gridItem.height = NaN;
-                        gridItem.percentHeight = 100;
+                    if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
+                        if (childSizeInfo.preferredHeight != 0) {
+                            gridItem.height = childSizeInfo.preferredHeight + dashboardGrid.paddingTop + dashboardGrid.paddingBottom;
+                            gridItem.percentHeight = NaN;
+                        } else {
+                            gridItem.height = NaN;
+                            gridItem.percentHeight = 100;
+                        }
                     }
                 }
             }
@@ -97,12 +101,16 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         viewChildren = new ArrayCollection();
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
             var gridRow:GridRow = new GridRow();
+            gridRow.horizontalScrollPolicy = "off";
+            gridRow.verticalScrollPolicy = "off";
             gridRow.percentWidth = 100;
             gridRow.percentHeight = 100;
             addChild(gridRow);
             for (var j:int = 0; j < dashboardGrid.columns; j++) {
                 var e:DashboardGridItem = findItem(i, j);
                 var gridItem:GridItem = new GridItem();
+                gridItem.horizontalScrollPolicy = "off";
+                gridItem.verticalScrollPolicy = "off";
                 gridItem.setStyle("borderThickness", 1);
                 gridItem.setStyle("borderStyle", "solid");
                 gridItem.percentWidth = 100;
@@ -140,7 +148,7 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         return null;
     }
 
-    public function validate():String {
+    public function validate(results:Array):void {
         var valid:String = null;
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
             var row:GridRow = getChildAt(i) as GridRow;
@@ -149,13 +157,12 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
                 var box:DashboardBox = item.getChildAt(0) as DashboardBox;
                 if (box.element == null) {
                     box.validationFail();
-                    valid = "You need to fully configure this grid.";
+                    results.push("You need to fully configure this grid.");
                 } else {
-                    valid = valid && box.validate();
+                    box.validate(results);
                 }
             }
         }
-        return valid;
     }
 
     public var dashboardEditorMetadata:DashboardEditorMetadata;
