@@ -83,7 +83,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         }
         if (sizeInfo.preferredHeight > 0) {
             height = dashboardReport.preferredHeight;
-        } else if (dashboardEditorMetadata.dashboard.absoluteSizing) {
+        } else if (!sizeInfo.autoCalcHeight && dashboardEditorMetadata.dashboard.absoluteSizing) {
             height = 400;
         } else if (!sizeInfo.autoCalcHeight) {
             percentHeight = 100;

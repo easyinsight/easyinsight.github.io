@@ -19,9 +19,11 @@
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.Value;
+        import com.easyinsight.analysis.list.SizeOverrideEvent;
         import com.easyinsight.analysis.ytd.VerticalListReportExtension;
 
         import mx.collections.ArrayCollection;
+        import mx.events.FlexEvent;
         import mx.formatters.Formatter;
 
         [Bindable]
@@ -199,6 +201,9 @@
                 } else {
                     dataGrid.x = 0;
                 }
+                if (additionalProperties["preferredSize"]) {
+                    dataGrid.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+                }
                 dataGrid.columns = columns;
                 dataGrid.rowCount = dColl.length + 2;
                 dataGrid.height = (dColl.length + 1) * 20 + 20;
@@ -207,6 +212,11 @@
                 invalidateDisplayList();
             }
 
+        }
+
+        private function onUpdateComplete(event:FlexEvent):void {
+            event.currentTarget.removeEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+            dispatchEvent(new SizeOverrideEvent(-1, event.currentTarget.height));
         }
 
         private var reportWidth:int;

@@ -79,41 +79,27 @@
             var remainder:int = formReport.columns.length % formReport.columnCount;
             var l:int = 0;
             for (var i:int = 0; i < formReport.columnCount; i++) {
-                if (formReport.direction == "Left") {
+                var form:Form = new Form();
 
-                    var form:Form = new Form();
+                for (var j:int = 0; j < (fieldsPerColumn + (i == 0 ? remainder : 0)); j++) {
+                    var item:AnalysisItem = formReport.columns.getItemAt(l++) as AnalysisItem;
+                    var formItem:FormItem = new FormItem();
+                    formItem.setStyle("fontWeight", "normal");
+                    formItem.setStyle("fontSize", formReport.labelFontSize);
+                    formItem.setStyle("fontFamily", formReport.getFont());
 
-                    for (var j:int = 0; j < (fieldsPerColumn + (i == 0 ? remainder : 0)); j++) {
-                        var item:AnalysisItem = formReport.columns.getItemAt(l++) as AnalysisItem;
-                        var formItem:FormItem = new FormItem();
-                        formItem.setStyle("fontWeight", "normal");
-                        formItem.setStyle("fontSize", formReport.labelFontSize);
-                        formItem.setStyle("fontFamily", formReport.getFont());
+                    formItem.label = item.display + ":";
 
-                        formItem.label = item.display + ":";
+                    var renderer:FormCellRenderer = new FormCellRenderer();
+                    renderer.analysisItem = item;
+                    renderer.report = formReport;
+                    renderer.data = row;
+                    formItem.addChild(renderer);
 
-                        var renderer:FormCellRenderer = new FormCellRenderer();
-                        renderer.analysisItem = item;
-                        renderer.report = formReport;
-                        renderer.data = row;
-                        formItem.addChild(renderer);
-
-                        form.addChild(formItem);
-                    }
-                    hbox.addChild(form);
-                } else if (formReport.direction == "Bottom" || formReport.direction == "Top") {
-                    var vbox:VBox = new VBox();
-                    for (var k:int = 0; k < (fieldsPerColumn + (i == 0 ? remainder : 0)); k++) {
-                        var xItem:AnalysisItem = formReport.columns.getItemAt(l++) as AnalysisItem;
-                        var vRenderer:VerticalFormCellRenderer = new VerticalFormCellRenderer();
-                        vRenderer.analysisItem = xItem;
-                        vRenderer.report = formReport;
-                        vRenderer.labelTop = formReport.direction == "Top";
-                        vRenderer.data = row;
-                        vbox.addChild(vRenderer);
-                    }
-                    hbox.addChild(vbox);
+                    form.addChild(formItem);
                 }
+                hbox.addChild(form);
+
             }
             return hbox;
         }

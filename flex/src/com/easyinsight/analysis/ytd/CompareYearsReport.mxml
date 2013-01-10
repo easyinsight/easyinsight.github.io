@@ -7,6 +7,7 @@
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.formatter.PercentageNumberFormatter;
+        import com.easyinsight.analysis.list.SizeOverrideEvent;
         import com.easyinsight.analysis.verticallist.VerticalListHeaderRenderer;
         import com.easyinsight.analysis.verticallist.VerticalListRenderer;
         import com.easyinsight.analysis.verticallist.VerticalListRowHeaderRenderer;
@@ -15,6 +16,7 @@
 
         import mx.collections.ArrayCollection;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
+        import mx.events.FlexEvent;
         import mx.formatters.Formatter;
         import mx.formatters.NumberBaseRoundType;
 
@@ -176,12 +178,20 @@
             if (endWidth > 0) {
                 dataGrid.x = (this.width - endWidth) / 2;
             }
+            if (additionalProperties["preferredSize"]) {
+                dataGrid.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+            }
             dataGrid.columns = columns.toArray();
             dataGrid.rowCount = dColl.length + 1;
             dataGrid.height = (dColl.length + 1) * 20 + 20;
             dataGrid.rowsToUnderline = underlines;
             dataGrid.dataProvider = dColl;
             invalidateDisplayList();
+        }
+
+        private function onUpdateComplete(event:FlexEvent):void {
+            event.currentTarget.removeEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+            dispatchEvent(new SizeOverrideEvent(-1, event.currentTarget.height));
         }
 
         public function updateExportMetadata():void {

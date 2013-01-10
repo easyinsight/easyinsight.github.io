@@ -136,7 +136,7 @@
             metadata.dashboard = _dashboard;
             box.dashboardEditorMetadata = metadata;
             box.element = _dashboard.rootElement;
-            box.allowDelete = false;
+            //box.allowDelete = false;
             UIComponent(box).addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent):void {
                 var filterMap:Object = new Object();
                 filterMap["master"] = _dashboard.filters;
@@ -468,7 +468,7 @@
             </mx:HBox>
             <mx:Canvas width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
                 <mx:VBox id="vbox" verticalScrollPolicy="on" verticalGap="0">
-                    <mx:Canvas width="100%" id="dashboardCanvas" backgroundColor="#CC0000"/>
+                    <mx:Canvas width="100%" id="dashboardCanvas"/>
                 </mx:VBox>
             </mx:Canvas>
         </mx:VBox>

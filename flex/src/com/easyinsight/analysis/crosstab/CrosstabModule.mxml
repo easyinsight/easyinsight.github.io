@@ -6,9 +6,11 @@
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.list.SizeOverrideEvent;
 
         import mx.collections.ArrayCollection;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
+        import mx.events.FlexEvent;
         import mx.formatters.Formatter;
 
         private var dimension1:AnalysisItem;
@@ -88,10 +90,18 @@
                 } else {
                     dataGrid.x = 0;
                 }
+                if (additionalProperties["preferredSize"]) {
+                    dataGrid.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+                }
                 dataGrid.height = (translated.length) * 22 + 4;
                 dataGrid.dataProvider = translated;
 
             }
+        }
+
+        private function onUpdateComplete(event:FlexEvent):void {
+            event.currentTarget.removeEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+            dispatchEvent(new SizeOverrideEvent(-1, event.currentTarget.height));
         }
 
         public function updateExportMetadata():void {
