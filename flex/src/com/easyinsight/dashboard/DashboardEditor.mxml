@@ -46,6 +46,7 @@
 
         private function populateData():void {
             commandProcessor = new CommandProcessor();
+            stage.addEventListener(Event.RESIZE, onResize);
             addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(DashboardChangedEvent.DASHBOARD_CHANGED, function (event:DashboardChangedEvent):void {
                 dashboardChanged = true;
@@ -312,6 +313,7 @@
         }
 
         public function cleanup():void {
+            stage.removeEventListener(Event.RESIZE, onResize);
         }
 
         private function newReport():void {
@@ -407,6 +409,10 @@
 
             //Alert.show("width set to " + (this.width - controls.width));
             //Alert.show("max height set to " + (this.height - headers.height - filtersBox.height) + " where this height = " + this.height);
+        }
+
+        private function onResize(event:Event):void {
+            invalidateSize();
         }
 
         // >=
