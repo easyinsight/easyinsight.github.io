@@ -226,13 +226,13 @@
                 Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
                         Alert.OK | Alert.CANCEL, null, viewListener, null, Alert.CANCEL);
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
             }
         }
 
         private function viewListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
             }
         }
 
@@ -330,10 +330,10 @@
         private function newDashboard():void {
             if (dashboardChanged) {
                 createPromptWindow("You have unsaved changes to this dashboard.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID})));
             }
         }
 
@@ -369,30 +369,30 @@
         private function goReport():void {
             if (_dashboard.id == 0) {
                 createRequiredPromptWindow("You need to save this dashboard first.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
                 });
             } else if (dashboardChanged) {
                 createRequiredPromptWindow("You have unsaved changes to this dashboard.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
             }
         }
 
         private function goAdmin():void {
             if (dashboardChanged) {
                 createPromptWindow("You have unsaved changes to this dashboard.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
             }
         }
 
         override protected function measure():void {
             super.measure();
-            vbox.width =  Application(Application.application).width - controls.width - 30;
+            vbox.width = Application(Application.application).width - controls.width - 30;
             vbox.maxHeight = Application(Application.application).height - headers.height - filtersBox.height - 20;
             lastFiltersHeight = filtersBox.height;
         }
@@ -418,6 +418,19 @@
 
         // >=
         //
+        private function viewInHTML():void {
+            if (_dashboard.id == 0) {
+                createRequiredPromptWindow("You have unsaved changes to this dashboard.", function ():void {
+                    navigateToURL(new URLRequest("/app/html/dashboard/" + _dashboard.urlKey), "_blank");
+                });
+            } else if (dashboardChanged) {
+                createPromptWindow("You have unsaved changes to this report.", function ():void {
+                    navigateToURL(new URLRequest("/app/html/dashboard/" + _dashboard.urlKey), "_blank");
+                });
+            } else {
+                navigateToURL(new URLRequest("/app/html/dashboard/" + _dashboard.urlKey), "_blank");
+            }
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptorsForDataSource" result="gotReports()"/>
@@ -437,16 +450,21 @@
         <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
                    toolTip="Save" labelPlacement="right" label="Save" styleName="grayButton"/>
         <mx:Button icon="@Embed(source='../../../../assets/document_edit.png')" click="configureDashboard()"
-                   toolTip="Configure Dashboard" label="Configure Dashboard" labelPlacement="right" styleName="grayButton"/>
+                   toolTip="Configure Dashboard" label="Configure Dashboard" labelPlacement="right"
+                   styleName="grayButton"/>
         <mx:Button icon="@Embed(source='../../../../assets/code_edit.png')" click="editCode()"
                    toolTip="Edit Code" label="Edit Code" labelPlacement="right" styleName="grayButton"/>
-        <analysis:AdditionalActionButton newReportAction="newReport()" newDashboardAction="newDashboard()" reportViewAction="goReport()"
-                                         configureDataSourceAction="goAdmin()" toolTip="Actions" icon="@Embed(source='../../../../assets/businessman_edit.png')"
-                                         />
+        <analysis:AdditionalActionButton newReportAction="newReport()" newDashboardAction="newDashboard()"
+                                         reportViewAction="goReport()"
+                                         viewInHTMLAction="viewInHTML()" configureDataSourceAction="goAdmin()"
+                                         toolTip="Actions"
+                                         icon="@Embed(source='../../../../assets/businessman_edit.png')"
+                />
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
     </mx:HBox>
-    <mx:HBox width="100%" height="100%" paddingLeft="10" paddingRight="10" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+    <mx:HBox width="100%" height="100%" paddingLeft="10" paddingRight="10" verticalScrollPolicy="off"
+             horizontalScrollPolicy="off">
         <mx:VBox height="100%" horizontalAlign="center" width="200" paddingTop="20" paddingBottom="20" id="controls">
             <mx:Label text="Controls" fontSize="14"/>
             <mx:List id="controlsList" dataProvider="{availableControls}" labelField="name" dragEnabled="true"
@@ -455,10 +473,11 @@
             <mx:List id="reportsList" dataProvider="{availableReports}" labelField="name" dragEnabled="true"
                      width="100%" height="100%"/>
         </mx:VBox>
-        <mx:VBox width="100%" height="100%" horizontalAlign="center" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+        <mx:VBox width="100%" height="100%" horizontalAlign="center" verticalScrollPolicy="off"
+                 horizontalScrollPolicy="off">
             <mx:HBox width="100%" id="filtersBox">
                 <mx:Button icon="@Embed(source='../../../../assets/funnel.png')"
-                       toolTip="Create New Filter..." click="transformContainer.addNewFilter()" label="New Filter"/>
+                           toolTip="Create New Filter..." click="transformContainer.addNewFilter()" label="New Filter"/>
                 <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
                                               borderStyle="solid"
                                               borderThickness="1" backgroundColor="#ffffff"
