@@ -18,6 +18,7 @@
 
 
         import mx.controls.Button;
+        import mx.core.Application;
 
         import mx.messaging.config.ServerConfig;
 
@@ -67,6 +68,7 @@
 
         private function onCreation():void {
             commandProcessor = new CommandProcessor();
+            stage.addEventListener(Event.RESIZE, onResize);
             addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(ReportNavigationEvent.TO_REPORT, onNavigation);
             addEventListener(SizeOverrideEvent.SIZE_OVERRIDE, sizeOverride);
@@ -328,6 +330,7 @@
         private var showReportInfoButton:Boolean;
 
         public function cleanup():void {
+            stage.removeEventListener(Event.RESIZE, onResize);
         }
 
         override protected function generateState():void {
@@ -422,8 +425,12 @@
 
         override protected function measure():void {
             super.measure();
-            vbox.width = this.width;
-            vbox.maxHeight = this.height - dashboardHeader.height;
+            vbox.width = Application(Application.application).width;
+            vbox.maxHeight = Application(Application.application).height - dashboardHeader.height;
+        }
+
+        private function onResize(event:Event):void {
+            invalidateSize();
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
