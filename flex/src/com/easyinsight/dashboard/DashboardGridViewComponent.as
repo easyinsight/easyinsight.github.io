@@ -105,10 +105,10 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
                 }
 
                 if (e.dashboardElement is DashboardReport || e.dashboardElement is DashboardTextElement) {
-                    gridItem.setStyle("paddingLeft", 3);
-                    gridItem.setStyle("paddingRight", 3);
-                    gridItem.setStyle("paddingTop", 3);
-                    gridItem.setStyle("paddingBottom", 3);
+                    /*gridItem.setStyle("paddingLeft", 5);
+                    gridItem.setStyle("paddingRight", 5);
+                    gridItem.setStyle("paddingTop", 5);
+                    gridItem.setStyle("paddingBottom", 5);*/
                 }
                 gridItem.setStyle("horizontalAlign", "center");
 

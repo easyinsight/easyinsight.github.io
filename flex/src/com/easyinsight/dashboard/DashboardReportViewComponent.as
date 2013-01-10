@@ -36,10 +36,10 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         setStyle("horizontalAlign", "center");
         setStyle("verticalAlign", "middle");
         setStyle("verticalGap", 5);
-        setStyle("paddingLeft", 0);
-        setStyle("paddingRight", 0);
-        setStyle("paddingTop", 0);
-        setStyle("paddingBottom", 0);
+        setStyle("paddingLeft", 5);
+        setStyle("paddingRight", 5);
+        setStyle("paddingTop", 5);
+        setStyle("paddingBottom", 5);
         setStyle("backgroundColor", 0xFFFFFF);
         setStyle("backgroundAlpha", 1);
     }

@@ -5,6 +5,7 @@ import com.easyinsight.util.AutoSizeTextArea;
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.controls.Alert;
+import mx.controls.Text;
 import mx.controls.TextArea;
 
 public class DashboardTextViewComponent extends Box implements IDashboardViewComponent  {
@@ -13,7 +14,7 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
 
     public var metadata:DashboardEditorMetadata;
 
-    private var textArea:TextArea;
+    private var textArea:Text;
 
     public function DashboardTextViewComponent() {
         super();
@@ -33,25 +34,8 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
 
     protected override function createChildren():void {
         super.createChildren();
-        var canvas:Box = new Box();
-        if (metadata.dashboard.borderThickness != 0) {
-            setStyle("borderStyle", "inset");
-            setStyle("borderThickness", 3);
-            setStyle("borderColor", 0x00000);
-            canvas.setStyle("borderStyle", "solid");
-            canvas.setStyle("borderThickness", 1);
-            canvas.setStyle("cornerRadius", 8);
-            canvas.setStyle("dropShadowEnabled", true);
-            canvas.setStyle("paddingLeft", 10);
-            canvas.setStyle("paddingRight", 10);
-            canvas.setStyle("paddingBottom", 10);
-            canvas.setStyle("paddingTop", 10);
-        }
-        canvas.percentHeight = 100;
-        canvas.percentWidth = 100;
-        addChild(canvas);
-        textArea = new TextArea();
-        textArea.setStyle("textAlign", "center");
+        textArea = new Text();
+        //textArea.setStyle("textAlign", "center");
         textArea.setStyle("fontSize", 14);
         if (dashboardText.preferredHeight == 0) {
             textArea.percentHeight = 100;
@@ -67,9 +51,9 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
             textArea.width = dashboardText.preferredWidth;
             this.width = dashboardText.preferredWidth;
         }
-        textArea.editable = false;
+        //textArea.editable = false;
         textArea.htmlText = dashboardText.text;
-        canvas.addChild(textArea);
+        addChild(textArea);
     }
 
     public function refresh():void {
