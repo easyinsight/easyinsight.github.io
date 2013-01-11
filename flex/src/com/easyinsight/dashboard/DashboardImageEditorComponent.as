@@ -45,7 +45,7 @@ public class DashboardImageEditorComponent extends VBox implements IDashboardEdi
     }
 
     public function validate(results:Array):void {
-        if (image.imageDescriptor == null) {
+        if (imageBox.imageDescriptor == null) {
             setStyle("borderColor", "red");
             setStyle("borderThickness", 2);
             setStyle("borderStyle", "solid");
