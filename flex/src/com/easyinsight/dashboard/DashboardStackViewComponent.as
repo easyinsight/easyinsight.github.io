@@ -349,7 +349,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     }
     
     protected function createStackButton(index:int, label:String):UIComponent {
-        if (dashboardEditorMetadata.dashboard.fillStackHeaders && (dashboardStack.dashboardLevel == 0 || dashboardStack.dashboardLevel == 1)) {
+        if (!dashboardStack.consolidateHeaderElements && dashboardEditorMetadata.dashboard.fillStackHeaders && (dashboardStack.dashboardLevel == 0 || dashboardStack.dashboardLevel == 1)) {
             return createHeaderLink(index, label);
         } else {
             return createHeaderButton(index, label);
