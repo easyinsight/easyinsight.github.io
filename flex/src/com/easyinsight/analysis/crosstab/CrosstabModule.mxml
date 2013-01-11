@@ -91,6 +91,7 @@
                     dataGrid.x = 0;
                 }
                 if (additionalProperties["preferredSize"]) {
+                    box.verticalScrollPolicy = "off";
                     dataGrid.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
                 }
                 dataGrid.height = (translated.length) * 22 + 4;
