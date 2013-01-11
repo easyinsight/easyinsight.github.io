@@ -227,7 +227,7 @@ public class TransformContainer extends HBox
                 if (filterValueDefinition.autoComplete) {
                     filter = new AutoCompleteFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
                 } else {
-                    filter = new ComboBoxFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report, filterDefinitions);
+                    filter = new ComboBoxFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report, _loadingFromReport ? ((_report != null && _report.filterDefinitions != null) ? _report.filterDefinitions : filterDefinitions) : filterDefinitions);
                 }
             } else {
                 filter = new MultiValueFilter(_feedID, filterDefinition.field, _reportID,  _dashboardID);
@@ -655,13 +655,15 @@ public class TransformContainer extends HBox
 
     public function updateState():Boolean {
         var changed:Boolean = false;
-        for each (var filter:IFilter in filterTile.getChildren()) {
-            if (filter is ComboBoxFilter) {
-                changed = ComboBoxFilter(filter).updateState() || changed;
-            } else if (filter is FlatDateFilter) {
-                changed = FlatDateFilter(filter).updateState() || changed;
-            } else if (filter is MultiFlatDateFilter) {
-                changed = MultiFlatDateFilter(filter).updateState() || changed;
+        if (filterTile != null) {
+            for each (var filter:IFilter in filterTile.getChildren()) {
+                if (filter is ComboBoxFilter) {
+                    changed = ComboBoxFilter(filter).updateState() || changed;
+                } else if (filter is FlatDateFilter) {
+                    changed = FlatDateFilter(filter).updateState() || changed;
+                } else if (filter is MultiFlatDateFilter) {
+                    changed = MultiFlatDateFilter(filter).updateState() || changed;
+                }
             }
         }
         return changed;
