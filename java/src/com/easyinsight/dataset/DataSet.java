@@ -265,7 +265,7 @@ public class DataSet implements Serializable, Cloneable {
     }
 
     public List<IRow> subset(int number) {
-        int index = Math.min(rows.size(), number - 1);
+        int index = Math.min(rows.size(), number);
         List<IRow> subsetRows = new ArrayList<IRow>(rows.subList(0, index));
         List<IRow> remainder;
         if (index < rows.size()) {
