@@ -2,7 +2,7 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:datasources="com.easyinsight.datasources.*"
          xmlns:listing="com.easyinsight.listing.*" width="100%"
          height="100%"
-         creationComplete="addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete); addEventListener(ChangeFolderEvent.CHANGE_FOLDER, onChangeFolder);
+         creationComplete="addEventListener(ChangeFolderEvent.CHANGE_FOLDER, onChangeFolder);
          addEventListener(AnalyzeEvent.ANALYZE, onAnalyze2); onCreation()"
          doubleClickEnabled="true" implements="com.easyinsight.listing.IDataSourceSpecificList">
     <mx:Metadata>
@@ -222,7 +222,6 @@
                 var currentlyShowing:Boolean = showScorecard;
                 showScorecard = realDataSource && ApplicationSkin.instance().myDataNewScorecard;
                 if (!currentlyShowing && showScorecard) {
-                    currentlyShowing = true;
                     createOptions.addItemAt({label: "New Scorecard", data: "newScorecard"}, 2);
                 }
                 var dataSourceChildren:ArrayCollection = _dataSourceDescriptor.children;
@@ -293,18 +292,6 @@
         }
 
         private var openState:Object = new Object();
-
-        private function keyHit(event:KeyboardEvent):void {
-            if (event.keyCode == Keyboard.DELETE) {
-                if (uploadGrid.selectedItems != null) {
-                    if (uploadGrid.selectedItems.length > 1) {
-                        Alert.show("You can only delete single items at the moment.");
-                    } else {
-                        deleteItem(uploadGrid.selectedItem);
-                    }
-                }
-            }
-        }
 
         private function preserveOpenState():void {
             if (existingData != null) {
@@ -411,11 +398,6 @@
                 controlsColumn.sortable = false;
                 var factory:ClassFactory = new ClassFactory(MyDataIconControls);
                 controlsColumn.itemRenderer = factory;
-                var showSize:Boolean = true;
-                var showLastData:Boolean = true;
-                showSize = true;
-                showLastData = true;
-                var i:int = 3;
                 factory.properties = {
                     showAdmin:true
                 };
@@ -475,22 +457,6 @@
             }
         }
 
-        private function deleteItem(selectedItem:Object):void {
-            if (selectedItem is InsightDescriptor) {
-                Alert.show("Are you sure you want to delete this report? You will not be able to undo this operation.", "Alert",
-                        Alert.OK | Alert.CANCEL, this, alertInsightListener, null, Alert.CANCEL);
-            } else if (selectedItem is LookupTableDescriptor) {
-                Alert.show("Are you sure you want to delete this lookup table? You will not be able to undo this operation.", "Alert",
-                        Alert.OK | Alert.CANCEL, this, alertLookupListener, null, Alert.CANCEL);
-            } else if (selectedItem is DashboardDescriptor) {
-                Alert.show("Are you sure you want to delete this dashboard? You will not be able to undo this operation.", "Alert",
-                        Alert.OK | Alert.CANCEL, this, alertDashboardListener, null, Alert.CANCEL);
-            } else if (selectedItem is ScorecardDescriptor) {
-                Alert.show("Are you sure you want to delete this scorecard? You will not be able to undo this operation.", "Alert",
-                        Alert.OK | Alert.CANCEL, this, alertScorecardListener, null, Alert.CANCEL);
-            }
-        }
-
         private function simpleIconFunction(item:Object):Class {
             if (item is InsightDescriptor) {
                 return crosstabIcon;
@@ -539,23 +505,7 @@
         private var showLoading:Boolean;
         private var loadingIndex:int;
 
-        private function alertInsightListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                var definition:InsightDescriptor = uploadGrid.selectedItem as InsightDescriptor;
-                ProgressAlert.alert(this, "Deleting report...", null, analysisService.deleteAnalysisDefinition);
-                analysisService.deleteAnalysisDefinition.send(definition.id);
-            }
-        }
-
-        private function alertLookupListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                var feedDescriptor:LookupTableDescriptor = uploadGrid.selectedItem as LookupTableDescriptor;
-                ProgressAlert.alert(this, "Deleting lookup table...", null, etlService.deleteLookupTable);
-                etlService.deleteLookupTable.send(feedDescriptor.id);
-            }
-        }
-
-        private function customSort(obj1:Object, obj2:Object):int {
+        private static function customSort(obj1:Object, obj2:Object):int {
             var date1:Date = null;
             var date2:Date = null;
             if (obj1 is DataSourceDescriptor) {
@@ -575,7 +525,7 @@
             return ObjectUtil.dateCompare(date1, date2);
         }
 
-        private function customCreationSort(obj1:Object, obj2:Object):int {
+        private static function customCreationSort(obj1:Object, obj2:Object):int {
             var date1:Date = null;
             var date2:Date = null;
             if (obj1 is EIDescriptor) {
@@ -593,27 +543,6 @@
                 date2.setUTCFullYear(1970);
             }
             return ObjectUtil.dateCompare(date1, date2);
-        }
-
-        private function onDelete(event:DeleteDataSourceEvent):void {
-            event.stopPropagation();
-            deleteItem(event.descriptor);
-        }
-
-        private function alertDashboardListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                var dashboardDescriptor:DashboardDescriptor = uploadGrid.selectedItem as DashboardDescriptor;
-                ProgressAlert.alert(this, "Deleting lookup table...", null, dashboardService.deleteDashboard);
-                dashboardService.deleteDashboard.send(dashboardDescriptor.id);
-            }
-        }
-
-        private function alertScorecardListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                var scorecardDescriptor:ScorecardDescriptor = uploadGrid.selectedItem as ScorecardDescriptor;
-                ProgressAlert.alert(this, "Deleting lookup table...", null, scorecardService.deleteScorecard);
-                scorecardService.deleteScorecard.send(scorecardDescriptor.id);
-            }
         }
 
         private function createScorecard():void {
@@ -686,7 +615,7 @@
             uploadGrid.verticalScrollPosition = scrollPosition;
         }
 
-        private function nameSort(obj1:Object, obj2:Object):int {
+        private static function nameSort(obj1:Object, obj2:Object):int {
             var name1:String = obj1.name;
             var name2:String = obj2.name;
             return ObjectUtil.stringCompare(name1, name2, true);
@@ -812,18 +741,6 @@
             cornerRadius: 8;
         }
     </mx:Style>
-    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
-        <mx:method name="deleteAnalysisDefinition" result="deleted()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject id="etlService" destination="feeds">
-        <mx:method name="deleteLookupTable" result="deleted()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject id="dashboardService" destination="dashboardService">
-        <mx:method name="deleteDashboard" result="deleted()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject id="scorecardService" destination="scorecardService">
-        <mx:method name="deleteScorecard" result="deleted()"/>
-    </mx:RemoteObject>
     <mx:RemoteObject id="uploadService" destination="userUpload">
         <mx:method name="move" result="moved()"/>
         <mx:method name="deleteReports" result="deleted()"/>
@@ -846,24 +763,6 @@
             <mx:LinkButton label="Delete the data source" click="deleteSelf()" fontSize="12"
                            visible="{admin}" id="deleteButton"/>
         </mx:HBox>
-
-        <!--<mx:VBox height="100%">
-            <mx:Spacer height="100%"/>
-
-            <mx:Spacer height="100%"/>
-
-        </mx:VBox>
-        <mx:Image/>
-        <mx:Spacer width="100%"/>
-        <mx:VBox horizontalAlign="center" height="100%" id="nameVBox">
-
-            <datasources:MyDataDataSourceDisplay dataSource="{dataSourceDescriptor}" visible="{realDataSource}"/>
-        </mx:VBox>
-        <mx:Spacer width="100%"/>
-        <mx:VBox paddingTop="5" paddingBottom="5" paddingLeft="0" paddingRight="0" verticalGap="0"
-                 borderStyle="solid" cornerRadius="8" borderThickness="1" backgroundColor="#CCCCCC" visible="{admin}">
-            <mx:LinkButton label="Configure..." textDecoration="underline" fontSize="12" click="dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));" width="200"/>
-        </mx:VBox>-->
     </mx:VBox>
     <mx:VBox paddingLeft="10" paddingRight="10"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
@@ -876,7 +775,6 @@
                     dataProvider="{customizeOptions}" itemClick="onItemClick(event)"/>
             <mx:Button label="Delete Selected" styleName="grayButton" click="deleteSelected()" width="140"/>
             <mx:Spacer width="100%"/>
-            <!--<mx:Button label="Manage Folders..." styleName="grayButton" icon="{folderClosed}" click="manageFolders()" visible="{admin}" width="140"/>-->
         </mx:HBox>
         <mx:AdvancedDataGrid id="uploadGrid" selectable="false"
                                              fontSize="12"

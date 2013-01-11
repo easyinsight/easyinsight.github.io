@@ -24,7 +24,6 @@ import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.ComboBox;
 import mx.controls.LinkButton;
@@ -139,18 +138,23 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             addChild(headerHBox);
         } else {
             var headerArea:Canvas;
-            if (dashboardEditorMetadata.dashboard.fillStackHeaders && dashboardStack.dashboardLevel == 0 && dashboardStack.gridItems.length > 1) {
+            if (dashboardStack.headerBackground == null && !dashboardStack.consolidateHeaderElements && dashboardEditorMetadata.dashboard.fillStackHeaders && dashboardStack.dashboardLevel == 0 && dashboardStack.gridItems.length > 1) {
                 headerArea = new HeaderCanvas();
                 headerArea.setStyle("fillColors", [dashboardEditorMetadata.dashboard.stackFill1Start, dashboardEditorMetadata.dashboard.stackFill1SEnd]);
                 headerArea.height = 30;
-            } else if (dashboardEditorMetadata.dashboard.fillStackHeaders && dashboardStack.dashboardLevel == 1 && dashboardStack.gridItems.length > 1) {
+            } else if (dashboardStack.headerBackground == null && !dashboardStack.consolidateHeaderElements && dashboardEditorMetadata.dashboard.fillStackHeaders && dashboardStack.dashboardLevel == 1 && dashboardStack.gridItems.length > 1) {
                 headerArea = new HeaderCanvas2();
                 headerArea.setStyle("fillColors", [dashboardEditorMetadata.dashboard.stackFill2Start, dashboardEditorMetadata.dashboard.stackFill2End]);
                 headerArea.height = 30;
             } else {
                 headerArea = new Canvas();
             }
-            defaultButtonsBox = styleHeaderArea(headerArea);
+
+            if (dashboardStack.headerBackground == null) {
+                defaultButtonsBox = styleHeaderArea(headerArea);
+            } else {
+                defaultButtonsBox = imagedHeaderArea(headerArea);
+            }
             addChild(headerArea);
         }
         viewStack = new ViewStack();
@@ -228,7 +232,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         var headerCentering:Box = new Box();
         headerCentering.percentWidth = 100;
         headerCentering.setStyle("horizontalAlign", "center");
-        var headerBackgroundImage:BackgroundImage = new BackgroundImage();
+        var headerBackgroundImage:DashboardHeaderBackgroundImage = new DashboardHeaderBackgroundImage();
         headerBackgroundImage.applyCenterScreenLogic = false;
         headerBackgroundImage.useBindings = false;
         var headerbar:HBox = new HBox();
@@ -266,7 +270,6 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     }
 
     private function styleHeaderArea(headerArea:Container):Container {
-        // Rebecca from Ecoxotic, vendor form, 760-634-1857 email to rebecca@ecoxotic.com, w9
         headerArea.setStyle("horizontalAlign", "center");
         headerArea.percentWidth = 100;
         var headerCentering:Box = new Box();
@@ -349,7 +352,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     }
     
     protected function createStackButton(index:int, label:String):UIComponent {
-        if (!dashboardStack.consolidateHeaderElements && dashboardEditorMetadata.dashboard.fillStackHeaders && (dashboardStack.dashboardLevel == 0 || dashboardStack.dashboardLevel == 1)) {
+        if (dashboardStack.headerBackground == null && !dashboardStack.consolidateHeaderElements && dashboardEditorMetadata.dashboard.fillStackHeaders && (dashboardStack.dashboardLevel == 0 || dashboardStack.dashboardLevel == 1)) {
             return createHeaderLink(index, label);
         } else {
             return createHeaderButton(index, label);
@@ -443,22 +446,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             childComboBox.dataProvider = dashboardStack.gridItems;
             childComboBox.addEventListener(Event.CHANGE, onComboBoxChange);
             headerbar.addChild(childComboBox);
-        } /*else if (dashboardStack.selectionType == 'Buttons') {
-            var toggleBar:ToggleButtonBar = new ToggleButtonBar();
-            toggleBar.labelFunction = comboBoxLabelFunction;
-            toggleBar.setStyle("fontSize", 16);
-            toggleBar.height = 28;
-            toggleBar.dataProvider = dashboardStack.gridItems;
-            toggleBar.addEventListener(ItemClickEvent.ITEM_CLICK, onComboBoxChange);
-            if (dashboardStack.dashboardLevel == 0) {
-                toggleBar.setStyle("buttonStyleName", "topDashboardButton");
-                toggleBar.setStyle("selectedButtonTextStyleName", "headerSelected");
-            } else if (dashboardStack.dashboardLevel == 1) {
-                toggleBar.setStyle("buttonStyleName", "topDashboardButton2");
-                toggleBar.setStyle("selectedButtonTextStyleName", "headerSelected");
-            }
-            headerbar.addChild(toggleBar);
-        }*/
+        }
     }
 
     protected function stackChildSize():int {
