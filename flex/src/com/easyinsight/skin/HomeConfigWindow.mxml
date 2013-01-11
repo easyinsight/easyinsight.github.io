@@ -54,10 +54,7 @@
             items.addItem(new CheckBoxReportFormItem("Show Report Owner", "myDataOwner", skin.myDataOwner, skin));
             items.addItem(new CheckBoxReportFormItem("Show Creation Date", "myDataCreationDate", skin.myDataCreationDate, skin));
             items.addItem(new CheckBoxReportFormItem("Show Account Visible", "myDataAccountVisible", skin.myDataAccountVisible, skin));
-            items.addItem(new CheckBoxReportFormItem("Combine Data Source", "myDataCombine", skin.myDataCombine, skin));
             items.addItem(new CheckBoxReportFormItem("Create Scorecard", "myDataNewScorecard", skin.myDataNewScorecard, skin));
-            items.addItem(new CheckBoxReportFormItem("Create Dashboard", "myDataNewDashboard", skin.myDataNewDashboard, skin));
-            items.addItem(new CheckBoxReportFormItem("Create Lookup Table", "myDataLookupTable", skin.myDataLookupTable, skin));
             var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
             lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
             for (var i:int = offset; i < items.length; i++) {
