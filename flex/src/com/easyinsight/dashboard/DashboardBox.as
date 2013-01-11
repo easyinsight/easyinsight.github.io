@@ -240,7 +240,9 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
     public function save():void {
         if (dropBox.getChildren().length > 0) {
             var comp:IDashboardEditorComponent = dropBox.getChildAt(0) as IDashboardEditorComponent;
-            comp.save();
+            if (comp != null) {
+                comp.save();
+            }
         }
     }
     

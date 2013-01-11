@@ -43,6 +43,7 @@ public class DashboardElementFactory {
             return comp;
         } else if (element is DashboardTextElement) {
             var text:DashboardTextEditorComponent = new DashboardTextEditorComponent();
+            text.dashboardEditorMetadata = dashboardEditorMetadata;
             text.dashboardText = element as DashboardTextElement;
             return text;
         }

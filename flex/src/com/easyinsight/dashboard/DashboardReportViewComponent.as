@@ -40,8 +40,8 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         setStyle("paddingRight", 5);
         setStyle("paddingTop", 5);
         setStyle("paddingBottom", 5);
-        setStyle("backgroundColor", 0xFFFFFF);
-        setStyle("backgroundAlpha", 1);
+        /*setStyle("backgroundColor", 0xFFFFFF);
+        setStyle("backgroundAlpha", 1);*/
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
@@ -139,7 +139,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         if (event.height != -1) {
             this.percentHeight = NaN;
             //Alert.show("setting size to " + event.height);
-            var h:int = event.height + (this.transformContainer ? this.transformContainer.height : 0) + 20 + (dashboardReport.showLabel ? 30 : 0);
+            var h:int = event.height + (this.transformContainer ? this.transformContainer.height : 0) + 25 + (dashboardReport.showLabel ? 30 : 0);
             this.height = h;
             alteredHeight = h;
             //Alert.show("setting to " + h);
