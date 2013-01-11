@@ -32,8 +32,23 @@ public class UserAccountAdminService {
 
     public String convertUser(long userID, boolean designer) {
         SecurityUtil.authorizeAccountAdmin();
+        EIConnection conn = Database.instance().getConnection();
+        int pricingModel;
+        try {
+            PreparedStatement pricingStmt = conn.prepareStatement("SELECT PRICING_MODEL FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            pricingStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = pricingStmt.executeQuery();
+            rs.next();
+            pricingModel = rs.getInt(1);
+            pricingStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
         AccountStats stats = getAccountStats();
-        if (designer && (stats.getCoreDesigners() + stats.getAddonDesigners()) <= stats.getUsedDesigners()) {
+        if (pricingModel == Account.NEW && designer && (stats.getCoreDesigners() + stats.getAddonDesigners()) <= stats.getUsedDesigners()) {
             return "You're currently at your limit of " + (stats.getCoreDesigners() + stats.getAddonDesigners()) + " designers. You'll need to upgrade your account before you can convert this user to a designer.";
         }
         Session session = Database.instance().createSession();
