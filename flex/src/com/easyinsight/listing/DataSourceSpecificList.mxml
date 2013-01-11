@@ -348,6 +348,17 @@
             }
         }
 
+        private static function renderType(object:Object, column:AdvancedDataGridColumn):String {
+            if (object is InsightDescriptor) {
+                return "Report";
+            } else if (object is DashboardDescriptor) {
+                return "Dashboard";
+            } else if (object is LookupTableDescriptor) {
+                return "Lookup Table";
+            }
+            return "";
+        }
+
         private var nameColumnFactory:ClassFactory;
 
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
@@ -373,6 +384,10 @@
                 nameColumn.headerText = "Name";
                 nameColumn.sortCompareFunction = nameSort;
                 nameColumn.itemRenderer = nameColumnFactory;
+                var typeColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                typeColumn.labelFunction = renderType;
+                typeColumn.width = 120;
+                typeColumn.headerText = "Type";
                 var creationDateColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                 creationDateColumn.dataField = "creationDate";
                 creationDateColumn.width = 140;
@@ -408,6 +423,7 @@
                 var remWidth:int = controlsColumn.width;
                 columns.push(selectColumn);
                 columns.push(nameColumn);
+                columns.push(typeColumn);
                 if (ApplicationSkin.instance().myDataOwner) {
                     columns.push(ownerNameColumn);
                     remWidth += ownerNameColumn.width;
