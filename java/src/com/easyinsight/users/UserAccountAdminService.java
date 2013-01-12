@@ -957,7 +957,12 @@ public class UserAccountAdminService {
     }
 
     public AccountStats getAccountStats(EIConnection conn) throws SQLException {
-        long accountID = SecurityUtil.getAccountID();
+        long accountID;
+        try {
+            accountID = SecurityUtil.getAccountID();
+        } catch (Exception e) {
+            return null;
+        }
         AccountStats accountStats = new AccountStats();
 
         long usedAPI = 0;
