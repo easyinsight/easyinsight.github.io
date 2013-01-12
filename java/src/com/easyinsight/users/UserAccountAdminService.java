@@ -371,11 +371,11 @@ public class UserAccountAdminService {
         List results;
         try {
             session.beginTransaction();
-            results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+            results = session.createQuery("from User where userName = ? or email = ?").setString(0, userName).setString(1, userName).list();
             if (results.size() > 0) {
                 message = "A user already exists by that name.";
             } else {
-                results = session.createQuery("from User where email = ?").setString(0, email).list();
+                results = session.createQuery("from User where email = ?").setString(0, email).setString(1, userName).list();
                 if (results.size() > 0) {
                     message = "That email address is already used.";
                 }

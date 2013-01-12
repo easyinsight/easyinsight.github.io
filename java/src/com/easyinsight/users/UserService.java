@@ -701,37 +701,34 @@ public class UserService {
 */
 
     public String updateUserLabels(String userName, String fullName, String email, String firstName, boolean optIn) {
-        User user = retrieveUser().user;
-        if (SecurityUtil.getAccountID() != user.getAccount().getAccountID()) {
-            throw new SecurityException();
-        }
-        if (!SecurityUtil.isAccountAdmin() && (SecurityUtil.getUserID() != user.getUserID())) {
-            throw new SecurityException();
-        }
-
-        user.setUserName(userName);
-        user.setName(fullName);
-        user.setEmail(email);
-        user.setFirstName(firstName);
-        user.setOptInEmail(optIn);
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
-            List results = session.createQuery("from User where email = ?").setString(0, email).list();
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+            List results = session.createQuery("from User where email = ? or userName = ?").setString(0, email).setString(1, email).list();
             if (results.size() == 1) {
                 User existing = (User) results.get(0);
-                if (existing.getUserID() != user.getUserID()) {
+                if (existing.getUserID() != SecurityUtil.getUserID()) {
                     return "This email address is already in use.";
                 }
+                user = existing;
             }
-            results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+            results = session.createQuery("from User where userName = ? or email = ?").setString(0, userName).setString(1, userName).list();
             if (results.size() == 1) {
                 User existing = (User) results.get(0);
-                if (existing.getUserID() != user.getUserID()) {
+                if (existing.getUserID() != SecurityUtil.getUserID()) {
                     return "This user name is already in use.";
                 }
             }
-            session.saveOrUpdate(user);
+            if (SecurityUtil.getAccountID() != user.getAccount().getAccountID()) {
+                throw new SecurityException();
+            }
+            user.setUserName(userName);
+            user.setName(fullName);
+            user.setEmail(email);
+            user.setFirstName(firstName);
+            user.setOptInEmail(optIn);
+            session.update(user);
             session.getTransaction().commit();
             return null;
         } catch (Exception e) {
