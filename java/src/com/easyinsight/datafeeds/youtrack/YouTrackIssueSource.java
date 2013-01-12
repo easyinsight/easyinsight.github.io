@@ -78,7 +78,7 @@ public class YouTrackIssueSource extends YouTrackBaseSource {
         fields.add(new AnalysisDimension(keys.get(SUMMARY)));
         fields.add(new AnalysisDimension(keys.get(PROJECT)));
         fields.add(new AnalysisDimension(keys.get(REPORTER_NAME)));
-        fields.add(new AnalysisDimension(keys.get(DESCRIPTION)));
+        fields.add(new AnalysisText(keys.get(DESCRIPTION)));
         fields.add(new AnalysisDimension(keys.get(ID)));
 
         fields.add(new AnalysisDateDimension(keys.get(CREATED), true, AnalysisDateDimension.DAY_LEVEL));
