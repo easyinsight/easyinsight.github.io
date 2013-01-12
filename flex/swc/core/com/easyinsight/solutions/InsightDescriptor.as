@@ -16,5 +16,9 @@ public class InsightDescriptor extends EIDescriptor {
     override public function getType():int {
         return EIDescriptor.REPORT;
     }
+
+    override public function get typeString():String {
+        return "Report";
+    }
 }
 }

@@ -372,7 +372,8 @@
                 nameColumn.sortCompareFunction = nameSort;
                 nameColumn.itemRenderer = nameColumnFactory;
                 var typeColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-                typeColumn.labelFunction = renderType;
+                //typeColumn.labelFunction = renderType;
+                typeColumn.dataField = "typeString";
                 typeColumn.width = 120;
                 typeColumn.headerText = "Type";
                 var creationDateColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();

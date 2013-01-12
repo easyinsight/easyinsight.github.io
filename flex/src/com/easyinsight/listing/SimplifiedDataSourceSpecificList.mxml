@@ -251,10 +251,17 @@
                 var nameColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                 nameColumn.dataField = "name";
                 nameColumn.headerText = "Name";
+                nameColumn.width = unscaledWidth - 120;
                 nameColumn.itemRenderer = new ClassFactory(ReportRolloverLabel);
                 nameColumn.sortCompareFunction = nameSort;
 
                 columns.push(nameColumn);
+                var typeColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                //typeColumn.labelFunction = renderType;
+                typeColumn.dataField = "typeString";
+                typeColumn.width = 120;
+                typeColumn.headerText = "Type";
+                columns.push(typeColumn);
                 uploadGrid.columns = columns;
                 columnsInvalid = false;
             }

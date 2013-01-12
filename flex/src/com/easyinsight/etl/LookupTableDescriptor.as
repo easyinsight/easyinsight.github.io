@@ -11,5 +11,9 @@ public class LookupTableDescriptor extends EIDescriptor {
     override public function getType():int {
         return EIDescriptor.LOOKUP_TABLE;
     }
+
+    override public function get typeString():String {
+        return "Lookup Table";
+    }
 }
 }

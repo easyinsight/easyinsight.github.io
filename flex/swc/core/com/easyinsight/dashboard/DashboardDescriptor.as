@@ -13,6 +13,10 @@ public class DashboardDescriptor extends EIDescriptor {
         return EIDescriptor.DASHBOARD;
     }
 
+    override public function get typeString():String {
+        return "Dashboard";
+    }
+
     public function get size():int {
         return 0;
     }

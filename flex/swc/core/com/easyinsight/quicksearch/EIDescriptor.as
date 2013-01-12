@@ -32,6 +32,10 @@ public class EIDescriptor {
 
     private var _selected:Boolean;
 
+    public function get typeString():String {
+        return "";
+    }
+
     public function get selected():Boolean {
         return _selected;
     }

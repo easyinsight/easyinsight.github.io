@@ -15,6 +15,10 @@ public class ScorecardDescriptor extends EIDescriptor {
         return EIDescriptor.SCORECARD;
     }
 
+    override public function get typeString():String {
+        return "Scorecard";
+    }
+
     public function get size():int {
         return 0;
     }
