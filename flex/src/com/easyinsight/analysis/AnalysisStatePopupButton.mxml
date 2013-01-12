@@ -145,7 +145,7 @@
         </node>
     </mx:XMLList>
     <mx:PopUpMenuButton id="p2" 
-            dataProvider="{xmlList}"
+            dataProvider="{xmlList}" label="List"
             labelField="@label" width="100" popUpStyleName="CustomPopupMenu"
             showRoot="false" itemClick="itemClickHandler(event);"/>
 </mx:Box>
