@@ -125,6 +125,10 @@
 
         private function gotDashboard():void {
             _dashboard = dashboardService.getDashboard.lastResult as Dashboard;
+            if (!_dashboard.absoluteSizing) {
+                vbox.percentHeight = 100;
+                dashboardCanvas.percentHeight = 100;
+            }
             dataSourceID = _dashboard.dataSourceID;
             metadata.dataSourceID = dataSourceID;
             var feedFragmentObject:Object = new Object();

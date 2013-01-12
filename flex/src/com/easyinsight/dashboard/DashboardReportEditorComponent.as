@@ -27,6 +27,9 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
 
     protected override function createChildren():void {
         super.createChildren();
+        if (!dashboardEditorMetadata.dashboard.absoluteSizing) {
+            percentHeight = 100;
+        }
         reportComp.dashboardReport = report;
         reportComp.dashboardEditorMetadata = dashboardEditorMetadata;
         reportComp.elementID = String(DashboardElementFactory.counter++);
