@@ -83,7 +83,7 @@
             <listing:HeaderListingOption label="Account" perspective="{PerspectiveInfo.ACCOUNT}"/>
         </mx:Array>
     </mx:ArrayCollection>
-    <mx:HBox width="1000">
+    <mx:HBox width="1000"  verticalAlign="middle">
 
         <mx:ToggleButtonBar buttonStyleName="topGrayButton" dataProvider="{nodes}" itemClick="choseButton(event)"
                             fontSize="24" height="38" selectedButtonTextStyleName="headerSelected"
