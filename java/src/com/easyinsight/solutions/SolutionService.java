@@ -61,7 +61,19 @@ public class SolutionService {
                 }
             }
             Map<Long, AnalysisDefinition> alreadyInstalledMap = new HashMap<Long, AnalysisDefinition>();
+            PreparedStatement analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.auto_setup_delivery FROM ANALYSIS, DATA_FEED " +
+                    " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
+                    "DATA_FEED.feed_type = ? AND ANALYSIS.SOLUTION_VISIBLE = ? AND " +
+                    "analysis.recommended_exchange = ?");
+            analysisQueryStmt.setInt(1, dataSource.getFeedType().getType());
+            analysisQueryStmt.setBoolean(2, true);
+            analysisQueryStmt.setBoolean(3, true);
+            ResultSet rs = analysisQueryStmt.executeQuery();
             Session session = Database.instance().createSession(conn);
+            while (rs.next()) {
+                long reportID = rs.getLong(1);
+                installReport(reportID, solutionKPIData.getDataSourceID(), conn, session, false, true, alreadyInstalledMap);
+            }
 
             PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD.DASHBOARD_NAME FROM DASHBOARD, DATA_FEED " +
                     " WHERE DASHBOARD.DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
