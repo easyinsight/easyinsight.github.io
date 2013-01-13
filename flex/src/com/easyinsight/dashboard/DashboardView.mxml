@@ -316,10 +316,10 @@
         private function toggleReportInfo():void {
             if (reportInfoLabel == "Show Dashboard Info") {
                 reportInfoLabel = "Hide Dashboard Info";
-                addChildAt(descriptionBox, 3);
+                vbox.addChildAt(descriptionBox, 2);
             } else {
                 reportInfoLabel = "Show Dashboard Info";
-                removeChild(descriptionBox);
+                vbox.removeChild(descriptionBox);
             }
         }
 
