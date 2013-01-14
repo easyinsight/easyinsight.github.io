@@ -375,7 +375,7 @@ public class UserAccountAdminService {
             if (results.size() > 0) {
                 message = "A user already exists by that name.";
             } else {
-                results = session.createQuery("from User where email = ?").setString(0, email).setString(1, userName).list();
+                results = session.createQuery("from User where email = ? or userName = ?").setString(0, email).setString(1, userName).list();
                 if (results.size() > 0) {
                     message = "That email address is already used.";
                 }
