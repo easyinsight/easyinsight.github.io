@@ -472,8 +472,16 @@ public class UserAccountAdminService {
                 account = (Account) results.get(0);
                 int maxUsers = account.getMaxUsers();
                 int currentUsers = account.getUsers().size();
-                if (currentUsers >= maxUsers) {
+                int currentDesigners = 0;
+                for (User test : account.getUsers()) {
+                    if (test.isAnalyst()) {
+                        currentDesigners++;
+                    }
+                }
+                if (account.getPricingModel() == 0 && currentUsers >= maxUsers) {
                     userCreationResponse = new UserCreationResponse("You are at the maximum number of users for your account.");
+                } else if (account.getPricingModel() == 1 && userTransferObject.isAnalyst() && (currentDesigners >= (account.getCoreDesigners() + account.getAddonDesigners()))) {
+                    userCreationResponse = new UserCreationResponse("You are at the maximum number of designers for your account.");
                 } else {
                     User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
                     user = userTransferObject.toUser();
