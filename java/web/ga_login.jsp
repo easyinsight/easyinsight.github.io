@@ -26,9 +26,6 @@
         .center_stuff {
             text-align:center;
         }
-        #googleApps {
-            color: #4a4b4c;
-        }
     </style>
     <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.min.js"></script>
@@ -36,17 +33,6 @@
         function preserveHash() {
             $('input[name=urlhash]').val(window.location.hash);
         }
-
-        $(function() {
-            preserveHash()
-            $("#googleApps").click(function(e) {
-                e.preventDefault();
-                var v = $("input[name=urlhash]").val();
-                if(!v || v == "")
-                    v = "";
-                window.location = "/app/ga_login.jsp" + v;
-            })
-        })
     </script>
 </head>
 <%
@@ -112,57 +98,25 @@
 
         <div class="span6 offset3">
 
-            <form class="well" method="post" action="/app/loginAction.jsp" id="loginForm" onsubmit="preserveHash()">
+            <form class="well" method="get" action="/app/openid" id="loginForm" onsubmit="preserveHash()">
+
                 <input type="hidden" name='OWASP_CSRFTOKEN' value="<%= session.getAttribute("OWASP_CSRFTOKEN")%>" />
+
                 <div style="width:100%;text-align: center">
-                    <%
-                        if (request.getParameter("subdomain") != null) {
-                            %>
-                    <img src="<%= RedirectUtil.getURL(request, "/app/whiteLabelImage") %>" alt="Logo Image"/>
-                    <%
-                        } else {
-                    %>
                     <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
-                    <%
-                        }
-                    %>
                 </div>
 
                 <input type="hidden" id="urlhash" name="urlhash"/>
 
-                <label for="userName" class="promptLabel">
-                    User Name or Email
+                <label for="hd" class="promptLabel">
+                    Domain
                 </label>
-                <input type="text" name="userName" id="userName" style="width:100%;font-size:14px;height:28px" autocapitalize="off" autocorrect="off" autoFocus/>
+                <input type="text" name="hd" id="hd" style="width:100%;font-size:14px;height:28px" autocapitalize="off" autocorrect="off" autoFocus/>
 
-                <label for="password" class="promptLabel">
-                    Password
-                </label>
-                <input type="password" name="password" id="password" style="width:100%;font-size:14px;height:28px"/>
-                <%
-                    if (request.getParameter("error") != null) {
-                %>
-        <fieldset class="control-group error">
-            <label class="formAreaP control-label" style="font-size: 12px;padding: 0;margin-bottom: 5px">We didn't recognize the username or password you entered.</label>
-        </fieldset>
-                <%
-                    } else if (request.getParameter("passwordReset") != null) {
-                        %>
-        <fieldset class="control-group">
-            <label class="formAreaP control-label" style="font-size: 12px;padding: 0;margin-bottom: 5px;color: #009900">Your password has been reset.</label>
-        </fieldset>
-                        <%
-                    }
-                %>
                 <label class="checkbox">
-                    <input type="checkbox" id="rememberMeCheckbox" name="rememberMeCheckbox">Remember me on this computer
+                    <input type="checkbox" id="rememberMeCheckbox" name="rememberMeCheckbox" />Remember me on this computer
                 </label>
-                <button class="btn btn-inverse" type="submit" value="Sign In">Sign In</button> <button class="btn" id="googleApps">Sign In With <img src="/images/apps_logo_3D_online_medium.png" alt="Google Apps Login" height="16" width="72" /></button>
-                <div class="signInBar" style="padding-top: 10px">
-                    <a href="<%= RedirectUtil.getURL(request, "/app/newaccount")%>" style="font-size: 12px">No account yet?</a>
-                    <a href="<%= RedirectUtil.getURL(request, "/app/forgot.jsp")%>" style="font-size: 12px;float:right">Forgot your password?</a>
-                </div>
-            </form>
+                <button class="btn btn-inverse" type="submit" value="Sign In">Sign In</button>
         </div>
     </div>
 </div>
