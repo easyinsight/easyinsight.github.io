@@ -11,9 +11,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -66,7 +64,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
     }
 
     public String getRedirect(Request req, int pricingModel) {
-        switch(pricingModel) {
+        switch (pricingModel) {
             case Account.TIERED:
                 return gateway.transparentRedirect().trData(req, ConfigLoader.instance().getRedirectLocation() + "/app/billing/newSubmit.jsp");
             case Account.NEW:
@@ -178,6 +176,11 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
 
     public void setSubscribedStatus(Account account) {
         Customer c = getCustomer(account);
+        Set<String> transactions = new HashSet<String>();
+        for (AccountCreditCardBillingInfo b : account.getBillingInfo()) {
+            transactions.add(b.getTransactionID());
+        }
+
         System.out.println("Account ID: " + account.getAccountID());
         if (c != null) {
             System.out.println("customer exists");
@@ -188,6 +191,21 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
             }
             if (dc != null) {
                 for (Subscription ss : dc.getSubscriptions()) {
+                    for (Transaction t : ss.getTransactions()) {
+                        if (!transactions.contains(t.getId())) {
+                            AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
+                            info.setAccountId(account.getAccountID());
+                            info.setResponse(t.getProcessorAuthorizationCode());
+                            info.setResponseCode(t.getProcessorResponseCode());
+                            info.setResponseString(t.getProcessorResponseText());
+                            info.setTransactionID(t.getId());
+                            info.setSuccessful(t.getProcessorResponseCode().equals("1000"));
+                            info.setTransactionTime(t.getCreatedAt().getTime());
+                            info.setAmount(t.getAmount().toString());
+                            account.getBillingInfo().add(info);
+                            transactions.add(t.getId());
+                        }
+                    }
                     if (ss.getStatus() == Subscription.Status.ACTIVE) {
                         account.setAccountState(Account.ACTIVE);
                     } else if (ss.getStatus() == Subscription.Status.PAST_DUE) {
@@ -200,6 +218,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                         account.setAccountState(Account.DELINQUENT);
                     }
                 }
+
             }
         }
 
