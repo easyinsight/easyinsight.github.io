@@ -34,9 +34,8 @@ public class ColumnChartServlet extends HtmlServlet {
         JSONObject params = new JSONObject();
         JSONObject seriesDefaults = new JSONObject();
         JSONObject rendererOptions = new JSONObject();
-
-
-
+        JSONObject pointLabels = new JSONObject();
+        int fontSize = 0, fontColor = 0;
 
         seriesDefaults.put("rendererOptions", rendererOptions);
 
@@ -46,16 +45,31 @@ public class ColumnChartServlet extends HtmlServlet {
         if (report instanceof WSColumnChartDefinition) {
             WSColumnChartDefinition columnChartDefinition = (WSColumnChartDefinition) report;
             xAxisItem = columnChartDefinition.getXaxis();
-
             measures = columnChartDefinition.getMeasures();
+            if ("auto".equals(columnChartDefinition.getLabelPosition())) {
+                seriesDefaults.put("pointLabels", pointLabels);
+                pointLabels.put("labels", new JSONArray());
+                fontColor = columnChartDefinition.getLabelOutsideFontColor();
+                fontSize = columnChartDefinition.getLabelFontSize();
+            }
         } else if (report instanceof WSBarChartDefinition) {
             WSBarChartDefinition columnChartDefinition = (WSBarChartDefinition) report;
             xAxisItem = columnChartDefinition.getYaxis();
             measures = columnChartDefinition.getMeasures();
+            if ("auto".equals(columnChartDefinition.getLabelPosition())) {
+                seriesDefaults.put("pointLabels", pointLabels);
+                pointLabels.put("labels", new JSONArray());
+                fontColor = columnChartDefinition.getLabelOutsideFontColor();
+                fontSize = columnChartDefinition.getLabelFontSize();
+            }
         } else if (report instanceof WSPieChartDefinition) {
             WSPieChartDefinition pieChart = (WSPieChartDefinition) report;
             xAxisItem = pieChart.getXaxis();
             measures = pieChart.getMeasures();
+            if ("auto".equals(pieChart.getLabelPosition())) {
+                seriesDefaults.put("pointLabels", pointLabels);
+                pointLabels.put("labels", new JSONArray());
+            }
         } else {
             throw new RuntimeException();
         }
@@ -65,7 +79,7 @@ public class ColumnChartServlet extends HtmlServlet {
 
         rendererOptions.put("highlightMouseOver", l != null);
 
-        if(l != null && l instanceof DrillThrough) {
+        if (l != null && l instanceof DrillThrough) {
             JSONObject drillthrough = new JSONObject();
             drillthrough.put("reportID", report.getUrlKey());
             drillthrough.put("id", l.getLinkID());
@@ -96,14 +110,16 @@ public class ColumnChartServlet extends HtmlServlet {
                     val.put(row.getValue(xAxisItem).toString());
                     val.put(row.getValue(measureItem).toDouble());
                 }
+                if (seriesDefaults.get("pointLabels") != null && seriesDefaults.has("pointLabels")) {
+//                    String s = "<span style='color:" + String.format("#%06X", (0xFFFFFF & fontColor)) + ";font-size:" + fontSize + "px'>" + row.getValue(measureItem).toDouble() + "</span>";
+                    ((JSONArray) ((JSONObject) seriesDefaults.get("pointLabels")).get("labels")).put(row.getValue(measureItem).toDouble());
+                }
             }
 
         }
         object.put("ticks", ticks);
 
         object.put("values", blahArray);
-
-
 
 
         System.out.println(object.toString());

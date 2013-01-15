@@ -177,6 +177,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        includes.add("/js/plugins/jqplot.pointLabels.js");
         includes.add("/js/visualizations/chart.js");
         includes.add("/js/visualizations/util.js");
         return includes;
@@ -271,9 +272,20 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
             JSONObject drillthroughOptions = new JSONObject();
             drillthroughOptions.put("embedded", htmlReportMetadata.isEmbedded());
             fullObject.put("drillthrough", drillthroughOptions);
+
+            if ("auto".equals(getLabelPosition())) {
+                JSONObject labels = new JSONObject();
+                labels.put("location", "'e'");
+                labels.put("show", "true");
+                labels.put("edgetolerance", -15);
+                labels.put("escapeHTML", false);
+                seriesDefaults.put("pointLabels", labels);
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
+
+
         String argh = fullObject.toString();
         argh = argh.replaceAll("\"", "");
 

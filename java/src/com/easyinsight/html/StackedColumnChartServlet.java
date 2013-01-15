@@ -58,6 +58,10 @@ public class StackedColumnChartServlet extends HtmlServlet {
                            EIConnection conn, WSAnalysisDefinition report) throws Exception {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
 
+        JSONObject pointLabels = new JSONObject();
+
+
+        JSONObject seriesDefaults = new JSONObject();
         JSONObject object = new JSONObject();
         // need series, need ticks
         AnalysisItem xAxisItem;
@@ -76,6 +80,10 @@ public class StackedColumnChartServlet extends HtmlServlet {
             stackItem = columnChartDefinition.getStackItem();
             measureItem = columnChartDefinition.getMeasures().get(0);
             populator = new BarPopulator();
+            if ("inside".equals(columnChartDefinition.getLabelPosition())) {
+                seriesDefaults.put("pointLabels", pointLabels);
+                pointLabels.put("labels", new JSONArray());
+            }
         } else {
             throw new RuntimeException();
         }
@@ -88,7 +96,6 @@ public class StackedColumnChartServlet extends HtmlServlet {
         JSONArray series = new JSONArray();
 
         JSONObject params = new JSONObject();
-        JSONObject seriesDefaults = new JSONObject();
         JSONObject rendererOptions = new JSONObject();
 
 

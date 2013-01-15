@@ -176,6 +176,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+        includes.add("/js/plugins/jqplot.pointLabels.js");
         includes.add("/js/visualizations/chart.js");
         includes.add("/js/visualizations/util.js");
         return includes;
@@ -259,6 +260,15 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             JSONObject drillthroughOptions = new JSONObject();
             drillthroughOptions.put("embedded", htmlReportMetadata.isEmbedded());
             fullObject.put("drillthrough", drillthroughOptions);
+
+            if ("auto".equals(getLabelPosition())) {
+                JSONObject labels = new JSONObject();
+                labels.put("location", "'n'");
+                labels.put("show", "true");
+                labels.put("edgetolerance", -15);
+//                labels.put("ypadding", 50);
+                seriesDefaults.put("pointLabels", labels);
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -285,7 +295,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         }*/
         String styleProps = htmlReportMetadata.createStyleProperties();
 
-        String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getColumnChartCallback('"+ targetDiv + "', " + argh + ","+styleProps+"))";
+        String xyz = "$.getJSON('/app/columnChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getColumnChartCallback('" + targetDiv + "', " + argh + "," + styleProps + "))";
         return xyz;
     }
 }

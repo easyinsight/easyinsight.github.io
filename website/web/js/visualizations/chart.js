@@ -6,7 +6,6 @@ Chart = {
                     var labels = data["labels"];
                     params.jqplotOptions.legend = $.extend({}, params.jqplotOptions.legend, {show:true, labels:labels});
                 }
-
                 var s1 = data["values"];
                 var customHeight = styleProps["customHeight"];
                 if (customHeight > -1) {
@@ -90,7 +89,7 @@ Chart = {
     getBarChartCallback:function (target, params, styleProps) {
         return Chart.getCallback(target, params, false, styleProps, function (data) {
             var tt = $("#" + target);
-            tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"]));
+            tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"], 0));
             tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
         })
     },
@@ -116,17 +115,17 @@ Chart = {
     getColumnChartCallback:function (target, params, styleProps) {
         return Chart.getCallback(target, params, false, styleProps, function (data) {
             var tt = $("#" + target);
-            tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"]));
+            tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"], 1));
             tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
         })
     },
 
-    columnToolTipHover:function (ticks) {
+    columnToolTipHover:function (ticks, i) {
         return function (ev, seriesIndex, pointIndex, data) {
             var mouseX = ev.pageX; //these are going to be how jquery knows where to put the div that will be our tooltip
             var mouseY = ev.pageY;
 
-            var s = ticks[pointIndex] + ', ' + data[1];
+            var s = ticks[pointIndex] + ', ' + data[i];
             if (!(ev.target == Chart.prevTooltip.chart && s == Chart.prevTooltip.text)) {
                 $('#chartpseudotooltip').html(s);
                 Chart.prevTooltip = { chart:ev.target, text:s };
