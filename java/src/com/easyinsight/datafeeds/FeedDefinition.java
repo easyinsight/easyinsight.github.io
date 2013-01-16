@@ -62,6 +62,15 @@ public class FeedDefinition implements Cloneable, Serializable {
     private String refreshMarmotScript;
     private boolean concreteFieldsEditable;
     private DataSourceInfo dataSourceInfo;
+    private boolean kpiSource;
+
+    public boolean isKpiSource() {
+        return kpiSource;
+    }
+
+    public void setKpiSource(boolean kpiSource) {
+        this.kpiSource = kpiSource;
+    }
 
     public String toXML() {
         Element dataSource = new Element("dataSource");
@@ -689,6 +698,10 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public boolean waitsOnServiceUtil() {
+        return false;
+    }
+
+    public boolean rebuildFieldWindow() {
         return false;
     }
 }
