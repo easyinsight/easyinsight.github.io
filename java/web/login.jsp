@@ -7,6 +7,7 @@
 <%@ page import="com.easyinsight.users.UserServiceResponse" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.html.RedirectUtil" %>
+<%@ page import="com.easyinsight.users.UserService" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -73,6 +74,11 @@
             conn.setAutoCommit(false);
             UserServiceResponse userServiceResponse = new InternalUserService().validateCookie(cookieValue, userName, conn, hibernateSession);
             if (userServiceResponse != null) {
+                String ipAddress  = request.getHeader("X-FORWARDED-FOR");
+                if(ipAddress == null) {
+                    ipAddress = request.getRemoteAddr();
+                }
+                new UserService().logAuthentication(userName, userServiceResponse.getUserID(), userServiceResponse.isSuccessful(), ipAddress, request.getHeader("User-Agent"));
                 SecurityUtil.populateSession(session, userServiceResponse);
                 Cookie usernameCookie = new Cookie("eiUserName", userName);
                 usernameCookie.setSecure(true);
@@ -157,7 +163,8 @@
                 <label class="checkbox">
                     <input type="checkbox" id="rememberMeCheckbox" name="rememberMeCheckbox">Remember me on this computer
                 </label>
-                <button class="btn btn-inverse" type="submit" value="Sign In">Sign In</button> <button class="btn" id="googleApps">Sign In With <img src="/images/apps_logo_3D_online_medium.png" alt="Google Apps Login" height="16" width="72" /></button>
+                <button class="btn btn-inverse" type="submit" value="Sign In">Sign In</button>
+                <%--<button class="btn" id="googleApps">Sign In With <img src="/images/apps_logo_3D_online_medium.png" alt="Google Apps Login" height="16" width="72" /></button>--%>
                 <div class="signInBar" style="padding-top: 10px">
                     <a href="<%= RedirectUtil.getURL(request, "/app/newaccount")%>" style="font-size: 12px">No account yet?</a>
                     <a href="<%= RedirectUtil.getURL(request, "/app/forgot.jsp")%>" style="font-size: 12px;float:right">Forgot your password?</a>
