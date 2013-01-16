@@ -12,6 +12,7 @@ public class DataSourceRefreshResult {
 
     public var date:Date;
     public var warning:ReportFault;
+    public var newFields:Boolean;
 
     public function DataSourceRefreshResult() {
     }

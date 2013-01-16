@@ -10,6 +10,15 @@ import java.util.Date;
 public class DataSourceRefreshResult {
     private Date date;
     private ReportFault warning;
+    private boolean newFields;
+
+    public boolean isNewFields() {
+        return newFields;
+    }
+
+    public void setNewFields(boolean newFields) {
+        this.newFields = newFields;
+    }
 
     public Date getDate() {
         return date;
