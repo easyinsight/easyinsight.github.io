@@ -13,6 +13,8 @@ import com.easyinsight.datafeeds.cloudwatch.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.datafeeds.constantcontact.*;
 import com.easyinsight.datafeeds.database.MySQLDatabaseConnection;
+import com.easyinsight.datafeeds.database.OracleDatabaseConnection;
+import com.easyinsight.datafeeds.database.SQLServerDatabaseConnection;
 import com.easyinsight.datafeeds.database.ServerDatabaseConnection;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.freshbooks.*;
@@ -289,6 +291,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.INSIGHTLY_PROJECTS, InsightlyProjectSource.class);
         registerType(FeedType.INSIGHTLY_TASKS, InsightlyTaskSource.class);
         registerType(FeedType.SERVER_MYSQL, MySQLDatabaseConnection.class);
+        registerType(FeedType.SERVER_SQL_SERVER, SQLServerDatabaseConnection.class);
+        registerType(FeedType.SERVER_ORACLE, OracleDatabaseConnection.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
