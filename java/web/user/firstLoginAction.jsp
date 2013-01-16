@@ -30,7 +30,7 @@
         }
         if (errorString != null) {
             request.getSession().setAttribute("errorString", errorString);
-            response.sendRedirect("initialUserSetup.jsp?error=true");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/user/initialUserSetup.jsp?error=true"));
         } else {
             request.getSession().removeAttribute("errorString");
             new UserService().updatePassword(password);
