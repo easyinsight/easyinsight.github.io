@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()" height="400">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemEditEvent;
+        import com.easyinsight.analysis.AnalysisItemEditWindow;
+        import com.easyinsight.analysis.AnalysisItemNode;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.events.CollectionEvent;
+        import mx.managers.PopUpManager;
+
+        private var dataSource:FeedDefinitionData;
+
+        public var dataSourceID:int;
+
+        private function onCreation():void {
+            grid.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onEdit);
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            ProgressAlert.alert(this, "Retrieving data source...", null, feedService.getFeedDefinition);
+            feedService.getFeedDefinition.send(dataSourceID);
+        }
+
+        private function save():void {
+            var fieldList:ArrayCollection = new ArrayCollection();
+            for each (var w:AnalysisItemWrapper in allFields) {
+                fieldList.addItem(w.analysisItem);
+            }
+            for each (var c:AnalysisItem in calculatedFields) {
+                fieldList.addItem(c);
+            }
+            dataSource.fields = fieldList;
+            ProgressAlert.alert(this, "Saving data source...", null, feedService.updateFeedDefinition);
+            feedService.updateFeedDefinition.send(dataSource);
+        }
+
+        private function updated():void {
+            dispatchEvent(new Event(Event.COMPLETE));
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var allFields:ArrayCollection;
+        private var calculatedFields:ArrayCollection;
+
+        private function onEdit(event:AnalysisItemEditEvent):void {
+            var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            analysisItemEditor.dataSourceID = dataSource.dataFeedID;
+            analysisItemEditor.originalWrapper = event.previousItemWrapper;
+            analysisItemEditor.analysisItems = this.allFields;
+            analysisItemEditor.analysisItem = event.analysisItem;
+            PopUpManager.addPopUp(analysisItemEditor, this, true);
+            PopUpUtil.centerPopUp(analysisItemEditor);
+            analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
+        }
+
+        private function itemEdited(event:AnalysisItemEditEvent):void {
+            event.previousItemWrapper.analysisItem = event.analysisItem;
+            event.previousItemWrapper.displayName = event.analysisItem.display;
+            event.previousItemWrapper.invalidateItem();
+            allFields.dispatchEvent(new CollectionEvent(CollectionEvent.COLLECTION_CHANGE));
+            /*var index:int = fieldHierarchy.getItemIndex(event.previousItemWrapper);
+            if (index != -1) {
+                fieldHierarchy.removeItemAt(index);
+                fieldHierarchy.addItem(event.previousItemWrapper);
+            }
+
+            dispatchEvent(new AnalysisChangedEvent());
+            allFields.dispatchEvent(new CollectionEvent(CollectionEvent.COLLECTION_CHANGE));
+            fieldHierarchy.dispatchEvent(new CollectionEvent(CollectionEvent.COLLECTION_CHANGE));*/
+        }
+
+        private function gotFeedDefinition():void {
+            dataSource = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
+            var wrappers:ArrayCollection = new ArrayCollection();
+            var calcFields:ArrayCollection = new ArrayCollection();
+            for each (var field:AnalysisItem in dataSource.fields) {
+                if (field.getType() == AnalysisItemTypes.DATE ||
+                        field.getType() == AnalysisItemTypes.MEASURE ||
+                        field.getType() == AnalysisItemTypes.DIMENSION) {
+                    var node:AnalysisItemNode = new AnalysisItemNode();
+                    node.analysisItem = field;
+                    wrappers.addItem(new AnalysisItemWrapper(node));
+                } else {
+                    calcFields.addItem(field);
+                }
+            }
+            allFields = wrappers;
+            calculatedFields = calcFields;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="getFeedDefinition" result="gotFeedDefinition()"/>
+        <mx:method name="updateFeedDefinition" result="updated()"/>
+    </mx:RemoteObject>
+    <mx:VBox backgroundColor="#FFFFFF" width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <mx:DataGrid dataProvider="{allFields}" rowHeight="28" id="grid" height="100%">
+            <mx:columns>
+                <mx:DataGridColumn headerText="Field Name" dataField="displayName" width="400"/>
+                <mx:DataGridColumn headerText="Field Type" dataField="fieldType" width="100"/>
+                <mx:DataGridColumn itemRenderer="com.easyinsight.administration.feed.FieldTypeComboBox" sortable="false"
+                        width="65"/>
+            </mx:columns>
+        </mx:DataGrid>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Done" click="save()"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>
