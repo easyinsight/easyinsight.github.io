@@ -42,6 +42,25 @@ public class ConfigLoader {
 
     private boolean databaseListener;
 
+    private String databaseRequestQueue;
+    private String databaseResponseQueue;
+
+    public String getDatabaseRequestQueue() {
+        return databaseRequestQueue;
+    }
+
+    public void setDatabaseRequestQueue(String databaseRequestQueue) {
+        this.databaseRequestQueue = databaseRequestQueue;
+    }
+
+    public String getDatabaseResponseQueue() {
+        return databaseResponseQueue;
+    }
+
+    public void setDatabaseResponseQueue(String databaseResponseQueue) {
+        this.databaseResponseQueue = databaseResponseQueue;
+    }
+
     public boolean isDatabaseListener() {
         return databaseListener;
     }
@@ -232,7 +251,10 @@ public class ConfigLoader {
             billingEnabled = Boolean.valueOf((String) properties.get("billing.enabled"));
 
             databaseListener = Boolean.valueOf((String) properties.get("database.listener"));
-            
+
+            databaseRequestQueue = (String) properties.get("database.request.queue");
+            databaseResponseQueue = (String) properties.get("database.response.queue");
+
         } catch (IOException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
