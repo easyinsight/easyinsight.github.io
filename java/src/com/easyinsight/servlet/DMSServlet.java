@@ -103,7 +103,9 @@ public class DMSServlet extends HttpServlet {
         DatabaseManager.instance().shutdown();
         EventDispatcher.instance().setRunning(false);
         EventDispatcher.instance().interrupt();
-        DatabaseListener.instance().stop();
+        if (DatabaseListener.instance() != null) {
+            DatabaseListener.instance().stop();
+        }
         if (scheduler != null) {
             scheduler.stop();
         }
