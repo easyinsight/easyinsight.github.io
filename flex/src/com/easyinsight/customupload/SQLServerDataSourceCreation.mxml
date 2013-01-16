@@ -6,8 +6,7 @@
 	</mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
-        import com.easyinsight.datasources.BaseCampDataSource;
-        import com.easyinsight.datasources.MySQLDatabaseConnection;
+        import com.easyinsight.datasources.SQLServerDatabaseConnection;
 
         import mx.controls.Button;
         import mx.validators.Validator;
@@ -15,7 +14,7 @@
         [Bindable]
         private var host:String;
         [Bindable]
-        private var port:String = "3306";
+        private var port:String;
         [Bindable]
         private var databaseName:String;
         [Bindable]
@@ -28,7 +27,7 @@
         }
 
         public function get dataSourceDefinition():FeedDefinitionData {
-            var obj:MySQLDatabaseConnection = new MySQLDatabaseConnection();
+            var obj:SQLServerDatabaseConnection = new SQLServerDatabaseConnection();
             obj.host = hostInput.text;
             obj.port = int(portInput.text);
             obj.databaseName = databaseNameInput.text;
@@ -41,7 +40,7 @@
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
-            var ds:MySQLDatabaseConnection = feedDefinition as MySQLDatabaseConnection;
+            var ds:SQLServerDatabaseConnection = feedDefinition as SQLServerDatabaseConnection;
             host = ds.host;
             port = String(ds.port);
             databaseName = ds.databaseName;
@@ -50,7 +49,7 @@
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var obj:MySQLDatabaseConnection = feedDefinition as MySQLDatabaseConnection;
+            var obj:SQLServerDatabaseConnection = feedDefinition as SQLServerDatabaseConnection;
             obj.host = hostInput.text;
             obj.port = int(portInput.text);
             obj.databaseName = databaseNameInput.text;

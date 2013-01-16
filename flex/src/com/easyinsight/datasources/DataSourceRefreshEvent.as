@@ -13,14 +13,16 @@ public class DataSourceRefreshEvent extends Event {
     public static const DATA_SOURCE_REFRESH:String = "dataSourceRefreshed";
 
     public var newDateTime:Date;
+    public var newFields:Boolean;
 
-    public function DataSourceRefreshEvent(newDateTime:Date) {
+    public function DataSourceRefreshEvent(newDateTime:Date, newFields:Boolean) {
         super(DATA_SOURCE_REFRESH);
         this.newDateTime = newDateTime;
+        this.newFields = newFields;
     }
 
     override public function clone():Event {
-        return new DataSourceRefreshEvent(newDateTime);
+        return new DataSourceRefreshEvent(newDateTime, newFields);
     }
 }
 }

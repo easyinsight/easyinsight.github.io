@@ -84,7 +84,7 @@
                 timer.stop();
                 var refreshResult:DataSourceRefreshResult = callData.result as DataSourceRefreshResult;
                 var newDate:Date = refreshResult.date;
-                dispatchEvent(new DataSourceRefreshEvent(newDate));
+                dispatchEvent(new DataSourceRefreshEvent(newDate, refreshResult.newFields));
 
                 if (refreshResult.warning != null) {
                     var tWindow:UIComponent = ReportFault(refreshResult.warning).createFaultWindow();

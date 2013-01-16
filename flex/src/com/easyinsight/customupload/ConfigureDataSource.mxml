@@ -4,6 +4,7 @@
         import com.easyinsight.administration.feed.CallData;
         import com.easyinsight.administration.feed.CredentialsResponse;
         import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.analysis.DataSourceRefreshResult;
         import com.easyinsight.analysis.ReportFault;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
         import com.easyinsight.scorecard.DataSourceAsyncEvent;
@@ -112,10 +113,14 @@
             var callData:CallData = asyncService.getCallData.lastResult as CallData;
             if (callData.status == CallData.DONE) {
                 timer.stop();
+                var newFields:Boolean = false;
+                if (callData.result is DataSourceRefreshResult) {
+                    newFields = DataSourceRefreshResult(callData.result).newFields;
+                }
                 var descriptor:DataSourceDescriptor = new DataSourceDescriptor();
                 descriptor.id = dataSourceDefinition.dataFeedID;
                 descriptor.name = dataSourceDefinition.feedName;
-                dispatchEvent(new DataSourceConfiguredEvent(descriptor));
+                dispatchEvent(new DataSourceConfiguredEvent(descriptor, newFields && dataSourceDefinition.allowFieldEdit()));
                 stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
                 PopUpManager.removePopUp(this);
             } else if (callData.status == CallData.FAILED) {

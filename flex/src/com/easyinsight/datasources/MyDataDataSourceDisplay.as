@@ -1,9 +1,12 @@
 package com.easyinsight.datasources {
+import com.easyinsight.administration.feed.BulkFieldWindow;
 import com.easyinsight.customupload.FileFeedUpdateWindow;
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.util.PopUpUtil;
+
+import flash.display.DisplayObject;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -14,6 +17,7 @@ import mx.containers.FormItem;
 import mx.containers.VBox;
 import mx.controls.Button;
 import mx.controls.Label;
+import mx.core.Application;
 import mx.formatters.DateFormatter;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
@@ -201,6 +205,12 @@ public class MyDataDataSourceDisplay extends VBox {
     }
 
     private function onRefresh(event:DataSourceRefreshEvent):void {
+        if (event.newFields) {
+            var bulkFieldWindow:BulkFieldWindow = new BulkFieldWindow();
+            bulkFieldWindow.dataSourceID = _dataSource.id;
+            PopUpManager.addPopUp(bulkFieldWindow, DisplayObject(Application.application), true);
+            PopUpUtil.centerPopUp(bulkFieldWindow);
+        }
         updateString(event.newDateTime);
     }
 }

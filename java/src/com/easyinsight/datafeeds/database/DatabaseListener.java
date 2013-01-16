@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.database;
 
 import com.easyinsight.analysis.ReportFault;
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedConsumer;
@@ -29,8 +30,8 @@ import java.util.List;
  */
 public class DatabaseListener implements Runnable {
 
-    public static final String DB_REQUEST = "EIDBRequestProduction";
-    public static final String DB_RESPONSE = "EIDBResponseProduction";
+    /*public static final String DB_REQUEST = "EIDBRequestDev";
+    public static final String DB_RESPONSE = "EIDBResponseDev";*/
 
     private boolean running;
 
@@ -52,7 +53,7 @@ public class DatabaseListener implements Runnable {
 
     public void blah() throws Exception {
         running = true;
-        MessageQueue messageQueue = SQSUtils.connectToQueue(DB_REQUEST, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+        MessageQueue messageQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseRequestQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
         while (running) {
             try {
                 Message message = messageQueue.receiveMessage();
@@ -66,67 +67,89 @@ public class DatabaseListener implements Runnable {
                     String body = message.getMessageBody();
                     messageQueue.deleteMessage(message);
                     String[] tokens = body.split("\\|");
-                    long sourceID = Long.parseLong(tokens[0]);
+                    final long sourceID = Long.parseLong(tokens[0]);
                     long time = Long.parseLong(tokens[1]);
+
                     if (time < (System.currentTimeMillis() - (1000 * 60 * 60))) {
                         System.out.println("Dropping old message from " + new Date(time));
                         continue;
                     }
                     System.out.println("firing up a refresh on " + sourceID);
-                    EIConnection conn = Database.instance().getConnection();
-                    try {
-                        conn.setAutoCommit(false);
-                        FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(sourceID, conn);
-                        UserStub dataSourceUser = null;
-                        List<FeedConsumer> owners = dataSource.getUploadPolicy().getOwners();
-                        for (FeedConsumer owner : owners){
-                            if (owner.type() == FeedConsumer.USER) {
-                                dataSourceUser = (UserStub) owner;
+                    new Thread(new Runnable() {
+
+                        public void run() {
+                            boolean changed;
+                            EIConnection conn = Database.instance().getConnection();
+                            try {
+                                conn.setAutoCommit(false);
+                                FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(sourceID, conn);
+                                UserStub dataSourceUser = null;
+                                List<FeedConsumer> owners = dataSource.getUploadPolicy().getOwners();
+                                for (FeedConsumer owner : owners){
+                                    if (owner.type() == FeedConsumer.USER) {
+                                        dataSourceUser = (UserStub) owner;
+                                    }
+                                }
+                                PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin, USER.guest_user," +
+                                        "ACCOUNT.FIRST_DAY_OF_WEEK, USER.ANALYST FROM USER, ACCOUNT " +
+                                        "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
+                                queryStmt.setInt(1, Account.ACTIVE);
+                                queryStmt.setInt(2, Account.TRIAL);
+                                queryStmt.setLong(3, dataSourceUser.getUserID());
+                                ResultSet rs = queryStmt.executeQuery();
+                                rs.next();
+                                String userName = rs.getString(1);
+                                long userID = rs.getLong(2);
+                                long accountID = rs.getLong(3);
+                                int accountType = rs.getInt(4);
+                                boolean accountAdmin = rs.getBoolean(5);
+                                boolean guestUser = rs.getBoolean(6);
+                                int firstDayOfWeek = rs.getInt(7);
+                                boolean analyst = rs.getBoolean(8);
+                                PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.persona_name FROM USER, PERSONA WHERE USER.PERSONA_ID = PERSONA.PERSONA_ID AND USER.USER_ID = ?");
+                                stmt.setLong(1, userID);
+                                ResultSet personaRS = stmt.executeQuery();
+
+                                String personaName = null;
+                                if (personaRS.next()) {
+                                    personaName = personaRS.getString(1);
+                                }
+                                stmt.close();
+                                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+                                try {
+                                    UserUploadService.UploadDataSource source = new UserUploadService.UploadDataSource(conn, new ArrayList<ReportFault>(), new Date(),
+                                            dataSource, (IServerDataSourceDefinition) dataSource, null);
+                                    changed = source.invoke();
+                                    conn.commit();
+                                } finally {
+                                    SecurityUtil.clearThreadLocal();
+                                }
+                            } catch (Exception e) {
+                                LogClass.error(e);
+                                conn.rollback();
+                                try {
+                                    MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+                                    if (e.getCause() == null) {
+                                        responseQueue.sendMessage(String.valueOf(sourceID) + "|false|" + e.getMessage());
+                                    } else {
+                                        responseQueue.sendMessage(String.valueOf(sourceID) + "|false|" + e.getCause().getMessage());
+                                    }
+                                } catch (Exception e1) {
+                                    LogClass.error(e1);
+                                }
+                                throw new RuntimeException(e);
+                            } finally {
+                                conn.setAutoCommit(true);
+                                Database.closeConnection(conn);
+                            }
+                            try {
+                                MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+                                responseQueue.sendMessage(String.valueOf(sourceID) + "|true|" + changed);
+                            } catch (Exception e) {
+                                LogClass.error(e);
                             }
                         }
-                        PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin, USER.guest_user," +
-                                "ACCOUNT.FIRST_DAY_OF_WEEK, USER.ANALYST FROM USER, ACCOUNT " +
-                                "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
-                        queryStmt.setInt(1, Account.ACTIVE);
-                        queryStmt.setInt(2, Account.TRIAL);
-                        queryStmt.setLong(3, dataSourceUser.getUserID());
-                        ResultSet rs = queryStmt.executeQuery();
-                        rs.next();
-                            String userName = rs.getString(1);
-                            long userID = rs.getLong(2);
-                            long accountID = rs.getLong(3);
-                            int accountType = rs.getInt(4);
-                            boolean accountAdmin = rs.getBoolean(5);
-                            boolean guestUser = rs.getBoolean(6);
-                            int firstDayOfWeek = rs.getInt(7);
-                            boolean analyst = rs.getBoolean(8);
-                            PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.persona_name FROM USER, PERSONA WHERE USER.PERSONA_ID = PERSONA.PERSONA_ID AND USER.USER_ID = ?");
-                            stmt.setLong(1, userID);
-                            ResultSet personaRS = stmt.executeQuery();
-
-                            String personaName = null;
-                            if (personaRS.next()) {
-                                personaName = personaRS.getString(1);
-                            }
-                            stmt.close();
-                            SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
-                            try {
-                                UserUploadService.UploadDataSource source = new UserUploadService.UploadDataSource(conn, new ArrayList<ReportFault>(), new Date(),
-                                        dataSource, (IServerDataSourceDefinition) dataSource, null);
-                                source.invoke();
-                                conn.commit();
-                            } finally {
-                                SecurityUtil.clearThreadLocal();
-                            }
-                    } catch (Exception e) {
-                        LogClass.error(e);
-                        conn.rollback();
-                    } finally {
-                        conn.setAutoCommit(true);
-                        Database.closeConnection(conn);
-                    }
-                    MessageQueue responseQueue = SQSUtils.connectToQueue(DatabaseListener.DB_RESPONSE, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-                    responseQueue.sendMessage(String.valueOf(sourceID));
+                    }).start();
                 }
             } catch (Exception e) {
                 LogClass.error(e);

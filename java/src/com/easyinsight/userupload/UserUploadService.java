@@ -1,5 +1,6 @@
 package com.easyinsight.userupload;
 
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dashboard.DashboardDescriptor;
@@ -7,7 +8,6 @@ import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextAccount;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
-import com.easyinsight.datafeeds.database.DatabaseListener;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
@@ -437,8 +437,15 @@ public class UserUploadService {
             }
 
             //results.addAll(objects);
-            if (groupID == 0) {
-                for (LookupTableDescriptor lookupTableDescriptor : feedStorage.getLookupTableDescriptors(conn)) {
+            PreparedStatement analystStmt = conn.prepareStatement("SELECT ANALYST FROM USER WHERE USER_ID = ?");
+            analystStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet analystRS = analystStmt.executeQuery();
+            analystRS.next();
+            boolean analyst = analystRS.getBoolean(1);
+            analystStmt.close();
+            if (groupID == 0 && analyst) {
+                List<LookupTableDescriptor> lookupTables = feedStorage.getLookupTableDescriptors(conn);
+                for (LookupTableDescriptor lookupTableDescriptor : lookupTables) {
                     DataSourceDescriptor feedDescriptor = descriptorMap.get(lookupTableDescriptor.getDataSourceID());
                     if (feedDescriptor != null) {
                         lookupTableDescriptor.setRole(feedDescriptor.getRole());
@@ -869,6 +876,8 @@ public class UserUploadService {
                                 } else {
                                     sourcesToRefresh.add(feedDefinition);
                                 }
+
+                                boolean changed = false;
                                 for (FeedDefinition sourceToRefresh : sourcesToRefresh) {
                                     if (sourceToRefresh instanceof IServerDataSourceDefinition && (sourceToRefresh.getDataSourceType() == DataSourceInfo.STORED_PULL ||
                                             sourceToRefresh.getDataSourceType() == DataSourceInfo.COMPOSITE_PULL)) {
@@ -876,7 +885,7 @@ public class UserUploadService {
                                         DataSourceRefreshEvent info = new DataSourceRefreshEvent();
                                         info.setDataSourceName("Synchronizing with " + refreshable.getFeedName());
                                         ServiceUtil.instance().updateStatus(callID, ServiceUtil.RUNNING, info);
-                                        new DataSourceFactory().createSource(conn, warnings, now, sourceToRefresh, refreshable, callID).invoke();
+                                        changed = changed || new DataSourceFactory().createSource(conn, warnings, now, sourceToRefresh, refreshable, callID).invoke();
                                         PreparedStatement stmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_REFRESH_LOG (REFRESH_TIME, DATA_SOURCE_ID) VALUES (?, ?)");
                                         stmt.setTimestamp(1, new Timestamp(now.getTime()));
                                         stmt.setLong(2, sourceToRefresh.getDataFeedID());
@@ -892,6 +901,7 @@ public class UserUploadService {
                                 DataSourceRefreshResult result = new DataSourceRefreshResult();
                                 result.setDate(now);
                                 result.setWarning(warning);
+                                result.setNewFields(sourcesToRefresh.size() == 1 && sourcesToRefresh.get(0).rebuildFieldWindow() && changed);
                                 ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result);
 
                                 conn.commit();
@@ -1145,10 +1155,11 @@ public class UserUploadService {
                         try {
                             conn.setAutoCommit(false);
                             Date now = new Date();
-                            new DataSourceFactory().createSource(conn, new ArrayList<ReportFault>(), now, dataSource, serverDataSourceDefinition, callID).invoke();
+                            boolean changed = new DataSourceFactory().createSource(conn, new ArrayList<ReportFault>(), now, dataSource, serverDataSourceDefinition, callID).invoke();
                             conn.commit();
                             DataSourceRefreshResult result = new DataSourceRefreshResult();
                             result.setDate(now);
+                            result.setNewFields(changed && dataSource.rebuildFieldWindow());
                             ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result);
                         } catch (ReportException re) {
                             if (!conn.getAutoCommit()) {
@@ -1209,8 +1220,10 @@ public class UserUploadService {
 
     public static class DataSourceFactory {
         public IUploadDataSource createSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID) {
-            if (sourceToRefresh.getFeedType().getType() == FeedType.SERVER_MYSQL.getType()) {
-                return new SQSUploadDataSource(sourceToRefresh.getDataFeedID());
+            if (sourceToRefresh.getFeedType().getType() == FeedType.SERVER_MYSQL.getType() ||
+                    sourceToRefresh.getFeedType().getType() == FeedType.SERVER_SQL_SERVER.getType() ||
+                    sourceToRefresh.getFeedType().getType() == FeedType.ORACLE.getType()) {
+                return new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), sourceToRefresh);
             } else {
                 return new UploadDataSource(conn, warnings, now, sourceToRefresh, refreshable, callID);
             }
@@ -1218,22 +1231,25 @@ public class UserUploadService {
     }
 
     public static interface IUploadDataSource {
-        public void invoke() throws Exception;
+        public boolean invoke() throws Exception;
     }
 
     public static class SQSUploadDataSource implements IUploadDataSource {
 
         private long dataSourceID;
+        private FeedDefinition dataSource;
 
-        private SQSUploadDataSource(long dataSourceID) {
+        private SQSUploadDataSource(long dataSourceID, FeedDefinition dataSource) {
             this.dataSourceID = dataSourceID;
+            this.dataSource = dataSource;
         }
 
-        public void invoke() throws Exception {
-            MessageQueue msgQueue = SQSUtils.connectToQueue(DatabaseListener.DB_REQUEST, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-            MessageQueue responseQueue = SQSUtils.connectToQueue(DatabaseListener.DB_RESPONSE, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+        public boolean invoke() throws Exception {
+            MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseRequestQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             msgQueue.sendMessage(dataSourceID + "|" + System.currentTimeMillis());
             boolean responded = false;
+            boolean changed = false;
             int i = 0;
             while (!responded && i < 60) {
                 Message message = responseQueue.receiveMessage();
@@ -1245,15 +1261,25 @@ public class UserUploadService {
                         // ignore
                     }
                 } else {
-                    long sourceID = Long.parseLong(message.getMessageBody());
+                    String body = message.getMessageBody();
+                    String[] parts = body.split("\\|");
+                    long sourceID = Long.parseLong(parts[0]);
                     System.out.println("got response with id = " + sourceID);
-                    responseQueue.deleteMessage(message);
                     if (sourceID == dataSourceID) {
-                        System.out.println("matched!");
-                        responded = true;
+                        responseQueue.deleteMessage(message);
+                        boolean successful = Boolean.parseBoolean(parts[1]);
+                        if (successful) {
+                            changed = Boolean.parseBoolean(parts[2]);
+                            System.out.println("matched!");
+                            responded = true;
+                        } else {
+                            String error = parts[2];
+                            throw new ReportException(new DataSourceConnectivityReportFault(error, dataSource));
+                        }
                     }
                 }
             }
+            return changed;
         }
     }
 
@@ -1274,7 +1300,7 @@ public class UserUploadService {
             this.callID = callID;
         }
 
-        public void invoke() throws Exception {
+        public boolean invoke() throws Exception {
             boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings);
             sourceToRefresh.setVisible(true);
             sourceToRefresh.setLastRefreshStart(now);
@@ -1283,6 +1309,7 @@ public class UserUploadService {
             } else {
                 feedStorage.updateDataFeedConfiguration(sourceToRefresh, conn);
             }
+            return changed;
         }
     }
 }

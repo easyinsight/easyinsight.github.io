@@ -13,11 +13,11 @@ import java.text.MessageFormat;
  * Date: 11/27/12
  * Time: 10:24 PM
  */
-public class MySQLDatabaseConnection extends ServerDatabaseConnection {
+public class OracleDatabaseConnection extends ServerDatabaseConnection {
 
     private String host;
-    private int port = 3306;
-    private String databaseName;
+    private int port;
+    private String sid;
     private String dbUserName;
     private String dbPassword;
 
@@ -37,12 +37,12 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
         this.port = port;
     }
 
-    public String getDatabaseName() {
-        return databaseName;
+    public String getSid() {
+        return sid;
     }
 
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
+    public void setSid(String sid) {
+        this.sid = sid;
     }
 
     public String getDbUserName() {
@@ -63,19 +63,19 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
 
     @Override
     protected Connection createConnection() throws SQLException {
-        String url = MessageFormat.format("jdbc:mysql://{0}:{1}/{2}", host, String.valueOf(port), databaseName);
+        String url = MessageFormat.format("jdbc:oracle:thin:@//{0}:{1}/{2}", host, String.valueOf(port), sid);
         return DriverManager.getConnection(url, dbUserName, dbPassword);
     }
 
     @Override
     public FeedType getFeedType() {
-        return FeedType.SERVER_MYSQL;
+        return FeedType.SERVER_ORACLE;
     }
 
     @Override
     public void beforeSave(EIConnection conn) throws Exception {
         super.beforeSave(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT mysql_database_connection.query_string FROM mysql_database_connection WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT oracle_database_connection.query_string FROM oracle_database_connection WHERE DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet existing = queryStmt.executeQuery();
         if (existing.next()) {
@@ -92,7 +92,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
 
-        PreparedStatement findPasswordStmt = conn.prepareStatement("SELECT DATABASE_PASSWORD FROM MYSQL_DATABASE_CONNECTION WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement findPasswordStmt = conn.prepareStatement("SELECT DATABASE_PASSWORD FROM oracle_database_connection WHERE DATA_SOURCE_ID = ?");
         findPasswordStmt.setLong(1, getDataFeedID());
         ResultSet passwordRS = findPasswordStmt.executeQuery();
         String existingPassword = null;
@@ -100,16 +100,16 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
             existingPassword = passwordRS.getString(1);
         }
         findPasswordStmt.close();
-        PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM mysql_database_connection WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM oracle_database_connection WHERE DATA_SOURCE_ID = ?");
         deleteStmt.setLong(1, getDataFeedID());
         deleteStmt.executeUpdate();
         deleteStmt.close();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO mysql_database_connection (data_source_id, host_name, server_port, database_name," +
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO oracle_database_connection (data_source_id, host_name, server_port, sid," +
                 "database_username, database_password, query_string, rebuild_fields) values (?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, host);
         insertStmt.setInt(3, port);
-        insertStmt.setString(4, databaseName);
+        insertStmt.setString(4, sid);
         insertStmt.setString(5, dbUserName);
         if (dbPassword == null || "".equals(dbPassword)) {
             if (existingPassword == null) {
@@ -129,14 +129,14 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT host_name, server_port, database_name, database_username," +
-                "database_password, query_string, rebuild_fields FROM mysql_database_connection WHERE data_source_id = ?");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT host_name, server_port, sid, database_username," +
+                "database_password, query_string, rebuild_fields FROM oracle_database_connection WHERE data_source_id = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
             host = rs.getString(1);
             port = rs.getInt(2);
-            databaseName = rs.getString(3);
+            sid = rs.getString(3);
             dbUserName = rs.getString(4);
             dbPassword = rs.getString(5);
             if (dbPassword != null && !"".equals(dbPassword)) {

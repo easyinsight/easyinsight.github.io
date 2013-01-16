@@ -1,8 +1,12 @@
 package com.easyinsight.datasources {
+import com.easyinsight.administration.feed.BulkFieldWindow;
 import com.easyinsight.analysis.IRetrievable;
 import com.easyinsight.framework.User;
 import com.easyinsight.util.AutoSizeTextArea;
 import com.easyinsight.util.MultiLineButton;
+import com.easyinsight.util.PopUpUtil;
+
+import flash.display.DisplayObject;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -15,6 +19,7 @@ import mx.containers.ViewStack;
 import mx.controls.Button;
 import mx.controls.TextArea;
 import mx.controls.VRule;
+import mx.core.Application;
 import mx.effects.Effect;
 import mx.effects.Fade;
 import mx.events.EffectEvent;
@@ -240,6 +245,12 @@ public class DataSourceDisplay extends HBox {
     }
 
     private function onRefresh(event:DataSourceRefreshEvent):void {
+        if (event.newFields) {
+            var bulkFieldWindow:BulkFieldWindow = new BulkFieldWindow();
+            bulkFieldWindow.dataSourceID = dataSource.dataSourceID;
+            PopUpManager.addPopUp(bulkFieldWindow, DisplayObject(Application.application), true);
+            PopUpUtil.centerPopUp(bulkFieldWindow);
+        }
         updateString(event.newDateTime);
         _dataView.refresh();
         close();

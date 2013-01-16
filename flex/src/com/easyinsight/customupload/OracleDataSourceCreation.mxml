@@ -6,8 +6,7 @@
 	</mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
-        import com.easyinsight.datasources.BaseCampDataSource;
-        import com.easyinsight.datasources.MySQLDatabaseConnection;
+        import com.easyinsight.datasources.OracleDatabaseConnection;
 
         import mx.controls.Button;
         import mx.validators.Validator;
@@ -15,7 +14,7 @@
         [Bindable]
         private var host:String;
         [Bindable]
-        private var port:String = "3306";
+        private var port:String;
         [Bindable]
         private var databaseName:String;
         [Bindable]
@@ -28,10 +27,10 @@
         }
 
         public function get dataSourceDefinition():FeedDefinitionData {
-            var obj:MySQLDatabaseConnection = new MySQLDatabaseConnection();
+            var obj:OracleDatabaseConnection = new OracleDatabaseConnection();
             obj.host = hostInput.text;
             obj.port = int(portInput.text);
-            obj.databaseName = databaseNameInput.text;
+            obj.sid = databaseNameInput.text;
             obj.dbUserName = databaseUserNameInput.text;
             obj.dbPassword = databasePasswordInput.text;
             obj.query = queryArea.text;
@@ -41,19 +40,19 @@
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
-            var ds:MySQLDatabaseConnection = feedDefinition as MySQLDatabaseConnection;
+            var ds:OracleDatabaseConnection = feedDefinition as OracleDatabaseConnection;
             host = ds.host;
             port = String(ds.port);
-            databaseName = ds.databaseName;
+            databaseName = ds.sid;
             userName = ds.dbUserName;
             query = ds.query;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var obj:MySQLDatabaseConnection = feedDefinition as MySQLDatabaseConnection;
+            var obj:OracleDatabaseConnection = feedDefinition as OracleDatabaseConnection;
             obj.host = hostInput.text;
             obj.port = int(portInput.text);
-            obj.databaseName = databaseNameInput.text;
+            obj.sid = databaseNameInput.text;
             obj.dbUserName = databaseUserNameInput.text;
             obj.dbPassword = databasePasswordInput.text;
             obj.query = queryArea.text;
@@ -79,7 +78,7 @@
             <mx:FormItem label="Database Port:" labelWidth="150">
                 <mx:TextInput id="portInput" fontWeight="normal" fontFamily="Lucida Grande" text="{port}" width="350"/>
             </mx:FormItem>
-            <mx:FormItem label="Database Name:" labelWidth="150">
+            <mx:FormItem label="Database SID:" labelWidth="150">
                 <mx:TextInput id="databaseNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{databaseName}" width="350"/>
             </mx:FormItem>
             <mx:FormItem label="Database User Name:" labelWidth="150">

@@ -6,40 +6,39 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.datasources {
-import com.easyinsight.administration.feed.ServerDataSourceDefinition;
-import com.easyinsight.customupload.MySQLDataSourceConfiguration;
-import com.easyinsight.customupload.MySQLDataSourceCreation;
+import com.easyinsight.customupload.SQLServerDataSourceConfiguration;
+import com.easyinsight.customupload.SQLServerDataSourceCreation;
 
 import mx.collections.ArrayCollection;
 
 [Bindable]
-[RemoteClass(alias="com.easyinsight.datafeeds.database.MySQLDatabaseConnection")]
-public class MySQLDatabaseConnection extends ServerDatabaseConnection {
+[RemoteClass(alias="com.easyinsight.datafeeds.database.SQLServerDatabaseConnection")]
+public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
 
     public var host:String;
-    public var port:int = 3306;
+    public var port:int;
     public var databaseName:String;
     public var dbUserName:String;
     public var dbPassword:String;
 
-    public function MySQLDatabaseConnection() {
+    public function SQLServerDatabaseConnection() {
     }
 
     override public function getFeedType():int {
-        return DataSourceType.MYSQL_SERVER;
+        return DataSourceType.SERVER_SQL_SERVER;
     }
 
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
-        var config:MySQLDataSourceConfiguration = new MySQLDataSourceConfiguration();
+        var config:SQLServerDataSourceConfiguration = new SQLServerDataSourceConfiguration();
         config.dataSourceDefinition = this;
-        config.label = "MySQL Server Configuration";
+        config.label = "SQL Server Configuration";
         pages.addItem(config);
         return pages;
     }
 
     override public function configClass():Class {
-        return MySQLDataSourceCreation;
+        return SQLServerDataSourceCreation;
     }
 }
 }

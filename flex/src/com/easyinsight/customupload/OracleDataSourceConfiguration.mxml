@@ -1,13 +1,12 @@
 <?xml version="1.0" ?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
     <mx:Metadata>
 		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
 		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
 	</mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
-        import com.easyinsight.datasources.BaseCampDataSource;
-        import com.easyinsight.datasources.MySQLDatabaseConnection;
+        import com.easyinsight.datasources.OracleDatabaseConnection;
 
         import mx.controls.Button;
         import mx.validators.Validator;
@@ -28,58 +27,49 @@
         }
 
         public function get dataSourceDefinition():FeedDefinitionData {
-            var obj:MySQLDatabaseConnection = new MySQLDatabaseConnection();
+            var obj:OracleDatabaseConnection = new OracleDatabaseConnection();
             obj.host = hostInput.text;
             obj.port = int(portInput.text);
-            obj.databaseName = databaseNameInput.text;
+            obj.sid = databaseNameInput.text;
             obj.dbUserName = databaseUserNameInput.text;
             obj.dbPassword = databasePasswordInput.text;
             obj.query = queryArea.text;
-            obj.feedName = nameInput.text;
             obj.rebuildFields = true;
             return obj;
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
-            var ds:MySQLDatabaseConnection = feedDefinition as MySQLDatabaseConnection;
+            var ds:OracleDatabaseConnection = feedDefinition as OracleDatabaseConnection;
             host = ds.host;
             port = String(ds.port);
-            databaseName = ds.databaseName;
+            databaseName = ds.sid;
             userName = ds.dbUserName;
             query = ds.query;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var obj:MySQLDatabaseConnection = feedDefinition as MySQLDatabaseConnection;
+            var obj:OracleDatabaseConnection = feedDefinition as OracleDatabaseConnection;
             obj.host = hostInput.text;
             obj.port = int(portInput.text);
-            obj.databaseName = databaseNameInput.text;
+            obj.sid = databaseNameInput.text;
             obj.dbUserName = databaseUserNameInput.text;
             obj.dbPassword = databasePasswordInput.text;
             obj.query = queryArea.text;
-            obj.feedName = nameInput.text;
             obj.rebuildFields = true;
         }
 
         public function validate():Boolean {
-            return Validator.validateAll([nameValidator, hostValidator, portValidator, databaseNameValidator, queryValidator]).length == 0;
+            return Validator.validateAll([hostValidator, portValidator, databaseNameValidator, queryValidator]).length == 0;
         }
         ]]></mx:Script>
-    <mx:VBox horizontalAlign="center" paddingTop="5">
-        <mx:Form>
-            <mx:FormItem label="Data Source Name:" labelWidth="150">
-                <mx:TextInput id="nameInput" fontWeight="normal" fontFamily="Lucida Grande"  width="350"/>
-            </mx:FormItem>
-        </mx:Form>
-        <mx:HRule width="100%"/>
-        <mx:Form>
+    <mx:VBox horizontalAlign="center" paddingTop="5"><mx:Form>
             <mx:FormItem label="Database Host:" labelWidth="150">
                 <mx:TextInput id="hostInput" fontWeight="normal" fontFamily="Lucida Grande" text="{host}" width="350"/>
             </mx:FormItem>
             <mx:FormItem label="Database Port:" labelWidth="150">
                 <mx:TextInput id="portInput" fontWeight="normal" fontFamily="Lucida Grande" text="{port}" width="350"/>
             </mx:FormItem>
-            <mx:FormItem label="Database Name:" labelWidth="150">
+            <mx:FormItem label="Database SID:" labelWidth="150">
                 <mx:TextInput id="databaseNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{databaseName}" width="350"/>
             </mx:FormItem>
             <mx:FormItem label="Database User Name:" labelWidth="150">
@@ -102,7 +92,6 @@
         <mx:HRule width="100%"/>
         <mx:Text width="200" selectable="true" text="The query defines what fields and data to pull back into Easy Insight. For example, you might do 'select * from table_name', 'select a, b from table_name' or 'select a as A, b as B from table_name where X = Y'."/>
     </mx:VBox>
-    <mx:StringValidator id="nameValidator" minLength="1" source="{nameInput}" property="text"/>
     <mx:StringValidator id="hostValidator" minLength="1" source="{hostInput}" property="text"/>
     <mx:NumberValidator id="portValidator" source="{portInput}" property="text"/>
     <mx:StringValidator id="databaseNameValidator" minLength="1" source="{databaseNameInput}" property="text"/>

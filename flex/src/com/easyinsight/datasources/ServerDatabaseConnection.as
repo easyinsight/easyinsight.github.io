@@ -24,5 +24,10 @@ public class ServerDatabaseConnection extends ServerDataSourceDefinition {
         var pages:ArrayCollection = new ArrayCollection();
         return pages;
     }
+
+
+    override public function allowFieldEdit():Boolean {
+        return true;
+    }
 }
 }

@@ -71,6 +71,7 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                     fields.add(analysisItem);
                     map.put(analysisItem.getKey().toKeyString(), analysisItem);
                 }
+                boolean newField = false;
                 if (getQuery() != null) {
                     try {
                         //Class.forName(serverDatabaseConnection.getDriver());
@@ -79,10 +80,11 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                         ResultSet rs = statement.executeQuery(query);
                         rs.next();
                         int columnCount = rs.getMetaData().getColumnCount();
-                        for (int i = 1; i < columnCount; i++) {
+                        for (int i = 1; i <= columnCount; i++) {
                             String columnName = rs.getMetaData().getColumnName(i);
                             AnalysisItem analysisItem = map.get(columnName);
                             if (analysisItem == null) {
+                                newField = true;
                                 switch (rs.getMetaData().getColumnType(i)) {
                                     case Types.BIGINT:
                                     case Types.TINYINT:
@@ -119,6 +121,7 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                         throw new RuntimeException(e);
                     }
                 }
+                rebuildFields = newField;
                 cacheFields = fields;
                 conn.setAutoCommit(false);
             }
@@ -163,40 +166,6 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
-        /*try {
-            MessageQueue queue = SQSUtils.connectToQueue("EIDatabaseConnSend", "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-            queue.sendMessage(String.valueOf(getDataFeedID()));
-            MessageQueue returnQueue = SQSUtils.connectToQueue("EIDatabaseConnDone", "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-            int retries = 0;
-            boolean gotData = false;
-            Message returnMessage;
-            do {
-                returnMessage = returnQueue.receiveMessage();
-                if (returnMessage == null) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                        // ignore
-                    }
-                } else {
-                    String body = returnMessage.getMessageBody();
-                    Long id = Long.parseLong(body.split(":")[1]);
-                    if (id == getDataFeedID()) {
-                        gotData = true;
-                    }
-                }
-                retries++;
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    gotData = true;
-                }
-            } while (retries < 60 && !gotData);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return null;*/
         Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
         for (AnalysisItem field : getFields()) {
             map.put(field.getKey().toKeyString(), field);
@@ -210,9 +179,12 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
             while (rs.next()) {
                 IRow row = dataSet.createRow();
                 int columnCount = rs.getMetaData().getColumnCount();
-                for (int i = 1; i < columnCount; i++) {
+                for (int i = 1; i <= columnCount; i++) {
                     String columnName = rs.getMetaData().getColumnName(i);
                     AnalysisItem analysisItem = map.get(columnName);
+                    if (analysisItem == null) {
+                        continue;
+                    }
                     switch (rs.getMetaData().getColumnType(i)) {
                         case Types.BIGINT:
                         case Types.TINYINT:
@@ -224,7 +196,11 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                         case Types.DECIMAL:
                         case Types.REAL:
                             double number = rs.getDouble(i);
-                            row.addValue(analysisItem.getKey(), number);
+                            if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                                row.addValue(analysisItem.getKey(), String.valueOf((int) number));
+                            } else {
+                                row.addValue(analysisItem.getKey(), number);
+                            }
                             break;
 
                         case Types.BOOLEAN:
@@ -272,4 +248,8 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
     protected boolean clearsData(FeedDefinition parentSource) {
         return false;
     }*/
+
+    public boolean rebuildFieldWindow() {
+        return true;
+    }
 }
