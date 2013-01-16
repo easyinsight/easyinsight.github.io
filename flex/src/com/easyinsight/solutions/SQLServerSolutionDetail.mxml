@@ -20,7 +20,7 @@
         <mx:VBox backgroundColor="#FFFFFF" horizontalAlign="center" verticalGap="10"
                  paddingBottom="20" paddingLeft="20"
                  paddingRight="20" paddingTop="20" borderStyle="solid" cornerRadius="15" borderThickness="1">
-            <mx:Text fontSize="12" width="500" text="We offer two options for connecting Easy Insight to MySQL:  "/>
+            <mx:Text fontSize="12" width="500" text="We offer two options for connecting Easy Insight to SQL Server:  "/>
             <mx:Text fontSize="12" width="500" text="You can download a Java web application to run behind your firewall and publish the data out to Easy Insight. This web application can run in any standard Java servlet container."/>
             <mx:Text fontSize="12" width="500" text="You can also directly connect Easy Insight to your database by granting firewall permissions to a fixed IP of db.easy-insight.com (107.21.250.229)."/>
             <mx:HBox id="controlsBox" width="100%" horizontalAlign="center">

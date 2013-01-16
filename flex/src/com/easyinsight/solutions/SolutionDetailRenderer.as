@@ -1,6 +1,7 @@
 package com.easyinsight.solutions {
 
 import com.easyinsight.account.UpgradeEvent;
+import com.easyinsight.administration.feed.BulkFieldWindow;
 import com.easyinsight.administration.feed.FeedDefinitionData;
 import com.easyinsight.analysis.PromptEvent;
 import com.easyinsight.analysis.SavePromptWindow;
@@ -20,6 +21,7 @@ import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
 
 import flash.display.Bitmap;
+import flash.display.DisplayObject;
 import flash.display.Loader;
 import flash.display.LoaderInfo;
 import flash.events.Event;
@@ -27,6 +29,10 @@ import flash.net.FileReference;
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
 import flash.utils.ByteArray;
+
+import mx.containers.Box;
+
+import mx.containers.Canvas;
 
 import mx.controls.Alert;
 import mx.core.Application;
@@ -59,8 +65,10 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
         solutionService.connectionInstalled.addEventListener(ResultEvent.RESULT, checkedValidity);
         solutionService.addKPIData.addEventListener(ResultEvent.RESULT, installed);
         addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
-        setStyle("borderStyle", "none");
-        setStyle("borderThickness", 0);
+        setStyle("verticalAlign", "middle");
+        setStyle("horizontalAlign", "center");
+        percentWidth = 100;
+        percentHeight = 100;
     }
 
     private function onCreation(event:FlexEvent):void {
@@ -104,6 +112,18 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     }
 
     private function onSourceConfigured(event:DataSourceConfiguredEvent):void {
+        if (event.requiresFieldSetup) {
+            var bulkFieldWindow:BulkFieldWindow = new BulkFieldWindow();
+            bulkFieldWindow.dataSourceID = event.descriptor.id;
+            bulkFieldWindow.addEventListener(Event.COMPLETE, onFieldComplete);
+            PopUpManager.addPopUp(bulkFieldWindow, DisplayObject(Application.application), true);
+            PopUpUtil.centerPopUp(bulkFieldWindow);
+        } else {
+            connectionInstalled();
+        }
+    }
+
+    private function onFieldComplete(event:Event):void {
         connectionInstalled();
     }
 
@@ -229,7 +249,6 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     }
 
     public function cleanup():void {
-        cleanupBindings();
     }
 
     private var fileRef:FileReference;
@@ -257,21 +276,6 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
             fileRef.addEventListener(Event.COMPLETE, complete);
             fileRef.save(bytes, _solution.solutionArchiveName);
         }
-    }
-
-    override protected function createChildren():void {
-        super.createChildren();
-        if (solution != null && solution.image != null) {
-            var loader:Loader = new Loader();
-            loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
-            loader.loadBytes(solution.image);
-        }
-    }
-
-    private function onComplete(event:Event):void {
-        var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
-        logo = Bitmap(loaderContent.loader.content);
-        loaderContent.loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onComplete);
     }
 }
 }

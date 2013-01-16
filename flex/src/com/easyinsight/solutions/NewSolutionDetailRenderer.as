@@ -1,6 +1,7 @@
 package com.easyinsight.solutions {
 
 import com.easyinsight.account.UpgradeEvent;
+import com.easyinsight.administration.feed.BulkFieldWindow;
 import com.easyinsight.administration.feed.FeedDefinitionData;
 import com.easyinsight.analysis.PromptEvent;
 import com.easyinsight.analysis.SavePromptWindow;
@@ -16,6 +17,8 @@ import com.easyinsight.schedule.DailyScheduleType;
 import com.easyinsight.schedule.DataSourceRefreshActivity;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
+
+import flash.display.DisplayObject;
 
 import flash.events.Event;
 import flash.events.EventDispatcher;
@@ -56,6 +59,18 @@ public class NewSolutionDetailRenderer extends EventDispatcher {
     }
 
     private function onSourceConfigured(event:DataSourceConfiguredEvent):void {
+        if (event.requiresFieldSetup) {
+            var bulkFieldWindow:BulkFieldWindow = new BulkFieldWindow();
+            bulkFieldWindow.dataSourceID = event.descriptor.id;
+            bulkFieldWindow.addEventListener(Event.COMPLETE, onComplete);
+            PopUpManager.addPopUp(bulkFieldWindow, DisplayObject(Application.application), true);
+            PopUpUtil.centerPopUp(bulkFieldWindow);
+        } else {
+            connectionInstalled();
+        }
+    }
+
+    private function onComplete(event:Event):void {
         connectionInstalled();
     }
 

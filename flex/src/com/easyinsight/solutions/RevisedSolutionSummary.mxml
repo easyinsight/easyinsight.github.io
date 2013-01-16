@@ -117,7 +117,6 @@
                     event.solution.dataSourceType == DataSourceType.YOUTRACK ||
                     event.solution.dataSourceType == DataSourceType.WUFOO ||
                     event.solution.dataSourceType == DataSourceType.INSIGHTLY ||
-                    event.solution.dataSourceType == DataSourceType.MYSQL_SERVER ||
                     event.solution.dataSourceType == DataSourceType.ZENDESK) {
                 var renderer:NewSolutionDetailRenderer = new NewSolutionDetailRenderer();
                 renderer.solution = event.solution;
@@ -178,12 +177,6 @@
                 default:
                     okay = false;
                     break;
-                /*case Solution.LEARNING:
-                 okay = learning;
-                 break;
-                 case Solution.BIZ:
-                 okay = biz;
-                 break;*/
             }
             return okay;
         }

@@ -30,15 +30,6 @@
                 case DataSourceType.GOOGLE_ANALYTICS:
                     result = new GoogleAnalyticsSolutionDetail();
                     break;
-                case DataSourceType.BASECAMP:
-                    result = new BasecampSolutionDetail();
-                    break;
-                case DataSourceType.BASECAMP_NEXT:
-                    result = new BasecampNextSolutionDetail();
-                    break;
-                case DataSourceType.HIGHRISE:
-                    result = new HighriseSolutionDetail();
-                    break;
                 case DataSourceType.STATIC:
                     result = new FileUploadSolutionDetail();
                     break;
@@ -48,22 +39,8 @@
                 case DataSourceType.LINKEDIN:
                     result = new LinkedInSolutionDetail();
                     break;
-                case DataSourceType.PIVOTAL_TRACKER:
-                    result = new PivotalTrackerSolutionDetail();
-                    break;
-                case DataSourceType.SENDGRID:
-                    result = new SendGridSolutionDetail();
-                    break;
-                case DataSourceType.MYSQL:
-                case DataSourceType.ORACLE:
-                case DataSourceType.SQL_SERVER:
+                case DataSourceType.MYSQL_SERVER:
                     result = new MySQLSolutionDetail();
-                    break;
-                case DataSourceType.FRESHBOOKS:
-                    result = new FreshbooksSolutionDetail();
-                    break;
-                case DataSourceType.CONSTANT_CONTACT:
-                    result = new ConstantContactSolutionDetail();
                     break;
                 case DataSourceType.QUICKBASE:
                     result = new QuickbaseSolutionDetail();
@@ -74,20 +51,17 @@
                 case DataSourceType.JSON:
                     result = new JSONSolutionDetail();
                     break;
-                case DataSourceType.BATCHBOOK:
-                    result = new BatchbookSolutionDetail();
-                    break;
                 case DataSourceType.CLOUD_WATCH:
                     result = new CloudWatchSolutionDetail();
                     break;
-                case DataSourceType.HARVEST_COMPOSITE:
-                    result = new HarvestSolutionDetail();
-                    break;
-                case DataSourceType.ZENDESK:
-                    result = new ZendeskSolutionDetail();
+                case DataSourceType.ORACLE:
+                    result = new OracleSolutionDetail();
                     break;
                 case DataSourceType.SALESFORCE:
                     result = new SalesforceSolutionDetail();
+                    break;
+                case DataSourceType.SERVER_SQL_SERVER:
+                    result = new SQLServerSolutionDetail();
                     break;
                 case DataSourceType.SAMPLE:
                     result = new SampleSolutionDetail();
