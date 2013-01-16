@@ -77,6 +77,7 @@ import mx.collections.ArrayCollection;
         public var reportStateID:int;
         public var authorName:String;
         public var description:String;
+        public var headerFontSize:int = 24;
         public var dataSourceFields:Boolean;
         public var solutionVisible:Boolean;
         public var temporaryReport:Boolean;
@@ -97,6 +98,7 @@ import mx.collections.ArrayCollection;
         public var rowsEditable:Boolean;
         public var adHocExecution:Boolean;
         public var cacheable:Boolean;
+        public var maxHeaderWidth:int;
 
 		public function AnalysisDefinition()
 		{

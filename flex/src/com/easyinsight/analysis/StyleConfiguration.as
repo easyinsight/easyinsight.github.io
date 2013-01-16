@@ -134,6 +134,8 @@ public class StyleConfiguration {
                 "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
         }
         items.addItem(new NumericReportFormItem("Font Size", "fontSize", report.fontSize, report, 8, 48));
+        items.addItem(new NumericReportFormItem("Header Font Size", "headerFontSize", report.headerFontSize, report, 8, 48));
+        items.addItem(new NumericReportFormItem("Max Header Width", "maxHeaderWidth", report.maxHeaderWidth, report, 100, 1500));
         items.addItem(new NumericReportFormItem("Background Alpha", "backgroundAlpha", report.backgroundAlpha, report, 0, 1));
         items.addItem(new NumericReportFormItem("Fixed Report Width", "fixedWidth", report.fixedWidth, report, 0, 5000));
         if (report is ListDefinition) {

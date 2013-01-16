@@ -527,6 +527,8 @@
 
         private function onSetup(event:ReportSetupEvent):void {
             report = event.reportInfo.report;
+            headerFontSize = report.headerFontSize;
+            maxHeaderWidth = report.maxHeaderWidth;
 
             if (exchangeItem == null) {
                 var editItem:ContextMenuItem = new ContextMenuItem("Edit " + report.name);
@@ -736,6 +738,12 @@
         private function viewInHTML():void {
             navigateToURL(new URLRequest("/app/html/report/" + report.urlKey), "_blank");
         }
+
+        [Bindable]
+        private var headerFontSize:int = 24;
+
+        [Bindable]
+        private var maxHeaderWidth:int = 600;
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="setupAddRow" result="setupAddRow()"/>
@@ -766,7 +774,7 @@
         </mx:Box>
         <mx:Spacer width="100%"/>
         <mx:HBox id="breadCrumbBox"/>
-        <mx:Label text="{reportName}" fontSize="24" maxWidth="600" id="reportLabel"/>
+        <mx:Label text="{reportName}" fontSize="{headerFontSize}" maxWidth="{maxHeaderWidth}" id="reportLabel"/>
         <mx:LinkButton label="{reportInfoLabel}" textDecoration="underline" fontSize="14" visible="{showReportInfoButton}" click="toggleReportInfo()"
                 id="linkButton"/>
         <mx:Spacer width="100%"/>

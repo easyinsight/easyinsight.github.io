@@ -101,6 +101,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean dataSourceFields;
     private boolean lookupTableOptimization;
     private boolean adHocExecution;
+    private int headerFontSize = 24;
+    private int maxHeaderWidth = 600;
 
     private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
@@ -108,6 +110,22 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private double backgroundAlpha = 1;
 
     private boolean rowsEditable;
+
+    public int getMaxHeaderWidth() {
+        return maxHeaderWidth;
+    }
+
+    public void setMaxHeaderWidth(int maxHeaderWidth) {
+        this.maxHeaderWidth = maxHeaderWidth;
+    }
+
+    public int getHeaderFontSize() {
+        return headerFontSize;
+    }
+
+    public void setHeaderFontSize(int headerFontSize) {
+        this.headerFontSize = headerFontSize;
+    }
 
     public boolean isCacheable() {
         return cacheable;
@@ -712,6 +730,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
         fontSize = (int) findNumberProperty(properties, "fontSize", 12);
         fixedWidth = (int) findNumberProperty(properties, "fixedWidth", 0);
         backgroundAlpha =  findNumberProperty(properties, "backgroundAlpha", 1);
+        headerFontSize =  (int) findNumberProperty(properties, "headerFontSize", 24);
+        maxHeaderWidth =  (int) findNumberProperty(properties, "maxHeaderWidth", 600);
         optimized =  findBooleanProperty(properties, "optimized", false);
         fullJoins =  findBooleanProperty(properties, "fullJoins", false);
         dataSourceFields =  findBooleanProperty(properties, "dataSourceFields", false);
@@ -725,6 +745,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
         List<ReportProperty> properties = new ArrayList<ReportProperty>();
         properties.add(new ReportStringProperty("fontName", fontName));
         properties.add(new ReportNumericProperty("fontSize", fontSize));
+        properties.add(new ReportNumericProperty("headerFontSize", headerFontSize));
+        properties.add(new ReportNumericProperty("maxHeaderWidth", maxHeaderWidth));
         properties.add(new ReportNumericProperty("fixedWidth", fixedWidth));
         properties.add(new ReportNumericProperty("backgroundAlpha", backgroundAlpha));
         properties.add(new ReportBooleanProperty("optimized", optimized));

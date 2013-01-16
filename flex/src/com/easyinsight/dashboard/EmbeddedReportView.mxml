@@ -191,6 +191,8 @@
 
         private function onSetup(event:ReportSetupEvent):void {
             report = event.reportInfo.report;
+            headerFontSize = report.headerFontSize;
+            maxHeaderWidth = report.maxHeaderWidth;
             if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
                 filterDefinitions = report.filterDefinitions;
                 filterIndex = 1;
@@ -277,6 +279,12 @@
             _showHeader = value;
             dispatchEvent(new Event("showHeaderChanged"));
         }
+
+        [Bindable]
+        private var headerFontSize:int = 24;
+
+        [Bindable]
+        private var maxHeaderWidth:int = 600;
         ]]>
     </mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
@@ -304,7 +312,7 @@
             </mx:Box>
             <mx:Spacer width="100%"/>
             <mx:HBox id="breadCrumbBox"/>
-            <mx:Label text="{_reportName}" fontSize="24" maxWidth="600" id="reportLabel"/>
+            <mx:Label text="{_reportName}" fontSize="{headerFontSize}" maxWidth="{maxHeaderWidth}" id="reportLabel"/>
             <mx:Spacer width="100%"/>
         </mx:HBox>
     </mx:ViewStack>
