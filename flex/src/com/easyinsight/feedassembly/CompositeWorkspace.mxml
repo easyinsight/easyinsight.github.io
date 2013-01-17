@@ -262,8 +262,7 @@
         public function createEdges():ArrayCollection {
             var compositeFeedConnections:ArrayCollection = new ArrayCollection();
 
-            for each (var edgeArray:Array in graph.edges) {
-                var connection:CompositeFeedConnection = graph.getLinkData(edgeArray[0], edgeArray[1]) as CompositeFeedConnection;
+            for each (var connection:CompositeFeedConnection in connections) {
                 compositeFeedConnections.addItem(connection);
             }
             return compositeFeedConnections;
@@ -357,7 +356,7 @@
                     <mx:Label text="Joins" fontSize="16"/>
                 </mx:HBox>
                 <mx:Button label="Add Join..." click="addConnection()" styleName="grayButton"/>
-                <mx:DataGrid dataProvider="{connections}" rowHeight="28">
+                <mx:DataGrid dataProvider="{connections}" rowHeight="28" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true">
                     <mx:columns>
                         <util:EIDataGridColumn dataField="sourceFeedName" headerText="Source Data Source" sortable="false" width="175"/>
                         <util:EIDataGridColumn dataField="sourceDisplay" headerText="Source Field" sortable="false" width="210"/>
