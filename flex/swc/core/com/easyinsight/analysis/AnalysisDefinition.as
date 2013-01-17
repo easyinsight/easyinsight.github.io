@@ -98,7 +98,7 @@ import mx.collections.ArrayCollection;
         public var rowsEditable:Boolean;
         public var adHocExecution:Boolean;
         public var cacheable:Boolean;
-        public var maxHeaderWidth:int;
+        public var maxHeaderWidth:int = 600;
 
 		public function AnalysisDefinition()
 		{
