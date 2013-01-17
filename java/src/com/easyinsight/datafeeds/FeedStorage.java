@@ -60,9 +60,9 @@ public class FeedStorage {
     public List<LookupTableDescriptor> getLookupTableDescriptors(EIConnection conn) throws SQLException {
         List<LookupTableDescriptor> descriptors = new ArrayList<LookupTableDescriptor>();
 
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT LOOKUP_TABLE_ID, LOOKUP_TABLE_NAME, DATA_SOURCE_ID FROM LOOKUP_TABLE, UPLOAD_POLICY_USERS " +
-                "WHERE LOOKUP_TABLE.data_source_id = UPLOAD_POLICY_USERS.feed_id  AND UPLOAD_POLICY_USERS.user_id = ?");
-        queryStmt.setLong(1, SecurityUtil.getUserID());
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT LOOKUP_TABLE_ID, LOOKUP_TABLE_NAME, DATA_SOURCE_ID FROM LOOKUP_TABLE, UPLOAD_POLICY_USERS, USER " +
+                "WHERE LOOKUP_TABLE.data_source_id = UPLOAD_POLICY_USERS.feed_id  AND UPLOAD_POLICY_USERS.user_id = user.user_id and user.account_id = ?");
+        queryStmt.setLong(1, SecurityUtil.getAccountID());
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
             LookupTableDescriptor lookupTableDescriptor = new LookupTableDescriptor();
