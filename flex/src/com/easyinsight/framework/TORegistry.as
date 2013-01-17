@@ -92,7 +92,9 @@ import com.easyinsight.datasources.InsightlyCompositeSource;
 import com.easyinsight.datasources.JSONDataSource;
 import com.easyinsight.datasources.LinkedInDataSource;
 import com.easyinsight.datasources.MySQLDatabaseConnection;
+import com.easyinsight.datasources.OracleDatabaseConnection;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
+import com.easyinsight.datasources.SQLServerDatabaseConnection;
 import com.easyinsight.datasources.SampleDataSource;
 import com.easyinsight.datasources.SendGridDataSource;
 import com.easyinsight.datasources.WufooCompositeSource;
@@ -297,6 +299,8 @@ public class TORegistry {
         var wufoo:WufooCompositeSource;
         var insightly:InsightlyCompositeSource;
         var mysql:MySQLDatabaseConnection;
+        var sqlServer:SQLServerDatabaseConnection;
+        var oracle:OracleDatabaseConnection;
     }
 }
 }
