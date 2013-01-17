@@ -33,6 +33,16 @@ public class AnalysisItemWrapper extends EventDispatcher
         return isAnalysisItem() ? 1 : 0;
     }
 
+    public function get fieldType():String {
+        if (analysisItem.getType() == AnalysisItemTypes.DATE) {
+            return "Date;"
+        } else if (analysisItem.getType() == AnalysisItemTypes.MEASURE) {
+            return "Measure";
+        } else {
+            return "Grouping";
+        }
+    }
+
     public function get children():ArrayCollection {
         return _children;
     }
