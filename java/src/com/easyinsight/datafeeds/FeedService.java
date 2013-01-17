@@ -697,6 +697,7 @@ public class FeedService {
 
             FederatedDataSource federatedDataSource = new FederatedDataSource();
             federatedDataSource.setFeedName(name);
+        federatedDataSource.setAccountVisible(true);
             federatedDataSource.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID()));
             federatedDataSource.setSources(sources);
             federatedDataSource.populateFields(conn);
@@ -711,6 +712,7 @@ public class FeedService {
                                                        String feedName, EIConnection conn) throws Exception {
         CompositeFeedDefinition feedDef = new CompositeFeedDefinition();
         feedDef.setFeedName(feedName);
+        feedDef.setAccountVisible(true);
         feedDef.setCompositeFeedNodes(compositeFeedNodes);
         feedDef.setConnections(edges);
         feedDef.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID()));
@@ -731,7 +733,7 @@ public class FeedService {
     }
 
     public CompositeFeedDefinition createCompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> edges, String feedName) {
-        final EIConnection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             CompositeFeedDefinition feedDef = createCompositeFeed(compositeFeedNodes, edges, feedName, conn);
