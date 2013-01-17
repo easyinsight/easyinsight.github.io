@@ -49,6 +49,7 @@ public class ApplicationSkin implements Serializable {
     private boolean myDataNewDashboard;
     private boolean myDataLookupTable;
     private boolean myDataAccountVisible;
+
     private long id;
 
     public long getId() {
@@ -136,7 +137,7 @@ public class ApplicationSkin implements Serializable {
         myDataCreationDate = findBooleanProperty(properties, "myDataCreationDate", false);
         myDataLastTime = findBooleanProperty(properties, "myDataLastTime", false);
         myDataCombine = findBooleanProperty(properties, "myDataCombine", false);
-        myDataNewScorecard = findBooleanProperty(properties, "myDataScorecard", true);
+        myDataNewScorecard = findBooleanProperty(properties, "myDataScorecard", false);
         myDataNewDashboard = findBooleanProperty(properties, "myDataDashboard", true);
         myDataLookupTable = findBooleanProperty(properties, "myDataLookupTable", false);
         myDataAccountVisible = findBooleanProperty(properties, "myDataAccountVisible", false);
