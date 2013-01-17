@@ -54,7 +54,7 @@
                 case DataSourceType.CLOUD_WATCH:
                     result = new CloudWatchSolutionDetail();
                     break;
-                case DataSourceType.ORACLE:
+                case DataSourceType.SERVER_ORACLE:
                     result = new OracleSolutionDetail();
                     break;
                 case DataSourceType.SALESFORCE:
