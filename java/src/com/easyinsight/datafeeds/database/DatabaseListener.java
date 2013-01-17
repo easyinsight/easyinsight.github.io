@@ -43,7 +43,12 @@ public class DatabaseListener implements Runnable {
 
     public static void initialize() {
         instance = new DatabaseListener();
-
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            Class.forName("oracle.jdbc.OracleDriver");
+        } catch (ClassNotFoundException e) {
+            LogClass.error(e);
+        }
         new Thread(instance).start();
     }
 
