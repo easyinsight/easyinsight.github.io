@@ -1,4 +1,5 @@
 package com.easyinsight.datasources {
+import mx.collections.ArrayCollection;
 
 
 [Bindable]
@@ -12,6 +13,11 @@ public class ZendeskDataSource extends CompositeServerDataSource {
     public function ZendeskDataSource() {
         super();
         this.feedName = "Zendesk";
+    }
+
+    override public function createAdminPages():ArrayCollection {
+        var pages:ArrayCollection = new ArrayCollection();
+        return pages;
     }
 
     override public function getFeedType():int {
