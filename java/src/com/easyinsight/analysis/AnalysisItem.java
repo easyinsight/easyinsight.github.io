@@ -640,21 +640,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     private transient AggregateKey cachedKey;
 
     public AggregateKey createAggregateKey() {
-        if (getFromField() != null) {
-            if (cachedKey == null) {
-                if (keyColumn) {
-                    cachedKey = new AggregatePrimaryKey(getKey(), getType(), getFilters());
-                } else {
-                    cachedKey = new AggregateKey(getKey(), getType(), getFilters(), toDisplay());
-                }
-            }
-        } else {
-            if (cachedKey == null) {
-                if (keyColumn) {
-                    cachedKey = new AggregatePrimaryKey(getKey(), getType(), getFilters());
-                } else {
-                    cachedKey = new AggregateKey(getKey(), getType(), getFilters());
-                }
+        if (cachedKey == null) {
+            if (keyColumn) {
+                cachedKey = new AggregatePrimaryKey(getKey(), getType(), getFilters());
+            } else {
+                cachedKey = new AggregateKey(getKey(), getType(), getFilters());
             }
         }
         return cachedKey;
