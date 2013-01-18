@@ -455,7 +455,7 @@ public class UserService {
 
     private void cancelAccount(Session session, Account a) {
         a.setAccountState(Account.CLOSING);
-        if (a.isBillingInformationGiven()) {
+        if (a.isBillingInformationGiven() != null && a.isBillingInformationGiven()) {
             BillingSystem billingSystem = BillingSystemFactory.getBillingSystem();
             billingSystem.cancelPlan(a.getAccountID());
         }
