@@ -31,16 +31,22 @@ public abstract class FeedNode implements Serializable {
     public abstract String toDisplay();
 
     public void sort() {
+
         Collections.sort(children, new Comparator<FeedNode>() {
 
-                public int compare(FeedNode o1, FeedNode o2) {
-                    if (o1 instanceof FolderNode && !(o2 instanceof FolderNode)) {
-                        return -1;
-                    } else if (!(o1 instanceof FolderNode) && o2 instanceof FolderNode) {
-                        return 1;
-                    }
-                    return o1.toDisplay().compareTo(o2.toDisplay());
+            public int compare(FeedNode o1, FeedNode o2) {
+                if (o1 instanceof FolderNode && !(o2 instanceof FolderNode)) {
+                    return -1;
+                } else if (!(o1 instanceof FolderNode) && o2 instanceof FolderNode) {
+                    return 1;
                 }
-            });
+                if ("KPIs".equals(o1.toDisplay())) {
+                    return -1;
+                } else if ("KPIs".equals(o2.toDisplay())) {
+                    return 1;
+                }
+                return o1.toDisplay().compareTo(o2.toDisplay());
+            }
+        });
     }
 }

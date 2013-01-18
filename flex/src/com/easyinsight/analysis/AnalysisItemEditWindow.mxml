@@ -33,7 +33,13 @@
 
         public var report:AnalysisDefinition;
 
+        private var _kpiSource:Boolean;
+
         private var _dataSourceID:int;
+
+        public function set kpiSource(value:Boolean):void {
+            _kpiSource = value;
+        }
 
         public static const BASE:int = 1;
         public static const LINKS:int = 2;
@@ -46,10 +52,10 @@
 
             linkFactory = new ClassFactory(LinkControls);
             if (_analysisItem != null) {
-                linkFactory.properties = { sourceItem: _analysisItem, dataSourceID: dataSourceID };
+                linkFactory.properties = { sourceItem:_analysisItem, dataSourceID:dataSourceID };
                 transformContainer.existingFilters = _analysisItem.filters;
             } else {
-                linkFactory.properties = { dataSourceID: dataSourceID };
+                linkFactory.properties = { dataSourceID:dataSourceID };
             }
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
@@ -150,8 +156,8 @@
         override protected function createChildren():void {
             super.createChildren();
             if (_editorClass == null) {
-                editor = new AnalysisItemEditorPerspective(new PerspectiveInfo(PerspectiveInfo.ANALYSIS_ITEM_EDITOR, {dataSourceID: _dataSourceID,
-                    analysisItem: _analysisItem, analysisItems: _analysisItems}));
+                editor = new AnalysisItemEditorPerspective(new PerspectiveInfo(PerspectiveInfo.ANALYSIS_ITEM_EDITOR, {dataSourceID:_dataSourceID,
+                    analysisItem:_analysisItem, analysisItems:_analysisItems}));
             } else {
                 editor = new _editorClass();
                 editor.dataSourceID = _dataSourceID;
@@ -204,7 +210,14 @@
                 lastTab = tabNavigator.getChildIndex(DisplayObject(_reportEditor));
                 tabNavigator.selectedChild = _reportEditor as Container;
             }
+            if (_kpiSource) {
+                fieldAdminWindow = new FieldAdminWindow();
+                fieldAdminWindow.analysisItem = _analysisItem;
+                tabNavigator.addChild(fieldAdminWindow);
+            }
         }
+
+        private var fieldAdminWindow:FieldAdminWindow;
 
         private var _reportEditor:IReportExtensionEditor;
 
@@ -233,6 +246,9 @@
                 event.analysisItem.filters = transformContainer.getFilterDefinitions();
             } else {
                 event.analysisItem.filters = new ArrayCollection();
+            }
+            if (fieldAdminWindow != null) {
+                fieldAdminWindow.save(event.analysisItem);
             }
             if (linkIndex == 1) {
                 var linkColl:ArrayCollection = new ArrayCollection();

@@ -15,38 +15,6 @@
             </mx:AddChild>
         </mx:State>
 
-        <mx:State name="ComplexMeasure">
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:ComplexMeasureDetailEditor addedToStage="detailEditor = complexDetailEditor"
-                                                     id="complexDetailEditor"
-                                                     dimensionFields="{dimensionFields}"
-                                                     dateDimensionFields="{dateFields}"
-                                                     measureObjects="{measureObjects}"
-                                                     analysisItem="{startingAnalysisItem}"/>
-            </mx:AddChild>
-        </mx:State>
-
-        <mx:State name="ReaggregateMeasure">
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:ReaggregateMeasureDetailEditor addedToStage="detailEditor = reaggregateDetailEditor"
-                                                     id="reaggregateDetailEditor"
-                                                     dimensionFields="{dimensionFields}"
-                                                     dateDimensionFields="{dateFields}"
-                                                     measureObjects="{measureObjects}"
-                                                     measureFields="{measureFields}"
-                                                     analysisItem="{startingAnalysisItem}"/>
-            </mx:AddChild>
-        </mx:State>
-
-        <mx:State name="SixSigmaMeasure">
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:SixSigmaDetailEditor addedToStage="detailEditor = sigmaDetailEditor" id="sigmaDetailEditor"
-                                               dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                                               measureFields="{measureFields}"
-                                               measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
-            </mx:AddChild>
-        </mx:State>
-
         <mx:State name="Grouping">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:GroupingDetailEditor addedToStage="detailEditor = groupingDetailEditor"
@@ -204,15 +172,13 @@
             fieldKeyString = analysisItem.key.toBaseKey().createString();
         }
 
-        private function indexOfType(option:String):int {
+        private static function indexOfType(option:String):int {
             if (getGroupingOptions().contains(option)) {
                 return 0;
             } else if (getMeasureOptions().contains(option)) {
                 return 1;
-            } else if (getComplexOptions().contains(option)) {
-                return 2;
             }
-            return -1;
+            return 1;
         }
 
         private var commandProcessor:CommandProcessor;
@@ -234,7 +200,7 @@
             } else {
                 var derivedKey:DerivedKey = key as DerivedKey;
                 var valids:Array = [];
-                var noComp:Object = { display: "[ No Selection ]"};
+                var noComp:Object = { display:"[ No Selection ]"};
                 valids.push(noComp);
                 for each (var analysisItem:AnalysisItem in dimensionFields) {
                     var compareKey:Key = analysisItem.key;
@@ -268,16 +234,12 @@
             return getGroupingOptions();
         }
 
-        protected function getGroupingOptions():ArrayCollection {
+        protected static function getGroupingOptions():ArrayCollection {
             return new ArrayCollection(["Grouping", "Range", "Date", "Tags", "Latitude", "Longitude", "Zip Code", "Text"]);
         }
 
-        protected function getMeasureOptions():ArrayCollection {
+        protected static function getMeasureOptions():ArrayCollection {
             return new ArrayCollection(["Sum", "Average", "Min", "Max", "Count", "Median", "Variance", "Ranking", "Percent of Total", "Count Distinct"]);
-        }
-
-        protected function getComplexOptions():ArrayCollection {
-            return new ArrayCollection(["Normality", "Step", "Six Sigma", "Reaggregate"]);
         }
 
         public function validate():Boolean {
@@ -287,10 +249,10 @@
         public function save(dataSourceID:int):void {
             if (detailEditor != null) {
                 if (detailEditor.validate()) {
-                    var existingType:int = startingAnalysisItem.getType();
                     var analysisItem:AnalysisItem = detailEditor.createAnalysisItem(aggregationBox.selectedItem as String);
                     analysisItem.concrete = startingAnalysisItem.concrete;
                     analysisItem.lookupTableID = startingAnalysisItem.lookupTableID;
+                    // CAS238634-5MN4
                     /*if (analysisItem.getType() == existingType) {
                      analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
                      }*/
@@ -300,8 +262,7 @@
                     analysisItem.hidden = hiddenCheckbox.selected;
                     analysisItem.tooltip = fieldTooltipInput.text;
                     if (loadFromAnotherBox.selectedItem is AnalysisItem) {
-                        var loadItem:AnalysisItem = loadFromAnotherBox.selectedItem as AnalysisItem;
-                        analysisItem.fromField = loadItem;
+                        analysisItem.fromField = loadFromAnotherBox.selectedItem as AnalysisItem;
                     }
                     detailEditor.save(analysisItem);
                     dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
@@ -328,9 +289,6 @@
                 case "Count Distinct":
                     currentState = "Measure";
                     break;
-                case "Normality":
-                    currentState = "ComplexMeasure";
-                    break;
                 case "Calculation":
                     currentState = "Calculation";
                     break;
@@ -349,9 +307,6 @@
                 case "Date":
                     currentState = "Date";
                     break;
-                case "Six Sigma":
-                    currentState = "SixSigmaMeasure";
-                    break;
                 case "Latitude":
                     currentState = "Latitude";
                     break;
@@ -364,8 +319,8 @@
                 case "Text":
                     currentState = "Text";
                     break;
-                case "Reaggregate":
-                    currentState = "ReaggregateMeasure";
+                default:
+                    currentState = "Measure";
                     break;
             }
             invalidateDisplayList();
@@ -386,10 +341,8 @@
         private function prepareAggregationBox(index:int):String {
             if (index == 0) {
                 aggregationBox = groupingAggregationBox;
-            } else if (index == 1) {
-                aggregationBox = measureAggregationBox;
             } else {
-                aggregationBox = complexAggregationBox;
+                aggregationBox = measureAggregationBox;
             }
             aggIndex = index;
             return aggregationBox.dataProvider.getItemAt(0) as String;
@@ -422,7 +375,6 @@
             <mx:Array>
                 <mx:String>Grouping</mx:String>
                 <mx:String>Measure</mx:String>
-                <mx:String>Complex</mx:String>
             </mx:Array>
         </mx:dataProvider>
     </mx:ToggleButtonBar>
@@ -474,19 +426,6 @@
                                 <mx:String>Ranking</mx:String>
                                 <mx:String>Percent of Total</mx:String>
                                 <mx:String>Count Distinct</mx:String>
-                            </mx:Array>
-                        </mx:dataProvider>
-                    </mx:ComboBox>
-                </mx:Box>
-                <mx:Box>
-                    <mx:ComboBox id="complexAggregationBox"
-                         close="aggregationTypeChanged(event)" rowCount="9">
-                        <mx:dataProvider>
-                            <mx:Array>
-                                <mx:String>Normality</mx:String>
-                                <mx:String>Step</mx:String>
-                                <mx:String>Six Sigma</mx:String>
-                                <mx:String>Reaggregate</mx:String>
                             </mx:Array>
                         </mx:dataProvider>
                     </mx:ComboBox>

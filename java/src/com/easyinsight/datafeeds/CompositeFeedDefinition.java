@@ -179,7 +179,85 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
     }
 
+    protected void loadKPIs(List<AnalysisItem> kpis) {
+        if (!getFeedType().equals(FeedType.COMPOSITE)) {
+            super.loadKPIs(kpis);
+            return;
+        }
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            for (CompositeFeedNode node : compositeFeedNodes) {
+                PreparedStatement query = conn.prepareStatement("SELECT ANALYSIS_ITEM.ANALYSIS_ITEM_ID FROM ANALYSIS_ITEM, FEED_TO_ANALYSIS_ITEM, DATA_FEED WHERE " +
+                        "DATA_FEED.FEED_TYPE = ? AND ANALYSIS_ITEM.KPI = ? AND DATA_FEED.DATA_FEED_ID = FEED_TO_ANALYSIS_ITEM.FEED_ID AND " +
+                        "FEED_TO_ANALYSIS_ITEM.ANALYSIS_ITEM_ID = ANALYSIS_ITEM.ANALYSIS_ITEM_ID");
+                query.setInt(1, node.getDataSourceType());
+                query.setBoolean(2, true);
+                ResultSet kpiRS = query.executeQuery();
+                while (kpiRS.next()) {
+                    long fieldID = kpiRS.getLong(1);
+                    AnalysisItem kpi = (AnalysisItem) session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, fieldID).list().get(0);
+                    kpi.setDataSourceID(node.getDataFeedID());
+                    kpi.afterLoad();
+                    kpis.add(kpi);
+                }
+                query.close();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+        } finally {
+            session.close();
+            Database.closeConnection(conn);
+        }
+    }
 
+    protected void addKPIsToFolder(FeedFolder clonedFolder, List<AnalysisItem> kpis, Map<Long, AnalysisItem> replacementMap) {
+        if (!getFeedType().equals(FeedType.COMPOSITE)) {
+            super.addKPIsToFolder(clonedFolder, kpis, replacementMap);
+            return;
+        }
+        long dataSourceID = 0;
+        for (CompositeFeedNode node : compositeFeedNodes) {
+            if (node.getDataSourceName().equals(clonedFolder.getName())) {
+                dataSourceID = node.getDataFeedID();
+                break;
+            }
+        }
+        if (dataSourceID != 0) {
+            FeedFolder kpiFolder = new FeedFolder();
+            kpiFolder.setName("KPIs");
+            int size = 0;
+            for (AnalysisItem kpi : kpis) {
+                if (kpi.getDataSourceID() == dataSourceID) {
+                    size++;
+                    AnalysisItem targetKPI = replacementMap.remove(kpi.getAnalysisItemID());
+                    targetKPI.setKpi(false);
+                    kpiFolder.addAnalysisItem(targetKPI);
+                }
+            }
+            if (size > 0) {
+                clonedFolder.getChildFolders().add(kpiFolder);
+            }
+        }
+    }
+
+    protected void addKPIs(List<AnalysisItem> kpis, Map<Long, AnalysisItem> replacementMap, List<FeedNode> feedNodes) {
+        if (!getFeedType().equals(FeedType.COMPOSITE)) {
+            super.addKPIs(kpis, replacementMap, feedNodes);
+        }
+    }
+
+    protected boolean compositeSourceFolder(FeedFolder clonedFolder) {
+        if (!getFeedType().equals(FeedType.COMPOSITE)) {
+            return super.compositeSourceFolder(clonedFolder);
+        }
+        for (CompositeFeedNode node : compositeFeedNodes) {
+            if (node.getDataSourceName().equals(clonedFolder.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public Feed createFeedObject(FeedDefinition parent) {
         try {

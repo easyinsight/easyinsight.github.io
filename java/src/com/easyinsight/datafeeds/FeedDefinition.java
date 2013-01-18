@@ -15,6 +15,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 
+import java.sql.ResultSet;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -354,12 +355,17 @@ public class FeedDefinition implements Cloneable, Serializable {
             }
         }
         Feed feed = createFeedObject(parentSource);
+
+        List<AnalysisItem> kpis = new ArrayList<AnalysisItem>();
+        if (!isKpiSource()) {
+            loadKPIs(kpis);
+        }
         feed.setDataSource(this);
         feed.setFeedID(getDataFeedID());
         feed.setAttribution(getAttribution());
         feed.setProperties(createProperties());
         feed.setFilterExampleMessage(getFilterExampleMessage());
-        populateFeedFields(feed);
+        populateFeedFields(feed, kpis);
         feed.setName(getFeedName());
         feed.setVisible(isVisible());
         feed.setType(getDataSourceType());
@@ -368,15 +374,69 @@ public class FeedDefinition implements Cloneable, Serializable {
         return feed;
     }
 
-    private void populateFeedFields(Feed feed) {
+    protected void loadKPIs(List<AnalysisItem> kpis) {
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            PreparedStatement query = conn.prepareStatement("SELECT ANALYSIS_ITEM.ANALYSIS_ITEM_ID FROM ANALYSIS_ITEM, FEED_TO_ANALYSIS_ITEM, DATA_FEED WHERE " +
+                    "DATA_FEED.FEED_TYPE = ? AND ANALYSIS_ITEM.KPI = ? AND DATA_FEED.DATA_FEED_ID = FEED_TO_ANALYSIS_ITEM.FEED_ID AND " +
+                    "FEED_TO_ANALYSIS_ITEM.ANALYSIS_ITEM_ID = ANALYSIS_ITEM.ANALYSIS_ITEM_ID");
+            query.setInt(1, getFeedType().getType());
+            query.setBoolean(2, true);
+            ResultSet kpiRS = query.executeQuery();
+            while (kpiRS.next()) {
+                long fieldID = kpiRS.getLong(1);
+                AnalysisItem kpi = (AnalysisItem) session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, fieldID).list().get(0);
+                kpi.afterLoad();
+                kpis.add(kpi);
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+        } finally {
+            session.close();
+            Database.closeConnection(conn);
+        }
+    }
+
+    private void populateFeedFields(Feed feed, List<AnalysisItem> kpis) {
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
-        for (AnalysisItem field : getFields()) {
+        List<AnalysisItem> allFields = new ArrayList<AnalysisItem>();
+        allFields.addAll(getFields());
+        allFields.addAll(kpis);
+        for (AnalysisItem field : allFields) {
             try {
                 AnalysisItem clone = field.clone();
                 clones.add(clone);
                 clone.setConcrete(true);
                 replacementMap.put(field.getAnalysisItemID(), clone);
+                if (!isKpiSource()) {
+                    if (field.isKpi()) {
+                        Key key = null;
+                        AnalysisItem dataSourceItem = findAnalysisItemByDisplayName(clone.toDisplay());
+                        if (dataSourceItem != null) {
+                            key = dataSourceItem.getKey();
+                        } else {
+                            if (clone.getOriginalDisplayName() != null) {
+                                dataSourceItem = findAnalysisItemByDisplayName(clone.getOriginalDisplayName());
+                            }
+                            if (dataSourceItem != null) {
+                                key = dataSourceItem.getKey();
+                            } else {
+                                dataSourceItem = findAnalysisItem(clone.getKey().toKeyString());
+                                if (dataSourceItem != null) {
+                                    key = dataSourceItem.getKey();
+                                }
+                            }
+                        }
+                        if (key != null) {
+                            clone.setKey(key);
+                        } else {
+                            Key clonedKey = clone.getKey().clone();
+                            clone.setKey(clonedKey);
+                        }
+                    }
+                }
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e);
             }
@@ -390,6 +450,11 @@ public class FeedDefinition implements Cloneable, Serializable {
             try {
                 FeedFolder clonedFolder = feedFolder.clone();
                 clonedFolder.updateIDs(replacementMap);
+
+                if (compositeSourceFolder(clonedFolder)) {
+                    addKPIsToFolder(clonedFolder, kpis, replacementMap);
+                }
+
                 boolean hasVisibleChildren = clonedFolder.getChildFolders().size() > 0;
                 if (!hasVisibleChildren) {
                     for (AnalysisItem analysisItem : clonedFolder.getChildItems()) {
@@ -406,6 +471,7 @@ public class FeedDefinition implements Cloneable, Serializable {
                 LogClass.error(e);
             }
         }
+        addKPIs(kpis, replacementMap, feedNodes);
         for (AnalysisItem analysisItem : replacementMap.values()) {
             if (!analysisItem.isHidden()) {
                 feedNodes.add(analysisItem.toFeedNode());
@@ -419,6 +485,11 @@ public class FeedDefinition implements Cloneable, Serializable {
                     } else if (!(o1 instanceof FolderNode) && o2 instanceof FolderNode) {
                         return 1;
                     }
+                    if ("KPIs".equals(o1.toDisplay())) {
+                        return -1;
+                    } else if ("KPIs".equals(o2.toDisplay())) {
+                        return 1;
+                    }
                     return o1.toDisplay().compareTo(o2.toDisplay());
                 }
             });
@@ -426,6 +497,27 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setUrlKey(getApiKey());
         decorateLinks(clones);
         feed.setFields(clones);
+    }
+
+    protected void addKPIs(List<AnalysisItem> kpis, Map<Long, AnalysisItem> replacementMap, List<FeedNode> feedNodes) {
+        if (kpis.size() > 0) {
+            FeedFolder kpiFolder = new FeedFolder();
+            kpiFolder.setName("KPIs");
+            for (AnalysisItem kpi : kpis) {
+                AnalysisItem targetKPI = replacementMap.remove(kpi.getAnalysisItemID());
+                targetKPI.setKpi(false);
+                kpiFolder.addAnalysisItem(targetKPI);
+            }
+            feedNodes.add(kpiFolder.toFeedNode());
+        }
+    }
+
+    protected void addKPIsToFolder(FeedFolder clonedFolder, List<AnalysisItem> kpis, Map<Long, AnalysisItem> replacementMap) {
+
+    }
+
+    protected boolean compositeSourceFolder(FeedFolder clonedFolder) {
+        return false;
     }
 
     public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {

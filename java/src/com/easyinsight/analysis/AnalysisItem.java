@@ -38,6 +38,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Transient
     private transient boolean loaded;
 
+    @Transient
+    private transient long dataSourceID;
+
     @Column(name="concrete")
     private boolean concrete = true;
 
@@ -117,6 +120,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @JoinColumn(name="from_field_id")
     private AnalysisItem fromField;
 
+    @Column(name="kpi")
+    private boolean kpi;
+
     /*@Transient
     private transient Set<String> pipelineSections;*/
 
@@ -134,6 +140,22 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public long getDataSourceID() {
+        return dataSourceID;
+    }
+
+    public void setDataSourceID(long dataSourceID) {
+        this.dataSourceID = dataSourceID;
+    }
+
+    public boolean isKpi() {
+        return kpi;
+    }
+
+    public void setKpi(boolean kpi) {
+        this.kpi = kpi;
     }
 
     public AnalysisItem getFromField() {
@@ -618,11 +640,21 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     private transient AggregateKey cachedKey;
 
     public AggregateKey createAggregateKey() {
-        if (cachedKey == null) {
-            if (keyColumn) {
-                cachedKey = new AggregatePrimaryKey(getKey(), getType(), getFilters());
-            } else {
-                cachedKey = new AggregateKey(getKey(), getType(), getFilters());
+        if (getFromField() != null) {
+            if (cachedKey == null) {
+                if (keyColumn) {
+                    cachedKey = new AggregatePrimaryKey(getKey(), getType(), getFilters());
+                } else {
+                    cachedKey = new AggregateKey(getKey(), getType(), getFilters(), toDisplay());
+                }
+            }
+        } else {
+            if (cachedKey == null) {
+                if (keyColumn) {
+                    cachedKey = new AggregatePrimaryKey(getKey(), getType(), getFilters());
+                } else {
+                    cachedKey = new AggregateKey(getKey(), getType(), getFilters());
+                }
             }
         }
         return cachedKey;
