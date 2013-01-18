@@ -10,7 +10,7 @@
     if (userID == null) {
         session.setAttribute("loginRedirect", RedirectUtil.getURL(request, "/app/linkToExistingAction.jsp"));
         System.out.println("redirecting to log in, no user ID found in session");
-        response.sendRedirect(RedirectUtil.getURL(request, "login.jsp"));
+        response.sendRedirect(RedirectUtil.getURL(request, "/app/login.jsp"));
     } else {
         System.out.println("blah");
         Session hibernateSession = Database.instance().createSession();

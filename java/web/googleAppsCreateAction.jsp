@@ -1,7 +1,8 @@
 <%@ page import="com.easyinsight.util.RandomTextGenerator" %>
 <%@ page import="com.easyinsight.users.*" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
-<%@ page import="com.easyinsight.datafeeds.FeedType" %><%
+<%@ page import="com.easyinsight.datafeeds.FeedType" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %><%
 
     String domain = (String) session.getAttribute("googleDomain");
     String email = (String) session.getAttribute("googleAppsSetupEmail");
@@ -29,9 +30,9 @@
         SecurityUtil.populateSession(session, userServiceResponse);
     //    response.sendRedirect(new TokenService().getHttpOAuthURL(FeedType.GOOGLE_PROVISIONING.getType(), true, TokenService.USER_SOURCE, session).getRequestToken());
         request.getSession().removeAttribute("appsErrorString");
-        response.sendRedirect("googleAppsUserList.jsp");
+        response.sendRedirect(RedirectUtil.getURL(request, "/app/googleAppsUserList.jsp"));
     } else {
         request.getSession().setAttribute("appsErrorString", exists);
-        response.sendRedirect("googleAppsSettings.jsp");
+        response.sendRedirect(RedirectUtil.getURL(request, "/app/googleAppsSettings.jsp"));
     }
 %>
