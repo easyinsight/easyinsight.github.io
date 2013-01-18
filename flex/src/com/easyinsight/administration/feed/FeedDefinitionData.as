@@ -42,6 +42,7 @@ import mx.collections.ArrayCollection;
         public var dataSourceInfo:DataSourceInfo;
         public var refreshMarmotScript:String;
         public var dataSourceBehavior:int;
+        public var kpiSource:Boolean;
 		
 		public function FeedDefinitionData()
 		{
