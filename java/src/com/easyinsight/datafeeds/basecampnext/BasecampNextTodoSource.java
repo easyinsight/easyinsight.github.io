@@ -167,10 +167,12 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
 
                     JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
-                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource);
+                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource,
+                            project.isArchived());
 
                     JSONArray completedArray = todoMasterObject.getJSONArray("completed");
-                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource);
+                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource,
+                            project.isArchived());
                 }
                 JSONArray completedTodoListArray = runJSONRequest("projects/"+projectID+"/todolists/completed.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
                 for (int j = 0; j < completedTodoListArray.length(); j++) {
@@ -191,10 +193,12 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
 
                     JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
-                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource);
+                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource,
+                            project.isArchived());
 
                     JSONArray completedArray = todoMasterObject.getJSONArray("completed");
-                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource);
+                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource,
+                            project.isArchived());
                 }
                 if (lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
                     IDataStorage.insertData(dataSet);
@@ -213,7 +217,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
 
     private void parseTodoList(Map<String, Key> keys, DataSet dataSet, String projectID, String todoListID, String todoListName,
                                String todoListDescription, String todoListURL, Date todoListUpdatedAt, JSONArray todoArray,
-                               BasecampNextCompositeSource parentSource) throws JSONException {
+                               BasecampNextCompositeSource parentSource, boolean projectArchived) throws JSONException {
         for (int k = 0; k < todoArray.length(); k++) {
             JSONObject todoObject = todoArray.getJSONObject(k);
             IRow row = dataSet.createRow();
@@ -229,16 +233,23 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             Date updatedAt = parseDate(updatedAtString);
             Object obj = todoObject.get("assignee");
             String assigneeString = null;
-            if (obj != null && obj instanceof JSONObject) {
-                JSONObject assignee = (JSONObject) obj;
-                assigneeString = assignee.getString("name");
-            }
             String completer = null;
             Object obj2 = todoObject.get("completer");
             if (obj2 != null && obj2 instanceof JSONObject) {
                 JSONObject completerObject = (JSONObject) obj2;
                 completer = completerObject.getString("name");
             }
+            if (projectArchived) {
+                if (completedAt != null) {
+                    assigneeString = completer;
+                }
+            } else {
+                if (obj != null && obj instanceof JSONObject) {
+                    JSONObject assignee = (JSONObject) obj;
+                    assigneeString = assignee.getString("name");
+                }
+            }
+
             row.addValue(keys.get(TODO_LIST_NAME), todoListName);
             row.addValue(keys.get(TODO_LIST_ID), todoListID);
             row.addValue(keys.get(TODO_LIST_PROJECT_ID), projectID);
