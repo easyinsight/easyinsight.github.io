@@ -63,7 +63,7 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
 
     @Override
     protected Connection createConnection() throws SQLException {
-        String url = MessageFormat.format("jdbc:sqlserver://{0}:{1};databaseName={2}", host, String.valueOf(port), databaseName);
+        String url = MessageFormat.format("jdbc:sqlserver://{0}:{1};databaseName={2};loginTimeout=15", host, String.valueOf(port), databaseName);
         return DriverManager.getConnection(url, dbUserName, dbPassword);
     }
 
