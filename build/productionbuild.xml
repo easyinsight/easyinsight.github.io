@@ -352,7 +352,7 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="testVCS, compileJava, compileCoreSWC, apps, modules1, modules2, modules3, modules4, modules6, modules7, modules8">
+    <target name="compileFlex" depends="testVCS, compileJava, compileCoreSWC, apps, modules4, modules6, modules7, modules8">
     </target>
 
     <target name="quickArchive" depends="compileJava, compileCoreSWC, compileFlexOptimized">
@@ -415,14 +415,11 @@
         </sequential>
     </macrodef>
 
-    <target name="modules1" depends="report.areachart, report.bubblechart"/>
-    <target name="modules2" depends="report.linechart, report.list"/>
-    <target name="modules3" depends="report.piechart, report.plotchart"/>
-    <target name="modules4" depends="report.crosstab, report.tree, report.treemap, app.embeddeddashboard"/>
+    <target name="modules4" depends="report.treemap, app.embeddeddashboard"/>
     <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail, perspective.spreadsheetupdatewizard"/>
     <target name="modules7" depends="perspective.kpiwindow,perspective.datasourceadmin"/>
     <target name="modules8" depends="report.heatmap, report.gantt, report.form"/>
-    <target name="apps" depends="compileFlexOptimized, app.embeddedreport, app.selenium, app.admin"/>
+    <target name="apps" depends="compileFlexOptimized, app.embeddedreport, app.selenium, app.admin, app.font"/>
 
     <target name="compileFlexOptimized">
         <buildSWF mainMXML="PrimaryWorkspace.mxml" swfName="PrimaryWorkspace" buildFile="core-optimized-config.xml"/>
@@ -446,6 +443,10 @@
 
     <target name="app.admin">
         <buildSWF mainMXML="AdministrationApplication.mxml" swfName="AdministrationApplication" buildFile="administration-app.xml"/>
+    </target>
+
+    <target name="app.font">
+        <buildSWF mainMXML="FontApplication.mxml" swfName="FontApplication" buildFile="font-customizer.xml"/>
     </target>
 
     <target name="perspective.spreadsheetwizard">

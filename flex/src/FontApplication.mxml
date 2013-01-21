@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" applicationComplete="onComplete()"  backgroundColor="#FFFFFF">
+    <mx:Script><![CDATA[
+        [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf", fontName="Lucida Grande", fontStyle="normal")]
+        private var myNormalLucida:Class;
+
+        [Embed(source="/com/easyinsight/skin/osx/font3.swf", fontName="Open Sans", fontStyle="normal")]
+        private var openSans:Class;
+
+        private function onComplete():void {
+            Font.registerFont(myNormalLucida);
+            Font.registerFont(openSans);
+        }
+
+        [Bindable]
+        private var dataGridData:ArrayCollection = new ArrayCollection([
+            {label: "ABC", value: 500},
+            {label: "DEF", value: 1500},
+            {label: "GHI", value: 3000},
+            {label: "JKL", value: 1500}
+        ]);
+
+        [Bindable]
+        public var expenses:ArrayCollection = new ArrayCollection([
+            {Month:"Jan", Profit:2000, Expenses:1500},
+            {Month:"Feb", Profit:1000, Expenses:200},
+            {Month:"Mar", Profit:1500, Expenses:500}
+        ]);
+
+        private function changeFont():void {
+            setStyle("fontFamily", fontBox.selectedItem);
+        }
+        ]]></mx:Script>
+    <mx:Array id="gridFitTypes">
+        <mx:Object label="none" />
+        <mx:Object label="pixel" />
+        <mx:Object label="subpixel" />
+    </mx:Array>
+
+    <mx:Array id="fontWeights">
+        <mx:Object label="none" />
+        <mx:Object label="bold" />
+    </mx:Array>
+    <mx:VBox>
+        <mx:HBox>
+            <mx:ComboBox id="fontBox" change="changeFont()">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>Lucida Grande</mx:String>
+                            <mx:String>Open Sans</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
+            <mx:Form>
+                <mx:FormItem label="fontSize:">
+                    <mx:HSlider id="sizeSlider"
+                                minimum="6"
+                                maximum="24"
+                                value="10"
+                                liveDragging="true"
+                                snapInterval="1"
+                                tickInterval="1" />
+                </mx:FormItem>
+                <mx:FormItem label="fontSharpness:">
+
+                    <mx:HSlider id="sharpnessSlider"
+                                minimum="-400"
+                                maximum="400"
+                                value="0"
+                                liveDragging="true"
+                                snapInterval="1"
+                                tickInterval="20" />
+                </mx:FormItem>
+                <mx:FormItem label="fontThickness:">
+                    <mx:HSlider id="thicknessSlider"
+                                minimum="-200"
+                                maximum="200"
+                                value="0"
+                                liveDragging="true"
+                                snapInterval="1"
+                                tickInterval="10" />
+                </mx:FormItem>
+                <mx:FormItem label="fontGridFitType:">
+                    <mx:ComboBox id="gridFitTypeComboBox"
+                                 dataProvider="{gridFitTypes}" />
+                </mx:FormItem>
+                <mx:FormItem label="fontWeight:">
+                    <mx:ComboBox id="fontWeightComboBox"
+                                 dataProvider="{fontWeights}" />
+                </mx:FormItem>
+            </mx:Form>
+        </mx:HBox>
+        <mx:HBox fontSize="{sizeSlider.value}"
+                 fontAntiAliasType="advanced"
+                 fontSharpness="{sharpnessSlider.value}"
+                 fontWeight="{fontWeightComboBox.selectedItem.label}"
+                 fontThickness="{thicknessSlider.value}"
+                 fontGridFitType="{gridFitTypeComboBox.selectedItem.label}">
+            <mx:DataGrid dataProvider="{dataGridData}"/>
+            <mx:ColumnChart id="myChart" dataProvider="{expenses}" showDataTips="true" fontSize="{sizeSlider.value}">
+                <mx:horizontalAxis>
+                    <mx:CategoryAxis
+                            dataProvider="{expenses}"
+                            categoryField="Month"
+                            />
+                </mx:horizontalAxis>
+                <mx:series>
+                    <mx:ColumnSeries
+                            xField="Month"
+                            yField="Profit"
+                            displayName="Profit"
+                            />
+                    <mx:ColumnSeries
+                            xField="Month"
+                            yField="Expenses"
+                            displayName="Expenses"
+                            />
+                </mx:series>
+            </mx:ColumnChart>
+        </mx:HBox>
+    </mx:VBox>
+</mx:Application>

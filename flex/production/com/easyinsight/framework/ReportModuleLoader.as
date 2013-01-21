@@ -8,6 +8,8 @@
 package com.easyinsight.framework {
 
 import com.easyinsight.analysis.LoadingModuleDisplay;
+import com.easyinsight.analysis.charts.bubble.BubbleChartModule;
+import com.easyinsight.analysis.charts.plot.PlotChartModule;
 import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartModule;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartModule;
@@ -67,7 +69,8 @@ public class ReportModuleLoader extends EventDispatcher {
                 _reportRendererModule == "LineChartModule.swf" || _reportRendererModule == "AreaChartModule.swf" ||
                 _reportRendererModule == "YTD.swf" || _reportRendererModule == "CompareYears.swf" ||
                 _reportRendererModule == "FormModule.swf" || _reportRendererModule == "PieChartModule.swf" ||
-                _reportRendererModule == "SummaryModule.swf") {
+                _reportRendererModule == "SummaryModule.swf" || _reportRendererModule == "BubbleChartModule.swf" ||
+                _reportRendererModule == "PlotChartModule.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
@@ -100,8 +103,6 @@ public class ReportModuleLoader extends EventDispatcher {
         if (inline) {
             if (moduleName == "VerticalList.swf") {
                 return new VerticalListModule();
-            } else if (moduleName == "CombinedVerticalList.swf") {
-                return new CombinedVerticalListModule();
             } else if (moduleName == "ColumnChartModule.swf") {
                 return new ColumnChartModule();
             } else if (moduleName == "BarChartModule.swf") {
@@ -138,6 +139,10 @@ public class ReportModuleLoader extends EventDispatcher {
                 return new PieChartModule();
             } else if (moduleName == "SummaryModule.swf") {
                 return new SummaryModule();
+            } else if (moduleName == "BubbleChartModule.swf") {
+                return new BubbleChartModule();
+            } else if (moduleName == "PlotChartModule.swf") {
+                return new PlotChartModule();
             }
         }
         return moduleInfo.factory.create();
