@@ -14,6 +14,7 @@ import flash.net.navigateToURL;
 import mx.containers.Box;
 import mx.controls.Alert;
 import mx.controls.Label;
+import mx.controls.Text;
 import mx.controls.TextArea;
 import mx.core.UIComponent;
 
@@ -105,23 +106,25 @@ public class FormCellRenderer extends Box
                 addChild(textFieldTextArea);
             } else {
                 if (text.length > 70) {
-                    var textArea:TextArea = new TextArea();
+                    var textArea:Text = new Text();
                     textArea.width = 400;
                     textArea.setStyle("fontSize", _report.fontSize);
-                    textArea.setStyle("fontFamily", _report.getFont());
+                    textArea.setStyle("fontFamily", "Lucida Grande");
                     textArea.setStyle("fontWeight", "normal");
-                    textArea.setStyle("borderStyle", "none");
-                    textArea.setStyle("backgroundAlpha", 0);
-                    textArea.editable = false;
                     textArea.text = text;
                     this.textComp = textArea;
                     addChild(textArea);
                 } else {
-                    var label:Label = new Label();
+                    var label:Text = new Text();
                     label.width = 400;
+
                     label.setStyle("fontWeight", "normal");
                     label.setStyle("fontSize", _report.fontSize);
-                    label.setStyle("fontFamily", _report.getFont());
+                    /*label.setStyle("fondGridFitType", "none");
+                    label.setStyle("fontAntiAliasType", "advanced");
+                    label.setStyle("fontSharpness", 16);
+                    label.setStyle("fontThickness", 1);*/
+                    label.setStyle("fontFamily", "Lucida Grande");
                     label.text = text;
                     this.textComp = label;
                     addChild(label);

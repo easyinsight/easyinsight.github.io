@@ -60,7 +60,7 @@
                     var formItem:FormItem = new FormItem();
                     formItem.setStyle("fontWeight", "normal");
                     formItem.setStyle("fontSize", formReport.labelFontSize);
-                    formItem.setStyle("fontFamily", formReport.getFont());
+                    formItem.setStyle("fontFamily", "Helvetica Neue");
 
                     formItem.label = item.display + ":";
 
