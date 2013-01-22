@@ -7,6 +7,8 @@
 		<![CDATA[
         import com.easyinsight.framework.User;
 
+        import mx.controls.Alert;
+
         import mx.events.MenuEvent;
 
         [Bindable]
@@ -58,20 +60,39 @@
             }
         }
 
+        [Bindable]
+        private var reportLabel:String = "List";
+
         public function set selectedLabel(type:int):void {
             setLabel(all, type);
             //p2.label = selectedLabel;
         }
 
-        private function setLabel(parent:XMLList, type:int):void {
-            var nodes:XMLList = parent.children();
-            for (var i:int = 0; i < nodes.length(); i++) {
-                var node:XMLList = XMLList(nodes[i]);
-                if (node.@type == type) {
-                    p2.label = node.@label;
+        private function setLabelXML(parent:XML, type:int):void {
+            for each (var xmlNode:XML in parent.children()) {
+                //Alert.show(xmlNode.@label + " - " + getQualifiedClassName(xmlNode));
+                if (xmlNode.@type == type) {
+                    reportLabel = xmlNode.@label;
+                } else {
+                    setLabelXML(xmlNode, type);
                 }
-                setLabel(node, type);
             }
+        }
+
+        private function setLabel(parent:XMLList, type:int):void {
+            //var nodes:XMLList = parent.children();
+            for each (var xmlNode:XML in parent) {
+                //Alert.show(xmlNode.@label + " - " + getQualifiedClassName(xmlNode));
+                if (xmlNode.@type == type) {
+                    reportLabel = xmlNode.@label;
+                } else {
+                    setLabelXML(xmlNode, type);
+                }
+            }
+            /*for (var i:int = 0; i < nodes.length(); i++) {
+                var node:XMLList = XMLList(nodes[i]);
+
+            }*/
         }
 
         public function openPopup():void {
@@ -145,7 +166,7 @@
         </node>
     </mx:XMLList>
     <mx:PopUpMenuButton id="p2" 
-            dataProvider="{xmlList}" label="List"
+            dataProvider="{xmlList}" label="{reportLabel}"
             labelField="@label" width="100" popUpStyleName="CustomPopupMenu"
             showRoot="false" itemClick="itemClickHandler(event);"/>
 </mx:Box>
