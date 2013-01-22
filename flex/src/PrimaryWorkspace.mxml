@@ -87,8 +87,17 @@
         [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf", fontName="Lucida Grande", fontStyle="normal")]
         private var myNormalLucida:Class;
 
+        [Embed(source="/com/easyinsight/skin/osx/helvetica.swf", fontName="Helvetica Neue", fontStyle="normal")]
+        private var helvetica:Class;
+
+        [Embed(source="/com/easyinsight/skin/osx/helvetica.swf", fontName="Helvetica Neue", fontStyle="bold")]
+        private var helveticaBold:Class;
+
         private function startWorkspace():void {
             Font.registerFont(myNormalLucida);
+            Font.registerFont(helvetica);
+            Font.registerFont(helveticaBold);
+            /*Font.registerFont(openSansBold);*/
             Security.allowInsecureDomain("maps.googleapis.com");
             PerspectiveFactoryHolder.factory = new PerspectiveFactory();
             Constants.setup();
