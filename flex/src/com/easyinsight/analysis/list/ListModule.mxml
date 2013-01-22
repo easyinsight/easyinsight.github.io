@@ -357,7 +357,11 @@
                 }
                 //dataGrid.maxHeight = this.height;
                 if (additionalProperties["preferredSize"]) {
-                    dataGrid.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+                    if (!updateListener) {
+                        updateListener = true;
+                        dataGrid.percentHeight = NaN;
+                        dataGrid.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+                    }
                 } else {
                     dataGrid.maxHeight = this.height;
                     if (!resizeListener) {
@@ -367,8 +371,6 @@
                 }
                 dataGrid.columns = columns;
                 dataGrid.rowCount = dataSet.length;
-
-
             } else {
                 if (def.columns.length > 0) stackIndex = 2;
                 else stackIndex = 1;
@@ -377,10 +379,17 @@
             }
         }
 
+        private var updateListener:Boolean = false;
+
         private function onUpdateComplete(event:FlexEvent):void {
-            dataGrid.removeEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+            //dataGrid.removeEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+            callLater(recomp);
+        }
+
+        private function recomp():void {
+
             var height:int = dataGrid.measureHeightOfItems(0,myDataSet.length)+dataGrid.headerHeight+2;
-            //var height:int = (myDataSet.length * (listDef.fontSize + 13)) + dataGrid.headerHeight + 2;
+
             dataGrid.height = height;
             dataGrid.minHeight = height;
             this.height = height + 50;
