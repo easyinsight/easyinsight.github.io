@@ -24,11 +24,23 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
     @JoinColumn(name="trend_date_id")
     private AnalysisItem date;
 
+    @OneToOne (fetch = FetchType.LAZY)
+    @JoinColumn(name="trend_comparison_id")
+    private AnalysisItem trendComparisonField;
+
     @Column(name="icon_image")
     private String iconImage;
 
     @Column(name="high_low")
     private int highLow;
+
+    public AnalysisItem getTrendComparisonField() {
+        return trendComparisonField;
+    }
+
+    public void setTrendComparisonField(AnalysisItem trendComparisonField) {
+        this.trendComparisonField = trendComparisonField;
+    }
 
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
@@ -88,6 +100,9 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
         if (getEverything && date != null) {
             items.add(date);
         }
+        if (trendComparisonField != null) {
+            items.add(trendComparisonField);
+        }
         return items;
     }
 
@@ -98,6 +113,10 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
             date.reportSave(session);
             session.saveOrUpdate(date);
         }
+        if (trendComparisonField != null) {
+            trendComparisonField.reportSave(session);
+            session.saveOrUpdate(trendComparisonField);
+        }
     }
 
     @Override
@@ -106,6 +125,10 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
         if (date != null) {
             setDate((AnalysisItem) Database.deproxy(getDate()));
             date.afterLoad();
+        }
+        if (trendComparisonField != null) {
+            setTrendComparisonField((AnalysisItem) Database.deproxy(getTrendComparisonField()));
+            trendComparisonField.afterLoad();
         }
     }
 }

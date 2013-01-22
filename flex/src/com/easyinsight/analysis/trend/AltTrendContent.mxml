@@ -27,7 +27,8 @@
                 for each (var updateOutcome:TrendOutcome in trends) {
                     updateOutcome.leftTextWidth = width + 10;
                     if (updateOutcome.measure.reportFieldExtension != null && updateOutcome.measure.reportFieldExtension is TrendReportFieldExtension &&
-                            TrendReportFieldExtension(updateOutcome.measure.reportFieldExtension).date) {
+                            (TrendReportFieldExtension(updateOutcome.measure.reportFieldExtension).date ||
+                                    TrendReportFieldExtension(updateOutcome.measure.reportFieldExtension).trendComparisonField)) {
                         var r:AltTrendRenderer = new AltTrendRenderer();
                         r.trendDefinition = trendDef;
                         r.data = updateOutcome;

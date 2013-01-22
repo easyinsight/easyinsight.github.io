@@ -105,6 +105,10 @@ import mx.collections.ArrayCollection;
 			reportType = type;
 		}
 
+        public function initialConfig():void {
+
+        }
+
         public function newFilters(filterDefinitions:ArrayCollection):ArrayCollection {
             return new ArrayCollection();
         }

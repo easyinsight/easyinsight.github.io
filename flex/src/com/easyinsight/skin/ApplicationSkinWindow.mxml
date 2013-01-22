@@ -24,6 +24,7 @@
         import mx.managers.PopUpManager;
 
         private var items:ArrayCollection = new ArrayCollection();
+        private var lfItems:ArrayCollection = new ArrayCollection();
 
         public static const USER_SKIN:int = 1;
         public static const ACCOUNT_SKIN:int = 2;
@@ -68,6 +69,13 @@
                 skin = new ApplicationSkinTO();
             }
 
+            lfItems.addItem(new ColorReportFormItem("Chart Color 1", "customChartColor", skin.customChartColor, skin, "customChartColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Chart Color 2", "gradientChartColor", skin.gradientChartColor, skin, "gradientChartColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Stack 1 Fill Start", "dashboardStack1ColorStart", skin.dashboardStack1ColorStart, skin));
+            lfItems.addItem(new ColorReportFormItem("Stack 1 Fill End", "dashboardStack1ColorEnd", skin.dashboardStack1ColorEnd, skin));
+            lfItems.addItem(new ColorReportFormItem("Stack 2 Fill Start", "dashboardStackColor2Start", skin.dashboardStackColor2Start, skin));
+            lfItems.addItem(new ColorReportFormItem("Stack 2 Fill End", "dashboardStackColor2End", skin.dashboardStackColor2End, skin));
+
             items.addItem(new ColorReportFormItem("Core Application Background Color", "coreAppBackgroundColor", skin.coreAppBackgroundColor, skin, "coreAppBackgroundColorEnabled"));
             items.addItem(new ImageReportFormItem("Core Application Background Image", "coreAppBackgroundImage", skin.coreAppBackgroundImage, skin, "coreAppBackgroundImageEnabled"));
             items.addItem(new ComboBoxReportFormItem("Core Application Background Styling", "coreAppBackgroundSize", skin.coreAppBackgroundSize, skin, ["100%", "Auto"], "coreAppBackgroundSizeEnabled"));
@@ -90,6 +98,10 @@
             for each (var item:ReportFormItem in items) {
                 reportForm.addChild(item);
             }
+            for each (var lItem:ReportFormItem in lfItems) {
+                lookAndFeelForm.addChild(lItem);
+            }
+
         }
 
         private function onDone(event:FlexEvent):void {
@@ -117,6 +129,9 @@
             if (valid) {
                 for each (var item:ReportFormItem in items) {
                     item.save();
+                }
+                for each (var lItem:ReportFormItem in lfItems) {
+                    lItem.save();
                 }
                 skin.reportHeader = customHeader.selected;
                 skin.reportBackgroundColor = backgroundColorItem.selectedColor;
@@ -180,6 +195,11 @@
         <mx:TabNavigator resizeToContent="true" creationPolicy="all" selectedIndex="{_initialIndex}">
             <mx:VBox label="Application Settings" width="600" horizontalAlign="center">
                 <mx:Form id="reportForm" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+
+                </mx:Form>
+            </mx:VBox>
+            <mx:VBox label="Look and Feel Settings" width="600" horizontalAlign="center">
+                <mx:Form id="lookAndFeelForm" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
 
                 </mx:Form>
             </mx:VBox>

@@ -41,6 +41,16 @@ public class ApplicationSkinTO {
     public var myDataLookupTable:Boolean = false;
     public var myDataAccountVisible:Boolean = false;
 
+    public var customChartColor:int;
+    public var customChartColorEnabled:Boolean;
+    public var gradientChartColor:int;
+    public var gradientChartColorEnabled:Boolean;
+
+    public var dashboardStack1ColorStart:int;
+    public var dashboardStack1ColorEnd:int;
+    public var dashboardStackColor2Start:int;
+    public var dashboardStackColor2End:int;
+
     public function ApplicationSkinTO() {
     }
 

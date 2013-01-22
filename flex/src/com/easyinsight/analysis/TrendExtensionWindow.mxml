@@ -9,11 +9,15 @@
         [Bindable]
         private var dateFields:ArrayCollection;
 
+        [Bindable]
+        private var fields:ArrayCollection;
+
         private var _analysisItem:AnalysisItem;
 
         public function save(analysisItem:AnalysisItem):void {
             var ext:TrendReportFieldExtension = new TrendReportFieldExtension();
             ext.date = dateComboBox.selectedItem as AnalysisDateDimension;
+            ext.trendComparisonField = altTrendComboBox.selectedItem as AnalysisItem;
             ext.highLow = int(highGroup.selectedValue);
             analysisItem.reportFieldExtension = ext;
         }
@@ -25,21 +29,30 @@
                 if (ext.date != null) {
                     selectedValue = ext.date.display;
                 }
+                if (ext.trendComparisonField != null) {
+                    selectedTrend = ext.trendComparisonField.display;
+                }
                 highGood = String(ext.highLow);
             }
         }
 
         public function set analysisItems(analysisItems:ArrayCollection):void {
             var dateFields:ArrayCollection = new ArrayCollection();
+            var fields:ArrayCollection = new ArrayCollection();
             for each (var analysisItemWrapper:AnalysisItemWrapper in analysisItems) {
                 if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
                     dateFields.addItem(analysisItemWrapper.analysisItem);
+                } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    fields.addItem(analysisItemWrapper.analysisItem);
                 }
             }
             var noComp:Object = { display: "[ No Comparison ]"};
             dateFields.addItemAt(noComp, 0);
+            var noTrend:Object = {display: "[ No Trend Measure ] "};
+            fields.addItemAt(noTrend, 0);
             rowCount = Math.min(15, dateFields.length);
             this.dateFields = dateFields;
+            this.fields = fields;
         }
 
         [Bindable]
@@ -50,6 +63,9 @@
 
         [Bindable]
         private var selectedValue:String;
+
+        [Bindable]
+        private var selectedTrend:String;
         ]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="Are high values good?" direction="horizontal">
@@ -61,6 +77,10 @@
         <mx:FormItem label="Which date field should the trend compare against?">
             <util:SmartComboBox dataProvider="{dateFields}" id="dateComboBox" labelField="display" selectedValue="{selectedValue}" selectedProperty="display"
                     rowCount="{rowCount}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Alternate trend field">
+            <util:SmartComboBox dataProvider="{fields}" id="altTrendComboBox" labelField="display" selectedValue="{selectedTrend}" selectedProperty="display"
+                                rowCount="{rowCount}"/>
         </mx:FormItem>
     </mx:Form>
 

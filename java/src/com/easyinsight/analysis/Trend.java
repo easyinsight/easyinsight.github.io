@@ -23,6 +23,7 @@ public class Trend {
         for (AnalysisItem analysisItem : measures) {
             AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
             //TrendOutcome trendOutcome = new TrendOutcome();
+
             Map<Map<String, Value>, TrendOutcome> outcomeMap = new HashMap<Map<String, Value>, TrendOutcome>();
             if (nowSet.getRows().size() > 0) {
                 for (IRow row : nowSet.getRows()) {
@@ -34,12 +35,22 @@ public class Trend {
                     }
                     TrendOutcome trendOutcome = new TrendOutcome();
                     trendOutcome.setNow(row.getValue(analysisMeasure.createAggregateKey()));
+                    if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension &&
+                            ((TrendReportFieldExtension) analysisItem.getReportFieldExtension()).getTrendComparisonField() != null) {
+                        Value previousValue = row.getValue(((TrendReportFieldExtension) analysisItem.getReportFieldExtension()).getTrendComparisonField());
+                        trendOutcome.setHistorical(previousValue);
+                    }
                     outcomeMap.put(map, trendOutcome);
                 }
 
                 //newValue = trendOutcome.getNow().toDouble();
             }
-            if (pastSet.getRows().size() > 0) {
+            boolean needPastSet = false;
+            if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension &&
+                    ((TrendReportFieldExtension) analysisItem.getReportFieldExtension()).getTrendComparisonField() != null) {
+                needPastSet = true;
+            }
+            if (!needPastSet && pastSet.getRows().size() > 0) {
                 for (IRow row : pastSet.getRows()) {
                     Map<String, Value> map = new HashMap<String, Value>();
                     if (groupings != null) {

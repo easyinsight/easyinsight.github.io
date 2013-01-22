@@ -50,6 +50,16 @@ public class ApplicationSkin implements Serializable {
     private boolean myDataLookupTable;
     private boolean myDataAccountVisible;
 
+    private int customChartColor;
+    private boolean customChartColorEnabled;
+    private int gradientChartColor;
+    private boolean gradientChartColorEnabled;
+
+    private int dashboardStack1ColorStart;
+    private int dashboardStack1ColorEnd;
+    private int dashboardStackColor2Start;
+    private int dashboardStackColor2End;
+
     private long id;
 
     public long getId() {
@@ -82,6 +92,25 @@ public class ApplicationSkin implements Serializable {
             properties.add(new ReportNumericProperty("reportBackgroundColor", reportBackgroundColor, true));
             properties.add(new ReportNumericProperty("reportTextColor", reportTextColor, true));
             properties.add(new ReportBooleanProperty("reportHeader", reportHeader, true));
+
+            /*
+            private int customChartColor;
+    private boolean customChartColorEnabled;
+    private int gradientChartColor;
+    private boolean gradientChartColorEnabled;
+
+    private int dashboardStack1ColorStart;
+    private int dashboardStack1ColorEnd;
+    private int dashboardStackColor2Start;
+    private int dashboardStackColor2End;
+             */
+
+            properties.add(new ReportNumericProperty("customChartColor", customChartColor, customChartColorEnabled));
+            properties.add(new ReportNumericProperty("gradientChartColor", gradientChartColor, gradientChartColorEnabled));
+            properties.add(new ReportNumericProperty("dashboardStack1ColorStart", dashboardStack1ColorStart));
+            properties.add(new ReportNumericProperty("dashboardStack1ColorEnd", dashboardStack1ColorEnd));
+            properties.add(new ReportNumericProperty("dashboardStack2ColorStart", dashboardStackColor2Start));
+            properties.add(new ReportNumericProperty("dashboardStack2ColorEnd", dashboardStackColor2End));
         }
         if (mode == APPLICATION || mode == USER) {
             properties.add(new ReportBooleanProperty("myDataName", myDataName));
@@ -141,6 +170,79 @@ public class ApplicationSkin implements Serializable {
         myDataNewDashboard = findBooleanProperty(properties, "myDataDashboard", true);
         myDataLookupTable = findBooleanProperty(properties, "myDataLookupTable", false);
         myDataAccountVisible = findBooleanProperty(properties, "myDataAccountVisible", false);
+
+        customChartColor = (int) findNumberProperty(properties, "customChartColor", 0);
+        gradientChartColor = (int) findNumberProperty(properties, "gradientChartColor", 0);
+        customChartColorEnabled = propertyEnabled(properties, "customChartColor");
+        gradientChartColorEnabled = propertyEnabled(properties, "gradientChartColor");
+        dashboardStack1ColorStart = (int) findNumberProperty(properties, "dashboardStack1ColorStart", 0);
+        dashboardStack1ColorEnd = (int) findNumberProperty(properties, "dashboardStack1ColorEnd", 0);
+        dashboardStackColor2Start = (int) findNumberProperty(properties, "dashboardStack2ColorStart", 0);
+        dashboardStackColor2End = (int) findNumberProperty(properties, "dashboardStack2ColorEnd", 0);
+    }
+
+    public int getCustomChartColor() {
+        return customChartColor;
+    }
+
+    public void setCustomChartColor(int customChartColor) {
+        this.customChartColor = customChartColor;
+    }
+
+    public boolean isCustomChartColorEnabled() {
+        return customChartColorEnabled;
+    }
+
+    public void setCustomChartColorEnabled(boolean customChartColorEnabled) {
+        this.customChartColorEnabled = customChartColorEnabled;
+    }
+
+    public int getGradientChartColor() {
+        return gradientChartColor;
+    }
+
+    public void setGradientChartColor(int gradientChartColor) {
+        this.gradientChartColor = gradientChartColor;
+    }
+
+    public boolean isGradientChartColorEnabled() {
+        return gradientChartColorEnabled;
+    }
+
+    public void setGradientChartColorEnabled(boolean gradientChartColorEnabled) {
+        this.gradientChartColorEnabled = gradientChartColorEnabled;
+    }
+
+    public int getDashboardStack1ColorStart() {
+        return dashboardStack1ColorStart;
+    }
+
+    public void setDashboardStack1ColorStart(int dashboardStack1ColorStart) {
+        this.dashboardStack1ColorStart = dashboardStack1ColorStart;
+    }
+
+    public int getDashboardStack1ColorEnd() {
+        return dashboardStack1ColorEnd;
+    }
+
+    public void setDashboardStack1ColorEnd(int dashboardStack1ColorEnd) {
+        this.dashboardStack1ColorEnd = dashboardStack1ColorEnd;
+    }
+
+    public int getDashboardStackColor2Start() {
+        return dashboardStackColor2Start;
+    }
+
+    public void setDashboardStackColor2Start(int dashboardStackColor2Start) {
+        this.dashboardStackColor2Start = dashboardStackColor2Start;
+    }
+
+    public int getDashboardStackColor2End() {
+        return dashboardStackColor2End;
+    }
+
+    public void setDashboardStackColor2End(int dashboardStackColor2End) {
+        this.dashboardStackColor2End = dashboardStackColor2End;
     }
 
     public ImageDescriptor getReportHeaderImage() {

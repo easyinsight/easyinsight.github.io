@@ -31,6 +31,16 @@ public class ApplicationSkin extends EventDispatcher {
     private var _myDataLookupTable:Boolean = false;
     private var _myDataAccountVisible:Boolean = false;
 
+    public var customChartColor:int;
+    public var customChartColorEnabled:Boolean;
+    public var gradientChartColor:int;
+    public var gradientChartColorEnabled:Boolean;
+
+    public var dashboardStack1ColorStart:int;
+    public var dashboardStack1ColorEnd:int;
+    public var dashboardStackColor2Start:int;
+    public var dashboardStackColor2End:int;
+
     public function ApplicationSkin() {
         super();
     }
@@ -62,6 +72,15 @@ public class ApplicationSkin extends EventDispatcher {
         headerBackgroundColor = appSkin.reportBackgroundColor;
         headerTextColor = appSkin.reportTextColor;
         reportHeader = appSkin.reportHeader;
+
+        customChartColor = appSkin.customChartColor;
+        customChartColorEnabled = appSkin.customChartColorEnabled;
+        gradientChartColor = appSkin.gradientChartColor;
+        gradientChartColorEnabled = appSkin.gradientChartColorEnabled;
+        dashboardStack1ColorStart = appSkin.dashboardStack1ColorStart;
+        dashboardStack1ColorEnd = appSkin.dashboardStack1ColorEnd;
+        dashboardStackColor2Start = appSkin.dashboardStackColor2Start;
+        dashboardStackColor2End = appSkin.dashboardStackColor2End;
 
         if (appSkin.reportHeaderImage != null) {
             var reportHeaderImageLoader:ImageLoader = new ImageLoader();
