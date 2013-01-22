@@ -63,6 +63,7 @@
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.datasources.DataSourceInfo;
+        import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataService;
@@ -242,6 +243,7 @@
             }
             if (analysisDefinition == null) {
                 this.analysisDefinition = dataViewFactory.createNewDefinition();
+                analysisDefinition.initialConfig();
                 analysisDefinition.visibleAtFeedLevel = shareDataSourceSettings;
                 analysisDefinition.dataFeedID = dataSourceID;
             } else {
@@ -344,6 +346,7 @@
                 dataSourceName = this.feedMetadata.dataSourceName;
                 joinsCustomizable = this.feedMetadata.customJoinsAllowed;
 
+
                 fieldsLabel = this.feedMetadata.dataSourceName + " Fields";
                 availableFields = new ArrayCollection();
                 wrappers = new ArrayCollection();
@@ -379,6 +382,9 @@
                 if (analysisDefinition == null) {
                     saveAsEnabled = false;
                     newAnalysis(User.getInstance().defaultReportSharing);
+                    if (feedMetadata.dataSourceType == DataSourceType.COMPOSITE) {
+                        analysisDefinition.optimized = true;
+                    }
                     for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {
                         transformContainer.addFilterDefinition(filter);
                     }
