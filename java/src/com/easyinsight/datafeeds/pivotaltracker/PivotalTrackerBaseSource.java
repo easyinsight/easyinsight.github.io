@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.pivotaltracker;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -65,6 +66,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
     public static final String STORY_ACCEPTED_AT = "Story Accepted At";
     public static final String STORY_URL = "Story URL";
     public static final String STORY_COUNT = "Story Count";
+    public static final String STORY_PRIORITY = "Priority";
 
     private String ptUserName;
     private String ptPassword;
@@ -190,9 +192,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
                 Document doneIterations = runRestRequest(httpClient, token, "https://www.pivotaltracker.com/services/v3/projects/" + id +
                     "/iterations/done");
                 storyIDs.addAll(parseIterations(keys, dataSet, dateFormat, id, name, initialVelocity, currentVelocity, labels, doneIterations, "Done"));
-                /*Document iceboxIterations = runRestRequest(httpClient, token, "https://www.pivotaltracker.com/services/v3/projects/" + id +
-                        "/iterations/icebox");
-                parseIterations(keys, dataSet, dateFormat, id, name, initialVelocity, currentVelocity, labels, iceboxIterations, "Icebox");*/
+
                 processStories(keys, dataSet, dateFormat, httpClient, token, id, storyIDs, name, initialVelocity, currentVelocity, labels);
                 
             }
@@ -208,6 +208,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         Document doc = runRestRequest(httpClient, token, "https://www.pivotaltracker.com/services/v3/projects/" + projectID +
                 "/stories?limit=3000");
         Nodes stories = doc.query("/stories/story");
+        int j = 0;
         for (int k = 0; k < stories.size(); k++) {
             Node storyNode = stories.get(k);
             String storyName = queryField(storyNode, "name/text()");
@@ -215,6 +216,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
             if (storyIDs.contains(storyID)) {
                 continue;
             }
+            j = j + 1;
             String requestedBy = queryField(storyNode, "requested_by/text()");
             String ownedBy = queryField(storyNode, "owned_by/text()");
             String state = queryField(storyNode, "current_state/text()");
@@ -243,6 +245,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
             }
             String storyURL = queryField(storyNode, "url/text()");
             IRow row = dataSet.createRow();
+
             row.addValue(keys.get(PROJECT_NAME), name);
             row.addValue(keys.get(PROJECT_ID), projectID);
             row.addValue(keys.get(PROJECT_INITIAL_VELOCITY), initialVelocity);
@@ -263,6 +266,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
             row.addValue(keys.get(STORY_CREATED_AT), storyCreatedAt);
             row.addValue(keys.get(STORY_UPDATED_AT), storyUpdatedAt);
             row.addValue(keys.get(STORY_ACCEPTED_AT), storyAcceptedAt);
+            row.addValue(keys.get(STORY_PRIORITY), j);
         }
     }
 
@@ -270,6 +274,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
                                  int initialVelocity, int currentVelocity, String labels, Document iterations, String iterationState) throws ParseException {
         Set<String> storyIDs = new HashSet<String>();
         Nodes iterationNodes = iterations.query("/iterations/iteration");
+
         for (int j = 0; j < iterationNodes.size(); j++) {
             Node curIteration = iterationNodes.get(j);
             String iterationID = queryField(curIteration, "id/text()");
@@ -340,6 +345,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
                 row.addValue(keys.get(STORY_CREATED_AT), storyCreatedAt);
                 row.addValue(keys.get(STORY_UPDATED_AT), storyUpdatedAt);
                 row.addValue(keys.get(STORY_ACCEPTED_AT), storyAcceptedAt);
+                row.addValue(keys.get(STORY_PRIORITY), k);
             }
         }
         return storyIDs;
@@ -350,7 +356,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         return Arrays.asList(PROJECT_ID, PROJECT_NAME, PROJECT_INITIAL_VELOCITY, PROJECT_CURRENT_VELOCITY, PROJECT_LABELS,
                 ITERATION_ID, ITERATION_START_DATE, ITERATION_FINISH_DATE, ITERATION_NUMBER, ITERATION_STATE, STORY_NAME,
                 STORY_REQUESTED_BY, STORY_OWNED_BY, STORY_STATE, STORY_ESTIMATE, STORY_LABELS, STORY_CREATED_AT, STORY_TYPE,
-                STORY_UPDATED_AT, STORY_ACCEPTED_AT, STORY_URL, STORY_COUNT, STORY_ID, STORY_DESCRIPTION);
+                STORY_UPDATED_AT, STORY_ACCEPTED_AT, STORY_URL, STORY_COUNT, STORY_ID, STORY_DESCRIPTION, STORY_PRIORITY);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -379,6 +385,12 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         analysisItems.add(new AnalysisDimension(keys.get(STORY_URL), true));
         analysisItems.add(new AnalysisDimension(keys.get(STORY_DESCRIPTION), true));
         analysisItems.add(new AnalysisDimension(keys.get(STORY_ID), true));
+
+        Key k = keys.get(STORY_PRIORITY);
+        if(k == null) {
+            k = new NamedKey(STORY_PRIORITY);
+        }
+        analysisItems.add(new AnalysisMeasure(k, AggregationTypes.SUM));
         return analysisItems;
     }
 
