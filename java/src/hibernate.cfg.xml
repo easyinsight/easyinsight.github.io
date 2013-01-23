@@ -103,6 +103,7 @@
         <mapping class="com.easyinsight.analysis.ReportNumericProperty"/>              
         <mapping class="com.easyinsight.analysis.ReportBooleanProperty"/>
         <mapping class="com.easyinsight.analysis.ReportImageProperty"/>
+        <mapping class="com.easyinsight.analysis.ReportMultiColorProperty"/>
         <mapping class="com.easyinsight.analysis.JoinOverride"/>
         <mapping class="com.easyinsight.analysis.ReportFieldExtension"/>
         <mapping class="com.easyinsight.analysis.TrendReportFieldExtension"/>
