@@ -20,6 +20,16 @@ public class AnalysisItemEventHandler extends UIComponent {
     private var _analysisItems:ArrayCollection;
     private var _dataSourceID:int;
 
+    private var _report:AnalysisDefinition;
+
+
+    public function get report():AnalysisDefinition {
+        return _report;
+    }
+
+    public function set report(value:AnalysisDefinition):void {
+        _report = value;
+    }
 
     public function AnalysisItemEventHandler() {
         super();
@@ -70,6 +80,7 @@ public class AnalysisItemEventHandler extends UIComponent {
         analysisItemEditor.x = tmpX;
         analysisItemEditor.y = tmpY;
         analysisItemEditor.editorClass = editor;
+        analysisItemEditor.report = report;
         analysisItemEditor.originalWrapper = analysisItemWrapper;
         analysisItemEditor.analysisItem = analysisItem;
         analysisItemEditor.dataSourceID = _dataSourceID;

@@ -1058,7 +1058,7 @@
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="fieldToDataSourceLevel" result="promoted()"/>
     </mx:RemoteObject>
-    <analysis:AnalysisItemEventHandler id="fieldEventHandler" dataSourceID="{dataSourceID}" analysisItems="{wrappers}"/>
+    <analysis:AnalysisItemEventHandler id="fieldEventHandler" dataSourceID="{dataSourceID}" analysisItems="{wrappers}" report="{analysisDefinition}"/>
     <mx:HBox width="100%" styleName="topButtonBar">
         <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
                    toolTip="Close" labelPlacement="right" label="Close Editor" x="10" styleName="grayButton"/>
