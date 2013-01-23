@@ -14,6 +14,7 @@
 <%@ page import="com.braintreegateway.exceptions.NotFoundException" %>
 <%@ page import="com.braintreegateway.*" %>
 <%@ page import="com.easyinsight.html.BillingResponse" %>
+<%@ page import="com.easyinsight.logging.LogClass" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String postBillingMessage = "";
@@ -94,7 +95,7 @@
             } catch (NotFoundException e) {
 
                 // customer has billingInformationGiven = true, but not found in vault somehow.
-
+                LogClass.error(e);
                 account.setBillingInformationGiven(false);
                 hibernateSession.save(account);
                 t.commit();
