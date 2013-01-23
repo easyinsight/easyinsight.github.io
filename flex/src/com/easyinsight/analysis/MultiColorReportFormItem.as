@@ -5,7 +5,6 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
 
 import mx.controls.ColorPicker;
 import mx.controls.LinkButton;
@@ -41,7 +40,6 @@ public class MultiColorReportFormItem extends ReportFormItem {
     }
 
     private function onMultiColor(event:MultiColorEvent):void {
-        Alert.show("got " + event.colors.length);
         colors = event.colors;
     }
 
