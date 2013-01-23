@@ -38,6 +38,8 @@ import flash.events.EventDispatcher;
     public var trendFilter:Boolean;
     public var notCondition:Boolean;
     public var parentFilters:String;
+    public var fieldChoiceFilterLabel:String;
+    public var section:int;
 		
 		public function FilterDefinition()
 			{

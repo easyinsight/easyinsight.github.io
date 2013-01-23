@@ -7,7 +7,6 @@
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
-
         import com.easyinsight.analysis.AnalysisDateDimension;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
@@ -16,6 +15,7 @@
 
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
+        import com.easyinsight.analysis.MultiColor;
         import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.EILegend;
 
@@ -64,7 +64,6 @@
             hbox.addChild(lineChart);
             if (legend == null) {
                 legend = new EILegend();
-                legend.maxWidth = 200;
                 legend.percentHeight = 100;
             }
             hbox.addChild(legend);
@@ -127,9 +126,17 @@
                 hbox.removeChild(lineChart);
 
                 lineChart = new LineChart();
-                lineChart.setStyle("fontFamily", lineChartDef.getFont());
+                lineChart.setStyle("fontFamily", "Helvetica Neue");
+                lineChart.setStyle("fontWeight", "normal");
                 lineChart.setStyle("fontSize", lineChartDef.fontSize);
+                lineChart.setStyle("fontGridFitType", "subpixel");
+                lineChart.setStyle("fontSharpess", -16);
+                lineChart.setStyle("fontAntiAliasType", "advanced");
+                lineChart.setStyle("fontThickness", 20);
+                lineChart.setStyle("color", 0x333333);
+                lineChart.setStyle("axisTitleStyleName", "chartAxis");
                 lineChart.addEventListener("legendDataChanged", legendDataChanged);
+                legend.maxWidth = lineChartDef.legendMaxWidth;
                 legend.visible = true;
                 lineChart.percentHeight = 100;
                 lineChart.percentWidth = 100;
@@ -156,7 +163,20 @@
                 lineChart.verticalAxis = verticalAxis;
 
                 var strokes:Array = [];
-                var colors:Array = FillProvider.createSolidColors();
+                var useCustomColors:Boolean;
+                var colors:Array;
+                useCustomColors = (lineChartDef.multiColors != null && lineChartDef.multiColors.length && MultiColor(lineChartDef.multiColors.getItemAt(0)).color1StartEnabled);
+                if (useCustomColors) {
+                    colors = [];
+                    for each (var mc:MultiColor in lineChartDef.multiColors) {
+                        if (mc.color1StartEnabled) {
+                            colors.push(new SolidColor(mc.color1Start));
+                        }
+                    }
+                } else {
+                    colors = FillProvider.createSolidColors();
+                }
+
                 for each (var color:SolidColor in colors) {
                     var newStroke:Stroke = new Stroke();
                     newStroke.color = color.color;
@@ -255,9 +275,11 @@
                     stroke.weight = lineChartDef.strokeWeight;
                     uniqueLineSeries.setStyle("lineStroke", stroke);
                     uniqueLineSeries.setStyle("stroke", stroke);
-                    var cf:ClassFactory = new ClassFactory(EICircleItemRenderer);
-                    cf.properties = { analysisItem: lineChartDef.multiMeasure ? lineChartDef.xaxis : lineChartDef.yaxis};
-                    uniqueLineSeries.setStyle("itemRenderer", cf);
+                    if (lineChartDef.showPoints) {
+                        var cf:ClassFactory = new ClassFactory(EICircleItemRenderer);
+                        cf.properties = { analysisItem:lineChartDef.multiMeasure ? lineChartDef.xaxis : lineChartDef.yaxis};
+                        uniqueLineSeries.setStyle("itemRenderer", cf);
+                    }
                     uniqueLineSeries.xField = lineChartDef.xaxis.qualifiedName();
                     if (key == null || key == "") {
                         key = "[ No Value ]";
@@ -283,8 +305,9 @@
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
-        }]]></mx:Script>
+        }
+        ]]></mx:Script>
     <mx:Canvas width="100%" height="100%" backgroundColor="#FFFFFF" id="coreBox">
-        <mx:HBox width="100%" height="100%" id="hbox"/>
+        <mx:Box width="100%" height="100%" id="hbox" direction="horizontal"/>
     </mx:Canvas>
 </mx:Module>

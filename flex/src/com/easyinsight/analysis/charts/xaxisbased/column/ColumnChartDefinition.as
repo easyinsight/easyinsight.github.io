@@ -3,6 +3,7 @@ import com.easyinsight.analysis.ChartDefinition;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisDefinition;
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.skin.ApplicationSkin;
 
 import mx.collections.ArrayCollection;
 
@@ -25,6 +26,17 @@ public class ColumnChartDefinition extends XAxisDefinition{
 
     public function ColumnChartDefinition() {
         super();
+    }
+
+    override public function initialConfig():void {
+        super.initialConfig();
+        if (ApplicationSkin.instance().customChartColorEnabled) {
+            chartColor = ApplicationSkin.instance().customChartColor;
+            useChartColor = ApplicationSkin.instance().customChartColorEnabled;
+        }
+        if (ApplicationSkin.instance().gradientChartColorEnabled) {
+            gradientColor = ApplicationSkin.instance().gradientChartColor;
+        }
     }
 
     override public function supportsEmbeddedFonts():Boolean {

@@ -120,8 +120,13 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
         }
     }
 
-    public function regenerate():void {
+    public function regenerate(label:String = null):void {
         _loadingFromReport = true;
+        if (filterLabel is Label) {
+            if (label != null && label != "") {
+                Label(filterLabel).text = label;
+            }
+        }
         _filterDefinition.filteredValues = new ArrayCollection(["All"]);
         dataService = new RemoteObject();
         dataService.destination = "data";
@@ -203,7 +208,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
                 deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
                 deleteButton.toolTip = "Delete";
-                deleteButton.enabled = false;
+                deleteButton.enabled = true;
             }
             //hbox.addChild(deleteButton);
         }
@@ -238,6 +243,8 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
 
     private function onFault(event:FaultEvent):void {
         Alert.show(event.fault.faultString);
+        valuesSet = false;
+        invalidateDisplayList();
     }
     
     private var loadingBar:ProgressBar;

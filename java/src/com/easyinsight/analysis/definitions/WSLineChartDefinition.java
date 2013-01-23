@@ -3,6 +3,7 @@ package com.easyinsight.analysis.definitions;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
+import flex.messaging.io.ArrayCollection;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +23,11 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
 
     private int strokeWeight = 2;
     private boolean alignLabelsToUnits = true;
+
+    private boolean showPoints = true;
+
+    private List<MultiColor> multiColors = new ArrayCollection();
+    private int legendMaxWidth;
 
     /*public LimitsResults applyLimits(DataSet dataSet) {
         LimitsResults limitsResults;
@@ -105,6 +111,22 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         this.xAxisMaximum = xAxisMaximum;
     }
 
+    public boolean isShowPoints() {
+        return showPoints;
+    }
+
+    public void setShowPoints(boolean showPoints) {
+        this.showPoints = showPoints;
+    }
+
+    public int getLegendMaxWidth() {
+        return legendMaxWidth;
+    }
+
+    public void setLegendMaxWidth(int legendMaxWidth) {
+        this.legendMaxWidth = legendMaxWidth;
+    }
+
     public boolean isAutoScaled() {
         return autoScaled;
     }
@@ -137,6 +159,15 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         return ChartDefinitionState.LINE_FAMILY;
     }
 
+    public void untweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
+        if (getXaxis() != null && getXaxis().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+            AnalysisDateDimension date = (AnalysisDateDimension) getXaxis();
+            if (date.getRevertDateLevel() != 0) {
+                date.setDateLevel(date.getRevertDateLevel());
+            }
+        }
+    }
+
     public void tweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
         if (autoScale && getXaxis() != null && getXaxis().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             int daysDuration = 0;
@@ -162,21 +193,25 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
             if (daysDuration > (365 * 6)) {
                 if (xAxis.getDateLevel() != AnalysisDateDimension.YEAR_LEVEL) {
                     autoScaled = true;
+                    xAxis.setRevertDateLevel(xAxis.getDateLevel());
                     xAxis.setDateLevel(AnalysisDateDimension.YEAR_LEVEL);
                 }
             } else if (daysDuration > (365 * 2)) {
                 if (xAxis.getDateLevel() != AnalysisDateDimension.MONTH_LEVEL) {
                     autoScaled = true;
+                    xAxis.setRevertDateLevel(xAxis.getDateLevel());
                     xAxis.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
                 }
             } else if (daysDuration >= (90)) {
                 if (xAxis.getDateLevel() != AnalysisDateDimension.WEEK_LEVEL) {
                     autoScaled = true;
+                    xAxis.setRevertDateLevel(xAxis.getDateLevel());
                     xAxis.setDateLevel(AnalysisDateDimension.WEEK_LEVEL);
                 }
             } else if (daysDuration > 6) {
                 if (xAxis.getDateLevel() != AnalysisDateDimension.DAY_LEVEL) {
                     autoScaled = true;
+                    xAxis.setRevertDateLevel(xAxis.getDateLevel());
                     xAxis.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
                 }
             }
@@ -193,16 +228,30 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         strokeWeight = (int) findNumberProperty(properties, "strokeWeight", 2);
+        legendMaxWidth = (int) findNumberProperty(properties, "legendMaxWidth", 200);
         autoScale = findBooleanProperty(properties, "autoScale", false);
         alignLabelsToUnits = findBooleanProperty(properties, "alignLabelsToUnits", true);
+        showPoints = findBooleanProperty(properties, "showPoints", true);
+        multiColors = multiColorProperty(properties, "multiColors");
+    }
+
+    public List<MultiColor> getMultiColors() {
+        return multiColors;
+    }
+
+    public void setMultiColors(List<MultiColor> multiColors) {
+        this.multiColors = multiColors;
     }
 
     @Override
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportNumericProperty("strokeWeight", strokeWeight));
+        properties.add(new ReportNumericProperty("legendMaxWidth", legendMaxWidth));
         properties.add(new ReportBooleanProperty("autoScale", autoScale));
         properties.add(new ReportBooleanProperty("alignLabelsToUnits", alignLabelsToUnits));
+        properties.add(new ReportBooleanProperty("showPoints", showPoints));
+        properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         return properties;
     }
 

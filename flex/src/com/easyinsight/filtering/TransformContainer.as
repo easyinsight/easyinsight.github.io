@@ -8,6 +8,7 @@ import com.easyinsight.commands.CommandEvent;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemWrapper;
+import com.easyinsight.filtering.AnalysisItemFilterDefinition;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.display.DisplayObject;
@@ -23,6 +24,7 @@ import mx.collections.ArrayCollection;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.containers.VBox;
 
 import mx.controls.AdvancedDataGrid;
 import mx.controls.Alert;
@@ -453,21 +455,42 @@ public class TransformContainer extends HBox
             var index:int = filterDefinitions.getItemIndex(event.previousFilterDefinition);
             filterDefinitions.removeItemAt(index);
             var existingFilter:IFilter = null;
+            for each (var tObj1:Object in filterTile.getChildren()) {
+                if (tObj1 is VBox) {
+                    for each (var testFilter1:IFilter in VBox(tObj1).getChildren()) {
+                        if (testFilter1.filterDefinition == event.filterDefinition) {
+                            existingFilter = testFilter1;
+                        }
+                    }
+                } else if (tObj1 is IFilter) {
+                    if (IFilter(tObj1).filterDefinition == event.filterDefinition) {
+                        existingFilter = IFilter(tObj1);
+                    }
+                }
+            }
             for each (var filter:IFilter in filterTile.getChildren()) {
                 if (filter.filterDefinition == event.previousFilterDefinition) {
                     existingFilter = filter;
                 }
             }
             if (existingFilter != null) {
-                filterTile.removeChild(existingFilter as DisplayObject);
+                UIComponent(existingFilter).parent.removeChild(existingFilter as DisplayObject);
             }
             var newFilter:IFilter = createFilter(event.filterDefinition);
             initializeFilter(newFilter, false);
         } else {
             var existingFilter1:IFilter = null;
-            for each (var testFilter:IFilter in filterTile.getChildren()) {
-                if (testFilter.filterDefinition == event.filterDefinition) {
-                    existingFilter1 = testFilter;
+            for each (var tObj:Object in filterTile.getChildren()) {
+                if (tObj is VBox) {
+                    for each (var testFilter:IFilter in VBox(tObj).getChildren()) {
+                        if (testFilter.filterDefinition == event.filterDefinition) {
+                            existingFilter1 = testFilter;
+                        }
+                    }
+                } else if (tObj is IFilter) {
+                    if (IFilter(tObj).filterDefinition == event.filterDefinition) {
+                        existingFilter1 = IFilter(tObj);
+                    }
                 }
             }
             register(existingFilter1);
@@ -475,7 +498,11 @@ public class TransformContainer extends HBox
             if (coll != null) {
                 for each (var child:IFilter in coll) {
                     if (child is ComboBoxFilter) {
-                        ComboBoxFilter(child).regenerate();
+                        var label:String = null;
+                        if (event.filter.filterDefinition != null && event.filter.filterDefinition is AnalysisItemFilterDefinition) {
+                            label = AnalysisItemFilterDefinition(event.filter.filterDefinition).targetItem.display;
+                        }
+                        ComboBoxFilter(child).regenerate(label);
                     }
                 }
             }
@@ -494,7 +521,17 @@ public class TransformContainer extends HBox
         filter.addEventListener(FilterDeletionEvent.DELETED_FILTER, filterDeleted);
         var roleVisible:Boolean = _role == 0 || _role <= filter.filterDefinition.minimumRole;
         if (!_reportView || (filter.filterDefinition.showOnReportView && roleVisible)) {
-            filterTile.addChild(filter as DisplayObject);
+            if (_reportView && filter.filterDefinition != null && filter.filterDefinition.section != 0) {
+                var section:VBox = sectionMap[String(filter.filterDefinition.section)];
+                if (section == null) {
+                    section = new VBox();
+                    sectionMap[String(filter.filterDefinition.section)] = section;
+                    filterTile.addChild(section);
+                }
+                section.addChild(filter as DisplayObject)
+            } else {
+                filterTile.addChild(filter as DisplayObject);
+            }
         }
         if (_loadingFromReport) {
             addFilter(filter);
@@ -504,6 +541,8 @@ public class TransformContainer extends HBox
             dispatchEvent(new AnalysisChangedEvent());
         }
     }
+
+    private var sectionMap:Object = new Object();
 
     private var triggerMap:Object = new Object();
 
@@ -543,6 +582,15 @@ public class TransformContainer extends HBox
             }
             coll[filter.filterDefinition.filterName] = filter;
         }
+        if (filter.filterDefinition.fieldChoiceFilterLabel != null && filter.filterDefinition.fieldChoiceFilterLabel != "") {
+            var tFilterName:String = filter.filterDefinition.fieldChoiceFilterLabel;
+            var coll1:Object = triggerMap[tFilterName];
+            if (coll1 == null) {
+                coll1 = new Object();
+                triggerMap[tFilterName] = coll1;
+            }
+            coll1[tFilterName] = filter;
+        }
     }
 
     protected function addFilter(filter:IFilter):void {
@@ -579,7 +627,9 @@ public class TransformContainer extends HBox
         filterTile.removeChild(filter as DisplayObject);
         //delete filterMap[filter.filterDefinition.field.qualifiedName()];
         var index:int = filterDefinitions.getItemIndex(filter.filterDefinition);
-        filterDefinitions.removeItemAt(index);
+        if (index != -1) {
+            filterDefinitions.removeItemAt(index);
+        }
         if (filterDefinitions.length == 0) {
             noFilters = true;
             //removeChild(filterTile);

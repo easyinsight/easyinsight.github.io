@@ -3,6 +3,8 @@ import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
 import com.easyinsight.analysis.AnalysisDefinition;
 
+import mx.collections.ArrayCollection;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSLineChartDefinition")]
 public class LineChartDefinition extends TwoAxisDefinition{
@@ -14,6 +16,11 @@ public class LineChartDefinition extends TwoAxisDefinition{
     public var strokeWeight:int = 2;
     public var alignLabelsToUnits:Boolean = true;
 
+    public var showPoints:Boolean = true;
+
+    public var legendMaxWidth:int = 200;
+
+    public var multiColors:ArrayCollection = new ArrayCollection();
 
     public function LineChartDefinition() {
         super();

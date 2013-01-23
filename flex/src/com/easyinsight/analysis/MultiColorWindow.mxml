@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _multiColors:ArrayCollection;
+
+        public function set multiColors(value:ArrayCollection):void {
+            _multiColors = value;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (_multiColors == null) {
+                _multiColors = new ArrayCollection();
+            }
+            for (var i:int = 0; i < 15; i++) {
+                if (i < _multiColors.length) {
+                    var p1:MultiColorPicker = new MultiColorPicker();
+                    p1.config = _multiColors.getItemAt(i) as MultiColor;
+                    grid.addChild(p1);
+                } else {
+                    var p2:MultiColorPicker = new MultiColorPicker();
+                    grid.addChild(p2);
+                }
+            }
+        }
+
+        private function apply():void {
+            var cols:ArrayCollection = new ArrayCollection();
+            for each (var mcp:MultiColorPicker in grid.getChildren()) {
+                cols.addItem(mcp.save());
+            }
+            dispatchEvent(new MultiColorEvent(cols));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:Grid id="grid">
+    </mx:Grid>
+    <mx:HBox>
+        <util:SaveButton label="Apply" click="apply()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

@@ -44,7 +44,7 @@ public class FilterDefinition implements Serializable, Cloneable {
     public static final int ANALYSIS_ITEM = 13;
     public static final int MULTI_FLAT_DATE = 14;
     public static final int MONTH_CUTOFF = 15;
-    
+
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem field;
@@ -81,12 +81,34 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name="trend_filter")
     private boolean trendFilter;
 
+    @Column(name="field_choice_filter_label")
+    private String fieldChoiceFilterLabel;
+
+    @Column(name="section")
+    private int section;
+
     @Transient
     transient private String pipelineName;
 
     public void applyCalculationsBeforeRun(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
                                            Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) {
 
+    }
+
+    public int getSection() {
+        return section;
+    }
+
+    public void setSection(int section) {
+        this.section = section;
+    }
+
+    public String getFieldChoiceFilterLabel() {
+        return fieldChoiceFilterLabel;
+    }
+
+    public void setFieldChoiceFilterLabel(String fieldChoiceFilterLabel) {
+        this.fieldChoiceFilterLabel = fieldChoiceFilterLabel;
     }
 
     public boolean isNotCondition() {

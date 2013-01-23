@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<mx:GridRow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var color:uint;
+
+        [Bindable]
+        private var colorEnabled:Boolean;
+
+        public function set config(multiColor:MultiColor):void {
+            color = multiColor.color1Start;
+            colorEnabled = multiColor.color1StartEnabled;
+        }
+
+        public function save():MultiColor {
+            var mc:MultiColor = new MultiColor();
+            mc.color1Start = colorPicker.selectedColor;
+            mc.color1StartEnabled = colorEnabledBox.selected;
+            return mc;
+        }
+        ]]></mx:Script>
+    <mx:GridItem>
+        <mx:CheckBox id="colorEnabledBox" selected="{colorEnabled}"/>
+    </mx:GridItem>
+    <mx:GridItem>
+        <mx:ColorPicker id="colorPicker" enabled="{colorEnabledBox.selected}" selectedColor="{color}"/>
+    </mx:GridItem>
+</mx:GridRow>

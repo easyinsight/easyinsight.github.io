@@ -520,24 +520,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 populate(map, analysisItem, insightRequestMetadata);
             }
         }
-        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : allItems) {
-                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), items);
-                }
-                items.add(analysisItem);
-            }
-            for (AnalysisItem analysisItem : allItems) {
-                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    displayMap.put(analysisItem.toDisplay(), items);
-                }
-                items.add(analysisItem);
-            }
+        KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
+        Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
+        Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
         if (getReportRunMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
@@ -721,6 +706,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public void tweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
     }
 
+    public void untweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
+    }
+
     public List<IComponent> createComponents() {
         return new ArrayList<IComponent>();
     }
@@ -777,6 +765,16 @@ public abstract class WSAnalysisDefinition implements Serializable {
             }
         }
         return defaultValue;
+    }
+
+    protected List<MultiColor> multiColorProperty(List<ReportProperty> properties, String property) {
+        for (ReportProperty reportProperty : properties) {
+            if (reportProperty.getPropertyName().equals(property)) {
+                ReportMultiColorProperty reportMultiColorProperty = (ReportMultiColorProperty) reportProperty;
+                return reportMultiColorProperty.toMultiColorList();
+            }
+        }
+        return new ArrayList<MultiColor>();
     }
 
     protected boolean findBooleanProperty(List<ReportProperty> properties, String property, boolean defaultValue) {

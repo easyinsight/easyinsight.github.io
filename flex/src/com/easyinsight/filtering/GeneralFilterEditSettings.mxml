@@ -57,6 +57,8 @@
             parameterFilter = _filterDefinition.templateFilter;
             toggle = _filterDefinition.toggleEnabled;
             role = _filterDefinition.minimumRole;
+            fieldFilter = _filterDefinition.fieldChoiceFilterLabel;
+            section = _filterDefinition.section;
             if (_filterDefinition.field != null) {
                 filterField = filterDefinition.field.display + " - " + filterDefinition.field.key.createString();
             }
@@ -123,6 +125,8 @@
             _filterDefinition.templateFilter = parameterFilterCheckbox.selected;
             _filterDefinition.toggleEnabled = toggleCheckbox.selected;
             _filterDefinition.minimumRole = int(roleComboBox.selectedItem.data);
+            _filterDefinition.fieldChoiceFilterLabel = fieldFilterInput.text;
+            _filterDefinition.section = sectionInput.value;
             dispatchEvent(new FilterEditEvent(_filterDefinition, previousDefinition, null, rebuild));
             PopUpManager.removePopUp(this);
         }
@@ -139,6 +143,12 @@
 
         [Bindable]
         private var parentNames:String;
+
+        [Bindable]
+        private var fieldFilter:String;
+
+        [Bindable]
+        private var section:int;
 		]]>
 	</mx:Script>
 	<mx:VBox id="coreBox">
@@ -158,6 +168,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="Parent Filter Names:">
                     <mx:TextInput id="parentNamesInput" text="{parentNames}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Section:">
+                    <mx:NumericStepper id="sectionInput" value="{section}"/>
                 </mx:FormItem>
             </mx:Form>
             <mx:Form>
@@ -183,6 +196,9 @@
                             </mx:ArrayCollection>
                         </util:dataProvider>
                     </util:SmartComboBox>
+                </mx:FormItem>
+                <mx:FormItem label="Use Field Choice Filter:">
+                    <mx:TextInput id="fieldFilterInput" text="{fieldFilter}"/>
                 </mx:FormItem>
             </mx:Form>
         </mx:HBox>

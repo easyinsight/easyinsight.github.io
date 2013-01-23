@@ -15,6 +15,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.StandardReportPipeline;
+import flex.messaging.FlexContext;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,6 +65,16 @@ public class DataService {
             if (report != null) {
                 insightRequestMetadata.setJoinOverrides(report.getJoinOverrides());
                 insightRequestMetadata.setTraverseAllJoins(report.isFullJoins());
+
+                if (requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
+                    String label = requester.getFieldChoiceFilterLabel();
+                    for (FilterDefinition testFilter : report.getFilterDefinitions()) {
+                        if (label.equals(testFilter.getFilterName()) && testFilter.type() == FilterDefinition.ANALYSIS_ITEM) {
+                            AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) testFilter;
+                            analysisItem = analysisItemFilterDefinition.getTargetItem();
+                        }
+                    }
+                }
             }
             timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed);
             return feed.getMetadata(analysisItem, insightRequestMetadata, conn, report, additionalFilters, requester);
@@ -419,6 +430,7 @@ public class DataService {
                                                         InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters, EIConnection conn) throws Exception {
         ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
         DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
+        analysisDefinition.untweakReport(null);
         EmbeddedResults embeddedResults = results.toEmbeddedResults();
         embeddedResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
         embeddedResults.setDefinition(analysisDefinition);
@@ -1222,6 +1234,10 @@ public class DataService {
         }
         EIConnection conn = Database.instance().getConnection();
         try {
+            if (FlexContext.getHttpRequest() != null) {
+                String ip = FlexContext.getHttpRequest().getRemoteAddr();
+                System.out.println(ip);
+            }
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
@@ -1327,8 +1343,18 @@ public class DataService {
             analysisDefinition.getFilterDefinitions().addAll(dlsFilters);
 
             for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                if (filter.getFieldChoiceFilterLabel() != null && !"".equals(filter.getFieldChoiceFilterLabel())) {
+                    String label = filter.getFieldChoiceFilterLabel();
+                    for (FilterDefinition testFilter : analysisDefinition.getFilterDefinitions()) {
+                        if (label.equals(testFilter.getFilterName()) && testFilter.type() == FilterDefinition.ANALYSIS_ITEM) {
+                            AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) testFilter;
+                            filter.setField(analysisItemFilterDefinition.getTargetItem());
+                        }
+                    }
+                }
                 if (filter instanceof AnalysisItemFilterDefinition) {
                     AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
+
                     Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
                     Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);
                     for (Map.Entry<String, AnalysisItem> entry : structureCopy.entrySet()) {
@@ -1353,24 +1379,10 @@ public class DataService {
                 allFields.addAll(analysisDefinition.getAddedItems());
             }
 
-            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : allFields) {
-                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), items);
-                }
-                items.add(analysisItem);
-            }
-            for (AnalysisItem analysisItem : allFields) {
-                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    displayMap.put(analysisItem.toDisplay(), items);
-                }
-                items.add(analysisItem);
-            }
+            KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields);
+            Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
+            Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
+
 
             if (analysisDefinition.getMarmotScript() != null) {
                 StringTokenizer toker = new StringTokenizer(analysisDefinition.getMarmotScript(), "\r\n");
