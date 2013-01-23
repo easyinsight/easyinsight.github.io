@@ -37,6 +37,7 @@ import mx.formatters.Formatter;
         public var labelColumn:Boolean;
         public var fromField:AnalysisItem;
         public var kpi:Boolean;
+        public var fieldType:int;
 		
 		public function AnalysisItem() {
 			super();
