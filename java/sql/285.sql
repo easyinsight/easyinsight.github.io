@@ -1,5 +1,5 @@
 alter table analysis_item add kpi tinyint(4) not null default 0;
-create index analysis_item_idx_kpi on analysis (kpi);
+create index analysis_item_idx_kpi on analysis_item (kpi);
 alter table data_feed add kpi_source tinyint(4) not null default 0;
 create index data_feed_idx_kpi on data_feed (kpi_source);
 
