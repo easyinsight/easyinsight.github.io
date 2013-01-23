@@ -117,7 +117,11 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
 
             ClientConnectionManager mgr = initClient.getConnectionManager();
             HttpParams params = initClient.getParams();
-            final DefaultHttpClient client = new DefaultHttpClient(new ThreadSafeClientConnManager(params, mgr.getSchemeRegistry()), params);
+            ThreadSafeClientConnManager manager = new ThreadSafeClientConnManager(params, mgr.getSchemeRegistry());
+            manager.setMaxTotal(10);
+            manager.setDefaultMaxPerRoute(10);
+
+            final DefaultHttpClient client = new DefaultHttpClient(manager, params);
 
             for (final Campaign campaign : campaigns) {
                 tpe.execute(new Runnable() {
