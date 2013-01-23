@@ -582,3 +582,8 @@ TransformContainer {
     fontSize: 14;
     fontWeight: normal;
 }
+
+.chartAxis {
+    fontColor: #101010;
+    fontWeight: bold;
+}
