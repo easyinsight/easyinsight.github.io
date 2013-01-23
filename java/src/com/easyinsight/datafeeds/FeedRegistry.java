@@ -60,7 +60,7 @@ public class FeedRegistry {
                 LogClass.debug("Cache miss for feed id: " + identifier);
                 FeedDefinition feedDefinition;
                 feedDefinition = feedStorage.getFeedDefinitionData(identifier, conn);
-                feed = feedDefinition.createFeed();
+                feed = feedDefinition.createFeed(conn);
                 feed.setVersion(getLatestVersion(identifier, conn));
                 try {
                     if(cache != null)
@@ -90,7 +90,7 @@ public class FeedRegistry {
                 LogClass.debug("Cache miss for feed id: " + identifier);
                 FeedDefinition feedDefinition;
                 feedDefinition = feedStorage.getFeedDefinitionData(identifier, conn);
-                feed = feedDefinition.createFeed();
+                feed = feedDefinition.createFeed(conn);
                 feed.setVersion(getLatestVersion(identifier, conn));
                 try {
                     if(cache != null)

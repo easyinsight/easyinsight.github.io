@@ -1175,7 +1175,6 @@ public class AnalysisService {
     }
 
     public AnalysisItem cloneItem(AnalysisItem analysisItem) {
-        System.out.println("WHYYYYYYYYYYYY");
         try {
             AnalysisItem copy = analysisItem.clone();
             if (copy instanceof AnalysisHierarchyItem ||
@@ -1401,22 +1400,9 @@ public class AnalysisService {
                 tree = (CalculationTreeNode) ret.getTree();
 
                 if (allItems != null) {
-                    for (AnalysisItem analysisItem : allItems) {
-                        List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                        if (items == null) {
-                            items = new ArrayList<AnalysisItem>(1);
-                            keyMap.put(analysisItem.getKey().toKeyString(), items);
-                        }
-                        items.add(analysisItem);
-                    }
-                    for (AnalysisItem analysisItem : allItems) {
-                        List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                        if (items == null) {
-                            items = new ArrayList<AnalysisItem>(1);
-                            displayMap.put(analysisItem.toDisplay(), items);
-                        }
-                        items.add(analysisItem);
-                    }
+                    KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
+                    keyMap = mapper.getKeyMap();
+                    displayMap = mapper.getDisplayMap();
                 }
                 if (report != null && report.getFilterDefinitions() != null) {
                     for (FilterDefinition filter : report.getFilterDefinitions()) {

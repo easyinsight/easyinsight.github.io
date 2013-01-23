@@ -112,26 +112,13 @@ public class AnalysisCalculation extends AnalysisMeasure {
     private transient Set<KeySpecification> specs;*/
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
+
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
         Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
         if (allItems != null) {
-            for (AnalysisItem analysisItem : allItems) {
-                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), items);
-                }
-                items.add(analysisItem);
-            }
-
-            for (AnalysisItem analysisItem : allItems) {
-                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    displayMap.put(analysisItem.toDisplay(), items);
-                }
-                items.add(analysisItem);
-            }
+            KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
+            keyMap = mapper.getKeyMap();
+            displayMap = mapper.getDisplayMap();
 
             for (FilterDefinition filter : structure.getFilters()) {
                 filter.calculationItems(displayMap);

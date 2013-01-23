@@ -179,12 +179,11 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
     }
 
-    protected void loadKPIs(List<AnalysisItem> kpis) {
+    protected void loadKPIs(List<AnalysisItem> kpis, EIConnection conn) {
         if (!getFeedType().equals(FeedType.COMPOSITE)) {
-            super.loadKPIs(kpis);
+            super.loadKPIs(kpis, conn);
             return;
         }
-        EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             for (CompositeFeedNode node : compositeFeedNodes) {
@@ -207,7 +206,6 @@ public class CompositeFeedDefinition extends FeedDefinition {
             LogClass.error(e);
         } finally {
             session.close();
-            Database.closeConnection(conn);
         }
     }
 

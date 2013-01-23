@@ -345,11 +345,11 @@ public class FeedDefinition implements Cloneable, Serializable {
         return new HashMap<String, String>();
     }
 
-    public Feed createFeed() {
+    public Feed createFeed(EIConnection conn) {
         FeedDefinition parentSource = null; 
         if (getParentSourceID() > 0) {
             try {
-                parentSource = new FeedStorage().getFeedDefinitionData(getParentSourceID());
+                parentSource = new FeedStorage().getFeedDefinitionData(getParentSourceID(), conn);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -358,7 +358,7 @@ public class FeedDefinition implements Cloneable, Serializable {
 
         List<AnalysisItem> kpis = new ArrayList<AnalysisItem>();
         if (!isKpiSource()) {
-            loadKPIs(kpis);
+            loadKPIs(kpis, conn);
         }
         feed.setDataSource(this);
         feed.setFeedID(getDataFeedID());
@@ -374,8 +374,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return feed;
     }
 
-    protected void loadKPIs(List<AnalysisItem> kpis) {
-        EIConnection conn = Database.instance().getConnection();
+    protected void loadKPIs(List<AnalysisItem> kpis, EIConnection conn) {
         Session session = Database.instance().createSession(conn);
         try {
             PreparedStatement query = conn.prepareStatement("SELECT ANALYSIS_ITEM.ANALYSIS_ITEM_ID FROM ANALYSIS_ITEM, FEED_TO_ANALYSIS_ITEM, DATA_FEED WHERE " +
@@ -394,7 +393,6 @@ public class FeedDefinition implements Cloneable, Serializable {
             LogClass.error(e);
         } finally {
             session.close();
-            Database.closeConnection(conn);
         }
     }
 
@@ -412,6 +410,8 @@ public class FeedDefinition implements Cloneable, Serializable {
                 replacementMap.put(field.getAnalysisItemID(), clone);
                 if (!isKpiSource()) {
                     if (field.isKpi()) {
+                        clone.setKpi(false);
+                        clone.setFieldType(AnalysisItem.ORDER_KPI);
                         Key key = null;
                         AnalysisItem dataSourceItem = findAnalysisItemByDisplayName(clone.toDisplay());
                         if (dataSourceItem != null) {
@@ -505,7 +505,6 @@ public class FeedDefinition implements Cloneable, Serializable {
             kpiFolder.setName("KPIs");
             for (AnalysisItem kpi : kpis) {
                 AnalysisItem targetKPI = replacementMap.remove(kpi.getAnalysisItemID());
-                targetKPI.setKpi(false);
                 kpiFolder.addAnalysisItem(targetKPI);
             }
             feedNodes.add(kpiFolder.toFeedNode());

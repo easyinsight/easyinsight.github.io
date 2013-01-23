@@ -29,6 +29,12 @@ import org.hibernate.proxy.HibernateProxy;
 @Table(name="analysis_item")
 @Inheritance(strategy=InheritanceType.JOINED)
 public abstract class AnalysisItem implements Cloneable, Serializable {
+
+    public static final int ORDER_DEFAULT = 0;
+    public static final int ORDER_REPORT_LEVEL = 1;
+    public static final int ORDER_DATA_SOURCE_LEVEL = 2;
+    public static final int ORDER_KPI = 3;
+
     // if we fold out key into its own class...
 
     @OneToOne (fetch = FetchType.LAZY)
@@ -123,6 +129,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="kpi")
     private boolean kpi;
 
+    @Column(name="field_type")
+    private int fieldType;
+
     /*@Transient
     private transient Set<String> pipelineSections;*/
 
@@ -140,6 +149,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public int getFieldType() {
+        return fieldType;
+    }
+
+    public void setFieldType(int fieldType) {
+        this.fieldType = fieldType;
     }
 
     public long getDataSourceID() {

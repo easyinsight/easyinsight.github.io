@@ -6,10 +6,7 @@ import com.easyinsight.security.SecurityUtil;
 import nu.xom.Attribute;
 import nu.xom.Element;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Column;
+import javax.persistence.*;
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -34,12 +31,23 @@ public class AnalysisDateDimension extends AnalysisDimension {
     @Column(name="output_date_format")
     private String outputDateFormat;
 
+    @Transient
+    private transient int revertDateLevel;
+
     @Column(name="date_time_field")
     private boolean dateOnlyField = false;
 
     @Override
     public int actualType() {
         return AnalysisItemTypes.DATE_DIMENSION;
+    }
+
+    public int getRevertDateLevel() {
+        return revertDateLevel;
+    }
+
+    public void setRevertDateLevel(int revertDateLevel) {
+        this.revertDateLevel = revertDateLevel;
     }
 
     @Override

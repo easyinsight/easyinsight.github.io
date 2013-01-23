@@ -84,23 +84,9 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
             tree = (CalculationTreeNode) ret.getTree();
 
             if (allItems != null) {
-                for (AnalysisItem analysisItem : allItems) {
-                    List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                    if (items == null) {
-                        items = new ArrayList<AnalysisItem>(1);
-                        keyMap.put(analysisItem.getKey().toKeyString(), items);
-                    }
-                    items.add(analysisItem);
-                }
-
-                for (AnalysisItem analysisItem : allItems) {
-                    List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                    if (items == null) {
-                        items = new ArrayList<AnalysisItem>(1);
-                        displayMap.put(analysisItem.toDisplay(), items);
-                    }
-                    items.add(analysisItem);
-                }
+                KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
+                keyMap = mapper.getKeyMap();
+                displayMap = mapper.getDisplayMap();
             }
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
             tree.accept(visitor);

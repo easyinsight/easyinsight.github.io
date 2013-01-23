@@ -180,6 +180,64 @@ public class ReportCalculation {
         return compositeCalculationMetadata.getJoins();
     }
 
+    public static List<PostProcessOperation> processOperations(Collection<AnalysisItem> analysisItems, long dataSourceID,
+                                                               Collection<AnalysisItem> dataSourceFields, EIConnection conn) throws RecognitionException {
+        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+        for (AnalysisItem analysisItem : dataSourceFields) {
+            List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+            if (items == null) {
+                items = new ArrayList<AnalysisItem>(1);
+                keyMap.put(analysisItem.getKey().toKeyString(), items);
+            }
+            items.add(analysisItem);
+        }
+        for (AnalysisItem analysisItem : dataSourceFields) {
+            List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
+            if (items == null) {
+                items = new ArrayList<AnalysisItem>(1);
+                displayMap.put(analysisItem.toDisplay(), items);
+            }
+            items.add(analysisItem);
+        }
+        List<PostProcessOperation> ops = new ArrayList<PostProcessOperation>();
+        for (AnalysisItem analysisItem : analysisItems) {
+            if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+            DerivedAnalysisDimension derivedAnalysisDimension = (DerivedAnalysisDimension) analysisItem;
+            if (derivedAnalysisDimension.getDerivationCode().contains("loadfromjoin")) {
+                PostProcessCalculationMetadata metadata = new PostProcessCalculationMetadata();
+                metadata.setConnection(conn);
+                metadata.setDataSourceID(dataSourceID);
+                metadata.setDataSourceFields(dataSourceFields);
+                PostProcessOperation op = new PostProcessOperation();
+                ops.add(op);
+                metadata.setOp(op);
+                op.setTarget(analysisItem);
+                ICalculationTreeVisitor visitor;
+                CalculationsParser.expr_return ret;
+                CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(derivedAnalysisDimension.getDerivationCode()));
+                CommonTokenStream tokes = new CommonTokenStream();
+                tokes.setTokenSource(lexer);
+                CalculationsParser parser = new CalculationsParser(tokes);
+                parser.setTreeAdaptor(new NodeFactory());
+                ret = parser.expr();
+                CalculationTreeNode calculationTreeNode = (CalculationTreeNode) ret.getTree();
+                for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
+                    if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
+                        calculationTreeNode.deleteChild(i);
+                        break;
+                    }
+                }
+                visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+                calculationTreeNode.accept(visitor);
+                ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, metadata);
+                calculationTreeNode.accept(rowVisitor);
+            }
+            }
+        }
+        return ops;
+    }
+
     public List<FilterDefinition> apply(Map<String, Object> data, List<AnalysisItem> analysisItems, WSAnalysisDefinition report,
                                         AnalysisItem field) throws RecognitionException, SQLException {
         DrillthroughCalculationMetadata drillthroughCalculationMetadata = new DrillthroughCalculationMetadata();
