@@ -609,5 +609,6 @@ TransformContainer {
 
 .chartAxis {
     fontColor: #101010;
+    font-family: 'Helvetica Neue';
     fontWeight: bold;
 }
