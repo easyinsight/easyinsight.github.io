@@ -23,6 +23,15 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     private boolean useInsideLabelFontColor;
     private int labelFontSize;
     private String labelFontWeight;
+    private List<MultiColor> multiColors = new ArrayList<MultiColor>();
+
+    public List<MultiColor> getMultiColors() {
+        return multiColors;
+    }
+
+    public void setMultiColors(List<MultiColor> multiColors) {
+        this.multiColors = multiColors;
+    }
 
     public int getLabelFontSize() {
         return labelFontSize;
@@ -115,6 +124,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         labelPosition = findStringProperty(properties, "labelPosition", "none");
         labelInsideFontColor = (int) findNumberProperty(properties, "labelInsideFontColor", 0);
         useInsideLabelFontColor = findBooleanProperty(properties, "useInsideLabelFontColor", false);
+        multiColors = multiColorProperty(properties, "multiColors");
     }
 
     @Override
@@ -128,6 +138,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         properties.add(new ReportStringProperty("labelPosition", labelPosition));
         properties.add(new ReportBooleanProperty("useInsideLabelFontColor", useInsideLabelFontColor));
         properties.add(new ReportNumericProperty("labelInsideFontColor", labelInsideFontColor));
+        properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         return properties;
     }
 

@@ -1,6 +1,8 @@
 package com.easyinsight.analysis {
 import com.easyinsight.analysis.charts.ChartTypes;
 
+import mx.charts.chartClasses.ChartBase;
+
 import mx.collections.ArrayCollection;
 
 [Bindable]
@@ -32,6 +34,18 @@ public class ChartDefinition extends AnalysisDefinition {
     public function ChartDefinition() {
         chartType = getChartType();
         chartFamily = getChartFamily();
+    }
+
+    public function styleChart(chart:ChartBase):void {
+        chart.setStyle("fontFamily", "Helvetica Neue");
+        chart.setStyle("fontWeight", "normal");
+        chart.setStyle("fontSize", fontSize);
+        chart.setStyle("fontGridFitType", "subpixel");
+        chart.setStyle("fontSharpess", -16);
+        chart.setStyle("fontAntiAliasType", "advanced");
+        chart.setStyle("fontThickness", 20);
+        chart.setStyle("color", 0x333333);
+        chart.setStyle("axisTitleStyleName", "chartAxis");
     }
 
     override public function fromSave(savedDef:AnalysisDefinition):void {

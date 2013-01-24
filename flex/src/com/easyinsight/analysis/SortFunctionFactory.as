@@ -8,7 +8,7 @@ public class SortFunctionFactory {
     public function SortFunctionFactory() {
     }
     
-    public static function createSortFunction(myHeader:AnalysisItem, sortDescending:Boolean, column:AdvancedDataGridColumn = null):Function {
+    public static function createSortFunction(myHeader:AnalysisItem, sortDescending:Boolean, advancedSort:Boolean = false, column:AdvancedDataGridColumn = null):Function {
             return function(obj1:Object, obj2:Object, fields:Array = null):int {
 
                 var value1:Value;
@@ -138,9 +138,9 @@ public class SortFunctionFactory {
                         }
                     }
                     if (number1 < number2) {
-                        return -1;
+                        return -1 * (advancedSort ? (sortDescending ? -1 : 1) : 1);
                     } else if (number1 > number2) {
-                        return 1;
+                        return 1 * (advancedSort ? (sortDescending ? -1 : 1) : 1);
                     } else {
                         return 0;
                     }
@@ -148,16 +148,16 @@ public class SortFunctionFactory {
                 if (value1.toSortValue().type() == Value.STRING && value2.toSortValue().type() == Value.STRING) {
                     var string1:String = value1.toSortValue().toString();
                     var string2:String = value2.toSortValue().toString();
-                    return ObjectUtil.stringCompare(string1, string2, true);
+                    return ObjectUtil.stringCompare(string1, string2, true) * (advancedSort ? (sortDescending ? -1 : 1) : 1);
                 }
                 if (value1.toSortValue().type() == Value.DATE && value2.toSortValue().type() == Value.DATE) {
                     var date1:Date = value1.toSortValue().toDate();
                     var date2:Date = value2.toSortValue().toDate();
-                    return ObjectUtil.dateCompare(date1, date2);
+                    return ObjectUtil.dateCompare(date1, date2) * (advancedSort ? (sortDescending ? -1 : 1) : 1);
                 }
                 var strCopy1:String = String(value1.toSortValue().getValue());
                 var strCopy2:String = String(value2.toSortValue().getValue());
-                return ObjectUtil.stringCompare(strCopy1, strCopy2, true);
+                return ObjectUtil.stringCompare(strCopy1, strCopy2, true) * (advancedSort ? (sortDescending ? -1 : 1) : 1);
                 //return Number(value1.getValue()) - Number(value2.getValue());
             };
         }

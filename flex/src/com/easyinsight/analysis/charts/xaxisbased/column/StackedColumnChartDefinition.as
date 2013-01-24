@@ -27,6 +27,8 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
     public var useInsideLabelFontColor:Boolean = true;
     public var labelFontSize:int = 12;
     public var labelFontWeight:String = "none";
+    public var legendMaxWidth:int = 200;
+    public var multiColors:ArrayCollection = new ArrayCollection();
 
     public function StackedColumnChartDefinition() {
         super();
@@ -70,7 +72,7 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
         for (var i:int = 0; i < dataSet.length; i++) {
             var object:Object = dataSet.getItemAt(i);
             var xValVal:Value = object[xaxis.qualifiedName()];
-            var xVal:String = xValVal.toString();
+            var xVal:String = xaxis.getFormatter().format(xValVal.getValue());
             if (xVal == null ||
                     xVal == "") {
                 xVal = "(No Value)";
@@ -89,7 +91,7 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
                 results.addItem(newObject);
             }
             var stackVal:Value = object[stackItem.qualifiedName()];
-            var dimensionValue:String = stackVal.toString();
+            var dimensionValue:String = stackItem.getFormatter().format(stackVal.getValue());
             if (dimensionValue == null || dimensionValue == "") {
                 dimensionValue = "(No Value)";
             }

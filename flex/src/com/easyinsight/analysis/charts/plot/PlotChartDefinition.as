@@ -12,6 +12,8 @@ public class PlotChartDefinition extends ChartDefinition{
     public var iconGrouping:AnalysisItem;
     public var xaxisMeasure:AnalysisItem;
     public var yaxisMeasure:AnalysisItem;
+    public var showLabels:Boolean;
+    public var briefLabels:Boolean;
 
     public function PlotChartDefinition() {
         super();

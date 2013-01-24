@@ -29,10 +29,12 @@
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.Link;
         import com.easyinsight.analysis.charts.ChartUtil;
+        import com.easyinsight.analysis.charts.EIDataTip;
         import com.easyinsight.filtering.FilterRawData;
 
         import mx.charts.ChartItem;
         import mx.charts.chartClasses.CartesianTransform;
+        import mx.charts.chartClasses.DataTip;
         import mx.charts.chartClasses.DataTransform;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
@@ -73,6 +75,8 @@
 
         private var plotChartDef:PlotChartDefinition;
 
+        private var briefLabels:Boolean;
+
         protected function formatDataTip(hd:HitData):String {
             var dt:String = "";
             var columnSeriesItem:PlotSeriesItem = hd.chartItem as PlotSeriesItem;
@@ -80,13 +84,13 @@
             var n:String = series.displayName;
             if (n != null && n.length > 0)
                 dt += "<b>" + hd.item[plotChartDef.dimension.qualifiedName()] + "</b><BR/>";
-
+            if (!briefLabels) {
                 dt += "<i>" + plotChartDef.xaxisMeasure.display + ":</i> ";
-            dt += measure1Formatter.format(PlotSeriesItem(hd.chartItem).xValue) + "\n";
+                dt += measure1Formatter.format(PlotSeriesItem(hd.chartItem).xValue) + "\n";
 
                 dt += "<i>" + plotChartDef.yaxisMeasure.display + ":</i> ";
-            dt += measure2Formatter.format(PlotSeriesItem(hd.chartItem).yValue) + "\n";
-
+                dt += measure2Formatter.format(PlotSeriesItem(hd.chartItem).yValue) + "\n";
+            }
             return dt;
         }
 
@@ -95,11 +99,11 @@
             var seriesMap:Object = new Object();
             if (dataSet.length > 0) {
                 coreBox.setStyle("backgroundAlpha", plotChartDef.backgroundAlpha);
-                plotChart.setStyle("fontFamily", plotChartDef.getFont());
                 if (additionalProperties != null) {
                     var correlation:Number = additionalProperties.correlation;
                 }
                 this.correlation = new NumberFormatter().format(correlation);
+                plotChartDef.styleChart(plotChart);
                 measure1 = plotChartDef.xaxisMeasure.qualifiedName();
                 measure1Name = plotChartDef.xaxisMeasure.display;
                 measure2 = plotChartDef.yaxisMeasure.qualifiedName();
@@ -108,6 +112,7 @@
                 measure2Formatter = plotChartDef.yaxisMeasure.getFormatter();
                 dimension = plotChartDef.dimension.qualifiedName();
                 dimensionItem = plotChartDef.dimension;
+                briefLabels = plotChartDef.briefLabels;
                 this.defaultLink = ChartUtil.setup(plotChartDef.dimension, plotChart, onChartClick);
                 if (plotChartDef.iconGrouping != null) {
                     // if an icon grouping is defined, we need to break out items by
@@ -143,6 +148,15 @@
                     defaultSeries.displayName = plotChartDef.dimension.display;
                     plotChart.series = [ defaultSeries ];
                     currentState = "";
+                }
+                if (plotChartDef.showLabels) {
+                    plotChart.setStyle("dataTipRenderer", EIDataTip);
+                    plotChart.showAllDataTips = true;
+                    plotChart.showDataTips = false;
+                } else {
+                    plotChart.setStyle("dataTipRenderer", DataTip);
+                    plotChart.showAllDataTips = false;
+                    plotChart.showDataTips = true;
                 }
             }
             graphData = dataSet;

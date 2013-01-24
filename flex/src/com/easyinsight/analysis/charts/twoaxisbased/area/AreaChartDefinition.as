@@ -12,6 +12,9 @@ public class AreaChartDefinition extends TwoAxisDefinition{
 
     public var stackingType:String = "stacked";
 
+    public var legendMaxWidth:int = 200;
+
+    public var multiColors:ArrayCollection = new ArrayCollection();
 
     public function AreaChartDefinition() {
         super();

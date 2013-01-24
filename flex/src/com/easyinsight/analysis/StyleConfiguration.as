@@ -8,6 +8,7 @@
 package com.easyinsight.analysis {
 
 import com.easyinsight.analysis.charts.bubble.BubbleChartDefinition;
+import com.easyinsight.analysis.charts.plot.PlotChartDefinition;
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
 import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartDefinition;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartDefinition;
@@ -211,12 +212,16 @@ public class StyleConfiguration {
                     report, ["true", "false"]));
             items.addItem(new ComboBoxReportFormItem("Stacking Type", "stackingType", AreaChartDefinition(report).stackingType,
                 report, ["overlaid", "stacked", "100%"]));
+            items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", AreaChartDefinition(report).legendMaxWidth, report, 10, 400));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", AreaChartDefinition(report).multiColors, report));
         }
         if (report is PieChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", PieChartDefinition(report).colorScheme,
                     report, [FillProvider.radialGradients, FillProvider.highContrast]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", PieChartDefinition(report).labelPosition,
                     report, ["callout", "insideWithCallout", "inside", "outside", "none"]));
+            items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", PieChartDefinition(report).legendMaxWidth, report, 10, 400));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", PieChartDefinition(report).multiColors, report));
         }
         if (report is BarChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", BarChartDefinition(report).colorScheme,
@@ -273,6 +278,8 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Label Font Weight", "labelFontWeight", StackedBarChartDefinition(report).labelFontWeight, report,
                     ["none", "bold"]));
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", StackedBarChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
+            items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", StackedBarChartDefinition(report).legendMaxWidth, report, 10, 400));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", StackedBarChartDefinition(report).multiColors, report));
 
         }
         if (report is StackedColumnChartDefinition) {
@@ -289,6 +296,8 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Label Font Weight", "labelFontWeight", StackedColumnChartDefinition(report).labelFontWeight, report,
                     ["none", "bold"]));
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", StackedColumnChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
+            items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", StackedColumnChartDefinition(report).legendMaxWidth, report, 10, 400));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", StackedColumnChartDefinition(report).multiColors, report));
         }
         if (report is FormReport) {
             items.addItem(new ComboBoxReportFormItem("Label Font Name", "labelFont", FormReport(report).labelFont, report, ["Arial", "Arial Black", "Comic Sans MS",
@@ -316,6 +325,10 @@ public class StyleConfiguration {
         }
         if (report is BubbleChartDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show Labels", "showLabels", BubbleChartDefinition(report).showLabels, report));
+        }
+        if (report is PlotChartDefinition) {
+            items.addItem(new CheckBoxReportFormItem("Show Labels", "showLabels", PlotChartDefinition(report).showLabels, report));
+            items.addItem(new CheckBoxReportFormItem("Brief Labels", "briefLabels", PlotChartDefinition(report).briefLabels, report));
         }
         if (report is TrendDefinition) {
             items.addItem(new NumericReportFormItem("Major Font Size", "majorFontSize", TrendDefinition(report).majorFontSize, report, 8, 48));

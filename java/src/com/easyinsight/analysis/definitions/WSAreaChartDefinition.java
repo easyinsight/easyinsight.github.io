@@ -1,10 +1,12 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import flex.messaging.io.ArrayCollection;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,8 @@ import java.util.Map;
 public class WSAreaChartDefinition extends WSTwoAxisDefinition {
 
     private String stackingType = "stacked";
+    private List<MultiColor> multiColors = new ArrayList<MultiColor>();
+    private int legendMaxWidth;
 
     public String getStackingType() {
         return stackingType;
@@ -24,6 +28,22 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
 
     public void setStackingType(String stackingType) {
         this.stackingType = stackingType;
+    }
+
+    public List<MultiColor> getMultiColors() {
+        return multiColors;
+    }
+
+    public void setMultiColors(List<MultiColor> multiColors) {
+        this.multiColors = multiColors;
+    }
+
+    public int getLegendMaxWidth() {
+        return legendMaxWidth;
+    }
+
+    public void setLegendMaxWidth(int legendMaxWidth) {
+        this.legendMaxWidth = legendMaxWidth;
     }
 
     public int getChartType() {
@@ -38,12 +58,17 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         stackingType = findStringProperty(properties, "stackingType", "stacked");
+        multiColors = multiColorProperty(properties, "multiColors");
+        legendMaxWidth = (int) findNumberProperty(properties, "legendMaxWidth", 200);
+
     }
 
     @Override
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportStringProperty("stackingType", stackingType));
+        properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
+        properties.add(new ReportNumericProperty("legendMaxWidth", legendMaxWidth));
         return properties;
     }
 

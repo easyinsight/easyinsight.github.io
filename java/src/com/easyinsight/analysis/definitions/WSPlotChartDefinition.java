@@ -1,9 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.HTMLReportMetadata;
-import com.easyinsight.analysis.WSChartDefinition;
-import com.easyinsight.analysis.ChartDefinitionState;
+import com.easyinsight.analysis.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,6 +16,24 @@ public class WSPlotChartDefinition extends WSChartDefinition {
     private AnalysisItem iconGrouping;
     private AnalysisItem xaxisMeasure;
     private AnalysisItem yaxisMeasure;
+    private boolean briefLabels;
+    private boolean showLabels;
+
+    public boolean isBriefLabels() {
+        return briefLabels;
+    }
+
+    public void setBriefLabels(boolean briefLabels) {
+        this.briefLabels = briefLabels;
+    }
+
+    public boolean isShowLabels() {
+        return showLabels;
+    }
+
+    public void setShowLabels(boolean showLabels) {
+        this.showLabels = showLabels;
+    }
 
     private boolean calculateCorrelation;
 
@@ -60,6 +75,21 @@ public class WSPlotChartDefinition extends WSChartDefinition {
 
     public void setDimension(AnalysisItem dimension) {
         this.dimension = dimension;
+    }
+
+    @Override
+    public void populateProperties(List<ReportProperty> properties) {
+        super.populateProperties(properties);
+        showLabels = findBooleanProperty(properties, "showLabels", true);
+        briefLabels = findBooleanProperty(properties, "briefLabels", true);
+    }
+
+    @Override
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportBooleanProperty("showLabels", showLabels));
+        properties.add(new ReportBooleanProperty("briefLabels", briefLabels));
+        return properties;
     }
 
     public void createReportStructure(Map<String, AnalysisItem> structure) {

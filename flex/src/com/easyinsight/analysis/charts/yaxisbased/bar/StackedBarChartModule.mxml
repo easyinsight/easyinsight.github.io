@@ -18,6 +18,7 @@
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.Link;
+        import com.easyinsight.analysis.MultiColor;
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.EILegend;
@@ -48,6 +49,7 @@
         import mx.events.FlexEvent;
         import mx.formatters.Formatter;
         import mx.graphics.IFill;
+        import mx.graphics.SolidColor;
 
         [Bindable]
         private var graphData:ArrayCollection = new ArrayCollection();
@@ -201,10 +203,22 @@
                 yField = barChartDef.yaxis.qualifiedName();
                 createChart();
 
-                barChart.setStyle("fontFamily", "Lucida Grande");
-                barChart.setStyle("fontSize", barChartDef.fontSize);
+                barChartDef.styleChart(barChart);
+                legend.maxWidth = barChartDef.legendMaxWidth;
 
-
+                var useCustomColors:Boolean;
+                var colors:Array;
+                useCustomColors = (barChartDef.multiColors != null && barChartDef.multiColors.length && MultiColor(barChartDef.multiColors.getItemAt(0)).color1StartEnabled);
+                if (useCustomColors) {
+                    colors = [];
+                    for each (var mc:MultiColor in barChartDef.multiColors) {
+                        if (mc.color1StartEnabled) {
+                            colors.push(new SolidColor(mc.color1Start));
+                        }
+                    }
+                } else {
+                    colors = FillProvider.createLinearGradients(90);
+                }
 
                 var mySeries:Array = new Array();
 

@@ -24,6 +24,8 @@ public class StackedBarChartDefinition extends YAxisDefinition{
     public var useInsideLabelFontColor:Boolean = true;
     public var labelFontSize:int = 12;
     public var labelFontWeight:String = "none";
+    public var legendMaxWidth:int = 200;
+    public var multiColors:ArrayCollection = new ArrayCollection();
 
     public function StackedBarChartDefinition() {
         super();
@@ -67,7 +69,7 @@ public class StackedBarChartDefinition extends YAxisDefinition{
         for (var i:int = 0; i < dataSet.length; i++) {
             var object:Object = dataSet.getItemAt(i);
             var xValVal:Value = object[yaxis.qualifiedName()];
-            var xVal:String = xValVal.toString();
+            var xVal:String = yaxis.getFormatter().format(xValVal.getValue());
             if (xVal == null ||
                     xVal == "") {
                 xVal = "(No Value)";
@@ -80,7 +82,7 @@ public class StackedBarChartDefinition extends YAxisDefinition{
                 results.addItem(newObject);
             }
             var stackVal:Value = object[stackItem.qualifiedName()];
-            var dimensionValue:String = stackVal.toString();
+            var dimensionValue:String = stackItem.getFormatter().format(stackVal.getValue());
             if (dimensionValue == null || dimensionValue == "") {
                 dimensionValue = "(No Value)";
             }

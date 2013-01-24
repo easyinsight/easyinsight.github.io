@@ -28,7 +28,10 @@
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.Link;
+        import com.easyinsight.analysis.MultiColor;
         import com.easyinsight.analysis.charts.ChartUtil;
+
+        import mx.graphics.SolidColor;
 
         //import com.easyinsight.pseudocontext.PseudoContextWindow;
 
@@ -74,17 +77,23 @@
                 pieChart.visible = true;
                 legend.visible = true;
                 labelPosition = pieChartDef.labelPosition;
-                pieChart.setStyle("fontFamily", pieChartDef.getFont());
-                pieChart.setStyle("fontSize", pieChartDef.fontSize);
-                pieSeries.setStyle("fontFamily", pieChartDef.getFont());
-                pieSeries.setStyle("fontSize", pieChartDef.fontSize);
-                if (pieChartDef.colorScheme == FillProvider.radialGradients) {
-                    pieSeries.setStyle("fills", FillProvider.createRadialGradients());
-                } else if (pieChartDef.colorScheme == FillProvider.highContrast) {
-                    pieSeries.setStyle("fills", FillProvider.createSAPColors());
+                pieChartDef.styleChart(pieChart);
+                legend.maxWidth = pieChartDef.legendMaxWidth;
+                var fills:Array = [];
+                var useCustomColors:Boolean;
+                var colors:Array;
+                useCustomColors = (pieChartDef.multiColors != null && pieChartDef.multiColors.length && MultiColor(pieChartDef.multiColors.getItemAt(0)).color1StartEnabled);
+                if (useCustomColors) {
+                    colors = [];
+                    for each (var mc:MultiColor in pieChartDef.multiColors) {
+                        if (mc.color1StartEnabled) {
+                            colors.push(new SolidColor(mc.color1Start));
+                        }
+                    }
                 } else {
-                    pieSeries.setStyle("fills", FillProvider.createRadialGradients());
+                    colors = FillProvider.createRadialGradients();
                 }
+                pieSeries.setStyle("fills", colors);
                 this.defaultLink = ChartUtil.setup(pieChartDef.xaxis, pieChart, onChartClick);
                 this.measureFormatter = pieChartDef.measures.getItemAt(0).getFormatter();
                 measureName = pieChartDef.measures.getItemAt(0).qualifiedName();

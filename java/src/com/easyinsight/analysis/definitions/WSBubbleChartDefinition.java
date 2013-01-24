@@ -17,6 +17,15 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
     private AnalysisItem yaxisMeasure;
     private AnalysisItem zaxisMeasure;
     private boolean showLabels = true;
+    private boolean briefLabels = true;
+
+    public boolean isBriefLabels() {
+        return briefLabels;
+    }
+
+    public void setBriefLabels(boolean briefLabels) {
+        this.briefLabels = briefLabels;
+    }
 
     public boolean isShowLabels() {
         return showLabels;
@@ -62,12 +71,14 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         showLabels = findBooleanProperty(properties, "showLabels", true);
+        briefLabels = findBooleanProperty(properties, "briefLabels", true);
     }
 
     @Override
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportBooleanProperty("showLabels", showLabels));
+        properties.add(new ReportBooleanProperty("briefLabels", briefLabels));
         return properties;
     }
 

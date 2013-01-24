@@ -1,9 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.ChartDefinitionState;
-import com.easyinsight.analysis.HTMLReportMetadata;
-import com.easyinsight.analysis.ReportProperty;
-import com.easyinsight.analysis.ReportStringProperty;
+import com.easyinsight.analysis.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,6 +15,15 @@ import java.util.*;
 public class WSPieChartDefinition extends WSXAxisDefinition {
 
     private String labelPosition;
+    private List<MultiColor> multiColors = new ArrayList<MultiColor>();
+
+    public List<MultiColor> getMultiColors() {
+        return multiColors;
+    }
+
+    public void setMultiColors(List<MultiColor> multiColors) {
+        this.multiColors = multiColors;
+    }
 
     public int getChartType() {
         return ChartDefinitionState.PIE_2D;
@@ -39,12 +45,14 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         labelPosition = findStringProperty(properties, "labelPosition", "outside");
+        multiColors = multiColorProperty(properties, "multiColors");
     }
 
     @Override
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportStringProperty("labelPosition", labelPosition));
+        properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         return properties;
     }
 

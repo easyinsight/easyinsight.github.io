@@ -1,9 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.dataset.DataSet;
-import com.easyinsight.dataset.LimitsResults;
-import flex.messaging.io.ArrayCollection;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +23,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
 
     private boolean showPoints = true;
 
-    private List<MultiColor> multiColors = new ArrayCollection();
+    private List<MultiColor> multiColors = new ArrayList<MultiColor>();
     private int legendMaxWidth;
 
     /*public LimitsResults applyLimits(DataSet dataSet) {

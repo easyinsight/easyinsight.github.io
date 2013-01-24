@@ -51,12 +51,16 @@
             var noTrend:Object = {display: "[ No Trend Measure ] "};
             fields.addItemAt(noTrend, 0);
             rowCount = Math.min(15, dateFields.length);
+            altRowCount = Math.min(15, fields.length);
             this.dateFields = dateFields;
             this.fields = fields;
         }
 
         [Bindable]
         private var rowCount:int;
+
+        [Bindable]
+        private var altRowCount:int;
 
         [Bindable]
         private var highGood:String = "0";
@@ -80,7 +84,7 @@
         </mx:FormItem>
         <mx:FormItem label="Alternate trend field">
             <util:SmartComboBox dataProvider="{fields}" id="altTrendComboBox" labelField="display" selectedValue="{selectedTrend}" selectedProperty="display"
-                                rowCount="{rowCount}"/>
+                                rowCount="{altRowCount}"/>
         </mx:FormItem>
     </mx:Form>
 
