@@ -17,6 +17,30 @@ Application {
     fillColors: #ffffff, #ffffff;
 }
 
+@font-face {
+    src: url("/com/easyinsight/skin/osx/opensans.swf");
+    fontFamily: "Open Sans";
+}
+
+.myFontStyle {
+    font-grid-fit-type: 'subpixel';
+    font-family: 'Open Sans';
+    font-sharpness: -221;
+    font-thickness: 4;
+}
+
+@font-face {
+    src: url("/com/easyinsight/skin/osx/helvetica.swf");
+    fontFamily: "Helvetica Neue";
+}
+
+.helveticaStyle {
+    font-grid-fit-type: 'subpixel';
+    font-family: 'Helvetica Neue';
+    font-sharpness: -16;
+    font-thickness: 20;
+}
+
 Form {
     paddingLeft: 0;
     paddingRight: 0;

@@ -37,13 +37,10 @@ public class ChartDefinition extends AnalysisDefinition {
     }
 
     public function styleChart(chart:ChartBase):void {
-        chart.setStyle("fontFamily", "Helvetica Neue");
+
         chart.setStyle("fontWeight", "normal");
         chart.setStyle("fontSize", fontSize);
-        chart.setStyle("fontGridFitType", "subpixel");
-        chart.setStyle("fontSharpess", -16);
-        chart.setStyle("fontAntiAliasType", "advanced");
-        chart.setStyle("fontThickness", 20);
+        chart.styleName = "helveticaStyle";
         chart.setStyle("color", 0x333333);
         chart.setStyle("axisTitleStyleName", "chartAxis");
     }
