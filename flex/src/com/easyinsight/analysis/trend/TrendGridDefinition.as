@@ -21,6 +21,7 @@ public class TrendGridDefinition extends KPIDefinition {
     public var trendReportID:int;
     public var sortIndex:int = 3;
     public var sortAscending:Boolean = false;
+    public var showKPIName:Boolean = false;
 
     public function TrendGridDefinition() {
     }
