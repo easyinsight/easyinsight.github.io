@@ -6,17 +6,18 @@ import mx.containers.HBox;
 import mx.controls.Label;
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
+import mx.core.UITextField;
+import mx.core.UITextFormat;
 import mx.events.FlexEvent;
 import mx.formatters.Formatter;
 
 public class TrendValueRenderer extends UIComponent implements IListItemRenderer {
 
-    private var valueLabel:Label;
+    private var valueLabel:UITextField;
 
     public function TrendValueRenderer() {
         super();
-        valueLabel = new Label();
-        valueLabel.setStyle("textAlign", "right");
+        valueLabel = new UITextField();
     }
 
 
@@ -33,6 +34,11 @@ public class TrendValueRenderer extends UIComponent implements IListItemRenderer
         if (trendOutcome != null) {
             var formatter:Formatter = trendOutcome.measure.getFormatter();
             valueLabel.text = formatter.format(trendOutcome.now.getValue());
+            valueLabel.validateNow();
+            var tf:UITextFormat = new UITextFormat(this.systemManager);
+            tf.align = "right";
+            valueLabel.setTextFormat(tf);
+            invalidateProperties();
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
         }
     }
@@ -45,7 +51,7 @@ public class TrendValueRenderer extends UIComponent implements IListItemRenderer
         super.updateDisplayList(unscaledWidth, unscaledHeight);
 
         //valueLabel.move(0,8);
-        valueLabel.setActualSize(unscaledWidth, unscaledHeight);
+        valueLabel.setActualSize(unscaledWidth - 5, unscaledHeight);
     }
 }
 }

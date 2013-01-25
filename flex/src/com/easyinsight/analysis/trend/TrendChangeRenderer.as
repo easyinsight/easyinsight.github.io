@@ -46,7 +46,7 @@ public class TrendChangeRenderer extends UIComponent implements IListItemRendere
             var change:Number = (now - previous) / previous * 100;
             valueLabel.text = formatter.format(change);
             valueLabel.validateNow();
-            var tf:UITextFormat = new UITextFormat(this.systemManager, "Lucida Grande");
+            var tf:UITextFormat = new UITextFormat(this.systemManager);
             tf.align = "right";
             valueLabel.setTextFormat(tf);
             invalidateProperties();

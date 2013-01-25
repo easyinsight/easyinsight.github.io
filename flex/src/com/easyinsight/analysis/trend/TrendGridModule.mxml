@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:trend="com.easyinsight.analysis.trend.*"
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:trend="com.easyinsight.analysis.trend.*"
            implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%">
     <mx:states>
         <mx:State name="notConfigured">
@@ -66,7 +66,10 @@
         }
         ]]></mx:Script>
 
-    <mx:Box id="box" verticalScrollPolicy="auto" horizontalScrollPolicy="auto" width="100%" height="100%" horizontalAlign="center">
+    <mx:VBox id="box" verticalScrollPolicy="auto" horizontalScrollPolicy="auto" width="100%" height="100%" horizontalAlign="center">
+
+        <!--<mx:Text fontSize="12" fontSharpness="-249" fontThickness="27" fontAntiAliasType="advanced" fontGridFitType="subpixel" text="Chrome Firefox Safari Internet Explorer" fontFamily="Open Sans" color="0x202020" fontWeight="normal"/>-->
+        <!--<mx:Text fontSize="12" styleName="boldStyle" text="Chrome Firefox Safari Internet Explorer" fontFamily="Open Sans Bold" color="0x202020" fontWeight="bold"/>-->
         <trend:DefaultTrendContent id="defaultContent"/>
-    </mx:Box>
-</mx:Module>
+    </mx:VBox>
+</mx:Canvas>

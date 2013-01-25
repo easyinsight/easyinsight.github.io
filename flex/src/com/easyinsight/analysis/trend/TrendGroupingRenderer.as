@@ -10,6 +10,10 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.TrendOutcome;
 import com.easyinsight.analysis.Value;
 
+import flash.text.AntiAliasType;
+
+import mx.controls.Label;
+
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.Application;
 import mx.core.UIComponent;
@@ -20,16 +24,28 @@ import mx.events.FlexEvent;
 public class TrendGroupingRenderer extends UIComponent implements IListItemRenderer {
 
     private var _grouping:AnalysisItem;
-    private var text:UITextField;
+    private var text:Label;
 
     public function TrendGroupingRenderer() {
         super();
         this.percentWidth = 100;
+        setStyle("color", 0x272727);
     }
 
     override protected function createChildren():void {
         super.createChildren();
-        text = new UITextField();
+        text = new Label();
+        /*
+         setStyle("fontGridFitType", "subpixel");
+         setStyle("fontSharpess", -249);
+         setStyle("fontAntiAliasType", "advanced");
+         setStyle("fontThickness", 27);
+         */
+        /*text.gridFitType = "subpixel";
+        text.embedFonts = true;
+        text.sharpness = -249;
+        text.thickness = 27;
+        text.antiAliasType = AntiAliasType.ADVANCED;*/
         addChild(text);
     }
 
@@ -59,9 +75,9 @@ public class TrendGroupingRenderer extends UIComponent implements IListItemRende
             text.text = _grouping.getFormatter().format(val.getValue());
         }
         text.validateNow();
-        var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Lucida Grande");
+        /*var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Open Sans");
         //tf.align = "right";
-        text.setTextFormat(tf);
+        text.setTextFormat(tf);*/
         invalidateProperties();
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
