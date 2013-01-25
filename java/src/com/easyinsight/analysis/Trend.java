@@ -45,12 +45,12 @@ public class Trend {
 
                 //newValue = trendOutcome.getNow().toDouble();
             }
-            boolean needPastSet = false;
+            boolean needPastSet = true;
             if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension &&
                     ((TrendReportFieldExtension) analysisItem.getReportFieldExtension()).getTrendComparisonField() != null) {
-                needPastSet = true;
+                needPastSet = false;
             }
-            if (!needPastSet && pastSet.getRows().size() > 0) {
+            if (needPastSet && pastSet.getRows().size() > 0) {
                 for (IRow row : pastSet.getRows()) {
                     Map<String, Value> map = new HashMap<String, Value>();
                     if (groupings != null) {
