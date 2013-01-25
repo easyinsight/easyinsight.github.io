@@ -16,6 +16,15 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
 
     private String labelPosition;
     private List<MultiColor> multiColors = new ArrayList<MultiColor>();
+    private int legendMaxWidth;
+
+    public int getLegendMaxWidth() {
+        return legendMaxWidth;
+    }
+
+    public void setLegendMaxWidth(int legendMaxWidth) {
+        this.legendMaxWidth = legendMaxWidth;
+    }
 
     public List<MultiColor> getMultiColors() {
         return multiColors;
@@ -45,6 +54,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         labelPosition = findStringProperty(properties, "labelPosition", "outside");
+        legendMaxWidth = (int) findNumberProperty(properties, "legendMaxWidth", 200);
         multiColors = multiColorProperty(properties, "multiColors");
     }
 
@@ -52,6 +62,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportStringProperty("labelPosition", labelPosition));
+        properties.add(new ReportNumericProperty("legendMaxWidth", legendMaxWidth));
         properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         return properties;
     }
