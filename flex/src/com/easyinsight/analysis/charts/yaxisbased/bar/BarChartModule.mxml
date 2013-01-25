@@ -61,10 +61,6 @@
             return BarChartDefinition(chartDef).chartColor;
         }
 
-        override protected function getColorScheme():String {
-            return BarChartDefinition(chartDef).colorScheme;
-        }
-
         override protected function sortData(dataSet:ArrayCollection):void {
             var columnChartDef:BarChartDefinition = chartDef as BarChartDefinition;
             var firstMeasure:AnalysisMeasure = columnChartDef.measures.getItemAt(0) as AnalysisMeasure;

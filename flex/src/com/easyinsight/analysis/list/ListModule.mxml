@@ -326,7 +326,7 @@
                     var existingGridColumn:AdvancedDataGridColumn = columnMap[myHeader.qualifiedName()] as AdvancedDataGridColumn;
                     columnMap[myHeader.qualifiedName()] = columnHeaderObject;
                     //if (explicitWidth) columnHeaderObject.width = myHeader.width;
-                    columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending, columnHeaderObject);
+                    columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending, false, columnHeaderObject);
                     if (listDef.multiLineHeaders) {
                         columnHeaderObject.headerWordWrap = true;
                     }

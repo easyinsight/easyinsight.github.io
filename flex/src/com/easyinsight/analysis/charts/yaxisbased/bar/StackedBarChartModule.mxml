@@ -239,7 +239,7 @@
                         //cFactory.properties = { stackItem: barChartDef.stackItem, seriesField: key, report: barChartDef};
                         uniqueLineSeries.setStyle("itemRenderer", cFactory);
                     }
-                    uniqueLineSeries.setStyle("fill", FillProvider.getColor(barChartDef.colorScheme, i, 90));
+                    uniqueLineSeries.setStyle("fill", colors[i % colors.length]);
                     if (key == null || key == "") {
                         key = "[ No Value ]";
                     }
@@ -311,10 +311,6 @@
             var series:BarSeries = event.hitData.chartItem.element as BarSeries;
             var key:String = series.xField;
             ClickUtil.doStuff(defaultLink, event.hitData.item, barChartDef.stackItem, this, barChartDef, key, barChart);
-        }
-
-        private function customFill(element:ChartItem, index:Number):IFill {
-            return FillProvider.getColor(barChartDef.colorScheme, index);
         }
 
         [Bindable]

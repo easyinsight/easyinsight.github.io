@@ -11,7 +11,6 @@ public class YAxisDefinition extends ChartDefinition{
 
     public var measures:ArrayCollection;
     public var yaxis:AnalysisItem;
-    public var colorScheme:String = FillProvider.defaultFill;
 
     public function YAxisDefinition() {
         super();

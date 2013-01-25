@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:bubble="com.easyinsight.analysis.charts.bubble.*"
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
            width="100%" height="100%" implements="com.easyinsight.analysis.IReportRenderer"
            creationComplete="createRenderer()">
     <!--<mx:Style>
@@ -14,12 +14,6 @@
             fontSize: 14;
         }
     </mx:Style>-->
-    <mx:Style>
-        EIDataTip {
-            backgroundColor: #FFFFFF;
-
-        }
-    </mx:Style>
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;

@@ -58,10 +58,6 @@
             return ColumnChartDefinition(chartDef).chartColor;
         }
 
-        override protected function getColorScheme():String {
-            return ColumnChartDefinition(chartDef).colorScheme;
-        }
-
         override protected function sortData(dataSet:ArrayCollection):void {
             var columnChartDef:ColumnChartDefinition = chartDef as ColumnChartDefinition;
             var firstMeasure:AnalysisMeasure = columnChartDef.measures.getItemAt(0) as AnalysisMeasure;

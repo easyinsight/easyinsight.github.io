@@ -7,8 +7,7 @@ import mx.collections.ArrayCollection;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSPieChartDefinition")]
-public class
-PieChartDefinition extends XAxisDefinition{
+public class PieChartDefinition extends XAxisDefinition{
 
     public var labelPosition:String = "outside";
     public var multiColors:ArrayCollection = new ArrayCollection();

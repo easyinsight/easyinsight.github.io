@@ -126,15 +126,7 @@
                 hbox.removeChild(lineChart);
 
                 lineChart = new LineChart();
-                lineChart.setStyle("fontFamily", "Helvetica Neue");
-                lineChart.setStyle("fontWeight", "normal");
-                lineChart.setStyle("fontSize", lineChartDef.fontSize);
-                lineChart.setStyle("fontGridFitType", "subpixel");
-                lineChart.setStyle("fontSharpess", -16);
-                lineChart.setStyle("fontAntiAliasType", "advanced");
-                lineChart.setStyle("fontThickness", 20);
-                lineChart.setStyle("color", 0x333333);
-                lineChart.setStyle("axisTitleStyleName", "chartAxis");
+                lineChartDef.styleChart(lineChart);
                 lineChart.addEventListener("legendDataChanged", legendDataChanged);
                 legend.maxWidth = lineChartDef.legendMaxWidth;
                 legend.visible = true;

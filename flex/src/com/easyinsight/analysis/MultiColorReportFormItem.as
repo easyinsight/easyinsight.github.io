@@ -24,6 +24,8 @@ public class MultiColorReportFormItem extends ReportFormItem {
         super.createChildren();
 
         button = new LinkButton();
+        button.setStyle("left", 0);
+        button.setStyle("paddingLeft", 0);
         button.label = "Edit...";
         button.addEventListener(MouseEvent.CLICK, onClick);
 

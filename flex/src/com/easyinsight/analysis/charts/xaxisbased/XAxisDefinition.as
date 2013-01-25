@@ -13,8 +13,6 @@ public class XAxisDefinition extends ChartDefinition{
     public var measures:ArrayCollection;
     public var xaxis:AnalysisItem;
 
-    public var colorScheme:String = FillProvider.defaultFill;
-
     public function XAxisDefinition() {
         super();
     }

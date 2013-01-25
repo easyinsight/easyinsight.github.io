@@ -270,10 +270,6 @@
             return 0;
         }
 
-        protected function getColorScheme():String {
-            return null;
-        }
-
         protected function getAngle():int {
             return 0;
         }
@@ -292,10 +288,10 @@
                     } else if (useChartColor()) {
                         fills = [new SolidColor(getChartColor())];
                     } else {
-                        fills = FillProvider.getColors(getColorScheme(), getAngle());
+                        fills = FillProvider.getColors(FillProvider.linearGradients, getAngle());
                     }
                 } else {
-                    fills = [FillProvider.getColor(getColorScheme(), j, getAngle())];
+                    fills = [FillProvider.getColor(FillProvider.linearGradients, j, getAngle())];
                 }
                 mySeries[j].setStyle("fills", fills);
 
