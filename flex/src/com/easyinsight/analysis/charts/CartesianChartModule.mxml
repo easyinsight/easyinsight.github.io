@@ -154,15 +154,7 @@
 
         private function applyGeneralStyling():void {
             canvas.setStyle("backgroundAlpha", chartDef.backgroundAlpha);
-            chart.setStyle("fontFamily", "Helvetica Neue");
-            chart.setStyle("fontWeight", "normal");
-            chart.setStyle("fontSize", chartDef.fontSize);
-            chart.setStyle("fontGridFitType", "subpixel");
-            chart.setStyle("fontSharpess", -16);
-            chart.setStyle("fontAntiAliasType", "advanced");
-            chart.setStyle("fontThickness", 20);
-            chart.setStyle("color", 0x333333);
-            chart.setStyle("axisTitleStyleName", "chartAxis");
+            chartDef.styleChart(chart);
         }
 
         protected function getDimensionItem():AnalysisItem {
