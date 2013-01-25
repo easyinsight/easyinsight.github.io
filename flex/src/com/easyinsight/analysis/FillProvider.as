@@ -57,14 +57,14 @@ public class FillProvider {
     }
 
     public static function createLinearGradients(angle:int):Array {
-        /*return [ lg(0xf9fbf5, 0xa6bc59, angle), lg(0xf1f3f7, 0x597197, angle), lg(0xf9f3e0, 0xd6ab2a, angle),
+        return [ lg(0xf9fbf5, 0xa6bc59, angle), lg(0xf1f3f7, 0x597197, angle), lg(0xf9f3e0, 0xd6ab2a, angle),
         lg(0xfcf3ef, 0xd86068, angle), lg(0xe9f1e5, 0x5d9942, angle), lg(0xd4c5cd, 0x7a4c6c, angle),
         lg(0xffffff, 0x61B796, angle), lg(0xffffff, 0x3a93e8, angle), lg(0xffffff, 0xAB3032, angle),
         lg(0xffffff, 0x377026, angle), lg(0xffffff, 0x8e3160, angle), lg(0xffffff, 0x5a46cc, angle),
         lg(0xffffff, 0xBBC417, angle), lg(0xffffff, 0x2921B8, angle), lg(0xffffff, 0xB57C99, angle),
-        lg(0xffffff, 0xB57C99, angle)];*/
+        lg(0xffffff, 0xB57C99, angle)];
         //return [new SolidColor(0xB22222), new SolidColor(0xDC143C), new SolidColor(0xCD5C5C), new SolidColor(0xF08080), new SolidColor(0xE9967A), new SolidColor(0xFA8072), new SolidColor(0xFFA07A)];
-        return [new SolidColor(0x8db6c7), new SolidColor(0xc1b3be), new SolidColor(0xd1c6bf), new SolidColor(0xca9f92), new SolidColor(0xf9cd97), new SolidColor(0xe3d9b0), new SolidColor(0xb1c27a), new SolidColor(0xb2e289), new SolidColor(0xf1c0bf), new SolidColor(0x59add0), new SolidColor(0x7095e1), new SolidColor(0x9fa3e3), new SolidColor(0xc993d4), new SolidColor(0xdb8db2), new SolidColor(0xf1c3d0)];
+        //return [new SolidColor(0x8db6c7), new SolidColor(0xc1b3be), new SolidColor(0xd1c6bf), new SolidColor(0xca9f92), new SolidColor(0xf9cd97), new SolidColor(0xe3d9b0), new SolidColor(0xb1c27a), new SolidColor(0xb2e289), new SolidColor(0xf1c0bf), new SolidColor(0x59add0), new SolidColor(0x7095e1), new SolidColor(0x9fa3e3), new SolidColor(0xc993d4), new SolidColor(0xdb8db2), new SolidColor(0xf1c3d0)];
     }
 
     public static function createRadialGradients2():Array {
