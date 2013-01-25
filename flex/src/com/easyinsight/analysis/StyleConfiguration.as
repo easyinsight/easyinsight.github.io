@@ -28,6 +28,7 @@ import com.easyinsight.analysis.summary.SummaryDefinition;
 import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.trend.TrendDefinition;
+import com.easyinsight.analysis.trend.TrendGridDefinition;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.analysis.ytd.CompareYearsDefinition;
@@ -216,17 +217,12 @@ public class StyleConfiguration {
             items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", AreaChartDefinition(report).multiColors, report));
         }
         if (report is PieChartDefinition) {
-            items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", PieChartDefinition(report).colorScheme,
-                    report, [FillProvider.radialGradients, FillProvider.highContrast]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", PieChartDefinition(report).labelPosition,
                     report, ["callout", "insideWithCallout", "inside", "outside", "none"]));
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", PieChartDefinition(report).legendMaxWidth, report, 10, 400));
             items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", PieChartDefinition(report).multiColors, report));
         }
         if (report is BarChartDefinition) {
-            items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", BarChartDefinition(report).colorScheme,
-                    report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
-            //items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", BarChartDefinition(report).useChartColor, report));
             items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", BarChartDefinition(report).chartColor, report, "useChartColor"));
             items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", BarChartDefinition(report).gradientColor, report));
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", BarChartDefinition(report).columnSort, report,
@@ -244,8 +240,6 @@ public class StyleConfiguration {
         }
 
         if (report is ColumnChartDefinition) {
-            items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", ColumnChartDefinition(report).colorScheme,
-                    report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", ColumnChartDefinition(report).labelPosition,
                     report, ["none", "auto"]));
             //items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", ColumnChartDefinition(report).useChartColor, report));
@@ -265,10 +259,6 @@ public class StyleConfiguration {
         }
 
         if (report is StackedBarChartDefinition) {
-            items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", StackedBarChartDefinition(report).colorScheme,
-                    report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
-            items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", StackedBarChartDefinition(report).useChartColor, report));
-            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", StackedBarChartDefinition(report).chartColor, report));
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", StackedBarChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                     ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
@@ -283,10 +273,6 @@ public class StyleConfiguration {
 
         }
         if (report is StackedColumnChartDefinition) {
-            items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", StackedColumnChartDefinition(report).colorScheme,
-                    report, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
-            items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", StackedColumnChartDefinition(report).useChartColor, report));
-            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", StackedColumnChartDefinition(report).chartColor, report));
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", StackedColumnChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                     ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
@@ -334,6 +320,9 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Major Font Size", "majorFontSize", TrendDefinition(report).majorFontSize, report, 8, 48));
             items.addItem(new NumericReportFormItem("Minor Font Size", "minorFontSize", TrendDefinition(report).minorFontSize, report, 8, 48));
             items.addItem(new ComboBoxReportFormItem("Direction", "direction", TrendDefinition(report).direction, report, [ "horizontal", "vertical" ]));
+        }
+        if (report is TrendGridDefinition) {
+            items.addItem(new CheckBoxReportFormItem("Show KPI Name", "showKPIName", TrendGridDefinition(report).showKPIName, report));
         }
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
         items.addItem(new CheckBoxReportFormItem("Filter Optimization", "lookupTableOptimization", report.lookupTableOptimization, report));
