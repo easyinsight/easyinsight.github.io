@@ -212,7 +212,7 @@
                     dataTipFunction="formatDataTip" dataTipRenderer="com.easyinsight.analysis.charts.EIDataTip"
 		selectionMode="multiple" backgroundElements="{ChartUtil.gridLine('both')}" showAllDataTips="true">
 		<mx:horizontalAxis>
-			<mx:LinearAxis labelFunction="renderXAxis" baseAtZero="false" title="{measure1Name}" id="xAxis" autoAdjust="true" minimum="100"/>
+			<mx:LinearAxis labelFunction="renderXAxis" baseAtZero="false" title="{measure1Name}" id="xAxis" autoAdjust="true"/>
 		</mx:horizontalAxis>
 		<mx:horizontalAxisRenderers>
 			<mx:AxisRenderer axis="{xAxis}" axisStroke="{ChartUtil.axisStroke()}">
