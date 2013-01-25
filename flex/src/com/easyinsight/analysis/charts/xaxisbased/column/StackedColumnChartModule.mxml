@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
            implements="com.easyinsight.analysis.IReportRenderer"
            width="100%" height="100%">
     <mx:states>
@@ -348,4 +348,4 @@
 
         </mx:HBox>
     </mx:Canvas>
-</mx:Module>
+</mx:Canvas>
