@@ -13,7 +13,7 @@ public class BubbleChartDefinition extends ChartDefinition{
     public var yaxisMeasure:AnalysisItem;
     public var zaxisMeasure:AnalysisItem;
     public var showLabels:Boolean = true;
-    public var briefLabels:Boolean;
+    public var briefLabels:Boolean = true;
     /*public var baseXAxisAtZero:Boolean;
     public var baseYAxisAtZero:Boolean;
     public var showGridLines:Boolean;
