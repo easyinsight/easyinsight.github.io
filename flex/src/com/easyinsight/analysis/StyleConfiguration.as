@@ -129,12 +129,12 @@ public class StyleConfiguration {
 
     public static function getFormItems(report:AnalysisDefinition):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
-        if (report.supportsEmbeddedFonts()) {
+        /*if (report.supportsEmbeddedFonts()) {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande"]));
         } else {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Arial", "Arial Black", "Comic Sans MS",
                 "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
-        }
+        }*/
         items.addItem(new NumericReportFormItem("Font Size", "fontSize", report.fontSize, report, 8, 48));
         items.addItem(new NumericReportFormItem("Header Font Size", "headerFontSize", report.headerFontSize, report, 8, 48));
         items.addItem(new NumericReportFormItem("Max Header Width", "maxHeaderWidth", report.maxHeaderWidth, report, 100, 1500));
@@ -311,6 +311,7 @@ public class StyleConfiguration {
         }
         if (report is BubbleChartDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show Labels", "showLabels", BubbleChartDefinition(report).showLabels, report));
+            items.addItem(new CheckBoxReportFormItem("Brief Labels", "briefLabels", BubbleChartDefinition(report).briefLabels, report));
         }
         if (report is PlotChartDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show Labels", "showLabels", PlotChartDefinition(report).showLabels, report));

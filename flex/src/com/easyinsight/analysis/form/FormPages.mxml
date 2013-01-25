@@ -84,9 +84,8 @@
                 for (var j:int = 0; j < (fieldsPerColumn + (i == 0 ? remainder : 0)); j++) {
                     var item:AnalysisItem = formReport.columns.getItemAt(l++) as AnalysisItem;
                     var formItem:FormItem = new FormItem();
-                    formItem.setStyle("fontWeight", "bold");
+                    formItem.styleName = "boldStyle";
                     formItem.setStyle("fontSize", formReport.labelFontSize);
-                    formItem.setStyle("fontFamily", "Helvetica Neue");
 
                     formItem.label = item.display + ":";
 

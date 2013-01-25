@@ -30,6 +30,7 @@ public class FormCellRenderer extends Box
         addEventListener(MouseEvent.ROLL_OVER, onRollOver);
         addEventListener(MouseEvent.ROLL_OUT, onRollOut);
         addEventListener(MouseEvent.CLICK, onClick);
+        styleName = "myFontStyle";
     }
 
     private var defaultLink:Link;
@@ -96,7 +97,6 @@ public class FormCellRenderer extends Box
                 var textFieldTextArea:TextArea = new TextArea();
                 textFieldTextArea.width = 400;
                 textFieldTextArea.setStyle("fontSize", _report.fontSize);
-                textFieldTextArea.setStyle("fontFamily", _report.getFont());
                 textFieldTextArea.setStyle("fontWeight", "normal");
                 textFieldTextArea.setStyle("borderStyle", "none");
                 textFieldTextArea.setStyle("backgroundAlpha", 0);
@@ -109,7 +109,6 @@ public class FormCellRenderer extends Box
                     var textArea:Text = new Text();
                     textArea.width = 400;
                     textArea.setStyle("fontSize", _report.fontSize);
-                    textArea.setStyle("fontFamily", "Lucida Grande");
                     textArea.setStyle("fontWeight", "normal");
                     textArea.text = text;
                     this.textComp = textArea;
