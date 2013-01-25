@@ -90,19 +90,19 @@
         /*[Embed(source="/com/easyinsight/skin/osx/helvetica.swf", fontName="Helvetica Neue", fontStyle="normal")]
         private var helvetica:Class;*/
 
-        /*[Embed(source="/com/easyinsight/skin/osx/opensans.swf", fontName="Open Sans", fontStyle="normal")]
+        [Embed(source="/com/easyinsight/skin/osx/opensans.swf", fontName="Open Sans", fontStyle="normal")]
         private var openSans:Class;
 
-        [Embed(source="/com/easyinsight/skin/osx/opensans.swf", fontName="Open Sans", fontStyle="bold")]
-        private var openSansBold:Class;*/
+        [Embed(source="/com/easyinsight/skin/osx/opensansbold.swf", fontName="Open Sans Bold", fontWeight="bold")]
+        private var openSansBold:Class;
 
         /*[Embed(source="/com/easyinsight/skin/osx/helvetica.swf", fontName="Helvetica Neue", fontStyle="bold")]
         private var helveticaBold:Class;*/
 
         private function startWorkspace():void {
             Font.registerFont(myNormalLucida);
-            /*Font.registerFont(openSans);
-            Font.registerFont(openSansBold);*/
+            Font.registerFont(openSans);
+            Font.registerFont(openSansBold);
             /*Font.registerFont(openSansBold);*/
             Security.allowInsecureDomain("maps.googleapis.com");
             PerspectiveFactoryHolder.factory = new PerspectiveFactory();

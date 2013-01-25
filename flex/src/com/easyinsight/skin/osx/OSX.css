@@ -17,7 +17,7 @@ Application {
     fillColors: #ffffff, #ffffff;
 }
 
-@font-face {
+/*@font-face {
     src: url("/com/easyinsight/skin/osx/opensans.swf");
     fontFamily: "Open Sans";
 }
@@ -26,7 +26,7 @@ Application {
     src: url("/com/easyinsight/skin/osx/opensansbold.swf");
     fontFamily: "Open Sans Bold";
     fontWeight: "bold";
-}
+}*/
 
 .myFontStyle {
     font-grid-fit-type: 'subpixel';
