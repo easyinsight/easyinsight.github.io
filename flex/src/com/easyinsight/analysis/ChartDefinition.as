@@ -40,7 +40,7 @@ public class ChartDefinition extends AnalysisDefinition {
 
         chart.setStyle("fontWeight", "normal");
         chart.setStyle("fontSize", fontSize);
-        chart.styleName = "helveticaStyle";
+        chart.styleName = "myFontStyle";
         chart.setStyle("color", 0x333333);
         chart.setStyle("axisTitleStyleName", "chartAxis");
     }
