@@ -22,9 +22,22 @@ Application {
     fontFamily: "Open Sans";
 }
 
+@font-face {
+    src: url("/com/easyinsight/skin/osx/opensansbold.swf");
+    fontFamily: "Open Sans Bold";
+    fontWeight: "bold";
+}
+
 .myFontStyle {
     font-grid-fit-type: 'subpixel';
     font-family: 'Open Sans';
+    font-sharpness: -221;
+    font-thickness: 4;
+}
+
+.boldStyle {
+    font-grid-fit-type: 'subpixel';
+    font-family: 'Open Sans Bold';
     font-sharpness: -221;
     font-thickness: 4;
 }
@@ -609,6 +622,8 @@ TransformContainer {
 
 .chartAxis {
     fontColor: #101010;
-    font-family: 'Helvetica Neue';
+    font-family: 'Open Sans Bold';
+    font-sharpness: -221;
+    font-thickness: 4;
     fontWeight: bold;
 }
