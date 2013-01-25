@@ -188,13 +188,13 @@
                 if (barChartDef.columnSort != ChartDefinition.SORT_UNSORTED) {
                     var sort:Sort = new Sort();
                     if (barChartDef.columnSort == ChartDefinition.SORT_X_ASCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.yaxis, false);
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.yaxis, false, true);
                     } else if (barChartDef.columnSort == ChartDefinition.SORT_X_DESCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.yaxis, true);
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.yaxis, true, true);
                     } else if (barChartDef.columnSort == ChartDefinition.SORT_Y_ASCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measures.getItemAt(0) as AnalysisItem, false);
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measures.getItemAt(0) as AnalysisItem, false, true);
                     } else if (barChartDef.columnSort == ChartDefinition.SORT_Y_DESCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measures.getItemAt(0) as AnalysisItem, true);
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measures.getItemAt(0) as AnalysisItem, true, true);
                     }
                     dataSet.sort = sort;
                     dataSet.refresh();

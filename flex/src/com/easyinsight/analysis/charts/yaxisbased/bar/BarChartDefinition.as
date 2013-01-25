@@ -3,6 +3,7 @@ import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.ChartDefinition;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.yaxisbased.YAxisDefinition;
+import com.easyinsight.skin.ApplicationSkin;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSBarChartDefinition")]
@@ -25,6 +26,17 @@ public class BarChartDefinition extends YAxisDefinition{
 
     public function BarChartDefinition() {
         super();
+    }
+
+    override public function initialConfig():void {
+        super.initialConfig();
+        if (ApplicationSkin.instance().customChartColorEnabled) {
+            chartColor = ApplicationSkin.instance().customChartColor;
+            useChartColor = ApplicationSkin.instance().customChartColorEnabled;
+        }
+        if (ApplicationSkin.instance().gradientChartColorEnabled) {
+            gradientColor = ApplicationSkin.instance().gradientChartColor;
+        }
     }
 
     override public function supportsEmbeddedFonts():Boolean {
