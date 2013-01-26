@@ -55,24 +55,9 @@ public class CleanupComponent implements IComponent {
                 allNeededAnalysisItems.addAll(linkItems);
             }
         }
-        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-        for (AnalysisItem analysisItem : pipelineData.getAllItems()) {
-            List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-            if (items == null) {
-                items = new ArrayList<AnalysisItem>(1);
-                keyMap.put(analysisItem.getKey().toKeyString(), items);
-            }
-            items.add(analysisItem);
-        }
-        for (AnalysisItem analysisItem : pipelineData.getAllItems()) {
-            List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-            if (items == null) {
-                items = new ArrayList<AnalysisItem>(1);
-                displayMap.put(analysisItem.toDisplay(), items);
-            }
-            items.add(analysisItem);
-        }
+        KeyDisplayMapper mapper = KeyDisplayMapper.create(pipelineData.getAllItems());
+        Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
+        Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
         if (report.getReportRunMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(report.getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {

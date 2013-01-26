@@ -192,24 +192,9 @@ public abstract class Pipeline {
             }
         }
         allNeededAnalysisItems.addAll(report.getLimitFields());
-        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-        for (AnalysisItem analysisItem : allFields) {
-            List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-            if (items == null) {
-                items = new ArrayList<AnalysisItem>(1);
-                keyMap.put(analysisItem.getKey().toKeyString(), items);
-            }
-            items.add(analysisItem);
-        }
-        for (AnalysisItem analysisItem : allFields) {
-            List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-            if (items == null) {
-                items = new ArrayList<AnalysisItem>(1);
-                displayMap.put(analysisItem.toDisplay(), items);
-            }
-            items.add(analysisItem);
-        }
+        KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields);
+        Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
+        Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
         if (report.getReportRunMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(report.getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
@@ -305,6 +290,7 @@ public abstract class Pipeline {
 
     public DataSet toDataSet(DataSet dataSet) {
         for (IComponent component : components) {
+            //System.out.println(component.getClass() + " - " + dataSet.getRows());
             dataSet = component.apply(dataSet, pipelineData);
             if (pipelineData.getReport() != null && pipelineData.getReport().isLogReport()) {
                 String componentName;
@@ -351,7 +337,7 @@ public abstract class Pipeline {
             }*/
         }
         resultSet = dataSet;
-        DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()), aliases);
+        DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()), aliases, pipelineData.getReport());
         for (IComponent component : components) {
             component.decorate(results);
         }
