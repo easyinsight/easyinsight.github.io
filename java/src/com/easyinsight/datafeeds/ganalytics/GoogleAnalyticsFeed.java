@@ -19,7 +19,9 @@ import com.google.gdata.data.analytics.*;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.InvalidEntryException;
 import com.google.gdata.util.ServiceException;
+import com.google.gdata.util.ServiceForbiddenException;
 
+import java.io.IOException;
 import java.util.*;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -105,8 +107,29 @@ public class GoogleAnalyticsFeed extends Feed {
                             String startDateString = outboundDateFormat.format(cal.getTime());
                             urlBuilder.append("&start-date=").append(startDateString).append("&end-date=").append(endDateString);
                             URL reportUrl = new URL(urlBuilder.toString());
-                            DataFeed feed = as.getFeed(reportUrl, DataFeed.class);
-
+                            DataFeed feed = null;
+                            int retries = 0;
+                            Exception sfe = null;
+                            do {
+                                try {
+                                    feed = as.getFeed(reportUrl, DataFeed.class);
+                                } catch (ServiceForbiddenException e) {
+                                    sfe = e;
+                                    if (e.getMessage().contains("usageLimits")) {
+                                        System.out.println("retrying...");
+                                        retries++;
+                                    }
+                                } catch (AuthenticationException se1) {
+                                    sfe = se1;
+                                    if (se1.getMessage().contains("usageLimits")) {
+                                        System.out.println("retrying...");
+                                        retries++;
+                                    }
+                                }
+                            } while (feed == null && retries < 2);
+                            if (feed == null) {
+                                throw sfe;
+                            }
                             for (DataEntry entry : feed.getEntries()) {
                                 metadata.addValue(queryItem, getValue(queryItem, entry), insightRequestMetadata);
                             }
@@ -310,7 +333,29 @@ public class GoogleAnalyticsFeed extends Feed {
 
                         while (next != null) {
                             URL reportUrl = new URL(next);
-                            DataFeed feed = as.getFeed(reportUrl, DataFeed.class);
+                            DataFeed feed = null;
+                            int retries = 0;
+                            Exception sfe = null;
+                            do {
+                                try {
+                                    feed = as.getFeed(reportUrl, DataFeed.class);
+                                } catch (ServiceForbiddenException e) {
+                                    sfe = e;
+                                    if (e.getMessage().contains("usageLimits")) {
+                                        System.out.println("retrying...");
+                                        retries++;
+                                    }
+                                } catch (AuthenticationException se1) {
+                                    sfe = se1;
+                                    if (se1.getMessage().contains("usageLimits")) {
+                                        System.out.println("retrying...");
+                                        retries++;
+                                    }
+                                }
+                            } while (feed == null && retries < 2);
+                            if (feed == null) {
+                                throw sfe;
+                            }
 
                             for (DataEntry entry : feed.getEntries()) {
                                 IRow row = dataSet.createRow();
@@ -330,16 +375,20 @@ public class GoogleAnalyticsFeed extends Feed {
                             } else {
                                 next = null;
                             }
+
                         }
                     }
                 }
             }
             return dataSet;
         } catch (AuthenticationException ae) {
+            ae.printStackTrace();
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
         } catch (InvalidEntryException iee) {
+            iee.printStackTrace();
             throw new ReportException(new GenericReportFault(iee.getMessage()));
         } catch (ServiceException se) {
+            se.printStackTrace();
             throw new ReportException(new GenericReportFault(se.getMessage()));
         } catch (ReportException tme) {
             throw tme;
@@ -367,8 +416,8 @@ public class GoogleAnalyticsFeed extends Feed {
                 } else {
                     value = new DateValue(new Date());
                 }
-            } catch (ParseException e) {
-                System.out.println("Parse exception on " + date);
+            } catch (Exception e) {
+                System.out.println(e.getMessage() + " on " + date);
                 value = new EmptyValue();
             }
         } else {
