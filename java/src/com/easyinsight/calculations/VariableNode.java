@@ -20,6 +20,10 @@ public class VariableNode extends CalculationTreeNode {
     public AggregateKey createAggregateKey() {
         return analysisItem.createAggregateKey();
     }
+
+    public String toDisplay() {
+        return analysisItem.toDisplay();
+    }
     
     public void resolveVariableKey(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems) {
         String s = getText().trim();
@@ -28,7 +32,21 @@ public class VariableNode extends CalculationTreeNode {
         variableKey = new NamedKeySpecification(s);
         List<AnalysisItem> analysisItems = keyItems.get(s);
         if (analysisItems != null) {
-            analysisItem = analysisItems.get(0);
+            if (analysisItems.size() > 1) {
+                boolean matched = false;
+                for (AnalysisItem testItem : analysisItems) {
+                    if (s.equals(testItem.toDisplay())) {
+                        analysisItem = testItem;
+                        matched = true;
+                        break;
+                    }
+                }
+                if (!matched) {
+                    analysisItem = analysisItems.get(0);
+                }
+            } else {
+                analysisItem = analysisItems.get(0);
+            }
         } else {
             analysisItems = displayItems.get(s);
             if (analysisItems != null) {
