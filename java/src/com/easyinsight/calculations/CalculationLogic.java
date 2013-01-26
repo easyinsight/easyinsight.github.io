@@ -37,24 +37,9 @@ public class CalculationLogic {
                     break;
                 }
             }
-            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : allItems) {
-                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), items);
-                }
-                items.add(analysisItem);
-            }
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : allItems) {
-                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    displayMap.put(analysisItem.toDisplay(), items);
-                }
-                items.add(analysisItem);
-            }
+            KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
+            Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
+            Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
             if (report != null && report.getFilterDefinitions() != null) {
                 for (FilterDefinition filter : report.getFilterDefinitions()) {
                     filter.calculationItems(displayMap);
