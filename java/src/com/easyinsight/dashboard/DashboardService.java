@@ -294,24 +294,9 @@ public class DashboardService {
             dashboard.setRole(role);
             Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
             List<FilterDefinition> dlsFilters = DataService.addDLSFilters(dashboard.getDataSourceID(), conn);
-            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : feed.getFields()) {
-                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), items);
-                }
-                items.add(analysisItem);
-            }
-            for (AnalysisItem analysisItem : feed.getFields()) {
-                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    displayMap.put(analysisItem.toDisplay(), items);
-                }
-                items.add(analysisItem);
-            }
+            KeyDisplayMapper mapper = KeyDisplayMapper.create(feed.getFields());
+            Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
+            Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
             if (dashboard.getMarmotScript() != null && !"".equals(dashboard.getMarmotScript().trim())) {
                 StringTokenizer toker = new StringTokenizer(dashboard.getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
