@@ -13,30 +13,19 @@ import java.util.*;
 public class MarmotHerderComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         if (pipelineData.getReport().getReportRunMarmotScript() != null) {
-            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : pipelineData.getAllItems()) {
-                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), items);
-                }
-                items.add(analysisItem);
+            List<AnalysisItem> allItems = new ArrayList<AnalysisItem>(pipelineData.getAllItems());
+            if (pipelineData.getReport() != null && pipelineData.getReport().getAddedItems() != null) {
+                allItems.addAll(pipelineData.getReport().getAddedItems());
             }
-            for (AnalysisItem analysisItem : pipelineData.getAllItems()) {
-                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    displayMap.put(analysisItem.toDisplay(), items);
-                }
-                items.add(analysisItem);
-            }
+            KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
+            Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
+            Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
             StringTokenizer toker = new StringTokenizer(pipelineData.getReport().getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 for (IRow row : dataSet.getRows()) {
                     try {
-                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), pipelineData.getAllItems(), keyMap, displayMap, row);
+                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), allItems, keyMap, displayMap, row);
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {
