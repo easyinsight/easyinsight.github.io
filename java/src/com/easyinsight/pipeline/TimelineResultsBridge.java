@@ -38,7 +38,7 @@ public class TimelineResultsBridge implements ResultsBridge {
         return valueSet;
     }
 
-    public DataResults toDataResults(DataSet dataSet, List<AnalysisItem> columns, Map<AnalysisItem, AnalysisItem> aliases) {
+    public DataResults toDataResults(DataSet dataSet, List<AnalysisItem> columns, Map<AnalysisItem, AnalysisItem> aliases, WSAnalysisDefinition report) {
         // iterate the data set
 
         // this is granular
@@ -122,7 +122,7 @@ public class TimelineResultsBridge implements ResultsBridge {
 
         List<ListDataResults> listDatas = new ArrayList<ListDataResults>();
         for (Value key : keyList) {
-            ListDataResults listDataResults = (ListDataResults) new ListResultsBridge().toDataResults(dataSetMap.get(key), columns, aliases);
+            ListDataResults listDataResults = (ListDataResults) new ListResultsBridge().toDataResults(dataSetMap.get(key), columns, aliases, report);
             listDatas.add(listDataResults);
         }
         seriesDataResults.setListDatas(listDatas);

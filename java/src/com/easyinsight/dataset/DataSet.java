@@ -229,7 +229,7 @@ public class DataSet implements Serializable, Cloneable {
         rows.add(row);
     }
 
-    public DataResults toListDataResults(List<AnalysisItem> columns, Map<AnalysisItem, AnalysisItem> aliases) {
+    public DataResults toListDataResults(List<AnalysisItem> columns, Map<AnalysisItem, AnalysisItem> aliases, WSAnalysisDefinition report) {
         ListRow[] listRows = new ListRow[getRows().size()];
         int rowCount = 0;
         for (IRow row : getRows()) {
