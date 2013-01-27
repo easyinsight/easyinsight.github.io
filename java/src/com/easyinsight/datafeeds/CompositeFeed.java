@@ -164,6 +164,10 @@ public class CompositeFeed extends Feed {
             queryNodeMap.put(node.getDataFeedID(), queryStateNode);
             graph.addVertex(queryStateNode);
             for (AnalysisItem analysisItem : analysisItems) {
+                if (insightRequestMetadata.getPostProcessJoins().contains(analysisItem)) {
+                    itemSet.remove(analysisItem);
+                    continue;
+                }
                 if (queryStateNode.handles(analysisItem)) {
                     itemSet.remove(analysisItem);
                     neededNodes.put(queryStateNode.feedID, queryStateNode);
@@ -176,6 +180,9 @@ public class CompositeFeed extends Feed {
             if (filters != null) {
                 for (FilterDefinition filterDefinition : filters) {
                     if (filterDefinition.isSingleSource() && filterDefinition.getField() != null) {
+                        if (insightRequestMetadata.getPostProcessJoins().contains(filterDefinition.getField())) {
+                            continue;
+                        }
                         if (queryStateNode.handles(filterDefinition.getField())) {
                             queryStateNode.addFilter(filterDefinition);
                         } else if (alwaysPassThrough(filterDefinition.getField())) {
@@ -583,7 +590,7 @@ public class CompositeFeed extends Feed {
         }
 
 
-        postProcessFields(analysisItems, queryNodeMap, dataSet, connections);
+        postProcessFields(analysisItems, queryNodeMap, dataSet, conn);
 
         for (IJoin postJoin : postJoins) {
             QueryStateNode queryStateNode = queryNodeMap.get(postJoin.getTargetFeedID());
@@ -632,95 +639,28 @@ public class CompositeFeed extends Feed {
         return dataSet;
     }
 
-    private void postProcessFields(Set<AnalysisItem> analysisItems, Map<Long, QueryStateNode> queryNodeMap, DataSet dataSet, List<IJoin> connections) {
-        for (AnalysisItem postItem : analysisItems) {
-            if (postItem.getFromField() != null) {
-                DerivedKey base = (DerivedKey) postItem.getKey();
-                AnalysisItem fromField = postItem.getFromField();
-                DerivedKey derivedKey = (DerivedKey) fromField.getKey();
-                long dataSourceID = derivedKey.getFeedID();
-                AnalysisItem sourceItem = null;
-                AnalysisItem targetItem = null;
-                for (IJoin join : connections) {
-                    if (join instanceof CompositeFeedConnection) {
-                        CompositeFeedConnection connection = (CompositeFeedConnection) join;
-                        if (connection.getSourceFeedID() == base.getFeedID() && connection.getTargetFeedID() == dataSourceID) {
-                            AnalysisItem testSourceItem = null;
-                            AnalysisItem testTargetItem = null;
-                            if (connection.getSourceItem() == null) {
-                                for (AnalysisItem analysisItem : getFields()) {
-                                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toKeyString().equals(connection.getSourceJoin().toKeyString())) {
-                                        testSourceItem = analysisItem;
-                                        break;
-                                    }
-                                }
-                                for (AnalysisItem analysisItem : getFields()) {
-                                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toKeyString().equals(connection.getTargetJoin().toKeyString())) {
-                                        testTargetItem = analysisItem;
-                                        break;
-                                    }
-                                }
-                            } else {
-                                testSourceItem = connection.getSourceItem();
-                                testTargetItem = connection.getTargetItem();
-                            }
-                            if (testSourceItem.getKey().toKeyString().equals(postItem.getKey().toKeyString())) {
-                                sourceItem = testSourceItem;
-                                targetItem = testTargetItem;
-                            }
-                        } else if (connection.getSourceFeedID() == dataSourceID && connection.getTargetFeedID() == base.getFeedID()) {
-                            AnalysisItem testSourceItem = null;
-                            AnalysisItem testTargetItem = null;
-                            if (connection.getTargetItem() == null) {
-                                for (AnalysisItem analysisItem : getFields()) {
-                                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toKeyString().equals(connection.getTargetJoin().toKeyString())) {
-                                        testTargetItem = analysisItem;
-                                        break;
-                                    }
-                                }
-                                for (AnalysisItem analysisItem : getFields()) {
-                                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toKeyString().equals(connection.getSourceJoin().toKeyString())) {
-                                        testSourceItem = analysisItem;
-                                        break;
-                                    }
-                                }
-                            } else {
-                                testTargetItem = connection.getSourceItem();
-                                testSourceItem = connection.getTargetItem();
-                            }
-                            if (testTargetItem.getKey().toKeyString().equals(postItem.getKey().toKeyString())) {
-                                targetItem = testTargetItem;
-                                sourceItem = testSourceItem;
-                            }
-                        }
-                    }
-
-                }
-                for (AnalysisItem analysisItem : getFields()) {
-                    if (analysisItem.getKey().toKeyString().equals(sourceItem.getKey().toKeyString())) {
-                        sourceItem = analysisItem;
-                        break;
-                    }
-                }
-                for (AnalysisItem analysisItem : getFields()) {
-                    if (analysisItem.getKey().toKeyString().equals(targetItem.getKey().toKeyString())) {
-                        targetItem = analysisItem;
-                        break;
-                    }
-                }
-                DataSet originalSet = queryNodeMap.get(derivedKey.getFeedID()).originalDataSet;
-                Map<Value, Value> rowMap = new HashMap<Value, Value>();
-                for (IRow row : originalSet.getRows()) {
-                    Value indexValue = row.getValue(targetItem);
-                    Value targetValue = row.getValue(fromField);
-                    rowMap.put(indexValue, targetValue);
-                }
-                for (IRow row : dataSet.getRows()) {
-                    Value indexValue = row.getValue(sourceItem);
-                    Value value = rowMap.get(indexValue);
-                    if (value != null) {
-                        row.addValue(postItem.createAggregateKey(), value);
-                    }
+    private void postProcessFields(Set<AnalysisItem> analysisItems, Map<Long, QueryStateNode> queryNodeMap, DataSet dataSet, EIConnection conn) {
+        List<PostProcessOperation> ops;
+        try {
+            ops = ReportCalculation.processOperations(analysisItems, getFeedID(), getFields(), conn);
+        } catch (RecognitionException e) {
+            throw new RuntimeException(e);
+        }
+        for (PostProcessOperation op : ops) {
+            AnalysisItem sourceItem = op.getConnection().getSourceItem();
+            AnalysisItem targetItem = op.getConnection().getTargetItem();
+            DataSet originalSet = queryNodeMap.get(((DerivedKey) op.getFromField().getKey()).getFeedID()).originalDataSet;
+            Map<Value, Value> rowMap = new HashMap<Value, Value>();
+            for (IRow row : originalSet.getRows()) {
+                Value indexValue = row.getValue(targetItem);
+                Value targetValue = row.getValue(op.getFromField());
+                rowMap.put(indexValue, targetValue);
+            }
+            for (IRow row : dataSet.getRows()) {
+                Value indexValue = row.getValue(sourceItem);
+                Value value = rowMap.get(indexValue);
+                if (value != null) {
+                    row.addValue(op.getTarget().createAggregateKey(), value);
                 }
             }
         }
