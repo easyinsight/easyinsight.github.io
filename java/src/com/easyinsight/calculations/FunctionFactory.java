@@ -57,6 +57,8 @@ public class FunctionFactory {
             return new ArcCosine();
         } else if (s.equals("atan")) {
             return new ArcTan();
+        } else if (s.equals("loadfromjoin")) {
+            return new LoadFromJoin();
         } else if (s.equals("nconcat")) {
             return new NConcat();
         } else if (s.equals("bracketvalue")) {
