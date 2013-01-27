@@ -13,6 +13,8 @@ public class EILegend extends List {
     public function EILegend() {
         itemRenderer = new ClassFactory(EILegendRenderer);
         setStyle("borderStyle", "none");
+        styleName = "boldStyle";
+        setStyle("color", 0x333333);
         //this.width = 200;
     }
 }
