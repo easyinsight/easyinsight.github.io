@@ -29,7 +29,7 @@ public class KeyDisplayMapper {
                 }
                 items.add(analysisItem);
             }
-            for (Map.Entry<String, List<AnalysisItem>> entry : keyMap.entrySet()) {
+            /*for (Map.Entry<String, List<AnalysisItem>> entry : keyMap.entrySet()) {
                 if (entry.getValue().size() > 1) {
                     Collections.sort(entry.getValue(), new Comparator<AnalysisItem>() {
 
@@ -48,7 +48,7 @@ public class KeyDisplayMapper {
                         }
                     });
                 }
-            }
+            }*/
         }
     }
 
