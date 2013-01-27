@@ -34,6 +34,24 @@ public class InsightRequestMetadata implements Serializable {
 
     private transient String targetCurrency;
     private transient Map<AnalysisItem, AnalysisItem> currencyMap = new HashMap<AnalysisItem, AnalysisItem>();
+    private transient Set<AnalysisItem> postProcessJoins = new HashSet<AnalysisItem>();
+    private String ip;
+
+    public void addPostProcessJoin(AnalysisItem analysisItem) {
+        postProcessJoins.add(analysisItem);
+    }
+
+    public Set<AnalysisItem> getPostProcessJoins() {
+        return postProcessJoins;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
 
     public Map<AnalysisItem, AnalysisItem> getCurrencyMap() {
         return currencyMap;
