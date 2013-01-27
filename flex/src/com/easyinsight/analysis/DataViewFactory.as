@@ -544,6 +544,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
             var fields:ArrayCollection = existingDefinition.getFields();
             newDef.populate(fields);
             copyStandardData(existingDefinition, newDef);
+            newDef.initialConfig();
             return newDef;
         }
     }
