@@ -117,14 +117,13 @@ public class UserServiceResponse {
             if (rs.next()) {
                 newsDate = new Date(rs.getTimestamp(1).getTime());
             }
-            PreparedStatement stmt = conn.prepareStatement("SELECT CURRENT_SIZE, MAX_DAYS_OVER_SIZE_BOUNDARY FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-            stmt.setLong(1, user.getAccount().getAccountID());
-            ResultSet daysRS = stmt.executeQuery();
-            if (daysRS.next()) {
-                long currentSize = daysRS.getLong(1);
-                int maxDays = daysRS.getInt(2);
-                if (maxDays != -1) {
-                    accountOverSize = currentSize > account.getMaxSize();
+            if (account.getPricingModel() == 0) {
+                if (account.getMaxDaysOverSizeBoundary() != -1) {
+                    accountOverSize = account.getUsedSize() > account.getMaxSize();
+                }
+            } else {
+                if (account.getMaxDaysOverSizeBoundary() != -1) {
+                    accountOverSize = account.getUsedSize() > (account.getCoreStorage() + account.getAddonStorageUnits() * 250000000L);
                 }
             }
         } catch (Exception e) {
