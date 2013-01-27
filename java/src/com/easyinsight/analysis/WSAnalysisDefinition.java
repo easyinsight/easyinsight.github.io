@@ -486,6 +486,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 insightRequestMetadata.pipelineAssign(analysisItem);
             }
         }
+
         /*for (AnalysisItem analysisItem : analysisItems) {
             insightRequestMetadata.pipelineAssign(analysisItem);
         }*/
@@ -557,6 +558,15 @@ public abstract class WSAnalysisDefinition implements Serializable {
         if (!joinPipeline) {
             for (AnalysisItem analysisItem : map.values()) {
                 insightRequestMetadata.pipelineAssign(analysisItem);
+            }
+        }
+
+        for (AnalysisItem analysisItem : map.values()) {
+            if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                DerivedAnalysisDimension derivedAnalysisDimension = (DerivedAnalysisDimension) analysisItem;
+                if (derivedAnalysisDimension.getDerivationCode().contains("loadfromjoin")) {
+                    insightRequestMetadata.addPostProcessJoin(analysisItem);
+                }
             }
         }
 
