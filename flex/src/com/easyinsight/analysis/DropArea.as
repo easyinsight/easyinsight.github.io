@@ -145,6 +145,7 @@ public class DropArea extends HBox
         analysisItemEditor.dataSourceID = _dataSourceID;
         analysisItemEditor.analysisItems = this._analysisItems;
         analysisItemEditor.analysisItem = this.analysisItem;
+        analysisItemEditor.report = this._report;
         analysisItemEditor.initialWindow = initialWindow;
         if (_report != null) {
             analysisItemEditor.reportType = _report.reportType;
