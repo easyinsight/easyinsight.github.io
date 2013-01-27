@@ -106,6 +106,11 @@ public class BetterBoxRenderer extends UIComponent implements IDataRenderer {
         {
             label = new Label();
             label.truncateToFit = true;
+            if (_labelFontWeight != null && _labelFontWeight == "bold") {
+                label.styleName = "boldStyle";
+            } else {
+                label.styleName = "myFontStyle";
+            }
             label.setStyle("fontSize", _labelFontSize);
             label.setStyle("textAlign", "center");
             label.setStyle("fontWeight", _labelFontWeight);
