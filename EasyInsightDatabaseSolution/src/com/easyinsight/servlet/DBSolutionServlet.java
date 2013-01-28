@@ -18,6 +18,9 @@ import java.sql.DriverManager;
  * To change this template use File | Settings | File Templates.
  */
 public class DBSolutionServlet extends HttpServlet {
+
+    public static final int version = 1;
+
     @Override
     public void init(ServletConfig servletConfig) throws ServletException {
         super.init(servletConfig);

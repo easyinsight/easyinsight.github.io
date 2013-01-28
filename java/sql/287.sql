@@ -1,4 +1,4 @@
-drop table report_multi_color_property;
+drop table if exists report_multi_color_property;
 create table report_multi_color_property (
   report_multi_color_property_id bigint(20) auto_increment not null,
   report_property_id bigint(20) not null,

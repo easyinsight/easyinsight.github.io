@@ -5,6 +5,7 @@
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="com.easyinsight.connections.database.data.Query" %>
+<%@ page import="com.easyinsight.servlet.DBSolutionServlet" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -421,6 +422,7 @@ input[type=radio], input[type=checkbox] {
                                                                                           type="password"
                                                                                           name="confirmPassword"/><br/>
                         <button class="btn btn-inverse" onclick="updateUser('#updateCurrentUser');">Submit</button>
+                        <p>Version: <%= DBSolutionServlet.version %></p>
                     </form>
                     <div id="updateUserResults"></div>
                 </div>
