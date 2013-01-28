@@ -5,6 +5,7 @@ import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,10 +36,22 @@ public class ReportCache {
     }
 
     @Nullable
-    public EmbeddedResults getResults(long dataSourceID, CacheKey cacheKey) {
+    public EmbeddedResults getResults(long dataSourceID, CacheKey cacheKey, int cacheTime) {
         Map<CacheKey, EmbeddedResults> map = (Map<CacheKey, EmbeddedResults>) reportCache.get(dataSourceID);
         if (map != null) {
-            return map.get(cacheKey);
+            EmbeddedResults results = map.get(cacheKey);
+            if (results != null) {
+                System.out.println("got time = " + new Date(results.getTime()));
+                if (System.currentTimeMillis() > (results.getTime() + (cacheTime * 1000 * 60))) {
+                    try {
+                        System.out.println("expired...");
+                        reportCache.remove(dataSourceID);
+                    } catch (CacheException e) {
+                    }
+                    return null;
+                }
+            }
+            return results;
         }
         return null;
     }
