@@ -544,7 +544,7 @@ public class DataService {
                     filters.add(filter.toXML(xmlMetadata).toXML());
                 }
                 cacheKey = new CacheKey(reportID, filters);
-                EmbeddedResults embeddedResults = ReportCache.instance().getResults(dataSourceID, cacheKey);
+                EmbeddedResults embeddedResults = ReportCache.instance().getResults(dataSourceID, cacheKey, analysisDefinition.getCacheMinutes());
                 if (embeddedResults != null) {
                     LogClass.debug("*** Returning from cache");
                     return embeddedResults;

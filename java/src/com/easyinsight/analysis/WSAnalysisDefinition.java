@@ -103,6 +103,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean adHocExecution;
     private int headerFontSize = 24;
     private int maxHeaderWidth = 600;
+    private int cacheMinutes;
 
     private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
@@ -110,6 +111,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private double backgroundAlpha = 1;
 
     private boolean rowsEditable;
+
+    public int getCacheMinutes() {
+        return cacheMinutes;
+    }
+
+    public void setCacheMinutes(int cacheMinutes) {
+        this.cacheMinutes = cacheMinutes;
+    }
 
     public int getMaxHeaderWidth() {
         return maxHeaderWidth;
@@ -726,6 +735,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public void populateProperties(List<ReportProperty> properties) {
         fontName = findStringProperty(properties, "fontName", "Tahoma");
         fontSize = (int) findNumberProperty(properties, "fontSize", 12);
+        cacheMinutes = (int) findNumberProperty(properties, "cacheMinutes", 0);
         fixedWidth = (int) findNumberProperty(properties, "fixedWidth", 0);
         backgroundAlpha =  findNumberProperty(properties, "backgroundAlpha", 1);
         headerFontSize =  (int) findNumberProperty(properties, "headerFontSize", 24);
@@ -743,6 +753,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         List<ReportProperty> properties = new ArrayList<ReportProperty>();
         properties.add(new ReportStringProperty("fontName", fontName));
         properties.add(new ReportNumericProperty("fontSize", fontSize));
+        properties.add(new ReportNumericProperty("cacheMinutes", cacheMinutes));
         properties.add(new ReportNumericProperty("headerFontSize", headerFontSize));
         properties.add(new ReportNumericProperty("maxHeaderWidth", maxHeaderWidth));
         properties.add(new ReportNumericProperty("fixedWidth", fixedWidth));

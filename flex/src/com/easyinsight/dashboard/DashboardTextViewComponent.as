@@ -18,6 +18,7 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
 
     public function DashboardTextViewComponent() {
         super();
+        styleName = "myFontStyle";
         setStyle("horizontalAlign", "center");
         setStyle("verticalAlign", "middle");
         /*setStyle("paddingLeft", 10);

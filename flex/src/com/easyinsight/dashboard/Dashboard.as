@@ -44,6 +44,7 @@ public class Dashboard {
     public var stackFill1SEnd:int = 0x545050;
     public var stackFill2Start:int = 0x494444;
     public var stackFill2End:int = 0x343030;
+    public var reportHorizontalPadding:int = 20;
 
     public function Dashboard() {
     }

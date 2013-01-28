@@ -20,7 +20,9 @@ public class DashboardButton extends Canvas {
 
     public function DashboardButton() {
         labelObj = new Label();
+        labelObj.styleName = "myFontStyle";
         labelObj.setStyle("color", 0xFFFFFF);
+
         addEventListener(MouseEvent.CLICK, onClick);
         mouseEnabled = true;
         mouseChildren = false;

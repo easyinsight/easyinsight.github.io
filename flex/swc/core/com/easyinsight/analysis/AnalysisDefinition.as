@@ -99,6 +99,7 @@ import mx.collections.ArrayCollection;
         public var adHocExecution:Boolean;
         public var cacheable:Boolean;
         public var maxHeaderWidth:int = 600;
+        public var cacheMinutes:int;
 
 		public function AnalysisDefinition()
 		{

@@ -35,6 +35,7 @@
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
+        import mx.formatters.Formatter;
         import mx.graphics.IStroke;
         import mx.graphics.SolidColor;
         import mx.graphics.Stroke;
@@ -104,6 +105,12 @@
             legend.dataProvider = lineChart.legendData;
         }
 
+        private var measureFormatter:Formatter;
+
+        private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {
+            return measureFormatter.format(labelValue);
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
 
             var lineChartDef:LineChartDefinition = analysisDefinition as LineChartDefinition;
@@ -126,6 +133,9 @@
                 hbox.removeChild(lineChart);
 
                 lineChart = new LineChart();
+                if (!lineChartDef.lineShadow) {
+                    lineChart.seriesFilters = [];
+                }
                 lineChartDef.styleChart(lineChart);
                 lineChart.addEventListener("legendDataChanged", legendDataChanged);
                 legend.maxWidth = lineChartDef.legendMaxWidth;
@@ -138,6 +148,18 @@
                 lineChart.backgroundElements = ChartUtil.gridLine("horizontal");
                 lineChart.dataTipFunction = dataTipFunction;
                 var verticalAxis:LinearAxis = new LinearAxis();
+                if (lineChartDef.multiMeasure) {
+                    if (lineChartDef.measures.length == 1) {
+                        verticalAxis.labelFunction = renderAxis;
+                        measureFormatter = lineChartDef.measures.getItemAt(0).getFormatter();
+                    } else {
+                        verticalAxis.labelFunction = null;
+                    }
+                } else {
+                    verticalAxis.labelFunction = renderAxis;
+                    measureFormatter = lineChartDef.measure.getFormatter();
+                }
+
                 verticalAxis.baseAtZero = lineChartDef.baseAtZero == "true";
                 if (!lineChartDef.multiMeasure && lineChartDef.measure != null) {
                     verticalAxis.title = lineChartDef.measure.display;
@@ -153,6 +175,8 @@
                 hAxisRenderer.axis = verticalAxis;
                 lineChart.verticalAxisRenderer = hAxisRenderer;
                 lineChart.verticalAxis = verticalAxis;
+
+
 
                 var strokes:Array = [];
                 var useCustomColors:Boolean;

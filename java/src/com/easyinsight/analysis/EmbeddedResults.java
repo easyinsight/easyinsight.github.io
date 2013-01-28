@@ -15,6 +15,15 @@ public class EmbeddedResults implements Serializable, Cloneable {
     protected DataSourceInfo dataSourceInfo;
     private ReportFault reportFault;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private long time = System.currentTimeMillis();
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
 
     public Map<String, Object> getAdditionalProperties() {
         return additionalProperties;

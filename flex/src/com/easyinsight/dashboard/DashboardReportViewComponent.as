@@ -103,6 +103,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         viewFactory.reportID = dashboardReport.report.id;
         viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
         viewFactory.dashboardID = dashboardEditorMetadata.dashboardID;
+        viewFactory.reportPaddingWidth = dashboardEditorMetadata.dashboard.reportHorizontalPadding;
         viewFactory.spaceSides = false;
         if (dashboardReport.showLabel) {
             var blah:Box = new Box();

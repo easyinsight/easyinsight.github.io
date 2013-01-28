@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 @Entity
 @Table(name="date_level_wrapper")
-public class DateLevelWrapper implements Serializable
+public class DateLevelWrapper implements Serializable, Cloneable
 {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -33,5 +33,11 @@ public class DateLevelWrapper implements Serializable
 
     public void setDateLevel(int dateLevel) {
         this.dateLevel = dateLevel;
+    }
+
+    public DateLevelWrapper clone() throws CloneNotSupportedException {
+        DateLevelWrapper wrapper = (DateLevelWrapper) super.clone();
+        wrapper.setId(0);
+        return wrapper;
     }
 }

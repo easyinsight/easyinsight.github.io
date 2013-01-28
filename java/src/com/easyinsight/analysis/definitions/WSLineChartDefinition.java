@@ -25,6 +25,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
 
     private List<MultiColor> multiColors = new ArrayList<MultiColor>();
     private int legendMaxWidth;
+    private boolean lineShadow;
 
     /*public LimitsResults applyLimits(DataSet dataSet) {
         LimitsResults limitsResults;
@@ -91,6 +92,14 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         }
         return limitsResults;
     }*/
+
+    public boolean isLineShadow() {
+        return lineShadow;
+    }
+
+    public void setLineShadow(boolean lineShadow) {
+        this.lineShadow = lineShadow;
+    }
 
     public int getStrokeWeight() {
         return strokeWeight;
@@ -228,6 +237,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         legendMaxWidth = (int) findNumberProperty(properties, "legendMaxWidth", 200);
         autoScale = findBooleanProperty(properties, "autoScale", false);
         alignLabelsToUnits = findBooleanProperty(properties, "alignLabelsToUnits", true);
+        lineShadow = findBooleanProperty(properties, "lineShadow", true);
         showPoints = findBooleanProperty(properties, "showPoints", true);
         multiColors = multiColorProperty(properties, "multiColors");
     }
@@ -246,6 +256,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         properties.add(new ReportNumericProperty("strokeWeight", strokeWeight));
         properties.add(new ReportNumericProperty("legendMaxWidth", legendMaxWidth));
         properties.add(new ReportBooleanProperty("autoScale", autoScale));
+        properties.add(new ReportBooleanProperty("lineShadow", lineShadow));
         properties.add(new ReportBooleanProperty("alignLabelsToUnits", alignLabelsToUnits));
         properties.add(new ReportBooleanProperty("showPoints", showPoints));
         properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));

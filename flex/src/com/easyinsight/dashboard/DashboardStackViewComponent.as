@@ -363,11 +363,12 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     private function createHeaderLink(index:int, label:String):UIComponent {
         var topButton:DashboardButton = new DashboardButton();
         topButton.addEventListener(ItemClickEvent.ITEM_CLICK, onCustomButtonClick);
-        if (dashboardStack.dashboardLevel == 0) {
+        /*if (dashboardStack.dashboardLevel == 0) {
             topButton.setStyle("fontSize", 16);
         } else {
             topButton.setStyle("fontSize", 14);
-        }
+        }*/
+        topButton.setStyle("fontSize", dashboardStack.stackFontSize);
         if (index == 0) {
             topButton.selected = true;
             selectedButton = topButton;

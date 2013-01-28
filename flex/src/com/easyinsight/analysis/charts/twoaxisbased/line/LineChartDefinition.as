@@ -22,6 +22,8 @@ public class LineChartDefinition extends TwoAxisDefinition{
 
     public var multiColors:ArrayCollection = new ArrayCollection();
 
+    public var lineShadow:Boolean;
+
     public function LineChartDefinition() {
         super();
     }

@@ -81,6 +81,17 @@ public class MultiFlatDateFilter extends FilterDefinition {
     }
 
     @Override
+    public FilterDefinition clone() throws CloneNotSupportedException {
+        MultiFlatDateFilter filter = (MultiFlatDateFilter) super.clone();
+        Collection<DateLevelWrapper> wrappers = new ArrayList<DateLevelWrapper>();
+        for (DateLevelWrapper wrapper : getLevels()) {
+            wrappers.add(wrapper.clone());
+        }
+        filter.setLevels(wrappers);
+        return filter;
+    }
+
+    @Override
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
         return new MaterializedMultiFlatDateFilter(getField(), levels);
     }

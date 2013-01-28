@@ -28,6 +28,15 @@ public class DashboardStack extends DashboardElement {
     private int stackControl;
     private boolean consolidateHeaderElements;
     private String selectionType;
+    private int stackFontSize;
+
+    public int getStackFontSize() {
+        return stackFontSize;
+    }
+
+    public void setStackFontSize(int stackFontSize) {
+        this.stackFontSize = stackFontSize;
+    }
 
     public String getSelectionType() {
         return selectionType;
@@ -105,8 +114,8 @@ public class DashboardStack extends DashboardElement {
     public long save(EIConnection conn) throws SQLException {
         long id = super.save(conn);
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_STACK (DASHBOARD_ELEMENT_ID, STACK_SIZE, EFFECT, EFFECT_DURATION, " +
-                "STACK_CONTROL, CONSOLIDATE_HEADER_ELEMENTS, SELECTION_TYPE) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "STACK_CONTROL, CONSOLIDATE_HEADER_ELEMENTS, SELECTION_TYPE, STACK_FONT_SIZE) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, getElementID());
         insertStmt.setInt(2, count);
@@ -115,6 +124,7 @@ public class DashboardStack extends DashboardElement {
         insertStmt.setInt(5, stackControl);
         insertStmt.setBoolean(6, consolidateHeaderElements);
         insertStmt.setString(7, selectionType);
+        insertStmt.setInt(8, stackFontSize);
         insertStmt.execute();
         long gridID = Database.instance().getAutoGenKey(insertStmt);
         int position = 0;
@@ -129,7 +139,7 @@ public class DashboardStack extends DashboardElement {
 
     public static DashboardElement loadGrid(long elementID, EIConnection conn) throws SQLException {
         DashboardStack dashboardGrid = null;
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_STACK_ID, STACK_SIZE, EFFECT, EFFECT_DURATION, STACK_CONTROL, CONSOLIDATE_HEADER_ELEMENTS, SELECTION_TYPE FROM DASHBOARD_STACK WHERE DASHBOARD_ELEMENT_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_STACK_ID, STACK_SIZE, EFFECT, EFFECT_DURATION, STACK_CONTROL, CONSOLIDATE_HEADER_ELEMENTS, SELECTION_TYPE, STACK_FONT_SIZE FROM DASHBOARD_STACK WHERE DASHBOARD_ELEMENT_ID = ?");
         queryStmt.setLong(1, elementID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -141,6 +151,7 @@ public class DashboardStack extends DashboardElement {
             dashboardGrid.setStackControl(rs.getInt(5));
             dashboardGrid.setConsolidateHeaderElements(rs.getBoolean(6));
             dashboardGrid.setSelectionType(rs.getString(7));
+            dashboardGrid.setStackFontSize(rs.getInt(8));
             dashboardGrid.loadElement(elementID, conn);
             PreparedStatement gridItemStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, DASHBOARD_ELEMENT.element_type, " +
                     "ITEM_POSITION FROM DASHBOARD_STACK_ITEM, DASHBOARD_ELEMENT WHERE DASHBOARD_STACK_ID = ? AND DASHBOARD_STACK_ITEM.dashboard_element_id = dashboard_element.dashboard_element_id");

@@ -52,6 +52,7 @@ public class StyleConfiguration {
         var items:ArrayCollection = new ArrayCollection();
         items.addItem(new NumericReportFormItem("Padding", "padding", dashboard.padding, dashboard, 0, 100));
         items.addItem(new NumericReportFormItem("Border Thickness", "borderThickness", dashboard.borderThickness, dashboard, 0, 100));
+        items.addItem(new NumericReportFormItem("Report Horizontal Padding", "reportHorizontalPadding", dashboard.reportHorizontalPadding, dashboard, 0, 100));
         items.addItem(new ColorReportFormItem("Border Color", "borderColor",  dashboard.borderColor, dashboard));
         items.addItem(new ColorReportFormItem("Background Color", "backgroundColor",  dashboard.backgroundColor, dashboard));
         items.addItem(new ColorReportFormItem("Stack 1 Fill Start", "stackFill1Start",  dashboard.stackFill1Start, dashboard));
@@ -84,6 +85,7 @@ public class StyleConfiguration {
         if (dashboardElement is DashboardStack) {
             items.addItem(new CheckBoxReportFormItem("Consolidate Header Elements", "consolidateHeaderElements", DashboardStack(dashboardElement).consolidateHeaderElements, dashboardElement));
             items.addItem(new ComboBoxReportFormItem("Header Controls", "selectionType", DashboardStack(dashboardElement).selectionType, dashboardElement, ["Buttons", "Combo Box"]));
+            items.addItem(new NumericReportFormItem("Stack Font Size", "stackFontSize", DashboardStack(dashboardElement).stackFontSize, dashboardElement, 0, 100));
         }
         if (dashboardElement is DashboardGrid) {
             items.addItem(new NumericReportFormItem("Width", "width", DashboardGrid(dashboardElement).width, dashboardElement, 0, 2000));
@@ -201,6 +203,7 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", LineChartDefinition(report).legendMaxWidth, report, 10, 400));
             items.addItem(new CheckBoxReportFormItem("Auto Scale", "autoScale", LineChartDefinition(report).autoScale, report));
             items.addItem(new CheckBoxReportFormItem("Show Points", "showPoints", LineChartDefinition(report).showPoints, report));
+            items.addItem(new CheckBoxReportFormItem("Line Shadow", "lineShadow", LineChartDefinition(report).lineShadow, report));
             items.addItem(new CheckBoxReportFormItem("Align Labels To Units", "alignLabelsToUnits", LineChartDefinition(report).alignLabelsToUnits, report));
             items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", LineChartDefinition(report).multiColors, report));
         }
@@ -332,6 +335,7 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Data Source Fields", "dataSourceFields", report.dataSourceFields, report));
         items.addItem(new CheckBoxReportFormItem("Report Runs Manually", "adHocExecution", report.adHocExecution, report));
         items.addItem(new CheckBoxReportFormItem("Cacheable", "cacheable", report.cacheable, report));
+        items.addItem(new NumericReportFormItem("Cache Minutes", "cacheMinutes", report.cacheMinutes, report, 0, 50000));
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];
         items.sort = sort;

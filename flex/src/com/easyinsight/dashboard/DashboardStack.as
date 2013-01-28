@@ -22,6 +22,7 @@ public class DashboardStack extends DashboardElement {
     public var stackControl:int;
     public var consolidateHeaderElements:Boolean;
     public var selectionType:String = "Buttons";
+    public var stackFontSize:int = 16;
 
     public function DashboardStack() {
         super();

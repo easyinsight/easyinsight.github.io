@@ -93,6 +93,12 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         overlayIndex = 3;
     }
 
+    private var _reportPaddingWidth:int = 10;
+
+    public function set reportPaddingWidth(value:int):void {
+        _reportPaddingWidth = value;
+    }
+
     override protected function createChildren():void {
         super.createChildren();
 
@@ -112,8 +118,8 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         canvas.setStyle("backgroundAlpha", 1);
         canvas.setStyle("backgroundColor", 0xFFFFFF);
         reportCanvas = new ReportCanvas();
-        canvas.x = 10;
-        reportCanvas.x = 10;
+        canvas.x = _reportPaddingWidth;
+        reportCanvas.x = _reportPaddingWidth;
         if (_spaceSides) {
             canvas.y = 5;
             reportCanvas.y = 10;
@@ -146,14 +152,14 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         if (_spaceSides) {
-            canvas.width = unscaledWidth - 20;
+            canvas.width = unscaledWidth - (_reportPaddingWidth * 2);
             canvas.height = unscaledHeight - 10;
-            reportCanvas.width = unscaledWidth - 40;
+            reportCanvas.width = unscaledWidth - (_reportPaddingWidth * 4);
             reportCanvas.height = unscaledHeight - 40;
         } else {
-            canvas.width = unscaledWidth - 20;
+            canvas.width = unscaledWidth - (_reportPaddingWidth * 2);
             canvas.height = unscaledHeight;
-            reportCanvas.width = unscaledWidth - 40;
+            reportCanvas.width = unscaledWidth - (_reportPaddingWidth * 4);
             reportCanvas.height = unscaledHeight;
         }
 
