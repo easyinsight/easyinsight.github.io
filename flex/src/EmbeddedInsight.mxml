@@ -70,8 +70,16 @@
         [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf", fontName="Lucida Grande", fontStyle="normal")]
         private var myNormalLucida:Class;
 
+        [Embed(source="/com/easyinsight/skin/osx/opensans.swf", fontName="Open Sans", fontStyle="normal")]
+        private var openSans:Class;
+
+        [Embed(source="/com/easyinsight/skin/osx/opensansbold.swf", fontName="Open Sans Bold", fontWeight="bold")]
+        private var openSansBold:Class;
+
         private function handleFlashVars():void {
             Font.registerFont(myNormalLucida);
+            Font.registerFont(openSans);
+            Font.registerFont(openSansBold);
             Constants.setup();
             UserAudit.initialize();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
