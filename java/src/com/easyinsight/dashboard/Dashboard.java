@@ -58,7 +58,7 @@ public class Dashboard implements Cloneable, Serializable {
     private int stackFill2Start;
     private int stackFill2End;
     private boolean fillStackHeaders;
-    private int reportHorizontalPadding;
+    private int reportHorizontalPadding = 20;
 
     public int getReportHorizontalPadding() {
         return reportHorizontalPadding;

@@ -28,7 +28,7 @@ public class DashboardStack extends DashboardElement {
     private int stackControl;
     private boolean consolidateHeaderElements;
     private String selectionType;
-    private int stackFontSize;
+    private int stackFontSize = 16;
 
     public int getStackFontSize() {
         return stackFontSize;
