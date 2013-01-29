@@ -36,9 +36,6 @@
         [Bindable]
         private var dataSourceID:int;
 
-        [Bindable]
-        private var reportName:String;
-
 
         private var _showToolbar:Boolean;
 
@@ -82,7 +79,6 @@
             this.urlKey = String(Application.application.parameters.analysisID);
             this.reportType = int(Application.application.parameters.reportType);
             this.dataSourceID = int(Application.application.parameters.dataSourceID);
-            this.reportName = String(Application.application.parameters.reportName);
 
             this.showToolbar = int(Application.application.parameters.showToolbar) == 1;
             this.showHeader = int(Application.application.parameters.showHeader) == 1;
@@ -197,7 +193,7 @@
     <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
         <mx:Box/>
         <framework:LoginComponent loginEvent2="stackIndex = 2"/>
-        <dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
+        <dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}"
                                       dataSourceID="{dataSourceID}" reportType="{reportType}"
                                       showToolbar="{showToolbar}"
                                         showFilters="{showFilters}" showHeader="{showHeader}"/>

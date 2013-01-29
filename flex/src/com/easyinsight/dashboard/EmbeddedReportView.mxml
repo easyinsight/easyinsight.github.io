@@ -191,6 +191,7 @@
 
         private function onSetup(event:ReportSetupEvent):void {
             report = event.reportInfo.report;
+            reportName = event.reportInfo.report.name;
             headerFontSize = report.headerFontSize;
             maxHeaderWidth = report.maxHeaderWidth;
             if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
