@@ -71,6 +71,8 @@
             var sortItem:AnalysisItem = sortComboBox.selectedItem as AnalysisItem;
             if (sortItem != null) {
                 analysisDimension.sortItem = sortItem;
+            } else {
+                analysisDimension.sortItem = null;
             }
             analysisDimension.keyColumn = primaryKeyCheckbox.selected;
         }
