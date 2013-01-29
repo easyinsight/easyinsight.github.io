@@ -34,9 +34,9 @@ public abstract class Value implements Serializable, Comparable<Value>, Cloneabl
         if (originalValue != null) {
             value.setOriginalValue(originalValue.clone());
         }
-        if (sortValue != null && sortValue != value) {
+        /*if (sortValue != null && sortValue != value) {
             value.setSortValue(sortValue.clone());
-        }
+        }*/
         return value;
     }
 
