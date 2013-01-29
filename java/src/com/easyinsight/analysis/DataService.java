@@ -66,7 +66,7 @@ public class DataService {
                 insightRequestMetadata.setJoinOverrides(report.getJoinOverrides());
                 insightRequestMetadata.setTraverseAllJoins(report.isFullJoins());
 
-                if (requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
+                if (requester != null && requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
                     String label = requester.getFieldChoiceFilterLabel();
                     for (FilterDefinition testFilter : report.getFilterDefinitions()) {
                         if (label.equals(testFilter.getFilterName()) && testFilter.type() == FilterDefinition.ANALYSIS_ITEM) {
