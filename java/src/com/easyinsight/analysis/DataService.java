@@ -1110,7 +1110,8 @@ public class DataService {
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
 
-            DataSet dataSet = listDataSet(analysisDefinition, insightRequestMetadata, conn);
+            DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+            //DataSet dataSet = listDataSet(analysisDefinition, insightRequestMetadata, conn);
             TreeData treeData = new TreeData(analysisDefinition, (AnalysisHierarchyItem) analysisDefinition.getHierarchy(), null, dataSet);
             for (IRow row : dataSet.getRows()) {
                 treeData.addRow(row);
