@@ -42,7 +42,7 @@ public class ReportCache {
             EmbeddedResults results = map.get(cacheKey);
             if (results != null) {
                 System.out.println("got time = " + new Date(results.getTime()));
-                if (System.currentTimeMillis() > (results.getTime() + (cacheTime * 1000 * 60))) {
+                if (cacheTime > 0 && System.currentTimeMillis() > (results.getTime() + (cacheTime * 1000 * 60))) {
                     try {
                         System.out.println("expired...");
                         reportCache.remove(dataSourceID);
