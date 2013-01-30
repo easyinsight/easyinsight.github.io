@@ -389,6 +389,7 @@ public class FeedDefinition implements Cloneable, Serializable {
                 kpi.afterLoad();
                 kpis.add(kpi);
             }
+            query.close();
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
