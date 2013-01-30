@@ -59,7 +59,7 @@
                     var item:AnalysisItem = formReport.columns.getItemAt(l++) as AnalysisItem;
                     var formItem:FormItem = new FormItem();
                     formItem.styleName = "boldStyle";
-                    formItem.setStyle("fontWeight", "normal");
+                    formItem.setStyle("fontWeight", "bold");
                     formItem.setStyle("fontSize", formReport.labelFontSize);
 
                     formItem.label = item.display + ":";
