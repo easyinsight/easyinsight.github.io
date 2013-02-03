@@ -272,7 +272,11 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         if (queued) {
             queued = false;
             retrievedDataOnce = true;
-            viewFactory.refresh();
+            if (event.reportInfo.report.manualButRunFirst) {
+                viewFactory.forceRetrieve();
+            } else {
+                viewFactory.refresh();
+            }
         }
     }
 
@@ -297,7 +301,12 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             if (setup) {
                 retrievedDataOnce = true;
                 viewFactory.additionalFilterDefinitions = createAdditionalFilters(filterMap);
-                viewFactory.refresh();
+                if (report != null && report.manualButRunFirst) {
+                    viewFactory.forceRetrieve();
+                } else {
+                    viewFactory.refresh();
+                }
+
             } else {
                 queued = true;
             }

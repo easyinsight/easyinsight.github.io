@@ -104,6 +104,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private int headerFontSize = 24;
     private int maxHeaderWidth = 600;
     private int cacheMinutes;
+    private boolean manualButRunFirst;
 
     private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
@@ -111,6 +112,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private double backgroundAlpha = 1;
 
     private boolean rowsEditable;
+
+    public boolean isManualButRunFirst() {
+        return manualButRunFirst;
+    }
+
+    public void setManualButRunFirst(boolean manualButRunFirst) {
+        this.manualButRunFirst = manualButRunFirst;
+    }
 
     public int getCacheMinutes() {
         return cacheMinutes;
@@ -747,6 +756,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         lookupTableOptimization =  findBooleanProperty(properties, "lookupTableOptimization", false);
         adHocExecution = findBooleanProperty(properties, "adHocExecution", false);
         cacheable = findBooleanProperty(properties, "cacheable", false);
+        manualButRunFirst = findBooleanProperty(properties, "manualButRunFirst", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -764,6 +774,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("lookupTableOptimization", lookupTableOptimization));
         properties.add(new ReportBooleanProperty("adHocExecution", adHocExecution));
         properties.add(new ReportBooleanProperty("cacheable", cacheable));
+        properties.add(new ReportBooleanProperty("manualButRunFirst", manualButRunFirst));
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }

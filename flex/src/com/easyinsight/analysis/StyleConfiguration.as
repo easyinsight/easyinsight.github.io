@@ -335,6 +335,7 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Data Source Fields", "dataSourceFields", report.dataSourceFields, report));
         items.addItem(new CheckBoxReportFormItem("Report Runs Manually", "adHocExecution", report.adHocExecution, report));
         items.addItem(new CheckBoxReportFormItem("Cacheable", "cacheable", report.cacheable, report));
+        items.addItem(new CheckBoxReportFormItem("Run Before Manual", "manualButRunFirst", report.manualButRunFirst, report));
         items.addItem(new NumericReportFormItem("Cache Minutes", "cacheMinutes", report.cacheMinutes, report, 0, 50000));
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];

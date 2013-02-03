@@ -100,6 +100,7 @@ import mx.collections.ArrayCollection;
         public var cacheable:Boolean;
         public var maxHeaderWidth:int = 600;
         public var cacheMinutes:int;
+        public var manualButRunFirst:Boolean;
 
 		public function AnalysisDefinition()
 		{
