@@ -621,7 +621,7 @@ public class SolutionService {
             //childReport.setFolder(EIDescriptor.OTHER_VIEW);
             AnalysisDefinition alreadyInstalled = alreadyInstalledMap.get(childReport.getAnalysisID());
             if (alreadyInstalled == null) {
-                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, childReport);
+                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, childReport, null);
                 copyReport.setFolder(toFolder);
                 reportReplacementMap.put(childReport.getAnalysisID(), copyReport);
                 reportList.add(copyReport);
@@ -738,7 +738,15 @@ public class SolutionService {
         recurseReport(reports, dashboards, originalBaseReport, session, conn);
         //reports.add(originalBaseReport);
         FeedStorage feedStorage = new FeedStorage();
+        FeedDefinition originalSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
         FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+        Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+        for (AnalysisItem field : originalSource.getFields()) {
+            map.put(field.toDisplay(), field);
+        }
+        for (AnalysisItem field : targetDataSource.getFields()) {
+            map.remove(field.toDisplay());
+        }
         Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
         Map<Long, Dashboard> dashboardReplacementMap = new HashMap<Long, Dashboard>();
         List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
@@ -746,7 +754,7 @@ public class SolutionService {
         for (AnalysisDefinition child : reports.values()) {
             AnalysisDefinition alreadyInstalled = alreadyInstalledMap.get(child.getAnalysisID());
             if (alreadyInstalled == null) {
-                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child);
+                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child, new ArrayList<AnalysisItem>(map.values()));
                 if (child.getAnalysisID() != reportID) {
                     copyReport.setFolder(EIDescriptor.OTHER_VIEW);
                 }
@@ -882,8 +890,8 @@ public class SolutionService {
         return clonedDashboard;
     }
 
-    private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report) throws CloneNotSupportedException {
-        AnalysisDefinition clonedReport = report.clone(localDefinition, localDefinition.getFields(), true);
+    private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report, List<AnalysisItem> additionalDataSourceFields) throws CloneNotSupportedException {
+        AnalysisDefinition clonedReport = report.clone(localDefinition, localDefinition.getFields(), true, additionalDataSourceFields);
         clonedReport.setSolutionVisible(false);
         clonedReport.setRecommendedExchange(false);
         clonedReport.setAutoSetupDelivery(false);
