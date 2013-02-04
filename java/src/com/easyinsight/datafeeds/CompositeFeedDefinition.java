@@ -302,7 +302,8 @@ public class CompositeFeedDefinition extends FeedDefinition {
 
             // have to reconcile what was returned by the visitor with existing fields
 
-            Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+            //Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+            ReplacementMap replacementMap = new ReplacementMap();
 
             Map<Key, AnalysisItem> childToParentMap = new HashMap<Key, AnalysisItem>();
 
@@ -311,7 +312,13 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
 
             for (AnalysisItem field : getFields()) {
-                replacementMap.put(field.getAnalysisItemID(), childToParentMap.get(field.createAggregateKey()));
+                AnalysisItem item = childToParentMap.get(field.createAggregateKey());
+                if (item == null) {
+                    replacementMap.addField(field, false);
+                } else {
+                    replacementMap.addField(item, false, field.getAnalysisItemID());
+                }
+                //replacementMap.put(field.getAnalysisItemID(), childToParentMap.get(field.createAggregateKey()));
             }
 
             List<AnalysisItem> fields = getFields() == null ? new ArrayList<AnalysisItem>() : getFields();
@@ -366,10 +373,10 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 folderMap.put(feed.getDataFeedID(), defineFolder(name));
             }
 
-            ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+            //ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
 
             for (AnalysisItem analysisItem : getFields()) {
-                analysisItem.updateIDs(replacements);
+                analysisItem.updateIDs(replacementMap);
             }
 
             for (AnalysisItem analysisItem : analysisItemVisitor.fields) {

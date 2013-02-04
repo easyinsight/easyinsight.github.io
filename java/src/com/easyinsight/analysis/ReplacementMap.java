@@ -50,6 +50,20 @@ public class ReplacementMap {
         return exists;
     }
 
+    public AnalysisItem addField(AnalysisItem analysisItem, boolean changingDataSource, long analysisItemID) throws CloneNotSupportedException {
+        if (analysisItem == null) {
+            return null;
+        }
+        AnalysisItem exists = getField(analysisItem);
+        if (exists == null) {
+            exists = analysisItem.clone();
+            cleanup(exists, changingDataSource);
+            replacementMap.put(analysisItemID, exists);
+            qualifiedNameReplacementMap.put(analysisItem.toDisplay() + "-" + analysisItem.getQualifiedSuffix(), exists);
+        }
+        return exists;
+    }
+
     public AnalysisItem getField(AnalysisItem analysisItem) {
         AnalysisItem returnItem;
         if (analysisItem.getAnalysisItemID() > 0) {
