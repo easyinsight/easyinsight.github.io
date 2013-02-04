@@ -1,7 +1,13 @@
-<%@ page import="java.net.URLEncoder" %>
 <%@ page import="com.easyinsight.users.Account" %>
 <%@ page import="com.easyinsight.users.UserService" %>
-<%@ page import="com.easyinsight.html.RedirectUtil" %><%
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
+<%@ page import="com.easyinsight.users.UserServiceResponse" %>
+<%@ page import="com.easyinsight.security.SecurityUtil" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.email.AccountMemberInvitation" %>
+<%@ page import="com.easyinsight.logging.LogClass" %>
+<%
     String firstName = request.getParameter("firstName");
     String lastName = request.getParameter("lastName");
     String email = request.getParameter("email");
@@ -12,7 +18,7 @@
 
 
     if (wasSubmit != null) {
-        if(errorString != null) {
+        if (errorString != null) {
             // fall through
         } else if (firstName == null || "".equals(firstName)) {
             errorString = "Please specify a first name.";
@@ -22,7 +28,7 @@
             errorString = "Please specify an email address";
         } else if (company == null || "".equals(company)) {
             errorString = "Please specify a company name.";
-        }  else if (password == null || "".equals(password)) {
+        } else if (password == null || "".equals(password)) {
             errorString = "Please specify a password.";
         } else if (password.length() < 8) {
             errorString = "Your password must be at least eight characters.";
@@ -41,18 +47,44 @@
             com.easyinsight.users.AccountTransferObject account = new com.easyinsight.users.AccountTransferObject();
             account.setName(company);
             account.setAccountType(Account.PROFESSIONAL);
+            account.setAccountState(Account.TRIAL);
 
             String exists = new com.easyinsight.users.UserService().doesUserExist(user.getUserName(), user.getEmail(), account.getName());
             if (exists == null) {
-                String url = "https://www.easy-insight.com/app";
+                String url = "/app";
                 new com.easyinsight.users.UserService().createAccount(user, account, request.getParameter("password"), url);
+
+
+                UserServiceResponse userServiceResponse = new UserService().authenticate(email, password, false);
+                session.invalidate();
+                session = request.getSession(true);
+                SecurityUtil.populateSession(session, userServiceResponse);
+                final long userID = userServiceResponse.getUserID();
+                final String curEmail = email;
+                final String curFirstName = firstName;
+
+                new Thread(new Runnable() {
+
+                    public void run() {
+                        EIConnection conn = Database.instance().getConnection();
+                        try {
+                            new AccountMemberInvitation().sendWelcomeEmail(curEmail, conn, userID, curFirstName);
+                        } catch (Exception e) {
+                            LogClass.error(e);
+                        } finally {
+                            Database.closeConnection(conn);
+                        }
+                    }
+                }).start();
+
+                UserService.checkAccountStateOnLogin(session, userServiceResponse, request, response, url);
+
             } else {
                 errorString = exists;
             }
         }
     }
     if (errorString == null) {
-        response.sendRedirect(RedirectUtil.getURL(request, "/app/newaccount/accountCreated.jsp"));
         return;
     } else {
         request.getSession().setAttribute("errorString", errorString);

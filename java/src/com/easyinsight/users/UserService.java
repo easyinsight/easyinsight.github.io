@@ -854,21 +854,11 @@ public class UserService {
             account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
             session.update(account);
 
-            String activationKey = RandomTextGenerator.generateText(20);
-            if (account.getGoogleDomainName() == null) {
 
-                if (sourceURL == null) {
-                    sourceURL = "https://www.easy-insight.com/app";
-                }
-                createAccountActivation(conn, account.getAccountID(), activationKey, sourceURL);
-            }
-            //}
             session.flush();
             conn.commit();
             if (SecurityUtil.getSecurityProvider() instanceof DefaultSecurityProvider) {
-                if (account.getGoogleDomainName() == null) {
-                    new AccountMemberInvitation().sendActivationEmail(user.getEmail(), user.getFirstName(), activationKey);
-                }
+
                 new Thread(new SalesEmail(account, user)).start();
             }
             new AccountActivityStorage().generateSalesEmailSchedules(user.getUserID(), conn);
@@ -923,9 +913,9 @@ public class UserService {
     }
 
     private void configureNewAccount(Account account) {
-        if (account.getGoogleDomainName() == null) {
-            account.setAccountState(Account.INACTIVE);
-        }
+//        if (account.getGoogleDomainName() == null) {
+//            account.setAccountState(Account.INACTIVE);
+//        }
         AccountLimits.configureAccount(account);
     }
 
@@ -978,9 +968,12 @@ public class UserService {
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
-            User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
-            user.setHtmlOrFlex(mode);
-            session.update(user);
+            List<User> users = (List<User>) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list();
+            if(users.size() != 0) {
+                User user = users.get(0);
+                user.setHtmlOrFlex(mode);
+                session.update(user);
+            }
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -989,6 +982,7 @@ public class UserService {
         } finally {
             session.close();
         }
+
     }
 
     private UserInfo retrieveUserNoSecurity(long userID) {
