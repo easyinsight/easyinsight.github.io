@@ -6,12 +6,15 @@ import com.easyinsight.analysis.CheckBoxReportFormItem;
 import com.easyinsight.analysis.ColorReportFormItem;
 import com.easyinsight.analysis.ComboBoxReportFormItem;
 import com.easyinsight.analysis.FillProvider;
+import com.easyinsight.analysis.MultiColor;
 import com.easyinsight.analysis.Value;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisDefinition;
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.skin.ApplicationSkin;
 
 import mx.collections.ArrayCollection;
+import mx.controls.Alert;
 
 
 [Bindable]
@@ -33,6 +36,18 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
     public function StackedColumnChartDefinition() {
         super();
     }
+
+    /*override public function initialConfig():void {
+        super.initialConfig();
+        if  (ApplicationSkin.instance().multiColors != null && ApplicationSkin.instance().multiColors.length > 0) {
+            Alert.show("!");
+        }
+        if  (ApplicationSkin.instance().multiColors != null && ApplicationSkin.instance().multiColors.length > 0 &&
+                MultiColor(ApplicationSkin.instance().multiColors.getItemAt(0)).color1StartEnabled) {
+            Alert.show("setting");
+            multiColors = ApplicationSkin.instance().multiColors;
+        }
+    }*/
 
     override public function supportsEmbeddedFonts():Boolean {
         return true;
@@ -72,14 +87,14 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
         for (var i:int = 0; i < dataSet.length; i++) {
             var object:Object = dataSet.getItemAt(i);
             var xValVal:Value = object[xaxis.qualifiedName()];
-            var xVal:String = xaxis.getFormatter().format(xValVal.getValue());
+            var xVal:String = xValVal.toString();
             if (xVal == null ||
                     xVal == "") {
                 xVal = "(No Value)";
             }
 
             var measureValue:Value = object[measures.getItemAt(0).qualifiedName()];
-            
+
             if (measureValue.type() == Value.EMPTY || measureValue.toNumber() == 0) {
                 continue;
             }
@@ -91,7 +106,7 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
                 results.addItem(newObject);
             }
             var stackVal:Value = object[stackItem.qualifiedName()];
-            var dimensionValue:String = stackItem.getFormatter().format(stackVal.getValue());
+            var dimensionValue:String = stackVal.toString();
             if (dimensionValue == null || dimensionValue == "") {
                 dimensionValue = "(No Value)";
             }
@@ -102,7 +117,7 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
                 }
             }
             newObject[stackItem.qualifiedName()] = dimensionValue;
-            
+
             newObject[dimensionValue] = measureValue;
             if (!uniques.contains(dimensionValue)) {
                 uniques.addItem(dimensionValue);

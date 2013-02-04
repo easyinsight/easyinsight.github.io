@@ -215,8 +215,12 @@
 
 
                 var dataObjs:ArrayCollection = columnChartDef.populateGroupings(dataSet, uniques);
-                var columnSet:ColumnSet = new ColumnSet();
+                var columnSet:EIColumnSet = new EIColumnSet();
                 measureFormatter = columnChartDef.measures.getItemAt(0).getFormatter();
+                dimensionFormatter = columnChartDef.xaxis.getFormatter();
+                columnSet.xAxisFormatter = dimensionFormatter;
+                columnSet.yAxisFormatter = measureFormatter;
+                columnSet.stackFormatter = stackItem.getFormatter();
                 columnSet.type = "stacked";
 
                 var useCustomColors:Boolean;
@@ -274,7 +278,7 @@
                 this.defaultLink = ChartUtil.setup(columnChartDef.stackItem, columnChart, onChartClick);
 
 
-                dimensionFormatter = columnChartDef.xaxis.getFormatter();
+
 
                 var newXAxisItem:AnalysisItem = columnChartDef.xaxis;
                 if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {

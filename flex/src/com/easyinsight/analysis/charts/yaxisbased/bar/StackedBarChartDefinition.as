@@ -69,7 +69,7 @@ public class StackedBarChartDefinition extends YAxisDefinition{
         for (var i:int = 0; i < dataSet.length; i++) {
             var object:Object = dataSet.getItemAt(i);
             var xValVal:Value = object[yaxis.qualifiedName()];
-            var xVal:String = yaxis.getFormatter().format(xValVal.getValue());
+            var xVal:String = xValVal.toString();
             if (xVal == null ||
                     xVal == "") {
                 xVal = "(No Value)";
@@ -82,7 +82,7 @@ public class StackedBarChartDefinition extends YAxisDefinition{
                 results.addItem(newObject);
             }
             var stackVal:Value = object[stackItem.qualifiedName()];
-            var dimensionValue:String = stackItem.getFormatter().format(stackVal.getValue());
+            var dimensionValue:String = stackVal.toString();
             if (dimensionValue == null || dimensionValue == "") {
                 dimensionValue = "(No Value)";
             }
