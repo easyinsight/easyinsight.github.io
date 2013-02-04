@@ -15,7 +15,11 @@ public class MultiColor {
     public var color1End:int;
     public var color1EndEnabled:Boolean;
 
-    public function MultiColor() {
+    public function MultiColor(color1Start:int = 0, color1StartEnabled:Boolean = false, color1End:int = 0, color1EndEnabled:Boolean = false) {
+        this.color1Start = color1Start;
+        this.color1StartEnabled = color1StartEnabled;
+        this.color1End = color1End;
+        this.color1EndEnabled = color1EndEnabled;
     }
 }
 }

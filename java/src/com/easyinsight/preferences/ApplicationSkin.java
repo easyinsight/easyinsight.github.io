@@ -59,6 +59,7 @@ public class ApplicationSkin implements Serializable {
     private int dashboardStack1ColorEnd;
     private int dashboardStackColor2Start;
     private int dashboardStackColor2End;
+    private List<MultiColor> multiColors;
 
     private long id;
 
@@ -111,6 +112,7 @@ public class ApplicationSkin implements Serializable {
             properties.add(new ReportNumericProperty("dashboardStack1ColorEnd", dashboardStack1ColorEnd));
             properties.add(new ReportNumericProperty("dashboardStack2ColorStart", dashboardStackColor2Start));
             properties.add(new ReportNumericProperty("dashboardStack2ColorEnd", dashboardStackColor2End));
+            properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         }
         if (mode == APPLICATION || mode == USER) {
             properties.add(new ReportBooleanProperty("myDataName", myDataName));
@@ -179,6 +181,15 @@ public class ApplicationSkin implements Serializable {
         dashboardStack1ColorEnd = (int) findNumberProperty(properties, "dashboardStack1ColorEnd", 0);
         dashboardStackColor2Start = (int) findNumberProperty(properties, "dashboardStack2ColorStart", 0);
         dashboardStackColor2End = (int) findNumberProperty(properties, "dashboardStack2ColorEnd", 0);
+        multiColors = multiColorProperty(properties, "multiColors");
+    }
+
+    public List<MultiColor> getMultiColors() {
+        return multiColors;
+    }
+
+    public void setMultiColors(List<MultiColor> multiColors) {
+        this.multiColors = multiColors;
     }
 
     public int getCustomChartColor() {
@@ -530,6 +541,16 @@ public class ApplicationSkin implements Serializable {
             }
         }
         return defaultValue;
+    }
+
+    protected List<MultiColor> multiColorProperty(List<ReportProperty> properties, String property) {
+        for (ReportProperty reportProperty : properties) {
+            if (reportProperty.getPropertyName().equals(property)) {
+                ReportMultiColorProperty reportMultiColorProperty = (ReportMultiColorProperty) reportProperty;
+                return reportMultiColorProperty.toMultiColorList();
+            }
+        }
+        return new ArrayList<MultiColor>();
     }
 
     protected ImageDescriptor findImage(List<ReportProperty> properties, String property, ImageDescriptor defaultValue) {

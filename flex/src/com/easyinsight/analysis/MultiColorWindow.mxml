@@ -2,6 +2,7 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
+        import mx.events.ListEvent;
         import mx.managers.PopUpManager;
 
         private var _multiColors:ArrayCollection;
@@ -35,9 +36,64 @@
             dispatchEvent(new MultiColorEvent(cols));
             PopUpManager.removePopUp(this);
         }
+
+        private var palettes:ArrayCollection = new ArrayCollection([
+            {label:"Default", colors:[
+                new MultiColor(0xa6bc59, true),
+                new MultiColor(0x597197, true),
+                new MultiColor(0xd6ab2a, true),
+                new MultiColor(0xd86068, true),
+                new MultiColor(0x5d9942, true),
+                new MultiColor(0x7a4c6c, true),
+                new MultiColor(0x61B796, true),
+                new MultiColor(0x3a93e8, true),
+                new MultiColor(0xAB3032, true),
+                new MultiColor(0x377026, true),
+                new MultiColor(0x8e3160, true),
+                new MultiColor(0x5a46cc, true),
+                new MultiColor(0xBBC417, true),
+                new MultiColor(0x2921B8, true),
+                new MultiColor(0xB57C99, true),
+                new MultiColor(0xB57C99, true)
+            ]},
+            {label:"Other", colors:[
+                new MultiColor(0xB22222, true),
+                new MultiColor(0xDC143C, true),
+                new MultiColor(0xCD5C5C, true),
+                new MultiColor(0xF08080, true),
+                new MultiColor(0xE9967A, true),
+                new MultiColor(0xFA8072, true)
+            ]}
+        ]);
+
+        //return [new SolidColor(0xB22222), new SolidColor(0xDC143C), new SolidColor(0xCD5C5C), new SolidColor(0xF08080), new SolidColor(0xE9967A), new SolidColor(0xFA8072), new SolidColor(0xFFA07A)];
+
+        private function onClick(event:ListEvent):void {
+            var colors:Array = palettes.getItemAt(event.rowIndex).colors;
+            grid.removeAllChildren();
+            for (var i:int = 0; i < 15; i++) {
+                if (i < colors.length) {
+                    var p1:MultiColorPicker = new MultiColorPicker();
+                    p1.config = colors[i] as MultiColor;
+                    grid.addChild(p1);
+                } else {
+                    var p2:MultiColorPicker = new MultiColorPicker();
+                    grid.addChild(p2);
+                }
+            }
+        }
         ]]></mx:Script>
-    <mx:Grid id="grid">
-    </mx:Grid>
+    <mx:HBox>
+        <mx:Grid id="grid">
+        </mx:Grid>
+        <mx:VBox horizontalAlign="center">
+            <mx:Label text="Default Palettes"/>
+            <mx:Text text="Click on a default palette to populate this report with its colors." width="150"/>
+            <mx:List dataProvider="{palettes}" itemClick="onClick(event)" width="150" rowCount="{palettes.length}">
+
+            </mx:List>
+        </mx:VBox>
+    </mx:HBox>
     <mx:HBox>
         <util:SaveButton label="Apply" click="apply()"/>
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

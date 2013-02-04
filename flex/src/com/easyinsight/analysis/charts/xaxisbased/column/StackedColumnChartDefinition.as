@@ -37,17 +37,13 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
         super();
     }
 
-    /*override public function initialConfig():void {
+    override public function initialConfig():void {
         super.initialConfig();
-        if  (ApplicationSkin.instance().multiColors != null && ApplicationSkin.instance().multiColors.length > 0) {
-            Alert.show("!");
-        }
         if  (ApplicationSkin.instance().multiColors != null && ApplicationSkin.instance().multiColors.length > 0 &&
                 MultiColor(ApplicationSkin.instance().multiColors.getItemAt(0)).color1StartEnabled) {
-            Alert.show("setting");
             multiColors = ApplicationSkin.instance().multiColors;
         }
-    }*/
+    }
 
     override public function supportsEmbeddedFonts():Boolean {
         return true;

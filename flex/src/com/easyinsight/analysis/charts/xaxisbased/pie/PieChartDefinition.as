@@ -1,7 +1,9 @@
 package com.easyinsight.analysis.charts.xaxisbased.pie {
+import com.easyinsight.analysis.MultiColor;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisDefinition;
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.skin.ApplicationSkin;
 
 import mx.collections.ArrayCollection;
 
@@ -15,6 +17,14 @@ public class PieChartDefinition extends XAxisDefinition{
 
     public function PieChartDefinition() {
         super();
+    }
+
+    override public function initialConfig():void {
+        super.initialConfig();
+        if  (ApplicationSkin.instance().multiColors != null && ApplicationSkin.instance().multiColors.length > 0 &&
+                MultiColor(ApplicationSkin.instance().multiColors.getItemAt(0)).color1StartEnabled) {
+            multiColors = ApplicationSkin.instance().multiColors;
+        }
     }
 
     override public function supportsEmbeddedFonts():Boolean {

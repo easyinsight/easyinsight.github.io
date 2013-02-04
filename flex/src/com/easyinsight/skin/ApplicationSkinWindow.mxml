@@ -7,6 +7,7 @@
 
         import com.easyinsight.analysis.ComboBoxReportFormItem;
         import com.easyinsight.analysis.ImageReportFormItem;
+        import com.easyinsight.analysis.MultiColorReportFormItem;
 
         import com.easyinsight.analysis.NumericReportFormItem;
 
@@ -75,6 +76,7 @@
             lfItems.addItem(new ColorReportFormItem("Stack 1 Fill End", "dashboardStack1ColorEnd", skin.dashboardStack1ColorEnd, skin));
             lfItems.addItem(new ColorReportFormItem("Stack 2 Fill Start", "dashboardStackColor2Start", skin.dashboardStackColor2Start, skin));
             lfItems.addItem(new ColorReportFormItem("Stack 2 Fill End", "dashboardStackColor2End", skin.dashboardStackColor2End, skin));
+            lfItems.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", skin.multiColors, skin));
 
             items.addItem(new ColorReportFormItem("Core Application Background Color", "coreAppBackgroundColor", skin.coreAppBackgroundColor, skin, "coreAppBackgroundColorEnabled"));
             items.addItem(new ImageReportFormItem("Core Application Background Image", "coreAppBackgroundImage", skin.coreAppBackgroundImage, skin, "coreAppBackgroundImageEnabled"));

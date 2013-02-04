@@ -1,4 +1,5 @@
 package com.easyinsight.skin {
+import mx.collections.ArrayCollection;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.preferences.ApplicationSkin")]
@@ -50,6 +51,8 @@ public class ApplicationSkinTO {
     public var dashboardStack1ColorEnd:int;
     public var dashboardStackColor2Start:int;
     public var dashboardStackColor2End:int;
+
+    public var multiColors:ArrayCollection;
 
     public function ApplicationSkinTO() {
     }

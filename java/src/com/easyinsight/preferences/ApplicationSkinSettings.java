@@ -1,5 +1,6 @@
 package com.easyinsight.preferences;
 
+import com.easyinsight.analysis.ReportMultiColorProperty;
 import com.easyinsight.analysis.ReportProperty;
 import org.hibernate.Session;
 
@@ -112,14 +113,27 @@ public class ApplicationSkinSettings {
     private ApplicationSkinSettings override(ApplicationSkinSettings settings) {
         Map<String, ReportProperty> propertyMap = new HashMap<String, ReportProperty>();
         for (ReportProperty reportProperty : settings.getProperties()) {
-            if (reportProperty.isEnabled()) {
+            if (reportProperty instanceof ReportMultiColorProperty) {
+                ReportMultiColorProperty multiColorProperty = (ReportMultiColorProperty) reportProperty;
+                if (multiColorProperty.isColor1StartEnabled()) {
+                    propertyMap.put(reportProperty.getPropertyName(), reportProperty);
+                }
+            } else if (reportProperty.isEnabled()) {
                 propertyMap.put(reportProperty.getPropertyName(), reportProperty);
             }
         }
 
         for (ReportProperty reportProperty : getProperties()) {
-            if (!propertyMap.containsKey(reportProperty.getPropertyName()) && reportProperty.isEnabled()) {
-                propertyMap.put(reportProperty.getPropertyName(), reportProperty);
+            if (!propertyMap.containsKey(reportProperty.getPropertyName())) {
+                if (reportProperty instanceof ReportMultiColorProperty) {
+                    ReportMultiColorProperty multiColorProperty = (ReportMultiColorProperty) reportProperty;
+                    if (multiColorProperty.isColor1StartEnabled()) {
+                        propertyMap.put(reportProperty.getPropertyName(), reportProperty);
+                    }
+                } else if (reportProperty.isEnabled()) {
+                    propertyMap.put(reportProperty.getPropertyName(), reportProperty);
+                }
+
             }
         }
 

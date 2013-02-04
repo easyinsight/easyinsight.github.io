@@ -4,6 +4,8 @@ import com.easyinsight.framework.User;
 import flash.events.Event;
 import flash.events.EventDispatcher;
 
+import mx.collections.ArrayCollection;
+
 public class ApplicationSkin extends EventDispatcher {
 
     private var _coreAppBackgroundImage:Object;
@@ -35,6 +37,8 @@ public class ApplicationSkin extends EventDispatcher {
     public var customChartColorEnabled:Boolean;
     public var gradientChartColor:int;
     public var gradientChartColorEnabled:Boolean;
+
+    public var multiColors:ArrayCollection;
 
     public var dashboardStack1ColorStart:int;
     public var dashboardStack1ColorEnd:int;
@@ -81,6 +85,7 @@ public class ApplicationSkin extends EventDispatcher {
         dashboardStack1ColorEnd = appSkin.dashboardStack1ColorEnd;
         dashboardStackColor2Start = appSkin.dashboardStackColor2Start;
         dashboardStackColor2End = appSkin.dashboardStackColor2End;
+        multiColors = appSkin.multiColors;
 
         if (appSkin.reportHeaderImage != null) {
             var reportHeaderImageLoader:ImageLoader = new ImageLoader();
