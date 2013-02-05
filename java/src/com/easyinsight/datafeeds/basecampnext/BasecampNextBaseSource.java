@@ -67,9 +67,18 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                 if (restMethod.getStatusCode() == 404 && path.endsWith("projects.json")) {
                     throw new ReportException(new DataSourceConnectivityReportFault("We were unable to retrieve the list of projects for this Basecamp account. Check that you created this connection under the right 37Signals user, and if so, that your Basecamp account is still active. If this problem persists, contact support@easy-insight.com.", parentDefinition));
                 }
-                jsonObject = new JSONArray(restMethod.getResponseBodyAsString());
-                restMethod.releaseConnection();
-                successful = true;
+                if (restMethod.getStatusCode() == 429 || restMethod.getStatusCode() == 502 || restMethod.getStatusCode() == 503 ||
+                        restMethod.getStatusCode() == 504) {
+                    retryCount++;
+                    try {
+                        Thread.sleep(20000);
+                    } catch (InterruptedException e1) {
+                    }
+                } else {
+                    jsonObject = new JSONArray(restMethod.getResponseBodyAsString());
+                    restMethod.releaseConnection();
+                    successful = true;
+                }
             } catch (IOException e) {
                 retryCount++;
                 if (e.getMessage().contains("429") || e instanceof SocketException) {
@@ -84,10 +93,6 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
             } catch (ReportException re) {
                 throw re;
             } catch (Throwable e) {
-                try {
-                    System.out.println("https://basecamp.com/"+parentDefinition.getEndpoint()+"/api/v1/" + path + " = " + restMethod.getResponseBodyAsString());
-                } catch (IOException e1) {
-                }
                 throw new RuntimeException(e);
             }
         } while (!successful && retryCount < 10);
@@ -115,8 +120,17 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
         do {
             try {
                 httpClient.executeMethod(restMethod);
-                jsonObject = new JSONObject(restMethod.getResponseBodyAsString());
-                successful = true;
+                if (restMethod.getStatusCode() == 429 || restMethod.getStatusCode() == 502 || restMethod.getStatusCode() == 503 ||
+                        restMethod.getStatusCode() == 504) {
+                    retryCount++;
+                    try {
+                        Thread.sleep(20000);
+                    } catch (InterruptedException e1) {
+                    }
+                } else {
+                    jsonObject = new JSONObject(restMethod.getResponseBodyAsString());
+                    successful = true;
+                }
             } catch (IOException e) {
                 System.out.println("IOException " + e.getMessage());
                 retryCount++;
@@ -154,8 +168,17 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
         do {
             try {
                 client.executeMethod(restMethod);
-                jsonObject = new JSONObject(restMethod.getResponseBodyAsString());
-                successful = true;
+                if (restMethod.getStatusCode() == 429 || restMethod.getStatusCode() == 502 || restMethod.getStatusCode() == 503 ||
+                        restMethod.getStatusCode() == 504) {
+                    retryCount++;
+                    try {
+                        Thread.sleep(20000);
+                    } catch (InterruptedException e1) {
+                    }
+                } else {
+                    jsonObject = new JSONObject(restMethod.getResponseBodyAsString());
+                    successful = true;
+                }
             } catch (IOException e) {
                 System.out.println("IOException " + e.getMessage());
                 retryCount++;
