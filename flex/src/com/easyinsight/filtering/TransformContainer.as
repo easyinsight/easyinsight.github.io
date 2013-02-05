@@ -8,6 +8,7 @@ import com.easyinsight.commands.CommandEvent;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemWrapper;
+import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.filtering.AnalysisItemFilterDefinition;
 import com.easyinsight.util.PopUpUtil;
 
@@ -221,6 +222,12 @@ public class TransformContainer extends HBox
         return filter;
     }
 
+    private var _dashboard:Dashboard;
+
+    public function set dashboard(value:Dashboard):void {
+        _dashboard = value;
+    }
+
     private function createFilter(filterDefinition:FilterDefinition):IFilter {
         var filter:IFilter;
         if (filterDefinition.getType() == FilterDefinition.VALUE) {
@@ -229,7 +236,9 @@ public class TransformContainer extends HBox
                 if (filterValueDefinition.autoComplete) {
                     filter = new AutoCompleteFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
                 } else {
-                    filter = new ComboBoxFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report, _loadingFromReport ? ((_report != null && _report.filterDefinitions != null) ? _report.filterDefinitions : filterDefinitions) : filterDefinitions);
+                    filter = new ComboBoxFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report,
+                            _loadingFromReport ? ((_report != null && _report.filterDefinitions != null) ? _report.filterDefinitions : filterDefinitions) : filterDefinitions,
+                            _dashboard);
                 }
             } else {
                 filter = new MultiValueFilter(_feedID, filterDefinition.field, _reportID,  _dashboardID);
@@ -667,7 +676,7 @@ public class TransformContainer extends HBox
                     filterValueDefinition.inclusive = includeFilter;
                     filterDefinition = filterValueDefinition;
                     if (values.length == 1 && includeFilter) {
-                        filter = new ComboBoxFilter(_feedID, key, _reportID, _dashboardID, _report, filterDefinitions);
+                        filter = new ComboBoxFilter(_feedID, key, _reportID, _dashboardID, _report, filterDefinitions, _dashboard);
                     } else {
                         filter = new MultiValueFilter(_feedID, key, _reportID, _dashboardID);
                     }

@@ -4,6 +4,7 @@ import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -41,11 +42,17 @@ public class DataService {
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
                                                               @Nullable WSAnalysisDefinition report) {
-        return getAnalysisItemMetadata(feedID, analysisItem, utfOffset, reportID, dashboardID, report, null, null);
+        return getAnalysisItemMetadata(feedID, analysisItem, utfOffset, reportID, dashboardID, report, null, null, null);
     }
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
                                                               @Nullable WSAnalysisDefinition report, List<FilterDefinition> additionalFilters, FilterDefinition requester) {
+        return getAnalysisItemMetadata(feedID, analysisItem, utfOffset, reportID, dashboardID, report, additionalFilters, requester, null);
+    }
+
+    public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
+                                                              @Nullable WSAnalysisDefinition report, List<FilterDefinition> additionalFilters, FilterDefinition requester,
+                                                              @Nullable Dashboard dashboard) {
         EIConnection conn = Database.instance().getConnection();
         try {
             if (reportID > 0) {
@@ -69,6 +76,16 @@ public class DataService {
                 if (requester != null && requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
                     String label = requester.getFieldChoiceFilterLabel();
                     for (FilterDefinition testFilter : report.getFilterDefinitions()) {
+                        if (label.equals(testFilter.getFilterName()) && testFilter.type() == FilterDefinition.ANALYSIS_ITEM) {
+                            AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) testFilter;
+                            analysisItem = analysisItemFilterDefinition.getTargetItem();
+                        }
+                    }
+                }
+            } else if (dashboard != null) {
+                if (requester != null && requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
+                    String label = requester.getFieldChoiceFilterLabel();
+                    for (FilterDefinition testFilter : dashboard.getFilters()) {
                         if (label.equals(testFilter.getFilterName()) && testFilter.type() == FilterDefinition.ANALYSIS_ITEM) {
                             AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) testFilter;
                             analysisItem = analysisItemFilterDefinition.getTargetItem();

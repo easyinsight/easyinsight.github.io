@@ -238,7 +238,8 @@
             <filtering:TransformContainer id="transformContainer" filterEditable="false"
                                           existingFilters="{filterDefinitions}"
                                           width="100%" feedID="{dataSourceID}"
-                                          reportView="true" dashboardID="{_dashboardID}" updatedTransforms="transformsUpdated(event)"/>
+                                          reportView="true" dashboardID="{_dashboardID}" updatedTransforms="transformsUpdated(event)"
+                    dashboard="{dashboard}"/>
 
     </mx:ViewStack>
     <mx:Canvas width="100%" backgroundAlpha="1" borderColor="0" id="dashboardStyleArea">

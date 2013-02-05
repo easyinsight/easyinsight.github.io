@@ -6,6 +6,7 @@ import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.ReportFault;
 
 import com.easyinsight.analysis.Value;
+import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
@@ -74,11 +75,14 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
 
     private var _report:AnalysisDefinition;
 
-    public function ComboBoxFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition, otherFilters:ArrayCollection) {
+    private var _dashboard:Dashboard;
+
+    public function ComboBoxFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition, otherFilters:ArrayCollection, dashboard:Dashboard) {
         super();
         this._report = report;
         this._feedID = feedID;
         this._analysisItem = analysisItem;
+        this._dashboard = dashboard;
         _otherFilters = otherFilters;
         this.reportID = reportID;
         this.dashboardID = dashboardID;
@@ -116,7 +120,8 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report, _otherFilters, _filterDefinition);
+            dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report,
+                    _otherFilters, _filterDefinition, _dashboard);
         }
     }
 
@@ -131,7 +136,8 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
         dataService = new RemoteObject();
         dataService.destination = "data";
         dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-        dataService.getAnalysisItemMetadata.send(_feedID, filterDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report, _otherFilters, _filterDefinition);
+        dataService.getAnalysisItemMetadata.send(_feedID, filterDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report,
+                _otherFilters, _filterDefinition, _dashboard);
     }
 
     private function onChange(event:Event):void {
@@ -235,7 +241,8 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             dataService.destination = "data";
             dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
             dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
-            dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report, _otherFilters, _filterDefinition);
+            dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID, _report,
+                    _otherFilters, _filterDefinition, _dashboard);
         } else {
             processMetadata(_filterDefinition.cachedValues as AnalysisDimensionResultMetadata);
         }
