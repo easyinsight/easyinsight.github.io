@@ -1,5 +1,6 @@
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.users.Account" %>
+<%@ page import="com.easyinsight.users.UserService" %>
 <!DOCTYPE html>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
@@ -57,30 +58,15 @@
                     <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
                 </div>
 
-                <input type="hidden" id="urlhash" name="urlhash"/>
-
-                <div style="height:250px">
-                    <div style="float:left;padding-left: 60px">
-                        <img src="/images/ZendeskDashboardA.png" width="300" height="225"/>
-                    </div>
-                    <div style="float:right;padding-right: 60px">
-                        <img src="/images/ZendeskChartA.png" width="300" height="225"/>
-                    </div>
-                </div>
+                <%  try {
+                    new UserService().unsubscribe(request.getParameter("key"));
+                } catch(Exception e) { }
+                %>
 
                 <div style="text-align: center">
-                    <p style="font-size: 18px"><strong>Ready to start a fresh 30 day trial of Easy Insight?</strong></p>
-                    <input type="hidden" value="<%= request.getParameter("key") %>" name="key"/>
-                    <% if(request.getParameter("error") != null && !request.getParameter("error").isEmpty()) { %>
-                        <% if("invalid_key".equals(request.getParameter("error"))) {%>
-                            <div>This key is already used.</div>
-                        <% } %>
-                    <% } %>
-                    <div>New Password: <input type="password" name="password"/></div>
-                    <button class="btn btn-large btn-inverse" type="submit" value="Reset the Password">Start a New
-                        Trial!
-                    </button>
+                    <div>You have been unsubscribed.</div>
                 </div>
+
 
             </form>
         </div>

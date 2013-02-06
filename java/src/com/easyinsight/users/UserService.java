@@ -35,6 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import flex.messaging.FlexContext;
@@ -56,9 +57,9 @@ public class UserService {
         if (userServiceResponse.getAccountState() == Account.CLOSED) {
             response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/billingSetupAction.jsp"));
         } else if (userServiceResponse.getAccountState() == Account.DELINQUENT) {
-            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/billingSetupAction.jsp"));
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/billingSetupAction.jsp"));
         } else if (userServiceResponse.getAccountState() == Account.BILLING_FAILED) {
-            response.sendRedirect(RedirectUtil.getURL(request,"/app/billing/billingSetupAction.jsp"));
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/billingSetupAction.jsp"));
         } else if (userServiceResponse.getAccountState() == Account.INACTIVE) {
             response.sendRedirect(RedirectUtil.getURL(request, "/app/activation/reactivate.jsp"));
         } else if (userServiceResponse.getAccountState() == Account.REACTIVATION_POSSIBLE) {
@@ -82,11 +83,11 @@ public class UserService {
                 session.removeAttribute("loginRedirect");
                 String redirectUrl = RedirectUtil.getURL(request, "/app/");
                 //System.out.println("Redirect url = " + oldRedirectUrl);
-                if(oldRedirectUrl != null) {
-                   redirectUrl = oldRedirectUrl;
+                if (oldRedirectUrl != null) {
+                    redirectUrl = oldRedirectUrl;
                 }
-                if(urlHash != null)
-                   redirectUrl = redirectUrl + urlHash;
+                if (urlHash != null)
+                    redirectUrl = redirectUrl + urlHash;
                 response.sendRedirect(redirectUrl);
             }
         }
@@ -163,38 +164,77 @@ public class UserService {
         insertStmt.execute();
     }
 
-    public void reactivate() {
-        long accountID = SecurityUtil.getAccountID();
+    public String reactivate(String key, String password, HttpServletRequest request) {
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
-            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
-            if (account.getAccountState() == Account.REACTIVATION_POSSIBLE) {
+            List<ReactivatableUser> reUsers = session.createQuery("from ReactivatableUser where reactivationKey = ?").setString(0, key).list();
+            if (reUsers.size() > 0) {
+
+                ReactivatableUser ru = reUsers.get(0);
+
+                com.easyinsight.users.UserTransferObject user = new com.easyinsight.users.UserTransferObject();
+                user.setUserName(ru.getEmail());
+                user.setFirstName(ru.getFirstName());
+                user.setName(ru.getLastName());
+                user.setEmail(ru.getEmail());
+                user.setAccountAdmin(true);
+                user.setOptInEmail(true);
+                user.setInitialSetupDone(true);
+                user.setAnalyst(true);
+                com.easyinsight.users.AccountTransferObject account = new com.easyinsight.users.AccountTransferObject();
+                account.setName(ru.getCompany());
+                account.setAccountType(Account.PROFESSIONAL);
                 account.setAccountState(Account.TRIAL);
-                PreparedStatement nukeTimedState = conn.prepareStatement("DELETE FROM ACCOUNT_TIMED_STATE WHERE ACCOUNT_ID = ?");
-                nukeTimedState.setLong(1, accountID);
-                nukeTimedState.executeUpdate();
-                PreparedStatement addTimedState = conn.prepareStatement("INSERT INTO ACCOUNT_TIMED_STATE (ACCOUNT_ID, ACCOUNT_STATE, STATE_CHANGE_TIME) VALUES (?, ?, ?)");
-                Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.DAY_OF_YEAR, 30);
-                addTimedState.setLong(1, accountID);
-                addTimedState.setInt(2, Account.ACTIVE);
-                addTimedState.setTimestamp(3, new java.sql.Timestamp(cal.getTimeInMillis()));
-                addTimedState.execute();
-                session.update(account);
-                new AccountActivityStorage().generateSalesEmailSchedules(SecurityUtil.getUserID(), conn);
+
+                String exists = new com.easyinsight.users.UserService().doesUserExist(user.getUserName(), user.getEmail(), account.getName());
+                if (exists == null) {
+                    String url = "/reactivate/index.jsp";
+                    new com.easyinsight.users.UserService().createAccount(user, account, password, url);
+
+                }
+                session.delete(ru);
+
+                UserServiceResponse userServiceResponse = new UserService().authenticate(user.getEmail(), password, false);
+                request.getSession().invalidate();
+                SecurityUtil.populateSession(request.getSession(true), userServiceResponse);
+
+                session.flush();
+                conn.commit();
             } else {
-                throw new RuntimeException("Attempt to reactivate an account not in reactivation possible state");
+                return "invalid_key";
             }
-            session.flush();
-            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
         } finally {
             conn.setAutoCommit(true);
             session.close();
+            Database.closeConnection(conn);
+        }
+        return "";
+    }
+
+    public void unsubscribe(String userkey) {
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        Transaction t = null;
+        try {
+            t = session.beginTransaction();
+            ReactivatableUser user = (ReactivatableUser) session.createQuery("from ReactivatableUser where reactivationKey = ?").setString(0, userkey).list().get(0);
+            user.setOptOut(true);
+            session.save(user);
+            t.commit();
+        } catch (Exception e) {
+            if(t != null)
+                t.rollback();
+            LogClass.error(e);
+
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }
@@ -321,7 +361,7 @@ public class UserService {
         boolean success = false;
         try {
             conn.setAutoCommit(false);
-            PreparedStatement stmt = conn.prepareStatement("select password_request_string from password_reset where password_request_string = ? and request_date > ?");
+            PreparedStatement stmt = conn.prepareStatement("SELECT password_request_string FROM password_reset WHERE password_request_string = ? AND request_date > ?");
             Calendar c = Calendar.getInstance();
             c.setTime(new Date());
             c.setTimeInMillis(c.getTimeInMillis() - 172800000L);
@@ -348,7 +388,7 @@ public class UserService {
         try {
             conn.setAutoCommit(false);
             Session s = Database.instance().createSession(conn);
-            PreparedStatement stmt = conn.prepareStatement("select user_id, password_request_string from password_reset where password_request_string = ? and request_date > ?");
+            PreparedStatement stmt = conn.prepareStatement("SELECT user_id, password_request_string FROM password_reset WHERE password_request_string = ? AND request_date > ?");
             Calendar c = Calendar.getInstance();
 
             c.setTime(new Date());
@@ -365,7 +405,7 @@ public class UserService {
                         u.setPassword(PasswordService.getInstance().encrypt(password, u.getHashSalt(), u.getHashType()));
                         s.update(u);
                         success = true;
-                        PreparedStatement deleteStatement = conn.prepareStatement("delete from password_reset where password_request_string = ?");
+                        PreparedStatement deleteStatement = conn.prepareStatement("DELETE FROM password_reset WHERE password_request_string = ?");
                         deleteStatement.setString(1, passwordResetValidation);
                         deleteStatement.executeUpdate();
                         break;
@@ -376,7 +416,7 @@ public class UserService {
                             u.setPassword(PasswordService.getInstance().encrypt(password, u.getHashSalt(), u.getHashType()));
                             s.update(u);
                             success = true;
-                            PreparedStatement deleteStatement = conn.prepareStatement("delete from password_reset where password_request_string = ?");
+                            PreparedStatement deleteStatement = conn.prepareStatement("DELETE FROM password_reset WHERE password_request_string = ?");
                             deleteStatement.setString(1, passwordResetValidation);
                             deleteStatement.executeUpdate();
                             break;
@@ -503,13 +543,13 @@ public class UserService {
                 User user = (User) results.get(0);
                 String passwordPrefix = RandomTextGenerator.generateText(20);
 
-                PreparedStatement updateStatement = conn.prepareStatement("update password_reset set request_date = ?, password_request_string = ? where user_id = ?");
+                PreparedStatement updateStatement = conn.prepareStatement("UPDATE password_reset SET request_date = ?, password_request_string = ? WHERE user_id = ?");
                 updateStatement.setDate(1, new java.sql.Date(new Date().getTime()));
                 updateStatement.setString(2, passwordPrefix);
                 updateStatement.setLong(3, user.getUserID());
 
 
-                PreparedStatement insertStatement = conn.prepareStatement("insert into password_reset(user_id, request_date, password_request_string) values (?,?,?)");
+                PreparedStatement insertStatement = conn.prepareStatement("INSERT INTO password_reset(user_id, request_date, password_request_string) VALUES (?,?,?)");
                 insertStatement.setLong(1, user.getUserID());
                 insertStatement.setDate(2, new java.sql.Date(new Date().getTime()));
                 insertStatement.setString(3, passwordPrefix);
@@ -742,7 +782,7 @@ public class UserService {
 
     public String updatePassword(String password) {
         String error = UserService.checkPassword(password);
-        if(error != null)
+        if (error != null)
             return error;
         Session session = Database.instance().createSession();
         try {
@@ -768,7 +808,7 @@ public class UserService {
 
     public String updatePassword(String existingPassword, String password) {
         String error = checkPassword(password);
-        if(error != null) {
+        if (error != null) {
             return error;
         }
         Session session = Database.instance().createSession();
@@ -969,7 +1009,7 @@ public class UserService {
         try {
             session.beginTransaction();
             List<User> users = (List<User>) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list();
-            if(users.size() != 0) {
+            if (users.size() != 0) {
                 User user = users.get(0);
                 user.setHtmlOrFlex(mode);
                 session.update(user);
@@ -1030,7 +1070,7 @@ public class UserService {
         Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT SELENIUM_REQUEST.USER_ID FROM SELENIUM_REQUEST WHERE SELENIUM_REQUEST.username = ? and " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SELENIUM_REQUEST.USER_ID FROM SELENIUM_REQUEST WHERE SELENIUM_REQUEST.username = ? AND " +
                     "selenium_request.password = ?");
             queryStmt.setString(1, userName);
             queryStmt.setString(2, password);
@@ -1094,7 +1134,7 @@ public class UserService {
         Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.USER_ID FROM USER_SESSION, USER WHERE USER_SESSION.user_id = user.user_id and " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.USER_ID FROM USER_SESSION, USER WHERE USER_SESSION.user_id = user.user_id AND " +
                     "user_session.session_number = ? AND user.username = ?");
             queryStmt.setString(1, cookie);
             queryStmt.setString(2, userName);
@@ -1462,7 +1502,7 @@ public class UserService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM ACCOUNT LEFT JOIN USER_IMAGE ON ACCOUNT.login_image = USER_IMAGE.user_image_id where account.subdomain = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM ACCOUNT LEFT JOIN USER_IMAGE ON ACCOUNT.login_image = USER_IMAGE.user_image_id WHERE account.subdomain = ?");
             queryStmt.setString(1, subdomain);
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next())
@@ -1485,30 +1525,30 @@ public class UserService {
 
             conn.setAutoCommit(false);
 
-            if(userId == null || userId == 0) {
+            if (userId == null || userId == 0) {
                 PreparedStatement usernameStatement = conn.prepareStatement("SELECT USER_ID FROM USER WHERE username = ?");
                 usernameStatement.setString(1, username);
                 ResultSet rs = usernameStatement.executeQuery();
-                if(rs.next()) {
+                if (rs.next()) {
                     userId = rs.getLong(1);
                 }
                 usernameStatement.close();
                 rs.close();
-                if(userId == null || userId == 0) {
+                if (userId == null || userId == 0) {
                     PreparedStatement emailStatement = conn.prepareStatement("SELECT USER_ID FROM USER WHERE email = ?");
                     emailStatement.setString(1, username);
                     ResultSet ers = emailStatement.executeQuery();
-                    if(ers.next()) {
+                    if (ers.next()) {
                         userId = ers.getLong(1);
                     }
                     emailStatement.close();
                     ers.close();
 
-                    if(userId == null || userId == 0) {
+                    if (userId == null || userId == 0) {
                         PreparedStatement apiKeyStatement = conn.prepareStatement("SELECT USER_ID FROM USER WHERE user_key = ?");
                         apiKeyStatement.setString(1, username);
                         ResultSet ars = apiKeyStatement.executeQuery();
-                        if(ars.next()) {
+                        if (ars.next()) {
                             userId = ars.getLong(1);
                         }
                         apiKeyStatement.close();
