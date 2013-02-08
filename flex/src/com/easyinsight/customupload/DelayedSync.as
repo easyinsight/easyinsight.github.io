@@ -165,7 +165,7 @@ public class DelayedSync extends EISlimWindow {
         var desc:DataSourceDescriptor = new DataSourceDescriptor();
         desc.id = _dataSourceDefinition.dataFeedID;
         desc.name = _dataSourceDefinition.feedName;
-        User.getEventNotifier().dispatchEvent(new NavigationEvent("Home", null, { dataSourceDescriptor: desc}));
+        User.getEventNotifier().dispatchEvent(new NavigationEvent("Home", null, { dataSourceDescriptor: desc, freshInstall: true}));
         PopUpManager.removePopUp(this);
     }
 
