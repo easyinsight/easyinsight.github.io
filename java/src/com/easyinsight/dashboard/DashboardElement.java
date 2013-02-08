@@ -33,6 +33,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     public static final int TEXT = 6;
 
     private long elementID;
+    private long elementServerID;
     private boolean forceScrollingOff;
     private String label;
     private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
@@ -52,6 +53,14 @@ public abstract class DashboardElement implements Cloneable, Serializable {
 
     private int preferredWidth;
     private int preferredHeight;
+
+    public long getElementServerID() {
+        return elementServerID;
+    }
+
+    public void setElementServerID(long elementServerID) {
+        this.elementServerID = elementServerID;
+    }
 
     public boolean isForceScrollingOff() {
         return forceScrollingOff;
@@ -245,6 +254,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         setPreferredWidth(rs.getInt(i++));
         setPreferredHeight(rs.getInt(i++));
         setElementID(rs.getLong(i++));
+        setElementServerID(getElementID());
         setForceScrollingOff(rs.getBoolean(i));
         loadStmt.close();
     }
