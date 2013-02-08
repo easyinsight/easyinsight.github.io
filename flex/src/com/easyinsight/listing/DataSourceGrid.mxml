@@ -3,7 +3,7 @@
          height="100%" horizontalAlign="center" initialize="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.dashboard.DashboardDescriptor;
-        import com.easyinsight.datasources.NewReportDataSourceWindow;
+        /*import com.easyinsight.datasources.NewReportDataSourceWindow;*/
         import com.easyinsight.feedassembly.CompositeCreator;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
@@ -139,11 +139,11 @@
             removeChild(DisplayObject(event.currentTarget));
         }
 
-        private function blah():void {
+        /*private function blah():void {
             var window:NewReportDataSourceWindow = new NewReportDataSourceWindow();
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-        }
+        }*/
 
         [Bindable]
         public var topItems:ArrayCollection = new ArrayCollection();
