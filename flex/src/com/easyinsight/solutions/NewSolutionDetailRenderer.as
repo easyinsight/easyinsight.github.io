@@ -99,7 +99,7 @@ public class NewSolutionDetailRenderer extends EventDispatcher {
     }
 
     private function installed(event:Event):void {
-        User.getEventNotifier().dispatchEvent(new NavigationEvent("Home", null, { dataSourceDescriptor: dataSourceDescriptor}));
+        User.getEventNotifier().dispatchEvent(new NavigationEvent("Home", null, { dataSourceDescriptor: dataSourceDescriptor, freshInstall: true}));
     }
 
     private var dataSourceDescriptor:DataSourceDescriptor;

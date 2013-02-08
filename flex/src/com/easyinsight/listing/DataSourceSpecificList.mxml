@@ -29,6 +29,8 @@
         import com.easyinsight.solutions.CustomFolder;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.tour.Note;
+        import com.easyinsight.tour.NoteEvent;
         import com.easyinsight.util.Callout;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -81,7 +83,13 @@
                     formatter.formatString = "DD.MM.YYYY HH:NN";
                     break;
             }
+            if (showTutorial) {
+                showTutorial = false;
+                xyz();
+            }
         }
+
+        public var showTutorial:Boolean;
 
         private function onStartedDragging(event:Event):void {
             uploadGrid.collapseAll();
@@ -719,6 +727,34 @@
             PopUpUtil.centerPopUp(applicationSkinWindow);
         }
 
+        private function xyz():void {
+            callout = new Callout();
+            callout.setStyle("backgroundColor", 0x99ccff);
+            callout.setStyle("backgroundAlpha", 1);
+            callout.setStyle("cornerRadius", 10);
+            callout.setStyle("dropShadowEnabled", true);
+            callout.setStyle("preferredTailPosition", "topRight");
+            var note:Note = new Note();
+            if (dataSourceDescriptor.children.length == 0) {
+                note.text = "You successfully created a connection to " + dataSourceDescriptor.name + "! Click Create to design your first report.";
+            } else {
+                note.text = "You successfully created a connection to " + dataSourceDescriptor.name + "! Prebuilt reports and dashboards are available in the grid to the right--just click on the report or dashboard name to open it up. You can also create your own reports and dashboards through the Create button.";
+            }
+            callout.addEventListener(NoteEvent.CLOSE_NOTE, onClose);
+            callout.content = note;
+            if (dataSourceDescriptor.children.length == 0) {
+                callout.show(newButton);
+            } else {
+                callout.show(uploadGrid);
+            }
+        }
+
+        private var callout:Callout;
+
+        private function onClose(event:NoteEvent):void {
+            callout = null;
+        }
+
         [Bindable]
         private var createOptions:ArrayCollection = new ArrayCollection([ {label: "New Report", data: "newReport"},
             {label: "New Dashboard", data: "newDashboard"},
@@ -747,7 +783,6 @@
         <mx:method name="deleteReports" result="deleted()"/>
     </mx:RemoteObject>
     <mx:VBox
-
          horizontalGap="20"
          backgroundColor="#FFFFFF" width="100%" horizontalAlign="center" verticalGap="5">
         <mx:Label text="{dataSourceName}" fontSize="20" maxWidth="300"/>

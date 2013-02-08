@@ -152,7 +152,7 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     }
 
     private function installed(event:Event):void {
-        dispatchEvent(new NavigationEvent("Home", null, { dataSourceDescriptor: dataSourceDescriptor}));
+        dispatchEvent(new NavigationEvent("Home", null, { dataSourceDescriptor: dataSourceDescriptor, freshInstall: true}));
         PopUpManager.removePopUp(this);
     }
 
