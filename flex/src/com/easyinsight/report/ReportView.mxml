@@ -510,7 +510,7 @@
                             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:crumb.eiDescriptor.id,
                                 initialFilters:crumb.filters,
                                 exchangeItem:exchangeItem, reportList:reportList, reportIndex:reportIndex,
-                                breadCrumbs:_breadCrumbs, originalExchangeItem:originalExchangeItem != null ? originalExchangeItem : desc})));
+                                breadCrumbs:_breadCrumbs, originalExchangeItem:originalExchangeItem != null ? originalExchangeItem : desc, dashboardStackPositions: crumb.stackPositions})));
                         }
                     });
                     breadCrumbBox.addChild(backButton);

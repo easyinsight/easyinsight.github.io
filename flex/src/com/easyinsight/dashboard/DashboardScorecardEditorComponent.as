@@ -24,6 +24,10 @@ public class DashboardScorecardEditorComponent extends VBox implements IDashboar
         return new SizeInfo();
     }
 
+    public function stackPopulate(positions:DashboardStackPositions):void {
+
+    }
+
     protected override function createChildren():void {
         super.createChildren();
         var image:Image = new Image();

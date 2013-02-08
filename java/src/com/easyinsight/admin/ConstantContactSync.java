@@ -58,6 +58,7 @@ public class ConstantContactSync {
     public static final int TWO_WEEKS = 3;
     public static final int THREE_WEEKS = 4;
     public static final int FOUR_WEEKS = 5;
+    public static final int ONE_DAY = 6;
 
     private static String getSubject(int marketingType) {
         switch (marketingType) {
@@ -77,6 +78,11 @@ public class ConstantContactSync {
 
     public static String getContent(int marketingType) {
         switch (marketingType) {
+            case ONE_DAY:
+                return "Hello {0},\n\nWe want to make sure you are getting the answers you need from Easy Insight.  I'd love to jump onto a quick call with you to answer any questions you may have and help you to get up and running. If you are interested, please let me know and we'll set something up right away!\n" +
+                        "You can also check out our documentation at http://wiki.easy-insight.com/ or send any questions directly to me or to support@easy-insight.com.\n" +
+                        "\n" +
+                        "Thanks for your interest in Easy Insight!\n\n{1}\nhttp://www.easy-insight.com/\n{2}";
             case CREATION_DAY:
                 return "<html>\n" +
                         "<body>\n" +

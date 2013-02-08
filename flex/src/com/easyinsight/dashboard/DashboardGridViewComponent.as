@@ -171,6 +171,12 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
         }
     }
 
+    public function stackPopulate(positions:DashboardStackPositions):void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.stackPopulate(positions);
+        }
+    }
+
     public function reportCount():ArrayCollection {
         var reports:ArrayCollection = new ArrayCollection();
         for each (var comp:IDashboardViewComponent in viewChildren) {

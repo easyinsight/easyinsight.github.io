@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" creationComplete="onCreation()"
+        verticalGap="0">
+    <mx:Script><![CDATA[
+        import com.easyinsight.dashboard.DashboardDescriptor;
+        import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.report.ReportAnalyzeSource;
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.RolloverLabelEvent;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var topItems:ArrayCollection = new ArrayCollection();
+
+        private function onRolloverEvent(event:RolloverLabelEvent):void {
+            if (event.data is InsightDescriptor) {
+                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.data))));
+            } else if (event.data is DashboardDescriptor) {
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.data.id })));
+            }
+
+        }
+
+        private function onCreation():void {
+            topList.addEventListener(RolloverLabelEvent.ROLLOVER_LABEL, onRolloverEvent);
+        }
+
+        private function onUpdate():void {
+            var height:int = topList.measureHeightOfItems(0,topItems.length)+topList.headerHeight+2;
+            topList.height = height;
+            topList.minHeight = height;
+        }
+
+        private function editTop():void {
+            var window:AccountReportWindow = new AccountReportWindow();
+            window.addEventListener(TopReportsEvent.TOP_REPORTS, onChange);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onChange(event:TopReportsEvent):void {
+            topItems.removeAll();
+            topItems.addAll(event.descriptors);
+            dispatchEvent(event);
+        }
+        ]]></mx:Script>
+    <mx:Canvas width="700">
+        <mx:Box backgroundColor="#440000" borderThickness="1" borderStyle="solid" horizontalAlign="center" width="100%">
+            <mx:Label text="Your Top Reports and Dashboards" fontSize="16" styleName="boldStyle" fontWeight="bold" color="#FFFFFF"/>
+        </mx:Box>
+        <!--<mx:Box width="100%" horizontalAlign="right">
+            <mx:LinkButton label="Edit..." fontSize="12" click="editTop()"/>
+        </mx:Box>-->
+    </mx:Canvas>
+    <analysis:ListViewGrid id="topList" dataProvider="{topItems}" variableRowHeight="true" headerHeight="0" updateComplete="onUpdate()" selectable="false" width="700">
+        <analysis:columns>
+            <mx:AdvancedDataGridColumn itemRenderer="com.easyinsight.listing.DescriptorRolloverLabel" width="200" dataField="name" wordWrap="true"/>
+            <mx:AdvancedDataGridColumn itemRenderer="com.easyinsight.listing.DescriptorRolloverLabel" width="480" dataField="description" wordWrap="true"/>
+        </analysis:columns>
+    </analysis:ListViewGrid>
+</mx:VBox>

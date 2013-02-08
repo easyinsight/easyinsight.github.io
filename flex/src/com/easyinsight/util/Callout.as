@@ -23,11 +23,14 @@
 
 package com.easyinsight.util
 {
-    import flash.display.BlendMode;
+import com.easyinsight.tour.NoteEvent;
+
+import flash.display.BlendMode;
     import flash.display.DisplayObject;
     import flash.display.DisplayObjectContainer;
     import flash.display.Shape;
-    import flash.geom.Matrix;
+import flash.events.MouseEvent;
+import flash.geom.Matrix;
     import flash.geom.Point;
     import flash.geom.Rectangle;
 
@@ -737,6 +740,16 @@ package com.easyinsight.util
             if (!isPopUp) {
                 this.owner = owner;
                 PopUpManager.addPopUp(this, owner);
+                stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
+            }
+        }
+
+        private function onMouseDown(event:MouseEvent):void {
+            var result:Boolean = hitTestPoint(event.stageX, event.stageY);
+            if (!result) {
+                dispatchEvent(new NoteEvent(NoteEvent.CLOSE_NOTE, null));
+                stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+                PopUpManager.removePopUp(this);
             }
         }
 

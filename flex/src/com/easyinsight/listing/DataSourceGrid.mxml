@@ -1,13 +1,22 @@
 <?xml version="1.0"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center" initialize="onCreation()">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%"
+         height="100%" horizontalAlign="center" initialize="onCreation()">
     <mx:Script><![CDATA[
+        import com.easyinsight.dashboard.DashboardDescriptor;
+        import com.easyinsight.datasources.NewReportDataSourceWindow;
         import com.easyinsight.feedassembly.CompositeCreator;
+        import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.RolloverLabelEvent;
 
         import mx.collections.ArrayCollection;
         import mx.formatters.DateFormatter;
+        import mx.managers.PopUpManager;
         import mx.utils.ObjectUtil;
 
         private var _dataProvider:ArrayCollection;
@@ -26,6 +35,8 @@
                 dataSourceGrid.invalidateSize();
             }
         }
+
+
 
         private function onCreation():void {
             formatter = new DateFormatter();
@@ -75,8 +86,16 @@
             return ObjectUtil.dateCompare(date1, date2);
         }
 
+        private var topReports:TopReports;
+
         override protected function createChildren():void {
             super.createChildren();
+            if (topReports == null && topItems.length > 0) {
+                topReports = new TopReports();
+                topReports.addEventListener(TopReportsEvent.TOP_REPORTS, onChange);
+                topReports.topItems = topItems;
+                addChildAt(topReports, 0);
+            }
             if (User.getInstance().newsDate != null) {
                 if (User.getInstance().newsDismissDate == null || User.getInstance().newsDismissDate.getTime() < User.getInstance().newsDate.getTime()) {
                     if (getChildren().length > 0 && !(getChildAt(0) is NewsBar)) {
@@ -90,6 +109,7 @@
                 var mb:AccountMessageBar = new AccountMessageBar();
                 addChildAt(mb, 0);
             }
+
         }
 
         private var formatter:DateFormatter;
@@ -118,11 +138,46 @@
         private function onDismissed(event:Event):void {
             removeChild(DisplayObject(event.currentTarget));
         }
+
+        private function blah():void {
+            var window:NewReportDataSourceWindow = new NewReportDataSourceWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        [Bindable]
+        public var topItems:ArrayCollection = new ArrayCollection();
+
+        private function blah1():void {
+            var window:AccountReportWindow = new AccountReportWindow();
+            window.addEventListener(TopReportsEvent.TOP_REPORTS, onChange);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onChange(event:TopReportsEvent):void {
+            topItems.removeAll();
+            topItems.addAll(event.descriptors);
+            if (event.descriptors.length > 0 && topReports == null) {
+                topReports = new TopReports();
+                topReports.addEventListener(TopReportsEvent.TOP_REPORTS, onChange);
+                topReports.topItems = topItems;
+                addChildAt(topReports, 0);
+            } else if (event.descriptors.length == 0 && topReports != null) {
+                removeChild(topReports);
+                topReports.removeEventListener(TopReportsEvent.TOP_REPORTS, onChange);
+                topReports = null;
+            }
+        }
         ]]></mx:Script>
+
+
     <mx:HBox width="680" verticalAlign="middle">
         <mx:Label text="Data Sources" fontSize="20" maxWidth="300"/>
         <mx:Spacer width="100%"/>
         <mx:LinkButton label="Join data sources" click="createCompositeFeed()" fontSize="12"/>
+        <!--<mx:LinkButton label="Data source from report" click="blah()" fontSize="12"/>-->
+        <mx:LinkButton label="Customize top reports" click="blah1()" fontSize="12"/>
     </mx:HBox>
     <mx:HBox paddingLeft="10" paddingRight="10"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"

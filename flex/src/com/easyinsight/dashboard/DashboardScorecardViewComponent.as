@@ -27,6 +27,10 @@ public class DashboardScorecardViewComponent extends Canvas implements IDashboar
         PopUpUtil.centerPopUp(window);
     }*/
 
+    public function stackPopulate(positions:DashboardStackPositions):void {
+
+    }
+
     public function obtainPreferredSizeInfo():SizeInfo {
         return new SizeInfo();
     }

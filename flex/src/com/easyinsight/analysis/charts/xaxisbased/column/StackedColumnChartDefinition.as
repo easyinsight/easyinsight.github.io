@@ -21,8 +21,7 @@ import mx.controls.Alert;
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSStackedColumnChartDefinition")]
 public class StackedColumnChartDefinition extends XAxisDefinition{
 
-    public var chartColor:uint;
-    public var useChartColor:Boolean;
+
     public var columnSort:String = ChartDefinition.SORT_UNSORTED;
     public var stackItem:AnalysisItem;
     public var labelPosition:String = "none";

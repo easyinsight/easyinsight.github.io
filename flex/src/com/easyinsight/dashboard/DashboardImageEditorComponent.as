@@ -25,6 +25,10 @@ public class DashboardImageEditorComponent extends VBox implements IDashboardEdi
         return new SizeInfo();
     }
 
+    public function stackPopulate(positions:DashboardStackPositions):void {
+
+    }
+
     protected override function createChildren():void {
         super.createChildren();
         imageBox = new ImageBox();

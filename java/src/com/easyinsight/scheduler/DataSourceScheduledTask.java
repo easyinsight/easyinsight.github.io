@@ -1,13 +1,18 @@
 package com.easyinsight.scheduler;
 
+import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.analysis.ReportFault;
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
+import com.xerox.amazonws.sqs2.Message;
+import com.xerox.amazonws.sqs2.MessageQueue;
+import com.xerox.amazonws.sqs2.SQSUtils;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -89,13 +94,8 @@ public class DataSourceScheduledTask extends ScheduledTask {
 
                         if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
                             try {
-                                boolean result = dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null, null, ((FeedDefinition) dataSource).getLastRefreshStart(), true, new ArrayList<ReportFault>());
-                                ((FeedDefinition)dataSource).setLastRefreshStart(now);
-                                if (result) {
-                                    new DataSourceInternalService().updateFeedDefinition((FeedDefinition) dataSource, conn, true, true);
-                                } else {
-                                    feedStorage.updateDataFeedConfiguration((FeedDefinition) dataSource, conn);
-                                }
+                                new DataSourceFactory().createSource(conn, new ArrayList<ReportFault>(), now, base, dataSource, null).invoke();
+                                conn.commit();
                             } finally {
                                 DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
                             }
@@ -131,5 +131,100 @@ public class DataSourceScheduledTask extends ScheduledTask {
         }
         insertStmt.setString(2, message);
         insertStmt.execute();
+    }
+
+    public static class DataSourceFactory {
+        public IUploadDataSource createSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID) {
+            if (sourceToRefresh.getFeedType().getType() == FeedType.SERVER_MYSQL.getType() ||
+                    sourceToRefresh.getFeedType().getType() == FeedType.SERVER_SQL_SERVER.getType() ||
+                    sourceToRefresh.getFeedType().getType() == FeedType.ORACLE.getType()) {
+                return new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), sourceToRefresh);
+            } else {
+                return new UploadDataSource(conn, warnings, now, sourceToRefresh, refreshable, callID);
+            }
+        }
+    }
+
+    public static interface IUploadDataSource {
+        public boolean invoke() throws Exception;
+    }
+
+    public static class SQSUploadDataSource implements IUploadDataSource {
+
+        private long dataSourceID;
+        private FeedDefinition dataSource;
+
+        private SQSUploadDataSource(long dataSourceID, FeedDefinition dataSource) {
+            this.dataSourceID = dataSourceID;
+            this.dataSource = dataSource;
+        }
+
+        public boolean invoke() throws Exception {
+            MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseRequestQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            msgQueue.sendMessage(dataSourceID + "|" + System.currentTimeMillis());
+            boolean responded = false;
+            boolean changed = false;
+            int i = 0;
+            while (!responded && i < 60) {
+                Message message = responseQueue.receiveMessage();
+                if (message == null) {
+                    i++;
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        // ignore
+                    }
+                } else {
+                    String body = message.getMessageBody();
+                    String[] parts = body.split("\\|");
+                    long sourceID = Long.parseLong(parts[0]);
+                    System.out.println("got response with id = " + sourceID);
+                    if (sourceID == dataSourceID) {
+                        responseQueue.deleteMessage(message);
+                        boolean successful = Boolean.parseBoolean(parts[1]);
+                        if (successful) {
+                            changed = Boolean.parseBoolean(parts[2]);
+                            System.out.println("matched!");
+                            responded = true;
+                        } else {
+                            String error = parts[2];
+                            throw new ReportException(new DataSourceConnectivityReportFault(error, dataSource));
+                        }
+                    }
+                }
+            }
+            return changed;
+        }
+    }
+
+    public static class UploadDataSource implements IUploadDataSource {
+        private EIConnection conn;
+        private List<ReportFault> warnings;
+        private Date now;
+        private FeedDefinition sourceToRefresh;
+        private IServerDataSourceDefinition refreshable;
+        private String callID;
+
+        public UploadDataSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID) {
+            this.conn = conn;
+            this.warnings = warnings;
+            this.now = now;
+            this.sourceToRefresh = sourceToRefresh;
+            this.refreshable = refreshable;
+            this.callID = callID;
+        }
+
+        public boolean invoke() throws Exception {
+            boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings);
+            sourceToRefresh.setVisible(true);
+            sourceToRefresh.setLastRefreshStart(now);
+            if (changed) {
+                new DataSourceInternalService().updateFeedDefinition(sourceToRefresh, conn, true, true);
+            } else {
+                feedStorage.updateDataFeedConfiguration(sourceToRefresh, conn);
+            }
+            return changed;
+        }
     }
 }

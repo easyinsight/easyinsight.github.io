@@ -17,8 +17,6 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSStackedBarChartDefinition")]
 public class StackedBarChartDefinition extends YAxisDefinition{
 
-    public var chartColor:uint;
-    public var useChartColor:Boolean;
     public var columnSort:String = ChartDefinition.SORT_UNSORTED;
     public var stackItem:AnalysisItem;
     public var labelPosition:String = "none";

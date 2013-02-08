@@ -9,6 +9,7 @@ import mx.core.UIComponent;
 public class DashboardElement {
 
     public var label:String;
+    public var elementServerID:int;
     public var filters:ArrayCollection = new ArrayCollection();
     public var filterBorderStyle:String = "solid";
     public var filterBorderColor:uint = 0xCCCCCC;

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+	creationComplete="analysisService.getInsightDescriptors.send()"  backgroundColor="#FFFFFF">
+	<mx:Script>
+		<![CDATA[
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var descriptors:ArrayCollection;
+
+        private var _groupID:int;
+
+
+        public function set groupID(val:int):void {
+            _groupID = val;
+        }
+
+        private function gotReports():void {
+            var descriptors:ArrayCollection = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name", true) ];
+            descriptors.sort = sort;
+            descriptors.refresh();
+            this.descriptors = descriptors;
+        }
+
+        private function chose():void {
+            var descriptor:InsightDescriptor = feedBox.selectedItem as InsightDescriptor;
+            dispatchEvent(new DescriptorAccountEvent(DescriptorAccountEvent.ADD, descriptor));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]>
+	</mx:Script>
+	<mx:RemoteObject destination="analysisDefinition" id="analysisService">
+		<mx:method name="getInsightDescriptors" result="gotReports()"/>
+	</mx:RemoteObject>
+    <mx:VBox>
+        <mx:Form>
+            <mx:FormItem label="Choose a Report:">
+                <mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Add this Report" click="chose()"/>
+            <util:CancelButton label="Cancel" click="cancel()"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

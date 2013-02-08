@@ -52,35 +52,41 @@
             }
         }
 
+        private var _dashboardStackPositions:DashboardStackPositions = new DashboardStackPositions();
+
+        public function set dashboardStackPositions(value:DashboardStackPositions):void {
+            _dashboardStackPositions = value;
+        }
+
         public function createDashboard(width:int = 0, height:int = 0):IDashboardViewComponent {
             /*var primary:VBox = new VBox();
-            primary.percentHeight = 100;
-            primary.percentWidth = 100;
-            primary.setStyle("verticalGap", 0);
-            primary.setStyle("horizontalAlign", "center");*/
+             primary.percentHeight = 100;
+             primary.percentWidth = 100;
+             primary.setStyle("verticalGap", 0);
+             primary.setStyle("horizontalAlign", "center");*/
 
             if (!_fixedID) {
                 /*dashboardStyleArea.setStyle("paddingLeft", dashboard.padding);
-                dashboardStyleArea.setStyle("paddingRight", dashboard.padding);
-                dashboardStyleArea.setStyle("paddingTop", dashboard.padding);
-                dashboardStyleArea.setStyle("paddingBottom", dashboard.padding);*/
+                 dashboardStyleArea.setStyle("paddingRight", dashboard.padding);
+                 dashboardStyleArea.setStyle("paddingTop", dashboard.padding);
+                 dashboardStyleArea.setStyle("paddingBottom", dashboard.padding);*/
             } else {
                 removeChild(filterViewStack);
                 /*setStyle("paddingTop", 0);
-                setStyle("paddingLeft", 0);
-                setStyle("paddingRight", 0);
-                setStyle("paddingBottom", 0);*/
+                 setStyle("paddingLeft", 0);
+                 setStyle("paddingRight", 0);
+                 setStyle("paddingBottom", 0);*/
             }
 
             /*if (ApplicationSkin.instance() != null && ApplicationSkin.instance().reportHeader && dashboard.borderThickness > 0) {
-                dashboardStyleArea.setStyle("backgroundColor", ApplicationSkin.instance().headerBackgroundColor);
-            } else {
-                dashboardStyleArea.setStyle("backgroundColor", dashboard.backgroundColor);
-            }*/
+             dashboardStyleArea.setStyle("backgroundColor", ApplicationSkin.instance().headerBackgroundColor);
+             } else {
+             dashboardStyleArea.setStyle("backgroundColor", dashboard.backgroundColor);
+             }*/
 
             /*if (dashboard.backgroundColor == 0xFFFFFF) {
-                setStyle("backgroundColor", 0xFFFFFF);
-            }*/
+             setStyle("backgroundColor", 0xFFFFFF);
+             }*/
             dashboardStyleArea.setStyle("backgroundColor", 0xFFFFFF);
             dashboardStyleArea.setStyle("borderThickness", dashboard.borderThickness);
             if (dashboard.borderThickness > 0) {
@@ -147,6 +153,7 @@
             }
 
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
+            dashboardEditorMetadata.dashboardStackPositions = _dashboardStackPositions;
             dashboardEditorMetadata.dataSourceID = dataSourceID;
             dashboardEditorMetadata.dashboardID = dashboard.id;
             dashboardEditorMetadata.role = dashboard.role;

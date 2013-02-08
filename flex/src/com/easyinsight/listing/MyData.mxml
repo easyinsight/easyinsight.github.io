@@ -47,6 +47,12 @@
         [Bindable]
         private var stackIndex:int;
 
+        private var _freshInstall:Boolean;
+
+        public function set freshInstall(value:Boolean):void {
+            _freshInstall = value;
+        }
+
         private function initListeners():void {
             addEventListener(DataSourceEvent.NAVIGATE_TO_DATA_SOURCE, navigate);
             addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
@@ -79,6 +85,7 @@
         private function onRefresh(event:Event):void {
             showLoading = true;
             loadingIndex = 1;
+            uploadService.getAccountReports.send();
             uploadService.getFeedAnalysisTree.send(true);
         }
 
@@ -93,6 +100,7 @@
 
             loadingIndex = 1;
             showLoading = true;
+            uploadService.getAccountReports.send();
             uploadService.getFeedAnalysisTree.send(true);
             buttonBox.refreshActions();
         }
@@ -116,7 +124,7 @@
                 descriptor.id = event.feedID;
                 descriptor.name = event.name;
                 if (event.startInAdmin) {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.id})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:descriptor.id})));
                 } else {
                     dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(event.feedID)));
                 }
@@ -181,6 +189,7 @@
             blah.removeAllChildren();
             if (dataGrid == null) {
                 dataGrid = new DataSourceGrid();
+                dataGrid.topItems = accountReports;
                 BindingUtils.bindProperty(dataGrid, "dataProvider", this, "dataSources");
             }
             blah.addChild(dataGrid);
@@ -205,6 +214,10 @@
             }
             if (User.getInstance().analyst) {
                 dsList = new DataSourceSpecificList();
+                if (_freshInstall) {
+                    _freshInstall = false;
+                    DataSourceSpecificList(dsList).showTutorial = true;
+                }
             } else {
                 dsList = new SimplifiedDataSourceSpecificList();
             }
@@ -238,10 +251,17 @@
 
         [Bindable]
         private var loadingIndex:int = 0;
+
+        private var accountReports:ArrayCollection = new ArrayCollection();
+
+        private function gotAccountReports():void {
+            accountReports = uploadService.getAccountReports.lastResult as ArrayCollection;
+        }
         ]]>
 </mx:Script>
     <mx:RemoteObject id="uploadService" destination="userUpload">
         <mx:method name="getFeedAnalysisTree" result="gotFeedAnalysisTree()"/>
+        <mx:method name="getAccountReports" result="gotAccountReports()"/>
         <mx:method name="deleteUserUpload" result="deleted()"/>
     </mx:RemoteObject>
     <skin:BackgroundImage width="100%" height="100%" id="centerCanvas" minCenterWidth="1000">
@@ -253,7 +273,6 @@
                 <mx:VBox paddingLeft="0" paddingRight="10" paddingBottom="10" width="100%"
                         height="100%" id="blah" verticalScrollPolicy="auto" horizontalScrollPolicy="off">
                 </mx:VBox>
-
                 <mx:ViewStack selectedIndex="{loadingIndex}" width="100%" height="100%">
                     <mx:Box/>
                     <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">

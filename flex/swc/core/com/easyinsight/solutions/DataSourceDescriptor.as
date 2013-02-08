@@ -16,7 +16,6 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.easyinsight.core.DataSourceDescriptor")]
 public class DataSourceDescriptor extends EIDescriptor{
 
-    public var description:String;
     public var dataSourceBehavior:int;
     public var dataSourceType:int;
     public var size:int;

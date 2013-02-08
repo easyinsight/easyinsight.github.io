@@ -23,6 +23,10 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
         return reportComp.obtainPreferredSizeInfo();
     }
 
+    public function stackPopulate(positions:DashboardStackPositions):void {
+
+    }
+
     private var reportComp:DashboardReportViewComponent = new DashboardReportViewComponent();
 
     protected override function createChildren():void {

@@ -26,6 +26,7 @@ public class EIDescriptor {
     public var role:int;
     public var accountVisible:Boolean;
     public var folder:int;
+    public var description:String;
     
     public function EIDescriptor() {
     }

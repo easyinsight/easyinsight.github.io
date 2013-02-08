@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" backgroundColor="#FFFFFF"
+        creationComplete="onCreation()" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:Script><![CDATA[
+        import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var reports:ArrayCollection;
+
+        private function save():void {
+            uploadService.defineAccountReports.send(reports);
+        }
+
+        private function onCreation():void {
+            uploadService.getAccountReports.send();
+        }
+
+        private function gotReports():void {
+            this.reports = uploadService.getAccountReports.lastResult as ArrayCollection;
+        }
+
+        private function addReport():void {
+            var window:AddReportWindow = new AddReportWindow();
+            window.addEventListener(DescriptorAccountEvent.ADD, onAdd);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function addDashboard():void {
+            var window:AddDashboardWindow = new AddDashboardWindow();
+            window.addEventListener(DescriptorAccountEvent.ADD, onAdd);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onAdd(event:DescriptorAccountEvent):void {
+            reports.addItem(event.descriptor);
+        }
+
+        private function removeSelected():void {
+            var num:int = 0;
+            for each (var descriptor:EIDescriptor in reports) {
+                if (descriptor.selected) {
+                    num++;
+                    reports.removeItemAt(reports.getItemIndex(descriptor));
+                }
+            }
+            if (num == 0) {
+                Alert.show("You need to select at least one report or dashboard to remove.");
+            }
+        }
+
+        private function defined():void {
+            dispatchEvent(new TopReportsEvent(reports));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="getAccountReports" result="gotReports()"/>
+        <mx:method name="defineAccountReports" result="defined()"/>
+    </mx:RemoteObject>
+    <mx:HBox>
+        <util:SaveButton label="Add Report..." click="addReport()" fontSize="12"/>
+        <util:SaveButton label="Add Dashboard..." click="addDashboard()" fontSize="12"/>
+        <util:SaveButton label="Remove Selected" click="removeSelected()" fontSize="12"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{reports}" variableRowHeight="true">
+        <mx:columns>
+            <mx:DataGridColumn itemRenderer="com.easyinsight.listing.EIDescriptorCheckbox" width="40" sortable="false"/>
+            <mx:DataGridColumn dataField="name" width="200" wordWrap="true"/>
+            <mx:DataGridColumn dataField="description" width="400" wordWrap="true"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EITitleWindow>

@@ -53,6 +53,11 @@ public class AccountActivityStorage {
             stmt.execute();
         }
         stmt.close();
+        PreparedStatement salesStmt = conn.prepareStatement("INSERT INTO PERSONALIZED_SALES_EMAIL (USER_ID, WELCOME_TYPE) VALUES (?, ?)");
+        salesStmt.setLong(1, userID);
+        salesStmt.setInt(2, 1);
+        salesStmt.execute();
+        salesStmt.close();
     }
 
     public void generateWelcomeBackEmailSchedules(long userID, Connection conn) throws SQLException {
@@ -146,4 +151,38 @@ public class AccountActivityStorage {
             throw new RuntimeException(e);
         }
     }*/
+
+    public void executePersonalizedSalesEmail(EIConnection conn) {
+        try {
+
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+    }
+
+    public static SalesInfo getSalesRep(long accountID) {
+
+        return null;
+    }
+
+    private static class SalesInfo {
+        private String rep;
+        private boolean send;
+
+        public String getRep() {
+            return rep;
+        }
+
+        public void setRep(String rep) {
+            this.rep = rep;
+        }
+
+        public boolean isSend() {
+            return send;
+        }
+
+        public void setSend(boolean send) {
+            this.send = send;
+        }
+    }
 }

@@ -27,6 +27,10 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         return new SizeInfo();
     }
 
+    public function stackPopulate(positions:DashboardStackPositions):void {
+
+    }
+
     public function save():void {
         var items:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < dashboardGrid.rows; i++) {

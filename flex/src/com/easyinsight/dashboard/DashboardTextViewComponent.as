@@ -29,6 +29,10 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
         setStyle("backgroundAlpha", 1);
     }
 
+    public function stackPopulate(positions:DashboardStackPositions):void {
+
+    }
+
     public function obtainPreferredSizeInfo():SizeInfo {
         return new SizeInfo(dashboardText.preferredWidth, dashboardText.preferredHeight);
     }

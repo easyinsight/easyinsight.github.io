@@ -28,6 +28,10 @@ public class DashboardImageViewComponent extends Box implements IDashboardViewCo
         setStyle("verticalAlign", "middle");
     }
 
+    public function stackPopulate(positions:DashboardStackPositions):void {
+
+    }
+
     public function obtainPreferredSizeInfo():SizeInfo {
         return new SizeInfo();
     }

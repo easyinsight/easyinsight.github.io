@@ -24,6 +24,7 @@ import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.ComboBox;
 import mx.controls.LinkButton;
@@ -58,6 +59,13 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     public function obtainPreferredSizeInfo():SizeInfo {
         return new SizeInfo(dashboardStack.preferredWidth, dashboardStack.preferredHeight);
+    }
+
+    public function stackPopulate(positions:DashboardStackPositions):void {
+        positions.saveStackPosition(dashboardStack, viewStack.selectedIndex);
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.stackPopulate(positions);
+        }
     }
 
     protected var viewStack:ViewStack;
@@ -201,9 +209,20 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                 }
             }
         }
+        if (dashboardEditorMetadata.dashboardStackPositions != null) {
+            var index:int = dashboardEditorMetadata.dashboardStackPositions.getStackPosition(dashboardStack);
+            viewStack.selectedIndex = index;
+            if (dashboardHeaderButtons != null) {
+                selectedButton.selected = false;
+                DashboardButton(dashboardHeaderButtons.getItemAt(index)).selected = true;
+                selectedButton = DashboardButton(dashboardHeaderButtons.getItemAt(index));
+            }
+        }
         addChild(viewStack);
 
     }
+
+    private var dashboardHeaderButtons:ArrayCollection;
 
     private var buttonsBox:HBox;
     private var defaultButtonsBox:Container;
@@ -406,9 +425,11 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             s1.percentWidth = 100;
             headerbar.addChild(s1);
         }
+        dashboardHeaderButtons = new ArrayCollection();
         for (var i:int = 0; i < dashboardStack.gridItems.length; i++) {
             var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
             var report:DashboardElement = stackItem.dashboardElement;
+
             if (dashboardStack.selectionType == 'Buttons') {
                 var label:String;
                 if (report == null) {
@@ -427,7 +448,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                     }
                 }
                 var topButton:UIComponent = createStackButton(i, label);
-
+                if (topButton is DashboardButton) {
+                    dashboardHeaderButtons.addItem(topButton);
+                }
                 if (editMode() || dashboardStack.count > 1) {
                     headerbar.addChild(topButton);
                     if (!editMode() && dashboardStack.headerBackground == null) {

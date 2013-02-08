@@ -22,6 +22,10 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
 
     }
 
+    public function stackPopulate(positions:DashboardStackPositions):void {
+
+    }
+
     public function obtainPreferredSizeInfo():SizeInfo {
         return new SizeInfo();
     }

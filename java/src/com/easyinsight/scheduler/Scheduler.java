@@ -21,7 +21,8 @@ import org.hibernate.Query;
 public class Scheduler {
 
     public static final String[] taskClassArray = { "com.easyinsight.users.AccountTimeScheduler",
-        "com.easyinsight.database.DatabaseVolumeScheduler", "com.easyinsight.billing.BillingTaskGenerator"};
+        "com.easyinsight.database.DatabaseVolumeScheduler", "com.easyinsight.billing.BillingTaskGenerator",
+        "com.easyinsight.users.SalesEmailScheduler"};
 
     public static final int TASK_LIMIT = 5;
 

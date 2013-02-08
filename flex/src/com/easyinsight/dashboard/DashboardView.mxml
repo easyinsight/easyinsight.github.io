@@ -16,6 +16,8 @@
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.framework.User;
 
+        import mx.controls.Alert;
+
 
         import mx.controls.Button;
         import mx.core.Application;
@@ -81,6 +83,7 @@
             });
             if (!_fixedID) {
                 //Alert.show("normal dashboard, no?");
+                dashboardHeader.dashboardView = this;
                 dashboardHeader.visible = true;
                 dashboardHeader.includeInLayout = true;
                 //addChildAt(dashboardHeader, 0);
@@ -103,7 +106,9 @@
             var dashboardDesc:DashboardDescriptor = new DashboardDescriptor();
             dashboardDesc.id = _dashboardID;
             dashboardDesc.name = dashboard.name;
-            _breadCrumbs.push(new BreadCrumb(dashboardDesc, dashboardRenderer.getFilterDefinitions()));
+            var pos:DashboardStackPositions = new DashboardStackPositions();
+            rootView.stackPopulate(pos);
+            _breadCrumbs.push(new BreadCrumb(dashboardDesc, dashboardRenderer.getFilterDefinitions(), pos));
             if (event.descriptor is InsightDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, null, null, 0, _breadCrumbs)));
             } else if (event.descriptor is DashboardDescriptor) {
@@ -165,8 +170,8 @@
                 descriptionBox.includeInLayout = false;
             }
             /*if (dashboard.backgroundColor == 0xFFFFFF) {
-                setStyle("backgroundColor", 0xFFFFFF);
-            }*/
+             setStyle("backgroundColor", 0xFFFFFF);
+             }*/
             if (_fixedID) {
                 setStyle("paddingLeft", 0);
                 setStyle("paddingTop", 0);
@@ -201,6 +206,7 @@
              }*/
             if (_breadCrumbs != null && _breadCrumbs.length > 0) {
                 var backButton:Button = new Button();
+
                 var crumb:BreadCrumb = _breadCrumbs[_breadCrumbs.length - 1] as BreadCrumb;
                 backButton.styleName = "grayButton";
                 backButton.label = "Back to " + crumb.eiDescriptor.name;
@@ -211,13 +217,26 @@
                     } else {
                         dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:crumb.eiDescriptor.id,
                             initialFilters:crumb.filters, breadCrumbs:_breadCrumbs, exchangeItem:exchangeItem, reportList:reportList, reportIndex:reportIndex,
-                            originalExchangeItem:originalExchangeItem != null ? originalExchangeItem : desc })));
+                            originalExchangeItem:originalExchangeItem != null ? originalExchangeItem : desc, dashboardStackPositions: crumb.stackPositions })));
                     }
                 });
                 breadCrumbBox.addChild(backButton);
             }
         }
 
+        private var _dashboardStackPositions:DashboardStackPositions;
+
+
+        [Bindable(event="dashboardStackPositionsChanged")]
+        public function get dashboardStackPositions():DashboardStackPositions {
+            return _dashboardStackPositions;
+        }
+
+        public function set dashboardStackPositions(value:DashboardStackPositions):void {
+            if (_dashboardStackPositions == value) return;
+            _dashboardStackPositions = value;
+            dispatchEvent(new Event("dashboardStackPositionsChanged"));
+        }
 
         [Bindable]
         private var description:String;
@@ -458,6 +477,6 @@
         </mx:Box>
         <dashboard:DashboardRenderer id="dashboardRenderer" dashboard="{dashboard}" dashboardID="{_dashboardID}"
                 dataSourceID="{dataSourceID}" initialFilters="{_initialFilters}" filterIndex="{filterIndex}"
-                fixedID="{_fixedID}"/>
+                fixedID="{_fixedID}" dashboardStackPositions="{dashboardStackPositions}"/>
     </mx:VBox>
 </report:DataViewPage>

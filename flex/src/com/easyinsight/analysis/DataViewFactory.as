@@ -543,8 +543,8 @@ public class DataViewFactory extends VBox implements IRetrievable {
             }
             var fields:ArrayCollection = existingDefinition.getFields();
             newDef.populate(fields);
-            copyStandardData(existingDefinition, newDef);
             newDef.initialConfig();
+            copyStandardData(existingDefinition, newDef);
             return newDef;
         }
     }
@@ -579,6 +579,29 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.joinOverrides = source.joinOverrides;
         target.folder = source.folder;
         target.urlKey = source.urlKey;
+        target.cacheMinutes = source.cacheMinutes;
+        target.cacheable = source.cacheable;
+
+        copyPropertyIfExists(source, target, "multiColors");
+        copyPropertyIfExists(source, target, "labelPosition");
+        copyPropertyIfExists(source, target, "labelFontSize");
+        copyPropertyIfExists(source, target, "labelFontWeight");
+        copyPropertyIfExists(source, target, "labelInsideFontColor");
+        copyPropertyIfExists(source, target, "labelOutsideFontColor");
+        copyPropertyIfExists(source, target, "useInsideLabelFontColor");
+        copyPropertyIfExists(source, target, "useOutsideLabelFontColor");
+        copyPropertyIfExists(source, target, "chartColor");
+        copyPropertyIfExists(source, target, "useChartColor");
+        copyPropertyIfExists(source, target, "gradientColor");
+        copyPropertyIfExists(source, target, "columnSort");
+        copyPropertyIfExists(source, target, "showLabels");
+        copyPropertyIfExists(source, target, "briefLabels");
+    }
+
+    private static function copyPropertyIfExists(source:AnalysisDefinition, target:AnalysisDefinition, property:String):void {
+        if (source.hasOwnProperty(property) && target.hasOwnProperty(property)) {
+            target[property] = source[property];
+        }
     }
 
     public function createNewDefinition():AnalysisDefinition {

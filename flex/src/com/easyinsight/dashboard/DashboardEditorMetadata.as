@@ -21,6 +21,7 @@ public class DashboardEditorMetadata {
     public var borderColor:uint;
     public var dashboardID:int;
     public var dashboard:Dashboard;
+    public var dashboardStackPositions:DashboardStackPositions;
 
     public function DashboardEditorMetadata() {
     }

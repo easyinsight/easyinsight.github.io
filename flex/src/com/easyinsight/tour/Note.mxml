@@ -49,10 +49,10 @@
                 controlsBox.removeChild(nextButton);
             }
         }]]></mx:Script>
-    <mx:TextArea text="{text}" textDecoration="none" borderStyle="none" backgroundAlpha="0" fontSize="14" width="230" height="{textHeight}" editable="false" selectable="false"/>
+    <mx:Text text="{text}" textDecoration="none" fontSize="14" width="230" selectable="false" color="#000000"/>
     <mx:HBox width="100%" horizontalAlign="center" id="controlsBox">
         <!--<mx:LinkButton label="Previous Tip" textDecoration="underline" id="previousButton" click="dispatchEvent(new NoteEvent(NoteEvent.PREVIOUS_NOTE, this))" fontSize="14"/>-->
         <mx:Button label="Next" id="nextButton" click="dispatchEvent(new NoteEvent(NoteEvent.NEXT_NOTE, this))" fontSize="14"/>
-        <mx:LinkButton label="Leave Tutorial" textDecoration="underline" click="dispatchEvent(new NoteEvent(NoteEvent.CLOSE_NOTE, this))" fontSize="12"/>
+        <!--<mx:LinkButton label="Dismiss" textDecoration="underline" click="dispatchEvent(new NoteEvent(NoteEvent.CLOSE_NOTE, this))" fontSize="12" />-->
     </mx:HBox>
 </mx:VBox>

@@ -91,7 +91,7 @@ public class ReportMultiColorProperty extends ReportProperty {
     public static ReportMultiColorProperty fromColors(List<MultiColor> multiColors, String name) {
         ReportMultiColorProperty prop = new ReportMultiColorProperty();
         prop.setPropertyName("multiColors");
-        if (multiColors.size() > 0) {
+        if (multiColors != null && multiColors.size() > 0) {
             prop.color1Start = multiColors.get(0).getColor1Start();
             prop.color1StartEnabled = multiColors.get(0).isColor1StartEnabled();
             prop.color1End = multiColors.get(0).getColor1End();

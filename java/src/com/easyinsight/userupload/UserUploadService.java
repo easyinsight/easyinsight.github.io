@@ -661,6 +661,14 @@ public class UserUploadService {
             uploadResponse = new UploadResponse(dataSourceID);
             conn.commit();
             return uploadResponse;
+        } catch (ReportException re) {
+            if (re.getReportFault() instanceof StorageLimitFault) {
+                conn.rollback();
+                uploadResponse = new UploadResponse("You have reached your account storage limit. You need to reduce the size of the data, clean up other data sources on the account, or upgrade to a higher account tier.");
+            } else {
+                conn.rollback();
+                uploadResponse = new UploadResponse(re.getMessage());
+            }
         } catch (StorageLimitException se) {
             conn.rollback();
             uploadResponse = new UploadResponse("You have reached your account storage limit.");
@@ -673,6 +681,85 @@ public class UserUploadService {
             Database.closeConnection(conn);
         }
         return uploadResponse;
+    }
+
+    public void defineAccountReports(List<EIDescriptor> descriptors) {
+        SecurityUtil.authorizeAccountAdmin();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM ACCOUNT_TO_REPORT WHERE ACCOUNT_ID = ?");
+            clearStmt.setLong(1, SecurityUtil.getAccountID());
+            clearStmt.executeUpdate();
+            clearStmt.close();
+            PreparedStatement clearDashboardStmt = conn.prepareStatement("DELETE FROM ACCOUNT_TO_DASHBOARD WHERE ACCOUNT_ID = ?");
+            clearDashboardStmt.setLong(1, SecurityUtil.getAccountID());
+            clearDashboardStmt.executeUpdate();
+            clearDashboardStmt.close();
+            PreparedStatement saveReportStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TO_REPORT (ACCOUNT_ID, REPORT_ID) VALUES (?, ?)");
+            PreparedStatement saveDashboardStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TO_DASHBOARD (ACCOUNT_ID, DASHBOARD_ID) VALUES (?, ?)");
+            for (EIDescriptor descriptor : descriptors) {
+                if (descriptor.getType() == EIDescriptor.REPORT) {
+                    saveReportStmt.setLong(1, SecurityUtil.getAccountID());
+                    saveReportStmt.setLong(2, descriptor.getId());
+                    saveReportStmt.execute();
+                } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                    saveDashboardStmt.setLong(1, SecurityUtil.getAccountID());
+                    saveDashboardStmt.setLong(2, descriptor.getId());
+                    saveDashboardStmt.execute();
+                }
+            }
+            saveReportStmt.close();
+            saveDashboardStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public List<EIDescriptor> getAccountReports() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            List<EIDescriptor> reports = new ArrayList<EIDescriptor>();
+            PreparedStatement getReportStmt = conn.prepareStatement("SELECT ANALYSIS.TITLE, ANALYSIS.ANALYSIS_ID, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE," +
+                    "ANALYSIS.URL_KEY, ANALYSIS.DESCRIPTION FROM " +
+                    "ANALYSIS, ACCOUNT_TO_REPORT WHERE ACCOUNT_TO_REPORT.ACCOUNT_ID = ? AND ACCOUNT_TO_REPORT.REPORT_ID = ANALYSIS.ANALYSIS_ID");
+            getReportStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet reportRS = getReportStmt.executeQuery();
+            while (reportRS.next()) {
+                String title = reportRS.getString(1);
+                long reportID = reportRS.getLong(2);
+                long dataSourceID = reportRS.getLong(3);
+                int reportType = reportRS.getInt(4);
+                String urlKey = reportRS.getString(5);
+                InsightDescriptor id = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, Roles.OWNER, true);
+                id.setDescription(reportRS.getString(6));
+                reports.add(id);
+            }
+            getReportStmt.close();
+            PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_NAME, DASHBOARD.DASHBOARD_ID, DASHBOARD.DATA_SOURCE_ID, " +
+                    "DASHBOARD.URL_KEY, DASHBOARD.DESCRIPTION FROM " +
+                    "DASHBOARD, ACCOUNT_TO_DASHBOARD WHERE ACCOUNT_TO_DASHBOARD.ACCOUNT_ID = ? AND ACCOUNT_TO_DASHBOARD.DASHBOARD_ID = DASHBOARD.DASHBOARD_ID");
+            getDashboardStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet dashboardRS = getDashboardStmt.executeQuery();
+            while (dashboardRS.next()) {
+                String title = dashboardRS.getString(1);
+                long reportID = dashboardRS.getLong(2);
+                long dataSourceID = dashboardRS.getLong(3);
+                String urlKey = dashboardRS.getString(4);
+                DashboardDescriptor dd = new DashboardDescriptor(title, reportID, urlKey, dataSourceID, Roles.OWNER, "", true);
+                dd.setDescription(dashboardRS.getString(5));
+                reports.add(dd);
+            }
+            getDashboardStmt.close();
+            return reports;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public static RawUploadData retrieveRawData(long uploadID) {
@@ -769,6 +856,8 @@ public class UserUploadService {
         int role = SecurityUtil.getUserRoleToFeed(dataFeedID);
         if (role <= Roles.SHARER) {
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataFeedID, conn);
+            feedDefinition.setVisible(false);
+            PreparedStatement updateReportStmt = conn.prepareStatement("UPDATE ANALYSIS SET TEMPORARY_REPORT = ? WHERE DATA_FEED_ID = ?");
             try {
                 feedDefinition.delete(conn);
             } catch (HibernateException e) {

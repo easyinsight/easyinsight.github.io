@@ -44,6 +44,10 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         setStyle("backgroundAlpha", 1);*/
     }
 
+    public function stackPopulate(positions:DashboardStackPositions):void {
+
+    }
+
     public function obtainPreferredSizeInfo():SizeInfo {
         return new SizeInfo(dashboardReport.preferredWidth, alteredHeight == -1 ? dashboardReport.preferredHeight : alteredHeight, dashboardReport.autoCalculateHeight);
     }
@@ -256,16 +260,16 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                     addChildAt(transformContainer, index++);
                 }
             }
-            if (event.reportInfo.report.adHocExecution) {
-                var executeButton:SaveButton = new SaveButton();
-                executeButton.label = "Run the Report";
-                executeButton.addEventListener(MouseEvent.CLICK, runReport);
-                var runBox:HBox = new HBox();
-                runBox.setStyle("horizontalAlign", "center");
-                runBox.percentWidth = 100;
-                runBox.addChild(executeButton);
-                addChildAt(runBox, index);
-            }
+        }
+        if (event.reportInfo.report.adHocExecution) {
+            var executeButton:SaveButton = new SaveButton();
+            executeButton.label = "Run the Report";
+            executeButton.addEventListener(MouseEvent.CLICK, runReport);
+            var runBox:HBox = new HBox();
+            runBox.setStyle("horizontalAlign", "center");
+            runBox.percentWidth = 100;
+            runBox.addChild(executeButton);
+            addChildAt(runBox, index);
         }
         viewFactory.additionalFilterDefinitions = createAdditionalFilters(filterMap);
         setup = true;

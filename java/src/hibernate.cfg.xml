@@ -168,6 +168,8 @@
         <mapping class="com.easyinsight.audit.ActionScorecardLog" />
         <mapping class="com.easyinsight.billing.AccountSyncTaskGenerator" />
         <mapping class="com.easyinsight.billing.AccountSyncScheduledTask" />
+        <mapping class="com.easyinsight.users.SalesEmailScheduler" />
+        <mapping class="com.easyinsight.users.SalesEmailTask" />
     </session-factory>
 
 </hibernate-configuration>

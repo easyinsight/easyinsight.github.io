@@ -134,6 +134,8 @@
         private function viewInHTML():void {
             navigateToURL(new URLRequest("/app/html/dashboard/" + _dashboard.urlKey), "_blank");
         }
+
+
         ]]></mx:Script>
     <mx:Button click="_dashboardView.close()" styleName="grayButton" labelPlacement="right"
                id="backButton"

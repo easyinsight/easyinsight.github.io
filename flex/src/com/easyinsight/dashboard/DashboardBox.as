@@ -41,6 +41,10 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         return new SizeInfo();
     }
 
+    public function stackPopulate(positions:DashboardStackPositions):void {
+
+    }
+
     public function DashboardBox() {
         super();
         setStyle("paddingTop", 0);

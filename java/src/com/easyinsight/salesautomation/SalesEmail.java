@@ -200,4 +200,10 @@ public class SalesEmail implements Runnable {
 
         }*/
     }
+
+    public static void personalizedNurture(String rep, String firstName, String email, String repEmail, String phoneNumber) throws MessagingException, UnsupportedEncodingException {
+        String string = ConstantContactSync.getContent(ConstantContactSync.ONE_DAY);
+        String emailBody = string.replace("{0}", firstName).replace("{1}", rep).replace("{2}", phoneNumber);
+        new SendGridEmail().sendEmail(email, "Checking in on your Easy Insight trial", emailBody, repEmail, true, rep);
+    }
 }
