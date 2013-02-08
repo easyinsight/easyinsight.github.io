@@ -36,8 +36,17 @@ public abstract class EIDescriptor implements Serializable {
     private long id;
     private int role = Roles.SUBSCRIBER;
     private int folder = MAIN_VIEW;
+    private String description;
 
     public abstract int getType();
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public boolean isAccountVisible() {
         return accountVisible;
