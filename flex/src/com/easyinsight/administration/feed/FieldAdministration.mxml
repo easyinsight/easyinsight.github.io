@@ -42,6 +42,8 @@
         import mx.collections.ArrayCollection;
         import mx.collections.HierarchicalCollectionView;
         import mx.collections.HierarchicalData;
+        import mx.collections.ICollectionView;
+        import mx.collections.IHierarchicalCollectionView;
         import mx.collections.Sort;
         import mx.collections.SortField;
         import mx.controls.Alert;
@@ -241,6 +243,7 @@
                     var hierarchyData:HierarchicalData = new HierarchicalData();
                     hierarchyData.source = hierarchy;
                     var myData:HierarchicalCollectionView = new HierarchicalCollectionView(hierarchyData);
+                    myData.filterFunction = filterFunction;
                     var sort:Sort = new Sort();
                     sort.fields = [ new SortField("sortType"), new SortField("displayName") ];
                     myData.sort = sort;
@@ -253,6 +256,7 @@
                 }
             } catch (e:Error) {
                 Alert.show(e.message);
+                throw e;
             }
         }
 
@@ -369,18 +373,45 @@
             var wrapper:AnalysisItemWrapper = item as AnalysisItemWrapper;
             return AnalysisItemTypeRenderer.getImageClass(wrapper);
         }
+
+        private function filterFunction(item:Object):Boolean {
+            var a:AnalysisItemWrapper = item as AnalysisItemWrapper;
+            if (a == null) return false;
+
+            var b:IHierarchicalCollectionView = (fieldGrid.dataProvider as IHierarchicalCollectionView);
+            if(b == null) return true;
+            var children:ICollectionView = b.getChildren(a);
+            if (a.analysisItem == null) {
+                children.filterFunction = filterFunction;
+                children.refresh();
+            }
+            return children.length > 0 || a.displayName.toLowerCase().indexOf(searchText.toLowerCase()) != -1;
+
+        }
+
+        private var searchText:String = "";
+
+        private function changeFilter(event:Event):void {
+            searchText = searchBox.text;
+            fieldGrid.dataProvider.refresh();
+        }
         ]]></mx:Script>
-    <analysis:BaseEditorFieldControlsFactory fields="{allFields}" id="controlsFactory" concreteFieldsEditable="{concreteFieldsEditable}"/>
+    <analysis:BaseEditorFieldControlsFactory fields="{allFields}" id="controlsFactory"
+                                             concreteFieldsEditable="{concreteFieldsEditable}"/>
     <mx:VBox height="100%" width="100%" horizontalAlign="center" paddingTop="5">
         <mx:HBox paddingLeft="5">
             <mx:Button icon="@Embed(source='../../../../../assets/cubes_blue_add.png')"
-                       toolTip="Add Hierarchy..." click="addHierarchy()"  styleName="grayButton" label="Add Hierarchy"/>
+                       toolTip="Add Hierarchy..." click="addHierarchy()" styleName="grayButton" label="Add Hierarchy"/>
             <mx:Button icon="@Embed(source='../../../../../assets/text_formula.png')"
-                       toolTip="Add Calculation..." click="addCalculation()"  styleName="grayButton" label="Add Derived Measure"/>
+                       toolTip="Add Calculation..." click="addCalculation()" styleName="grayButton"
+                       label="Add Derived Measure"/>
             <mx:Button icon="@Embed(source='../../../../../assets/code.png')"
-                       toolTip="Add Derived Grouping..." click="addDerivedGrouping()" styleName="grayButton" label="Add Derived Grouping"/>
+                       toolTip="Add Derived Grouping..." click="addDerivedGrouping()" styleName="grayButton"
+                       label="Add Derived Grouping"/>
             <mx:Button icon="@Embed(source='../../../../../assets/calendar.png')"
-                       toolTip="Add Derived Date..." click="addDerivedDate()" styleName="grayButton" label="Add Derived Date"/>
+                       toolTip="Add Derived Date..." click="addDerivedDate()" styleName="grayButton"
+                       label="Add Derived Date"/>
+            <mx:TextInput id="searchBox" change="changeFilter(event)" />
         </mx:HBox>
         <mx:AdvancedDataGrid height="100%" dragEnabled="true" iconFunction="iconFunction"
                              id="fieldGrid" backgroundColor="#FFFFFF"
