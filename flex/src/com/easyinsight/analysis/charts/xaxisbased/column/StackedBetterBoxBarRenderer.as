@@ -36,7 +36,7 @@ public class StackedBetterBoxBarRenderer extends BetterBoxRenderer {
         var csi:BarSeriesItem = chartItem as BarSeriesItem;
 
         // set the label
-        label.text = formatter.format(csi.xNumber);
+        label.text = formatter.format(Number(csi.xValue) - Number(csi.minValue));
         //label.text = cs.xField;
         label.width = label.measureText(label.text).width + 5;
 
