@@ -204,6 +204,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                             info.setAmount(t.getAmount().toString());
                             account.getBillingInfo().add(info);
                             transactions.add(t.getId());
+                            // TODO: email out the invoice here
                         }
                     }
                     if (ss.getStatus() == Subscription.Status.ACTIVE) {

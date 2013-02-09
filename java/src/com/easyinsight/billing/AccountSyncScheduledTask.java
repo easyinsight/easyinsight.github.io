@@ -2,6 +2,7 @@ package com.easyinsight.billing;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.users.Account;
 import org.hibernate.Session;
@@ -31,10 +32,17 @@ public class AccountSyncScheduledTask extends ScheduledTask {
         List<Account> l = (List<Account>) s.createQuery("from Account").list();
 
         for(Account a : l) {
-            Transaction t = s.beginTransaction();
-            a.syncState();
-            s.save(a);
-            t.commit();
+            if (a.getPricingModel() == Account.NEW && a.getAccountState() != Account.DELINQUENT && a.getAccountState() != Account.BILLING_FAILED) {
+                Transaction t = s.beginTransaction();
+                try {
+                    a.syncState();
+                    s.update(a);
+                    t.commit();
+                } catch (Exception e) {
+                    LogClass.error(e);
+                    t.rollback();
+                }
+            }
         }
 
     }
