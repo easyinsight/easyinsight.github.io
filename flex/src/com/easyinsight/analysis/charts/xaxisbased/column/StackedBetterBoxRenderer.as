@@ -33,7 +33,7 @@ public class StackedBetterBoxRenderer extends BetterBoxRenderer {
         var csi:ColumnSeriesItem = chartItem as ColumnSeriesItem;
 
         // set the label
-        label.text = formatter.format(csi.yNumber);
+        label.text = formatter.format(Number(csi.yValue) - Number(csi.minValue));
 
         label.width = label.maxWidth = unscaledWidth;
 
