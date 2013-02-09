@@ -29,10 +29,10 @@ public class AccountSyncScheduledTask extends ScheduledTask {
     protected void execute(Date now, EIConnection conn) throws Exception {
         System.out.println("starting...");
         Session s = Database.instance().createSession(conn);
-        List<Account> l = (List<Account>) s.createQuery("from Account").list();
+        List<Account> l = (List<Account>) s.createQuery("from Account where pricingModel = ?").setInteger(0, Account.NEW).list();
 
         for(Account a : l) {
-            if (a.getPricingModel() == Account.NEW && a.getAccountState() != Account.DELINQUENT && a.getAccountState() != Account.BILLING_FAILED) {
+            if (a.getAccountState() != Account.DELINQUENT && a.getAccountState() != Account.BILLING_FAILED) {
                 Transaction t = s.beginTransaction();
                 try {
                     a.syncState();
