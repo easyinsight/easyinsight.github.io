@@ -57,6 +57,7 @@
                     formatter.formatString = "DD.MM.YYYY HH:NN";
                     break;
             }
+            customizeVisible = User.getInstance().accountAdmin;
         }
 
         override protected function measure():void {
@@ -169,6 +170,9 @@
                 topReports = null;
             }
         }
+
+        [Bindable]
+        private var customizeVisible:Boolean;
         ]]></mx:Script>
 
 
@@ -177,7 +181,7 @@
         <mx:Spacer width="100%"/>
         <mx:LinkButton label="Join data sources" click="createCompositeFeed()" fontSize="12"/>
         <!--<mx:LinkButton label="Data source from report" click="blah()" fontSize="12"/>-->
-        <mx:LinkButton label="Customize top reports" click="blah1()" fontSize="12"/>
+        <mx:LinkButton label="Customize top reports" click="blah1()" fontSize="12" visible="{customizeVisible}"/>
     </mx:HBox>
     <mx:HBox paddingLeft="10" paddingRight="10"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
