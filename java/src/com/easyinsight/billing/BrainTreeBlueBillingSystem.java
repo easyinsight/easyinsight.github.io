@@ -105,6 +105,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
     }
 
     public Result<Subscription> subscribeMonthly(Account account, int numDesigners, int numStorage, int numConnections) {
+        System.out.println("subscribing account id " + account.getAccountID() + " monthly...");
         Customer c = getCustomer(account);
         SubscriptionRequest sr = new SubscriptionRequest();
         CreditCard dc = null;
@@ -123,11 +124,27 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
             sr.addOns().add().inheritedFromId("13").quantity(numConnections).done().done();
 
         Result<Subscription> r = gateway.subscription().create(sr);
+        if (r.getTarget() != null) {
+            System.out.println("subscription success - " + r.getMessage());
+        } else {
+            System.out.println("subscription failure - " + r.getMessage());
+            if (r.getErrors() != null) {
+                for (ValidationError ve : r.getErrors().getAllDeepValidationErrors()) {
+                    System.out.println(ve.getMessage());
+                }
+                for (ValidationError ve : r.getErrors().getAllValidationErrors()) {
+                    System.out.println(ve.getMessage());
+                }
+            }
+
+        }
+
         return r;
     }
 
 
     public Result<Subscription> subscribeYearly(Account account, int numDesigners, int numStorage, int numConnections) {
+        System.out.println("subscribing account id " + account.getAccountID() + " yearly...");
         Customer c = getCustomer(account);
         SubscriptionRequest sr = new SubscriptionRequest();
         CreditCard dc = null;
@@ -145,6 +162,20 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
             sr.addOns().add().inheritedFromId("23").quantity(numConnections).done().done();
 
         Result<Subscription> r = gateway.subscription().create(sr);
+        if (r.getTarget() != null) {
+            System.out.println("subscription success - " + r.getMessage());
+        } else {
+            System.out.println("subscription failure - " + r.getMessage());
+            if (r.getErrors() != null) {
+                for (ValidationError ve : r.getErrors().getAllDeepValidationErrors()) {
+                    System.out.println(ve.getMessage());
+                }
+                for (ValidationError ve : r.getErrors().getAllValidationErrors()) {
+                    System.out.println(ve.getMessage());
+                }
+            }
+
+        }
         return r;
     }
 
