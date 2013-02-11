@@ -17,6 +17,14 @@
                 _multiColors = new ArrayCollection();
             }
             for (var i:int = 0; i < 15; i++) {
+                var grid:Grid;
+                if (i < 5) {
+                    grid = grid1;
+                } else if (i < 10) {
+                    grid = grid2;
+                } else {
+                    grid = grid3;
+                }
                 if (i < _multiColors.length) {
                     var p1:MultiColorPicker = new MultiColorPicker();
                     p1.config = _multiColors.getItemAt(i) as MultiColor;
@@ -30,13 +38,20 @@
 
         private function apply():void {
             var cols:ArrayCollection = new ArrayCollection();
-            for each (var mcp:MultiColorPicker in grid.getChildren()) {
+            for each (var mcp:MultiColorPicker in grid1.getChildren()) {
+                cols.addItem(mcp.save());
+            }
+            for each (var mcp:MultiColorPicker in grid2.getChildren()) {
+                cols.addItem(mcp.save());
+            }
+            for each (var mcp:MultiColorPicker in grid3.getChildren()) {
                 cols.addItem(mcp.save());
             }
             dispatchEvent(new MultiColorEvent(cols));
             PopUpManager.removePopUp(this);
         }
 
+        [Bindable]
         private var palettes:ArrayCollection = new ArrayCollection([
             {label:"Default", colors:[
                 new MultiColor(0xa6bc59, true),
@@ -70,8 +85,18 @@
 
         private function onClick(event:ListEvent):void {
             var colors:Array = palettes.getItemAt(event.rowIndex).colors;
-            grid.removeAllChildren();
+            grid1.removeAllChildren();
+            grid2.removeAllChildren();
+            grid3.removeAllChildren();
             for (var i:int = 0; i < 15; i++) {
+                var grid:Grid;
+                if (i < 5) {
+                    grid = grid1;
+                } else if (i < 10) {
+                    grid = grid2;
+                } else {
+                    grid = grid3;
+                }
                 if (i < colors.length) {
                     var p1:MultiColorPicker = new MultiColorPicker();
                     p1.config = colors[i] as MultiColor;
@@ -83,19 +108,30 @@
             }
         }
         ]]></mx:Script>
-    <mx:HBox>
-        <mx:Grid id="grid">
-        </mx:Grid>
-        <mx:VBox horizontalAlign="center">
-            <mx:Label text="Default Palettes"/>
-            <mx:Text text="Click on a default palette to populate this report with its colors." width="150"/>
-            <mx:List dataProvider="{palettes}" itemClick="onClick(event)" width="150" rowCount="{palettes.length}">
+    <mx:VBox horizontalAlign="center">
+        <mx:Text
+                text="Click on one of the default palettes to populate this report with its colors, or define your own palette using the color pickers to the left."
+                width="100%"/>
+        <mx:HRule width="100%"/>
+        <mx:HBox horizontalGap="30">
+            <mx:Grid id="grid1">
+            </mx:Grid>
+            <mx:Grid id="grid2">
+            </mx:Grid>
+            <mx:Grid id="grid3">
+            </mx:Grid>
+            <mx:VRule height="100%"/>
+            <mx:VBox>
+                <mx:Label text="Default Palettes" styleName="boldStyle" fontWeight="bold"/>
+                <mx:List dataProvider="{palettes}" itemClick="onClick(event)" width="200" rowCount="{palettes.length}">
 
-            </mx:List>
-        </mx:VBox>
-    </mx:HBox>
-    <mx:HBox>
-        <util:SaveButton label="Apply" click="apply()"/>
-        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
-    </mx:HBox>
+                </mx:List>
+            </mx:VBox>
+        </mx:HBox>
+        <mx:HRule width="100%"/>
+        <mx:HBox horizontalAlign="center">
+            <util:SaveButton label="Apply" click="apply()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
 </util:EISlimWindow>
