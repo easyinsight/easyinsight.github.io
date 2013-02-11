@@ -18,7 +18,7 @@
     admin.setOptInEmail(true);
     admin.setInitialSetupDone(true);
     AccountTransferObject accountTransferObject = new AccountTransferObject();
-    accountTransferObject.setAccountType(Account.PLUS);
+    accountTransferObject.setAccountType(Account.PROFESSIONAL);
     accountTransferObject.setName(request.getParameter("companyName"));
     accountTransferObject.setGoogleAppsDomain(domain);
     accountTransferObject.setAccountState(Account.TRIAL);
