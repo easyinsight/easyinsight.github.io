@@ -153,55 +153,23 @@
 
             AccountCreditCardBillingInfo info;
             if (chargeNow) {
-
                 // if we actually have to charge now, make the actual bill call
-
                 t = hibernateSession.beginTransaction();
                 BillingSystem bs = new BrainTreeBlueBillingSystem();
-
-                // it's not an auth, it's a sale, if we're charging now
-
                 info = bs.billAccount(account.getAccountID(), Double.valueOf(amount), false);
                 if (info.isSuccessful()) {
-                    boolean yearly;
-                    if (accountTypeChange == null) {
-                        yearly = account.getBillingMonthOfYear() != null;
-                    } else {
-                        yearly = accountTypeChange.isYearly();
+                    Calendar cal = Calendar.getInstance();
+                    Integer billingMonthOfYear = account.getBillingMonthOfYear();
+                    if (accountTypeChange.isYearly() && billingMonthOfYear == null) {
+                        billingMonthOfYear = cal.get(Calendar.MONTH);
+                    } else if (!accountTypeChange.isYearly() && billingMonthOfYear != null) {
+                        billingMonthOfYear = null;
                     }
-                    int daysBetween;
-                    if (account.getBillingDayOfMonth() != null && account.getAccountState() == Account.ACTIVE) {
-                        Calendar cal = Calendar.getInstance();
-                        Integer billingMonthOfYear = account.getBillingMonthOfYear();
-                        if (accountTypeChange.isYearly() && billingMonthOfYear == null) {
-                            billingMonthOfYear = cal.get(Calendar.MONTH);
-                        } else if (!accountTypeChange.isYearly() && billingMonthOfYear != null) {
-                            billingMonthOfYear = null;
-                        }
-                        account.setBillingMonthOfYear(billingMonthOfYear);
-
-                        cal.set(Calendar.DAY_OF_MONTH, account.getBillingDayOfMonth());
-                        if (billingMonthOfYear != null) {
-                            cal.set(Calendar.MONTH, billingMonthOfYear);
-                        }
-
-                        if (cal.getTime().before(new Date())) {
-                            cal.add(Calendar.MONTH, 1);
-                        }
-
-                        Date date = cal.getTime();
-                        DateTime lastTime = new DateTime(date);
-                        DateTime now = new DateTime(System.currentTimeMillis());
-                        daysBetween = Days.daysBetween(lastTime, now).getDays();
-                    } else {
-                        daysBetween = yearly ? 365 : 28;
-                    }
-
-                    info.setDays(daysBetween);
+                    account.setBillingMonthOfYear(billingMonthOfYear);
+                    account.setBillingDayOfMonth(cal.get(Calendar.DAY_OF_MONTH));
                     success = true;
                 } else {
                     success = false;
-
                 }
                 hibernateSession.save(info);
                 t.commit();
