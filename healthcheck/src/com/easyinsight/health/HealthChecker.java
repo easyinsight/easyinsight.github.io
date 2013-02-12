@@ -52,6 +52,9 @@ public class HealthChecker extends TimerTask {
 
     public static final int RESET_THRESHOLD = 10;
 
+    private static int count = 0;
+    private static String[] numbers = {"7202858652", "3035850830"};
+
     @Override
     public void run() {
         if (active) {
@@ -146,7 +149,7 @@ public class HealthChecker extends TimerTask {
         TwilioRestClient client = new TwilioRestClient("ACef90386a431fd57dcc62d0b2bb8b00df", "f52b9bc3715f5896e91b0bd5af0ffd02", null);
         Map<String,String> params = new HashMap<String,String>();
         params.put("From", "7202208085");
-        params.put("To", "7202858652");
+        params.put("To", numbers[(count++) % numbers.length]);
         params.put("Url", "http://www.easy-insight.com/twilio.xml");
         TwilioRestResponse response = client.request("/"+"2010-04-01"+"/Accounts/"+client.getAccountSid()+"/Calls", "POST", params);
 
