@@ -1367,7 +1367,7 @@ public class AnalysisService {
         try {
             new AnalysisStorage().clearCache(reportID, 0);
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET ACCOUNT_VISIBLE = ? WHERE ANALYSIS_ID = ?");
-            updateStmt.setBoolean(1, false);
+            updateStmt.setBoolean(1, true);
             updateStmt.setLong(2, reportID);
             updateStmt.executeUpdate();
         } catch (SQLException e) {

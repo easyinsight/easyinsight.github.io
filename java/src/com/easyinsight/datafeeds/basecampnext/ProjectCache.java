@@ -28,24 +28,27 @@ public class ProjectCache extends BasecampNextBaseSource {
         HttpClient httpClient = new HttpClient();
         DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
         projects = new ArrayList<Project>();
-        JSONObject me = runJSONRequestForObject("/people/me.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-        JSONArray jsonArray = runJSONRequest("projects.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+        //JSONObject me = runJSONRequestForObject("/people/me.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+        BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
+        JSONArray jsonArray = runJSONRequest("projects.json", basecampNextCompositeSource, httpClient);
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject projectObject = jsonArray.getJSONObject(i);
+            String projectURL = "https://basecamp.com/"+basecampNextCompositeSource.getEndpoint()+"/projects/" + projectObject.getString("id");
             projects.add(new Project(String.valueOf(projectObject.getInt("id")),
                     projectObject.getString("name"),
                     projectObject.getString("description"),
-                    projectObject.getString("url"),
+                    projectURL,
                     format.parseDateTime(projectObject.getString("updated_at")).toDate(),
                     projectObject.getBoolean("archived")));
         }
         jsonArray = runJSONRequest("projects/archived.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject projectObject = jsonArray.getJSONObject(i);
+            String projectURL = "https://basecamp.com/"+basecampNextCompositeSource.getEndpoint()+"/projects/" + projectObject.getString("id");
             projects.add(new Project(String.valueOf(projectObject.getInt("id")),
                     projectObject.getString("name"),
                     projectObject.getString("description"),
-                    projectObject.getString("url"),
+                    projectURL,
                     format.parseDateTime(projectObject.getString("updated_at")).toDate(), projectObject.getBoolean("archived")));
         }
     }
