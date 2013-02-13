@@ -439,20 +439,34 @@ public class FilterValueDefinition extends FilterDefinition {
             sb.append("<label class=\"control-label\" for=\""+filterName+"\">Available Values</label>");
             sb.append("<div class=\"controls\">");
             int size = Math.min(15, dimensionMetadata.getValues().size());
-            sb.append("<select multiple=\"multiple\" id=\""+filterName+"\" size=\""+size+"\" style=\"width:400px\">");
-            for (Value value : dimensionMetadata.getValues()) {
-                if (filteredValues.contains(value)) {
-                    sb.append("<option selected=\"selected\">").append(value).append("</option>");
-                } else {
-                    sb.append("<option>").append(value).append("</option>");
+            sb.append("<ul id=\"");
+            sb.append(filterName);
+            sb.append("\">");
+
+            for( Value value: dimensionMetadata.getValues()) {
+                sb.append("<li><input type='checkbox'");
+                if(filteredValues.contains(value)) {
+                    sb.append(" checked='checked'");
                 }
+                sb.append(" /><span class='cb_filter_value'>");
+                sb.append(value);
+                sb.append("</span></li>");
             }
-            sb.append("</select>");
+            sb.append("</ul>");
+//            sb.append("<select multiple=\"multiple\" id=\""+filterName+"\" size=\""+size+"\" style=\"width:400px\">");
+//            for (Value value : dimensionMetadata.getValues()) {
+//                if (filteredValues.contains(value)) {
+//                    sb.append("<option selected=\"selected\">").append(value).append("</option>");
+//                } else {
+//                    sb.append("<option>").append(value).append("</option>");
+//                }
+//            }
+//            sb.append("</select>");
             sb.append("</div>");
             sb.append("</div>");
             sb.append("</div>");
             sb.append("<div class=\"modal-footer\">\n" +
-                    "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiFilter('"+filterName+"','"+filterHTMLMetadata.getFilterKey()+"',"+filterHTMLMetadata.createOnChange()+")\">Send</button>\n" +
+                    "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiFilter('"+filterName+"','"+filterHTMLMetadata.getFilterKey()+"',"+filterHTMLMetadata.createOnChange()+")\">˝Send</button>\n" +
                     "        <button class=\"btn\" data-dismiss=\"modal\" type=\"button\">Cancel</button>\n" +
                     "    </div>");
             sb.append("</div>");

@@ -71,8 +71,14 @@ function updateMultiFilter(name, key, refreshFunction) {
         keyedFilter = {};
         filterBase[key] = keyedFilter;
     }
-    var selects = $("#"+name).val();
-    keyedFilter[name] = selects;
+//    var selects = $("#"+name).val();
+    var selects = $("#" + name + " li input:checked");
+    var selectVals = $.map(selects, function(e, i) {
+        return $(".cb_filter_value", $(e).parent()).html();
+
+    })
+
+    keyedFilter[name] = selectVals;
     if (reportReady) {
         refreshFunction();
     }
