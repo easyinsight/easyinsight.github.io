@@ -80,6 +80,7 @@ public class HighRiseCaseJoinSource extends HighRiseBaseSource {
                             row.addValue(COMPANY_ID, partyID);
                         } else if ("Person".equals(partyType)) {
                             row.addValue(CONTACT_ID, partyID);
+                            row.addValue(COMPANY_ID, highRiseCompositeSource.getContactToCompanyCache().get(partyID));
                         }
                     }
                 }
@@ -99,6 +100,7 @@ public class HighRiseCaseJoinSource extends HighRiseBaseSource {
                             row.addValue(COMPANY_ID, partyID);
                         } else if ("Person".equals(partyType)) {
                             row.addValue(CONTACT_ID, partyID);
+                            row.addValue(COMPANY_ID, highRiseCompositeSource.getContactToCompanyCache().get(partyID));
                         }
                     }
                 }

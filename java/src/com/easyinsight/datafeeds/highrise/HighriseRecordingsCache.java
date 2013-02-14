@@ -59,6 +59,7 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
         }
         //public static final String ALTDATEFORMAT = "EEE MMM dd HH:mm:ss zzz yyyy";
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        HighRiseCompositeSource  highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
         String dateString = dateFormat.format(lastTime);
 
@@ -160,6 +161,8 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
                         } else {
                             contactID = subjectID;
                             highriseEmail.setContactID(subjectID);
+                            companyID = highRiseCompositeSource.getContactToCompanyCache().get(contactID);
+                            highriseEmail.setCompanyID(companyID);
                         }
                     } else if ("Deal".equals(subjectType)) {
                         dealID = subjectID;
@@ -178,6 +181,9 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
                             dealID = collectionID;
                             highriseEmail.setDealID(collectionID);
                         }
+                    }
+                    if (contactID != null && companyID == null) {
+                        companyID = highRiseCompositeSource.getContactToCompanyCache().get(contactID);
                     }
                     activities.add(new Activity(body, createdAt, null, contactID, companyID, dealID, caseID, "Email", id, author));
                     emails.add(highriseEmail);
