@@ -2,9 +2,12 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.DashboardPDFCreator;
+        import com.easyinsight.analysis.DashboardPDFWindow;
         import com.easyinsight.analysis.EmbedDashboardWindow;
         import com.easyinsight.report.URLWindow;
         import com.easyinsight.util.PopUpUtil;
+
+        import mx.core.UIComponent;
 
         import mx.core.UIComponent;
 
@@ -30,23 +33,20 @@
             _dashboard = value;
         }
 
-        private var _fitToScreen:Boolean = true;
+        private var _headerArea:UIComponent;
 
-        public function set fitToScreen(value:Boolean):void {
-            _fitToScreen = value;
+        public function set headerArea(value:UIComponent):void {
+            _headerArea = value;
         }
 
         private function pdf():void {
-            if (_fitToScreen) {
-                new DashboardPDFCreator().exportReportToPDF(_dashboard, this, UIComponent(_coreView), true);
-                PopUpManager.removePopUp(this);
-            } else {
-                var window:PrintableDashboardWindow = new PrintableDashboardWindow();
-                window.dashboard = _dashboard;
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-                PopUpManager.removePopUp(this);
-            }
+            var window:DashboardPDFWindow = new DashboardPDFWindow();
+            window.content = UIComponent(_coreView);
+            window.headerArea = _headerArea;
+            window.dashboard = _dashboard;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+            PopUpManager.removePopUp(this);
         }
 
         private function url():void {

@@ -777,6 +777,8 @@ public class ExportService {
         while (pageIter.hasNext()) {
             Page page = pageIter.next();
             Image image = Image.getInstance(page.getBytes());
+            float percent = (landscapeOrientation ? 770f : 523f) / page.getWidth() * 100;
+            image.scalePercent(percent);
             image.setAlignment(Element.ALIGN_CENTER);
             document.add(image);
             if (pageIter.hasNext()) {

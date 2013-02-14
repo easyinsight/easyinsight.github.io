@@ -6,8 +6,6 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.list.SizeOverrideEvent;
-        import com.easyinsight.framework.EIGlobalTimer;
-        import com.easyinsight.framework.GlobalDataSourceEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.report.BreadCrumb;
@@ -15,10 +13,6 @@
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.framework.User;
-
-        import mx.controls.Alert;
-
-
         import mx.controls.Button;
         import mx.core.Application;
 
@@ -308,11 +302,13 @@
         public function exportDashboard(exportButton:Button):void {
             var window:DashboardExportWindow = new DashboardExportWindow();
             window.dashboard = dashboard;
-            window.fitToScreen = !autoSize;
-            window.coreView = rootView as DisplayObject;
+            window.headerArea = headerArea;
+            window.coreView = dashboardRenderer;
+
             PopUpManager.addPopUp(window, this, true);
             window.x = exportButton.x - 20;
             window.y = exportButton.y + exportButton.height + 10;
+            PopUpManager.removePopUp(this);
         }
 
         private var dashboardWidth:int;
