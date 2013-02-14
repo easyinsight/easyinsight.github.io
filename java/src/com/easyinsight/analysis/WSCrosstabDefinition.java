@@ -13,6 +13,51 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
     private List<AnalysisItem> rows;
     private List<AnalysisItem> measures;
     private long crosstabDefinitionID;
+    private int headerBackgroundColor = 0x333333;
+    private int headerTextColor= 0xFFFFFF;
+    private int summaryBackgroundColor = 0x555555;
+    private int summaryTextColor = 0xFFFFFF;
+    private String align;
+
+    public String getAlign() {
+        return align;
+    }
+
+    public void setAlign(String align) {
+        this.align = align;
+    }
+
+    public int getHeaderBackgroundColor() {
+        return headerBackgroundColor;
+    }
+
+    public void setHeaderBackgroundColor(int headerBackgroundColor) {
+        this.headerBackgroundColor = headerBackgroundColor;
+    }
+
+    public int getHeaderTextColor() {
+        return headerTextColor;
+    }
+
+    public void setHeaderTextColor(int headerTextColor) {
+        this.headerTextColor = headerTextColor;
+    }
+
+    public int getSummaryBackgroundColor() {
+        return summaryBackgroundColor;
+    }
+
+    public void setSummaryBackgroundColor(int summaryBackgroundColor) {
+        this.summaryBackgroundColor = summaryBackgroundColor;
+    }
+
+    public int getSummaryTextColor() {
+        return summaryTextColor;
+    }
+
+    public void setSummaryTextColor(int summaryTextColor) {
+        this.summaryTextColor = summaryTextColor;
+    }
 
     public long getCrosstabDefinitionID() {
         return crosstabDefinitionID;
@@ -74,5 +119,25 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
         setColumns(items("column", structure));
         setRows(items("row", structure));
         setMeasures(items("measure", structure));
+    }
+
+    @Override
+    public void populateProperties(List<ReportProperty> properties) {
+        super.populateProperties(properties);
+        headerTextColor = (int) findNumberProperty(properties, "headerTextColor", 0xFFFFFF);
+        summaryTextColor = (int) findNumberProperty(properties, "summaryTextColor", 0xFFFFFF);
+        headerBackgroundColor = (int) findNumberProperty(properties, "headerBackgroundColor", 0x333333);
+        summaryBackgroundColor = (int) findNumberProperty(properties, "summaryBackgroundColor", 0x555555);
+        align = findStringProperty(properties, "align", "left");
+    }
+
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportNumericProperty("headerTextColor", headerTextColor));
+        properties.add(new ReportNumericProperty("headerBackgroundColor", headerBackgroundColor));
+        properties.add(new ReportNumericProperty("summaryTextColor", summaryTextColor));
+        properties.add(new ReportNumericProperty("summaryBackgroundColor", summaryBackgroundColor));
+        properties.add(new ReportStringProperty("align", align));
+        return properties;
     }
 }
