@@ -20,6 +20,7 @@ import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartDefinition;
+import com.easyinsight.analysis.crosstab.CrosstabDefinition;
 import com.easyinsight.analysis.form.FormReport;
 import com.easyinsight.analysis.gauge.GaugeDefinition;
 import com.easyinsight.analysis.heatmap.HeatMapDefinition;
@@ -155,6 +156,15 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Summary Row Background Color", "summaryRowBackgroundColor", ListDefinition(report).summaryRowBackgroundColor, report));
             items.addItem(new CheckBoxReportFormItem("Show Rollover Icon", "rolloverIcon", ListDefinition(report).rolloverIcon, report, null, true));
             items.addItem(new CheckBoxReportFormItem("Word Wrap Headers", "multiLineHeaders", ListDefinition(report).multiLineHeaders, report, null, true));
+            items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
+        }
+        if (report is CrosstabDefinition) {
+            items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
+            items.addItem(new ColorReportFormItem("Header Background Color", "headerBackgroundColor", CrosstabDefinition(report).headerBackgroundColor, report));
+            items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", CrosstabDefinition(report).headerTextColor, report));
+            items.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", CrosstabDefinition(report).summaryBackgroundColor, report));
+            items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", CrosstabDefinition(report).summaryTextColor, report));
+            items.addItem(new ComboBoxReportFormItem("Align", "align", CrosstabDefinition(report).align, report, ["left", "center", "right"]));
         }
         if (report is GaugeDefinition) {
             items.addItem(new NumericReportFormItem("Alert Point 1", "alertPoint1", GaugeDefinition(report).alertPoint1, report, 0, 1000000000));
@@ -172,6 +182,7 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", TreeDefinition(report).headerColor2, report));
             items.addItem(new CheckBoxReportFormItem("Auto Expand All", "autoExpandAll", TreeDefinition(report).autoExpandAll, report));
             items.addItem(new CheckBoxReportFormItem("Summary Row", "summaryTotal", TreeDefinition(report).summaryTotal, report));
+            items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
         }
         /*if (report is SummaryDefinition) {
             items.addItem(new TextReportFormItem("Summary Label", "summaryReportLine", SummaryDefinition(report).summaryReportLine, report));
