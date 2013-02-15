@@ -6,25 +6,42 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.filtering {
+import com.easyinsight.util.GridCheckbox;
+
 import flash.events.Event;
 
 import mx.binding.utils.BindingUtils;
+import mx.containers.Canvas;
 
 import mx.containers.HBox;
 import mx.controls.Alert;
 
 import mx.controls.CheckBox;
+import mx.controls.listClasses.IListItemRenderer;
+import mx.core.UIComponent;
 
-public class FilterStringCheckbox extends HBox {
+public class FilterStringCheckbox extends GridCheckbox {
 
-    private var curData:Object;
-
-    private var checkbox:CheckBox;
 
     public function FilterStringCheckbox() {
-        checkbox = new CheckBox();
-        checkbox.addEventListener(Event.CHANGE, onChange);
+        super();
         this.width = 140;
+        this.cbWidth = 140;
+        this.moveY = 12;
+    }
+
+
+    override protected function isSelected():Boolean {
+        return data.selected;
+    }
+
+
+    override protected function updateSelectedOnObject(selected:Boolean):void {
+        data.selected = selected;
+    }
+
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
     }
 
     override protected function createChildren():void {
@@ -32,21 +49,17 @@ public class FilterStringCheckbox extends HBox {
         addChild(checkbox);
     }
 
+    [Bindable("dataChange")]
     override public function set data(val:Object):void {
-        curData = val;
+        if(this.data)
+            this.data.removeEventListener("selectedChanged", onSelectedChanged)
+        super.data = val;
+        this.data.addEventListener("selectedChanged", onSelectedChanged);
         checkbox.label = val.label;
-        BindingUtils.bindProperty(checkbox, "selected", curData, "selected");
-        BindingUtils.bindProperty(curData, "selected", checkbox, "selected");
     }
 
-    private function onChange(event:Event):void {
-//        if (_multiFilterOption != null) {
-//            dispatchEvent(new MultiFilterEvent(_multiFilterOption));
-//        }
-    }
-
-    override public function get data():Object {
-        return curData;
+    private function onSelectedChanged(event:Event):void {
+        this.checkbox.selected = isSelected();
     }
 }
 }

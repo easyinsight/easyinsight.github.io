@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.filtering.IFilterDetailEditor"
-         horizontalAlign="center">
+         horizontalAlign="center" creationComplete="creationCompleteHandler(event)">
     <mx:Metadata>
         [Event(name="gotMetadataComplete", type="flash.events.Event")]
     </mx:Metadata>
@@ -11,6 +11,11 @@
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.controls.Alert;
+        import mx.controls.Label;
+        import mx.controls.List;
+        import mx.controls.TileList;
+        import mx.core.ClassFactory;
+        import mx.events.FlexEvent;
         import mx.rpc.remoting.RemoteObject;
         import mx.rpc.events.ResultEvent;
         import mx.collections.ArrayCollection;
@@ -20,16 +25,35 @@
 
         import mx.utils.ObjectUtil;
 
+        private var strings:ArrayCollection;
+
         private var _filterValueDefinition:FilterDefinition;
+
+        private var filterTileList:List;
+        private var tooManyBox:HBox;
 
         [Bindable]
         private var sourceValues:ArrayCollection;
-        [Bindable]
-        private var targetValues:ArrayCollection;
+
+        private var _targetValues:ArrayCollection;
 
         private var _reportID:int;
 
         private var _dashboardID:int;
+
+        private var realValues:ArrayCollection;
+
+
+        [Bindable(event="targetValuesChanged")]
+        public function get targetValues():ArrayCollection {
+            return _targetValues;
+        }
+
+        public function set targetValues(value:ArrayCollection):void {
+            if (_targetValues == value) return;
+            _targetValues = value;
+            dispatchEvent(new Event("targetValuesChanged"));
+        }
 
         public function set reportID(value:int):void {
             _reportID = value;
@@ -44,7 +68,6 @@
         private var dataService:RemoteObject;
 
         private function setup():void {
-//            BindingUtils.bindProperty(this, "keyword", availableSearch, "text");
         }
 
         private var _fields:ArrayCollection;
@@ -97,7 +120,8 @@
                 }
                 filteredStrings.addItem(filterString);
             }
-            var strings:ArrayCollection = new ArrayCollection();
+
+            strings = new ArrayCollection();
             for each (var value:Value in analysisDimensionResultMetadata.values) {
                 var string:String = String(value.getValue());
                 if (string == null || string == "") {
@@ -116,9 +140,22 @@
             filteredStrings.sort.compareFunction = compare;
 //            filteredStrings.filterFunction = targetFilterFunction;
             filteredStrings.refresh();
-            targetValues = new ArrayCollection(strings.toArray().map(function (obj:Object, a:*, b:*):Object {
-                return {label: obj, selected: filteredStrings.contains(obj) }
-            }));
+            if (strings.length > 500) {
+                if (filterTileList.parent)
+                    loadedValuesBox.removeChild(filterTileList);
+                loadedValuesBox.addChild(tooManyBox);
+            } else {
+                if (tooManyBox.parent)
+                    loadedValuesBox.removeChild(tooManyBox);
+                loadedValuesBox.addChild(filterTileList);
+            }
+
+            var a:Array = strings.toArray().map(function (obj:Object, a:*, b:*):Object {
+                return new MultiValueFilterOption(obj as String, filteredStrings.contains(obj));
+            })
+            realValues = new ArrayCollection(a);
+            targetValues = new ArrayCollection(a);
+            targetValues.filterFunction = valuesFilterFunction;
             stackIndex = 1;
         }
 
@@ -170,16 +207,15 @@
 
         public function makeUpdates():FilterDefinition {
             var valueFilter:FilterValueDefinition = _filterValueDefinition as FilterValueDefinition;
-//            valueFilter.filteredValues = targetList.dataProvider as ArrayCollection;
-            var a:Array = (solutionGrid.dataProvider as ArrayCollection).toArray().concat()
+            var a:Array = realValues.toArray().concat()
             a = a.filter(function (obj:Object, a:*, b:*):Boolean {
 
-                            return obj.selected;
-                        });
-
+                return obj.selected;
+            });
+            Alert.show(a.length.toString());
             valueFilter.filteredValues = new ArrayCollection(a.map(function (obj:Object, a:*, b:*):Object {
-                        return obj.label;
-                    }))
+                return obj.label;
+            }))
             var index:int = valueFilter.filteredValues.getItemIndex("[ No Value ]");
             if (index != -1) {
                 valueFilter.filteredValues.removeItemAt(index);
@@ -246,6 +282,80 @@
             _typeChangeAllowed = value;
             dispatchEvent(new Event("typeChangeAllowedChanged"));
         }
+
+        private var filterString:String = "";
+
+        private var selectedFilter:Boolean;
+
+        function valuesFilterFunction(o:Object):Boolean {
+            var result:Boolean = true;
+            if (selectedFilter) {
+                result = (o.selected as Boolean);
+            }
+            return result && (o.label as String).toLowerCase().indexOf(filterString.toLowerCase()) != -1;
+        }
+
+        private function filterBox_changeHandler(event:Event):void {
+            filterString = filterBox.text;
+            filterTileList.dataProvider.refresh();
+            if (filterTileList.dataProvider.length > 500) {
+                if (filterTileList.parent)
+                    loadedValuesBox.removeChild(filterTileList);
+                loadedValuesBox.addChild(tooManyBox);
+            }
+            else {
+                if (tooManyBox.parent)
+                    loadedValuesBox.removeChild(tooManyBox);
+                loadedValuesBox.addChild(filterTileList);
+            }
+        }
+
+        private function creationCompleteHandler(event:FlexEvent):void {
+            filterTileList = new List();
+            filterTileList.id = "solutionGrid";
+            filterTileList.itemRenderer = new ClassFactory(com.easyinsight.filtering.FilterStringCheckbox);
+            filterTileList.columnWidth = 150;
+            filterTileList.rowHeight = 30;
+            filterTileList.verticalScrollPolicy = "on";
+            filterTileList.columnCount = 1;
+            filterTileList.percentWidth = 100;
+
+            BindingUtils.bindProperty(filterTileList, "dataProvider", this, "targetValues");
+            loadedValuesBox.addChild(filterTileList);
+
+            tooManyBox = new HBox();
+            var l:Label = new Label();
+            l.text = "There are too many values to display. Please narrow your search above.";
+            tooManyBox.addChild(l);
+
+        }
+
+        private function selectedFilterEvent(event:Event):void {
+            selectedFilter = selectedFilterCheckBox.selected
+            filterTileList.dataProvider.refresh();
+            if (filterTileList.dataProvider.length > 500) {
+                if (filterTileList.parent)
+                    loadedValuesBox.removeChild(filterTileList);
+                loadedValuesBox.addChild(tooManyBox);
+            }
+            else {
+                if (tooManyBox.parent)
+                    loadedValuesBox.removeChild(tooManyBox);
+                loadedValuesBox.addChild(filterTileList);
+            }
+        }
+
+        private function selectAllClick(event:MouseEvent):void {
+            for each(var o:Object in realValues) {
+                o.selected = true;
+            }
+        }
+
+        private function clearAllClick(event:MouseEvent):void {
+            for each(var o:Object in realValues) {
+                o.selected = false;
+            }
+        }
         ]]>
 	</mx:Script>
     <mx:HBox visible="{typeChangeAllowed}">
@@ -255,35 +365,18 @@
         <mx:RadioButton group="{typeGroup}" label="Pattern Match" value="pattern"/>
         <mx:RadioButton group="{typeGroup}" label="Auto Complete" value="autoComplete"/>
     </mx:HBox>
+    <mx:HBox>
+        <mx:TextInput id="filterBox" width="100%" change="filterBox_changeHandler(event)"/>
+        <mx:CheckBox id="selectedFilterCheckBox" change="selectedFilterEvent(event)" label="Show only selected values"  />
+        <mx:Button label="Select All" click="selectAllClick(event)" />
+        <mx:Button label="Clear All" click="clearAllClick(event)" />
+    </mx:HBox>
     <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}" width="100%">
         <mx:Box>
             <mx:ProgressBar label="Loading the available values..." indeterminate="true"/>
         </mx:Box>
-        <mx:VBox>
-            <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.filtering.FilterStringCheckbox"
-                         dataProvider="{targetValues}" id="solutionGrid"
-                         columnWidth="150" rowHeight="30" verticalScrollPolicy="on" columnCount="1"/>
-
-            <!--<mx:Label text="Drag Items Between Available and Filtered" fontWeight="bold" width="100%" textAlign="center"/>-->
-            <!--<mx:CheckBox label="Filter Includes Values" id="includeCheckbox" selected="{includeFilter}"/>-->
-            <!--<mx:HBox verticalAlign="middle">-->
-            <!--<mx:VBox width="300">-->
-            <!--<mx:Label text="Available Values" fontSize="14"/>-->
-            <!--<mx:TextInput id="availableSearch" change="sourceChange()"/>-->
-            <!--<mx:List dataProvider="{sourceValues}" dragMoveEnabled="true" dropEnabled="true" dragEnabled="true" width="300"-->
-            <!--allowMultipleSelection="true" maxHeight="400"/>-->
-            <!--</mx:VBox>-->
-            <!--<mx:VBox>-->
-            <!--<mx:Button label="Add All" click="addAll()"/>-->
-            <!--<mx:Button label="Remove All" click="removeAll()"/>-->
-            <!--</mx:VBox>-->
-            <!--<mx:VBox width="300">-->
-            <!--<mx:Label text="Filtered Values" fontSize="14"/>-->
-            <!--<mx:TextInput id="includedSearch" change="includedChange()"/>-->
-            <!--<mx:List dataProvider="{targetValues}" dropEnabled="true" dragEnabled="true" dragMoveEnabled="true" id="targetList"-->
-            <!--width="300" allowMultipleSelection="true" maxHeight="400"/>-->
-            <!--</mx:VBox>-->
-            <!--</mx:HBox>-->
+        <mx:VBox id="loadedValuesBox">
         </mx:VBox>
+
     </mx:ViewStack>
 </mx:VBox>

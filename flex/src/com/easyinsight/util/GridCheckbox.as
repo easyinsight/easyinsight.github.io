@@ -14,7 +14,10 @@ import mx.core.UIComponent;
 import mx.events.FlexEvent;
 
 public class GridCheckbox extends UIComponent implements IListItemRenderer {
-
+    protected var moveX:int = 8;
+    protected var moveY:int = 0;
+    protected var cbWidth:int = 16;
+    protected var cbHeight:int = 16;
 
     protected var checkbox:CheckBox;
 
@@ -45,8 +48,8 @@ public class GridCheckbox extends UIComponent implements IListItemRenderer {
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         if (checkbox != null) {
-            checkbox.move(8,0);
-            checkbox.setActualSize(16, 16);
+            checkbox.move(moveX, moveY);
+            checkbox.setActualSize(cbWidth, cbHeight);
         }
     }
 
