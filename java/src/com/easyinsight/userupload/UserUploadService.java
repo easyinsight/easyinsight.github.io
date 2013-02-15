@@ -1340,7 +1340,8 @@ public class UserUploadService {
             boolean responded = false;
             boolean changed = false;
             int i = 0;
-            while (!responded && i < 60) {
+            boolean success = false;
+            while (!responded && i < 600) {
                 Message message = responseQueue.receiveMessage();
                 if (message == null) {
                     i++;
@@ -1355,6 +1356,7 @@ public class UserUploadService {
                     long sourceID = Long.parseLong(parts[0]);
                     System.out.println("got response with id = " + sourceID);
                     if (sourceID == dataSourceID) {
+                        success = true;
                         responseQueue.deleteMessage(message);
                         boolean successful = Boolean.parseBoolean(parts[1]);
                         if (successful) {
@@ -1367,6 +1369,9 @@ public class UserUploadService {
                         }
                     }
                 }
+            }
+            if (!success) {
+                throw new ReportException(new DataSourceConnectivityReportFault("The connection timed out.", dataSource));
             }
             return changed;
         }
