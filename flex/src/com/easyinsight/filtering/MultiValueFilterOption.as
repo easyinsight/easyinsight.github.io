@@ -11,7 +11,7 @@ import flash.events.EventDispatcher;
 import mx.events.PropertyChangeEvent;
 
 [Bindable]
-public class MultiValueFilterOption extends EventDispatcher {
+public class MultiValueFilterOption {
     private var _selected:Boolean;
     private var _label:String;
 
@@ -20,10 +20,7 @@ public class MultiValueFilterOption extends EventDispatcher {
         return _selected;
     }
     public function set selected(value:Boolean):void {
-        var temp:Boolean = _selected;
         _selected = value;
-        if(temp != value)
-            dispatchEvent(new PropertyChangeEvent("selectedChanged"))
     }
 
     [Bindable(event="labelChanged")]
@@ -32,10 +29,7 @@ public class MultiValueFilterOption extends EventDispatcher {
     }
 
     public function set label(value:String):void {
-        var temp:String = _label;
         _label = value;
-        if(temp != value)
-            dispatchEvent(new PropertyChangeEvent("labelChanged"))
     }
 
     public function MultiValueFilterOption(label:String = "", selected:Boolean = false) {

@@ -10,7 +10,7 @@
         import mx.collections.ArrayCollection;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
-        import mx.controls.Alert;
+
         import mx.controls.Label;
         import mx.controls.List;
         import mx.controls.TileList;
@@ -31,6 +31,8 @@
 
         private var filterTileList:List;
         private var tooManyBox:HBox;
+
+        private var allCheckBox:CheckBox;
 
         [Bindable]
         private var sourceValues:ArrayCollection;
@@ -153,6 +155,10 @@
             var a:Array = strings.toArray().map(function (obj:Object, a:*, b:*):Object {
                 return new MultiValueFilterOption(obj as String, filteredStrings.contains(obj));
             })
+
+            if(filteredStrings.contains("All"))
+                filterTileList.enabled = !(allCheckBox.selected = true);
+
             realValues = new ArrayCollection(a);
             targetValues = new ArrayCollection(a);
             targetValues.filterFunction = valuesFilterFunction;
@@ -212,14 +218,19 @@
 
                 return obj.selected;
             });
-            valueFilter.filteredValues = new ArrayCollection(a.map(function (obj:Object, a:*, b:*):Object {
-                return obj.label;
-            }))
-            var index:int = valueFilter.filteredValues.getItemIndex("[ No Value ]");
-            if (index != -1) {
-                valueFilter.filteredValues.removeItemAt(index);
-                valueFilter.filteredValues.addItem("");
+            if (allCheckBox.selected) {
+                valueFilter.filteredValues = new ArrayCollection(["All"]);
+            } else {
+                valueFilter.filteredValues = new ArrayCollection(a.map(function (obj:Object, a:*, b:*):Object {
+                    return obj.label;
+                }))
+                var index:int = valueFilter.filteredValues.getItemIndex("[ No Value ]");
+                if (index != -1) {
+                    valueFilter.filteredValues.removeItemAt(index);
+                    valueFilter.filteredValues.addItem("");
+                }
             }
+
             valueFilter.inclusive = true;
 //            valueFilter.inclusive = includeCheckbox.selected;
             valueFilter.singleValue = false;
@@ -318,9 +329,12 @@
             filterTileList.verticalScrollPolicy = "on";
             filterTileList.columnCount = 1;
             filterTileList.percentWidth = 100;
+            allCheckBox = new CheckBox();
+            allCheckBox.label = "All"
+            allCheckBox.addEventListener(Event.CHANGE, allCheckBox_changeHandler);
+
 
             BindingUtils.bindProperty(filterTileList, "dataProvider", this, "targetValues");
-            loadedValuesBox.addChild(filterTileList);
 
             tooManyBox = new HBox();
             var l:Label = new Label();
@@ -344,16 +358,13 @@
             }
         }
 
-        private function selectAllClick(event:MouseEvent):void {
-            for each(var o:Object in realValues) {
-                o.selected = true;
-            }
+        private function addLoadedBox(event:FlexEvent):void {
+            loadedValuesBox.addChild(allCheckBox);
+            loadedValuesBox.addChild(filterTileList);
         }
 
-        private function clearAllClick(event:MouseEvent):void {
-            for each(var o:Object in realValues) {
-                o.selected = false;
-            }
+        private function allCheckBox_changeHandler(event:Event):void {
+            filterTileList.enabled = !allCheckBox.selected;
         }
         ]]>
 	</mx:Script>
@@ -365,19 +376,19 @@
         <mx:RadioButton group="{typeGroup}" label="Auto Complete" value="autoComplete"/>
     </mx:HBox>
     <mx:HBox width="100%">
-        <mx:Image source="@Embed('../../../../assets/icon-search-black.png')" />
+        <mx:Image source="@Embed('../../../../assets/icon-search-black.png')"/>
         <mx:TextInput id="filterBox" width="100%" change="filterBox_changeHandler(event)"/>
     </mx:HBox>
     <mx:HBox>
-        <mx:Button label="Select All" click="selectAllClick(event)"/>
-        <mx:Button label="Clear All" click="clearAllClick(event)"/>
         <mx:CheckBox id="selectedFilterCheckBox" change="selectedFilterEvent(event)" label="Show only selected values"/>
     </mx:HBox>
     <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}" width="100%">
         <mx:Box>
             <mx:ProgressBar label="Loading the available values..." indeterminate="true"/>
         </mx:Box>
-        <mx:VBox id="loadedValuesBox">
+
+        <mx:VBox id="loadedValuesBox" creationComplete="addLoadedBox(event)">
+
         </mx:VBox>
 
     </mx:ViewStack>
