@@ -439,7 +439,7 @@ public class FilterValueDefinition extends FilterDefinition {
             sb.append("<label class=\"control-label\" for=\""+filterName+"\">Available Values</label>");
             sb.append("<div class=\"controls\">");
             int size = Math.min(15, dimensionMetadata.getValues().size());
-            sb.append("<ul id=\"");
+            sb.append("<ul class=\"unstyled\" id=\"");
             sb.append(filterName);
             sb.append("\">");
 
@@ -448,7 +448,7 @@ public class FilterValueDefinition extends FilterDefinition {
                 if(filteredValues.contains(value)) {
                     sb.append(" checked='checked'");
                 }
-                sb.append(" /><span class='cb_filter_value'>");
+                sb.append(" /> <span class='cb_filter_value'>");
                 sb.append(value);
                 sb.append("</span></li>");
             }

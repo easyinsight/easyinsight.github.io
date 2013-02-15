@@ -212,7 +212,6 @@
 
                 return obj.selected;
             });
-            Alert.show(a.length.toString());
             valueFilter.filteredValues = new ArrayCollection(a.map(function (obj:Object, a:*, b:*):Object {
                 return obj.label;
             }))
@@ -365,11 +364,14 @@
         <mx:RadioButton group="{typeGroup}" label="Pattern Match" value="pattern"/>
         <mx:RadioButton group="{typeGroup}" label="Auto Complete" value="autoComplete"/>
     </mx:HBox>
-    <mx:HBox>
+    <mx:HBox width="100%">
+        <mx:Image source="@Embed('../../../../assets/icon-search-black.png')" />
         <mx:TextInput id="filterBox" width="100%" change="filterBox_changeHandler(event)"/>
-        <mx:CheckBox id="selectedFilterCheckBox" change="selectedFilterEvent(event)" label="Show only selected values"  />
-        <mx:Button label="Select All" click="selectAllClick(event)" />
-        <mx:Button label="Clear All" click="clearAllClick(event)" />
+    </mx:HBox>
+    <mx:HBox>
+        <mx:Button label="Select All" click="selectAllClick(event)"/>
+        <mx:Button label="Clear All" click="clearAllClick(event)"/>
+        <mx:CheckBox id="selectedFilterCheckBox" change="selectedFilterEvent(event)" label="Show only selected values"/>
     </mx:HBox>
     <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}" width="100%">
         <mx:Box>
