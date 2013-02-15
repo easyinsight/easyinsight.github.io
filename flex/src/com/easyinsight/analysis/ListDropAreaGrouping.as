@@ -3,10 +3,12 @@ package com.easyinsight.analysis {
 import flash.display.DisplayObject;
 import flash.events.Event;
 import flash.geom.Point;
+import flash.utils.getQualifiedClassName;
 
 import flexlib.containers.FlowBox;
 
 import mx.collections.ArrayCollection;
+import mx.controls.Alert;
 import mx.core.UIComponent;
 import mx.events.FlexEvent;
 
@@ -45,7 +47,7 @@ public class ListDropAreaGrouping extends FlowBox {
     public function highlight(analysisItem:AnalysisItem):Boolean {
         var valid:Boolean = false;
         for each (var area:DropArea in dropAreas) {
-            valid = valid || area.highlight(analysisItem);
+            valid = area.highlight(analysisItem) || valid;
         }
         return valid;
     }
@@ -238,9 +240,11 @@ public class ListDropAreaGrouping extends FlowBox {
             }
         }
 
+        // TODO: fix reoder duplication issue
         dropAreas = new ArrayCollection();
         for (i = 0; i < keys.length; i++) {
             var key:String = keys[i];
+
             for (var j:int = 0; j < reorders.length; j++) {
                 dropArea = reorders.getItemAt(j) as DropArea;
                 if (dropArea.analysisItem.qualifiedName() == key) {

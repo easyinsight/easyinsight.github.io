@@ -26,7 +26,19 @@ public class CrosstabDataGrid extends AdvancedDataGrid {
     private var _headerRows:int = 1;
     private var _rowItems:int = 1;
 
+    private var _headerBackgroundColor:uint;
+    private var _summaryBackgroundColor:uint;
+
     public function CrosstabDataGrid() {
+    }
+
+
+    public function set headerBackgroundColor(value:uint):void {
+        _headerBackgroundColor = value;
+    }
+
+    public function set summaryBackgroundColor(value:uint):void {
+        _summaryBackgroundColor = value;
     }
 
     public function set headerRows(value:int):void {
@@ -107,7 +119,7 @@ public class CrosstabDataGrid extends AdvancedDataGrid {
         for ( var i:int = 0; i < _headerRows; i++)
             ww += columns[i].width;
 
-        g.beginFill(0x333333, 1);
+        g.beginFill(_headerBackgroundColor, 1);
         g.lineStyle(0, 0x000000, 0);
 
         /*g.moveTo(0, 0.5);
@@ -128,18 +140,18 @@ public class CrosstabDataGrid extends AdvancedDataGrid {
             var col:AdvancedDataGridColumn = columns[j];
             rowHeaderWidth += col.width;
         }
-        g.beginFill(0x333333, 1);
+        g.beginFill(_headerBackgroundColor, 1);
         g.drawRect(ww, 0, rowHeaderWidth, hhh);
 
         g.endFill();
 
         var summaryColumnWidth:int = columns[columns.length - 1].width;
-        g.beginFill(0x555555, 1);
+        g.beginFill(_summaryBackgroundColor, 1);
         g.drawRect(rowHeaderWidth + ww - summaryColumnWidth, hhh, summaryColumnWidth, tot - hhh);
 
         g.endFill();
 
-        g.beginFill(0x555555, 1);
+        g.beginFill(_summaryBackgroundColor, 1);
         g.drawRect(ww, tot - rowHeight, rowHeaderWidth, rowHeight);
         g.endFill();
     }

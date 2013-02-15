@@ -1,5 +1,6 @@
 package com.easyinsight.analysis {
 
+import com.easyinsight.analysis.list.SizeOverrideEvent;
 import com.easyinsight.analysis.service.EmbeddedDataService;
 import com.easyinsight.analysis.service.ReportRetrievalFault;
 import com.easyinsight.customupload.ProblemDataEvent;
@@ -376,6 +377,9 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
                     showReport();
                     _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, new Object(), event.additionalProperties);
                 } else {
+                    if (_usePreferredHeight) {
+                        dispatchEvent(new SizeOverrideEvent(-1, 100));
+                    }
                     showNoData();
                 }
                 dispatchEvent(event);

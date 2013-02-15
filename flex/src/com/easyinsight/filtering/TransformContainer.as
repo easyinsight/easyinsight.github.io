@@ -18,6 +18,7 @@ import flash.ui.ContextMenu;
 import flash.ui.ContextMenuItem;
 
 import flash.utils.Dictionary;
+import flash.utils.getQualifiedClassName;
 
 import flexlib.containers.FlowBox;
 
@@ -630,6 +631,7 @@ public class TransformContainer extends HBox
         if (filterDefinitions.length == 0) {
             noFilters = true;
         }
+        dispatchEvent(new TransformsUpdatedEvent(filterDefinitions));
     }
 
     public function commandFilterDelete(filter:IFilter):void {

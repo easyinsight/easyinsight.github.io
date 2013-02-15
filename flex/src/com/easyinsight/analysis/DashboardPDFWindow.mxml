@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" paddingBottom="10" paddingLeft="10"
+        paddingRight="10" paddingTop="10">
+    <mx:Script><![CDATA[
+        import com.easyinsight.dashboard.Dashboard;
+
+        import mx.core.UIComponent;
+        import mx.managers.PopUpManager;
+
+        private var _headerArea:UIComponent;
+
+        private var _content:UIComponent;
+
+        private var _dashboard:Dashboard;
+
+
+        public function set dashboard(value:Dashboard):void {
+            _dashboard = value;
+        }
+
+        public function set headerArea(value:UIComponent):void {
+            _headerArea = value;
+        }
+
+        public function set content(value:UIComponent):void {
+            _content = value;
+        }
+
+        private function renderPDF():void {
+            new DashboardPDFCreator().exportReportToPDF(_dashboard, this, UIComponent(_content), modeBox.selectedItem == "Landscape", includeHeaderCheckBox.selected ? _headerArea : null);
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Orientation:">
+            <mx:ComboBox id="modeBox">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>Landscape</mx:String>
+                            <mx:String>Portrait</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
+        </mx:FormItem>
+        <mx:FormItem label="Include Header:">
+            <mx:CheckBox id="includeHeaderCheckBox" selected="true"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox>
+        <util:SaveButton label="Export" click="renderPDF()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

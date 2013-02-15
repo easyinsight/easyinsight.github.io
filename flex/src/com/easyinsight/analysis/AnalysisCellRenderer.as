@@ -145,6 +145,34 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         validateNow();
     }
 
+    private var newColor:uint;
+    private var explicitColor:uint;
+
+    private var _changed:Boolean;
+    private var _valText:String;
+    private var _format:UITextFormat;
+
+    override public function validateNow():void {
+
+        if (data && parent) {
+            if (_changed) {
+                _changed = false;
+                setText(_valText);
+                setTextFormat(_format);
+            }
+            if (newColor != explicitColor)
+            {
+                styleChangedFlag = true;
+                explicitColor = newColor;
+                invalidateDisplayList();
+            }
+        }
+        super.validateNow();
+
+    }
+
+
+
     public function set data(value:Object):void {
         _data = value;
         var color:uint = 0;
@@ -194,14 +222,20 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
             text = "";
         }
 
-        setText(text);
+        //setText(text);
+        _valText = text;
 
         var rext:TextReportFieldExtension = analysisItem.reportFieldExtension as TextReportFieldExtension;
         var align:String = "left";
         if (rext != null && rext.align != null) {
             align = rext.align.toLowerCase();
         }
-
+        if (_report.getFont() == "Open Sans" && !bold) {
+            styleName = "myFontStyle";
+        } else if (_report.getFont() == "Open Sans" && bold) {
+            styleName = "boldStyle";
+        }
+        this.newColor = color;
         utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, bold, null, false);
         utf.align = align;
         if (hyperlinked) {
@@ -219,18 +253,21 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
             removeEventListener(MouseEvent.ROLL_OUT, onRollOut);
             removeEventListener(MouseEvent.CLICK, onClick);
         }
-        setTextFormat(utf);
+
+        _format = utf;
+        _changed = true;
+
         if (backgroundColor != 0xFFFFFF) {
             this.backgroundColor = backgroundColor;
             this.background = true;
         } else {
             this.background = false;
         }
-        new StandardContextWindow(analysisItem, passThrough, this, value, _report);
-        //UIComponentGlobals.layoutManager.invalidateSize(this);
+        //new StandardContextWindow(analysisItem, passThrough, this, value, _report);
+        UIComponentGlobals.layoutManager.invalidateProperties(this);
         invalidateSize();
         invalidateProperties();
-        //dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 
     private var hasLinks:Boolean;

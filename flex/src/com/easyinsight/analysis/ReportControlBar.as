@@ -124,7 +124,7 @@ public class ReportControlBar extends FlowBox {
         var valid:Boolean = false;
         for each (var child:DisplayObject in getChildren()) {
             if (child is ListDropAreaGrouping) {
-                valid = valid || ListDropAreaGrouping(child).highlight(analysisItem);
+                valid = ListDropAreaGrouping(child).highlight(analysisItem) || valid;
             }
         }
         return valid;

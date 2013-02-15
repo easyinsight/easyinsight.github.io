@@ -11,10 +11,23 @@ import mx.collections.ArrayCollection;
 		public var rows:ArrayCollection;
 		public var crosstabDefinitionID:Number;
         public var summaryTotal:Boolean;
-		
+        public var headerBackgroundColor:uint = 0x333333;
+        public var headerTextColor:uint = 0xFFFFFF;
+        public var summaryBackgroundColor:uint = 0x555555;
+        public var summaryTextColor:uint = 0xFFFFFF;
+        public var align:String = "left";
+
 		public function CrosstabDefinition()
 		{			
 		}
+
+        override public function getFont():String {
+            if (fontName == "Lucida Grande" || fontName == "Open Sans") {
+                return fontName;
+            } else {
+                return "Lucida Grande";
+            }
+        }
 
         override public function supportsEmbeddedFonts():Boolean {
             return true;

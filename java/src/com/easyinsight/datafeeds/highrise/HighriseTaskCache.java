@@ -118,6 +118,7 @@ public class HighriseTaskCache extends HighRiseBaseSource {
                     companyID = subjectID;
                 } else {
                     contactID = subjectID;
+                    companyID = highRiseCompositeSource.getContactToCompanyCache().get(subjectID);
                 }
             } else if ("Deal".equals(subjectType)) {
                 dealID = subjectID;
