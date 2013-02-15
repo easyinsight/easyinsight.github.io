@@ -51,15 +51,15 @@ public class FilterStringCheckbox extends GridCheckbox {
 
     [Bindable("dataChange")]
     override public function set data(val:Object):void {
-        if(this.data)
-            this.data.removeEventListener("selectedChanged", onSelectedChanged)
         super.data = val;
-        this.data.addEventListener("selectedChanged", onSelectedChanged);
         checkbox.label = val.label;
     }
 
-    private function onSelectedChanged(event:Event):void {
-        this.checkbox.selected = isSelected();
+
+    override public function set enabled(value:Boolean):void {
+        if(checkbox && checkbox.parent)
+            checkbox.enabled = value;
+        super.enabled = value;
     }
 }
 }

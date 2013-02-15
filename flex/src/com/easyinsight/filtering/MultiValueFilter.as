@@ -93,11 +93,13 @@ public class MultiValueFilter extends HBox implements IFilter {
     override protected function createChildren():void {
         super.createChildren();
         //if (!_filterEditable) {
-        var checkbox:CheckBox = new CheckBox();
-        checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
-        checkbox.toolTip = "Click to disable this filter.";
-        checkbox.addEventListener(Event.CHANGE, onChange);
-        addChild(checkbox);
+        if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
+            var checkbox:CheckBox = new CheckBox();
+            checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
+            checkbox.toolTip = "Click to disable this filter.";
+            checkbox.addEventListener(Event.CHANGE, onChange);
+            addChild(checkbox);
+        }
         //}
 
         var labelText:UIComponent;
