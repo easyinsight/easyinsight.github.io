@@ -306,6 +306,21 @@
                     mySeries.push(uniqueLineSeries);
                 }
 
+                var trendLineData:ArrayCollection = additionalProperties["trendLineData"];
+                if (trendLineData != null) {
+                    var trendSeries:LineSeries = new LineSeries();
+                    for each (var trendObj:Object in trendLineData) {
+                        trendObj["translatedDate"] = trendObj["date"].getValue();
+                    }
+                    trendSeries.xField = "translatedDate";
+                    trendSeries.yField = "trend";
+                    trendSeries.displayName = "Trend Line";
+                    var trendStroke:Stroke = new Stroke(lineChartDef.trendLineColor, lineChartDef.trendLineThickness, lineChartDef.trendLineAlpha);
+                    trendSeries.setStyle("lineStroke", trendStroke);
+                    trendSeries.dataProvider = trendLineData;
+                    mySeries.push(trendSeries);
+                }
+
                 lineChart.series = mySeries;
 
                 hbox.addChildAt(lineChart, 0);

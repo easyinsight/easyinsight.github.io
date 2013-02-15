@@ -26,6 +26,11 @@ public class LineChartDefinition extends TwoAxisDefinition{
 
     public var lineShadow:Boolean;
 
+    public var trendLineTimeInterval:String = "None";
+    public var trendLineColor:uint = 0x555555;
+    public var trendLineAlpha:Number = .7;
+    public var trendLineThickness:int = 2;
+
     public function LineChartDefinition() {
         super();
     }

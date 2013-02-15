@@ -1,6 +1,8 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.pipeline.LineChartComponent;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,7 +18,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
 
     private boolean autoScale = true;
     private boolean autoScaled = false;
-    private Date xAxisMaximum = null;
+    private transient Date xAxisMaximum = null;
 
     private int strokeWeight = 2;
     private boolean alignLabelsToUnits = true;
@@ -26,6 +28,50 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     private List<MultiColor> multiColors = new ArrayList<MultiColor>();
     private int legendMaxWidth;
     private boolean lineShadow;
+
+    private String trendLineTimeInterval = "None";
+    private int trendLineColor;
+    private double trendLineAlpha;
+    private int trendLineThickness;
+
+    @Override
+    public List<IComponent> createComponents() {
+        List<IComponent> components = super.createComponents();
+        components.add(new LineChartComponent());
+        return components;
+    }
+
+    public int getTrendLineColor() {
+        return trendLineColor;
+    }
+
+    public void setTrendLineColor(int trendLineColor) {
+        this.trendLineColor = trendLineColor;
+    }
+
+    public double getTrendLineAlpha() {
+        return trendLineAlpha;
+    }
+
+    public void setTrendLineAlpha(double trendLineAlpha) {
+        this.trendLineAlpha = trendLineAlpha;
+    }
+
+    public int getTrendLineThickness() {
+        return trendLineThickness;
+    }
+
+    public void setTrendLineThickness(int trendLineThickness) {
+        this.trendLineThickness = trendLineThickness;
+    }
+
+    public String getTrendLineTimeInterval() {
+        return trendLineTimeInterval;
+    }
+
+    public void setTrendLineTimeInterval(String trendLineTimeInterval) {
+        this.trendLineTimeInterval = trendLineTimeInterval;
+    }
 
     /*public LimitsResults applyLimits(DataSet dataSet) {
         LimitsResults limitsResults;
@@ -240,6 +286,10 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         lineShadow = findBooleanProperty(properties, "lineShadow", true);
         showPoints = findBooleanProperty(properties, "showPoints", true);
         multiColors = multiColorProperty(properties, "multiColors");
+        trendLineThickness = (int) findNumberProperty(properties, "trendLineThickness", 2);
+        trendLineTimeInterval = findStringProperty(properties, "trendLineTimeInterval", "None");
+        trendLineColor = (int) findNumberProperty(properties, "trendLineColor", 0x555555);
+        trendLineAlpha = findNumberProperty(properties, "trendLineAlpha", .7);
     }
 
     public List<MultiColor> getMultiColors() {
@@ -259,6 +309,10 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         properties.add(new ReportBooleanProperty("lineShadow", lineShadow));
         properties.add(new ReportBooleanProperty("alignLabelsToUnits", alignLabelsToUnits));
         properties.add(new ReportBooleanProperty("showPoints", showPoints));
+        properties.add(new ReportNumericProperty("trendLineColor", trendLineColor));
+        properties.add(new ReportNumericProperty("trendLineThickness", trendLineThickness));
+        properties.add(new ReportStringProperty("trendLineTimeInterval", trendLineTimeInterval));
+        properties.add(new ReportNumericProperty("trendLineAlpha", trendLineAlpha));
         properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         return properties;
     }

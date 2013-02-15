@@ -229,6 +229,10 @@ public class FunctionFactory {
             return new DayOfQuarter();
         } else if (s.equals("hourofday")) {
             return new HourOfDay();
+        } else if (s.equals("intervalmonths")) {
+            return new IntervalMonths();
+        } else if (s.equals("datetimeaxis")) {
+            return new DateTimeAxisMax();
         } else {
             return null;
         }

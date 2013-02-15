@@ -217,6 +217,11 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("Line Shadow", "lineShadow", LineChartDefinition(report).lineShadow, report));
             items.addItem(new CheckBoxReportFormItem("Align Labels To Units", "alignLabelsToUnits", LineChartDefinition(report).alignLabelsToUnits, report));
             items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", LineChartDefinition(report).multiColors, report));
+            items.addItem(new ComboBoxReportFormItem("Trend Line Interval", "trendLineTimeInterval", LineChartDefinition(report).trendLineTimeInterval, report,
+                ["None", "Year", "Month", "Week"]));
+            items.addItem(new ColorReportFormItem("Trend Line Color", "trendLineColor", LineChartDefinition(report).trendLineColor, report));
+            items.addItem(new NumericReportFormItem("Trend Line Alpha", "trendLineAlpha", LineChartDefinition(report).trendLineAlpha, report, 0, 1));
+            items.addItem(new NumericReportFormItem("Trend Line Thickness", "trendLineThickness", LineChartDefinition(report).trendLineThickness, report, 1, 10));
         }
         if (report is AreaChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Form", "form", TwoAxisDefinition(report).form,
