@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF" borderThickness="1" cornerRadius="15" dropShadowEnabled="true"
         borderStyle="solid">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
 
         import mx.managers.PopUpManager;
@@ -60,8 +61,14 @@
             _item = value;
         }
 
+        private var _report:AnalysisDefinition;
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
+
         private function addAbsolute():void {
-            var sliderDateFilter:SliderDateFilter = new SliderDateFilter(_feedID, _item, 0, 0);
+            var sliderDateFilter:SliderDateFilter = new SliderDateFilter(_feedID, _item, 0, 0, _report);
             dispatchEvent(new FilterCreationEvent(sliderDateFilter));
             PopUpManager.removePopUp(this);
         }

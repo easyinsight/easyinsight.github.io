@@ -245,7 +245,7 @@ public class TransformContainer extends HBox
                 filter = new MultiValueFilter(_feedID, filterDefinition.field, _reportID,  _dashboardID);
             }
         } else if (filterDefinition.getType() == FilterDefinition.DATE) {
-            filter = new SliderDateFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
+            filter = new SliderDateFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report);
         } else if (filterDefinition.getType() == FilterDefinition.RANGE) {
             filter = new SliderMeasureFilter(_feedID, filterDefinition.field);
         } else if (filterDefinition.getType() == FilterDefinition.ROLLING_DATE) {
@@ -375,6 +375,7 @@ public class TransformContainer extends HBox
     public function createNewFilter(analysisItem:AnalysisItem, stageX:int, stageY:int):void {
         if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
             var window:DateFilterWindow = new DateFilterWindow();
+            window.report = _report;
             window.feedID = _feedID;
             window.item = analysisItem;
             window.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);

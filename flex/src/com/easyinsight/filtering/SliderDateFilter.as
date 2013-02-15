@@ -1,7 +1,8 @@
 package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisDateDimensionResultMetadata;
-	import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisItem;
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.framework.User;
@@ -62,15 +63,18 @@ import mx.rpc.events.ResultEvent;
         _dashboardID = value;
     }
 
+        private var _report:AnalysisDefinition;
+
 		
-		public function SliderDateFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
+		public function SliderDateFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition = null) {
 			super();
 			this.analysisItem = analysisItem;
+            _report = report;
 			dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
             dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
-			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, new Date().getTimezoneOffset(), reportID, dashboardID);
+			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, new Date().getTimezoneOffset(), reportID, dashboardID, report);
 		}
 
         private function onFault(event:FaultEvent):void {
