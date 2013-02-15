@@ -193,6 +193,8 @@ public class FeedType implements Serializable {
     public static final FeedType SERVER_SQL_SERVER = new FeedType(168);
     public static final FeedType SERVER_ORACLE = new FeedType(169);
 
+    public static final FeedType SERVER_POSTGRES = new FeedType(170);
+
     public FeedType() {
     }
 

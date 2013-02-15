@@ -94,6 +94,7 @@ import com.easyinsight.datasources.LinkedInDataSource;
 import com.easyinsight.datasources.MySQLDatabaseConnection;
 import com.easyinsight.datasources.OracleDatabaseConnection;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
+//import com.easyinsight.datasources.ReportDataSourceDefinition;
 import com.easyinsight.datasources.SQLServerDatabaseConnection;
 import com.easyinsight.datasources.SampleDataSource;
 import com.easyinsight.datasources.SendGridDataSource;
@@ -225,6 +226,7 @@ public class TORegistry {
         var constantContact:ConstantContactDataSource;
         var campaignMonitor:CampaignMonitorDataSourceCreation;
         var qbSource:QuickbaseCompositeSource;
+//        var reportBased:ReportDataSourceDefinition;
         var basecampNextSource:BasecampNextCompositeSource;
         var clearDBSource:ClearDBCompositeSource;
         var clearDBDataSource:ClearDBDataSource;
@@ -301,6 +303,7 @@ public class TORegistry {
         var mysql:MySQLDatabaseConnection;
         var sqlServer:SQLServerDatabaseConnection;
         var oracle:OracleDatabaseConnection;
+
     }
 }
 }

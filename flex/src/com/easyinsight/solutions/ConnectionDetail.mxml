@@ -60,6 +60,9 @@
                 case DataSourceType.SALESFORCE:
                     result = new SalesforceSolutionDetail();
                     break;
+                case DataSourceType.SERVER_POSTGRES:
+                    result = new PostgresSolutionDetail();
+                    break;
                 case DataSourceType.SERVER_SQL_SERVER:
                     result = new SQLServerSolutionDetail();
                     break;

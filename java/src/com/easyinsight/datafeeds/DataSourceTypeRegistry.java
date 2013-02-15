@@ -12,10 +12,7 @@ import com.easyinsight.datafeeds.cleardb.ClearDBDataSource;
 import com.easyinsight.datafeeds.cloudwatch.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.datafeeds.constantcontact.*;
-import com.easyinsight.datafeeds.database.MySQLDatabaseConnection;
-import com.easyinsight.datafeeds.database.OracleDatabaseConnection;
-import com.easyinsight.datafeeds.database.SQLServerDatabaseConnection;
-import com.easyinsight.datafeeds.database.ServerDatabaseConnection;
+import com.easyinsight.datafeeds.database.*;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.freshbooks.*;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
@@ -293,6 +290,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.SERVER_MYSQL, MySQLDatabaseConnection.class);
         registerType(FeedType.SERVER_SQL_SERVER, SQLServerDatabaseConnection.class);
         registerType(FeedType.SERVER_ORACLE, OracleDatabaseConnection.class);
+        registerType(FeedType.SERVER_POSTGRES, PostgresDatabaseConnection.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
