@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.freshbooks;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -27,6 +28,7 @@ public class FreshbooksTimeEntrySource extends FreshbooksBaseSource {
 
     public static final String TIME_ENTRY_ID = "Time Entry ID";
     public static final String STAFF_ID = "Staff ID";
+    public static final String INVOICE_LINE_ID = "Time Entry Invoice Line ID";
     public static final String PROJECT_ID = "Project ID";
     public static final String TASK_ID = "Task ID";
     public static final String HOURS = "Time Entry Hours";
@@ -41,7 +43,7 @@ public class FreshbooksTimeEntrySource extends FreshbooksBaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(TIME_ENTRY_ID, STAFF_ID, PROJECT_ID, TASK_ID, HOURS, DATE, NOTES, COUNT);
+        return Arrays.asList(TIME_ENTRY_ID, STAFF_ID, PROJECT_ID, TASK_ID, HOURS, DATE, NOTES, COUNT, INVOICE_LINE_ID);
     }
 
     @Override
@@ -57,7 +59,11 @@ public class FreshbooksTimeEntrySource extends FreshbooksBaseSource {
         items.add(new AnalysisDimension(keys.get(FreshbooksTimeEntrySource.PROJECT_ID), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksTimeEntrySource.TASK_ID), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksTimeEntrySource.NOTES), true));
-
+        Key invoiceLineKey = keys.get(INVOICE_LINE_ID);
+        if (invoiceLineKey == null) {
+            invoiceLineKey = new NamedKey(INVOICE_LINE_ID);
+        }
+        items.add(new AnalysisDimension(invoiceLineKey, true));
         items.add(new AnalysisDateDimension(keys.get(FreshbooksTimeEntrySource.DATE), true, AnalysisDateDimension.DAY_LEVEL));
 
         items.add(new AnalysisMeasure(keys.get(FreshbooksTimeEntrySource.COUNT), AggregationTypes.SUM));
@@ -103,6 +109,10 @@ public class FreshbooksTimeEntrySource extends FreshbooksBaseSource {
                     String timeDateString = queryField(invoice, "date/text()");
                     Date entryDate = df.parse(timeDateString);
                     IRow row = dataSet.createRow();
+                    String invoiceLineKey = freshbooksCompositeSource.timeEntryToInvoiceLines().get(timeEntryID);
+                    if (invoiceLineKey != null) {
+                        addValue(row, FreshbooksTimeEntrySource.INVOICE_LINE_ID, invoiceLineKey, keys);
+                    }
                     addValue(row, FreshbooksTimeEntrySource.TIME_ENTRY_ID, timeEntryID, keys);
                     addValue(row, FreshbooksTimeEntrySource.STAFF_ID, staffID, keys);
                     addValue(row, FreshbooksTimeEntrySource.PROJECT_ID, projectID, keys);
