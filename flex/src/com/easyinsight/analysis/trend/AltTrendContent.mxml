@@ -19,8 +19,8 @@
                     var trendOutcome:TrendOutcome = dataSet.getItemAt(i) as TrendOutcome;
                     var mFormatter:Formatter = trendOutcome.measure.getFormatter();
                     var value:String = mFormatter.format(trendOutcome.now.getValue());
-                    width = Math.max(width,  uiComp.measureText(value).width);
-                    width += trendDef.majorFontSize;
+                    /*width = Math.max(width,  uiComp.measureText(value).width);
+                    width += trendDef.majorFontSize;*/
                     trendOutcome.dataSourceID = trendDef.dataFeedID;
                     trends.addItem(trendOutcome);
                 }

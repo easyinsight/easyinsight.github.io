@@ -127,6 +127,21 @@ public class CustomTreeTextRenderer extends UITextField implements IListItemRend
         }
     }
 
+    private var _changed:Boolean;
+    private var _format:UITextFormat;
+
+    override public function validateNow():void {
+
+        if (data && parent) {
+            if (_changed) {
+                _changed = false;
+                setTextFormat(_format);
+            }
+        }
+        super.validateNow();
+
+    }
+
     public function set data(value:Object):void {
         this._data = value;
         if (analysisItem.reportFieldExtension != null && analysisItem.reportFieldExtension is TextReportFieldExtension) {
@@ -137,7 +152,6 @@ public class CustomTreeTextRenderer extends UITextField implements IListItemRend
             }
         }
         var treeDef:TreeDefinition = _report as TreeDefinition;
-        var index:int = -1;
         for (var i:int = 0; i < AnalysisHierarchyItem(treeDef.hierarchy).hierarchyLevels.length; i++) {
             var level:HierarchyLevel = AnalysisHierarchyItem(treeDef.hierarchy).hierarchyLevels.getItemAt(i) as HierarchyLevel;
             if (level.analysisItem == analysisItem) {
@@ -156,11 +170,14 @@ public class CustomTreeTextRenderer extends UITextField implements IListItemRend
             }
         }
 
-
+        if (_report.getFont() == "Open Sans") {
+            styleName = "myFontStyle";
+        }
 
         var color:uint = depth == 0 ? 0xFFFFFF : 0x000000;
         utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color);
-        setTextFormat(utf);
+        _format = utf;
+        _changed = true;
         hyperlinkedUTF = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, null, null, true);
 
         if (hyperlinked && !hasLinks) {

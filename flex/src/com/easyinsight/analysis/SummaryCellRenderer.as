@@ -123,10 +123,24 @@ public class SummaryCellRenderer extends UITextField implements IListItemRendere
         validateNow();
     }
 
+    override public function validateNow():void {
+
+        if (data && parent) {
+            if (_changed) {
+                _changed = false;
+                setText(_valText);
+                setTextFormat(_format);
+            }
+        }
+        super.validateNow();
+
+    }
+
     public function set data(value:Object):void {
         _data = value;
         var treeRow:TreeRow = value as TreeRow;
         var color:uint = 0;
+        var bold:Object = null;
         var backgroundColor:uint = 0xFFFFFF;
         var text:String;
         if (value != null) {
@@ -142,6 +156,9 @@ public class SummaryCellRenderer extends UITextField implements IListItemRendere
                 if (objVal.valueExtension != null) {
                     var ext:TextValueExtension = objVal.valueExtension as TextValueExtension;
                     color = ext.color;
+                    if (ext.bold) {
+                        bold = true;
+                    }
                     backgroundColor = ext.backgroundColor;
                 }
                 if (defaultLink != null && objVal != null && objVal.type() != Value.EMPTY) {
@@ -160,12 +177,17 @@ public class SummaryCellRenderer extends UITextField implements IListItemRendere
             text = "";
         }
 
-        setText(text);
+        _valText = text;
 
         var rext:TextReportFieldExtension = analysisItem.reportFieldExtension as TextReportFieldExtension;
         var align:String = "left";
         if (rext != null && rext.align != null) {
             align = rext.align.toLowerCase();
+        }
+        if (_report.getFont() == "Open Sans" && !bold) {
+            styleName = "myFontStyle";
+        } else if (_report.getFont() == "Open Sans" && bold) {
+            styleName = "boldStyle";
         }
         if (hyperlinked && !hasLinks) {
             hasLinks = true;
@@ -178,22 +200,26 @@ public class SummaryCellRenderer extends UITextField implements IListItemRendere
             removeEventListener(MouseEvent.ROLL_OUT, onRollOut);
             removeEventListener(MouseEvent.CLICK, onClick);
         }
-        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, null, null, false);
+        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, bold, null, false);
         utf.align = align;
         if (hyperlinked) {
-            hyperlinkedUTF = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, null, null, true);
+            hyperlinkedUTF = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, bold, null, true);
             hyperlinkedUTF.align = align;
         }
-        setTextFormat(utf);
+        _format = utf;
+        _changed = true;
         if (backgroundColor != 0xFFFFFF) {
             this.backgroundColor = backgroundColor;
             this.background = true;
         }
         new StandardContextWindow(analysisItem, passThrough, this, value, _report);
         invalidateProperties();
+        invalidateSize();
     }
 
-
+    private var _changed:Boolean;
+    private var _valText:String;
+    private var _format:UITextFormat;
 
     private var hasLinks:Boolean;
 

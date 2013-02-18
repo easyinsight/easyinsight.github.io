@@ -1360,6 +1360,7 @@ public class DataService {
             List<FilterDefinition> dlsFilters = addDLSFilters(analysisDefinition.getDataFeedID(), conn);
             analysisDefinition.getFilterDefinitions().addAll(dlsFilters);
 
+            Set<AnalysisItem> fieldsReplaced = new HashSet<AnalysisItem>();
             for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                 if (filter.getFieldChoiceFilterLabel() != null && !"".equals(filter.getFieldChoiceFilterLabel())) {
                     String label = filter.getFieldChoiceFilterLabel();
@@ -1377,7 +1378,10 @@ public class DataService {
                     Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);
                     for (Map.Entry<String, AnalysisItem> entry : structureCopy.entrySet()) {
                         if (entry.getValue().toDisplay().equals(filter.getField().toDisplay())) {
-                            structure.put(entry.getKey(), analysisItemFilterDefinition.getTargetItem());
+                            if (!fieldsReplaced.contains(entry.getValue())) {
+                                structure.put(entry.getKey(), analysisItemFilterDefinition.getTargetItem());
+                                fieldsReplaced.add(entry.getValue());
+                            }
                         }
                     }
                     analysisDefinition.populateFromReportStructure(structure);
@@ -1394,6 +1398,9 @@ public class DataService {
 
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
             if (analysisDefinition.getAddedItems() != null) {
+
+                // TODO: bolt on other fields here
+
                 allFields.addAll(analysisDefinition.getAddedItems());
             }
 

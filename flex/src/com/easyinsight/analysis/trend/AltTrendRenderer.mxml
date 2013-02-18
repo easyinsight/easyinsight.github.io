@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" verticalAlign="middle" paddingLeft="5" paddingRight="5"
-        verticalScrollPolicy="off" horizontalScrollPolicy="off" verticalGap="0">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" verticalAlign="middle" paddingLeft="5" paddingRight="5"
+        verticalScrollPolicy="off" horizontalScrollPolicy="off" verticalGap="0" width="100%" horizontalAlign="center">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.DrillThrough;
         import com.easyinsight.analysis.DrillThroughEvent;
@@ -141,11 +141,6 @@
             }
         }
 
-        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
-            super.updateDisplayList(unscaledWidth, unscaledHeight);
-            labelArea.width = topBox.width;
-        }
-
         override public function set data(value:Object):void {
             _outcome = value as TrendOutcome;
             leftValueWidth = _outcome.leftTextWidth;
@@ -205,11 +200,11 @@
             return color;
         }
         ]]></mx:Script>
-    <mx:HBox verticalScrollPolicy="off" horizontalScrollPolicy="off" horizontalGap="0" verticalAlign="middle" height="{topHeight}" id="topBox">
-        <mx:Label text="{currentValue}" fontSize="{majorFontSize}" color="{trendColor}" width="{leftValueWidth}" textAlign="center" id="startLabel"/>
+    <mx:HBox verticalScrollPolicy="off" horizontalScrollPolicy="off" horizontalGap="8" verticalAlign="middle" height="{topHeight}" id="topBox">
+        <mx:Label text="{currentValue}" fontSize="{majorFontSize}" color="{trendColor}"  textAlign="center" id="startLabel"/>
         <!--<mx:Image source="{trendIcon}"/>-->
         <mx:Label text="{percentChange}" fontSize="{minorFontSize}" color="{trendColor}" textAlign="center" id="percentChangeLabel"/>
     </mx:HBox>
-    <util:AutoSizeTextArea text="{trendLabel}" fontSize="{minorFontSize}" editable="false" selectable="false" focusEnabled="false" width="132"
-            verticalScrollPolicy="off" horizontalScrollPolicy="off" backgroundAlpha="0" textAlign="center" id="labelArea" borderStyle="solid" borderThickness="0"/>
+    <mx:Text text="{trendLabel}" fontSize="{minorFontSize}" selectable="false" width="100%"
+            textAlign="center" id="labelArea"/>
 </mx:VBox>
