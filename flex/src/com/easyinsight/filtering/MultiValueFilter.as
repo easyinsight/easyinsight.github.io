@@ -27,6 +27,8 @@ public class MultiValueFilter extends HBox implements IFilter {
 
     private var _loadingFromReport:Boolean = false;
 
+    private var filterValues:Label;
+
 
     public function set loadingFromReport(value:Boolean):void {
         _loadingFromReport = value;
@@ -38,6 +40,7 @@ public class MultiValueFilter extends HBox implements IFilter {
         _feedID = feedID;
         _reportID = reportID;
         _dashboardID = dashboardID;
+        filterValues = new Label();
     }
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -83,6 +86,7 @@ public class MultiValueFilter extends HBox implements IFilter {
     }
 
     private function onFilterEdit(event:FilterEditEvent):void {
+        filterValues.text = _filterDefinition.filteredValues.toArray().map(function(a:Object, b:int, c:int):String { if(a == "") return "[ No Value ]"; return a.toString(); }).sort().join(", ");
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
     }
 
@@ -111,7 +115,7 @@ public class MultiValueFilter extends HBox implements IFilter {
         LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         addChild(labelText);
 
-        var filterValues:Label = new Label();
+
         filterValues.maxWidth = 150;
         filterValues.setStyle("fontSize", 12);
         filterValues.setStyle("paddingTop", 2);
