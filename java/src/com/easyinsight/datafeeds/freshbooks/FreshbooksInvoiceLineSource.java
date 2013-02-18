@@ -93,9 +93,19 @@ public class FreshbooksInvoiceLineSource extends FreshbooksBaseSource {
                         Nodes lineItems = invoice.query("lines/line");
                         for (int j = 0; j < lineItems.size(); j++) {
                             Node lineItem = lineItems.get(j);
+                            String lineItemID = invoiceID + "-" + queryField(lineItem, "line_id/text()");
                             IRow row = dataSet.createRow();
                             addValue(row, FreshbooksInvoiceLineSource.INVOICE_ID, invoiceID, keys);
-                            String lineItemID = queryField(lineItem, "line_id/text()");
+                            String type = queryField(lineItem, "type/text()");
+                            if ("Time".equals(type)) {
+                                Map<String, String> map = freshbooksCompositeSource.timeEntryToInvoiceLines();
+                                Nodes timeEntryNodes = lineItem.query("time_entries/time_entry");
+                                for (int t = 0; t < timeEntryNodes.size(); t++) {
+                                    Node timeEntryNode = timeEntryNodes.get(t);
+                                    String timeEntryID = queryField(timeEntryNode, "time_entry_id/text()");
+                                    map.put(timeEntryID, lineItemID);
+                                }
+                            }
                             String amountString = queryField(lineItem, "amount/text()");
                             String quantityString = queryField(lineItem, "quantity/text()");
                             String unitCostString = queryField(lineItem, "unit_cost/text()");

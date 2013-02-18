@@ -3,10 +3,7 @@ package com.easyinsight.datafeeds.freshbooks;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.DataSourceMigration;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.UserMessageException;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.kpi.KPI;
@@ -206,6 +203,36 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.FRESHBOOKS_TASKS, FeedType.FRESHBOOKS_TIME_ENTRIES, FreshbooksTaskSource.TASK_ID, FreshbooksTimeEntrySource.TASK_ID),
                 new ChildConnection(FeedType.FRESHBOOKS_LINE_ITEMS, FeedType.FRESHBOOKS_INVOICE, FreshbooksInvoiceLineSource.INVOICE_ID, FreshbooksInvoiceSource.INVOICE_ID),
                 new ChildConnection(FeedType.FRESHBOOKS_INVOICE, FeedType.FRESHBOOKS_STAFF, FreshbooksInvoiceSource.INVOICE_CREATED_BY, FreshbooksStaffSource.STAFF_ID));
+    }
+
+    private transient Map<String, String> timeEntryToInvoiceLineItem;
+
+    protected void sortSources(List<IServerDataSourceDefinition> children) {
+        Collections.sort(children, new Comparator<IServerDataSourceDefinition>() {
+
+            public int compare(IServerDataSourceDefinition feedDefinition, IServerDataSourceDefinition feedDefinition1) {
+                if (feedDefinition.getFeedType().getType() == FeedType.FRESHBOOKS_LINE_ITEMS.getType()) {
+                    return -1;
+                }
+                if (feedDefinition1.getFeedType().getType() == FeedType.FRESHBOOKS_LINE_ITEMS.getType()) {
+                    return 1;
+                }
+                return 0;
+            }
+        });
+    }
+
+    public Map<String, String> timeEntryToInvoiceLines() {
+        if (timeEntryToInvoiceLineItem == null) {
+            timeEntryToInvoiceLineItem = new HashMap<String, String>();
+        }
+        return timeEntryToInvoiceLineItem;
+    }
+
+    @Override
+    protected void refreshDone() {
+        super.refreshDone();
+        timeEntryToInvoiceLineItem = null;
     }
 
     @Override
