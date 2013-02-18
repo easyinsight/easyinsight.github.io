@@ -220,7 +220,7 @@ public class DashboardService {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET ACCOUNT_VISIBLE = ? WHERE DASHBOARD_ID = ?");
-            updateStmt.setBoolean(1, false);
+            updateStmt.setBoolean(1, true);
             updateStmt.setLong(2, dashboardID);
             updateStmt.executeUpdate();
         } catch (SQLException e) {
