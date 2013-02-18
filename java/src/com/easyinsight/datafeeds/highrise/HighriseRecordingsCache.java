@@ -107,6 +107,7 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
                         } else {
                             activityType = "Contact Note";
                             contactID = subjectID;
+                            companyID = highRiseCompositeSource.getContactToCompanyCache().get(contactID);
                             contactNotes.add(recording);
                         }
                     } else if ("Deal".equals(subjectType)) {
@@ -122,19 +123,22 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
                     String collectionID = queryField(recordingNode, "collection-id/text()");
                     if (collectionType != null) {
                         recording = new Recording(body, createdAt, updatedAt, collectionID, id, author);
-                        if (companyIDs.contains(subjectID)) {
-                            companyID = subjectID;
-                            recording.setCompanyID(subjectID);
-                        } else {
-                            contactID = subjectID;
-                            recording.setContactID(subjectID);
-                        }
+
                         if ("Kase".equals(collectionType) && !"Kase".equals(subjectType)) {
                             caseID = collectionID;
                             caseNotes.add(recording);
                         } else if ("Deal".equals(collectionType) && !"Deal".equals(subjectType)) {
-                            contactID = collectionID;
+                            dealID = collectionID;
                             dealNotes.add(recording);
+                        } else {
+                            /*if (companyIDs.contains(subjectID)) {
+                                companyID = subjectID;
+                                recording.setCompanyID(subjectID);
+                            } else {
+                                contactID = subjectID;
+                                companyID = highRiseCompositeSource.getContactToCompanyCache().get(contactID);
+                                recording.setContactID(subjectID);
+                            }*/
                         }
                     }
                     activities.add(new Activity(body, createdAt, updatedAt, contactID, companyID, dealID, caseID, activityType, id, author));

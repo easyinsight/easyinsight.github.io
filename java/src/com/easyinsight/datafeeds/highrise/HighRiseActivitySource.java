@@ -171,6 +171,7 @@ public class HighRiseActivitySource extends HighRiseBaseSource {
         row.addValue(CASE_ID, taskInfo.getCaseID());
         row.addValue(NOTE_CREATED_AT, new DateValue(taskInfo.getCreatedAt()));
         row.addValue(NOTE_UPDATED_AT, new DateValue(taskInfo.getCreatedAt()));
+        row.addValue(TASK_ID, taskInfo.getTaskID());
         row.addValue(COUNT, 1);
     }
 
