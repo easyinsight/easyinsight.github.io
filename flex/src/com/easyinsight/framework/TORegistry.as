@@ -94,6 +94,8 @@ import com.easyinsight.datasources.LinkedInDataSource;
 import com.easyinsight.datasources.MySQLDatabaseConnection;
 import com.easyinsight.datasources.OracleDatabaseConnection;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
+import com.easyinsight.datasources.PostgresDatabaseConnection;
+
 //import com.easyinsight.datasources.ReportDataSourceDefinition;
 import com.easyinsight.datasources.SQLServerDatabaseConnection;
 import com.easyinsight.datasources.SampleDataSource;
@@ -303,7 +305,7 @@ public class TORegistry {
         var mysql:MySQLDatabaseConnection;
         var sqlServer:SQLServerDatabaseConnection;
         var oracle:OracleDatabaseConnection;
-
+        var postgres:PostgresDatabaseConnection;
     }
 }
 }
