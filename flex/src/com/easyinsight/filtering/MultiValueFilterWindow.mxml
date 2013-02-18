@@ -154,8 +154,11 @@
                 loadedValuesBox.addChild(filterTileList);
             }
 
+            var all:Boolean = filteredStrings.contains("All");
+            allCheckBox.selected = all;
+
             var a:Array = strings.toArray().map(function (obj:Object, a:*, b:*):Object {
-                var m:MultiValueFilterOption = new MultiValueFilterOption(obj as String, filteredStrings.contains(obj))
+                var m:MultiValueFilterOption = new MultiValueFilterOption(obj as String, all || filteredStrings.contains(obj))
                 m.addEventListener("selectedChanged", valueChanged, false, 0, true);
                 return m;
             })
