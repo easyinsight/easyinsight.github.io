@@ -10,8 +10,10 @@ import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
+import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.core.UIComponent;
 import mx.managers.PopUpManager;
@@ -92,7 +94,6 @@ public class MultiValueFilter extends HBox implements IFilter {
 
     override protected function createChildren():void {
         super.createChildren();
-        //if (!_filterEditable) {
         if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
             var checkbox:CheckBox = new CheckBox();
             checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
@@ -100,7 +101,7 @@ public class MultiValueFilter extends HBox implements IFilter {
             checkbox.addEventListener(Event.CHANGE, onChange);
             addChild(checkbox);
         }
-        //}
+
 
         var labelText:UIComponent;
         labelText = new LinkButton();
@@ -110,12 +111,14 @@ public class MultiValueFilter extends HBox implements IFilter {
         LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         addChild(labelText);
 
-        /*if (editButton == null) {
-         editButton = new Button();
-         editButton.addEventListener(MouseEvent.CLICK, edit);
-         editButton.setStyle("icon", ImageConstants.EDIT_ICON);
-         editButton.toolTip = "Edit";
-         }*/
+        var filterValues:Label = new Label();
+        filterValues.maxWidth = 150;
+        filterValues.setStyle("fontSize", 12);
+        filterValues.setStyle("paddingTop", 2);
+        filterValues.setStyle("paddingBottom", 2);
+        filterValues.text = _filterDefinition.filteredValues.toArray().map(function(a:Object, b:int, c:int):String { if(a == "") return "[ No Value ]"; return a.toString(); }).sort().join(", ");
+        addChild(filterValues);
+
         if (_filterEditable) {
 
             if (deleteButton == null) {
