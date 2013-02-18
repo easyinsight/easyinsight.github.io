@@ -160,10 +160,12 @@
                 if (info.isSuccessful()) {
                     Calendar cal = Calendar.getInstance();
                     Integer billingMonthOfYear = account.getBillingMonthOfYear();
-                    if (accountTypeChange.isYearly() && billingMonthOfYear == null) {
-                        billingMonthOfYear = cal.get(Calendar.MONTH);
-                    } else if (!accountTypeChange.isYearly() && billingMonthOfYear != null) {
-                        billingMonthOfYear = null;
+                    if (accountTypeChange != null) {
+                        if (accountTypeChange.isYearly() && billingMonthOfYear == null) {
+                            billingMonthOfYear = cal.get(Calendar.MONTH);
+                        } else if (!accountTypeChange.isYearly() && billingMonthOfYear != null) {
+                            billingMonthOfYear = null;
+                        }
                     }
                     account.setBillingMonthOfYear(billingMonthOfYear);
                     account.setBillingDayOfMonth(cal.get(Calendar.DAY_OF_MONTH));
