@@ -160,9 +160,6 @@
                 return m;
             })
 
-            if(filteredStrings.contains("All"))
-                filterTileList.enabled = !(allCheckBox.selected = true);
-
             realValues = new ArrayCollection(a);
             targetValues = new ArrayCollection(a);
             targetValues.filterFunction = valuesFilterFunction;
