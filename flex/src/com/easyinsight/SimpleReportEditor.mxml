@@ -512,6 +512,7 @@
         }
 
         private function refactorToDataSource(event:ReportEditorFieldEvent):void {
+
             var window:SavePromptWindow = new SavePromptWindow();
             window.prompt = "Do you want to promote this field to the data source level, making it available to all reports on this data source?";
             window.defineOption("Promote to Data Source Field", "promoteToDataSource");
@@ -650,8 +651,12 @@
         }
 
         private function transformsUpdated(event:TransformsUpdatedEvent):void {
-            analysisDefinition.filterDefinitions = event.filterDefinitions;
-            dataView.refresh();
+            if (analysisDefinition != null) {
+                analysisDefinition.filterDefinitions = event.filterDefinitions;
+            }
+            if (dataView != null) {
+                dataView.refresh();
+            }
         }
 
         private function save(closeAfterSave:Boolean = false, saveHandler:Function = null):void {
