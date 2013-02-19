@@ -175,7 +175,6 @@ public class MultiValueFilter extends HBox implements IFilter {
         } else {
             _filterDefinition.filteredValues = new ArrayCollection(_filterDefinition.filteredValues.toArray().concat(filterValues.toArray()));
         }
-        //updateState();
     }
 
     public function addValue(value:String):void {
