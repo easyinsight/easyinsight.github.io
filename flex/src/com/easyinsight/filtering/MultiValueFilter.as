@@ -82,6 +82,7 @@ public class MultiValueFilter extends HBox implements IFilter {
     }
 
     private function onUpdated(event:Event):void {
+        filterValues.text = _filterDefinition.filteredValues.toArray().map(function(a:Object, b:int, c:int):String { if(a == "") return "[ No Value ]"; return a.toString(); }).sort().join(", ");
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 
