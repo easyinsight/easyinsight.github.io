@@ -1,16 +1,17 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.scorecard.ScorecardDescriptor;
-import com.easyinsight.security.Roles;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -85,7 +86,7 @@ public class DashboardScorecard extends DashboardElement {
     }
 
     @Override
-    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
+    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap, List<AnalysisItem> allFields, boolean changingDataSource, FeedDefinition dataSource) {
         /*AnalysisDefinition replacement = reportReplacementMap.get(report.getId());
         report = new InsightDescriptor(replacement.getAnalysisID(), replacement.getTitle(), replacement.getDataFeedID(), replacement.getReportType(),
                 replacement.getUrlKey(), Roles.SUBSCRIBER);*/
