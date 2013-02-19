@@ -659,7 +659,7 @@ public class SolutionService {
         }
         
         for (Dashboard copiedDashboard : dashboardReplacementMap.values()) {
-            copiedDashboard.updateIDs(reportReplacementMap);
+            copiedDashboard.updateIDs(reportReplacementMap, targetDataSource.getFields(), true, targetDataSource);
         }
 
         for (AnalysisDefinition copiedReport : reportList) {
@@ -790,7 +790,7 @@ public class SolutionService {
         }
 
         for (Dashboard copiedDashboard : dashboardList) {
-            copiedDashboard.updateIDs(reportReplacementMap);
+            copiedDashboard.updateIDs(reportReplacementMap, targetDataSource.getFields(), true, targetDataSource);
         }
 
         for (AnalysisDefinition copiedReport : reportList) {
