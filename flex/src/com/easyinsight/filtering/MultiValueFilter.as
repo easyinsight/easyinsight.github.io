@@ -82,12 +82,12 @@ public class MultiValueFilter extends HBox implements IFilter {
     }
 
     private function onUpdated(event:Event):void {
-        filterValues.text = _filterDefinition.filteredValues.toArray().map(function(a:Object, b:int, c:int):String { if(a == "") return "[ No Value ]"; return a.toString(); }).sort().join(", ");
+        filterValues.text = !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function(a:Object, b:int, c:int):String { if(a == "") return "[ No Value ]"; return a.toString(); }).sort().join(", ");
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 
     private function onFilterEdit(event:FilterEditEvent):void {
-        filterValues.text = _filterDefinition.filteredValues.toArray().map(function(a:Object, b:int, c:int):String { if(a == "") return "[ No Value ]"; return a.toString(); }).sort().join(", ");
+        filterValues.text = !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function(a:Object, b:int, c:int):String { if(a == "") return "[ No Value ]"; return a.toString(); }).sort().join(", ");
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
     }
 
@@ -116,12 +116,15 @@ public class MultiValueFilter extends HBox implements IFilter {
         LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         addChild(labelText);
 
-
         filterValues.maxWidth = 150;
         filterValues.setStyle("fontSize", 12);
         filterValues.setStyle("paddingTop", 2);
         filterValues.setStyle("paddingBottom", 2);
-        filterValues.text = _filterDefinition.filteredValues.toArray().map(function(a:Object, b:int, c:int):String { if(a == "") return "[ No Value ]"; return a.toString(); }).sort().join(", ");
+        filterValues.text = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function(a:Object, b:int, c:int):String {
+            if(!a) return "";
+            if(a == "") return "[ No Value ]";
+                return a.toString();
+        }).sort().join(", ");
         addChild(filterValues);
 
         if (_filterEditable) {
