@@ -99,6 +99,7 @@ public class MultiValueFilter extends HBox implements IFilter {
 
     override protected function createChildren():void {
         super.createChildren();
+        this.setStyle("horizontalGap", 2);
         if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
             var checkbox:CheckBox = new CheckBox();
             checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
@@ -120,6 +121,7 @@ public class MultiValueFilter extends HBox implements IFilter {
         filterValues.setStyle("fontSize", 12);
         filterValues.setStyle("paddingTop", 2);
         filterValues.setStyle("paddingBottom", 2);
+        filterValues.setStyle("paddingLeft", 0);
         filterValues.text = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function(a:Object, b:int, c:int):String {
             if(!a) return "";
             if(a == "") return "[ No Value ]";
