@@ -72,6 +72,7 @@
                 }
                 this.fieldLength = treeDefinition.items.length;
                 //coreGrid.setStyle("fontFamily", "Lucida Grande");
+
                 coreGrid.setStyle("fontSize", treeDefinition.fontSize);
                 coreGrid.setStyle("color", treeDefinition.textColor);
                 coreGrid.setStyle("alternatingItemColors", [ treeDefinition.rowColor1, treeDefinition.rowColor2 ]);
@@ -80,7 +81,7 @@
                 coreGrid.groupIconFunction = groupIconFunction;
                 coreGrid.iconFunction = iconFunction;
                 coreGrid.displayDisclosureIcon = false;
-                coreGrid.displayItemsExpanded = true;
+                //coreGrid.displayItemsExpanded = true;
                 coreGrid.setStyle("depthColors", [0xBBBBBB, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF]);
                 //}
                 this.treeDef = treeDefinition;
@@ -186,6 +187,7 @@
                 coreGrid.dataProvider = hierDataView;
                 /*groupingColl.refresh();
                  coreGrid.dataProvider = groupingColl;*/
+                coreGrid.clearRenderers();
                 coreGrid.columns = columns;
                 /*if (treeDefinition.autoExpandAll) {
                  coreGrid.validateNow();
@@ -316,7 +318,7 @@
                                   variableRowHeight="true" rowColorFunction="rowColor" fontFamily="Lucida Grande"
                                   horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
                                   verticalGridLines="true"
-                                  borderStyle="solid" borderColor="#DDDDDD" selectable="false"/>
+                                  borderStyle="solid" borderColor="#DDDDDD" selectable="false" displayItemsExpanded="true"/>
 
 
 </mx:Module>

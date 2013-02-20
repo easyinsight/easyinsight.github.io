@@ -12,6 +12,7 @@ import flash.display.Graphics;
 import flash.display.Shape;
 import flash.display.Sprite;
 import flash.geom.Matrix;
+import flash.utils.Dictionary;
 
 import mx.controls.AdvancedDataGrid;
 import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
@@ -19,7 +20,6 @@ import mx.core.FlexShape;
 import mx.core.IFlexDisplayObject;
 import mx.core.UIComponent;
 import mx.styles.ISimpleStyleClient;
-import mx.styles.StyleManager;
 
 public class VerticalDataGrid extends AdvancedDataGrid {
 
@@ -30,6 +30,12 @@ public class VerticalDataGrid extends AdvancedDataGrid {
 
     public function set headerRows(value:int):void {
         _headerRows = value;
+    }
+
+    public function clearRenderers():void {
+        this.itemRendererToFactoryMap = new Dictionary(false);
+        this.visibleData = new Object();
+        this.listData = null;
     }
 
     /*override protected function drawHorizontalLine(s:Sprite, rowIndex:int, color:uint, y:Number):void
