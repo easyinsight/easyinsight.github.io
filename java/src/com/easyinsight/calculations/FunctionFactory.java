@@ -239,6 +239,10 @@ public class FunctionFactory {
             return new IntervalQuarters();
         } else if (s.equals("intervalyears")) {
             return new IntervalYears();
+        } else if (s.equals("daysinquarter")) {
+            return new DaysInQuarter();
+        } else if (s.equals("quarters")) {
+            return new Quarters();
         } else {
             return null;
         }
