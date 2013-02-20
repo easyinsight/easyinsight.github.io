@@ -7,6 +7,7 @@ import com.easyinsight.analysis.FilterHTMLMetadata;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.scorecard.Scorecard;
 import org.hibernate.Session;
@@ -311,7 +312,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     }
 
     public abstract Set<Long> containedReports();
-    public abstract void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap);
+    public abstract void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap, List<AnalysisItem> allFields, boolean changingDataSource, FeedDefinition dataSource);
 
     public abstract Set<Long> containedScorecards();
     public abstract void updateScorecardIDs(Map<Long, Scorecard> scorecardReplacementMap);

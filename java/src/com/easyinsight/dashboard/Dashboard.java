@@ -421,8 +421,8 @@ public class Dashboard implements Cloneable, Serializable {
         System.out.println(Integer.parseInt("CCCCCC", 16));
     }
 
-    public void updateIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
-        getRootElement().updateReportIDs(reportReplacementMap);
+    public void updateIDs(Map<Long, AnalysisDefinition> reportReplacementMap, List<AnalysisItem> allFields, boolean changingDataSource, FeedDefinition dataSource) {
+        getRootElement().updateReportIDs(reportReplacementMap, allFields, changingDataSource, dataSource);
     }
     
     public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems) {

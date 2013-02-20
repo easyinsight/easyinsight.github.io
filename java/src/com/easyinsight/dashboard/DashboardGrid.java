@@ -7,6 +7,7 @@ import com.easyinsight.analysis.FilterHTMLMetadata;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.scorecard.Scorecard;
 
 import java.sql.PreparedStatement;
@@ -202,11 +203,11 @@ public class DashboardGrid extends DashboardElement {
     }
 
     @Override
-    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
+    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap, List<AnalysisItem> allFields, boolean changingDataSource, FeedDefinition dataSource) {
         for (DashboardGridItem gridItem : gridItems) {
             DashboardElement element = gridItem.getDashboardElement();
             if (element != null) {
-                element.updateReportIDs(reportReplacementMap);
+                element.updateReportIDs(reportReplacementMap, allFields, changingDataSource, dataSource);
             }
         }
     }

@@ -1,10 +1,10 @@
 package com.easyinsight.dashboard;
 
-import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.analysis.FilterHTMLMetadata;
+import com.easyinsight.analysis.*;
+import com.easyinsight.core.Key;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.scorecard.Scorecard;
 import org.hibernate.Session;
 
@@ -235,10 +235,56 @@ public class DashboardStack extends DashboardElement {
         }
     }
 
+    private void cleanup(AnalysisItem analysisItem, boolean changingDataSource) {
+        if (changingDataSource) {
+            // TODO: validate calculations and lookup tables--if necessary to create, should emit something with the report
+            analysisItem.setLookupTableID(null);
+        }
+    }
+
     @Override
-    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
+    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap, List<AnalysisItem> allFields, boolean changingDataSource, FeedDefinition dataSource) {
         for (DashboardStackItem gridItem : gridItems) {
-            gridItem.getDashboardElement().updateReportIDs(reportReplacementMap);
+            gridItem.getDashboardElement().updateReportIDs(reportReplacementMap, allFields, changingDataSource, dataSource);
+        }
+
+        try {
+            if (getFilters() != null) {
+                Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+                List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
+                for (FilterDefinition persistableFilterDefinition : getFilters()) {
+                    filterDefinitions.add(persistableFilterDefinition.clone());
+                    List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
+                    for (AnalysisItem item : filterItems) {
+                        if (replacementMap.get(item.getAnalysisItemID()) == null) {
+                            AnalysisItem clonedItem = item.clone();
+                            cleanup(clonedItem, changingDataSource);
+                            replacementMap.put(item.getAnalysisItemID(), clonedItem);
+                        }
+                    }
+                }
+                for (AnalysisItem analysisItem : replacementMap.values()) {
+                    Key key = dataSource.getField(analysisItem.getKey().toDisplayName());
+                    if (key != null) {
+                        analysisItem.setKey(key);
+                    } else {
+                        Key clonedKey = analysisItem.getKey().clone();
+                        analysisItem.setKey(clonedKey);
+                    }
+                }
+
+                ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+
+                for (AnalysisItem analysisItem : replacementMap.values()) {
+                    analysisItem.updateIDs(replacements);
+                }
+                for (FilterDefinition filter : filterDefinitions) {
+                    filter.updateIDs(replacements);
+                }
+                setFilters(filterDefinitions);
+            }
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
         }
     }
 

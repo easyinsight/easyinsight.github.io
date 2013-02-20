@@ -116,17 +116,19 @@ public class GoogleAnalyticsFeed extends Feed {
                                 } catch (ServiceForbiddenException e) {
                                     sfe = e;
                                     if (e.getMessage().contains("usageLimits")) {
+                                        Thread.sleep(1000);
                                         System.out.println("retrying...");
                                         retries++;
                                     }
                                 } catch (AuthenticationException se1) {
                                     sfe = se1;
                                     if (se1.getMessage().contains("usageLimits")) {
+                                        Thread.sleep(1000);
                                         System.out.println("retrying...");
                                         retries++;
                                     }
                                 }
-                            } while (feed == null && retries < 2);
+                            } while (feed == null && retries < 5);
                             if (feed == null) {
                                 throw sfe;
                             }
@@ -343,16 +345,18 @@ public class GoogleAnalyticsFeed extends Feed {
                                     sfe = e;
                                     if (e.getMessage().contains("usageLimits")) {
                                         System.out.println("retrying...");
+                                        Thread.sleep(1000);
                                         retries++;
                                     }
                                 } catch (AuthenticationException se1) {
                                     sfe = se1;
                                     if (se1.getMessage().contains("usageLimits")) {
                                         System.out.println("retrying...");
+                                        Thread.sleep(1000);
                                         retries++;
                                     }
                                 }
-                            } while (feed == null && retries < 2);
+                            } while (feed == null && retries < 5);
                             if (feed == null) {
                                 throw sfe;
                             }

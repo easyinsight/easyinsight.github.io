@@ -1,0 +1,2 @@
+update filter set not_condition = 1 where filter_id in (select FILTER_ID from value_based_filter where inclusive = 0 and single_value = 0);
+update value_based_filter set inclusive = 1 where single_value = 0;

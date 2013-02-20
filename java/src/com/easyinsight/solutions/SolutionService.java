@@ -613,7 +613,16 @@ public class SolutionService {
         Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
         Map<Long, Dashboard> dashboardReplacementMap = new HashMap<Long, Dashboard>();
 
+        FeedDefinition originalSource = feedStorage.getFeedDefinitionData(dashboard.getDataSourceID(), conn);
         FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+
+        Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+        for (AnalysisItem field : originalSource.getFields()) {
+            map.put(field.toDisplay(), field);
+        }
+        for (AnalysisItem field : targetDataSource.getFields()) {
+            map.remove(field.toDisplay());
+        }
 
         List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
         List<Dashboard> dashboardList = new ArrayList<Dashboard>();
@@ -621,7 +630,7 @@ public class SolutionService {
             //childReport.setFolder(EIDescriptor.OTHER_VIEW);
             AnalysisDefinition alreadyInstalled = alreadyInstalledMap.get(childReport.getAnalysisID());
             if (alreadyInstalled == null) {
-                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, childReport, null);
+                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, childReport, new ArrayList<AnalysisItem>(map.values()));
                 copyReport.setFolder(toFolder);
                 reportReplacementMap.put(childReport.getAnalysisID(), copyReport);
                 reportList.add(copyReport);
@@ -659,7 +668,7 @@ public class SolutionService {
         }
         
         for (Dashboard copiedDashboard : dashboardReplacementMap.values()) {
-            copiedDashboard.updateIDs(reportReplacementMap);
+            copiedDashboard.updateIDs(reportReplacementMap, targetDataSource.getFields(), true, targetDataSource);
         }
 
         for (AnalysisDefinition copiedReport : reportList) {
@@ -790,7 +799,7 @@ public class SolutionService {
         }
 
         for (Dashboard copiedDashboard : dashboardList) {
-            copiedDashboard.updateIDs(reportReplacementMap);
+            copiedDashboard.updateIDs(reportReplacementMap, targetDataSource.getFields(), true, targetDataSource);
         }
 
         for (AnalysisDefinition copiedReport : reportList) {
