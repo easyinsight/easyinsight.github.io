@@ -46,6 +46,7 @@ public class DatabaseListener implements Runnable {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             Class.forName("oracle.jdbc.OracleDriver");
+            Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
             LogClass.error(e);
         }
@@ -80,7 +81,7 @@ public class DatabaseListener implements Runnable {
                         continue;
                     }
                     System.out.println("firing up a refresh on " + sourceID);
-                    new Thread(new Runnable() {
+                    Thread thread = new Thread(new Runnable() {
 
                         public void run() {
                             boolean changed;
@@ -108,9 +109,9 @@ public class DatabaseListener implements Runnable {
                                 long accountID = rs.getLong(3);
                                 int accountType = rs.getInt(4);
                                 boolean accountAdmin = rs.getBoolean(5);
-                                boolean guestUser = rs.getBoolean(6);
+
                                 int firstDayOfWeek = rs.getInt(7);
-                                boolean analyst = rs.getBoolean(8);
+
                                 PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.persona_name FROM USER, PERSONA WHERE USER.PERSONA_ID = PERSONA.PERSONA_ID AND USER.USER_ID = ?");
                                 stmt.setLong(1, userID);
                                 ResultSet personaRS = stmt.executeQuery();
@@ -154,7 +155,9 @@ public class DatabaseListener implements Runnable {
                                 LogClass.error(e);
                             }
                         }
-                    }).start();
+                    });
+                    thread.setDaemon(true);
+                    thread.start();
                 }
             } catch (Exception e) {
                 LogClass.error(e);
