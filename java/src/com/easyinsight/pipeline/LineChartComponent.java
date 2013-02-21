@@ -21,6 +21,9 @@ public class LineChartComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         if (pipelineData.getReport() != null) {
             WSLineChartDefinition lineChartDefinition = (WSLineChartDefinition) pipelineData.getReport();
+            if (lineChartDefinition.isFillInZero()) {
+                lineChartDefinition.fillInZeroes(dataSet, pipelineData.getInsightRequestMetadata());
+            }
             max = lineChartDefinition.getXAxisMaximum();
             int interval;
             if ("Year".equals(lineChartDefinition.getTrendLineTimeInterval())) {
@@ -29,6 +32,8 @@ public class LineChartComponent implements IComponent {
                 interval = AnalysisDateDimension.MONTH_LEVEL;
             } else if ("Week".equals(lineChartDefinition.getTrendLineTimeInterval())) {
                 interval = AnalysisDateDimension.WEEK_LEVEL;
+            } else if ("Quarter".equals(lineChartDefinition.getTrendLineTimeInterval())) {
+                interval = AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL;
             } else {
                 interval = 0;
             }
@@ -83,6 +88,7 @@ public class LineChartComponent implements IComponent {
                 trendLineValues = values;
             }
         }
+
         return dataSet;
     }
 

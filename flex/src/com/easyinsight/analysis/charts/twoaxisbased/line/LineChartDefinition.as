@@ -31,6 +31,8 @@ public class LineChartDefinition extends TwoAxisDefinition{
     public var trendLineAlpha:Number = .7;
     public var trendLineThickness:int = 2;
 
+    public var fillInZero:Boolean;
+
     public function LineChartDefinition() {
         super();
     }

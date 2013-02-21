@@ -1,6 +1,8 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.*;
+import com.easyinsight.dataset.DataSet;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.LineChartComponent;
 import org.json.JSONArray;
@@ -33,6 +35,15 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     private int trendLineColor;
     private double trendLineAlpha;
     private int trendLineThickness;
+    private boolean fillInZero;
+
+    public boolean isFillInZero() {
+        return fillInZero;
+    }
+
+    public void setFillInZero(boolean fillInZero) {
+        this.fillInZero = fillInZero;
+    }
 
     @Override
     public List<IComponent> createComponents() {
@@ -71,6 +82,172 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
 
     public void setTrendLineTimeInterval(String trendLineTimeInterval) {
         this.trendLineTimeInterval = trendLineTimeInterval;
+    }
+
+    public void fillInZeroes(DataSet dataSet, InsightRequestMetadata insightRequestMetadata) {
+        Date minDate = null;
+        Date maxDate = null;
+        Set<Date> dateSet = new HashSet<Date>();
+        Set<Value> yAxisValues = new HashSet<Value>();
+        Map<RowKey, IRow> map = new HashMap<RowKey, IRow>();
+        for (IRow row : dataSet.getRows()) {
+            Value dateValue = row.getValue(getXaxis());
+            if (dateValue.type() == Value.DATE) {
+                DateValue dVal = (DateValue) dateValue;
+                if (minDate == null || dVal.getDate().before(minDate)) {
+                    minDate = dVal.getDate();
+                }
+                if (maxDate == null || dVal.getDate().after(maxDate)) {
+                    maxDate = dVal.getDate();
+                }
+                dateSet.add(dVal.getDate());
+                if (isMultiMeasure()) {
+                    map.put(new RowKey(dVal.getDate(), new EmptyValue()), row);
+                } else {
+                    map.put(new RowKey(dVal.getDate(), row.getValue(getYaxis())), row);
+                    yAxisValues.add(row.getValue(getYaxis()));
+                }
+
+            }
+        }
+        if (minDate == null || maxDate == null) {
+            return;
+        }
+
+        List<Date> dates = new ArrayList<Date>(dateSet);
+        Collections.sort(dates);
+
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(minDate);
+
+        Date start = minDate;
+        Date end = maxDate;
+        AnalysisDateDimension dateDim = (AnalysisDateDimension) getXaxis();
+        int dateLevel = dateDim.getDateLevel();
+        boolean valid = false;
+        if (dateLevel == AnalysisDateDimension.YEAR_LEVEL) {
+            valid = true;
+        } else if (dateLevel == AnalysisDateDimension.MONTH_LEVEL) {
+            valid = true;
+        } else if (dateLevel == AnalysisDateDimension.WEEK_LEVEL) {
+            valid = true;
+        } else if (dateLevel == AnalysisDateDimension.DAY_LEVEL) {
+            valid = true;
+        } else if (dateLevel == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+            valid = true;
+        }
+
+        if (!valid) {
+            return;
+        }
+
+
+        while (start.before(end)) {
+            if (dateLevel == AnalysisDateDimension.YEAR_LEVEL) {
+                cal.add(Calendar.YEAR, 1);
+            } else if (dateLevel == AnalysisDateDimension.MONTH_LEVEL) {
+                cal.add(Calendar.MONTH, 1);
+            } else if (dateLevel == AnalysisDateDimension.WEEK_LEVEL) {
+                cal.add(Calendar.WEEK_OF_YEAR, 1);
+            } else if (dateLevel == AnalysisDateDimension.DAY_LEVEL) {
+                cal.add(Calendar.DAY_OF_YEAR, 1);
+            } else if (dateLevel == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+                cal.add(Calendar.MONTH, 3);
+            }
+            if (!dates.contains(start)) {
+                dates.add(start);
+            }
+            start = cal.getTime();
+        }
+
+        cal = Calendar.getInstance();
+        Calendar shiftedCal = Calendar.getInstance();
+        int time = insightRequestMetadata.getUtcOffset() / 60;
+        String string;
+        if (time > 0) {
+            string = "GMT-"+Math.abs(time);
+        } else if (time < 0) {
+            string = "GMT+"+Math.abs(time);
+        } else {
+            string = "GMT";
+        }
+        TimeZone timeZone = TimeZone.getTimeZone(string);
+        shiftedCal.setTimeZone(timeZone);
+
+        Collections.sort(dates);
+
+
+
+
+
+        if (isMultiMeasure()) {
+            for (Date date : dates) {
+                IRow row = map.get(new RowKey(date, new EmptyValue()));
+                if (row == null) {
+                    row = dataSet.createRow();
+                    DateValue dateValue = new DateValue(date, new NumericValue(date.getTime()));
+                    dateValue.calculate(dateDim.isTimeshift() ? shiftedCal : cal);
+                    row.addValue(dateDim.createAggregateKey(), dateValue);
+                }
+
+                for (AnalysisItem item : getMeasures()) {
+                    Value value = row.getValue(item);
+                    if (value.type() == Value.EMPTY) {
+                        row.addValue(item.createAggregateKey(), new NumericValue(0));
+                    }
+                }
+            }
+        } else {
+            for (Date date : dates) {
+                for (Value yAxisValue : yAxisValues) {
+                    IRow row = map.get(new RowKey(date, yAxisValue));
+                    if (row == null) {
+                        row = dataSet.createRow();
+                        DateValue dateValue = new DateValue(date, new NumericValue(date.getTime()));
+                        dateValue.calculate(dateDim.isTimeshift() ? shiftedCal : cal);
+                        row.addValue(dateDim.createAggregateKey(), dateValue);
+                        row.addValue(getYaxis().createAggregateKey(), yAxisValue);
+                    }
+                    Value value = row.getValue(getMeasure());
+                    if (value.type() == Value.EMPTY) {
+                        row.addValue(getMeasure().createAggregateKey(), new NumericValue(0));
+                    }
+                }
+            }
+
+        }
+
+    }
+
+    private static class RowKey {
+        private Date date;
+        private Value value;
+
+        private RowKey(Date date, Value value) {
+            this.date = date;
+            this.value = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            RowKey rowKey = (RowKey) o;
+
+            if (!date.equals(rowKey.date)) return false;
+            if (!value.equals(rowKey.value)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = date.hashCode();
+            result = 31 * result + value.hashCode();
+            return result;
+        }
     }
 
     /*public LimitsResults applyLimits(DataSet dataSet) {
@@ -282,6 +459,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         strokeWeight = (int) findNumberProperty(properties, "strokeWeight", 2);
         legendMaxWidth = (int) findNumberProperty(properties, "legendMaxWidth", 200);
         autoScale = findBooleanProperty(properties, "autoScale", false);
+        fillInZero = findBooleanProperty(properties, "fillInZero", false);
         alignLabelsToUnits = findBooleanProperty(properties, "alignLabelsToUnits", true);
         lineShadow = findBooleanProperty(properties, "lineShadow", true);
         showPoints = findBooleanProperty(properties, "showPoints", true);
@@ -306,6 +484,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         properties.add(new ReportNumericProperty("strokeWeight", strokeWeight));
         properties.add(new ReportNumericProperty("legendMaxWidth", legendMaxWidth));
         properties.add(new ReportBooleanProperty("autoScale", autoScale));
+        properties.add(new ReportBooleanProperty("fillInZero", fillInZero));
         properties.add(new ReportBooleanProperty("lineShadow", lineShadow));
         properties.add(new ReportBooleanProperty("alignLabelsToUnits", alignLabelsToUnits));
         properties.add(new ReportBooleanProperty("showPoints", showPoints));

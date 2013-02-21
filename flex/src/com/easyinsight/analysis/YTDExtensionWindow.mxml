@@ -8,6 +8,9 @@
         import mx.collections.ArrayCollection;
 
         [Bindable]
+        private var measureFields:ArrayCollection;
+
+        [Bindable]
         private var dateFields:ArrayCollection;
 
         private var _analysisItem:AnalysisItem;
@@ -15,6 +18,7 @@
         public function save(analysisItem:AnalysisItem):void {
             var ext:YTDReportFieldExtension = new YTDReportFieldExtension();
             ext.benchmark = dateComboBox.selectedItem as AnalysisItem;
+            ext.dateField = sepDateComboBox.selectedItem as AnalysisItem;
             ext.lineAbove = verticalLineBox.selected;
             analysisItem.reportFieldExtension = ext;
         }
@@ -26,19 +30,27 @@
                 if (ext.benchmark != null) {
                     selectedValue = ext.benchmark.display;
                 }
+                if (ext.dateField != null) {
+                    selectedDate = ext.dateField.display;
+                }
                 verticalLineAbove = ext.lineAbove;
             }
         }
 
         public function set analysisItems(analysisItems:ArrayCollection):void {
+            var measureFields:ArrayCollection = new ArrayCollection();
             var dateFields:ArrayCollection = new ArrayCollection();
             for each (var analysisItemWrapper:AnalysisItemWrapper in analysisItems) {
                 if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    measureFields.addItem(analysisItemWrapper.analysisItem);
+                } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
                     dateFields.addItem(analysisItemWrapper.analysisItem);
                 }
             }
-            rowCount = Math.min(15, dateFields.length);
+            rowCount = 15;
             dateFields.addItemAt({ display: '[ No Benchmark ]'}, 0);
+            measureFields.addItemAt({ display: '[ No Benchmark ]'}, 0);
+            this.measureFields = measureFields;
             this.dateFields = dateFields;
         }
 
@@ -47,13 +59,20 @@
 
         [Bindable]
         private var selectedValue:String;
+
+        [Bindable]
+        private var selectedDate:String;
         
         [Bindable]
         private var verticalLineAbove:Boolean;
         ]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="Which field should serve as a benchmark?">
-            <util:SmartComboBox dataProvider="{dateFields}" id="dateComboBox" labelField="display" selectedValue="{selectedValue}" selectedProperty="display"
+            <util:SmartComboBox dataProvider="{measureFields}" id="dateComboBox" labelField="display" selectedValue="{selectedValue}" selectedProperty="display"
+                                rowCount="{rowCount}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Which field should serve as a date?">
+            <util:SmartComboBox dataProvider="{dateFields}" id="sepDateComboBox" labelField="display" selectedValue="{selectedDate}" selectedProperty="display"
                                 rowCount="{rowCount}"/>
         </mx:FormItem>
         <mx:FormItem label="Draw a vertical line over this field:">
