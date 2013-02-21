@@ -213,6 +213,7 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Stroke Weight", "strokeWeight", LineChartDefinition(report).strokeWeight, report, 1, 10));
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", LineChartDefinition(report).legendMaxWidth, report, 10, 400));
             items.addItem(new CheckBoxReportFormItem("Auto Scale", "autoScale", LineChartDefinition(report).autoScale, report));
+            items.addItem(new CheckBoxReportFormItem("Fill in Zero Points", "fillInZero", LineChartDefinition(report).fillInZero, report));
             items.addItem(new CheckBoxReportFormItem("Show Points", "showPoints", LineChartDefinition(report).showPoints, report));
             items.addItem(new CheckBoxReportFormItem("Line Shadow", "lineShadow", LineChartDefinition(report).lineShadow, report));
             items.addItem(new CheckBoxReportFormItem("Align Labels To Units", "alignLabelsToUnits", LineChartDefinition(report).alignLabelsToUnits, report));
