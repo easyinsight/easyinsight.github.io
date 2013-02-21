@@ -100,6 +100,7 @@ public class GenericFilter extends HBox implements IFilter {
                 } else {
                     labelText.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
                 }
+                labelText.styleName = "filterLabel";
                 addChild(labelText);
             /*} else {
                 if (_valueType == NAMED_REF) {

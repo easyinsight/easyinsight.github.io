@@ -57,6 +57,7 @@ public class FlatMonthDateFilter extends HBox implements IFilter
             _feedID = feedID;
             _reportID = reportID;
             _dashboardID = dashboardID;
+            setStyle("verticalAlign", "middle");
 		}
 
         private function onFault(event:FaultEvent):void {
@@ -85,6 +86,7 @@ public class FlatMonthDateFilter extends HBox implements IFilter
             }
 
             var label:Label = new Label();
+            label.styleName = "filterLabel";
             label.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
             addChild(label);
 

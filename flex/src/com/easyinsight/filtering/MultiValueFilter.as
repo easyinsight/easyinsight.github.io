@@ -10,7 +10,7 @@ import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
-import mx.controls.Alert;
+
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.Label;
@@ -27,7 +27,7 @@ public class MultiValueFilter extends HBox implements IFilter {
 
     private var _loadingFromReport:Boolean = false;
 
-    private var filterValues:Label;
+    private var filterValues:Button;
 
 
     public function set loadingFromReport(value:Boolean):void {
@@ -40,7 +40,9 @@ public class MultiValueFilter extends HBox implements IFilter {
         _feedID = feedID;
         _reportID = reportID;
         _dashboardID = dashboardID;
-        filterValues = new Label();
+        filterValues = new Button();
+        filterValues.styleName = "multiFilterButton";
+        setStyle("verticalAlign", "middle");
     }
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -82,7 +84,7 @@ public class MultiValueFilter extends HBox implements IFilter {
     }
 
     private function onUpdated(event:Event):void {
-        filterValues.text = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
+        filterValues.label = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
             if (a == "") return "[ No Value ]";
             return a.toString();
         }).sort().join(", ");
@@ -90,7 +92,7 @@ public class MultiValueFilter extends HBox implements IFilter {
     }
 
     private function onFilterEdit(event:FilterEditEvent):void {
-        filterValues.text = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
+        filterValues.label = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
             if (a == "") return "[ No Value ]";
             return a.toString();
         }).sort().join(", ");
@@ -116,19 +118,24 @@ public class MultiValueFilter extends HBox implements IFilter {
 
 
         var labelText:UIComponent;
-        labelText = new LinkButton();
-        labelText.setStyle("fontSize", 12);
-        labelText.addEventListener(MouseEvent.CLICK, edit);
-        labelText.setStyle("textDecoration", "underline");
-        LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+        if (_filterEditable) {
+            labelText = new LinkButton();
+            labelText.addEventListener(MouseEvent.CLICK, edit);
+            LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+        } else {
+            labelText = new Label();
+            Label(labelText).text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+        }
+        labelText.styleName = "filterLabel";
         addChild(labelText);
 
         filterValues.maxWidth = 150;
-        filterValues.setStyle("fontSize", 12);
-        filterValues.setStyle("paddingTop", 2);
+        filterValues.addEventListener(MouseEvent.CLICK, edit);
+        //filterValues.setStyle("fontSize", 12);
+        /*filterValues.setStyle("paddingTop", 2);
         filterValues.setStyle("paddingBottom", 2);
-        filterValues.setStyle("paddingLeft", 0);
-        filterValues.text = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
+        filterValues.setStyle("paddingLeft", 0);*/
+        filterValues.label = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
             if (!a) return "";
             if (a == "") return "[ No Value ]";
             return a.toString();

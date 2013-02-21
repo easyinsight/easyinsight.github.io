@@ -1,7 +1,6 @@
 package com.easyinsight.filtering
 {
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.filtering.CustomRollingInterval;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
@@ -56,6 +55,7 @@ public class RollingRangeFilter extends HBox implements IFilter
         rangeOptions.addItem(new RangeOption("Last Full Month", RollingDateRangeFilterDefinition.LAST_FULL_MONTH));
         rangeOptions.addItem(new RangeOption("Last Day of Data", RollingDateRangeFilterDefinition.LAST_DAY));        
         rangeOptions.addItem(new RangeOption("Custom", RollingDateRangeFilterDefinition.CUSTOM));
+        setStyle("verticalAlign", "middle");
     }
 
     private var _loadingFromReport:Boolean = false;
@@ -152,6 +152,7 @@ public class RollingRangeFilter extends HBox implements IFilter
         }
 
         var label:Label = new Label();
+        label.styleName = "filterLabel";
         label.text = FilterDefinition.getLabel(rollingFilter, _analysisItem);
         addChild(label);
 

@@ -87,6 +87,7 @@ import mx.managers.PopUpManager;
 			}
 
             var label:Label = new Label();
+            label.styleName = "filterLabel";
             label.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
             addChild(label);
 

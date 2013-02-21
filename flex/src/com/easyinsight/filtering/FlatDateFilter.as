@@ -56,6 +56,7 @@ import mx.rpc.events.ResultEvent;
             _feedID = feedID;
             _reportID = reportID;
             _dashboardID = dashboardID;
+            setStyle("verticalAlign", "middle");
 		}
 
         private function onFault(event:FaultEvent):void {
@@ -84,6 +85,7 @@ import mx.rpc.events.ResultEvent;
             }
 
             var label:Label = new Label();
+            label.styleName = "filterLabel";
             label.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
             addChild(label);
 

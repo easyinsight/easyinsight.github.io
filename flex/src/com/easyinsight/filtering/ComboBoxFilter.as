@@ -179,13 +179,13 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
 
         if (_filterEditable) {
             filterLabel = new LinkButton();
-            filterLabel.setStyle("fontSize", 12);
-            filterLabel.setStyle("textDecoration", "underline");
+            //filterLabel.setStyle("textDecoration", "underline");
             LinkButton(filterLabel).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         } else {
             filterLabel = new Label();
             Label(filterLabel).text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         }
+        filterLabel.styleName = "filterLabel";
         
         
         //addChild(label);
@@ -287,7 +287,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             filterLabel.x = xPos;
             filterLabel.y = (this.height - filterLabel.height) / 2;
             filterLabel.setActualSize(filterLabel.measuredWidth, filterLabel.measuredHeight);            
-            xPos += filterLabel.measuredWidth;
+            xPos += filterLabel.measuredWidth + 3;
             comboBox.x = xPos;
             comboBox.y = (this.height - comboBox.height) / 2;
             comboBox.setActualSize(comboBox.measuredWidth, comboBox.measuredHeight);

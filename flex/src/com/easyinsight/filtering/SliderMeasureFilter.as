@@ -243,6 +243,7 @@ public class SliderMeasureFilter extends HBox implements IFilter
             } else {
                 setStyle("verticalAlign", "middle");
                 var initLabel:Label = new Label();
+                initLabel.styleName = "filterLabel";
                 initLabel.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
                 addChild(initLabel);
                 var f:Formatter = _filterDefinition.field.getFormatter();
