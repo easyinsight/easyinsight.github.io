@@ -21,9 +21,10 @@ public class SummaryViewGrid extends AdvancedDataGrid {
         return false;
     }
 
-    override public function set columns(value:Array):void {
-        super.columns = value;
-        itemRendererToFactoryMap = new Dictionary(false);
+    public function clearRenderers():void {
+        this.itemRendererToFactoryMap = new Dictionary(false);
+        this.visibleData = new Object();
+        this.listData = null;
     }
 
     public function blah():int {

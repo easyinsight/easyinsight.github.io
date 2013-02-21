@@ -30,7 +30,8 @@ public class DayOfQuarter extends Function {
             }
         }
         if (startDate != null) {
-            Calendar calendar = Calendar.getInstance();
+            Calendar cal = Calendar.getInstance();
+            int today = cal.get(Calendar.DAY_OF_YEAR);
             int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
             String string;
             if (time > 0) {
@@ -41,19 +42,45 @@ public class DayOfQuarter extends Function {
                 string = "GMT";
             }
             TimeZone timeZone = TimeZone.getTimeZone(string);
-            calendar.setTimeZone(timeZone);
-            calendar.setTimeInMillis(startDate.getTime());
+            cal.setTimeZone(timeZone);
+            cal.setTimeInMillis(startDate.getTime());
 
 
             if (params.size() == 2) {
-                int quarterMonth = calendar.get(Calendar.MONTH) - calendar.get(Calendar.MONTH) % 3;
-                calendar.set(Calendar.MONTH, quarterMonth);
-                calendar.set(Calendar.DAY_OF_MONTH, 0);
                 int dayToSet = params.get(1).toDouble().intValue();
-                calendar.add(Calendar.DAY_OF_YEAR, dayToSet);
-                return new DateValue(calendar.getTime());
+                int i = 0;
+                int month = cal.get(Calendar.MONTH);
+                int firstMonth = month / 3 * 3;
+                cal.set(Calendar.MONTH, firstMonth);
+                cal.set(Calendar.DAY_OF_MONTH, 1);
+                int quarter = month / 3;
+                int newQuarter = quarter;
+                while (quarter == newQuarter) {
+                    if (cal.get(Calendar.DAY_OF_YEAR) == dayToSet) {
+                        break;
+                    }
+                    cal.add(Calendar.DAY_OF_YEAR, 1);
+                    newQuarter = (int) Math.floor(cal.get(Calendar.MONTH) / 3);
+                    i++;
+                }
+                return new DateValue(cal.getTime());
             } else {
-                return new NumericValue(calendar.get(Calendar.DAY_OF_MONTH));
+                int i = 0;
+                int month = cal.get(Calendar.MONTH);
+                int firstMonth = month / 3 * 3;
+                cal.set(Calendar.MONTH, firstMonth);
+                cal.set(Calendar.DAY_OF_MONTH, 1);
+                int quarter = month / 3;
+                int newQuarter = quarter;
+                while (quarter == newQuarter) {
+                    if (cal.get(Calendar.DAY_OF_YEAR) == today) {
+                        break;
+                    }
+                    cal.add(Calendar.DAY_OF_YEAR, 1);
+                    newQuarter = (int) Math.floor(cal.get(Calendar.MONTH) / 3);
+                    i++;
+                }
+                return new NumericValue(i);
             }
         } else {
             return new EmptyValue();

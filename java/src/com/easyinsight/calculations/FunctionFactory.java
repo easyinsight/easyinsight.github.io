@@ -233,6 +233,16 @@ public class FunctionFactory {
             return new IntervalMonths();
         } else if (s.equals("datetimeaxis")) {
             return new DateTimeAxisMax();
+        } else if (s.equals("intervalweeks")) {
+            return new IntervalWeeks();
+        } else if (s.equals("intervalquarters")) {
+            return new IntervalQuarters();
+        } else if (s.equals("intervalyears")) {
+            return new IntervalYears();
+        } else if (s.equals("daysinquarter")) {
+            return new DaysInQuarter();
+        } else if (s.equals("quarters")) {
+            return new Quarters();
         } else {
             return null;
         }

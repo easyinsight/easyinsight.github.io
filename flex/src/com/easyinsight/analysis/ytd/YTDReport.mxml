@@ -201,6 +201,7 @@
                 if (additionalProperties["preferredSize"]) {
                     dataGrid.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
                 }
+                dataGrid.clearRenderers();
                 dataGrid.columns = columns.toArray();
                 //dataGrid.rowCount = dColl.length + 1;
                 dataGrid.height = (dColl.length + 1) * 20 + 20;
