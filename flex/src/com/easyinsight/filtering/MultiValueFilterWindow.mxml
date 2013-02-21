@@ -1,12 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"  implements="com.easyinsight.filtering.IFilterDetailEditor" horizontalAlign="center">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.filtering.IFilterDetailEditor"
+         horizontalAlign="center" creationComplete="creationCompleteHandler(event)">
     <mx:Metadata>
         [Event(name="gotMetadataComplete", type="flash.events.Event")]
     </mx:Metadata>
-	<mx:Script>
+    <mx:Script>
 		<![CDATA[
         import mx.binding.utils.BindingUtils;
+        import mx.collections.ArrayCollection;
+        import mx.collections.ArrayCollection;
         import mx.collections.Sort;
+        import mx.controls.Alert;
+
+        import mx.controls.Label;
+        import mx.controls.List;
+        import mx.controls.TileList;
+        import mx.core.ClassFactory;
+        import mx.events.FlexEvent;
+        import mx.events.PropertyChangeEvent;
         import mx.rpc.remoting.RemoteObject;
         import mx.rpc.events.ResultEvent;
         import mx.collections.ArrayCollection;
@@ -16,16 +27,37 @@
 
         import mx.utils.ObjectUtil;
 
+        private var strings:ArrayCollection;
+
         private var _filterValueDefinition:FilterDefinition;
+
+        private var filterTileList:List;
+        private var tooManyBox:HBox;
+
+        private var allCheckBox:CheckBox;
 
         [Bindable]
         private var sourceValues:ArrayCollection;
-        [Bindable]
-        private var targetValues:ArrayCollection;
+
+        private var _targetValues:ArrayCollection;
 
         private var _reportID:int;
 
         private var _dashboardID:int;
+
+        private var realValues:ArrayCollection;
+
+
+        [Bindable(event="targetValuesChanged")]
+        public function get targetValues():ArrayCollection {
+            return _targetValues;
+        }
+
+        public function set targetValues(value:ArrayCollection):void {
+            if (_targetValues == value) return;
+            _targetValues = value;
+            dispatchEvent(new Event("targetValuesChanged"));
+        }
 
         public function set reportID(value:int):void {
             _reportID = value;
@@ -40,7 +72,6 @@
         private var dataService:RemoteObject;
 
         private function setup():void {
-            BindingUtils.bindProperty(this, "keyword", availableSearch, "text");
         }
 
         private var _fields:ArrayCollection;
@@ -68,7 +99,7 @@
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field, new Date().getTimezoneOffset(), _reportID,  _dashboardID);
+            dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID);
         }
 
         private function compare(obj1:Object, obj2:Object, fields:Array = null):int {
@@ -93,13 +124,14 @@
                 }
                 filteredStrings.addItem(filterString);
             }
-            var strings:ArrayCollection = new ArrayCollection();
+
+            strings = new ArrayCollection();
             for each (var value:Value in analysisDimensionResultMetadata.values) {
                 var string:String = String(value.getValue());
                 if (string == null || string == "") {
                     string = "[ No Value ]";
                 }
-                if (!strings.contains(string) && !filteredStrings.contains(string)) {
+                if (!strings.contains(string)) {
                     strings.addItem(string);
                 }
             }
@@ -110,10 +142,46 @@
             sourceValues = strings;
             filteredStrings.sort = new Sort();
             filteredStrings.sort.compareFunction = compare;
-            filteredStrings.filterFunction = targetFilterFunction;
+//            filteredStrings.filterFunction = targetFilterFunction;
             filteredStrings.refresh();
-            targetValues = filteredStrings;
+            if (strings.length > 500) {
+                if (filterTileList.parent)
+                    loadedValuesBox.removeChild(filterTileList);
+                loadedValuesBox.addChild(tooManyBox);
+            } else {
+                if (tooManyBox.parent)
+                    loadedValuesBox.removeChild(tooManyBox);
+                loadedValuesBox.addChild(filterTileList);
+            }
+
+            var all:Boolean = filteredStrings.contains("All");
+            allCheckBox.selected = all;
+
+            var a:Array = strings.toArray().map(function (obj:Object, a:*, b:*):Object {
+                var m:MultiValueFilterOption = new MultiValueFilterOption(obj as String, all || filteredStrings.contains(obj))
+                m.addEventListener("selectedChanged", valueChanged, false, 0, true);
+                return m;
+            })
+
+            realValues = new ArrayCollection(a);
+            targetValues = new ArrayCollection(a);
+            targetValues.filterFunction = valuesFilterFunction;
             stackIndex = 1;
+        }
+
+        private function valueChanged(event:PropertyChangeEvent):void {
+            if(event.newValue == false && allCheckBox.selected) {
+                allCheckBox.selected = false;
+            } else if(event.newValue == true) {
+                var b:Boolean = true;
+                for each(var v:* in realValues) {
+                    if(!v.selected)
+                        b = false;
+                }
+                if(b) {
+                    allCheckBox.selected = true;
+                }
+            }
         }
 
         private function filterFunction(item:Object):Boolean {
@@ -133,12 +201,10 @@
         }
 
         private function sourceChange():void {
-            keyword = availableSearch.text.toLowerCase();
             sourceValues.refresh();
         }
 
         private function includedChange():void {
-            includedKeyword = includedSearch.text.toLowerCase();
             targetValues.refresh();
         }
 
@@ -164,13 +230,24 @@
 
         public function makeUpdates():FilterDefinition {
             var valueFilter:FilterValueDefinition = _filterValueDefinition as FilterValueDefinition;
-            valueFilter.filteredValues = targetList.dataProvider as ArrayCollection;
-            var index:int = valueFilter.filteredValues.getItemIndex("[ No Value ]");
-            if (index != -1) {
-                valueFilter.filteredValues.removeItemAt(index);
-                valueFilter.filteredValues.addItem("");
+            var a:Array = realValues.toArray().concat()
+            a = a.filter(function (obj:Object, a:*, b:*):Boolean {
+                return obj.selected;
+            });
+            if (allCheckBox.selected) {
+                valueFilter.filteredValues = new ArrayCollection(["All"]);
+            } else {
+                valueFilter.filteredValues = new ArrayCollection(a.map(function (obj:Object, a:*, b:*):Object {
+                    return obj.label;
+                }))
+                var index:int = valueFilter.filteredValues.getItemIndex("[ No Value ]");
+                if (index != -1) {
+                    valueFilter.filteredValues.removeItemAt(index);
+                    valueFilter.filteredValues.addItem("");
+                }
             }
-            valueFilter.inclusive = includeCheckbox.selected;
+
+            valueFilter.inclusive = true;
             valueFilter.singleValue = false;
             return _filterValueDefinition;
         }
@@ -230,6 +307,83 @@
             _typeChangeAllowed = value;
             dispatchEvent(new Event("typeChangeAllowedChanged"));
         }
+
+        private var filterString:String = "";
+
+        private var selectedFilter:Boolean;
+
+        private function valuesFilterFunction(o:Object):Boolean {
+            var result:Boolean = true;
+            if (selectedFilter) {
+                result = (o.selected as Boolean);
+            }
+            return result && (o.label as String).toLowerCase().indexOf(filterString.toLowerCase()) != -1;
+        }
+
+        private function filterBox_changeHandler(event:Event):void {
+            filterString = filterBox.text;
+            filterTileList.dataProvider.refresh();
+            if (filterTileList.dataProvider.length > 500) {
+                if (filterTileList.parent)
+                    loadedValuesBox.removeChild(filterTileList);
+                loadedValuesBox.addChild(tooManyBox);
+            }
+            else {
+                if (tooManyBox.parent)
+                    loadedValuesBox.removeChild(tooManyBox);
+                loadedValuesBox.addChild(filterTileList);
+            }
+        }
+
+        private function creationCompleteHandler(event:FlexEvent):void {
+            filterTileList = new List();
+            filterTileList.id = "solutionGrid";
+            filterTileList.itemRenderer = new ClassFactory(com.easyinsight.filtering.FilterStringCheckbox);
+            filterTileList.columnWidth = 150;
+            filterTileList.rowHeight = 30;
+            filterTileList.verticalScrollPolicy = "on";
+            filterTileList.columnCount = 1;
+            filterTileList.percentWidth = 100;
+            allCheckBox = new CheckBox();
+            allCheckBox.label = "All"
+            allCheckBox.addEventListener(Event.CHANGE, allCheckBox_changeHandler);
+
+
+            BindingUtils.bindProperty(filterTileList, "dataProvider", this, "targetValues");
+
+            tooManyBox = new HBox();
+            var l:Label = new Label();
+            l.text = "There are too many values to display. Please narrow your search above.";
+            tooManyBox.addChild(l);
+
+        }
+
+        private function selectedFilterEvent(event:Event):void {
+            selectedFilter = selectedFilterCheckBox.selected
+            filterTileList.dataProvider.refresh();
+            if (filterTileList.dataProvider.length > 500) {
+                if (filterTileList.parent)
+                    loadedValuesBox.removeChild(filterTileList);
+                loadedValuesBox.addChild(tooManyBox);
+            }
+            else {
+                if (tooManyBox.parent)
+                    loadedValuesBox.removeChild(tooManyBox);
+                loadedValuesBox.addChild(filterTileList);
+            }
+        }
+
+        private function addLoadedBox(event:FlexEvent):void {
+            loadedValuesBox.addChild(allCheckBox);
+            loadedValuesBox.addChild(filterTileList);
+        }
+
+        private function allCheckBox_changeHandler(event:Event):void {
+            var b:Boolean = allCheckBox.selected;
+            for each(var a:* in realValues) {
+                a.selected = b;
+            }
+        }
         ]]>
 	</mx:Script>
     <mx:HBox visible="{typeChangeAllowed}">
@@ -239,31 +393,21 @@
         <mx:RadioButton group="{typeGroup}" label="Pattern Match" value="pattern"/>
         <mx:RadioButton group="{typeGroup}" label="Auto Complete" value="autoComplete"/>
     </mx:HBox>
+    <mx:HBox width="100%">
+        <mx:Image source="@Embed('../../../../assets/icon-search-black.png')"/>
+        <mx:TextInput id="filterBox" width="100%" change="filterBox_changeHandler(event)"/>
+    </mx:HBox>
+    <mx:HBox>
+        <mx:CheckBox id="selectedFilterCheckBox" change="selectedFilterEvent(event)" label="Show only selected values"/>
+    </mx:HBox>
     <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}" width="100%">
         <mx:Box>
             <mx:ProgressBar label="Loading the available values..." indeterminate="true"/>
         </mx:Box>
-        <mx:VBox>
-            <mx:Label text="Drag Items Between Available and Filtered" fontWeight="bold" width="100%" textAlign="center"/>
-            <mx:CheckBox label="Filter Includes Values" id="includeCheckbox" selected="{includeFilter}"/>
-            <mx:HBox verticalAlign="middle">
-                <mx:VBox width="300">
-                    <mx:Label text="Available Values" fontSize="14"/>
-                    <mx:TextInput id="availableSearch" change="sourceChange()"/>
-                    <mx:List dataProvider="{sourceValues}" dragMoveEnabled="true" dropEnabled="true" dragEnabled="true" width="300"
-                            allowMultipleSelection="true" maxHeight="400"/>
-                </mx:VBox>
-                <mx:VBox>
-                    <mx:Button label="Add All" click="addAll()"/>
-                    <mx:Button label="Remove All" click="removeAll()"/>
-                </mx:VBox>
-                <mx:VBox width="300">
-                    <mx:Label text="Filtered Values" fontSize="14"/>
-                    <mx:TextInput id="includedSearch" change="includedChange()"/>
-                    <mx:List dataProvider="{targetValues}" dropEnabled="true" dragEnabled="true" dragMoveEnabled="true" id="targetList"
-                        width="300" allowMultipleSelection="true" maxHeight="400"/>
-                </mx:VBox>
-            </mx:HBox>
+
+        <mx:VBox id="loadedValuesBox" creationComplete="addLoadedBox(event)">
+
         </mx:VBox>
+
     </mx:ViewStack>
 </mx:VBox>

@@ -10,8 +10,10 @@ import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
+import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.core.UIComponent;
 import mx.managers.PopUpManager;
@@ -25,6 +27,8 @@ public class MultiValueFilter extends HBox implements IFilter {
 
     private var _loadingFromReport:Boolean = false;
 
+    private var filterValues:Label;
+
 
     public function set loadingFromReport(value:Boolean):void {
         _loadingFromReport = value;
@@ -36,6 +40,7 @@ public class MultiValueFilter extends HBox implements IFilter {
         _feedID = feedID;
         _reportID = reportID;
         _dashboardID = dashboardID;
+        filterValues = new Label();
     }
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -77,10 +82,18 @@ public class MultiValueFilter extends HBox implements IFilter {
     }
 
     private function onUpdated(event:Event):void {
+        filterValues.text = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
+            if (a == "") return "[ No Value ]";
+            return a.toString();
+        }).sort().join(", ");
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 
     private function onFilterEdit(event:FilterEditEvent):void {
+        filterValues.text = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
+            if (a == "") return "[ No Value ]";
+            return a.toString();
+        }).sort().join(", ");
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
     }
 
@@ -92,13 +105,15 @@ public class MultiValueFilter extends HBox implements IFilter {
 
     override protected function createChildren():void {
         super.createChildren();
-        //if (!_filterEditable) {
-        var checkbox:CheckBox = new CheckBox();
-        checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
-        checkbox.toolTip = "Click to disable this filter.";
-        checkbox.addEventListener(Event.CHANGE, onChange);
-        addChild(checkbox);
-        //}
+        this.setStyle("horizontalGap", 2);
+        if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
+            var checkbox:CheckBox = new CheckBox();
+            checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
+            checkbox.toolTip = "Click to disable this filter.";
+            checkbox.addEventListener(Event.CHANGE, onChange);
+            addChild(checkbox);
+        }
+
 
         var labelText:UIComponent;
         labelText = new LinkButton();
@@ -108,12 +123,18 @@ public class MultiValueFilter extends HBox implements IFilter {
         LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         addChild(labelText);
 
-        /*if (editButton == null) {
-         editButton = new Button();
-         editButton.addEventListener(MouseEvent.CLICK, edit);
-         editButton.setStyle("icon", ImageConstants.EDIT_ICON);
-         editButton.toolTip = "Edit";
-         }*/
+        filterValues.maxWidth = 150;
+        filterValues.setStyle("fontSize", 12);
+        filterValues.setStyle("paddingTop", 2);
+        filterValues.setStyle("paddingBottom", 2);
+        filterValues.setStyle("paddingLeft", 0);
+        filterValues.text = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
+            if (!a) return "";
+            if (a == "") return "[ No Value ]";
+            return a.toString();
+        }).sort().join(", ");
+        addChild(filterValues);
+
         if (_filterEditable) {
 
             if (deleteButton == null) {
