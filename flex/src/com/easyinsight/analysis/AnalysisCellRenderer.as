@@ -264,6 +264,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
             this.background = false;
         }
         new StandardContextWindow(analysisItem, passThrough, this, value, _report);
+
         UIComponentGlobals.layoutManager.invalidateProperties(this);
         invalidateSize();
         invalidateProperties();
