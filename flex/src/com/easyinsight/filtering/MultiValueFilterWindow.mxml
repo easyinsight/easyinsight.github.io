@@ -374,8 +374,9 @@
         }
 
         private function addLoadedBox(event:FlexEvent):void {
-            loadedValuesBox.addChild(allCheckBox);
-            loadedValuesBox.addChild(filterTileList);
+            loadedValuesBox.addChildAt(allCheckBox, 0);
+            if(filterTileList.dataProvider && filterTileList.dataProvider.length <= 500)
+                loadedValuesBox.addChild(filterTileList);
         }
 
         private function allCheckBox_changeHandler(event:Event):void {
