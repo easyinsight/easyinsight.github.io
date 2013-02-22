@@ -67,13 +67,6 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
         return DriverManager.getConnection(url, dbUserName, dbPassword);
     }
 
-    public static void main(String[] args) throws Exception {
-        String url = MessageFormat.format("jdbc:sqlserver://{0}:{1};databaseName={2}", "eisqlserver.cplhhhtmbed8.us-east-1.rds.amazonaws.com", "1433", "sample");
-        Connection conn = DriverManager.getConnection(url, "jboe", "e1ernity");
-        Statement statement = conn.createStatement();
-        statement.execute("insert into sample_table (order_id) values ('7a')");
-    }
-
     @Override
     public FeedType getFeedType() {
         return FeedType.SERVER_SQL_SERVER;
