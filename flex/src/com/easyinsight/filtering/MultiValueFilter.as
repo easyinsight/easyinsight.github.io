@@ -10,6 +10,7 @@ import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Alert;
 
 import mx.controls.Button;
 import mx.controls.CheckBox;
@@ -84,18 +85,12 @@ public class MultiValueFilter extends HBox implements IFilter {
     }
 
     private function onUpdated(event:Event):void {
-        filterValues.label = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
-            if (a == "") return "[ No Value ]";
-            return a.toString();
-        }).sort().join(", ");
+        updateFilterLabel();
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 
     private function onFilterEdit(event:FilterEditEvent):void {
-        filterValues.label = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
-            if (a == "") return "[ No Value ]";
-            return a.toString();
-        }).sort().join(", ");
+        updateFilterLabel();
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
     }
 
@@ -131,15 +126,7 @@ public class MultiValueFilter extends HBox implements IFilter {
 
         filterValues.maxWidth = 150;
         filterValues.addEventListener(MouseEvent.CLICK, edit);
-        //filterValues.setStyle("fontSize", 12);
-        /*filterValues.setStyle("paddingTop", 2);
-        filterValues.setStyle("paddingBottom", 2);
-        filterValues.setStyle("paddingLeft", 0);*/
-        filterValues.label = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
-            if (!a) return "";
-            if (a == "") return "[ No Value ]";
-            return a.toString();
-        }).sort().join(", ");
+        updateFilterLabel();
         addChild(filterValues);
 
         if (_filterEditable) {
@@ -167,6 +154,23 @@ public class MultiValueFilter extends HBox implements IFilter {
         } else {
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
         }
+    }
+
+    private function updateFilterLabel():void {
+        if (_filterDefinition && _filterDefinition.filteredValues) {
+            if (_filterDefinition.filteredValues.length == 1) {
+                filterValues.label = _filterDefinition.filteredValues.getItemAt(0).toString();
+
+            } else {
+                filterValues.label = _filterDefinition.filteredValues.length + " Item" + ((_filterDefinition.filteredValues.length == 1) ? "" : "s");
+            }
+        } else {
+            filterValues.label = ""
+        }
+        filterValues.toolTip = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
+            if (a == "") return "[ No Value ]";
+            return a.toString();
+        }).sort().join(", ");
     }
 
     public function toInclusive(filterValues:ArrayCollection):void {
