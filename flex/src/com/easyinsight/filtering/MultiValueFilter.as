@@ -160,6 +160,8 @@ public class MultiValueFilter extends HBox implements IFilter {
         if (_filterDefinition && _filterDefinition.filteredValues) {
             if (_filterDefinition.filteredValues.length == 1) {
                 filterValues.label = _filterDefinition.filteredValues.getItemAt(0).toString();
+                if(filterValues.label == "")
+                    filterValues.label = "[ No Value ]";
 
             } else {
                 filterValues.label = _filterDefinition.filteredValues.length + " Item" + ((_filterDefinition.filteredValues.length == 1) ? "" : "s");
