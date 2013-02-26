@@ -26,6 +26,8 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     public var sessionTicket:String;
     public var host:String;
 
+    public var rebuildFields:Boolean = true;
+
     public function QuickbaseCompositeSource() {
         super();
         this.feedName = "Quickbase";

@@ -70,7 +70,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
         QuickbaseCompositeSource quickbaseCompositeSource = (QuickbaseCompositeSource) parentDefinition;
 
-        if (quickbaseCompositeSource.getHost() != null && quickbaseCompositeSource.getHost().contains("rci")) {
+        if (quickbaseCompositeSource.isRebuildFields()) {
             String sessionTicket = quickbaseCompositeSource.getSessionTicket();
             String applicationToken = quickbaseCompositeSource.getApplicationToken();
             String host = quickbaseCompositeSource.getHost();
@@ -101,6 +101,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM QUICKBASE_DATA_SOURCE where data_source_id = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
+        clearStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO QUICKBASE_DATA_SOURCE (DATA_SOURCE_ID, DATABASE_ID, support_index, weights_id) " +
                 "VALUES (?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
@@ -108,6 +109,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         insertStmt.setBoolean(3, indexEnabled);
         insertStmt.setLong(4, weightsID);
         insertStmt.execute();
+        insertStmt.close();
     }
 
     @Override
