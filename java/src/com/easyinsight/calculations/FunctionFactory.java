@@ -32,7 +32,7 @@ public class FunctionFactory {
         }
         s = s.toLowerCase();
         if(s.equals("if")) {
-          return new IfFunction();
+            return new IfFunction();
         } else if (s.equals("ln")) {
             return new NaturalLog();
         } else if (s.equals("firstvalue")) {
@@ -239,6 +239,10 @@ public class FunctionFactory {
             return new IntervalQuarters();
         } else if (s.equals("intervalyears")) {
             return new IntervalYears();
+        } else if (s.equals("daysinquarter")) {
+            return new DaysInQuarter();
+        } else if (s.equals("quarters")) {
+            return new Quarters();
         } else {
             return null;
         }
