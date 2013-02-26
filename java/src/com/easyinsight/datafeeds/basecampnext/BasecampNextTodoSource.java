@@ -107,8 +107,12 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             try {
                 return format.parseDateTime(string).toDate();
             } catch (Exception e) {
-                LogClass.error("Parse failure on " + string);
-                return null;
+                try {
+                    return altFormat.parseDateTime(string).toDate();
+                } catch (Exception e1) {
+                    LogClass.error("Parse failure on " + string);
+                    return null;
+                }
             }
         }
         return null;
@@ -122,6 +126,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
     }
     
     private static final DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+    private static final DateTimeFormatter altFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
     private static final DateTimeFormatter dueAtFormat = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     @Override

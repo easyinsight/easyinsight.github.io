@@ -6,6 +6,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
@@ -88,10 +89,14 @@ public class BasecampNextCalendarSource extends BasecampNextBaseSource {
                 return format.parseDateTime(string).toDate();
             } catch (Exception e) {
                 try {
-                    return otherFormat.parse(string);
-                } catch (ParseException e1) {
-                    e1.printStackTrace();
-                    return null;
+                    return altFormat.parseDateTime(string).toDate();
+                } catch (Exception e1) {
+                    try {
+                        return otherFormat.parse(string);
+                    } catch (ParseException e2) {
+                        LogClass.error(e2);
+                        return null;
+                    }
                 }
             }
         }
@@ -99,13 +104,13 @@ public class BasecampNextCalendarSource extends BasecampNextBaseSource {
     }
 
     private static final DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+    private static final DateTimeFormatter altFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
     public static final DateFormat otherFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         HttpClient httpClient = new HttpClient();
         try {
-            DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
             DataSet dataSet = new DataSet();
             JSONArray jsonArray = runJSONRequest("calendars.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -114,7 +119,12 @@ public class BasecampNextCalendarSource extends BasecampNextBaseSource {
                 String calendarID = String.valueOf(projectObject.getInt("id"));
                 String calendarName = projectObject.getString("name");
                 String calendarURL = projectObject.getString("url");
-                Date calendarUpdatedAt = format.parseDateTime(projectObject.getString("updated_at")).toDate();
+                Date calendarUpdatedAt;
+                try {
+                    calendarUpdatedAt = format.parseDateTime(projectObject.getString("updated_at")).toDate();
+                } catch (Exception e) {
+                    calendarUpdatedAt = altFormat.parseDateTime(projectObject.getString("updated_at")).toDate();
+                }
                 JSONArray eventArray = runJSONRequest("calendars/"+calendarID+"/calendar_events.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
                 parseCalendarEvents(keys, dataSet, calendarID, calendarName, calendarURL, calendarUpdatedAt, eventArray, null);
                 JSONArray pastEventArray = runJSONRequest("calendars/"+calendarID+"/calendar_events/past.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
