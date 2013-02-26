@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.Connection;
@@ -61,6 +62,7 @@ public class BasecampNextPeopleSource extends BasecampNextBaseSource {
         try {
             HttpClient httpClient = new HttpClient();
             DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+            DateTimeFormatter altFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
             DataSet dataSet = new DataSet();
             JSONArray jsonArray = runJSONRequest("people.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -70,7 +72,11 @@ public class BasecampNextPeopleSource extends BasecampNextBaseSource {
                 row.addValue(keys.get(PERSON_NAME), projectObject.getString("name"));
                 row.addValue(keys.get(PERSON_EMAIL), projectObject.getString("email_address"));
                 row.addValue(keys.get(URL), projectObject.getString("url"));
-                row.addValue(keys.get(PERSON_UPDATED_AT), format.parseDateTime(projectObject.getString("updated_at")).toDate());
+                try {
+                    row.addValue(keys.get(PERSON_UPDATED_AT), format.parseDateTime(projectObject.getString("updated_at")).toDate());
+                } catch (Exception e) {
+                    row.addValue(keys.get(PERSON_UPDATED_AT), altFormat.parseDateTime(projectObject.getString("updated_at")).toDate());
+                }
             }
             return dataSet;
         } catch (ReportException re) {

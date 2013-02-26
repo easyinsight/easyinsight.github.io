@@ -82,16 +82,23 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
             BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
             List<Project> projects = basecampNextCompositeSource.getOrCreateProjectCache().getProjects();
             DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+            DateTimeFormatter altFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.sssZZ");
             for (Project project : projects) {
                 JSONObject projectObject = runJSONRequestForObject("/projects/" + project.getId() + ".json", basecampNextCompositeSource, httpClient);
                 IRow row = dataSet.createRow();
+                Date createdAt;
+                try {
+                    createdAt = format.parseDateTime(projectObject.getString("created_at")).toDate();
+                } catch (Exception e) {
+                    createdAt = altFormat.parseDateTime(projectObject.getString("created_at")).toDate();
+                }
                 row.addValue(keys.get(PROJECT_ID), project.getId());
                 row.addValue(keys.get(PROJECT_NAME), project.getName());
                 row.addValue(keys.get(PROJECT_ARCHIVED), String.valueOf(project.isArchived()));
                 row.addValue(keys.get(DESCRIPTION), project.getDescription());
                 row.addValue(keys.get(URL), project.getUrl());
                 row.addValue(keys.get(UPDATED_AT), project.getUpdatedAt());
-                row.addValue(keys.get(CREATED_AT), format.parseDateTime(projectObject.getString("created_at")).toDate());
+                row.addValue(keys.get(CREATED_AT), createdAt);
             }
             return dataSet;
         } catch (ReportException re) {
