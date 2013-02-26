@@ -137,7 +137,8 @@ public class DataSourceScheduledTask extends ScheduledTask {
         public IUploadDataSource createSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID) {
             if (sourceToRefresh.getFeedType().getType() == FeedType.SERVER_MYSQL.getType() ||
                     sourceToRefresh.getFeedType().getType() == FeedType.SERVER_SQL_SERVER.getType() ||
-                    sourceToRefresh.getFeedType().getType() == FeedType.ORACLE.getType()) {
+                    sourceToRefresh.getFeedType().getType() == FeedType.ORACLE.getType() ||
+                    sourceToRefresh.getFeedType().getType() == FeedType.SERVER_POSTGRES.getType()) {
                 return new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), sourceToRefresh);
             } else {
                 return new UploadDataSource(conn, warnings, now, sourceToRefresh, refreshable, callID);
