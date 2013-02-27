@@ -243,6 +243,8 @@ public class FunctionFactory {
             return new DaysInQuarter();
         } else if (s.equals("quarters")) {
             return new Quarters();
+        } else if (s.equals("multimeasurestogrouping")) {
+            return new MultiMeasureToGrouping();
         } else {
             return null;
         }
