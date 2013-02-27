@@ -28,7 +28,7 @@ import java.util.*;
  * Time: 11:06 AM
  */
 public class BasecampNextTodoSource extends BasecampNextBaseSource {
-    
+
     public static final String TODO_LIST_NAME = "Todo List Name";
     public static final String TODO_LIST_PROJECT_ID = "Todo List Project ID";
     public static final String TODO_LIST_DESCRIPTION = "Todo List Description";
@@ -101,7 +101,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
         analysisitems.add(new AnalysisDateDimension(keys.get(TODO_DUE_AT), true, AnalysisDateDimension.DAY_LEVEL));
         return analysisitems;
     }
-    
+
     private Date parseDate(String string) {
         if (string != null && !"null".equals(string) && !"".equals(string)) {
             try {
@@ -124,7 +124,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
         }
         return null;
     }
-    
+
     private static final DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
     private static final DateTimeFormatter altFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
     private static final DateTimeFormatter dueAtFormat = DateTimeFormat.forPattern("yyyy-MM-dd");
