@@ -225,10 +225,10 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                     }
                     dealCount++;
                 }
-                offset += 500;
+                offset += dealCount;
                 IDataStorage.insertData(ds);
                 ds = new DataSet();
-            } while (dealCount == 500);
+            } while (dealCount != 0);
 
         } catch (ReportException re) {
             throw re;
