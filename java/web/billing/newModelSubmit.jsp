@@ -90,9 +90,13 @@
                                 if (accountTypeChange != null && accountTypeChange.isYearly())
                                     new BrainTreeBlueBillingSystem().subscribeYearly(account, accountTypeChange.getAddonDesigners(),
                                             accountTypeChange.getAddonStorage(), accountTypeChange.getAddonConnections());
-                                else
+                                else if (accountTypeChange != null) {
                                     new BrainTreeBlueBillingSystem().subscribeMonthly(account, accountTypeChange.getAddonDesigners(),
                                             accountTypeChange.getAddonStorage(), accountTypeChange.getAddonConnections());
+                                } else {
+                                    new BrainTreeBlueBillingSystem().subscribeMonthly(account, account.getAddonDesigners(),
+                                            account.getAddonStorageUnits(), account.getAddonSmallBizConnections());
+                                }
                                 account.setAccountState(Account.ACTIVE);
                             }
                         }
