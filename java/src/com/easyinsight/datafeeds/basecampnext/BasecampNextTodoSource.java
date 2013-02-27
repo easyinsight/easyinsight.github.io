@@ -166,7 +166,11 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     try {
                         todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
                     } catch (Exception e) {
-                        LogClass.error("Parse failure on " + todoList.getString("updated_at"));
+                        try {
+                            todoListUpdatedAt = altFormat.parseDateTime(todoList.getString("updated_at")).toDate();
+                        } catch (Exception e1) {
+                            LogClass.error("Parse failure on " + todoList.getString("updated_at"));
+                        }
                     }
                     JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition, httpClient);
                     JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
@@ -192,7 +196,11 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     try {
                         todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
                     } catch (Exception e) {
-                        LogClass.error("Parse failure on " + todoList.getString("updated_at"));
+                        try {
+                            todoListUpdatedAt = altFormat.parseDateTime(todoList.getString("updated_at")).toDate();
+                        } catch (Exception e1) {
+                            LogClass.error("Parse failure on " + todoList.getString("updated_at"));
+                        }
                     }
                     JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition, httpClient);
                     JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
