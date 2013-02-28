@@ -1,6 +1,8 @@
 package com.easyinsight.filtering {
 
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
@@ -26,6 +28,10 @@ public class MultiValueFilter extends HBox implements IFilter {
     private var deleteButton:Button;
     private var _analysisItems:ArrayCollection;
 
+    private var _report:AnalysisDefinition;
+    private var _otherFilters:ArrayCollection;
+    private var _dashboard:Dashboard;
+
     private var _loadingFromReport:Boolean = false;
 
     private var filterValues:Button;
@@ -35,12 +41,15 @@ public class MultiValueFilter extends HBox implements IFilter {
         _loadingFromReport = value;
     }
 
-    public function MultiValueFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
+    public function MultiValueFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition, otherFilters:ArrayCollection, dashboard:Dashboard) {
         super();
         _analysisItem = analysisItem;
         _feedID = feedID;
         _reportID = reportID;
         _dashboardID = dashboardID;
+        _report = report;
+        _dashboard = dashboard;
+        _otherFilters = otherFilters;
         filterValues = new Button();
         filterValues.styleName = "multiFilterButton";
         setStyle("verticalAlign", "middle");
@@ -67,7 +76,7 @@ public class MultiValueFilter extends HBox implements IFilter {
             var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
             window.feedID = _feedID;
             window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
-            window.detailClass = MultiValueFilterWindow;
+            window.detailClass = MultiValueFilterEditWindow;
             window.analysisItems = _analysisItems;
             window.filterDefinition = _filterDefinition;
             PopUpManager.addPopUp(window, this, true);
@@ -78,6 +87,9 @@ public class MultiValueFilter extends HBox implements IFilter {
             window2.dashboardID = _dashboardID;
             window2.embeddedFilter = _filterDefinition;
             window2.dataSourceID = _feedID;
+            window2.report = _report;
+            window2.otherFilters = _otherFilters;
+            window2.dashboard = _dashboard;
             window2.addEventListener("updated", onUpdated, false, 0, true);
             PopUpManager.addPopUp(window2, this, true);
             PopUpUtil.centerPopUpWithY(window2, 40);
@@ -125,7 +137,7 @@ public class MultiValueFilter extends HBox implements IFilter {
         addChild(labelText);
 
         filterValues.maxWidth = 150;
-        filterValues.addEventListener(MouseEvent.CLICK, edit);
+        filterValues.addEventListener(MouseEvent.CLICK, showFilter);
         updateFilterLabel();
         addChild(filterValues);
 
@@ -156,11 +168,25 @@ public class MultiValueFilter extends HBox implements IFilter {
         }
     }
 
+    private function showFilter(event:MouseEvent):void {
+        var window2:EmbeddedMultiValueFilterWindow = new EmbeddedMultiValueFilterWindow();
+        window2.reportID = _reportID;
+        window2.dashboardID = _dashboardID;
+        window2.embeddedFilter = _filterDefinition;
+        window2.dataSourceID = _feedID;
+        window2.report = _report;
+        window2.otherFilters = _otherFilters;
+        window2.dashboard = _dashboard;
+        window2.addEventListener("updated", onUpdated, false, 0, true);
+        PopUpManager.addPopUp(window2, this, true);
+        PopUpUtil.centerPopUpWithY(window2, 40);
+    }
+
     private function updateFilterLabel():void {
         if (_filterDefinition && _filterDefinition.filteredValues) {
             if (_filterDefinition.filteredValues.length == 1) {
                 filterValues.label = _filterDefinition.filteredValues.getItemAt(0).toString();
-                if(filterValues.label == "")
+                if (filterValues.label == "")
                     filterValues.label = "[ No Value ]";
 
             } else {
@@ -230,6 +256,10 @@ public class MultiValueFilter extends HBox implements IFilter {
 
     public function set showLabel(show:Boolean):void {
         _showLabel = show;
+    }
+
+    public function regenerate():void {
+
     }
 }
 }
