@@ -43,8 +43,17 @@ public class ReportDelivery extends ScheduledDelivery {
     private long dataSourceID;
     private String deliveryLabel;
     private boolean sendIfNoData;
+    private DeliveryExtension deliveryExtension;
 
     private List<FilterDefinition> customFilters;
+
+    public DeliveryExtension getDeliveryExtension() {
+        return deliveryExtension;
+    }
+
+    public void setDeliveryExtension(DeliveryExtension deliveryExtension) {
+        this.deliveryExtension = deliveryExtension;
+    }
 
     public boolean isSendIfNoData() {
         return sendIfNoData;
@@ -261,6 +270,9 @@ public class ReportDelivery extends ScheduledDelivery {
             session.close();
         }
         insertFilterStmt.close();
+        if (deliveryExtension != null) {
+            deliveryExtension.save(conn, deliveryID, 0);
+        }
     }
 
     protected void customLoad(EIConnection conn) throws SQLException {
@@ -307,6 +319,7 @@ public class ReportDelivery extends ScheduledDelivery {
                 session.close();
             }
             queryStmt.close();
+            setDeliveryExtension(DeliveryExtension.load(conn, reportDeliveryID, 0, reportFormat));
         } else {
             queryStmt.close();
             throw new RuntimeException("Orphan activity");
