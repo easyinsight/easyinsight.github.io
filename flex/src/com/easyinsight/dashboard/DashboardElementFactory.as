@@ -55,10 +55,17 @@ public class DashboardElementFactory {
             element.dashboardLevel = parent.dashboardLevel + 1;
         }
         if (element is DashboardGrid) {
-            var gridComp:DashboardGridViewComponent = new DashboardGridViewComponent();
-            gridComp.dashboardGrid = element as DashboardGrid;
-            gridComp.dashboardEditorMetadata = dashboardEditorMetadata;
-            return gridComp;
+            if (DashboardGrid(element).showLabel) {
+                var labeledGridComp:DashboardLabeledGridViewComponent = new DashboardLabeledGridViewComponent();
+                labeledGridComp.dashboardGrid = element as DashboardGrid;
+                labeledGridComp.dashboardEditorMetadata = dashboardEditorMetadata;
+                return labeledGridComp;
+            } else {
+                var gridComp:DashboardGridViewComponent = new DashboardGridViewComponent();
+                gridComp.dashboardGrid = element as DashboardGrid;
+                gridComp.dashboardEditorMetadata = dashboardEditorMetadata;
+                return gridComp;
+            }
         } else if (element is DashboardStack) {
             var stackComp:DashboardStackViewComponent = new DashboardStackViewComponent();
             stackComp.dashboardStack = element as DashboardStack;

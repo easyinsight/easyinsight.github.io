@@ -30,7 +30,18 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
     }
 
     public function stackPopulate(positions:DashboardStackPositions):void {
-
+        // christmas reset project/program
+        // each store gets a specific version of project/program based on dimensions
+        // project manager creates an order for a specific store (site)
+        // order will have multiple line items
+        // whatever parts are needed for display
+        // carriers will take shipments to store
+        // order will have site, shipment #, etc
+        // project is designed to go to some set of stores
+        // budgeting mechanism for showing that it's gone to 1000 / 2000
+        // volume graph
+        // within a shipment
+        // heat map of
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
@@ -41,12 +52,13 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
         super.createChildren();
         textArea = new Text();
         //textArea.setStyle("textAlign", "center");
-        textArea.setStyle("fontSize", 14);
+        textArea.setStyle("fontSize", dashboardText.fontSize);
+        textArea.setStyle("color", dashboardText.color);
         if (dashboardText.preferredHeight == 0) {
             textArea.percentHeight = 100;
             this.percentHeight = 100;
         } else {
-            textArea.height = dashboardText.preferredHeight;
+            //textArea.height = dashboardText.preferredHeight;
             this.height = dashboardText.preferredHeight;
         }
         if (dashboardText.preferredWidth == 0) {

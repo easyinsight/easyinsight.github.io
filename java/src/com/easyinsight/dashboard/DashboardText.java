@@ -21,6 +21,24 @@ import java.util.Set;
  */
 public class DashboardText extends DashboardElement {
     private String text;
+    private int fontSize;
+    private int color;
+
+    public int getFontSize() {
+        return fontSize;
+    }
+
+    public void setFontSize(int fontSize) {
+        this.fontSize = fontSize;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
+    }
 
     public String getText() {
         return text;
@@ -38,10 +56,12 @@ public class DashboardText extends DashboardElement {
     @Override
     public long save(EIConnection conn) throws SQLException {
         long id = super.save(conn);
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_TEXT (DASHBOARD_ELEMENT_ID, dashboard_text) " +
-                "VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_TEXT (DASHBOARD_ELEMENT_ID, dashboard_text, color, font_size) " +
+                "VALUES (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, getElementID());
         insertStmt.setString(2, text);
+        insertStmt.setInt(3, color);
+        insertStmt.setInt(4, fontSize);
         insertStmt.execute();
         return id;
     }
@@ -72,13 +92,15 @@ public class DashboardText extends DashboardElement {
 
     public static DashboardElement loadImage(long elementID, EIConnection conn) throws SQLException {
         DashboardText dashboardReport = null;
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_TEXT.dashboard_text from dashboard_text " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_TEXT.dashboard_text, color, font_size from dashboard_text " +
                 "where dashboard_element_id = ?");
         queryStmt.setLong(1, elementID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             dashboardReport = new DashboardText();
             dashboardReport.setText(rs.getString(1));
+            dashboardReport.setColor(rs.getInt(2));
+            dashboardReport.setFontSize(rs.getInt(3));
             dashboardReport.loadElement(elementID, conn);
         }
         return dashboardReport;
