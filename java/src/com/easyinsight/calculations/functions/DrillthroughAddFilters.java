@@ -31,10 +31,7 @@ public class DrillthroughAddFilters extends Function {
         }*/
 
         for (FilterDefinition filterDefinition : drillthroughCalculationMetadata.getReport().getFilterDefinitions()) {
-            if (filterDefinition.isShowOnReportView() && (filterDefinition instanceof FilterValueDefinition ||
-                    filterDefinition instanceof RollingFilterDefinition || filterDefinition instanceof FilterDateRangeDefinition ||
-                    filterDefinition instanceof FilterPatternDefinition || filterDefinition instanceof FlatDateFilter ||
-                    filterDefinition instanceof MultiFlatDateFilter)) {
+            if (!(filterDefinition instanceof AnalysisItemFilterDefinition)) {
                 FilterDefinition clone;
                 try {
                     clone = filterDefinition.clone();
