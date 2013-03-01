@@ -40,7 +40,7 @@ public class FilterValueDefinition extends FilterDefinition {
     private boolean excludeEmpty;
 
     @Column(name="all_option")
-    private boolean allOption;
+    private boolean allOption = true;
 
     @Transient
     private AnalysisItemResultMetadata cachedValues;
