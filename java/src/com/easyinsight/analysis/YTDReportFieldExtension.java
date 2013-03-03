@@ -7,6 +7,7 @@ import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -23,6 +24,17 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
 
     @Column(name="line_above")
     private boolean lineAbove;
+
+    @Column(name="always_show")
+    private boolean alwaysShow;
+
+    public boolean isAlwaysShow() {
+        return alwaysShow;
+    }
+
+    public void setAlwaysShow(boolean alwaysShow) {
+        this.alwaysShow = alwaysShow;
+    }
 
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
@@ -55,8 +67,8 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
         benchmark = replacementMap.getField(benchmark);
     }
 
-    public List<AnalysisItem> getAnalysisItems(boolean getEverything) {
-        List<AnalysisItem> items = super.getAnalysisItems(getEverything);
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
+        List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
         if (getEverything) {
             items.add(benchmark);
         }

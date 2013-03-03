@@ -6,7 +6,12 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.analysis.verticallist {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisMeasure;
+import com.easyinsight.analysis.ytd.VerticalListReportExtension;
+import com.easyinsight.analysis.ytd.YTDReportFieldExtension;
+
+import mx.controls.Alert;
 
 import mx.controls.Label;
 
@@ -35,10 +40,33 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
         addChild(text);
     }
 
+    override protected function commitProperties():void {
+        super.commitProperties();
+
+        if (data && parent) {
+            if (_changed) {
+                _changed = false;
+                text.text = _valText;
+                text.setTextFormat(_format);
+            }
+        }
+    }
+
+    private var _changed:Boolean;
+    private var _valText:String;
+    private var _format:UITextFormat;
+
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
-        text.width = this.width;
-        text.height = this.height;
+        if (text != null) {
+            text.setActualSize(this.width, this.height);
+        }
+    }
+
+    private var _report:AnalysisDefinition;
+
+    public function set report(value:AnalysisDefinition):void {
+        _report = value;
     }
 
     public function set data(value:Object):void {
@@ -46,18 +74,32 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
         if (value == null) {
             return;
         }
+        var bold:Object = null;
         var _analysisMeasure:AnalysisMeasure = value["baseMeasure"] as AnalysisMeasure;
         if (_analysisMeasure == null) {
-            text.text = "";
+            _valText = "";
         } else {
-            text.text = _analysisMeasure.display;
+            _valText = _analysisMeasure.display;
+            if (_analysisMeasure.reportFieldExtension != null && _analysisMeasure.reportFieldExtension is YTDReportFieldExtension) {
+                var testExt:YTDReportFieldExtension = _analysisMeasure.reportFieldExtension as YTDReportFieldExtension;
+                bold = testExt.alwaysShow;
+            } else if (_analysisMeasure.reportFieldExtension != null && _analysisMeasure.reportFieldExtension is VerticalListReportExtension) {
+                var vertExt:VerticalListReportExtension = _analysisMeasure.reportFieldExtension as VerticalListReportExtension;
+                bold = vertExt.alwaysShow;
+            }
         }
-        text.validateNow();
-        var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Lucida Grande", 10);
+
+        if (_report.getFont() == "Open Sans" && !bold) {
+            text.styleName = "myFontStyle";
+        } else if (_report.getFont() == "Open Sans" && bold) {
+            text.styleName = "boldStyle";
+        }
+
+        var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, _report.getFont(), 10, 0, bold);
         tf.align = "right";
-        text.setTextFormat(tf);
+        _format = tf;
+        _changed = true;
         invalidateProperties();
-        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 
     public function get data():Object {
