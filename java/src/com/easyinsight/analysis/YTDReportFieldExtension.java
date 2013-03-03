@@ -22,6 +22,7 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
     @JoinColumn(name="benchmark_id")
     private AnalysisItem benchmark;
 
+
     @Column(name="line_above")
     private boolean lineAbove;
 
