@@ -67,8 +67,8 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
         benchmark = replacementMap.getField(benchmark);
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
-        List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
+    public List<AnalysisItem> getAnalysisItems(boolean getEverything) {
+        List<AnalysisItem> items = super.getAnalysisItems(getEverything);
         if (getEverything) {
             items.add(benchmark);
         }
