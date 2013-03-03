@@ -593,7 +593,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             }
         }
         if (reportFieldExtension != null) {
-            analysisItemList.addAll(reportFieldExtension.getAnalysisItems(getEverything));
+            analysisItemList.addAll(reportFieldExtension.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
         }
         if (sortItem != null) {
             analysisItemList.addAll(sortItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
@@ -655,6 +655,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     private transient AggregateKey cachedKey;
+
+    public void clearCachedKey() {
+        cachedKey = null;
+    }
 
     public AggregateKey createAggregateKey() {
         if (cachedKey == null) {
