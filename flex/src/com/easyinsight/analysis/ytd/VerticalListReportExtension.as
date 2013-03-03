@@ -14,7 +14,8 @@ import com.easyinsight.analysis.ReportFieldExtension;
 public class VerticalListReportExtension extends ReportFieldExtension {
 
     public var lineAbove:Boolean;
-    
+    public var alwaysShow:Boolean;
+
     public function VerticalListReportExtension() {
     }
 }

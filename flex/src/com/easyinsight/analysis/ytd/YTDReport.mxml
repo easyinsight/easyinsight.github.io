@@ -14,7 +14,6 @@
         import com.easyinsight.analysis.verticallist.VerticalListRowHeaderRenderer;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.events.FlexEvent;
         import mx.formatters.Formatter;
@@ -23,10 +22,10 @@
         private var dataColl:ArrayCollection;
 
         override protected function measure():void {
-         super.measure();
-         box.width = this.width;
-         box.height = this.height;
-         }
+            super.measure();
+            box.width = this.width;
+            box.height = this.height;
+        }
 
         /*override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
          super.updateDisplayList(unscaledWidth, unscaledHeight);
@@ -41,7 +40,7 @@
             intervalColumn.dataField = field;
             intervalColumn.width = metrics.width + metrics.x + metrics.x + 5;
             var factory:ClassFactory = new ClassFactory(VerticalListRenderer);
-            factory.properties = { qualifiedName:field };
+            factory.properties = { qualifiedName:field, report: report};
             intervalColumn.itemRenderer = factory;
             intervalColumn.sortable = false;
             var headerFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
@@ -66,6 +65,7 @@
         private var queuedMap:Object;
         private var queuedProps:Object;
 
+
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
             super.updateDisplayList(unscaledWidth, unscaledHeight);
             if (queuedDataSet != null && unscaledWidth > 0) {
@@ -81,6 +81,8 @@
             }
         }
 
+        private var report:YTDDefinition;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             if (this.width == 0) {
                 queuedDataSet = dataSet;
@@ -93,13 +95,17 @@
                 return;
             }
             var vert:YTDDefinition = analysisDefinition as YTDDefinition;
+            this.report = vert;
             var dColl:ArrayCollection = new ArrayCollection();
             var columns:ArrayCollection = new ArrayCollection();
             var labelColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
             labelColumn.sortable = false;
-            labelColumn.itemRenderer = new ClassFactory(VerticalListRowHeaderRenderer);
+            var rowHeaderFactory:ClassFactory = new ClassFactory(VerticalListRowHeaderRenderer);
+            rowHeaderFactory.properties = { report: vert};
+            labelColumn.itemRenderer = rowHeaderFactory;
+
             var labelHeaderFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
-            labelHeaderFactory.properties = { headerText:"" };
+            labelHeaderFactory.properties = { headerText:""};
             labelColumn.headerRenderer = labelHeaderFactory;
             labelColumn.width = vert.headerWidth;
             labelColumn.dataField = "Label";
@@ -145,6 +151,10 @@
 
                 var obj:Object = new Object();
                 obj["baseMeasure"] = ytdValue.analysisMeasure;
+                if (ytdValue.analysisMeasure.reportFieldExtension != null && ytdValue.analysisMeasure.reportFieldExtension is YTDReportFieldExtension) {
+                    var testExt:YTDReportFieldExtension = ytdValue.analysisMeasure.reportFieldExtension as YTDReportFieldExtension;
+                    hasValue = testExt.alwaysShow;
+                }
                 var formatter:Formatter = ytdValue.analysisMeasure.getFormatter();
                 if (ytdValue.timeIntervalValues.length > 0) {
                     for (var y:int = 0; y < ytdValue.timeIntervalValues.length; y++) {
@@ -201,6 +211,7 @@
                 if (additionalProperties["preferredSize"]) {
                     dataGrid.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
                 }
+                dataGrid.clearRenderers();
                 dataGrid.columns = columns.toArray();
                 //dataGrid.rowCount = dColl.length + 1;
                 dataGrid.height = (dColl.length + 1) * 20 + 20;
