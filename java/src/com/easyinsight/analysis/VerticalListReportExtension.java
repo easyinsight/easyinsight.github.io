@@ -19,6 +19,17 @@ public class VerticalListReportExtension extends ReportFieldExtension {
     @Column(name="line_above")
     private boolean lineAbove;
 
+    @Column(name="always_show")
+    private boolean alwaysShow;
+
+    public boolean isAlwaysShow() {
+        return alwaysShow;
+    }
+
+    public void setAlwaysShow(boolean alwaysShow) {
+        this.alwaysShow = alwaysShow;
+    }
+
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
         Element element = new Element("verticalListReportFieldExtension");
