@@ -35,6 +35,14 @@ public class YTDDefinition extends AnalysisDefinition {
         this.ytdID = YTDDefinition(savedDef).ytdID;
     }
 
+    override public function getFont():String {
+        if (fontName == "Lucida Grande" || fontName == "Open Sans") {
+            return fontName;
+        } else {
+            return "Lucida Grande";
+        }
+    }
+
     override public function get type():int {
         return AnalysisDefinition.YTD;
     }

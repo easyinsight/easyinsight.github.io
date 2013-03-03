@@ -15,6 +15,7 @@
         public function save(analysisItem:AnalysisItem):void {
             var ext:VerticalListReportExtension = new VerticalListReportExtension();
             ext.lineAbove = verticalLineBox.selected;
+            ext.alwaysShow = alwaysShowBox.selected;
             analysisItem.reportFieldExtension = ext;
         }
 
@@ -23,6 +24,7 @@
             var ext:VerticalListReportExtension = _analysisItem.reportFieldExtension as VerticalListReportExtension;
             if (ext != null) {
                 verticalLineAbove = ext.lineAbove;
+                alwaysShow = ext.alwaysShow;
             }
         }
 
@@ -31,10 +33,16 @@
 
         [Bindable]
         private var verticalLineAbove:Boolean;
+
+        [Bindable]
+        private var alwaysShow:Boolean;
         ]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="Draw a vertical line over this field:">
             <mx:CheckBox id="verticalLineBox" selected="{verticalLineAbove}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Always show this field:">
+            <mx:CheckBox id="alwaysShowBox" selected="{alwaysShow}"/>
         </mx:FormItem>
     </mx:Form>
 

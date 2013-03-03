@@ -400,13 +400,13 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     public void tweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
         if (autoScale && getXaxis() != null && getXaxis().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             int daysDuration = 0;
-        AnalysisDateDimension start;
-        try {
-            start = (AnalysisDateDimension) getXaxis().clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
-        AnalysisDateDimension xAxis = (AnalysisDateDimension) this.getXaxis();
+            AnalysisDateDimension start;
+            try {
+                start = (AnalysisDateDimension) getXaxis().clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+            AnalysisDateDimension xAxis = (AnalysisDateDimension) this.getXaxis();
             if (getFilterDefinitions() != null) {
                 for (FilterDefinition filterDefinition : getFilterDefinitions()) {
                     if (filterDefinition instanceof RollingFilterDefinition) {
