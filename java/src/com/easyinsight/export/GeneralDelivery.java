@@ -211,6 +211,9 @@ public class GeneralDelivery extends ScheduledDelivery {
                 } finally {
                     session.close();
                 }
+                if (deliveryInfo.getDeliveryExtension() != null) {
+                    deliveryInfo.getDeliveryExtension().save(conn, 0, insertReportID);
+                }
             } else if (deliveryInfo.getType() == DeliveryInfo.SCORECARD) {
                 insertScorecardStmt.setLong(1, id);
                 insertScorecardStmt.setLong(2, deliveryInfo.getId());
@@ -274,6 +277,7 @@ public class GeneralDelivery extends ScheduledDelivery {
                     session.close();
                 }
                 deliveryInfo.setFilters(customFilters);
+                deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, 0, deliveryInfoID, deliveryInfo.getFormat()));
                 infos.add(deliveryInfo);
             }
             getFilterStmt.close();

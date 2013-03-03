@@ -242,7 +242,9 @@ public class TransformContainer extends HBox
                             _dashboard);
                 }
             } else {
-                filter = new MultiValueFilter(_feedID, filterDefinition.field, _reportID,  _dashboardID);
+                filter = new MultiValueFilter(_feedID, filterDefinition.field, _reportID,  _dashboardID,  _report,
+                                            _loadingFromReport ? ((_report != null && _report.filterDefinitions != null) ? _report.filterDefinitions : filterDefinitions) : filterDefinitions,
+                                            _dashboard);
             }
         } else if (filterDefinition.getType() == FilterDefinition.DATE) {
             filter = new SliderDateFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report);
@@ -514,7 +516,10 @@ public class TransformContainer extends HBox
                             label = AnalysisItemFilterDefinition(event.filter.filterDefinition).targetItem.display;
                         }
                         ComboBoxFilter(child).regenerate(label);
+                    } else if (child is MultiValueFilter) {
+                        MultiValueFilter(child).regenerate();
                     }
+
                 }
             }
             dispatchEvent(new TransformsUpdatedEvent(filterDefinitions));
@@ -681,7 +686,7 @@ public class TransformContainer extends HBox
                     if (values.length == 1 && includeFilter) {
                         filter = new ComboBoxFilter(_feedID, key, _reportID, _dashboardID, _report, filterDefinitions, _dashboard);
                     } else {
-                        filter = new MultiValueFilter(_feedID, key, _reportID, _dashboardID);
+                        filter = new MultiValueFilter(_feedID, key, _reportID, _dashboardID, _report, filterDefinitions, _dashboard);
                     }
                 } else if (key.hasType(AnalysisItemTypes.MEASURE)) {
                     var filterMeasureRangeDefinition:FilterRangeDefinition = new FilterRangeDefinition();

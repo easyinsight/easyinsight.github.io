@@ -28,7 +28,7 @@ public class DashboardLabeledGridViewComponent extends VBox implements IDashboar
         setStyle("verticalGap", 0);
         addEventListener(SizeOverrideEvent.SIZE_OVERRIDE, onSizeOverride);
     }
-
+    
     private function onSizeOverride(event:SizeOverrideEvent):void {
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
             var gridRow:GridRow = grid.getChildAt(i) as GridRow;
@@ -140,9 +140,9 @@ public class DashboardLabeledGridViewComponent extends VBox implements IDashboar
 
                 if (e.dashboardElement is DashboardReport || e.dashboardElement is DashboardTextElement) {
                     /*gridItem.setStyle("paddingLeft", 5);
-                     gridItem.setStyle("paddingRight", 5);
-                     gridItem.setStyle("paddingTop", 5);
-                     gridItem.setStyle("paddingBottom", 5);*/
+                    gridItem.setStyle("paddingRight", 5);
+                    gridItem.setStyle("paddingTop", 5);
+                    gridItem.setStyle("paddingBottom", 5);*/
                 }
                 gridItem.setStyle("horizontalAlign", "center");
                 gridItem.setStyle("verticalAlign", "middle");
