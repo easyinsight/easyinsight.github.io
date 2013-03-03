@@ -34,6 +34,8 @@
         private var queuedMap:Object;
         private var queuedProps:Object;
 
+        private var report:VerticalListDefinition;
+
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
             super.updateDisplayList(unscaledWidth, unscaledHeight);
             if (queuedDataSet != null && unscaledWidth > 0) {
@@ -62,12 +64,15 @@
                 return;
             }
             var vert:VerticalListDefinition = analysisDefinition as VerticalListDefinition;
+            this.report = vert;
             var dColl:ArrayCollection = new ArrayCollection();
             var columns:Array = [];
             var labelColumn:SortableAdvancedDataGridColumn = new SortableAdvancedDataGridColumn(0, 0);
             labelColumn.sortable = false;
             labelColumn.width = vert.headerWidth;
-            labelColumn.itemRenderer = new ClassFactory(VerticalListRowHeaderRenderer);
+            var cf:ClassFactory = new ClassFactory(VerticalListRowHeaderRenderer);
+            cf.properties = { report: vert};
+            labelColumn.itemRenderer = cf;
             var labelHeaderFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
             labelHeaderFactory.properties = { headerText: "" };
             labelColumn.headerRenderer = labelHeaderFactory;
@@ -84,6 +89,7 @@
             var a:int = 0;
             for (var l:int = 0; l < vert.measures.length; l++) {
                 var measure:AnalysisMeasure = vert.measures.getItemAt(l) as AnalysisMeasure;
+
                 var formatter:Formatter = measure.getFormatter();
                 var obj:Object = new Object();
                 obj["Label"] = measure.display;
@@ -91,6 +97,12 @@
                 var metrics:TextLineMetrics = dataGrid.measureText(measure.display);
                 headerWidth = Math.max(headerWidth, metrics.width + metrics.x + metrics.x);
                 var atLeastOneValue:Boolean = false;
+                if (measure.reportFieldExtension != null && measure.reportFieldExtension is VerticalListReportExtension) {
+                    var testExt:VerticalListReportExtension = measure.reportFieldExtension as VerticalListReportExtension;
+                    if (testExt.alwaysShow) {
+                        atLeastOneValue = true;
+                    }
+                }
                 var i:int = 0;
                 for each (var row:Object in dataSet) {
                     var columnValue:String;
@@ -139,7 +151,7 @@
                         dataColumn.headerText = columnValue;
                         dataColumn.dataField = columnValue;
                         var factory:ClassFactory = new ClassFactory(VerticalListRenderer);
-                        factory.properties = { qualifiedName: columnValue };
+                        factory.properties = { qualifiedName: columnValue, report: report };
                         dataColumn.itemRenderer = factory;
                         dataColumn.sortable = false;
                         var headerFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);

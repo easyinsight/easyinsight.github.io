@@ -15,6 +15,7 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
     
     public var benchmark:AnalysisItem;
     public var lineAbove:Boolean;
+    public var alwaysShow:Boolean;
     
     public function YTDReportFieldExtension() {
     }
