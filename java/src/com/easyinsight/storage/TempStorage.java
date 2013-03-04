@@ -354,6 +354,8 @@ public class TempStorage implements IDataStorage {
             } else {
                 if (keyMetadata.getType() == Value.STRING && string.length() > 253) {
                     string = string.substring(0, 253);
+                } else if (keyMetadata.getType() == Value.TEXT && string.length() > 65530) {
+                    string = string.substring(0, 65530);
                 }
                 insertStmt.setString(i++, string);
             }
