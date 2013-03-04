@@ -79,11 +79,15 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
             if (_analysisMeasure.reportFieldExtension != null && _analysisMeasure.reportFieldExtension is YTDReportFieldExtension) {
                 var testExt:YTDReportFieldExtension = _analysisMeasure.reportFieldExtension as YTDReportFieldExtension;
                 bold = testExt.alwaysShow;
-                align = "left";
+                if (testExt.alwaysShow) {
+                    align = "left";
+                }
             } else if (_analysisMeasure.reportFieldExtension != null && _analysisMeasure.reportFieldExtension is VerticalListReportExtension) {
                 var vertExt:VerticalListReportExtension = _analysisMeasure.reportFieldExtension as VerticalListReportExtension;
                 bold = vertExt.alwaysShow;
-                align = "left";
+                if (testExt.alwaysShow) {
+                    align = "left";
+                }
             }
         }
         var fontName:String = _report.getFont();
