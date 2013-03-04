@@ -85,7 +85,7 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
             } else if (_analysisMeasure.reportFieldExtension != null && _analysisMeasure.reportFieldExtension is VerticalListReportExtension) {
                 var vertExt:VerticalListReportExtension = _analysisMeasure.reportFieldExtension as VerticalListReportExtension;
                 bold = vertExt.alwaysShow;
-                if (testExt.alwaysShow) {
+                if (vertExt.alwaysShow) {
                     align = "left";
                 }
             }
