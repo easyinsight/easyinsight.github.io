@@ -11,16 +11,11 @@ import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.ytd.VerticalListReportExtension;
 import com.easyinsight.analysis.ytd.YTDReportFieldExtension;
 
-import mx.controls.Alert;
-
-import mx.controls.Label;
-
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.Application;
 import mx.core.UIComponent;
 import mx.core.UITextField;
 import mx.core.UITextFormat;
-import mx.events.FlexEvent;
 
 public class VerticalListRowHeaderRenderer extends UIComponent implements IListItemRenderer {
 
@@ -74,6 +69,7 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
         if (value == null) {
             return;
         }
+        var align:String = "right";
         var bold:Object = null;
         var _analysisMeasure:AnalysisMeasure = value["baseMeasure"] as AnalysisMeasure;
         if (_analysisMeasure == null) {
@@ -83,20 +79,23 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
             if (_analysisMeasure.reportFieldExtension != null && _analysisMeasure.reportFieldExtension is YTDReportFieldExtension) {
                 var testExt:YTDReportFieldExtension = _analysisMeasure.reportFieldExtension as YTDReportFieldExtension;
                 bold = testExt.alwaysShow;
+                align = "left";
             } else if (_analysisMeasure.reportFieldExtension != null && _analysisMeasure.reportFieldExtension is VerticalListReportExtension) {
                 var vertExt:VerticalListReportExtension = _analysisMeasure.reportFieldExtension as VerticalListReportExtension;
                 bold = vertExt.alwaysShow;
+                align = "left";
             }
         }
-
+        var fontName:String = _report.getFont();
         if (_report.getFont() == "Open Sans" && !bold) {
             text.styleName = "myFontStyle";
         } else if (_report.getFont() == "Open Sans" && bold) {
             text.styleName = "boldStyle";
+            fontName = "Open Sans Bold";
         }
 
-        var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, _report.getFont(), 10, 0, bold);
-        tf.align = "right";
+        var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, fontName, 10, 0, bold);
+        tf.align = align;
         _format = tf;
         _changed = true;
         invalidateProperties();
