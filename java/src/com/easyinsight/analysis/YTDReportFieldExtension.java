@@ -7,7 +7,9 @@ import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,6 +24,9 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
     @JoinColumn(name="benchmark_id")
     private AnalysisItem benchmark;
 
+    /*@OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="date_field_id")
+    private AnalysisItem dateField;*/
 
     @Column(name="line_above")
     private boolean lineAbove;
@@ -37,6 +42,14 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
         this.alwaysShow = alwaysShow;
     }
 
+    public static void main(String[] args) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, 2012);
+        cal.set(Calendar.MONTH, Calendar.DECEMBER);
+        cal.set(Calendar.DAY_OF_YEAR, 364);
+        System.out.println(cal.getTimeInMillis());
+    }
+
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
         Element element = new Element("ytdReportFieldExtension");
@@ -47,6 +60,14 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
         }
         return element;
     }
+
+    /*public AnalysisItem getDateField() {
+        return dateField;
+    }
+
+    public void setDateField(AnalysisItem dateField) {
+        this.dateField = dateField;
+    }*/
 
     public boolean isLineAbove() {
         return lineAbove;
@@ -66,12 +87,14 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
 
     public void upbenchmarkIDs(ReplacementMap replacementMap) {
         benchmark = replacementMap.getField(benchmark);
+//        dateField = replacementMap.getField(dateField);
     }
 
-    public List<AnalysisItem> getAnalysisItems(boolean getEverything) {
-        List<AnalysisItem> items = super.getAnalysisItems(getEverything);
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
+        List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
         if (getEverything) {
             items.add(benchmark);
+  //          items.add(dateField);
         }
         return items;
     }
@@ -83,6 +106,10 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
             benchmark.reportSave(session);
             session.saveOrUpdate(benchmark);
         }
+        /*if (dateField != null) {
+            dateField.reportSave(session);
+            session.saveOrUpdate(dateField);
+        }*/
     }
 
     @Override
@@ -92,5 +119,9 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
             setBenchmark((AnalysisItem) Database.deproxy(getBenchmark()));
             benchmark.afterLoad();
         }
+        /*if (dateField != null) {
+            setDateField((AnalysisItem) Database.deproxy(getDateField()));
+            dateField.afterLoad();
+        }*/
     }
 }
