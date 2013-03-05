@@ -11,8 +11,6 @@ import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.ytd.VerticalListReportExtension;
 import com.easyinsight.analysis.ytd.YTDReportFieldExtension;
 
-import mx.controls.Alert;
-
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.Application;
 import mx.core.UIComponent;
@@ -100,8 +98,8 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
             text.styleName = "myFontStyle";
             this.styleName = "myFontStyle";
         } else if (_report.getFont() == "Open Sans" && bold) {
-            text.styleName = "boldStyle";
-            this.styleName = "boldStyle";
+            text.styleName = "boldStyleArgh";
+            this.styleName = "boldStyleArgh";
             fontName = "Open Sans Bold";
         }
 
