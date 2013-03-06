@@ -43,11 +43,18 @@ Application {
     font-weight: bold;
 }
 
+.myFontStyle2 {
+    font-grid-fit-type: 'subpixel';
+    font-family: 'Open Sans';
+    font-sharpness: -20;
+    font-thickness: 4;
+}
+
 .boldStyle {
     font-grid-fit-type: 'subpixel';
     font-family: 'Open Sans Bold';
-    font-sharpness: -221;
-    font-thickness: 4;
+    font-sharpness: 221;
+    font-thickness: 100;
 }
 
 Form {
