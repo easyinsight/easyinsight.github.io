@@ -35,6 +35,14 @@ Application {
     font-thickness: 4;
 }
 
+.boldStyleArgh {
+    font-grid-fit-type: 'subpixel';
+    font-family: 'Open Sans Bold';
+    font-sharpness: -221;
+    font-thickness: 4;
+    font-weight: bold;
+}
+
 .boldStyle {
     font-grid-fit-type: 'subpixel';
     font-family: 'Open Sans Bold';
