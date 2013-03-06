@@ -24,6 +24,7 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
     public function VerticalListRowHeaderRenderer() {
         super();
         text = new UITextField();
+        text.embedFonts = true;
         this.percentWidth = 100;
         this.percentHeight = 100;
     }
@@ -42,6 +43,8 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
             if (_changed) {
                 _changed = false;
                 text.text = _valText;
+                //Alert.show("setting to " + _format.font + " where " + _valText);
+                text.defaultTextFormat = _format;
                 text.setTextFormat(_format);
             }
         }
@@ -93,8 +96,10 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
         var fontName:String = _report.getFont();
         if (_report.getFont() == "Open Sans" && !bold) {
             text.styleName = "myFontStyle";
+            this.styleName = "myFontStyle";
         } else if (_report.getFont() == "Open Sans" && bold) {
-            text.styleName = "boldStyle";
+            text.styleName = "boldStyleArgh";
+            this.styleName = "boldStyleArgh";
             fontName = "Open Sans Bold";
         }
 
