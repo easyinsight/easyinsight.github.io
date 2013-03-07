@@ -22,6 +22,7 @@ public class DeliveryInfo {
 
     public static final int REPORT = 1;
     public static final int SCORECARD = 2;
+    public static final int DASHBOARD = 3;
 
     private String name;
     private long id;
@@ -32,6 +33,7 @@ public class DeliveryInfo {
     private int index;
     private int format;
     private boolean sendIfNoData;
+    private DeliveryExtension deliveryExtension;
 
     public void fromXML(Element element, XMLImportMetadata xmlImportMetadata) {
         id = Long.parseLong(element.getAttribute("id").getValue());
@@ -153,5 +155,13 @@ public class DeliveryInfo {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public DeliveryExtension getDeliveryExtension() {
+        return deliveryExtension;
+    }
+
+    public void setDeliveryExtension(DeliveryExtension deliveryExtension) {
+        this.deliveryExtension = deliveryExtension;
     }
 }

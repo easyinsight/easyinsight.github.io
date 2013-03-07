@@ -162,6 +162,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
             var dropTextArea:TextArea = new TextArea();
             dropTextArea.setStyle("backgroundAlpha", 0);
             dropTextArea.setStyle("fontSize", 12);
+            dropTextArea.editable = false;
             dropTextArea.text = "Drag a control or report from the left side options to here.";
             dropTextArea.width = 200;
             dropBox.addChild(dropTextArea);

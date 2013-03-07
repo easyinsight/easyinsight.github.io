@@ -30,7 +30,7 @@
             intervalColumn.dataField = field;
             intervalColumn.width = metrics.width + metrics.x + metrics.x + 5;
             var factory:ClassFactory = new ClassFactory(VerticalListRenderer);
-            factory.properties = { qualifiedName:field };
+            factory.properties = { qualifiedName:field, report: report };
             intervalColumn.itemRenderer = factory;
             intervalColumn.sortable = false;
             var headerFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
@@ -54,6 +54,8 @@
         private var queuedDef:AnalysisDefinition;
         private var queuedMap:Object;
         private var queuedProps:Object;
+
+        private var report:CompareYearsDefinition;
 
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
             super.updateDisplayList(unscaledWidth, unscaledHeight);
@@ -79,11 +81,14 @@
                 return;
             }
             var vert:CompareYearsDefinition = analysisDefinition as CompareYearsDefinition;
+            this.report = vert;
             var dColl:ArrayCollection = new ArrayCollection();
             var columns:ArrayCollection = new ArrayCollection();
             var labelColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
             labelColumn.sortable = false;
-            labelColumn.itemRenderer = new ClassFactory(VerticalListRowHeaderRenderer);
+            var cf:ClassFactory = new ClassFactory(VerticalListRowHeaderRenderer);
+            cf.properties = { report: vert};
+            labelColumn.itemRenderer = cf;
             var labelHeaderFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
             labelHeaderFactory.properties = { headerText:"" };
             labelColumn.headerRenderer = labelHeaderFactory;
@@ -124,6 +129,12 @@
                 var ytdValue:CompareYearsRow = dataSet.getItemAt(z) as CompareYearsRow;
                 var obj:Object = new Object();
                 obj["baseMeasure"] = ytdValue.measure;
+                if (ytdValue.measure.reportFieldExtension != null && ytdValue.measure.reportFieldExtension is VerticalListReportExtension) {
+                    var testExt:VerticalListReportExtension = ytdValue.measure.reportFieldExtension as VerticalListReportExtension;
+                    if (testExt.alwaysShow) {
+                        hasValue = true;
+                    }
+                }
                 var formatter:Formatter = ytdValue.measure.getFormatter();
                 for (var key:String in ytdValue.results) {
                     var compareYearResult:CompareYearsResults = ytdValue.results[key];

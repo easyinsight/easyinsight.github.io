@@ -9,6 +9,7 @@ import nu.xom.Nodes;
 import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -93,15 +94,18 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
         if (date != null) {
             date = replacementMap.getField(date);
         }
+        if (trendComparisonField != null) {
+            trendComparisonField = replacementMap.getField(trendComparisonField);
+        }
     }
 
-    public List<AnalysisItem> getAnalysisItems(boolean getEverything) {
-        List<AnalysisItem> items = super.getAnalysisItems(getEverything);
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
+        List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
         if (getEverything && date != null) {
-            items.add(date);
+            items.addAll(date.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
         }
         if (trendComparisonField != null) {
-            items.add(trendComparisonField);
+            items.addAll(trendComparisonField.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
         }
         return items;
     }

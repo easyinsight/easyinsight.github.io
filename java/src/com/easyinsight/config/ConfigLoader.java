@@ -21,6 +21,8 @@ public class ConfigLoader {
     private String databaseUserName;
     private String databasePassword;
 
+    private String reportDeliveryQueue;
+
     private String billingUsername;
     private String billingPassword;
     private String billingKeyID;
@@ -44,6 +46,14 @@ public class ConfigLoader {
 
     private String databaseRequestQueue;
     private String databaseResponseQueue;
+
+    public String getReportDeliveryQueue() {
+        return reportDeliveryQueue;
+    }
+
+    public void setReportDeliveryQueue(String reportDeliveryQueue) {
+        this.reportDeliveryQueue = reportDeliveryQueue;
+    }
 
     public String getDatabaseRequestQueue() {
         return databaseRequestQueue;
@@ -254,6 +264,7 @@ public class ConfigLoader {
 
             databaseRequestQueue = (String) properties.get("database.request.queue");
             databaseResponseQueue = (String) properties.get("database.response.queue");
+            reportDeliveryQueue = (String) properties.get("report.delivery.queue");
 
         } catch (IOException e) {
             LogClass.error(e);

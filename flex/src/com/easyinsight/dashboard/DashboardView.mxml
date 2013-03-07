@@ -268,10 +268,6 @@
             exchangeItem = null;
             _showAddBar = false;
             generateState();
-            var window:DashboardAddedWindow = new DashboardAddedWindow();
-            window.dashboard = dashboard;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         }
 
         [Bindable]

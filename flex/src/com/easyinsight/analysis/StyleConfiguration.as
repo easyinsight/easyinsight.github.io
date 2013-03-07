@@ -12,12 +12,9 @@ import com.easyinsight.analysis.charts.plot.PlotChartDefinition;
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
 import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartDefinition;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartDefinition;
-import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartDefinition;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartDefinition;
 import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartDefinition;
-import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartDefinition;
 import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartDefinition;
-import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartDefinition;
 import com.easyinsight.analysis.crosstab.CrosstabDefinition;
@@ -30,7 +27,6 @@ import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.trend.TrendDefinition;
 import com.easyinsight.analysis.trend.TrendGridDefinition;
-import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.analysis.ytd.CompareYearsDefinition;
 import com.easyinsight.analysis.ytd.YTDDefinition;
@@ -40,6 +36,7 @@ import com.easyinsight.dashboard.DashboardGrid;
 import com.easyinsight.dashboard.DashboardReport;
 import com.easyinsight.dashboard.DashboardScorecard;
 import com.easyinsight.dashboard.DashboardStack;
+import com.easyinsight.dashboard.DashboardTextElement;
 
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
@@ -83,12 +80,17 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Header Background Color", "headerBackgroundColor",  dashboardElement.headerBackgroundColor, dashboardElement));
             items.addItem(new NumericReportFormItem("Header Background Alpha", "headerBackgroundAlpha",  dashboardElement.headerBackgroundAlpha, dashboardElement, 0, 1));
         }
+        if (dashboardElement is DashboardTextElement) {
+            items.addItem(new ColorReportFormItem("Font Color", "color",  DashboardTextElement(dashboardElement).color, dashboardElement));
+            items.addItem(new NumericReportFormItem("Font Size", "fontSize", DashboardTextElement(dashboardElement).fontSize, dashboardElement, 8, 48));
+        }
         if (dashboardElement is DashboardStack) {
             items.addItem(new CheckBoxReportFormItem("Consolidate Header Elements", "consolidateHeaderElements", DashboardStack(dashboardElement).consolidateHeaderElements, dashboardElement));
             items.addItem(new ComboBoxReportFormItem("Header Controls", "selectionType", DashboardStack(dashboardElement).selectionType, dashboardElement, ["Buttons", "Combo Box"]));
             items.addItem(new NumericReportFormItem("Stack Font Size", "stackFontSize", DashboardStack(dashboardElement).stackFontSize, dashboardElement, 0, 100));
         }
         if (dashboardElement is DashboardGrid) {
+            items.addItem(new CheckBoxReportFormItem("Show Label", "showLabel", DashboardGrid(dashboardElement).showLabel, dashboardElement));
             items.addItem(new NumericReportFormItem("Width", "width", DashboardGrid(dashboardElement).width, dashboardElement, 0, 2000));
             items.addItem(new ColorReportFormItem("Background Color", "backgroundColor",  DashboardGrid(dashboardElement).backgroundColor, dashboardElement));
             items.addItem(new NumericReportFormItem("Background Alpha", "backgroundAlpha",  DashboardGrid(dashboardElement).backgroundAlpha, dashboardElement, 0, 1));
@@ -99,7 +101,7 @@ public class StyleConfiguration {
         if (dashboardElement is DashboardReport) {
             items.addItem(new CheckBoxReportFormItem("Show Label", "showLabel", DashboardReport(dashboardElement).showLabel, dashboardElement));
             items.addItem(new CheckBoxReportFormItem("Auto Calculate Height", "autoCalculateHeight", DashboardReport(dashboardElement).autoCalculateHeight, dashboardElement, null,
-            false, function(dashboardReport:DashboardReport):Boolean {
+                    false, function(dashboardReport:DashboardReport):Boolean {
                         return dashboardReport.report.reportType == AnalysisDefinition.LIST || dashboardReport.report.reportType == AnalysisDefinition.FORM ||
                                 dashboardReport.report.reportType == AnalysisDefinition.CROSSTAB || dashboardReport.report.reportType == AnalysisDefinition.YTD ||
                                 dashboardReport.report.reportType == AnalysisDefinition.VERTICAL_LIST || dashboardReport.report.reportType == AnalysisDefinition.COMPARE_YEARS;
@@ -133,11 +135,11 @@ public class StyleConfiguration {
     public static function getFormItems(report:AnalysisDefinition):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
         /*if (report.supportsEmbeddedFonts()) {
-            items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande"]));
-        } else {
-            items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Arial", "Arial Black", "Comic Sans MS",
-                "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
-        }*/
+         items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande"]));
+         } else {
+         items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Arial", "Arial Black", "Comic Sans MS",
+         "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
+         }*/
         items.addItem(new NumericReportFormItem("Font Size", "fontSize", report.fontSize, report, 8, 48));
         items.addItem(new NumericReportFormItem("Header Font Size", "headerFontSize", report.headerFontSize, report, 8, 48));
         items.addItem(new NumericReportFormItem("Max Header Width", "maxHeaderWidth", report.maxHeaderWidth, report, 100, 1500));
@@ -185,8 +187,8 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
         }
         /*if (report is SummaryDefinition) {
-            items.addItem(new TextReportFormItem("Summary Label", "summaryReportLine", SummaryDefinition(report).summaryReportLine, report));
-        }*/
+         items.addItem(new TextReportFormItem("Summary Label", "summaryReportLine", SummaryDefinition(report).summaryReportLine, report));
+         }*/
         if (report is ChartDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show Legend", "showLegend", ChartDefinition(report).showLegend, report));
             items.addItem(new TextReportFormItem("X Axis Label", "xAxisLabel", ChartDefinition(report).xAxisLabel, report));
@@ -199,13 +201,13 @@ public class StyleConfiguration {
         }
         if (report is TreeMapDefinition) {
             items.addItem(new ComboBoxReportFormItem("Color Strategy", "colorStrategy", TreeMapDefinition(report).colorStrategy,
-                report, ["Linear", "Logarithmic"]));
+                    report, ["Linear", "Logarithmic"]));
             items.addItem(new ColorReportFormItem("High Color", "highColor", TreeMapDefinition(report).highColor, report));
             items.addItem(new ColorReportFormItem("Low Color", "lowColor", TreeMapDefinition(report).lowColor, report));
         }
         if (report is LineChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Form", "form", TwoAxisDefinition(report).form,
-                report, ["segment", "step", "reverseStep", "horizontal", "curve"]));
+                    report, ["segment", "step", "reverseStep", "horizontal", "curve"]));
             items.addItem(new ComboBoxReportFormItem("Base Y Axis at Zero", "baseAtZero", TwoAxisDefinition(report).baseAtZero,
                     report, ["true", "false"]));
             items.addItem(new ComboBoxReportFormItem("Interpolate Values", "interpolateValues", TwoAxisDefinition(report).interpolateValues,
@@ -219,20 +221,20 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("Align Labels To Units", "alignLabelsToUnits", LineChartDefinition(report).alignLabelsToUnits, report));
             items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", LineChartDefinition(report).multiColors, report));
             items.addItem(new ComboBoxReportFormItem("Trend Line Interval", "trendLineTimeInterval", LineChartDefinition(report).trendLineTimeInterval, report,
-                ["None", "Year", "Month", "Week"]));
+                    ["None", "Year", "Month", "Week"]));
             items.addItem(new ColorReportFormItem("Trend Line Color", "trendLineColor", LineChartDefinition(report).trendLineColor, report));
             items.addItem(new NumericReportFormItem("Trend Line Alpha", "trendLineAlpha", LineChartDefinition(report).trendLineAlpha, report, 0, 1));
             items.addItem(new NumericReportFormItem("Trend Line Thickness", "trendLineThickness", LineChartDefinition(report).trendLineThickness, report, 1, 10));
         }
         if (report is AreaChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Form", "form", TwoAxisDefinition(report).form,
-                report, ["segment", "step", "reverseStep", "horizontal", "curve"]));
+                    report, ["segment", "step", "reverseStep", "horizontal", "curve"]));
             items.addItem(new ComboBoxReportFormItem("Base Y Axis at Zero", "baseAtZero", TwoAxisDefinition(report).baseAtZero,
                     report, ["true", "false"]));
             items.addItem(new ComboBoxReportFormItem("Interpolate Values", "interpolateValues", TwoAxisDefinition(report).interpolateValues,
                     report, ["true", "false"]));
             items.addItem(new ComboBoxReportFormItem("Stacking Type", "stackingType", AreaChartDefinition(report).stackingType,
-                report, ["overlaid", "stacked", "100%"]));
+                    report, ["overlaid", "stacked", "100%"]));
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", AreaChartDefinition(report).legendMaxWidth, report, 10, 400));
             items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", AreaChartDefinition(report).multiColors, report));
         }
@@ -246,8 +248,8 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", BarChartDefinition(report).chartColor, report, "useChartColor"));
             items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", BarChartDefinition(report).gradientColor, report));
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", BarChartDefinition(report).columnSort, report,
-                [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
-                ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
+                    [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
+                        ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
             items.addItem(new ComboBoxReportFormItem("Chart Axis Type", "axisType", BarChartDefinition(report).axisType, report,
                     ["Linear", "Logarithmic"]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", BarChartDefinition(report).labelPosition,
@@ -267,7 +269,7 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", ColumnChartDefinition(report).gradientColor, report));
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", ColumnChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
-                    ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
+                        ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
             items.addItem(new ComboBoxReportFormItem("Chart Axis Type", "axisType", ColumnChartDefinition(report).axisType, report,
                     ["Linear", "Logarithmic"]));
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", ColumnChartDefinition(report).labelFontSize, report, 8, 48));
@@ -281,7 +283,7 @@ public class StyleConfiguration {
         if (report is StackedBarChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", StackedBarChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
-                    ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
+                        ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", StackedBarChartDefinition(report).labelPosition,
                     report, ["none", "inside"]));
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", StackedBarChartDefinition(report).labelFontSize, report, 8, 48));
@@ -295,7 +297,7 @@ public class StyleConfiguration {
         if (report is StackedColumnChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", StackedColumnChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
-                    ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
+                        ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", StackedColumnChartDefinition(report).labelPosition,
                     report, ["none", "inside"]));
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", StackedColumnChartDefinition(report).labelFontSize, report, 8, 48));
@@ -316,18 +318,16 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Header Width", "headerWidth", VerticalListDefinition(report).headerWidth, report, 100, 400));
             items.addItem(new NumericReportFormItem("Column Width", "columnWidth", VerticalListDefinition(report).columnWidth, report, 100, 400));
             items.addItem(new TextReportFormItem("Pattern Name", "patternName", VerticalListDefinition(report).patternName, report));
+            items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
         }
         if (report is CompareYearsDefinition) {
             items.addItem(new TextReportFormItem("Pattern Name", "patternName", CompareYearsDefinition(report).patternName, report));
+            items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
         }
         if (report is YTDDefinition) {
             items.addItem(new NumericReportFormItem("Custom Aggregation", "firstAggregation", YTDDefinition(report).firstAggregation, report, 1, 15));
             items.addItem(new TextReportFormItem("Sum Label", "ytdLabel", YTDDefinition(report).ytdLabel, report));
-        }
-        if (report is CombinedVerticalListDefinition) {
-            items.addItem(new NumericReportFormItem("Header Width", "headerWidth", CombinedVerticalListDefinition(report).headerWidth, report, 100, 400));
-            items.addItem(new NumericReportFormItem("Column Width", "columnWidth", CombinedVerticalListDefinition(report).columnWidth, report, 100, 400));
-            items.addItem(new CheckBoxReportFormItem("Hide Empty Rows", "removeEmptyRows", CombinedVerticalListDefinition(report).removeEmptyRows, report));
+            items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
         }
         if (report is BubbleChartDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show Labels", "showLabels", BubbleChartDefinition(report).showLabels, report));
