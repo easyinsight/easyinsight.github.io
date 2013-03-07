@@ -569,6 +569,7 @@ public class TransformContainer extends HBox
     }
 
     public function commandFilterAdd2(filter:IFilter, launchWindow:Boolean):void {
+
         commandFilterAdd(filter);
         if (launchWindow) {
             if (filter is SliderMeasureFilter) {
@@ -576,7 +577,8 @@ public class TransformContainer extends HBox
             } else if (filter is PatternFilter) {
                 PatternFilter(filter).edit(null);
             } else if (filter is MultiValueFilter) {
-                MultiValueFilter(filter).edit(null);
+
+                MultiValueFilter(filter).showFilter(null);
             }
         }
         if (filter is ComboBoxFilter) {

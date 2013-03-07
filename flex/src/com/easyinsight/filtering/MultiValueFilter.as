@@ -53,6 +53,7 @@ public class MultiValueFilter extends HBox implements IFilter {
         filterValues = new Button();
         filterValues.styleName = "multiFilterButton";
         setStyle("verticalAlign", "middle");
+
     }
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -160,6 +161,7 @@ public class MultiValueFilter extends HBox implements IFilter {
         if (deleteButton != null) {
             deleteButton.enabled = true;
         }
+        updateFilterLabel();
         if (_loadingFromReport) {
             _loadingFromReport = false;
 
@@ -168,7 +170,7 @@ public class MultiValueFilter extends HBox implements IFilter {
         }
     }
 
-    private function showFilter(event:MouseEvent):void {
+    public function showFilter(event:MouseEvent):void {
         var window2:EmbeddedMultiValueFilterWindow = new EmbeddedMultiValueFilterWindow();
         window2.reportID = _reportID;
         window2.dashboardID = _dashboardID;
