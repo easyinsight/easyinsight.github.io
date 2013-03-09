@@ -48,6 +48,15 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     private boolean preserveCredentials;
 
     private String applicationId;
+    private boolean rebuildFields = true;
+
+    public boolean isRebuildFields() {
+        return rebuildFields;
+    }
+
+    public void setRebuildFields(boolean rebuildFields) {
+        this.rebuildFields = rebuildFields;
+    }
 
     @Override
     public void beforeSave(EIConnection conn) throws Exception {
@@ -141,7 +150,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO QUICKBASE_COMPOSITE_SOURCE (DATA_SOURCE_ID, APPLICATION_TOKEN," +
-                "SESSION_TICKET, HOST_NAME, qb_username, qb_password, support_index, preserve_credentials, application_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                "SESSION_TICKET, HOST_NAME, qb_username, qb_password, support_index, preserve_credentials, application_id, rebuild_fields) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, applicationToken);
         insertStmt.setString(3, sessionTicket);
@@ -156,13 +165,15 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         insertStmt.setBoolean(7, supportIndex);
         insertStmt.setBoolean(8, preserveCredentials);
         insertStmt.setString(9, applicationId);
+        insertStmt.setBoolean(10, rebuildFields);
         insertStmt.execute();
     }
 
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT APPLICATION_TOKEN, SESSION_TICKET, HOST_NAME, qb_username, qb_password, support_index, preserve_credentials, application_id FROM " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT APPLICATION_TOKEN, SESSION_TICKET, HOST_NAME, qb_username, " +
+                "qb_password, support_index, preserve_credentials, application_id, rebuild_fields FROM " +
                 "QUICKBASE_COMPOSITE_SOURCE where data_source_id = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
@@ -180,6 +191,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
             }
         }
         applicationId = rs.getString(8);
+        rebuildFields = rs.getBoolean(9);
     }
 
     @Override

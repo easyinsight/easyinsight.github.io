@@ -46,4 +46,21 @@ public class DataSourceDLS {
     public void setFilters(List<FilterDefinition> filters) {
         this.filters = filters;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DataSourceDLS that = (DataSourceDLS) o;
+
+        if (dataSourceDLSID != that.dataSourceDLSID) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (dataSourceDLSID ^ (dataSourceDLSID >>> 32));
+    }
 }

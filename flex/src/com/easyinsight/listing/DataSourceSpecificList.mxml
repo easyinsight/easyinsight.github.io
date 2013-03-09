@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:datasources="com.easyinsight.datasources.*"
-         xmlns:listing="com.easyinsight.listing.*" width="100%"
+         xmlns:listing="com.easyinsight.listing.*" xmlns:util="com.easyinsight.util.*" width="100%"
          height="100%"
          creationComplete="addEventListener(ChangeFolderEvent.CHANGE_FOLDER, onChangeFolder);
          addEventListener(AnalyzeEvent.ANALYZE, onAnalyze2); onCreation()"
@@ -433,6 +433,7 @@
                 columnsInvalid = false;
             }
             if (dataChanged) {
+                uploadGrid.clearRenderers();
                 uploadGrid.dataProvider = hierarchicalData;
                 existingData = displayTreeData;
                 if (!dataSourceChanged) {
@@ -812,10 +813,10 @@
             <mx:Button label="Delete Selected" styleName="grayButton" click="deleteSelected()" width="140"/>
             <mx:Spacer width="100%"/>
         </mx:HBox>
-        <mx:AdvancedDataGrid id="uploadGrid" selectable="false"
+        <util:PatchedAdvancedDataGrid id="uploadGrid" selectable="false"
                                              fontSize="12"
                                              headerStyleName="BlueHeader"
                                              iconFunction="simpleIconFunction" width="100%" height="100%">
-        </mx:AdvancedDataGrid>
+        </util:PatchedAdvancedDataGrid>
     </mx:VBox>
 </mx:VBox>

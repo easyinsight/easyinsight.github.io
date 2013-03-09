@@ -73,10 +73,11 @@
         var designers = <%= account.getCoreDesigners() %>;
         var baseStorage = <%= account.getCoreStorage() / 1000000 %>;
         var baseConnections = <%= account.getCoreSmallBizConnections() %>;
-        var addonDesigners = 0;
-        var addonStorageUnits = 0;
-        var addonConnections = 0;
+        var addonDesigners = <%= account.getAddonDesigners() %>;
+        var addonStorageUnits = <%= account.getAddonStorageUnits() %>;
+        var addonConnections = <%= account.getAddonSmallBizConnections() %>;
         var accountType = <%= account.getAccountType() %>;
+        var enterpriseCost = <%= account.getEnterpriseAddonCost() %>
         var storageCost = 0;
         var billingInterval = <%= account.getBillingMonthOfYear() != null ? 2 : 1%>;
 
@@ -94,7 +95,10 @@
         }
 
         function updatePrice() {
-            var cost = 50 + (addonDesigners * 50) + (addonStorageUnits * 150) + (addonConnections * 25);
+            var cost = 50 + (addonDesigners * 50) + (addonStorageUnits * 150) + (addonConnections * 25) + enterpriseCost;
+            if (billingInterval == 2) {
+                cost = cost * 12;
+            }
             var discount = (billingInterval == 2 ? cost / 12 : 0);
 
             var costString = "$" + cost + ".00";
@@ -336,12 +340,12 @@
                                 <input type="number" min="0" style="width:290px" name="numberStorageBlocks"
                                        value="<%= account.getAddonStorageUnits() %>" id="numberStorageBlocks"
                                        onchange="updateStorageCostPro(this)">
-                                <label style="font-size: 14px">Bill Me</label>
+                                <%--<label style="font-size: 14px">Bill Me</label>
                                 <select style="width:280px" name="billingInterval"
                                         onchange="updateBillingInterval(this)" id="proBillingInterval">
                                     <option value="1">Monthly</option>
                                     <option <%= annual ? "selected=\"selected\"" : "" %> value="2">Yearly</option>
-                                </select>
+                                </select>--%>
 
                             </div>
                             <div class="span3" style="background-color:#FFFFFF;padding: 10px;width:313px;text-align: left">

@@ -95,6 +95,7 @@ public class AnalysisItemFilter extends HBox implements IFilter {
         }
 
         var label:Label = new Label();
+        label.styleName = "filterLabel";
         label.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         addChild(label);
         if (comboBox == null) {

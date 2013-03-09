@@ -188,6 +188,7 @@
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var def:ListDefinition = analysisDefinition as ListDefinition;
             //dataGrid.setStyle("fontFamily", def.getFont());
+
             dataGrid.setStyle("fontSize", def.fontSize);
             dataGrid.setStyle("color", def.textColor);
             dataGrid.setStyle("alternatingItemColors", [ def.rowColor1, def.rowColor2 ]);
@@ -369,6 +370,7 @@
                         addEventListener(Event.RESIZE, onResize);
                     }
                 }
+                dataGrid.clearRenderers();
                 dataGrid.columns = columns;
                 dataGrid.rowCount = dataSet.length;
             } else {

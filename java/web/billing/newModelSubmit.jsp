@@ -70,36 +70,36 @@
                         }
                     }
 
-                    if (curCC != null && currentSubscription != null) {
-                        new BrainTreeBlueBillingSystem().updateSubscriptionCard(curCC, currentSubscription);
+                        if (curCC != null && currentSubscription != null) {
+                            new BrainTreeBlueBillingSystem().updateSubscriptionCard(curCC, currentSubscription);
 
-                        if (account.getAccountState() != Account.TRIAL) {
-                            if (accountTypeChange != null) {
-                                if (currentSubscription.getPlanId().equals("1")) {
-                                    new BrainTreeBlueBillingSystem().updateMonthly(currentSubscription, accountTypeChange.getAddonDesigners(),
-                                            accountTypeChange.getAddonStorage(), accountTypeChange.getAddonConnections());
-                                } else if (currentSubscription.getPlanId().equals("2")) {
-                                    new BrainTreeBlueBillingSystem().updateYearly(currentSubscription, accountTypeChange.getAddonDesigners(),
-                                            accountTypeChange.getAddonStorage(), accountTypeChange.getAddonConnections());
+                            if (account.getAccountState() != Account.TRIAL) {
+                                if (accountTypeChange != null) {
+                                    if (currentSubscription.getPlanId().equals("1")) {
+                                        new BrainTreeBlueBillingSystem().updateMonthly(currentSubscription, accountTypeChange.getAddonDesigners(),
+                                                accountTypeChange.getAddonStorage(), accountTypeChange.getAddonConnections());
+                                    } else if (currentSubscription.getPlanId().equals("2")) {
+                                        new BrainTreeBlueBillingSystem().updateYearly(currentSubscription, accountTypeChange.getAddonDesigners(),
+                                                accountTypeChange.getAddonStorage(), accountTypeChange.getAddonConnections());
+                                    }
                                 }
+                                account.setAccountState(Account.ACTIVE);
                             }
-                            account.setAccountState(Account.ACTIVE);
-                        }
-                    } else {
-                        if (account.getAccountState() != Account.TRIAL) {
-                            if (accountTypeChange != null && accountTypeChange.isYearly())
-                                new BrainTreeBlueBillingSystem().subscribeYearly(account, accountTypeChange.getAddonDesigners(),
-                                        accountTypeChange.getAddonStorage(), accountTypeChange.getAddonConnections());
-                            else if (accountTypeChange != null) {
-                                new BrainTreeBlueBillingSystem().subscribeMonthly(account, accountTypeChange.getAddonDesigners(),
-                                        accountTypeChange.getAddonStorage(), accountTypeChange.getAddonConnections());
-                            } else {
-                                new BrainTreeBlueBillingSystem().subscribeMonthly(account, account.getAddonDesigners(),
-                                        account.getAddonStorageUnits(), account.getAddonSmallBizConnections());
+                        } else {
+                            if (account.getAccountState() != Account.TRIAL) {
+                                if (accountTypeChange != null && accountTypeChange.isYearly())
+                                    new BrainTreeBlueBillingSystem().subscribeYearly(account, accountTypeChange.getAddonDesigners(),
+                                            accountTypeChange.getAddonStorage(), accountTypeChange.getAddonConnections());
+                                else if (accountTypeChange != null) {
+                                    new BrainTreeBlueBillingSystem().subscribeMonthly(account, accountTypeChange.getAddonDesigners(),
+                                            accountTypeChange.getAddonStorage(), accountTypeChange.getAddonConnections());
+                                } else {
+                                    new BrainTreeBlueBillingSystem().subscribeMonthly(account, account.getAddonDesigners(),
+                                            account.getAddonStorageUnits(), account.getAddonSmallBizConnections());
+                                }
+                                account.setAccountState(Account.ACTIVE);
                             }
-                            account.setAccountState(Account.ACTIVE);
                         }
-                    }
                     if (accountTypeChange != null) {
                         account.setBillingMonthOfYear(accountTypeChange.isYearly() ? 1 : 0);
                     }

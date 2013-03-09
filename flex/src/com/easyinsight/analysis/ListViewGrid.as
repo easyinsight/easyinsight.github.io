@@ -8,7 +8,6 @@ import mx.collections.ArrayCollection;
 import mx.collections.CursorBookmark;
 import mx.collections.errors.ItemPendingError;
 import mx.controls.AdvancedDataGrid;
-import mx.controls.Alert;
 import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
 import mx.controls.listClasses.IListItemRenderer;
 import mx.controls.listClasses.ListRowInfo;
@@ -26,9 +25,10 @@ public class ListViewGrid extends AdvancedDataGrid {
         return false;
     }
 
-    override public function set columns(value:Array):void {
-        super.columns = value;
-        itemRendererToFactoryMap = new Dictionary(false);
+    public function clearRenderers():void {
+        this.itemRendererToFactoryMap = new Dictionary(false);
+        this.visibleData = new Object();
+        this.listData = null;
     }
 
     public function blah():int {

@@ -5,8 +5,6 @@
 <%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page import="com.easyinsight.users.NewModelAccountTypeChange" %>
-<%@ page import="java.sql.PreparedStatement" %>
-<%@ page import="java.sql.ResultSet" %>
 <%@ page import="com.easyinsight.users.UserAccountAdminService" %>
 <%@ page import="com.easyinsight.users.AccountStats" %><%
     SecurityUtil.populateThreadLocalFromSession(request);
@@ -86,7 +84,8 @@
         String billingInterval = request.getParameter("billingInterval");
         boolean yearly = "2".equals(billingInterval);
 
-        if (yearly && (account.getBillingMonthOfYear() == null || account.getBillingMonthOfYear() == 0) && account.isBillingInformationGiven()) {
+        if (yearly && (account.getBillingMonthOfYear() == null || account.getBillingMonthOfYear() == 0) && account.isBillingInformationGiven() != null &&
+                account.isBillingInformationGiven()) {
             response.sendRedirect(RedirectUtil.getURL(request, "/app/monthlyToYearly.jsp"));
             return;
         } else if (!yearly && (account.getBillingMonthOfYear() != null && account.getBillingMonthOfYear() > 0)) {

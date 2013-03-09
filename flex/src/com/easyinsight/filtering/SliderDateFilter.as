@@ -219,6 +219,7 @@ import mx.rpc.events.ResultEvent;
                 filterLabel = new Label();
                 Label(filterLabel).text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
             }
+            filterLabel.styleName = "filterLabel";
             addChild(filterLabel);
 
             var leftSideStack:ViewStack = new ViewStack();

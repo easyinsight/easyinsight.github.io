@@ -44,7 +44,7 @@ public class HtmlSeleniumPostProcessor extends SeleniumPostProcessor {
     }
 
     @Override
-    public void process(byte[] bytes, EIConnection conn, long accountID, long requestID) {
+    public void process(byte[] bytes, EIConnection conn, long accountID, long requestID, long blah) {
         // have to pass the data around to the appropriate point...
         HtmlResultCache.getInstance().addResults(bytes, requestID);
     }

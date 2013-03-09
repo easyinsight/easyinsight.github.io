@@ -108,8 +108,6 @@ public class AutoCompleteFilter extends HBox implements IFilter {
             dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
             dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, new Date().getTimezoneOffset());
         }
-
-        //
     }
 
     private function onChange(event:Event):void {
@@ -137,6 +135,7 @@ public class AutoCompleteFilter extends HBox implements IFilter {
         //}
 
         var label:Label = new Label();
+        label.styleName = "filterLabel";
         label.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         addChild(label);
 

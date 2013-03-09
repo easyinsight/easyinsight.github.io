@@ -38,7 +38,7 @@
 
         private function onTypeChange():void {
             if (typeGroup.selectedValue == "multi") {
-                dispatchEvent(new FilterEditEvent(_filterDefinition, _filterDefinition, MultiValueFilterWindow));
+                dispatchEvent(new FilterEditEvent(_filterDefinition, _filterDefinition, MultiValueFilterEditWindow));
             } else if (typeGroup.selectedValue == "pattern") {
                 dispatchEvent(new FilterEditEvent(_filterDefinition, _filterDefinition, PatternFilterWindow));
             } else if (typeGroup.selectedValue == "single") {

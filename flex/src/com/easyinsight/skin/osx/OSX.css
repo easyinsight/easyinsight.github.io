@@ -43,23 +43,18 @@ Application {
     font-weight: bold;
 }
 
-.boldStyle {
+.myFontStyle2 {
     font-grid-fit-type: 'subpixel';
-    font-family: 'Open Sans Bold';
-    font-sharpness: -221;
+    font-family: 'Open Sans';
+    font-sharpness: -20;
     font-thickness: 4;
 }
 
-@font-face {
-    src: url("/com/easyinsight/skin/osx/helvetica.swf");
-    fontFamily: "Helvetica Neue";
-}
-
-.helveticaStyle {
+.boldStyle {
     font-grid-fit-type: 'subpixel';
-    font-family: 'Helvetica Neue';
-    font-sharpness: -16;
-    font-thickness: 20;
+    font-family: 'Open Sans Bold';
+    font-sharpness: 221;
+    font-thickness: 100;
 }
 
 Form {
@@ -70,7 +65,10 @@ Form {
 }
 
 FormItem {
-    fontFamily: "Tahoma";
+    font-grid-fit-type: 'subpixel';
+    font-family: 'Open Sans Bold';
+    font-sharpness: -221;
+    font-thickness: 4;
     fontWeight: bold;
 }
 
@@ -343,8 +341,8 @@ RadioButton {
 ComboBox {
    backgroundAlpha: .85;
    color: #000000;
-   borderColor: #999999;
-   cornerRadius: 17;
+   borderColor: #CCCCCC;
+   cornerRadius: 5;
    highlightAlphas: 1, 0.32;
    fillAlphas: 1, 1, 1, 1;
    fillColors: #cccccc, #ffffff, #cccccc, #ffffff;
@@ -353,9 +351,43 @@ ComboBox {
    rollOverColor: #3370ce;
    textRollOverColor: #ffffff;
    themeColor: #3370ce;
-   fontFamily: "Lucida Grande";
+    font-grid-fit-type: 'subpixel';
+    font-family: 'Open Sans';
+    font-sharpness: -221;
+    font-thickness: 4;
    fontWeight: normal;
    fontSize: 11;
+}
+
+.multiFilterButton {
+    backgroundAlpha: .85;
+    color: #000000;
+    borderColor: #CCCCCC;
+    cornerRadius: 5;
+    highlightAlphas: 1, 0.32;
+    fillAlphas: 1, 1, 1, 1;
+    fillColors: #cccccc, #ffffff, #cccccc, #ffffff;
+    selectionColor: #ffffff;
+    textSelectedColor: #000000;
+    rollOverColor: #3370ce;
+    textRollOverColor: #000000;
+    themeColor: #3370ce;
+    font-grid-fit-type: 'subpixel';
+    font-family: 'Open Sans';
+    font-sharpness: -221;
+    font-thickness: 4;
+    fontWeight: normal;
+    fontSize: 11;
+}
+
+.filterLabel {
+    font-grid-fit-type: 'subpixel';
+    font-family: 'Open Sans';
+    font-sharpness: -221;
+    font-thickness: 4;
+    fontWeight: normal;
+    fontSize: 11;
+    color: #333333;
 }
 
 HSlider {
@@ -468,7 +500,10 @@ DateChooser {
 .BlueHeader {
     fontWeight: bold;
     fontSize: 13;
-    fontFamily: Tahoma;
+    font-grid-fit-type: 'subpixel';
+    font-family: 'Open Sans Bold';
+    font-sharpness: -221;
+    font-thickness: 4;
     color: #323232;
 }
 

@@ -110,6 +110,7 @@
             if (dataSet.length > 0) {
                 stackIndex = 0;
 
+
                 activeLookupTables = new ArrayCollection();
                 pairMaps = new ArrayCollection();
 
@@ -280,6 +281,7 @@
 
                 hierDataView.refresh();
                 coreGrid.dataProvider = hierDataView;
+                coreGrid.clearRenderers();
                 coreGrid.columns = columns;
             } else {
                 if (treeDefinition.items.length > 0 && treeDefinition.hierarchy != null) stackIndex = 2;

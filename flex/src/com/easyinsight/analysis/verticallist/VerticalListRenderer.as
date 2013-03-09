@@ -24,8 +24,8 @@ public class VerticalListRenderer extends UIComponent implements IListItemRender
     public function VerticalListRenderer() {
         super();
         /*var tf:UITextFormat = new UITextFormat(Application(Application.application).systemManager, "Lucida Grande", 12);
-         tf.align = "right";
-         setTextFormat(tf);*/
+        tf.align = "right";
+        setTextFormat(tf);*/
         text = new UITextField();
         this.percentWidth = 100;
         this.percentHeight = 100;

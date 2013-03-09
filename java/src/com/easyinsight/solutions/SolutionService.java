@@ -534,7 +534,7 @@ public class SolutionService {
             saveFolderStmt.execute();
             long id = Database.instance().getAutoGenKey(saveFolderStmt);
             saveFolderStmt.close();
-            dashboardDescriptor = installDashboard(dashboardID, dataSourceID, conn, session, true, false, new HashMap<Long, AnalysisDefinition>(), (int) id);
+            dashboardDescriptor = installDashboard(dashboardID, dataSourceID, conn, session, true, true, new HashMap<Long, AnalysisDefinition>(), (int) id);
 
             session.flush();
 
@@ -721,7 +721,7 @@ public class SolutionService {
 
 
             Session session = Database.instance().createSession(conn);
-            InsightDescriptor insightDescriptor = installReport(reportID, dataSourceID, conn, session, true, false, new HashMap<Long, AnalysisDefinition>());
+            InsightDescriptor insightDescriptor = installReport(reportID, dataSourceID, conn, session, true, true, new HashMap<Long, AnalysisDefinition>());
             conn.commit();
             session.close();
             return insightDescriptor;
