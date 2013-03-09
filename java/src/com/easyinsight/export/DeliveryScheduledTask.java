@@ -375,7 +375,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
                 MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getReportDeliveryQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                 int timeout = 0;
-                while (timeout < 600) {
+                while (timeout < 120) {
                     Message message = msgQueue.receiveMessage();
                     if (message == null) {
                         timeout++;
@@ -385,6 +385,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             // ignore
                         }
                     } else {
+                        timeout++;
                         String body = message.getMessageBody();
                         String[] parts = body.split("\\|");
                         long responseID = Long.parseLong(parts[0]);
