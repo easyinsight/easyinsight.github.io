@@ -14,7 +14,13 @@
         }
 
         private function addMultiValue():void {
-            var multiValFilter:MultiValueFilter = new MultiValueFilter(_feedID, _item, 0, 0, _report, null, null);
+            var multiValFilter:MultiValueFilter = new MultiValueFilter(_feedID, _item, 0, 0);
+            dispatchEvent(new FilterCreationEvent(multiValFilter));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function addNewMultiValue():void {
+            var multiValFilter:NewMultiValueFilter = new NewMultiValueFilter(_feedID, _item, 0, 0, _report, null, null);
             dispatchEvent(new FilterCreationEvent(multiValFilter));
             PopUpManager.removePopUp(this);
         }
@@ -65,7 +71,7 @@
                         borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
                         textAlign="center"/>
             </mx:VBox>
-            <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addMultiValue()" mouseChildren="false"
+            <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addNewMultiValue()" mouseChildren="false"
                     buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
                     id="multiValueBox"
                     rollOver="multiValueBox.setStyle('backgroundColor', 0xDDDDDD)"
@@ -101,6 +107,16 @@
                     <mx:TextArea text="Restrict this field to a single value, with an autocompletion text input"
                             borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
                             textAlign="center"/>
+                </mx:VBox>
+                <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addMultiValue()" mouseChildren="false"
+                         buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                         id="oldMultiValueBox"
+                         rollOver="oldMultiValueBox.setStyle('backgroundColor', 0xDDDDDD)"
+                         mouseOut="oldMultiValueBox.setStyle('backgroundColor', 0xFFFFFF)">
+                    <mx:Label text="Multi Value" fontSize="14"/>
+                    <mx:TextArea text="Restrict this field to a set of multiple values (previous version)"
+                                 borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
+                                 textAlign="center"/>
                 </mx:VBox>
             </mx:HBox>
         </mx:ViewStack>
