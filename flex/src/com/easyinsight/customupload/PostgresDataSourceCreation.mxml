@@ -36,6 +36,7 @@
             obj.query = queryArea.text;
             obj.feedName = nameInput.text;
             obj.rebuildFields = true;
+            obj.timeout = timeoutInput.value;
             return obj;
         }
 
@@ -46,6 +47,7 @@
             databaseName = ds.databaseName;
             userName = ds.dbUserName;
             query = ds.query;
+            connTimeout = ds.timeout;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
@@ -58,48 +60,55 @@
             obj.query = queryArea.text;
             obj.feedName = nameInput.text;
             obj.rebuildFields = true;
+            obj.timeout = timeoutInput.value;
         }
 
         public function validate():Boolean {
             return Validator.validateAll([nameValidator, hostValidator, portValidator, databaseNameValidator, queryValidator]).length == 0;
         }
+
+        [Bindable]
+        private var connTimeout:int;
         ]]></mx:Script>
     <mx:VBox horizontalAlign="center" paddingTop="5">
         <mx:Form>
-            <mx:FormItem label="Data Source Name:" labelWidth="150">
+            <mx:FormItem label="Data Source Name:" labelWidth="200">
                 <mx:TextInput id="nameInput" fontWeight="normal" fontFamily="Lucida Grande"  width="350"/>
             </mx:FormItem>
         </mx:Form>
         <mx:HRule width="100%"/>
         <mx:Form>
-            <mx:FormItem label="Database Host:" labelWidth="150">
+            <mx:FormItem label="Database Host:" labelWidth="200">
                 <mx:TextInput id="hostInput" fontWeight="normal" fontFamily="Lucida Grande" text="{host}" width="350"/>
             </mx:FormItem>
-            <mx:FormItem label="Database Port:" labelWidth="150">
+            <mx:FormItem label="Database Port:" labelWidth="200">
                 <mx:TextInput id="portInput" fontWeight="normal" fontFamily="Lucida Grande" text="{port}" width="350"/>
             </mx:FormItem>
-            <mx:FormItem label="Database Name:" labelWidth="150">
+            <mx:FormItem label="Database Name:" labelWidth="200">
                 <mx:TextInput id="databaseNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{databaseName}" width="350"/>
             </mx:FormItem>
-            <mx:FormItem label="Database User Name:" labelWidth="150">
+            <mx:FormItem label="Database User Name:" labelWidth="200">
                 <mx:TextInput id="databaseUserNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{userName}" width="350"/>
             </mx:FormItem>
-            <mx:FormItem label="Database Password:" labelWidth="150">
+            <mx:FormItem label="Database Password:" labelWidth="200">
                 <mx:TextInput id="databasePasswordInput" fontWeight="normal" fontFamily="Lucida Grande" width="350" displayAsPassword="true"/>
+            </mx:FormItem>
+            <mx:FormItem label="Connection Timeout (minutes):" labelWidth="200">
+                <mx:NumericStepper id="timeoutInput" fontWeight="normal" fontFamily="Lucida Grande" value="{connTimeout}"/>
             </mx:FormItem>
         </mx:Form>
         <mx:HRule width="100%"/>
         <mx:Form>
-            <mx:FormItem label="Query:" labelWidth="150">
+            <mx:FormItem label="Query:" labelWidth="200">
                 <mx:TextArea id="queryArea" fontWeight="normal" fontFamily="Lucida Grande" width="350" text="{query}" height="110"
                         borderStyle="solid" borderThickness="1"/>
             </mx:FormItem>
         </mx:Form>
     </mx:VBox>
     <mx:VBox horizontalAlign="center">
-        <mx:Text width="200" selectable="true" text="For the server side database connection to work, you'll need to open up your firewall to allow access on the database port to db.easy-insight.com (107.21.250.229). If you can't allow access through the firewall, you'll need to download and use the alternate database connection, hosting that behind your firewall."/>
+        <mx:Text width="300" selectable="true" text="For the server side database connection to work, you'll need to open up your firewall to allow access on the database port to db.easy-insight.com (107.21.250.229). If you can't allow access through the firewall, you'll need to download and use the alternate database connection, hosting that behind your firewall. If you're running on the Amazon Web Services cloud, the configuration will be a little different--please contact us at support@easy-insight.com or (720) 285-8652 and we'll work with you to complete setup."/>
         <mx:HRule width="100%"/>
-        <mx:Text width="200" selectable="true" text="The query defines what fields and data to pull back into Easy Insight. For example, you might do 'select * from table_name', 'select a, b from table_name' or 'select a as A, b as B from table_name where X = Y'."/>
+        <mx:Text width="300" selectable="true" text="The query defines what fields and data to pull back into Easy Insight. For example, you might do 'select * from table_name', 'select a, b from table_name' or 'select a as A, b as B from table_name where X = Y'."/>
     </mx:VBox>
     <mx:StringValidator id="nameValidator" minLength="1" source="{nameInput}" property="text"/>
     <mx:StringValidator id="hostValidator" minLength="1" source="{hostInput}" property="text"/>

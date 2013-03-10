@@ -6,6 +6,7 @@ import com.easyinsight.analysis.ReportFault;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.datafeeds.database.ServerDatabaseConnection;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -139,7 +140,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
                     sourceToRefresh.getFeedType().getType() == FeedType.SERVER_SQL_SERVER.getType() ||
                     sourceToRefresh.getFeedType().getType() == FeedType.ORACLE.getType() ||
                     sourceToRefresh.getFeedType().getType() == FeedType.SERVER_POSTGRES.getType()) {
-                return new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), sourceToRefresh);
+                return new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), (ServerDatabaseConnection) sourceToRefresh);
             } else {
                 return new UploadDataSource(conn, warnings, now, sourceToRefresh, refreshable, callID);
             }
@@ -153,9 +154,9 @@ public class DataSourceScheduledTask extends ScheduledTask {
     public static class SQSUploadDataSource implements IUploadDataSource {
 
         private long dataSourceID;
-        private FeedDefinition dataSource;
+        private ServerDatabaseConnection dataSource;
 
-        private SQSUploadDataSource(long dataSourceID, FeedDefinition dataSource) {
+        private SQSUploadDataSource(long dataSourceID, ServerDatabaseConnection dataSource) {
             this.dataSourceID = dataSourceID;
             this.dataSource = dataSource;
         }
@@ -167,7 +168,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
             boolean responded = false;
             boolean changed = false;
             int i = 0;
-            while (!responded && i < 60) {
+            while (!responded && i < (dataSource.getTimeout() * 60)) {
                 Message message = responseQueue.receiveMessage();
                 if (message == null) {
                     i++;

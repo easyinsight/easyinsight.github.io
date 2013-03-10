@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.google.QuickbaseCompositeSource;
+
+        [Bindable]
+        private var url:String;
+        [Bindable]
+        private var saveCredentials:Boolean;
+        [Bindable]
+        private var rebuildFields:Boolean;
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:QuickbaseCompositeSource = feedDefinition as QuickbaseCompositeSource;
+            url = ds.host;
+            saveCredentials = ds.preserveCredentials;
+            rebuildFields = ds.rebuildFields;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:QuickbaseCompositeSource = feedDefinition as QuickbaseCompositeSource;
+            ds.host = urlInput.text;
+            ds.preserveCredentials = saveCredentialsCheckbox.selected;
+            ds.rebuildFields = rebuildFieldsCheckbox.selected;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:Form paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
+        <mx:FormItem label="Quickbase URL:">
+            <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Save Credentials:" direction="horizontal">
+            <mx:CheckBox id="saveCredentialsCheckbox" selected="{saveCredentials}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Rebuild Fields on Change:" direction="horizontal">
+            <mx:CheckBox id="rebuildFieldsCheckbox" selected="{rebuildFields}"/>
+        </mx:FormItem>
+	</mx:Form>
+</mx:VBox>
