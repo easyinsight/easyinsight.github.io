@@ -396,11 +396,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     } else {
                         timeout++;
                         String body = message.getMessageBody();
+                        msgQueue.deleteMessage(message);
                         String[] parts = body.split("\\|");
                         long responseID = Long.parseLong(parts[0]);
                         System.out.println("got response of " + responseID);
                         if (responseID == id) {
-                            msgQueue.deleteMessage(message);
                             long pdfID = Long.parseLong(parts[1]);
                             PreparedStatement getStmt = conn.prepareStatement("SELECT PNG_IMAGE FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ?");
                             getStmt.setLong(1, pdfID);
