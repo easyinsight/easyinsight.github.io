@@ -274,11 +274,12 @@ public class DeliveryScheduledTask extends ScheduledTask {
             throws InterruptedException, SQLException, MessagingException, UnsupportedEncodingException {
         String emailBody = body;
         BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
-        ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 5, 5000, TimeUnit.MINUTES, queue);
+        ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 5, 5, TimeUnit.MINUTES, queue);
         final CountDownLatch latch = new CountDownLatch(infos.size());
         final List<String> bodyElements = new ArrayList<String>();
         final List<AttachmentInfo> attachmentInfos = new ArrayList<AttachmentInfo>();
-        for (final DeliveryInfo deliveryInfo : infos) {
+        for (DeliveryInfo dInfo : infos) {
+            final DeliveryInfo deliveryInfo = dInfo;
             tpe.execute(new Runnable() {
 
                 public void run() {

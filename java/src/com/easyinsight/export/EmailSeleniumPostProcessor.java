@@ -52,6 +52,7 @@ public class EmailSeleniumPostProcessor extends SeleniumPostProcessor {
         try {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PNG_EXPORT (USER_ID, PNG_IMAGE, REPORT_NAME, ANONYMOUS_ID) VALUES (?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
+            System.out.println("on request " + requestID);
             if (actionType == ReportDelivery.PDF) {
                 byte[] pdf = new ExportService().toImagePDF(bytes, 770, 523);
                 ByteArrayInputStream bais = new ByteArrayInputStream(pdf);
@@ -68,6 +69,7 @@ public class EmailSeleniumPostProcessor extends SeleniumPostProcessor {
                 insertStmt.setString(4, anonID);
                 insertStmt.execute();
                 long id = Database.instance().getAutoGenKey(insertStmt);
+                System.out.println("sending PDF of " + requestID + " to queue");
                 MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getReportDeliveryQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                 msgQueue.sendMessage(processorID + "|" + id);
             } else if (actionType == ReportDelivery.PNG) {
@@ -85,6 +87,7 @@ public class EmailSeleniumPostProcessor extends SeleniumPostProcessor {
                 insertStmt.setString(4, anonID);
                 insertStmt.execute();
                 long id = Database.instance().getAutoGenKey(insertStmt);
+                System.out.println("sending PNG of " + id + " to queue");
                 MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getReportDeliveryQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                 msgQueue.sendMessage(processorID + "|" + id);
             }
