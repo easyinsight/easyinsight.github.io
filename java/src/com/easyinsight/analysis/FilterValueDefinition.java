@@ -42,6 +42,9 @@ public class FilterValueDefinition extends FilterDefinition {
     @Column(name="all_option")
     private boolean allOption = true;
 
+    @Column(name="new_type")
+    private boolean newType = false;
+
     @Transient
     private AnalysisItemResultMetadata cachedValues;
 
@@ -52,6 +55,14 @@ public class FilterValueDefinition extends FilterDefinition {
         super(field);
         this.inclusive = inclusive;
         this.filteredValues = filteredValues;
+    }
+
+    public boolean isNewType() {
+        return newType;
+    }
+
+    public void setNewType(boolean newType) {
+        this.newType = newType;
     }
 
     public AnalysisItemResultMetadata getCachedValues() {
