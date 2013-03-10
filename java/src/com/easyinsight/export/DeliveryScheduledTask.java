@@ -303,6 +303,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             });
         }
         latch.await();
+        tpe.shutdown();
 
         for (String bodyElement : bodyElements) {
             emailBody += bodyElement;
