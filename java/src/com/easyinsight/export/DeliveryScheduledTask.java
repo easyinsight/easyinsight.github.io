@@ -538,7 +538,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     String userEmail = groupRS.getString(1);
                     String userFirstName = groupRS.getString(2);
                     String userLastName = groupRS.getString(3);
-                    userInfoSet.add(new UserInfo(userEmail, userFirstName, userLastName, rs.getString(7), rs.getLong(5), rs.getBoolean(6), rs.getLong(4)));
+                    userInfoSet.add(new UserInfo(userEmail, userFirstName, userLastName, groupRS.getString(7), groupRS.getLong(5), groupRS.getBoolean(6), groupRS.getLong(4)));
                 }
                 groupStmt.close();
                 String senderName = null;
