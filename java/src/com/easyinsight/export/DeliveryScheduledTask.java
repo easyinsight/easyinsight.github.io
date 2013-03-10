@@ -274,11 +274,12 @@ public class DeliveryScheduledTask extends ScheduledTask {
             throws InterruptedException, SQLException, MessagingException, UnsupportedEncodingException {
         String emailBody = body;
         BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
-        ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 5, 5000, TimeUnit.MINUTES, queue);
+        ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 5, 5, TimeUnit.MINUTES, queue);
         final CountDownLatch latch = new CountDownLatch(infos.size());
         final List<String> bodyElements = new ArrayList<String>();
         final List<AttachmentInfo> attachmentInfos = new ArrayList<AttachmentInfo>();
-        for (final DeliveryInfo deliveryInfo : infos) {
+        for (DeliveryInfo dInfo : infos) {
+            final DeliveryInfo deliveryInfo = dInfo;
             tpe.execute(new Runnable() {
 
                 public void run() {
@@ -395,11 +396,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     } else {
                         timeout++;
                         String body = message.getMessageBody();
+                        msgQueue.deleteMessage(message);
                         String[] parts = body.split("\\|");
                         long responseID = Long.parseLong(parts[0]);
                         System.out.println("got response of " + responseID);
                         if (responseID == id) {
-                            msgQueue.deleteMessage(message);
                             long pdfID = Long.parseLong(parts[1]);
                             PreparedStatement getStmt = conn.prepareStatement("SELECT PNG_IMAGE FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ?");
                             getStmt.setLong(1, pdfID);

@@ -127,6 +127,7 @@ public class ExportService {
             rs.next();
             long processorID = rs.getLong(1);
             long accountID = rs.getLong(2);
+            System.out.println("received " + requestID);
             SeleniumPostProcessor processor = SeleniumPostProcessor.loadProcessor(processorID, conn);
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM SELENIUM_REQUEST WHERE SELENIUM_REQUEST_ID = ?");
             clearStmt.setLong(1, requestID);
