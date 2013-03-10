@@ -303,6 +303,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             });
         }
         latch.await();
+        tpe.shutdown();
 
         for (String bodyElement : bodyElements) {
             emailBody += bodyElement;
@@ -343,7 +344,13 @@ public class DeliveryScheduledTask extends ScheduledTask {
             updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
             byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata, sendIfNoData, deliveryInfo.getFormat() == ReportDelivery.EXCEL_2007);
             if (bytes != null) {
-                return new DeliveryResult(new AttachmentInfo(bytes, deliveryInfo.getName() + ".xls", "application/xls"));
+                String deliveryName;
+                if (deliveryInfo.getName() == null || "".equals(deliveryInfo.getName())) {
+                    deliveryName = analysisDefinition.getName();
+                } else {
+                    deliveryName = deliveryInfo.getName();
+                }
+                return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".xls", "application/xls"));
             }
         } else if (deliveryInfo.getFormat() == ReportDelivery.HTML_TABLE) {
             if (deliveryInfo.getType() == DeliveryInfo.REPORT) {
@@ -373,6 +380,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             } else {
                 long id = new SeleniumLauncher().requestSeleniumDrawForReport(deliveryInfo.getId(), activityID, SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn,
                         deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
+                System.out.println("launched " + id);
                 MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getReportDeliveryQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                 int timeout = 0;
                 while (timeout < 120) {
@@ -389,6 +397,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         String body = message.getMessageBody();
                         String[] parts = body.split("\\|");
                         long responseID = Long.parseLong(parts[0]);
+                        System.out.println("got response of " + responseID);
                         if (responseID == id) {
                             msgQueue.deleteMessage(message);
                             long pdfID = Long.parseLong(parts[1]);
@@ -397,10 +406,16 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             ResultSet rs = getStmt.executeQuery();
                             rs.next();
                             byte[] bytes = rs.getBytes(1);
-                            if (deliveryInfo.getFormat() == ReportDelivery.PDF) {
-                                return new DeliveryResult(new AttachmentInfo(bytes, deliveryInfo.getName() + ".pdf", "application/pdf"));
+                            String deliveryName;
+                            if (deliveryInfo.getName() == null || "".equals(deliveryInfo.getName())) {
+                                deliveryName = "export";
                             } else {
-                                return new DeliveryResult(new AttachmentInfo(bytes, deliveryInfo.getName() + ".png", "image/png"));
+                                deliveryName = deliveryInfo.getName();
+                            }
+                            if (deliveryInfo.getFormat() == ReportDelivery.PDF) {
+                                return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".pdf", "application/pdf"));
+                            } else {
+                                return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".png", "image/png"));
                             }
                         }
                     }

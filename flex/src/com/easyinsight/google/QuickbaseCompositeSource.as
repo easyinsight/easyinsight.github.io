@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.google {
+import com.easyinsight.customupload.QuickBaseConfiguration;
 import com.easyinsight.customupload.QuickbaseDataSourceCreation;
 import com.easyinsight.datasources.CompositeServerDataSource;
 import com.easyinsight.datasources.DataSourceType;
@@ -26,7 +27,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     public var sessionTicket:String;
     public var host:String;
 
-    public var rebuildFields:Boolean = true;
+    public var rebuildFields:Boolean = false;
 
     public function QuickbaseCompositeSource() {
         super();
@@ -39,6 +40,10 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         index.fields = fields;
         index.dataSource = this;
         index.label = "Indexing";
+        var config:QuickBaseConfiguration = new QuickBaseConfiguration();
+        config.dataSourceDefinition = this;
+        config.label = "QuickBase Server Configuration";
+        pages.addItem(config);
         pages.addItem(index);
         return pages;
     }

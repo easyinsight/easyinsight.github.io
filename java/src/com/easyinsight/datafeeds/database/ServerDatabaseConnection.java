@@ -26,6 +26,7 @@ import java.util.Date;
 public abstract class ServerDatabaseConnection extends ServerDataSourceDefinition {
 
     private String query;
+    private int timeout = 5;
 
     private JCS getCache(String cacheName) {
         try {
@@ -58,6 +59,14 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
     }
 
     private List<AnalysisItem> cacheFields = new ArrayList<AnalysisItem>();
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
 
     @Override
     protected void beforeRefresh(EIConnection conn) {

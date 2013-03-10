@@ -8,6 +8,7 @@ import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextAccount;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
+import com.easyinsight.datafeeds.database.ServerDatabaseConnection;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
@@ -53,7 +54,6 @@ public class UserUploadService {
 
     private static FeedStorage feedStorage = new FeedStorage();
     private static Map<Long, RawUploadData> rawDataMap = new WeakHashMap<Long, RawUploadData>();
-    private static final long TEN_MEGABYTES = 10485760;
 
     public UserUploadService() {
     }
@@ -1311,8 +1311,9 @@ public class UserUploadService {
         public IUploadDataSource createSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID) {
             if (sourceToRefresh.getFeedType().getType() == FeedType.SERVER_MYSQL.getType() ||
                     sourceToRefresh.getFeedType().getType() == FeedType.SERVER_SQL_SERVER.getType() ||
-                    sourceToRefresh.getFeedType().getType() == FeedType.ORACLE.getType()) {
-                return new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), sourceToRefresh);
+                    sourceToRefresh.getFeedType().getType() == FeedType.ORACLE.getType() ||
+                    sourceToRefresh.getFeedType().getType() == FeedType.SERVER_POSTGRES.getType()) {
+                return new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), (ServerDatabaseConnection) sourceToRefresh);
             } else {
                 return new UploadDataSource(conn, warnings, now, sourceToRefresh, refreshable, callID);
             }
@@ -1326,9 +1327,9 @@ public class UserUploadService {
     public static class SQSUploadDataSource implements IUploadDataSource {
 
         private long dataSourceID;
-        private FeedDefinition dataSource;
+        private ServerDatabaseConnection dataSource;
 
-        private SQSUploadDataSource(long dataSourceID, FeedDefinition dataSource) {
+        private SQSUploadDataSource(long dataSourceID, ServerDatabaseConnection dataSource) {
             this.dataSourceID = dataSourceID;
             this.dataSource = dataSource;
         }
@@ -1341,7 +1342,7 @@ public class UserUploadService {
             boolean changed = false;
             int i = 0;
             boolean success = false;
-            while (!responded && i < 600) {
+            while (!responded && i < (dataSource.getTimeout() * 60)) {
                 Message message = responseQueue.receiveMessage();
                 if (message == null) {
                     i++;
