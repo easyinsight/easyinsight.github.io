@@ -133,13 +133,13 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
         return null;
     }
 
-    @Override
+   /* @Override
     public boolean checkDateTime(String name, Key key) {
         if (BasecampNextTodoSource.TODO_COMPLETED_AT.equals(name)) {
             return false;
         }
         return true;
-    }
+    }*/
 
     @Override
     public void exchangeTokens(EIConnection conn, HttpServletRequest httpRequest, String externalPin) throws Exception {
