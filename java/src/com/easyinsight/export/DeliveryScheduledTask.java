@@ -412,7 +412,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
                 System.out.println("launched " + id);
                 String topicName = ConfigLoader.instance().getReportDeliveryQueue();
-                String queueName = topicName + InetAddress.getLocalHost().getHostName();
+                String queueName = topicName + InetAddress.getLocalHost().getHostName().replace(".", "");
                 MessageQueue msgQueue = SQSUtils.connectToQueue(queueName, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                 NotificationService notificationService = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                 notificationService.createTopic(topicName);

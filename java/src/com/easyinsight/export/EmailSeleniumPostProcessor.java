@@ -56,7 +56,7 @@ public class EmailSeleniumPostProcessor extends SeleniumPostProcessor {
                     Statement.RETURN_GENERATED_KEYS);
             System.out.println("on request " + requestID);
             String topicName = ConfigLoader.instance().getReportDeliveryQueue();
-            String queueName = topicName + InetAddress.getLocalHost().getHostName();
+            String queueName = topicName + InetAddress.getLocalHost().getHostName().replace(".", "");
             if (actionType == ReportDelivery.PDF) {
                 byte[] pdf = new ExportService().toImagePDF(bytes, 770, 523);
                 ByteArrayInputStream bais = new ByteArrayInputStream(pdf);
