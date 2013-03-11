@@ -13,9 +13,13 @@ import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import com.itextpdf.text.DocumentException;
+import com.xerox.amazonws.common.Result;
+import com.xerox.amazonws.sns.NotificationService;
 import com.xerox.amazonws.sqs2.Message;
 import com.xerox.amazonws.sqs2.MessageQueue;
 import com.xerox.amazonws.sqs2.SQSUtils;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,10 +30,12 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -42,6 +48,29 @@ import java.util.concurrent.*;
 @Table(name = "delivery_scheduled_task")
 @PrimaryKeyJoinColumn(name = "scheduled_task_id")
 public class DeliveryScheduledTask extends ScheduledTask {
+
+    private static final String QUEUE_POLICY_FORMAT = "{\n" +
+                        "  \"Version\": \"2008-10-17\",\n" +
+                        "  \"Id\": \"arn:aws:sqs:us-east-1:808335860417:{0}/SQSDefaultPolicy\",\n" +
+                        "  \"Statement\": [\n" +
+                        "    {\n" +
+                        "      \"Sid\": \"Sid1363034700583\",\n" +
+                        "      \"Effect\": \"Allow\",\n" +
+                        "      \"Principal\": {\n" +
+                        "        \"AWS\": \"*\"\n" +
+                        "      },\n" +
+                        "      \"Action\": \"SQS:SendMessage\",\n" +
+                        "      \"Resource\": \"arn:aws:sqs:us-east-1:808335860417:{0}\",\n" +
+                        "      \"Condition\": {\n" +
+                        "        \"ArnEquals\": {\n" +
+                        "          \"aws:SourceArn\": \"arn:aws:sns:us-east-1:808335860417:{1}\"\n" +
+                        "        }\n" +
+                        "      }\n" +
+                        "    }\n" +
+                        "  ]\n" +
+                        "}";
+
+
     @Column(name = "scheduled_account_activity_id")
     private long activityID;
 
@@ -382,7 +411,15 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 long id = new SeleniumLauncher().requestSeleniumDrawForReport(deliveryInfo.getId(), activityID, SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn,
                         deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
                 System.out.println("launched " + id);
-                MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getReportDeliveryQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+                String topicName = ConfigLoader.instance().getReportDeliveryQueue();
+                String queueName = topicName + InetAddress.getLocalHost().getHostName();
+                MessageQueue msgQueue = SQSUtils.connectToQueue(queueName, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+                NotificationService notificationService = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+                notificationService.createTopic(topicName);
+                notificationService.subscribe("arn:aws:sns:us-east-1:808335860417:" + topicName, "sqs", "arn:aws:sqs:us-east-1:808335860417:" + queueName);
+                msgQueue.setQueueAttribute("Policy", MessageFormat.format(QUEUE_POLICY_FORMAT, queueName, topicName));
+
+                msgQueue.setEncoding(false);
                 int timeout = 0;
                 while (timeout < 120) {
                     Message message = msgQueue.receiveMessage();
@@ -395,7 +432,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         }
                     } else {
                         timeout++;
-                        String body = message.getMessageBody();
+                        JSONObject jo = (JSONObject) JSONValue.parse(message.getMessageBody());
+                        String body = (String) jo.get("Message");
                         msgQueue.deleteMessage(message);
                         String[] parts = body.split("\\|");
                         long responseID = Long.parseLong(parts[0]);

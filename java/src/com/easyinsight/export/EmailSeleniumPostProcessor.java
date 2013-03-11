@@ -6,11 +6,13 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.util.RandomTextGenerator;
+import com.xerox.amazonws.sns.NotificationService;
 import com.xerox.amazonws.sqs2.MessageQueue;
 import com.xerox.amazonws.sqs2.SQSUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.net.InetAddress;
 import java.sql.*;
 
 /**
@@ -34,7 +36,7 @@ public class EmailSeleniumPostProcessor extends SeleniumPostProcessor {
     public long save(EIConnection conn) throws SQLException {
         long id = super.save(conn);
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO email_selenium_processor (scheduled_account_activity_id, " +
-                "selenium_processor_id, action_type) values (?, ?, ?)");
+                "selenium_processor_id, action_type) VALUES (?, ?, ?)");
         insertStmt.setLong(1, accountActivityID);
         insertStmt.setLong(2, id);
         insertStmt.setInt(3, actionType);
@@ -53,6 +55,8 @@ public class EmailSeleniumPostProcessor extends SeleniumPostProcessor {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PNG_EXPORT (USER_ID, PNG_IMAGE, REPORT_NAME, ANONYMOUS_ID) VALUES (?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             System.out.println("on request " + requestID);
+            String topicName = ConfigLoader.instance().getReportDeliveryQueue();
+            String queueName = topicName + InetAddress.getLocalHost().getHostName();
             if (actionType == ReportDelivery.PDF) {
                 byte[] pdf = new ExportService().toImagePDF(bytes, 770, 523);
                 ByteArrayInputStream bais = new ByteArrayInputStream(pdf);
@@ -70,8 +74,9 @@ public class EmailSeleniumPostProcessor extends SeleniumPostProcessor {
                 insertStmt.execute();
                 long id = Database.instance().getAutoGenKey(insertStmt);
                 System.out.println("sending PDF of " + requestID + " to queue");
-                MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getReportDeliveryQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-                msgQueue.sendMessage(processorID + "|" + id);
+                NotificationService ns = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+                ns.createTopic(topicName);
+                ns.publish("arn:aws:sns:us-east-1:808335860417:" + topicName, processorID + "|" + id, null);
             } else if (actionType == ReportDelivery.PNG) {
                 ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
                 BufferedInputStream bis = new BufferedInputStream(bais, 1024);
@@ -88,8 +93,9 @@ public class EmailSeleniumPostProcessor extends SeleniumPostProcessor {
                 insertStmt.execute();
                 long id = Database.instance().getAutoGenKey(insertStmt);
                 System.out.println("sending PNG of " + id + " to queue");
-                MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getReportDeliveryQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-                msgQueue.sendMessage(processorID + "|" + id);
+                NotificationService ns = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+                ns.createTopic(topicName);
+                ns.publish("arn:aws:sns:us-east-1:808335860417:" + topicName, processorID + "|" + id, null);
             }
         } catch (Exception e) {
             LogClass.error(e);
