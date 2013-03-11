@@ -417,7 +417,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 NotificationService notificationService = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                 notificationService.createTopic(topicName);
                 notificationService.subscribe("arn:aws:sns:us-east-1:808335860417:" + topicName, "sqs", "arn:aws:sqs:us-east-1:808335860417:" + queueName);
-                msgQueue.setQueueAttribute("Policy", MessageFormat.format(QUEUE_POLICY_FORMAT, queueName, topicName));
+                msgQueue.setQueueAttribute("Policy", QUEUE_POLICY_FORMAT.replace("{0}", queueName).replace("{1}", topicName));
 
                 msgQueue.setEncoding(false);
                 int timeout = 0;
