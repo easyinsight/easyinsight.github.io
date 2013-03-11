@@ -240,10 +240,6 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             Date dueAt = parseDueDate(dueAtString);
             String completedAtString = todoObject.getString("completed_at");
             Date completedAt = parseDate(completedAtString);
-            if(completedAt != null) {
-                System.out.println("Completed At String: " + completedAtString);
-                System.out.println(completedAt.toString());
-            }
             String createdAtString = todoObject.getString("created_at");
             Date createdAt = parseDate(createdAtString);
             String updatedAtString = todoObject.getString("updated_at");
