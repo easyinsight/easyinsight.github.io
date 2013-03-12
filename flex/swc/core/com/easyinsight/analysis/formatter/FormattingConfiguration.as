@@ -51,10 +51,10 @@ import mx.formatters.NumberBaseRoundType;
                     formatter = percentageFormatter;
                     break;
                 case MILLISECONDS:
-                    formatter = new TimeStringFormatter(1);
+                    formatter = new TimeStringFormatter(1, precision);
                     break;
                 case SECONDS:
-                    formatter = new TimeStringFormatter(1000);
+                    formatter = new TimeStringFormatter(1000, precision);
                     break;
                 case BYTES:
                     formatter = new ByteFormatter();

@@ -307,14 +307,17 @@ public class DeliveryScheduledTask extends ScheduledTask {
         final CountDownLatch latch = new CountDownLatch(infos.size());
         final List<String> bodyElements = new ArrayList<String>();
         final List<AttachmentInfo> attachmentInfos = new ArrayList<AttachmentInfo>();
+        int i = 0;
         for (DeliveryInfo dInfo : infos) {
             final DeliveryInfo deliveryInfo = dInfo;
+            final int count = i++;
             tpe.execute(new Runnable() {
 
                 public void run() {
                     SecurityUtil.populateThreadLocal(firstUser.userName, firstUser.userID, accountID, accountType, firstUser.accountAdmin, firstDayOfWeek, personaName);
+                    EIConnection ourConn = Database.instance().getConnection();
                     try {
-                        DeliveryResult deliveryResult = handleDeliveryInfo(deliveryInfo, conn, timezoneOffset, sendIfNoData);
+                        DeliveryResult deliveryResult = handleDeliveryInfo(deliveryInfo, ourConn, timezoneOffset, sendIfNoData, count);
                         if (deliveryResult != null) {
                             if (deliveryResult.body != null) {
                                 bodyElements.add(deliveryResult.body);
@@ -328,6 +331,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         latch.countDown();
                     } finally {
                         SecurityUtil.clearThreadLocal();
+                        Database.closeConnection(ourConn);
                     }
                 }
             });
@@ -362,7 +366,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         deliveryAuditStmt.close();
     }
 
-    private DeliveryResult handleDeliveryInfo(DeliveryInfo deliveryInfo, EIConnection conn, int timezoneOffset, boolean sendIfNoData) throws Exception {
+    private DeliveryResult handleDeliveryInfo(DeliveryInfo deliveryInfo, EIConnection conn, int timezoneOffset, boolean sendIfNoData, int count) throws Exception {
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setUtcOffset(timezoneOffset);
         if (deliveryInfo.getFormat() == ReportDelivery.EXCEL || deliveryInfo.getFormat() == ReportDelivery.EXCEL_2007) {
@@ -412,7 +416,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
                 System.out.println("launched " + id);
                 String topicName = ConfigLoader.instance().getReportDeliveryQueue();
-                String queueName = topicName + InetAddress.getLocalHost().getHostName().replace(".", "");
+                String queueName = topicName + InetAddress.getLocalHost().getHostName().replace(".", "") + count;
                 MessageQueue msgQueue = SQSUtils.connectToQueue(queueName, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                 NotificationService notificationService = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                 notificationService.createTopic(topicName);
@@ -437,9 +441,10 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         msgQueue.deleteMessage(message);
                         String[] parts = body.split("\\|");
                         long responseID = Long.parseLong(parts[0]);
-                        System.out.println("got response of " + responseID);
+                        System.out.println("got response of " + responseID + ", looking for " + id);
                         if (responseID == id) {
                             long pdfID = Long.parseLong(parts[1]);
+                            System.out.println("retrieving and returning " + pdfID);
                             PreparedStatement getStmt = conn.prepareStatement("SELECT PNG_IMAGE FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ?");
                             getStmt.setLong(1, pdfID);
                             ResultSet rs = getStmt.executeQuery();
@@ -456,6 +461,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             } else {
                                 return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".png", "image/png"));
                             }
+                        } else {
+                            System.out.println("does not match, ignoring");
                         }
                     }
                 }
