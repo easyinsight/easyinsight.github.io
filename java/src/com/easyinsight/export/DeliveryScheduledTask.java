@@ -437,9 +437,10 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         msgQueue.deleteMessage(message);
                         String[] parts = body.split("\\|");
                         long responseID = Long.parseLong(parts[0]);
-                        System.out.println("got response of " + responseID);
+                        System.out.println("got response of " + responseID + ", looking for " + id);
                         if (responseID == id) {
                             long pdfID = Long.parseLong(parts[1]);
+                            System.out.println("retrieving and returning " + pdfID);
                             PreparedStatement getStmt = conn.prepareStatement("SELECT PNG_IMAGE FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ?");
                             getStmt.setLong(1, pdfID);
                             ResultSet rs = getStmt.executeQuery();
@@ -456,6 +457,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             } else {
                                 return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".png", "image/png"));
                             }
+                        } else {
+                            System.out.println("does not match, ignoring");
                         }
                     }
                 }
