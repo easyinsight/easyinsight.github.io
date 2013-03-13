@@ -81,11 +81,12 @@ public class SeleniumRunner {
                         } else {
                             final String childURL = message.getMessageBody();
                             messageQueue.deleteMessage(message);
-                            new Thread(new Runnable() {
+                            Thread t = new Thread(new Runnable() {
 
                                 public void run() {
+                                    Selenium selenium = null;
                                     try {
-                                        Selenium selenium = new DefaultSelenium("localhost", 4444, "*firefox", url);
+                                        selenium = new DefaultSelenium("localhost", 4444, "*firefox", url);
                                         selenium.start();
                                         selenium.open(childURL);
                                         try {
@@ -99,7 +100,13 @@ public class SeleniumRunner {
                                         e.printStackTrace();
                                     }
                                 }
-                            }).start();
+                            });
+                            t.start();
+                            t.join(60000);
+                            if(t.isAlive()) {
+                                t.interrupt();
+                                Thread.sleep(10000);
+                            }
 
                         }
                     } catch (Exception e) {

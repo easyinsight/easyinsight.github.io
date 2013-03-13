@@ -130,7 +130,7 @@ public class TreeData {
     }
 
     private class HigherLevel extends Argh {
-        private Map<Value, Argh> map = new LinkedHashMap<Value, Argh>();
+        private Map<Map<String, Value>, Argh> map = new LinkedHashMap<Map<String, Value>, Argh>();
         private AnalysisItem level;
         private AnalysisHierarchyItem hierarchy;
         private int index;
@@ -158,14 +158,23 @@ public class TreeData {
             this.value = row.getValue(level);
             AnalysisItem nextItem = hierarchy.getHierarchyLevels().get(index + 1).getAnalysisItem();
             Value value = row.getValue(nextItem);
-            Argh argh = map.get(value);
+            Map<String, Value> keyMap = new HashMap<String, Value>();
+            if ((index + 1) == (hierarchy.getHierarchyLevels().size() - 1)) {
+                for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                        keyMap.put(analysisItem.qualifiedName(), row.getValue(analysisItem));
+                    }
+                }
+            }
+            keyMap.put(nextItem.qualifiedName(), value);
+            Argh argh = map.get(keyMap);
             if (argh == null) {
                 if ((index + 1) == (hierarchy.getHierarchyLevels().size() - 1)) {
                     argh = new LowerLevel(nextItem);
                 } else {
                     argh = new HigherLevel(nextItem, hierarchy, index + 1, this);
                 }
-                map.put(value, argh);
+                map.put(keyMap, argh);
             }
             argh.addRow(row);
             String key = createKey();
