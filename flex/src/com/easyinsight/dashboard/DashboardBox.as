@@ -154,7 +154,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
                 editorComp = IDashboardEditorComponent(DashboardElementFactory.createEditorUIComponent(element, dashboardEditorMetadata));
             }
             dropBox.addChild(DisplayObject(editorComp));
-            editorComp.initialRetrieve();
+            //editorComp.initialRetrieve();
         } else {
             dropBox.setStyle("backgroundColor", 0xFFFFFF);
             dropBox.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
