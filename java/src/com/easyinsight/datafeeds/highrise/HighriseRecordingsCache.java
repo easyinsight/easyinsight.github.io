@@ -103,11 +103,15 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
                         if (companyIDs.contains(subjectID)) {
                             activityType = "Company Note";
                             companyID = subjectID;
+                            recording.setContactID(contactID);
+                            recording.setCompanyID(companyID);
                             companyNotes.add(recording);
                         } else {
                             activityType = "Contact Note";
                             contactID = subjectID;
                             companyID = highRiseCompositeSource.getContactToCompanyCache().get(contactID);
+                            recording.setContactID(contactID);
+                            recording.setCompanyID(companyID);
                             contactNotes.add(recording);
                         }
                     } else if ("Deal".equals(subjectType)) {
@@ -123,7 +127,8 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
                     String collectionID = queryField(recordingNode, "collection-id/text()");
                     if (collectionType != null) {
                         recording = new Recording(body, createdAt, updatedAt, collectionID, id, author);
-
+                        recording.setContactID(contactID);
+                        recording.setCompanyID(companyID);
                         if ("Kase".equals(collectionType) && !"Kase".equals(subjectType)) {
                             caseID = collectionID;
                             caseNotes.add(recording);
