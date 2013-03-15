@@ -71,6 +71,6 @@
     finally {
         SecurityUtil.clearThreadLocal();
     }
-    String redirectUrl = (String) session.getAttribute("googleCallbackURL");
+    String redirectUrl = RedirectUtil.getURL(request, "/app/");
     response.sendRedirect(redirectUrl);
 %>

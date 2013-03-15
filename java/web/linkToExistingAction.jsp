@@ -27,7 +27,7 @@
                 System.out.println("setting domain name to " + googleDomainName);
                 account.setGoogleDomainName(googleDomainName);
                 hibernateSession.update(account);
-                url = doneURL;
+                url = RedirectUtil.getURL(request, "/app/");
             }
             hibernateSession.getTransaction().commit();
             response.sendRedirect(url);
