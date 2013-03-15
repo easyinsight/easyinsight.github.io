@@ -47,7 +47,6 @@
                 <%
                     if (session.getAttribute("appsErrorString") != null) {
                 %>
-                }
                 <fieldset class="control-group error">
                     <label class="formAreaP control-label" style="font-size: 12px;padding: 0;margin-bottom: 5px"><%= session.getAttribute("appsErrorString")%></label>
                 </fieldset>
