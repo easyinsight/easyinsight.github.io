@@ -197,6 +197,14 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
+    public boolean checkDateTime(String name, Key key) {
+        if (BasecampNextTodoSource.TODO_DUE_AT.equals(name)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public FeedType getFeedType() {
         return FeedType.BASECAMP_NEXT_COMPOSITE;
     }
