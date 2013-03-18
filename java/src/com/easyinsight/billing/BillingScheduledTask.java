@@ -34,18 +34,19 @@ public class BillingScheduledTask extends ScheduledTask {
     protected void execute(Date now, EIConnection conn) throws Exception {
 
         //new AccountActivityStorage().updateAccountTimes(now, conn);
-        expireTrials(now, conn);
+        expireTrials(conn);
         billCustomers(now, conn);
         new AccountActivityStorage().executeSalesEmails(conn);
+        new AccountActivityStorage().executePersonalizedSalesEmail(conn);
     }
 
-    private void expireTrials(Date now, Connection conn) throws SQLException {
+    public void expireTrials(Connection conn) throws SQLException {
 
         // Where the account is not of the Free tier, the account is not Closing or Closed, and billing information is not given, and where
         // the trial end time is at or before today, set the account to Delinquent.
 
-        PreparedStatement selectStmt = conn.prepareStatement("SELECT ACCOUNT_ID, BILLING_INFORMATION_GIVEN, PRICING_MODEL FROM ACCOUNT WHERE  " +
-                "ACCOUNT_TYPE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND (BILLING_INFORMATION_GIVEN IS NULL OR BILLING_INFORMATION_GIVEN = FALSE) AND " +
+        PreparedStatement selectStmt = conn.prepareStatement("SELECT ACCOUNT_ID, BILLING_INFORMATION_GIVEN FROM ACCOUNT WHERE  " +
+                "ACCOUNT_TYPE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND PRICING_MODEL = ? AND (BILLING_INFORMATION_GIVEN IS NULL OR BILLING_INFORMATION_GIVEN = FALSE) AND " +
                 "ACCOUNT_ID IN (SELECT ACCOUNT_ID FROM ACCOUNT_TIMED_STATE WHERE date(state_change_time) < ?)");
 
         PreparedStatement stmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_ID = ?");
@@ -53,41 +54,59 @@ public class BillingScheduledTask extends ScheduledTask {
         selectStmt.setInt(2, Account.DELINQUENT);
         selectStmt.setInt(3, Account.CLOSING);
         selectStmt.setInt(4, Account.CLOSED);
-        selectStmt.setDate(5, new java.sql.Date(System.currentTimeMillis()));
+        selectStmt.setInt(5, Account.TIERED);
+        selectStmt.setDate(6, new java.sql.Date(System.currentTimeMillis()));
         ResultSet rs = selectStmt.executeQuery();
         while (rs.next()) {
             long accountID = rs.getLong(1);
             boolean billingInformationGiven = rs.getBoolean(2);
-            int pricingModel = rs.getInt(3);
-            if (pricingModel == Account.NEW) {
-                if (billingInformationGiven) {
-                    Session hibernateSession = Database.instance().createSession(conn);
-                    try {
-                        Account account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
-                        if (account.getBillingMonthOfYear() == 1)
-                            new BrainTreeBlueBillingSystem().subscribeYearly(account, account.getAddonDesigners(),
-                                    account.getAddonStorageUnits(), account.getAddonSmallBizConnections());
-                        else
-                            new BrainTreeBlueBillingSystem().subscribeMonthly(account, account.getAddonDesigners(),
-                                    account.getAddonStorageUnits(), account.getAddonSmallBizConnections());
-                    } finally {
-                        hibernateSession.close();
-                    }
-
-                } else {
-                    stmt.setInt(1, Account.DELINQUENT);
-                    stmt.setLong(2, accountID);
-                    stmt.executeUpdate();
-                }
-            } else if (pricingModel == Account.TIERED) {
-                if (!billingInformationGiven) {
-                    stmt.setInt(1, Account.DELINQUENT);
-                    stmt.setLong(2, accountID);
-                    stmt.executeUpdate();
-                }
+            if (!billingInformationGiven) {
+                stmt.setInt(1, Account.DELINQUENT);
+                stmt.setLong(2, accountID);
+                stmt.executeUpdate();
             }
         }
         selectStmt.close();
+
+
+        PreparedStatement newAccountStmt = conn.prepareStatement("SELECT ACCOUNT_ID, BILLING_INFORMATION_GIVEN FROM ACCOUNT WHERE  " +
+                "ACCOUNT_TYPE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND PRICING_MODEL = ? AND " +
+                "ACCOUNT_ID IN (SELECT ACCOUNT_ID FROM ACCOUNT_TIMED_STATE WHERE date(state_change_time) < ?)");
+
+
+        newAccountStmt.setInt(1, Account.PERSONAL);
+        newAccountStmt.setInt(2, Account.DELINQUENT);
+        newAccountStmt.setInt(3, Account.CLOSING);
+        newAccountStmt.setInt(4, Account.CLOSED);
+        newAccountStmt.setInt(5, Account.NEW);
+        newAccountStmt.setDate(6, new java.sql.Date(System.currentTimeMillis()));
+        ResultSet newAccountRS = newAccountStmt.executeQuery();
+        while (newAccountRS.next()) {
+            long accountID = newAccountRS.getLong(1);
+            boolean billingInformationGiven = newAccountRS.getBoolean(2);
+            if (billingInformationGiven) {
+                Session hibernateSession = Database.instance().createSession(conn);
+                try {
+                    Account account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+                    if (account.getBillingMonthOfYear() == 1)
+                        new BrainTreeBlueBillingSystem().subscribeYearly(account, account.getAddonDesigners(),
+                                account.getAddonStorageUnits(), account.getAddonSmallBizConnections());
+                    else
+                        new BrainTreeBlueBillingSystem().subscribeMonthly(account, account.getAddonDesigners(),
+                                account.getAddonStorageUnits(), account.getAddonSmallBizConnections());
+                } finally {
+                    hibernateSession.close();
+                }
+                stmt.setInt(1, Account.ACTIVE);
+                stmt.setLong(2, accountID);
+                stmt.executeUpdate();
+            } else {
+                stmt.setInt(1, Account.DELINQUENT);
+                stmt.setLong(2, accountID);
+                stmt.executeUpdate();
+            }
+        }
+        newAccountStmt.close();
         stmt.close();
     }
 
