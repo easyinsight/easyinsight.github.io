@@ -13,9 +13,11 @@
                 filterValueDefinition.field = _filterDefinition.field;
                 filterValueDefinition.singleValue = true;
                 filterValueDefinition.autoComplete = false;
+                filterValueDefinition.newType = true;
                 _filterDefinition = filterValueDefinition;
             } else {
                 FilterValueDefinition(_filterDefinition).singleValue = false;
+                FilterValueDefinition(_filterDefinition).newType = true;
             }
             return _filterDefinition;
         }
