@@ -70,16 +70,13 @@ public class BillingScheduledTask extends ScheduledTask {
 
 
         PreparedStatement newAccountStmt = conn.prepareStatement("SELECT ACCOUNT_ID, BILLING_INFORMATION_GIVEN FROM ACCOUNT WHERE  " +
-                "ACCOUNT_TYPE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND ACCOUNT_STATE != ? AND PRICING_MODEL = ? AND " +
+                "ACCOUNT_STATE = ? AND PRICING_MODEL = ? AND " +
                 "ACCOUNT_ID IN (SELECT ACCOUNT_ID FROM ACCOUNT_TIMED_STATE WHERE date(state_change_time) < ?)");
 
 
-        newAccountStmt.setInt(1, Account.PERSONAL);
-        newAccountStmt.setInt(2, Account.DELINQUENT);
-        newAccountStmt.setInt(3, Account.CLOSING);
-        newAccountStmt.setInt(4, Account.CLOSED);
-        newAccountStmt.setInt(5, Account.NEW);
-        newAccountStmt.setDate(6, new java.sql.Date(System.currentTimeMillis()));
+        newAccountStmt.setInt(1, Account.TRIAL);
+        newAccountStmt.setInt(2, Account.NEW);
+        newAccountStmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
         ResultSet newAccountRS = newAccountStmt.executeQuery();
         while (newAccountRS.next()) {
             long accountID = newAccountRS.getLong(1);
