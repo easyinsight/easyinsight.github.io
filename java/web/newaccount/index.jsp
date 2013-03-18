@@ -70,6 +70,7 @@
         <div class="signupHeadline">
             <a href="/app/">Customer Login</a>
             <a href="/app/newaccount/">Free Trial</a>
+            <a href="/app/whatsnew.jsp">What's New</a>
             <a href="/contactus.html">Contact Us</a>
         </div>
     </div>
@@ -80,8 +81,9 @@
         <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
         <a class="inactive" href="/api.html">Developers</a>
     </div>
-    <div id="trialBar">
-        <div style="font-size: 18px;padding-top:15px">More Info? Call 1 (720) 285-8652</div>
+    <div class="trialBar">
+
+        Have questions? Call 1 (720) 285-8652 or email us at <a href="mailto:sales@easy-insight.com">sales@easy-insight.com</a>.
     </div>
     <div id="contentHeaderStart"></div>
     <div id="midContent">
@@ -92,10 +94,10 @@
             <div style="width:100%;position:relative;height:500px">
                 <div style="height:450px; width: 655px; float:right;padding-left: 50px;padding-right: 50px;">
                     <div>
-                        <p style="text-align:center;font-size:32px;font-weight:bold;width: 100%">Start Using Easy Insight
+                        <p style="text-align:center;font-size:32px;font-weight:bold;width: 100%;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif">Start Using Easy Insight
                             Now!</p>
 
-                        <p style="text-align:center;font-size:24px;padding-top:20px;font-family:'Cabin',arial,serif;width: 100%">
+                        <p style="text-align:center;font-size:24px;padding-top:20px;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif;width: 100%">
                             Fully functional 30 day free trial, no credit card required</p>
                     </div>
 
@@ -106,7 +108,7 @@
                     </div>
                     <table style="padding-top:5px;border-spacing:10px;padding-left:65px">
                         <tr>
-                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">
+                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif">
                                 First Name
                             </td>
                             <td><input style="font-size:14px;width:400px" id="firstName" type="text"
@@ -114,7 +116,7 @@
                                        name="firstName"/></td>
                         </tr>
                         <tr>
-                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">
+                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif">
                                 Last Name
                             </td>
                             <td><input style="font-size:14px;width:400px" id="lastName" type="text"
@@ -122,7 +124,7 @@
                                        name="lastName"/></td>
                         </tr>
                         <tr>
-                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">
+                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif">
                                 Company
                             </td>
                             <td><input style="font-size:14px;width:400px" id="company" type="text"
@@ -130,7 +132,7 @@
                                        name="company"/></td>
                         </tr>
                         <tr>
-                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Cabin',arial,serif">
+                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif">
                                 Email
                             </td>
                             <td><input style="font-size:14px;width:400px" id="email" type="text"
@@ -138,7 +140,7 @@
                                        name="email"/></td>
                         </tr>
                         <tr>
-                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold">
+                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif">
                                 Password
                             </td>
                             <td><input style="font-size:14px;width:400px" id="password" type="password"
@@ -149,7 +151,7 @@
                         <input type="submit" class="btn btn-inverse btn-large" style="margin-top: 8px" value="Create Account"/>
                         <%--<input type="image" src="/images/GetStartedSmaller2.png" alt="Create Account"/>--%>
                     </div>
-                    <div style="fontSize:12px;font-family:'Cabin',arial,serif;color:#333333;padding-top:30px">By
+                    <div style="fontSize:12px;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif;color:#333333;padding-top:30px">By
                         clicking Get
                         Started Now you agree to the <a href="/terms.html"
                                                         style="text-decoration:underline;color:#CC0033">Terms
