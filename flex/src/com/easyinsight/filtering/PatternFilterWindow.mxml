@@ -69,7 +69,7 @@
             if (typeGroup.selectedValue == "single") {
                 dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, ComboBoxFilterWindow));
             } else if (typeGroup.selectedValue == "multi") {
-                dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, MultiValueFilterEditWindow));
+                dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, NewMultiValueFilterEditWindow));
             } else if (typeGroup.selectedValue == "autoComplete") {
                 dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, AutoCompleteFilterWindow));
             }

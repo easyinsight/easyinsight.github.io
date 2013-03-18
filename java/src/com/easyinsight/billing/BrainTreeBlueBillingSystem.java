@@ -2,10 +2,12 @@ package com.easyinsight.billing;
 
 import com.braintreegateway.*;
 import com.easyinsight.config.ConfigLoader;
+import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.AccountActivityStorage;
 import com.easyinsight.users.AccountCreditCardBillingInfo;
+import com.easyinsight.users.User;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 
@@ -205,16 +207,13 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
         return gateway.subscription().update(s.getId(), sr);
     }
 
-    public void setSubscribedStatus(Account account) {
+    public void syncBillNow(Account account) {
         Customer c = getCustomer(account);
         Set<String> transactions = new HashSet<String>();
         for (AccountCreditCardBillingInfo b : account.getBillingInfo()) {
             transactions.add(b.getTransactionID());
         }
-
-        System.out.println("Account ID: " + account.getAccountID());
         if (c != null) {
-            System.out.println("customer exists");
             CreditCard dc = null;
             for (CreditCard cc : c.getCreditCards()) {
                 if (cc.isDefault())
@@ -223,7 +222,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
             if (dc != null) {
                 for (Subscription ss : dc.getSubscriptions()) {
                     for (Transaction t : ss.getTransactions()) {
-                        if (!transactions.contains(t.getId())) {
+                        if (!transactions.contains(t.getId()) && t.getProcessorResponseCode().equals("1000")) {
                             AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
                             info.setAccountId(account.getAccountID());
                             info.setResponse(t.getProcessorAuthorizationCode());
@@ -234,6 +233,56 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                             info.setTransactionTime(t.getCreatedAt().getTime());
                             info.setAmount(t.getAmount().toString());
                             account.getBillingInfo().add(info);
+                            transactions.add(t.getId());
+                            String invoiceBody = info.toInvoiceText(account);
+                            /*for (User user : account.getUsers()) {
+                                if (user.isInvoiceRecipient()) {
+                                    try {
+                                        new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, "support@easy-insight.com", false, "Easy Insight");
+                                    } catch (Exception e) {
+                                        LogClass.error(e);
+                                    }
+                                }
+                            }*/
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void setSubscribedStatus(Account account) {
+        Customer c = getCustomer(account);
+        Set<String> transactions = new HashSet<String>();
+        for (AccountCreditCardBillingInfo b : account.getBillingInfo()) {
+            transactions.add(b.getTransactionID());
+        }
+
+        System.out.println("Account ID: " + account.getAccountID());
+        if (c != null) {
+            System.out.println("\tcustomer exists");
+            CreditCard dc = null;
+            for (CreditCard cc : c.getCreditCards()) {
+                if (cc.isDefault())
+                    dc = cc;
+            }
+            if (dc != null) {
+                for (Subscription ss : dc.getSubscriptions()) {
+                    for (Transaction t : ss.getTransactions()) {
+                        if (!transactions.contains(t.getId())) {
+                            System.out.println("\tCreating new record for transaction " + t.getId() + " with amount " +
+                                    t.getAmount().toString() + " for account " + account.getAccountID() + ".");
+                            AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
+                            info.setAccountId(account.getAccountID());
+                            info.setResponse(t.getProcessorAuthorizationCode());
+                            info.setResponseCode(t.getProcessorResponseCode());
+                            info.setResponseString(t.getProcessorResponseText());
+                            info.setTransactionID(t.getId());
+                            info.setSuccessful(t.getProcessorResponseCode().equals("1000"));
+                            info.setTransactionTime(t.getCreatedAt().getTime());
+                            info.setAmount(t.getAmount().toString());
+                            account.getBillingInfo().add(info);
+
                             transactions.add(t.getId());
                             // TODO: email out the invoice here
                         }
@@ -249,6 +298,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                     } else {
                         account.setAccountState(Account.DELINQUENT);
                     }
+                    System.out.println("\tUpdated " + account.getAccountID() + " to " + account.getAccountState() + ".");
                 }
 
             }

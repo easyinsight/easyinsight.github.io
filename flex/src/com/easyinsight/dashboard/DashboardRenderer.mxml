@@ -5,7 +5,6 @@
     <mx:Script><![CDATA[
         import com.easyinsight.filtering.AnalysisItemFilterDefinition;
         import com.easyinsight.filtering.FilterDefinition;
-        import com.easyinsight.skin.ApplicationSkin;
 
         import mx.collections.ArrayCollection;
         import mx.core.Container;
@@ -52,13 +51,25 @@
             }
         }
 
-        private var _dashboardStackPositions:DashboardStackPositions = new DashboardStackPositions();
+        private var _dashboardStackPositions:DashboardStackPositions;
 
         public function set dashboardStackPositions(value:DashboardStackPositions):void {
             _dashboardStackPositions = value;
         }
 
+        private var loadCount:int = 0;
+        private var requiredCount:int = 0;
+
+        private function onReportLoad(event:DashboardReportLoadEvent):void {
+            loadCount++;
+            if (loadCount == requiredCount) {
+                dispatchEvent(new DashboardReportLoadEvent(DashboardReportLoadEvent.DASHBOARD_LOAD));
+            }
+        }
+
         public function createDashboard(width:int = 0, height:int = 0):IDashboardViewComponent {
+
+            addEventListener(DashboardReportLoadEvent.DASHBOARD_REPORT_LOAD, onReportLoad);
             /*var primary:VBox = new VBox();
              primary.percentHeight = 100;
              primary.percentWidth = 100;
@@ -167,6 +178,7 @@
             Container(rootView).horizontalScrollPolicy = "off";
             Container(dashboardStyleArea).horizontalScrollPolicy = "off";
             UIComponent(rootView).addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent):void {
+                requiredCount = rootView.reportCount().length;
                 var filterMap:Object = new Object();
                 filterMap["master"] = toUse;
                 rootView.updateAdditionalFilters(filterMap);

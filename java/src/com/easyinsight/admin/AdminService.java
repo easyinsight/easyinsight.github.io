@@ -2,6 +2,7 @@ package com.easyinsight.admin;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.audit.*;
+import com.easyinsight.billing.BillingScheduledTask;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.DashboardDescriptor;
@@ -32,6 +33,7 @@ import com.easyinsight.users.AccountCreditCardBillingInfo;
 import com.easyinsight.users.User;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  * User: James Boe
@@ -41,6 +43,86 @@ import org.hibernate.Session;
 public class AdminService {
 
     private static final String LOC_XML = "<url>\r\n\t<loc>{0}</loc>\r\n</url>\r\n";
+
+    public void fixTrialAccounts() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("select account.account_id, name, creation_date from account left join account_timed_state on account.account_id = account_timed_state.account_id where pricing_model = 1 and account.account_state = 9 and account_timed_state.state_change_time is null");
+            ResultSet accounts = stmt.executeQuery();
+            PreparedStatement addBelatedStmt = conn.prepareStatement("insert into account_timed_state (state_change_time, account_id, account_state) values (?, ?, ?)");
+            while (accounts.next()) {
+                long accountID = accounts.getLong(1);
+                String name = accounts.getString(2);
+                Date creationDate = accounts.getTimestamp(3);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(creationDate);
+                cal.add(Calendar.DAY_OF_YEAR, 30);
+                Date changeTime = cal.getTime();
+                System.out.println("For " + name + " created at " + creationDate + " adding timed state change of " + changeTime);
+                addBelatedStmt.setTimestamp(1, new Timestamp(changeTime.getTime()));
+                addBelatedStmt.setLong(2, accountID);
+                addBelatedStmt.setInt(3, Account.ACTIVE);
+                addBelatedStmt.execute();
+            }
+            stmt.close();
+            addBelatedStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void forceTrialExpire() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            new BillingScheduledTask().expireTrials(conn);
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void syncInvoices() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        Session s = Database.instance().createSession(conn);
+        try {
+
+            List<Account> l = (List<Account>) s.createQuery("from Account where pricingModel = ?").setInteger(0, Account.NEW).list();
+
+            for(Account a : l) {
+                if (a.getAccountState() != Account.DELINQUENT && a.getAccountState() != Account.BILLING_FAILED) {
+                    Transaction t = s.beginTransaction();
+                    try {
+                        a.syncState();
+                        s.update(a);
+                        s.flush();
+                        t.commit();
+                    } catch (Exception e) {
+                        LogClass.error(e);
+                        t.rollback();
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            s.close();
+            Database.closeConnection(conn);
+        }
+    }
 
     public void requestEnterpriseAccess(final String email, final String phone, final boolean salesforce, final boolean quickbase) {
         final long accountID = SecurityUtil.getAccountID();

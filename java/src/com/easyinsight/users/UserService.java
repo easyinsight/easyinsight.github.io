@@ -901,6 +901,9 @@ public class UserService {
 
                 new Thread(new SalesEmail(account, user)).start();
             }
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, 30);
+            new AccountActivityStorage().saveAccountTimeChange(account.getAccountID(), Account.ACTIVE, cal.getTime(), conn);
             new AccountActivityStorage().generateSalesEmailSchedules(user.getUserID(), conn);
             return account.getAccountID();
         } catch (Exception e) {
