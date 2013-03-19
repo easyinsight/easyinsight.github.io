@@ -85,7 +85,7 @@ public class BillingScheduledTask extends ScheduledTask {
                 Session hibernateSession = Database.instance().createSession(conn);
                 try {
                     Account account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
-                    if (account.getBillingMonthOfYear() == 1)
+                    if (account.getBillingMonthOfYear() != null && account.getBillingMonthOfYear() == 1)
                         new BrainTreeBlueBillingSystem().subscribeYearly(account, account.getAddonDesigners(),
                                 account.getAddonStorageUnits(), account.getAddonSmallBizConnections());
                     else
