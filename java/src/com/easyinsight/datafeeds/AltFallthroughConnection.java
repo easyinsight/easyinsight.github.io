@@ -62,7 +62,15 @@ public class AltFallthroughConnection implements Serializable, IJoin {
             }
         }
     }
-    
+
+    public QueryNodeKey sourceQueryNodeKey() {
+        return new DataSourceQueryNodeKey(sourceFeedID);
+    }
+
+    public QueryNodeKey targetQueryNodeKey() {
+        return new DataSourceQueryNodeKey(targetFeedID);
+    }
+
     private Long sourceFeedID;
     private Long targetFeedID;
     
@@ -134,16 +142,18 @@ public class AltFallthroughConnection implements Serializable, IJoin {
                             Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID, int operations) {
 
         Map<Value, List<IRow>> index = new HashMap<Value, List<IRow>>();
-        /*Collection<AnalysisItem> sourceItems = new ArrayList<AnalysisItem>();
-        Collection<AnalysisItem> targetItems = new ArrayList<AnalysisItem>();*/
-        /*Collection<IRow> unjoinedRows = new ArrayList<IRow>();
-        List<IRow> sourceSetRows = sourceSet.getRows();
-        List<IRow> targetSetRows = dataSet.getRows();*/
         DataSet result = new DataSet();
         for (int z = 0; z < sourceItems.size(); z ++) {
             AnalysisItem myJoinDimension = sourceItems.get(z);
             AnalysisItem fromJoinDimension = targetItems.get(z);
-            Collection<IRow> unjoinedRows = new ArrayList<IRow>();
+            if (sourceSet != null && dataSet == null) {
+                result = sourceSet;
+                continue;
+            }
+            if (sourceSet == null && dataSet != null) {
+                result = dataSet;
+                continue;
+            }
             List<IRow> sourceSetRows = sourceSet.getRows();
             List<IRow> targetSetRows = dataSet.getRows();
             for (IRow row : sourceSetRows) {
@@ -178,21 +188,13 @@ public class AltFallthroughConnection implements Serializable, IJoin {
                     }
                 }
             }
-
-
-            /*for (List<IRow> rows : indexCopy.values()) {
-                for (IRow row : rows) {
-                    result.createRow().addValues(row);
-                }
-            }
-            for (IRow row : unjoinedRows) {
-                result.createRow().addValues(row);
-            }*/
         }
-        
-        for (IRow row : sourceSet.getRows()) {
-            if (!row.isMarked()) {
-                result.addRow(row);
+
+        if (sourceSet != null) {
+            for (IRow row : sourceSet.getRows()) {
+                if (!row.isMarked()) {
+                    result.addRow(row);
+                }
             }
         }
 
