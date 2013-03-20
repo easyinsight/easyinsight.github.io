@@ -54,9 +54,5 @@ public class AnalysisBasedFeedDefinition extends FeedDefinition {
         ResultSet rs = retrieveStmt.executeQuery();
         rs.next();
         reportID = rs.getLong(1);
-        WSAnalysisDefinition def = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
-        if (def != null) {
-            setFields(new FeedStorage().retrieveFields(def.getDataFeedID(), conn));
-        }
     }
 }
