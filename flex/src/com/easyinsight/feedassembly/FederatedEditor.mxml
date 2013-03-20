@@ -167,7 +167,7 @@
                 }
             }
             var sort:Sort = new Sort();
-            sort.fields = [ new SortField("fed")];
+            sort.fields = [ new SortField("fed", true)];
             federatedFields.sort = sort;
             federatedFields.refresh();
             createColumns();
@@ -183,7 +183,7 @@
                 if (dataSource.dataFeedID == dataSourceChoice.selectedItem.dataSourceID) {
                     chosenFields = new ArrayCollection(dataSource.fields.toArray());
                     var sort:Sort = new Sort();
-                    sort.fields = [ new SortField("display")];
+                    sort.fields = [ new SortField("display", true)];
                     chosenFields.sort = sort;
                     chosenFields.refresh();
                     fieldsInText = "Fields in " + dataSource.feedName;

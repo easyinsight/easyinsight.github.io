@@ -28,6 +28,9 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AddedItemUpdateEvent;
+        import com.easyinsight.analysis.AddonReport;
+        import com.easyinsight.analysis.AddonReportEvent;
+        import com.easyinsight.analysis.AddonReportWindow;
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -334,6 +337,66 @@
             dataView.addItem(event.analysisItem);
         }
 
+        public function addonReportStuff():void {
+            var window:AddonReportWindow = new AddonReportWindow();
+            window.addEventListener(AddonReportEvent.NEW_ADDONS, onNewAddons, false, 0, true);
+            window.report = analysisDefinition;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onNewAddons(event:AddonReportEvent):void {
+            for each (var addonReport:AddonReport in event.addonReports) {
+                boltOnFields(addonReport);
+            }
+            // start phase, start date, who changed it, end phase, end date time, analyst
+            // total contracts in process, number of contracts expiring next quarter, total 90 day outstanding ~100
+            //
+            for each (var toRemove:AddonReport in event.removedReports) {
+                for each (var wrapper:AnalysisItemWrapper in availableFields) {
+                    if (wrapper.addonReportID == toRemove.reportID) {
+                        availableFields.removeItemAt(availableFields.getItemIndex(wrapper));
+                        break;
+                    }
+                }
+                for each (var w:AnalysisItemWrapper in wrappers) {
+                    if (w.addonReportID == toRemove.reportID) {
+                        wrappers.removeItemAt(wrappers.getItemIndex(w));
+                    }
+                }
+            }
+        }
+
+        private function boltOnFields(addonReport:AddonReport):void {
+            coreDataService.addonFields.send(addonReport.reportID);
+        }
+
+        private function multiBolt():void {
+            var nodes:ArrayCollection = coreDataService.multiAddonFields.lastResult as ArrayCollection;
+            for each (var node:FeedNode in nodes) {
+                var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
+                wrapper.addonReportID = node.addonReportID;
+                availableFields.addItem(wrapper);
+                for each (var child:AnalysisItemNode in node.children) {
+                    var fieldWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(child);
+                    fieldWrapper.addonReportID = node.addonReportID;
+                    wrappers.addItem(fieldWrapper);
+                }
+            }
+        }
+
+        private function onBolt():void {
+            var node:FeedNode = coreDataService.addonFields.lastResult as FeedNode;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
+            wrapper.addonReportID = node.addonReportID;
+            availableFields.addItem(wrapper);
+            for each (var child:AnalysisItemNode in node.children) {
+                var fieldWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(child);
+                fieldWrapper.addonReportID = node.addonReportID;
+                wrappers.addItem(fieldWrapper);
+            }
+        }
+
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
             try {
                 dataSourceID = feedMetadata.dataFeedID;
@@ -398,6 +461,9 @@
 
                 } else {
                     //this.title = analysisDefinition.name;
+                    if (analysisDefinition.addonReports != null && analysisDefinition.addonReports.length > 0) {
+                        coreDataService.multiAddonFields.send(analysisDefinition);
+                    }
                     reportName = analysisDefinition.name;
                     saveAsEnabled = !_previewMode;
                     var controllerClass:Class = ControllerLookup.controllerForType(analysisDefinition.type);
@@ -977,6 +1043,7 @@
 
         private function additionalProps():void {
             var window:AdditionalPropsWindow = new AdditionalPropsWindow();
+            window.reportEditor = this;
             window.dataSourceID = dataService.dataFeedID;
             window.analysisDefinition = analysisDefinition;
             window.dataView = dataView;
@@ -1087,6 +1154,10 @@
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="fieldToDataSourceLevel" result="promoted()"/>
     </mx:RemoteObject>
+    <mx:RemoteObject id="coreDataService" destination="data">
+        <mx:method name="addonFields" result="onBolt()"/>
+        <mx:method name="multiAddonFields" result="multiBolt()"/>
+    </mx:RemoteObject>
     <analysis:AnalysisItemEventHandler id="fieldEventHandler" dataSourceID="{dataSourceID}" analysisItems="{wrappers}"
                                        report="{analysisDefinition}"/>
     <mx:HBox width="100%" styleName="topButtonBar">
@@ -1157,7 +1228,7 @@
                 <mx:Image source="@Embed(source='../../../assets/icon-search-black.png')" x="2" y="62"/>
 
                 <mx:TextInput id="searchBox" x="20" y="60" height="24" width="100%"
-                              change="onSearchTextChange(event)"></mx:TextInput>
+                              change="onSearchTextChange(event)"/>
                 <easyinsight:AnotherHackDataGrid width="100%" height="100%" dragEnabled="true"
                                                  iconFunction="iconFunction"
                                                  id="fieldGrid" backgroundColor="#FFFFFF"

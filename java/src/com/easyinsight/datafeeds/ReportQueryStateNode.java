@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.ReportQueryNodeKey;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
@@ -16,46 +17,23 @@ import java.util.*;
 * Date: 6/27/12
 * Time: 12:23 PM
 */
-class QueryStateNode {
-    public long feedID;
-    public QueryData queryData;
-    public Set<AnalysisItem> neededItems = new HashSet<AnalysisItem>();
-    public List<AnalysisItem> allAnalysisItems = new ArrayList<AnalysisItem>();
-    public Collection<FilterDefinition> filters = new ArrayList<FilterDefinition>();
-    public Collection<AnalysisItem> allFeedItems;
-    public List<AnalysisItem> parentItems = new ArrayList<AnalysisItem>();
-    public Collection<AnalysisItem> joinItems = new HashSet<AnalysisItem>();
-    public String dataSourceName;
-    public EIConnection conn;
-    public DataSet originalDataSet;
-    public Feed feed;
+class ReportQueryStateNode extends QueryStateNode {
+    public long reportID;
+    private WSAnalysisDefinition report;
     private String pipelineName;
     private Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
     private QueryNodeKey queryNodeKey;
 
-    QueryStateNode() {
-
-    }
-
-    QueryStateNode(long feedID, Feed feed, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata) {
-        this.feedID = feedID;
-        queryNodeKey = new DataSourceQueryNodeKey(feedID);
+    ReportQueryStateNode(long reportID, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata) {
+        this.reportID = reportID;
+        queryNodeKey = new ReportQueryNodeKey(reportID);
+        report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
         queryData = new QueryData(queryNodeKey);
-        this.feed = feed;
         this.conn = conn;
-        dataSourceName = feed.getName();
-        allFeedItems = feed.getFields();
+        dataSourceName = report.getName();
+        Feed sourceFeed = FeedRegistry.instance().getFeed(report.getDataFeedID());
+        allFeedItems = sourceFeed.getFields();
         this.parentItems = parentItems;
-        NamedPipeline pipeline = (NamedPipeline) insightRequestMetadata.findPipeline(feed.getName());
-        if (pipeline != null) {
-            pipelineName = pipeline.getName();
-            List<AnalysisItem> analysisItems = insightRequestMetadata.getFieldsForPipeline(pipeline.getName());
-            if (analysisItems != null) {
-                for (AnalysisItem analysisItem : analysisItems) {
-                    map.put(analysisItem.toDisplay(), analysisItem);
-                }
-            }
-        }
     }
 
     public QueryNodeKey queryNodeKey() {
@@ -63,7 +41,7 @@ class QueryStateNode {
     }
 
     public boolean handles(AnalysisItem analysisItem) {
-        return analysisItem.getKey().hasDataSource(feedID) || map.get(analysisItem.toDisplay()) != null;
+        return analysisItem.getKey().hasReport(reportID) || map.get(analysisItem.toDisplay()) != null;
     }
 
     public void addJoinItem(AnalysisItem analysisItem) {
@@ -109,15 +87,15 @@ class QueryStateNode {
     }
 
     public DataSet produceDataSet(InsightRequestMetadata insightRequestMetadata) throws ReportException {
-
+        AnalysisBasedFeed feed = new AnalysisBasedFeed();
+        feed.setAnalysisDefinition(report);
+        feed.setFields(allAnalysisItems);
         DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
 
         Pipeline pipeline;
-        if (!insightRequestMetadata.isTraverseAllJoins() && feed.getDataSource().getFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
-            pipeline = new CompositeReportPipeline();
-        } else {
-            pipeline = new AltCompositeReportPipeline(joinItems);
-        }
+
+        pipeline = new AltCompositeReportPipeline(joinItems);
+
         pipeline.setup(queryData.neededItems, feed.getFields(), insightRequestMetadata);
         originalDataSet = pipeline.toDataSet(dataSet);
         return originalDataSet;

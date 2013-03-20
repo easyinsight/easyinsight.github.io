@@ -5,9 +5,13 @@ import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -127,6 +131,18 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "description")
     private String description;
 
+    // one to many report adapters
+    // add report, remove report from report editor
+    // in retrieving fields, recognize and handle fields appropriately (QueryStateNode)
+
+    // what if there's a date...
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "report_to_report_stub",
+            joinColumns = @JoinColumn(name = "report_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "report_stub_id", nullable = false))
+    private List<ReportStub> reportStubs = new ArrayList<ReportStub>();
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "report_to_report_property",
             joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
@@ -142,6 +158,39 @@ public class AnalysisDefinition implements Cloneable {
 
     @Column(name = "account_visible")
     private boolean accountVisible;
+
+    public void validate() {
+        Iterator<Map.Entry<String, AnalysisItem>> iter = reportStructure.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry<String, AnalysisItem> entry = iter.next();
+            if (entry.getValue() != null) {
+                entry.getValue().afterLoad();
+            }
+            System.out.println(entry.getValue().getKey().getClass().getName());
+            if (entry.getValue() != null && entry.getValue().getKey().getClass().getName().equals("com.easyinsight.core.Key")) {
+                iter.remove();
+            }
+        }
+        if(joinOverrides != null) {
+            Iterator<JoinOverride> joinIter = joinOverrides.iterator();
+            while (joinIter.hasNext()) {
+                JoinOverride joinOverride = joinIter.next();
+                if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getKey().getClass().getName().equals("com.easyinsight.core.Key")) {
+                    joinIter.remove();
+                } else if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getKey().getClass().getName().equals("com.easyinsight.core.Key")) {
+                    joinIter.remove();
+                }
+            }
+        }
+    }
+
+    public List<ReportStub> getReportStubs() {
+        return reportStubs;
+    }
+
+    public void setReportStubs(List<ReportStub> reportStubs) {
+        this.reportStubs = reportStubs;
+    }
 
     public boolean isAutoSetupDelivery() {
         return autoSetupDelivery;
@@ -438,6 +487,8 @@ public class AnalysisDefinition implements Cloneable {
         AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
         structure.setBaseReport(this);
 
+        analysisDefinition.setReportStubs(new ArrayList<ReportStub>());
+
         if (getAddedItems() != null) {
 
             for (AnalysisItem analysisItem : getAddedItems()) {
@@ -506,39 +557,49 @@ public class AnalysisDefinition implements Cloneable {
 
         if (target != null) {
             for (AnalysisItem analysisItem : replacementMap.getFields()) {
+                //analysisItem.afterLoad();
                 Key key = null;
-
-                AnalysisItem dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
-                if (dataSourceItem != null) {
-                    key = dataSourceItem.getKey();
+                Key deproxiedKey = (Key) Database.deproxy(analysisItem.getKey());
+                if (deproxiedKey instanceof ReportKey) {
+                    System.out.println("blah");
                 } else {
-                    if (analysisItem.getOriginalDisplayName() != null) {
-                        dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
-                    }
+                    AnalysisItem dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
                     if (dataSourceItem != null) {
                         key = dataSourceItem.getKey();
                     } else {
-                        dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                        if (analysisItem.getOriginalDisplayName() != null) {
+                            dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
+                        }
                         if (dataSourceItem != null) {
                             key = dataSourceItem.getKey();
+                        } else {
+                            dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                            if (dataSourceItem != null) {
+                                key = dataSourceItem.getKey();
+                            }
                         }
                     }
-                }
-                if (key != null) {
-                    analysisItem.setKey(key);
-                    if (set.containsKey(analysisItem.toDisplay()) && !addedItems.contains(analysisItem)) {
-                        addedItems.add(analysisItem);
-                    }
-                } else {
-                    Key clonedKey = analysisItem.getKey().clone();
-                    analysisItem.setKey(clonedKey);
-                    if (!addedItems.contains(analysisItem)) {
-                        analysisItem.setConcrete(false);
-                        addedItems.add(analysisItem);
+                    if (key != null) {
+                        analysisItem.setKey(key);
+                        if (set.containsKey(analysisItem.toDisplay()) && !addedItems.contains(analysisItem)) {
+                            addedItems.add(analysisItem);
+                        }
+                    } else {
+                        Key clonedKey = analysisItem.getKey().clone();
+                        analysisItem.setKey(clonedKey);
+                        if (!addedItems.contains(analysisItem)) {
+                            analysisItem.setConcrete(false);
+                            addedItems.add(analysisItem);
+                        }
                     }
                 }
             }
         }
+        List<ReportStub> clonedStubs = new ArrayList<ReportStub>();
+        for (ReportStub reportStub : reportStubs) {
+            clonedStubs.add(reportStub.clone());
+        }
+        analysisDefinition.setReportStubs(clonedStubs);
         for (AnalysisItem analysisItem : replacementMap.getFields()) {
             if (target != null) {
                 target.updateLinks(analysisItem);
@@ -633,6 +694,28 @@ public class AnalysisDefinition implements Cloneable {
             }
             analysisDefinition.setJoinOverrides(joins);
         }
+        List<AddonReport> addonReports = new ArrayList<AddonReport>();
+        if (reportStubs != null && reportStubs.size() > 0) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                PreparedStatement stmt = conn.prepareStatement("SELECT TITLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                for (ReportStub reportStub : reportStubs) {
+                    AddonReport addonReport = new AddonReport();
+                    stmt.setLong(1, reportStub.getReportID());
+                    ResultSet rs = stmt.executeQuery();
+                    rs.next();
+                    addonReport.setReportName(rs.getString(1));
+                    addonReport.setReportID(reportStub.getReportID());
+                    addonReports.add(addonReport);
+                }
+                stmt.close();
+            } catch (Exception e) {
+                LogClass.error(e);
+            } finally {
+                Database.closeConnection(conn);
+            }
+        }
+        analysisDefinition.setAddonReports(addonReports);
         return analysisDefinition;
     }
 
@@ -651,13 +734,58 @@ public class AnalysisDefinition implements Cloneable {
         return reports;
     }
 
-    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap, Map<Long, Dashboard> dashboardReplacementMap) {
+    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap, Map<Long, Dashboard> dashboardReplacementMap, Session session) {
         analysisDefinitionState.updateReportIDs(reportReplacementMap);
         for (AnalysisItem analysisItem : reportStructure.values()) {
             for (Link link : analysisItem.getLinks()) {
                 link.updateReportIDs(reportReplacementMap, dashboardReplacementMap);
             }
         }
+        for (AnalysisItem analysisItem : reportStructure.values()) {
+            blah(analysisItem, reportReplacementMap, session);
+        }
+        for (FilterDefinition filterDefinition : getFilterDefinitions()) {
+            if (filterDefinition.getField() != null) {
+                blah(filterDefinition.getField(), reportReplacementMap, session);
+            }
+        }
+        for (AnalysisItem addedItem : getAddedItems()) {
+            blah(addedItem, reportReplacementMap, session);
+        }
+        for (JoinOverride joinOverride : getJoinOverrides()) {
+            AnalysisItem sourceItem = joinOverride.getSourceItem();
+            AnalysisItem targetItem = joinOverride.getTargetItem();
+            blah(sourceItem, reportReplacementMap, session);
+            blah(targetItem, reportReplacementMap, session);
+        }
+        for (ReportStub reportStub : reportStubs) {
+            if (reportReplacementMap.containsKey(reportStub.getReportID())) {
+                reportStub.setReportID(reportReplacementMap.get(reportStub.getReportID()).getAnalysisID());
+            }
+        }
+    }
+
+    private void blah(AnalysisItem analysisItem, Map<Long, AnalysisDefinition> reportReplacementMap, Session session) {
+            //Key key = (Key) Database.deproxy(analysisItem.getKey());
+            if (analysisItem.getKey() instanceof ReportKey) {
+                ReportKey reportKey = (ReportKey) analysisItem.getKey();
+                //reportKey.afterLoad();
+                if (reportReplacementMap.containsKey(reportKey.getReportID())) {
+                    ReportKey cloneKey = new ReportKey();
+                    cloneKey.setReportID(reportKey.getReportID());
+                    cloneKey.setParentKey(reportKey.getParentKey());
+                    cloneKey.updateIDs(reportReplacementMap);
+                    analysisItem.setKey(cloneKey);
+                    AnalysisDefinition targetDef = reportReplacementMap.get(reportKey.getReportID());
+                    for (AnalysisItem targetItem : targetDef.reportStructure.values()) {
+                        if (analysisItem.toDisplay().equals(targetItem.toDisplay())) {
+                            cloneKey.setParentKey(targetItem.getKey());
+                        }
+                    }
+                    analysisItem.getKey().updateIDs(reportReplacementMap);
+                    session.save(cloneKey);
+                }
+            }
     }
 
     public Set<EIDescriptor> containedReportIDs() {
@@ -675,6 +803,11 @@ public class AnalysisDefinition implements Cloneable {
                         }
                     }
                 }
+            }
+        }
+        if (reportStubs != null) {
+            for (ReportStub reportStub : reportStubs) {
+                drillIDs.add(new InsightDescriptor(reportStub.getReportID(), null, 0, 0, null, 0, false));
             }
         }
         return drillIDs;

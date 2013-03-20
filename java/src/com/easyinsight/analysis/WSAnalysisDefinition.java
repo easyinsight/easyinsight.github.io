@@ -111,7 +111,17 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private int fontSize = 12;
     private double backgroundAlpha = 1;
 
+    private List<AddonReport> addonReports;
+
     private boolean rowsEditable;
+
+    public List<AddonReport> getAddonReports() {
+        return addonReports;
+    }
+
+    public void setAddonReports(List<AddonReport> addonReports) {
+        this.addonReports = addonReports;
+    }
 
     public boolean isManualButRunFirst() {
         return manualButRunFirst;
@@ -380,6 +390,19 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public List<AnalysisItem> getAddedItems() {
         return addedItems;
+    }
+
+    public List<AnalysisItem> allAddedItems() {
+        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
+        if (addedItems != null) {
+            items.addAll(addedItems);
+        }
+        if (addonReports != null) {
+            for (AddonReport addonReport : addonReports) {
+                items.addAll(new AnalysisStorage().getAnalysisDefinition(addonReport.getReportID()).createStructure().values());
+            }
+        }
+        return items;
     }
 
     public void setAddedItems(List<AnalysisItem> addedItems) {

@@ -5,6 +5,8 @@ import com.easyinsight.quicksearch.EIDescriptor;
 [RemoteClass(alias="com.easyinsight.dashboard.DashboardDescriptor")]
 public class DashboardDescriptor extends EIDescriptor {
 
+    public var dataSourceID:int;
+
     public function DashboardDescriptor() {
         super();
     }

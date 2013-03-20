@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.ReportKey;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.Database;
@@ -105,6 +106,63 @@ public class DataService {
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public List<FeedNode> multiAddonFields(WSAnalysisDefinition report) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            List<FeedNode> nodes = new ArrayList<FeedNode>();
+            for (AddonReport addonReport : report.getAddonReports()) {
+                nodes.add(addonFields(addonReport.getReportID(), conn));
+            }
+            return nodes;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public FeedNode addonFields(long addonReportID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            return addonFields(addonReportID, conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    private FeedNode addonFields(long addonReportID, EIConnection conn) throws CloneNotSupportedException {
+        Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+        List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
+        WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(addonReportID, conn);
+        Map<String, AnalysisItem> structure = report.createStructure();
+        for (AnalysisItem item : structure.values()) {
+            AnalysisItem clone = item.clone();
+            ReportKey reportKey = new ReportKey();
+            reportKey.setParentKey(item.getKey());
+            reportKey.setReportID(addonReportID);
+            clone.setKey(reportKey);
+            replacementMap.put(item.getAnalysisItemID(), clone);
+            fields.add(clone);
+        }
+        ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+        for (AnalysisItem clone : fields) {
+            clone.updateIDs(replacements);
+        }
+        FolderNode folderNode = new FolderNode();
+        folderNode.setAddonReportID(addonReportID);
+        FeedFolder feedFolder = new FeedFolder();
+        feedFolder.setName(report.getName());
+        folderNode.setFolder(feedFolder);
+        for (AnalysisItem analysisItem : fields) {
+            folderNode.getChildren().add(analysisItem.toFeedNode());
+        }
+        return folderNode;
     }
 
     public FeedMetadata getFeedMetadata(long feedID) {
@@ -1348,7 +1406,7 @@ public class DataService {
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
             insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
 
-
+            insightRequestMetadata.setAddonReports(analysisDefinition.getAddonReports());
 
 
             if (insightRequestMetadata.getHierarchyOverrides() != null) {
@@ -1387,6 +1445,9 @@ public class DataService {
                     analysisDefinition.populateFromReportStructure(structure);
                 }
             }
+
+            feed.getDataSource().decorateLinks(new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values()));
+
             analysisDefinition.tweakReport(aliases);
 
             // acquirent report header on embed
@@ -1397,12 +1458,7 @@ public class DataService {
             // acs stuff
 
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
-            if (analysisDefinition.getAddedItems() != null) {
-
-                // TODO: bolt on other fields here
-
-                allFields.addAll(analysisDefinition.getAddedItems());
-            }
+            allFields.addAll(analysisDefinition.allAddedItems());
 
             KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields);
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();

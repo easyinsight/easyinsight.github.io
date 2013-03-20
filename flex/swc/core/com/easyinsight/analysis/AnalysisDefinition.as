@@ -8,8 +8,9 @@ import com.easyinsight.skin.ImageDescriptor;
 
 
 import mx.collections.ArrayCollection;
-	
-	[Bindable]
+import mx.controls.Alert;
+
+[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.WSAnalysisDefinition")]
 	public class AnalysisDefinition
 	{
@@ -58,6 +59,7 @@ import mx.collections.ArrayCollection;
 		public var dataFeedID:int;
         public var urlKey:String;
 		public var name:String;
+        public var addonReports:ArrayCollection = new ArrayCollection();
 		public var analysisID:int;
 		public var filterDefinitions:ArrayCollection = new ArrayCollection();
 		public var dataScrubs:ArrayCollection = new ArrayCollection();

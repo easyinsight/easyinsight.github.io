@@ -162,6 +162,15 @@ public class AnalysisDefinitionFactory {
         for (ReportProperty reportProperty : analysisDefinition.getProperties()) {
             reportProperty.cleanup();
         }
+        List<ReportStub> reportStubs = new ArrayList<ReportStub>();
+        if (wsAnalysisDefinition.getAddonReports() != null) {
+            for (AddonReport addonReport : wsAnalysisDefinition.getAddonReports()) {
+                ReportStub reportStub = new ReportStub();
+                reportStub.setReportID(addonReport.getReportID());
+                reportStubs.add(reportStub);
+            }
+        }
+        analysisDefinition.setReportStubs(reportStubs);
         analysisDefinition.setUrlKey(wsAnalysisDefinition.getUrlKey());
         analysisDefinition.setJoinOverrides(wsAnalysisDefinition.getJoinOverrides());
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);

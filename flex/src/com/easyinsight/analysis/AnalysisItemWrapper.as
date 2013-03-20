@@ -12,6 +12,7 @@ public class AnalysisItemWrapper extends EventDispatcher
 		private var _feedNode:FeedNode;
 		private var _displayName:String;
         private var _children:ArrayCollection;
+    public var addonReportID:int;
 		
 		public function AnalysisItemWrapper(feedNode:FeedNode)	{
 			this._feedNode = feedNode;
@@ -22,7 +23,7 @@ public class AnalysisItemWrapper extends EventDispatcher
             }
             if (_children.length > 0) {
                 var sort:Sort = new Sort();
-                sort.fields = [ new SortField("sortType"), new SortField("displayName") ];
+                sort.fields = [ new SortField("sortType"), new SortField("displayName", true) ];
                 _children.sort = sort;
                 _children.refresh();
             }
