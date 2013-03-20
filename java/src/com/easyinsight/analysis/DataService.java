@@ -73,6 +73,7 @@ public class DataService {
             if (report != null) {
                 insightRequestMetadata.setJoinOverrides(report.getJoinOverrides());
                 insightRequestMetadata.setTraverseAllJoins(report.isFullJoins());
+                insightRequestMetadata.setAddonReports(report.getAddonReports());
 
                 if (requester != null && requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
                     String label = requester.getFieldChoiceFilterLabel();
