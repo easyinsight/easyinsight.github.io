@@ -4,6 +4,7 @@ import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.NodeFactory;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.generated.CalculationsParser;
+import com.easyinsight.core.ReportKey;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.logging.LogClass;
@@ -95,6 +96,22 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
         parser.setTreeAdaptor(new NodeFactory());
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
         Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+
+
+        List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
+
+        if (!structure.onOrAfter(structure.getInsightRequestMetadata().getDerived(this))) {
+            return analysisItemList;
+        }
+
+        if (getKey() instanceof ReportKey) {
+            return analysisItemList;
+        }
+
+        //analysisItemList.add(this);
+
+        //if (!includeFilters) return analysisItemList;
+
         try {
             ret = parser.startExpr();
 
@@ -129,16 +146,6 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
 
         Set<KeySpecification> specs = variableVisitor.getVariableList();
 
-        List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
-
-        if (!structure.onOrAfter(getPipelineName())) {
-            return analysisItemList;
-        }
-
-        //analysisItemList.add(this);
-
-        //if (!includeFilters) return analysisItemList;
-
         for (KeySpecification spec : specs) {
             AnalysisItem analysisItem;
             try {
@@ -147,7 +154,12 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
+                for (AnalysisItem analysisItem1 : analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure)) {
+                    if (structure.getInsightRequestMetadata().getPipelines(analysisItem).isEmpty()) {
+                        structure.getInsightRequestMetadata().getPipelines(analysisItem).add(structure.getInsightRequestMetadata().getDerived(this));
+                    }
+                    analysisItemList.add(analysisItem1);
+                }
             }
         }
 
