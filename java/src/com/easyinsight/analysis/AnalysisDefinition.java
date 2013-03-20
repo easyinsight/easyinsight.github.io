@@ -479,6 +479,11 @@ public class AnalysisDefinition implements Cloneable {
         if (analysisDefinition.getAddedItems() != null) {
             allFields.addAll(analysisDefinition.getAddedItems());
         }
+        if (analysisDefinition.getReportStubs() != null) {
+            for (ReportStub reportStub : analysisDefinition.getReportStubs()) {
+                allFields.addAll(new AnalysisStorage().getAnalysisDefinition(reportStub.getReportID()).createStructure().values());
+            }
+        }
 
         List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
 
