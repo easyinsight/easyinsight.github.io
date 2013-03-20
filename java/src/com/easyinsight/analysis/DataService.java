@@ -143,7 +143,16 @@ public class DataService {
         WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(addonReportID, conn);
         Map<String, AnalysisItem> structure = report.createStructure();
         for (AnalysisItem item : structure.values()) {
-            AnalysisItem clone = item.clone();
+            AnalysisItem clone;
+            if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                clone = new AnalysisDateDimension();
+            } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
+                clone = new AnalysisMeasure();
+                clone.setFormattingConfiguration(item.getFormattingConfiguration());
+            } else {
+                clone = new AnalysisDimension();
+            }
+            clone.setDisplayName(item.getDisplayName());
             ReportKey reportKey = new ReportKey();
             reportKey.setParentKey(item.getKey());
             reportKey.setReportID(addonReportID);
