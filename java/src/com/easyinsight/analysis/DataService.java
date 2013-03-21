@@ -145,10 +145,19 @@ public class DataService {
         for (AnalysisItem item : structure.values()) {
             AnalysisItem clone;
             if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                clone = new AnalysisDateDimension();
+                AnalysisDateDimension baseDate = (AnalysisDateDimension) item;
+                AnalysisDateDimension date = new AnalysisDateDimension();
+                date.setDateLevel(baseDate.getDateLevel());
+                date.setOutputDateFormat(baseDate.getOutputDateFormat());
+                clone = date;
             } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
-                clone = new AnalysisMeasure();
-                clone.setFormattingConfiguration(item.getFormattingConfiguration());
+                AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
+                AnalysisMeasure measure = new AnalysisMeasure();
+                measure.setFormattingConfiguration(item.getFormattingConfiguration());
+                measure.setAggregation(baseMeasure.getAggregation());
+                measure.setPrecision(baseMeasure.getPrecision());
+                measure.setMinPrecision(baseMeasure.getMinPrecision());
+                clone = measure;
             } else {
                 clone = new AnalysisDimension();
             }
@@ -360,6 +369,7 @@ public class DataService {
                 tempReport.setFilterDefinitions(analysisDefinition.getFilterDefinitions());
                 tempReport.setColumns(columns);
                 tempReport.setDataFeedID(analysisDefinition.getDataFeedID());
+                tempReport.setAddonReports(analysisDefinition.getAddonReports());
                 tempReport.setAddedItems(analysisDefinition.getAddedItems());
                 tempReport.setMarmotScript(analysisDefinition.getMarmotScript());
                 tempReport.setReportRunMarmotScript(analysisDefinition.getReportRunMarmotScript());
@@ -810,6 +820,7 @@ public class DataService {
             tempReport.setMarmotScript(analysisDefinition.getMarmotScript());
             tempReport.setReportRunMarmotScript(analysisDefinition.getReportRunMarmotScript());
             tempReport.setJoinOverrides(analysisDefinition.getJoinOverrides());
+            tempReport.setAddonReports(analysisDefinition.getAddonReports());
             InsightRequestMetadata metadata = new InsightRequestMetadata();
             metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
@@ -1133,6 +1144,7 @@ public class DataService {
                 tempReport.setAddedItems(analysisDefinition.getAddedItems());
                 tempReport.setMarmotScript(analysisDefinition.getMarmotScript());
                 tempReport.setReportRunMarmotScript(analysisDefinition.getReportRunMarmotScript());
+                tempReport.setAddonReports(analysisDefinition.getAddonReports());
                 tempReport.setJoinOverrides(analysisDefinition.getJoinOverrides());
                 InsightRequestMetadata metadata = new InsightRequestMetadata();
                 metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
