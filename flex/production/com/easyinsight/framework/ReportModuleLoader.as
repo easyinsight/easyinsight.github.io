@@ -23,6 +23,7 @@ import com.easyinsight.analysis.form.FormModule;
 import com.easyinsight.analysis.gauge.GaugeModule;
 import com.easyinsight.analysis.list.ListModule;
 import com.easyinsight.analysis.summary.SummaryModule;
+import com.easyinsight.analysis.text.TextModule;
 import com.easyinsight.analysis.tree.TreeModule;
 import com.easyinsight.analysis.trend.TrendGridModule;
 import com.easyinsight.analysis.trend.TrendModule;
@@ -70,7 +71,7 @@ public class ReportModuleLoader extends EventDispatcher {
                 _reportRendererModule == "YTD.swf" || _reportRendererModule == "CompareYears.swf" ||
                 _reportRendererModule == "FormModule.swf" || _reportRendererModule == "PieChartModule.swf" ||
                 _reportRendererModule == "SummaryModule.swf" || _reportRendererModule == "BubbleChartModule.swf" ||
-                _reportRendererModule == "PlotChartModule.swf") {
+                _reportRendererModule == "PlotChartModule.swf" || _reportRendererModule == "TextModule.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
@@ -143,6 +144,8 @@ public class ReportModuleLoader extends EventDispatcher {
                 return new BubbleChartModule();
             } else if (moduleName == "PlotChartModule.swf") {
                 return new PlotChartModule();
+            } else if (moduleName == "TextModule.swf") {
+                return new TextModule();
             }
         }
         return moduleInfo.factory.create();
