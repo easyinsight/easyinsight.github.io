@@ -55,6 +55,7 @@ import mx.controls.Alert;
         public static const YTD:int = 38;
         public static const COMPARE_YEARS:int = 39;
         public static const SUMMARY:int = 40;
+        public static const TEXT:int = 41;
 
 		public var dataFeedID:int;
         public var urlKey:String;
