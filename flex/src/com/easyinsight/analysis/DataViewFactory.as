@@ -581,6 +581,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.urlKey = source.urlKey;
         target.cacheMinutes = source.cacheMinutes;
         target.cacheable = source.cacheable;
+        target.addonReports = source.addonReports;
 
         copyPropertyIfExists(source, target, "multiColors");
         copyPropertyIfExists(source, target, "labelPosition");
