@@ -73,6 +73,7 @@
         <mapping class="com.easyinsight.analysis.HeatMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.FormDefinitionState"/>
         <mapping class="com.easyinsight.analysis.VerticalListDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.TextDefinitionState"/>
         <mapping class="com.easyinsight.analysis.CombinedVerticalListDefinitionState"/>
         <mapping class="com.easyinsight.analysis.CompareYearsDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TrendDefinitionState"/>

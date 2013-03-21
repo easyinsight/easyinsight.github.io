@@ -153,6 +153,11 @@ public class AnalysisDefinitionFactory {
             trendDefinitionState.setDayWindow(String.valueOf(wsTrendDefinition.getDayWindow()));
             trendDefinitionState.setLinks(wsTrendDefinition.getLinks());
             analysisDefinitionState = trendDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TEXT)) {
+            WSTextDefinition wsTextDefinition = (WSTextDefinition) wsAnalysisDefinition;
+            TextDefinitionState textDefinitionState = new TextDefinitionState();
+            textDefinitionState.setTextReportID(wsTextDefinition.getTextReportID());
+            analysisDefinitionState = textDefinitionState;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());
         }

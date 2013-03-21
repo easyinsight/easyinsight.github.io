@@ -492,6 +492,9 @@ public class AnalysisDefinition implements Cloneable {
                         AnalysisDateDimension date = new AnalysisDateDimension();
                         date.setDateLevel(baseDate.getDateLevel());
                         date.setOutputDateFormat(baseDate.getOutputDateFormat());
+                        // Charles, questions about reports, 303-324-8520
+                        // 617-459-5807, videos don't seem to work in chrome
+                        //
                         clone = date;
                     } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                         AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
