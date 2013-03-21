@@ -66,6 +66,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int YTD = 38;
     public static final int COMPARE_YEARS = 39;
     public static final int SUMMARY = 40;
+    public static final int TEXT = 41;
 
     private String name;
     private String authorName;
@@ -399,7 +400,42 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         if (addonReports != null) {
             for (AddonReport addonReport : addonReports) {
-                items.addAll(new AnalysisStorage().getAnalysisDefinition(addonReport.getReportID()).createStructure().values());
+                Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+                List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
+                WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(addonReport.getReportID());
+                Map<String, AnalysisItem> structure = report.createStructure();
+                for (AnalysisItem item : structure.values()) {
+                    AnalysisItem clone;
+                    if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                        AnalysisDateDimension baseDate = (AnalysisDateDimension) item;
+                        AnalysisDateDimension date = new AnalysisDateDimension();
+                        date.setDateLevel(baseDate.getDateLevel());
+                        date.setOutputDateFormat(baseDate.getOutputDateFormat());
+                        clone = date;
+                    } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
+                        AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
+                        AnalysisMeasure measure = new AnalysisMeasure();
+                        measure.setFormattingConfiguration(item.getFormattingConfiguration());
+                        measure.setAggregation(baseMeasure.getAggregation());
+                        measure.setPrecision(baseMeasure.getPrecision());
+                        measure.setMinPrecision(baseMeasure.getMinPrecision());
+                        clone = measure;
+                    } else {
+                        clone = new AnalysisDimension();
+                    }
+                    clone.setDisplayName(item.getDisplayName());
+                    ReportKey reportKey = new ReportKey();
+                    reportKey.setParentKey(item.getKey());
+                    reportKey.setReportID(addonReport.getReportID());
+                    clone.setKey(reportKey);
+                    replacementMap.put(item.getAnalysisItemID(), clone);
+                    fields.add(clone);
+                }
+                ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+                for (AnalysisItem clone : fields) {
+                    clone.updateIDs(replacements);
+                    items.add(clone);
+                }
             }
         }
         return items;

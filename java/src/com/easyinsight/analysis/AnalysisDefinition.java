@@ -481,7 +481,42 @@ public class AnalysisDefinition implements Cloneable {
         }
         if (analysisDefinition.getReportStubs() != null) {
             for (ReportStub reportStub : analysisDefinition.getReportStubs()) {
-                allFields.addAll(new AnalysisStorage().getAnalysisDefinition(reportStub.getReportID()).createStructure().values());
+                Map<Long, AnalysisItem> xReplacementMap = new HashMap<Long, AnalysisItem>();
+                List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
+                WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportStub.getReportID());
+                Map<String, AnalysisItem> structure = report.createStructure();
+                for (AnalysisItem item : structure.values()) {
+                    AnalysisItem clone;
+                    if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                        AnalysisDateDimension baseDate = (AnalysisDateDimension) item;
+                        AnalysisDateDimension date = new AnalysisDateDimension();
+                        date.setDateLevel(baseDate.getDateLevel());
+                        date.setOutputDateFormat(baseDate.getOutputDateFormat());
+                        clone = date;
+                    } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
+                        AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
+                        AnalysisMeasure measure = new AnalysisMeasure();
+                        measure.setFormattingConfiguration(item.getFormattingConfiguration());
+                        measure.setAggregation(baseMeasure.getAggregation());
+                        measure.setPrecision(baseMeasure.getPrecision());
+                        measure.setMinPrecision(baseMeasure.getMinPrecision());
+                        clone = measure;
+                    } else {
+                        clone = new AnalysisDimension();
+                    }
+                    clone.setDisplayName(item.getDisplayName());
+                    ReportKey reportKey = new ReportKey();
+                    reportKey.setParentKey(item.getKey());
+                    reportKey.setReportID(reportStub.getReportID());
+                    clone.setKey(reportKey);
+                    xReplacementMap.put(item.getAnalysisItemID(), clone);
+                    fields.add(clone);
+                }
+                ReplacementMap replacements = ReplacementMap.fromMap(xReplacementMap);
+                for (AnalysisItem clone : fields) {
+                    clone.updateIDs(replacements);
+                    allFields.add(clone);
+                }
             }
         }
 
