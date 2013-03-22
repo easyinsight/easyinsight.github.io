@@ -31,6 +31,7 @@ public class LogClass {
     }
 
     public static void error(String message) {
+        Thread.dumpStack();
         if(ConfigLoader.instance().isProduction()) {
             try {
                 String username = null;
@@ -49,6 +50,7 @@ public class LogClass {
     }
 
     public static void error(String message, Throwable e) {
+        Thread.dumpStack();
         if(ConfigLoader.instance().isProduction()) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream writer = new PrintStream(baos);
@@ -71,6 +73,7 @@ public class LogClass {
     }
 
     public static void error(Throwable e) {
+        Thread.dumpStack();
         if(ConfigLoader.instance().isProduction()) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream writer = new PrintStream(baos);
@@ -83,6 +86,29 @@ public class LogClass {
             String msg = new String(baos.toByteArray());
             try {
                 new SendGridEmail().sendEmail("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + e.getClass().getName(), msg, "donotreply@easy-insight.com", false, "Easy Insight");
+            }
+            catch(Exception ex) {
+                // do nothing, wtf do you do at this point?
+                ex.printStackTrace();
+            }
+        }
+        log.error(e.getMessage(), e);
+    }
+
+    public static void apiError(Throwable e) {
+        Thread.dumpStack();
+        if(ConfigLoader.instance().isProduction()) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintStream writer = new PrintStream(baos);
+            e.printStackTrace(writer);
+            String username = null;
+            try {
+                username = SecurityUtil.getUserName();
+            } catch(Exception e1) {
+            }
+            String msg = new String(baos.toByteArray());
+            try {
+                new SendGridEmail().sendEmail("errors@easy-insight.com", "[API] Error! " + (username != null ? username : "Unknown") + ": " + e.getClass().getName(), msg, "donotreply@easy-insight.com", false, "Easy Insight");
             }
             catch(Exception ex) {
                 // do nothing, wtf do you do at this point?
