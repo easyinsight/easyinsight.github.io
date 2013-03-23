@@ -1,12 +1,17 @@
 package com.easyinsight.export;
 
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.util.RandomTextGenerator;
+import com.xerox.amazonws.sns.NotificationService;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.sql.*;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -58,4 +63,35 @@ public abstract class SeleniumPostProcessor {
     }
 
     public abstract void process(byte[] bytes, EIConnection conn, long accountID, long requestID, long processorID);
+
+    public void processDashboardPDF(List<Page> pages, EIConnection conn, long requestID, long processorID, boolean landscapeOrientation) {
+        try {
+            byte[] pdf = new ExportService().toImagePDF(pages, landscapeOrientation);
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PNG_EXPORT (USER_ID, PNG_IMAGE, REPORT_NAME, ANONYMOUS_ID) VALUES (?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            System.out.println("on request " + requestID);
+            String topicName = ConfigLoader.instance().getReportDeliveryQueue();
+
+            ByteArrayInputStream bais = new ByteArrayInputStream(pdf);
+            BufferedInputStream bis = new BufferedInputStream(bais, 1024);
+            long userID = SecurityUtil.getUserID(false);
+            if (userID == 0) {
+                insertStmt.setNull(1, Types.BIGINT);
+            } else {
+                insertStmt.setLong(1, SecurityUtil.getUserID());
+            }
+            insertStmt.setBinaryStream(2, bis, pdf.length);
+            insertStmt.setString(3, "export");
+            String anonID = RandomTextGenerator.generateText(20);
+            insertStmt.setString(4, anonID);
+            insertStmt.execute();
+            long id = Database.instance().getAutoGenKey(insertStmt);
+            System.out.println("sending PDF of " + requestID + " to queue");
+            NotificationService ns = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            ns.createTopic(topicName);
+            ns.publish("arn:aws:sns:us-east-1:808335860417:" + topicName, processorID + "|" + id, null);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+    }
 }
