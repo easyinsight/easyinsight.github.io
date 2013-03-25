@@ -15,6 +15,8 @@ import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.preferences.ApplicationSkin;
+import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
@@ -107,6 +109,10 @@ public class AnalysisService {
     }
 
     public ReportInfo getReportInfo(long reportID) {
+        return getReportInfo(reportID, false);
+    }
+
+    public ReportInfo getReportInfo(long reportID, boolean obtainHeader) {
         try {
             SecurityUtil.authorizeInsight(reportID);
         } catch (Exception e) {
@@ -124,6 +130,30 @@ public class AnalysisService {
                 dataSourceAccessible = false;
             }
             ReportInfo reportInfo = new ReportInfo();
+            if (obtainHeader) {
+                EIConnection conn = Database.instance().getConnection();
+                Session session = Database.instance().createSession(conn);
+                try {
+                    PreparedStatement stmt = conn.prepareStatement("SELECT USER.USER_ID, USER.ACCOUNT_ID FROM USER_TO_ANALYSIS, USER WHERE USER_TO_ANALYSIS.ANALYSIS_ID = ? AND " +
+                            "USER_TO_ANALYSIS.USER_ID = USER.USER_ID");
+                    stmt.setLong(1, report.getAnalysisID());
+                    ResultSet rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        long userID = rs.getLong(1);
+                        long accountID = rs.getLong(2);
+                        ApplicationSkin skin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
+                        reportInfo.setHeaderImage(skin.getReportHeaderImage());
+                        reportInfo.setBackgroundColor(skin.getReportBackgroundColor());
+                        reportInfo.setTextColor(skin.getReportTextColor());
+                    }
+
+                } finally {
+                    session.close();
+                    Database.closeConnection(conn);
+                }
+
+            }
+
             reportInfo.setAdmin(dataSourceAccessible);
             reportInfo.setReport(report);
             return reportInfo;
@@ -198,6 +228,7 @@ public class AnalysisService {
             JoinOverride joinOverride = new JoinOverride();
             FeedDefinition source = new FeedStorage().getFeedDefinitionData(connection.getSourceFeedID());
             FeedDefinition target = new FeedStorage().getFeedDefinitionData(connection.getTargetFeedID());
+            joinOverride.setDataSourceID(compositeFeedDefinition.getDataFeedID());
             joinOverride.setSourceItem(findSourceItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
             joinOverride.setTargetItem(findTargetItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
             if (joinOverride.getSourceItem() != null && joinOverride.getTargetItem() != null) {
@@ -260,7 +291,7 @@ public class AnalysisService {
         }
         return analysisItem;
     }
-    
+
     private AnalysisItem findLabelItem(List<AnalysisItem> items) {
         for (AnalysisItem item : items) {
             if (item.isLabelColumn()) {
@@ -455,7 +486,7 @@ public class AnalysisService {
                 String relatedProviderString = row.getValue(providerRecordID.createAggregateKey()).toString();
                 map.put(key, relatedProviderString);
 
-              //  relatedProviders.add(relatedProviderString);
+                //  relatedProviders.add(relatedProviderString);
             }
 
 
@@ -629,7 +660,7 @@ public class AnalysisService {
             Database.closeConnection(conn);
         }
     }
-    
+
     public void deleteRow(ActualRow actualRow, long dataSourceID) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();
@@ -654,7 +685,7 @@ public class AnalysisService {
             Database.closeConnection(conn);
         }
     }
-    
+
     public void updateRow(ActualRow actualRow, long dataSourceID) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();
@@ -688,7 +719,7 @@ public class AnalysisService {
             Database.closeConnection(conn);
         }
     }
-    
+
     public ActualRowSet setupAddRow(long dataSourceID, int offset) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
@@ -902,7 +933,7 @@ public class AnalysisService {
             FeedDefinition match = null;
             for (CompositeFeedNode node : def.getCompositeFeedNodes()) {
                 if (node.getDataSourceName().equals(name)) {
-                     match = new FeedStorage().getFeedDefinitionData(node.getDataFeedID());
+                    match = new FeedStorage().getFeedDefinitionData(node.getDataFeedID());
                 }
             }
             if (match == null) {
@@ -1121,6 +1152,19 @@ public class AnalysisService {
                             filterValueDefinition.setInclusive(true);
                             filterValueDefinition.setFilteredValues(Arrays.asList(data.get(grouping.qualifiedName())));
                             filters.add(filterValueDefinition);
+                        }
+                        if (grouping.getFilters() != null) {
+                            for (FilterDefinition filter : grouping.getFilters()) {
+                                FilterDefinition clone;
+                                try {
+                                    clone = filter.clone();
+                                } catch (CloneNotSupportedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                clone.setToggleEnabled(true);
+                                clone.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                                filters.add(clone);
+                            }
                         }
                     }
                 }
@@ -1590,6 +1634,7 @@ public class AnalysisService {
                     manualDeleteStmt.executeUpdate();
                 }
             }
+            new AnalysisStorage().clearCache(reportID, dbAnalysisDef.getDataFeedID());
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
