@@ -313,9 +313,15 @@ public class CompositeFeedDefinition extends FeedDefinition {
             List<AnalysisItem> newFields = new ArrayList<AnalysisItem>();
             for (AnalysisItem field : getFields()) {
                 if (field.getAnalysisItemID() != 0) {
-                    replacementMap.put(field.getAnalysisItemID(), childToParentMap.get(field.createAggregateKey()));
+                    AnalysisItem item = childToParentMap.get(field.createAggregateKey());
+                    if (item != null) {
+                        replacementMap.put(field.getAnalysisItemID(), item);
+                    } else {
+                        replacementMap.put(field.getAnalysisItemID(), field);
+                    }
                 } else {
                     // ????
+                    newFields.add(field);
                 }
             }
 
