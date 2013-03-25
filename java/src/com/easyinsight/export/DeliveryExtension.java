@@ -12,16 +12,19 @@ import java.sql.SQLException;
  * Time: 5:01 PM
  */
 public class DeliveryExtension {
-    public void save(EIConnection conn, long deliveryID, long deliveryToReportID) throws SQLException {
+    public void save(EIConnection conn, long deliveryID, long deliveryToReportID, long dashboardID) throws SQLException {
 
     }
 
-    public static DeliveryExtension load(EIConnection conn, long reportDeliveryID, long deliveryToReportID, int format) throws SQLException {
+    public static DeliveryExtension load(EIConnection conn, long reportDeliveryID, long deliveryToReportID, int format, long dashboardDeliveryID) throws SQLException {
         if (format == ReportDelivery.PDF) {
             PreparedStatement stmt;
             if (reportDeliveryID > 0) {
                 stmt = conn.prepareStatement("SELECT show_header, export_mode, width, height FROM pdf_delivery_extension WHERE report_delivery_id = ?");
                 stmt.setLong(1, reportDeliveryID);
+            } else if (dashboardDeliveryID > 0) {
+                stmt = conn.prepareStatement("SELECT show_header, export_mode, width, height FROM pdf_delivery_extension WHERE delivery_to_dashboard_id = ?");
+                stmt.setLong(1, dashboardDeliveryID);
             } else {
                 stmt = conn.prepareStatement("SELECT show_header, export_mode, width, height FROM pdf_delivery_extension WHERE delivery_to_report_id = ?");
                 stmt.setLong(1, deliveryToReportID);
