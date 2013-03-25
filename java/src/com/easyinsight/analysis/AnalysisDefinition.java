@@ -492,9 +492,6 @@ public class AnalysisDefinition implements Cloneable {
                         AnalysisDateDimension date = new AnalysisDateDimension();
                         date.setDateLevel(baseDate.getDateLevel());
                         date.setOutputDateFormat(baseDate.getOutputDateFormat());
-                        // Charles, questions about reports, 303-324-8520
-                        // 617-459-5807, videos don't seem to work in chrome
-                        //
                         clone = date;
                     } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                         AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
@@ -507,7 +504,8 @@ public class AnalysisDefinition implements Cloneable {
                     } else {
                         clone = new AnalysisDimension();
                     }
-                    clone.setDisplayName(item.getDisplayName());
+                    clone.setOriginalDisplayName(item.toDisplay());
+                    clone.setDisplayName(report.getName() + " - " + item.toDisplay());
                     ReportKey reportKey = new ReportKey();
                     reportKey.setParentKey(item.getKey());
                     reportKey.setReportID(reportStub.getReportID());

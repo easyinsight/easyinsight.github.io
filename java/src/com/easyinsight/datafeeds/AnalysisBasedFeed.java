@@ -42,7 +42,7 @@ public class AnalysisBasedFeed extends Feed {
         Map<Key, Key> map = new HashMap<Key, Key>();
         Map<String, AnalysisItem> map1 = new HashMap<String, AnalysisItem>();
         for (AnalysisItem analysisItem : analysisItems) {
-            map1.put(analysisItem.toDisplay(), analysisItem);
+            map1.put(analysisItem.getOriginalDisplayName(), analysisItem);
         }
         for (AnalysisItem analysisItem : fields) {
             AnalysisItem mapped = map1.get(analysisItem.toDisplay());

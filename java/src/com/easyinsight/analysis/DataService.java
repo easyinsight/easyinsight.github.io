@@ -161,7 +161,8 @@ public class DataService {
             } else {
                 clone = new AnalysisDimension();
             }
-            clone.setDisplayName(item.getDisplayName());
+            clone.setOriginalDisplayName(item.toDisplay());
+            clone.setDisplayName(report.getName() + " - " + item.toDisplay());
             ReportKey reportKey = new ReportKey();
             reportKey.setParentKey(item.getKey());
             reportKey.setReportID(addonReportID);
