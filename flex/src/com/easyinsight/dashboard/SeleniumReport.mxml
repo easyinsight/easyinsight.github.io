@@ -21,17 +21,15 @@
         import com.easyinsight.analysis.EmbeddedViewFactory;
         import com.easyinsight.analysis.IEmbeddedReportController;
         import com.easyinsight.analysis.InsightResponse;
-        import com.easyinsight.analysis.PNGCreator;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.report.ReportSetupEvent;
+        import com.easyinsight.skin.ImageLoadEvent;
+        import com.easyinsight.skin.ImageLoader;
         import com.easyinsight.util.PNGEnc;
-        import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.controls.Label;
-        import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
 
         [Bindable]
@@ -43,8 +41,6 @@
         private var exportIcon:Class;
 
         private function initStuff():void {
-            //UserAudit.instance().audit(UserAudit.USED_EMBEDDED);
-
             if (_urlKey != null) {
                 analysisService.openAnalysisIfPossible.send(_urlKey);
             } else {
@@ -71,6 +67,9 @@
 
         [Bindable]
         private var dataSource:DataSourceInfo;
+
+        [Bindable]
+        public var showHeader:Boolean;
 
         private var _filterDefinitions:ArrayCollection;
 
@@ -171,8 +170,8 @@
         }
 
         private function onTimer(event:TimerEvent):void {
-            var bd:BitmapData = new BitmapData(coreVBox.width, coreVBox.height);
-            bd.draw(coreVBox);
+            var bd:BitmapData = new BitmapData(canvas.width, canvas.height);
+            bd.draw(canvas);
             var ba:ByteArray = PNGEnc.encode(bd);
             exportService.seleniumDraw.send(_seleniumID, ba);
             timer.stop();
@@ -194,6 +193,7 @@
                 var controller:IEmbeddedReportController = new controllerClass();
                 dataViewFactory = controller.createEmbeddedView();
                 dataViewFactory.reportID = _analysisID;
+                dataViewFactory.showHeader = showHeader;
                 dataViewFactory.dataSourceID = _dataSourceID;
                 coreVBox.addChild(dataViewFactory);
                 dataViewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
@@ -204,9 +204,31 @@
         }
 
         private function onSetup(event:ReportSetupEvent):void {
+            reportLabel.setStyle("color", event.reportInfo.textColor);
+            headerArea.setStyle("backgroundColor", event.reportInfo.backgroundColor);
+            if (event.reportInfo.headerImage != null) {
+                imageLoader = new ImageLoader();
+                imageLoader.addEventListener(ImageLoadEvent.IMAGE_LOADED, onHeaderLoaded);
+                imageLoader.load(event.reportInfo.headerImage.id);
+            }
             dataViewFactory.filterDefinitions = event.reportInfo.report.filterDefinitions;
             dataViewFactory.refresh();
         }
+
+        private function onHeaderLoaded(event:ImageLoadEvent):void {
+            logoImage.source = event.bitmap;
+            imageLoader.removeEventListener(ImageLoadEvent.IMAGE_LOADED, onHeaderLoaded);
+            imageLoader = null;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            /*if (!showHeader) {
+                canvas.removeChild(headerArea);
+            }*/
+        }
+
+        private var imageLoader:ImageLoader;
 
         private var _snapshotOnLoad:Boolean = false;
 
@@ -228,6 +250,13 @@
         public function refreshData():void {
             dataViewFactory.refresh();
         }
+
+        [Bindable]
+        private var headerFontSize:int;
+
+
+        [Bindable]
+        private var maxHeaderWidth:int;
         ]]>
     </mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
@@ -236,6 +265,17 @@
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="seleniumDraw" result="sent()"/>
     </mx:RemoteObject>
-    <mx:Canvas id="coreVBox" width="{reportWidth}" height="{reportHeight}">
-    </mx:Canvas>
+    <mx:VBox id="canvas">
+        <mx:HBox width="100%" id="headerArea" paddingTop="5" paddingBottom="5" paddingLeft="10" verticalAlign="middle">
+            <mx:Box backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" borderColor="#FFFFFF" borderThickness="1" cornerRadius="5"
+                    borderStyle="solid">
+                <mx:Image id="logoImage"/>
+            </mx:Box>
+            <mx:Spacer width="100%"/>
+            <mx:Label text="{_reportName}" fontSize="{headerFontSize}" maxWidth="{maxHeaderWidth}" id="reportLabel"/>
+            <mx:Spacer width="100%"/>
+        </mx:HBox>
+        <mx:Canvas id="coreVBox" width="{reportWidth}" height="{reportHeight}">
+        </mx:Canvas>
+    </mx:VBox>
 </mx:VBox>

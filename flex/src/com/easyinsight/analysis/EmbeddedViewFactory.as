@@ -249,8 +249,10 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         analysisService = new RemoteObject();
         analysisService.destination = "analysisDefinition";
         analysisService.getReportInfo.addEventListener(ResultEvent.RESULT, gotReport);
-        analysisService.getReportInfo.send(_reportID);
+        analysisService.getReportInfo.send(_reportID, showHeader);
     }
+
+    public var showHeader:Boolean = false;
 
     public function gotReport(event:ResultEvent):void {
         var info:ReportInfo = analysisService.getReportInfo.lastResult as ReportInfo;
