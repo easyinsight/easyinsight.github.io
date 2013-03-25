@@ -1334,9 +1334,13 @@ public class ExportService {
         WSTextDefinition wsTextDefinition = (WSTextDefinition) listDefinition;
         StringBuilder sb = new StringBuilder();
         for (IRow row : dataSet.getRows()) {
-            for (AnalysisItem item : wsTextDefinition.getColumns()) {
+            for (int i = 0; i < wsTextDefinition.getColumns().size(); i++) {
+                AnalysisItem item = wsTextDefinition.getColumns().get(i);
                 Value value = row.getValue(item);
                 sb.append(value.toString());
+                if (i < wsTextDefinition.getColumns().size() - 1) {
+                    sb.append(" ");
+                }
             }
         }
         return sb.toString();
