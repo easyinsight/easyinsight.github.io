@@ -310,8 +310,13 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 childToParentMap.put(field.createAggregateKey(), field);
             }
 
+            List<AnalysisItem> newFields = new ArrayList<AnalysisItem>();
             for (AnalysisItem field : getFields()) {
-                replacementMap.put(field.getAnalysisItemID(), childToParentMap.get(field.createAggregateKey()));
+                if (field.getAnalysisItemID() != 0) {
+                    replacementMap.put(field.getAnalysisItemID(), childToParentMap.get(field.createAggregateKey()));
+                } else {
+                    // ????
+                }
             }
 
             List<AnalysisItem> fields = getFields() == null ? new ArrayList<AnalysisItem>() : getFields();
@@ -367,6 +372,10 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
 
             ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+
+            for (AnalysisItem analysisItem : newFields) {
+                replacements.addField(analysisItem, false);
+            }
 
             for (AnalysisItem analysisItem : getFields()) {
                 analysisItem.updateIDs(replacements);
