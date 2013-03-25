@@ -236,6 +236,12 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             loadingBar.indeterminate = true;
             addChild(loadingBar);
         }
+        if (_filterDefinition != null && _analysisItem == null) {
+            if (deleteButton) {
+                addChild(deleteButton);
+            }
+            return;
+        }
         if (_filterDefinition == null || _filterDefinition.cachedValues == null) {
             dataService = new RemoteObject();
             dataService.destination = "data";
