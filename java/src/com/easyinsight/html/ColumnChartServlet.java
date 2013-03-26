@@ -120,9 +120,6 @@ public class ColumnChartServlet extends HtmlServlet {
         object.put("ticks", ticks);
 
         object.put("values", blahArray);
-
-
-        System.out.println(object.toString());
         response.setContentType("application/json");
         response.getOutputStream().write(object.toString().getBytes());
         response.getOutputStream().flush();

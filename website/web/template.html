@@ -1,0 +1,75 @@
+<div>
+    <script type="text/template" id="stack">
+        <div class="tabbable">
+            <ul class="nav nav-pills" id="<%- id %>">
+                <% _.each(stack_items, function(e, i, l) { %>
+                <li<%- i == 0 ? ' class=active' : '' %>>
+                <a class="argh" data-toggle="tab" href="#stack_<%- id %>_<%- e.item.id %>"><%- typeof(e.label) == "undefined" ? ("Stack Item " + i) : e.label %></a>
+                </li>
+                <% }) %>
+            </ul>
+            <div class="tab-content">
+                <% _.each(stack_items, function(e, i, l) { %>
+                <div id="stack_<%- id %>_<%- e.item.id %>" class="tab-pane<%- i == 0 ? ' active' : '' %>">
+                    <%= dashboardComponent(e.item) %>
+                </div>
+                <% }) %>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="grid">
+        <div class="container-fluid">
+            <% _.each(grid, function(e, i, l) { %>
+            <div class="row-fluid<%- ((i - l.length) == 1) ? '' : ' marginal' %>">
+                <% _.each(e, function(a, j, m) { %>
+                <div class="span<%- Math.max(2, Math.floor(12 / m.length)) %> dashboard_grid">
+                    <%= dashboardComponent(a) %>
+                </div>
+                <% }) %>
+            </div>
+            <% }) %>
+        </div>
+    </script>
+
+    <script type="text/template" id="report_template">
+        <div>
+            <div class="dasbhoardReportHeader"><strong><%- report.name %></strong></div>
+        </div>
+        <div<%- typeof(preferredHeight) == "undefined" ? '' : ' style="height:' + preferredHeight + '"' %>>
+        <div class="dashboardReportDiv" id="<%= report.id %>">
+            <div class="reportArea" id="<%= report.id %>ReportArea">
+            </div>
+            <div class="noData">
+                Loading the report...
+            </div>
+        </div>
+</div>
+</script>
+
+<script type="text/template" id="text_template">
+    <% _.each(item.split("\r"), function(e, i, l) { %>
+    <%- e %> <br/>
+    <% }) %>
+</script>
+
+
+<script type="text/template" id="single_value_filter_template">
+    <label for="<%- id %>"><%- name %><select>
+        <% _.each(values, function(e, i , l) { %>
+        <option<%= selected == e ? ' selected="selected"' : ''%>><%- e %></option>
+        <% }) %>
+    </select></label>
+</script>
+
+<script type="text/template" id="dashboard_template">
+    <div>
+        <% _.each(filters, function(e, i, l) { %>
+            <%= Filter.create(e) %>
+        <% }) %>
+    </div>
+    <div>
+        <%= dashboardComponent(base) %>
+    </div>
+</script>
+</div>

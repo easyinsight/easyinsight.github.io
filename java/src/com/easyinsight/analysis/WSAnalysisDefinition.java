@@ -16,6 +16,8 @@ import java.io.Serializable;
 
 import com.easyinsight.preferences.ImageDescriptor;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.Transient;
 
@@ -903,6 +905,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
         return "$.get('/app/htmlExport?reportID="+getUrlKey()+"&embedded="+htmlReportMetadata.isEmbedded()+"&"+timezoneOffset+"&'+ strParams, function(data) { Utils.noData(data, function() { $('#"+targetDiv+" .reportArea').html(data); }, null, '" + targetDiv + "');});";
+    }
+
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        return null;
     }
 
     public String rootHTML() {

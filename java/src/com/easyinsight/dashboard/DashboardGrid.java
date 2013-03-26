@@ -9,6 +9,9 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.scorecard.Scorecard;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -244,6 +247,26 @@ public class DashboardGrid extends DashboardElement {
         return "updateGrid" + getElementID() + "()";
     }
 
+    @Override
+    public JSONObject toJSON(FilterHTMLMetadata metadata) throws JSONException {
+        JSONObject grid = new JSONObject();
+        grid.put("type", "grid");
+        grid.put("id", getElementID());
+        JSONArray jsonRows = new JSONArray();
+        for(int i = 0;i < rows;i++) {
+            JSONArray jsonColumns = new JSONArray();
+            for(int j = 0;j < columns;j ++) {
+                DashboardGridItem item = findItem(i, j);
+                jsonColumns.put(item.getDashboardElement().toJSON(metadata));
+            }
+            jsonRows.put(jsonColumns);
+        }
+        grid.put("grid", jsonRows);
+        return grid;
+    }
+
+
+
     public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n<script type=\"text/javascript\">\n");
@@ -264,7 +287,6 @@ public class DashboardGrid extends DashboardElement {
                 sb.append("<div class=\"row-fluid\">\n");
             }
 
-            //sb.append("<tr style=\"width:100%\">\r\n");
             for (int j = 0; j < columns; j++) {
                 int span;
                 if (columns == 1) {
@@ -279,7 +301,6 @@ public class DashboardGrid extends DashboardElement {
                     span = 2;
                 }
                 sb.append("<div class=\"span").append(span).append("\" style=\"background-color:#FFFFFF\">");
-                //sb.append("<td style=\"width:"+(100 / columns)+"%\">\r\n");
                 DashboardGridItem item = findItem(i, j);
                 DashboardElement element = item.getDashboardElement();
                 if (element != null) {

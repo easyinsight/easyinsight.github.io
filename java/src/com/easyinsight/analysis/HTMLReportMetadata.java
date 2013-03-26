@@ -35,7 +35,7 @@ public class HTMLReportMetadata {
             params.put("customHeight", customHeight);
             params.put("verticalMargin", verticalMargin);
             String argh = params.toString();
-            argh = argh.replaceAll("\"", "");
+//            argh = argh.replaceAll("\"", "");
             return argh;
         } catch (JSONException e) {
             throw new RuntimeException(e);

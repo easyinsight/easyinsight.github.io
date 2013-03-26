@@ -3,6 +3,8 @@ package com.easyinsight.analysis.definitions;
 import com.easyinsight.analysis.AnalysisTypes;
 import com.easyinsight.analysis.DiagramLink;
 import com.easyinsight.analysis.HTMLReportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -41,12 +43,21 @@ public class WSDiagramDefinition extends WSKPIDefinition {
 
     @Override
     public List<String> javaScriptIncludes() {
-        return Arrays.asList("/js/diagram.js","/js/color.js");    //To change body of overridden methods use File | Settings | File Templates.
+        return Arrays.asList("/js/diagram.js", "/js/color.js");    //To change body of overridden methods use File | Settings | File Templates.
     }
 
     @Override
     public List<String> cssIncludes() {
         return Arrays.asList("/css/diagram.css");
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject diagram = new JSONObject();
+        diagram.put("key", getUrlKey());
+        diagram.put("type", "diagram");
+        diagram.put("url", "/app/diagramChart");
+        return diagram;
     }
 
     @Override

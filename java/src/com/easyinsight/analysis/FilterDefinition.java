@@ -12,6 +12,8 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -437,6 +439,11 @@ public class FilterDefinition implements Serializable, Cloneable {
     public void calculationItems(Map<String, List<AnalysisItem>> map) {
 
     }
+
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
+        return null;
+    }
+
 
     public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         if (!isToggleEnabled()) {

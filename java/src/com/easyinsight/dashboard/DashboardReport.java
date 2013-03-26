@@ -7,6 +7,8 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.Roles;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -113,9 +115,9 @@ public class DashboardReport extends DashboardElement {
         DashboardReport dashboardReport = null;
         PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.title, analysis.data_feed_id, analysis.report_type, analysis.analysis_id, analysis.url_key, " +
                 "dashboard_report.label_placement, dashboard_report.show_label, dashboard_element.preferred_width, dashboard_element.preferred_height," +
-                "dashboard_report.auto_calculate_height, dashboard_report.space_sides from " +
-                "analysis, dashboard_report, dashboard_element where dashboard_report.dashboard_element_id = dashboard_element.dashboard_element_id and " +
-                "dashboard_report.report_id = analysis.analysis_id and dashboard_element.dashboard_element_id = ?");
+                "dashboard_report.auto_calculate_height, dashboard_report.space_sides FROM " +
+                "analysis, dashboard_report, dashboard_element WHERE dashboard_report.dashboard_element_id = dashboard_element.dashboard_element_id AND " +
+                "dashboard_report.report_id = analysis.analysis_id AND dashboard_element.dashboard_element_id = ?");
         queryStmt.setLong(1, elementID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -168,6 +170,22 @@ public class DashboardReport extends DashboardElement {
             return filterDefinitions;
         }
         return null;
+    }
+
+    @Override
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
+        WSAnalysisDefinition reportDefinition = new AnalysisService().openAnalysisDefinition(report.getId());
+        JSONObject reportJSON = new JSONObject();
+        reportJSON.put("type", "report");
+        JSONObject reportDataJSON = new JSONObject();
+        reportDataJSON.put("name", report.getName());
+        reportDataJSON.put("id", report.getUrlKey());
+        reportDataJSON.put("metadata", reportDefinition.toJSON(new HTMLReportMetadata()));
+        reportJSON.put("report", reportDataJSON);
+
+        if(getPreferredHeight() > 0)
+            reportJSON.put("preferredHeight", getPreferredHeight());
+        return reportJSON;
     }
 
     public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
