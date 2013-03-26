@@ -38,11 +38,25 @@ public class AnalysisBasedFeed extends Feed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
+        List<FilterDefinition> reportFilters = new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions());
         List<AnalysisItem> fields = new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values());
         Map<Key, Key> map = new HashMap<Key, Key>();
         Map<String, AnalysisItem> map1 = new HashMap<String, AnalysisItem>();
         for (AnalysisItem analysisItem : analysisItems) {
             map1.put(analysisItem.getOriginalDisplayName(), analysisItem);
+        }
+        Map<FilterDefinition, AnalysisItem> filterMap = new HashMap<FilterDefinition, AnalysisItem>();
+        for (FilterDefinition filter : filters) {
+            if (filter.getField() != null) {
+                for (AnalysisItem analysisItem : fields) {
+                    if (analysisItem.toDisplay().equals(filter.getField().getOriginalDisplayName())) {
+                        filterMap.put(filter, filter.getField());
+                        filter.setField(analysisItem);
+                        break;
+                    }
+                }
+            }
+            analysisDefinition.getFilterDefinitions().add(filter);
         }
         for (AnalysisItem analysisItem : fields) {
             AnalysisItem mapped = map1.get(analysisItem.toDisplay());
@@ -54,6 +68,10 @@ public class AnalysisBasedFeed extends Feed {
         // map this data set back into the original one
         for (Map.Entry<Key, Key> entry : map.entrySet()) {
             dataSet.replaceKey(entry.getKey(), entry.getValue());
+        }
+        analysisDefinition.setFilterDefinitions(reportFilters);
+        for (Map.Entry<FilterDefinition, AnalysisItem> entry : filterMap.entrySet()) {
+            entry.getKey().setField(entry.getValue());
         }
         return dataSet;
     }
