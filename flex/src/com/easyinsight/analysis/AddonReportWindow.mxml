@@ -56,14 +56,15 @@
             }
         }
         ]]></mx:Script>
+    <mx:Text width="330" text="You can add the fields of another report to this report through this window. For example, you might have a report with a set of complex calculations. Rather than trying to replicate the same calculations inside this report, you can refer directly to the other report and reuse the same fields."/>
     <mx:HBox>
-        <util:SaveButton label="Add Report..." click="addReport()"/>
-        <util:SaveButton label="Delete Selected" click="deleteSelected()"/>
+        <util:SaveButton label="Add Report..." click="addReport()" fontSize="12"/>
+        <util:SaveButton label="Delete Selected" click="deleteSelected()" fontSize="12"/>
     </mx:HBox>
     <mx:DataGrid dataProvider="{addonReports}">
         <mx:columns>
-            <mx:DataGridColumn headerText="" itemRenderer="com.easyinsight.analysis.AddonReportCheckbox" width="30" sortable="false"/>
-            <mx:DataGridColumn headerText="Report" dataField="reportName" width="300"/>
+            <mx:DataGridColumn headerText="" itemRenderer="com.easyinsight.analysis.AddonReportCheckbox" width="30" sortable="false" fontSize="12"/>
+            <mx:DataGridColumn headerText="Report" dataField="reportName" width="300" fontSize="12"/>
         </mx:columns>
     </mx:DataGrid>
     <mx:HBox width="100%" horizontalAlign="center">

@@ -345,7 +345,16 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        private var addonCount:int = 0;
+        private var neededAddonCount:int = 0;
+
+        private var newAddonReports:ArrayCollection;
+        private var removedAddonReports:ArrayCollection;
+
         private function onNewAddons(event:AddonReportEvent):void {
+            neededAddonCount = event.addonReports.length;
+            newAddonReports = event.addonReports;
+            removedAddonReports = event.removedReports;
             for each (var addonReport:AddonReport in event.addonReports) {
                 boltOnFields(addonReport);
             }
@@ -395,6 +404,24 @@
                 fieldWrapper.addonReportID = node.addonReportID;
                 wrappers.addItem(fieldWrapper);
             }
+            addonCount++;
+            if (addonCount == neededAddonCount) {
+                addonCount = 0;
+                var items:ArrayCollection = new ArrayCollection();
+                for each (var wrapper1:AnalysisItemWrapper in wrappers) {
+                    items.addItem(wrapper1.analysisItem);
+                }
+                analysisService.generateForAddons.send(analysisDefinition.joinOverrides, analysisDefinition.dataFeedID,
+                        items, newAddonReports, removedAddonReports);
+                newAddonReports = null;
+                removedAddonReports = null;
+                neededAddonCount = 0;
+            }
+        }
+
+        public function generatedAddonJoins():void {
+            var joins:ArrayCollection = analysisService.generateForAddons.lastResult as ArrayCollection;
+            analysisDefinition.joinOverrides = joins;
         }
 
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
@@ -1150,6 +1177,7 @@
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="openAnalysisDefinition" result="gotReport()"/>
         <mx:method name="generatePossibleIntentions" result="gotIntentions()"/>
+        <mx:method name="generateForAddons" result="generatedAddonJoins()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="fieldToDataSourceLevel" result="promoted()"/>

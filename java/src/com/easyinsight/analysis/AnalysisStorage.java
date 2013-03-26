@@ -92,6 +92,7 @@ public class AnalysisStorage {
             List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
             if (results.size() > 0) {
                 AnalysisDefinition savedReport = (AnalysisDefinition) results.get(0);
+                savedReport.validate();
                 analysisDefinition = savedReport.createBlazeDefinition();
             }
             session.getTransaction().commit();
@@ -133,6 +134,7 @@ public class AnalysisStorage {
             List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
             if (results.size() > 0) {
                 AnalysisDefinition savedReport = (AnalysisDefinition) results.get(0);
+                savedReport.validate();
                 analysisDefinition = savedReport.createBlazeDefinition();
             }
             session.getTransaction().commit();

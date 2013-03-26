@@ -28,8 +28,16 @@ public class JoinOverride {
 
     public function toConnection():CompositeFeedConnection {
         var connection:CompositeFeedConnection = new CompositeFeedConnection();
-        connection.sourceFeedID = DerivedKey(sourceItem.key).feedID;
-        connection.targetFeedID = DerivedKey(targetItem.key).feedID;
+        if (sourceItem.key is DerivedKey) {
+            connection.sourceFeedID = DerivedKey(sourceItem.key).feedID;
+        } else {
+            connection.sourceReportID = ReportKey(sourceItem.key).reportID;
+        }
+        if (targetItem.key is DerivedKey) {
+            connection.targetFeedID = DerivedKey(targetItem.key).feedID;
+        } else {
+            connection.targetReportID = ReportKey(targetItem.key).reportID;
+        }
         connection.sourceFeedName = sourceName;
         connection.targetFeedName = targetName;
         connection.sourceItem = sourceItem;
