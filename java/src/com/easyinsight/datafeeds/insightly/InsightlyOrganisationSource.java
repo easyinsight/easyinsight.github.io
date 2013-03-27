@@ -30,6 +30,18 @@ public class InsightlyOrganisationSource extends InsightlyBaseSource {
     public static final String DATE_UPDATED = "Organization Date Updated";
     public static final String ORGANISATION_COUNT = "Organization Count";
 
+    public static final String ORGANISATION_TAGS = "Organization Tags";
+
+    public static final String WORK_EMAIL = "Organization Work Email";
+
+    public static final String WORK_PHONE = "Organization Work Phone";
+
+    public static final String WORK_ADDRESS = "Organization Work Address";
+    public static final String WORK_CITY = "Organization Work City";
+    public static final String WORK_STATE = "Organization Work State";
+    public static final String WORK_COUNTRY = "Organization Work Country";
+    public static final String WORK_POSTAL = "Organization Work Postal Code";
+
     public InsightlyOrganisationSource() {
         setFeedName("Organizations");
     }
@@ -37,7 +49,8 @@ public class InsightlyOrganisationSource extends InsightlyBaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(ORGANIZATION_ID, NAME,  BACKGROUND, DATE_CREATED, DATE_UPDATED, ORGANISATION_COUNT);
+        return Arrays.asList(ORGANIZATION_ID, NAME,  BACKGROUND, DATE_CREATED, DATE_UPDATED, ORGANISATION_COUNT, ORGANISATION_TAGS,
+                WORK_PHONE, WORK_EMAIL, WORK_ADDRESS, WORK_CITY, WORK_COUNTRY, WORK_POSTAL, WORK_STATE);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -45,6 +58,55 @@ public class InsightlyOrganisationSource extends InsightlyBaseSource {
         fields.add(new AnalysisDimension(keys.get(ORGANIZATION_ID)));
         fields.add(new AnalysisDimension(keys.get(NAME)));
         fields.add(new AnalysisDimension(keys.get(BACKGROUND)));
+
+        Key workEmailKey = keys.get(WORK_EMAIL);
+        if (workEmailKey == null) {
+            workEmailKey = new NamedKey(WORK_EMAIL);
+        }
+        fields.add(new AnalysisDimension(workEmailKey));
+
+        Key workPhoneKey = keys.get(WORK_PHONE);
+        if (workPhoneKey == null) {
+            workPhoneKey = new NamedKey(WORK_PHONE);
+        }
+        fields.add(new AnalysisDimension(workPhoneKey));
+
+        Key workAddressKey = keys.get(WORK_ADDRESS);
+        if (workAddressKey == null) {
+            workAddressKey = new NamedKey(WORK_ADDRESS);
+        }
+        fields.add(new AnalysisDimension(workAddressKey));
+
+        Key workCityKey = keys.get(WORK_CITY);
+        if (workCityKey == null) {
+            workCityKey = new NamedKey(WORK_CITY);
+        }
+        fields.add(new AnalysisDimension(workCityKey));
+
+        Key workStateKey = keys.get(WORK_STATE);
+        if (workStateKey == null) {
+            workStateKey = new NamedKey(WORK_STATE);
+        }
+        fields.add(new AnalysisDimension(workStateKey));
+
+        Key workCountryKey = keys.get(WORK_COUNTRY);
+        if (workCountryKey == null) {
+            workCountryKey = new NamedKey(WORK_COUNTRY);
+        }
+        fields.add(new AnalysisDimension(workCountryKey));
+
+        Key workPostalKey = keys.get(WORK_POSTAL);
+        if (workPostalKey == null) {
+            workPostalKey = new NamedKey(WORK_POSTAL);
+        }
+        fields.add(new AnalysisDimension(workPostalKey));
+
+        Key contactTagsKey = keys.get(ORGANISATION_TAGS);
+        if (contactTagsKey == null) {
+            contactTagsKey = new NamedKey(ORGANISATION_TAGS);
+        }
+        fields.add(new AnalysisList(contactTagsKey, true, ","));
+
         InsightlyCompositeSource insightlyCompositeSource = (InsightlyCompositeSource) parentDefinition;
         HttpClient httpClient = getHttpClient(insightlyCompositeSource.getInsightlyApiKey(), "x");
         List customFields = runJSONRequest("customFields", insightlyCompositeSource, httpClient);
@@ -111,6 +173,47 @@ public class InsightlyOrganisationSource extends InsightlyBaseSource {
                 row.addValue(keys.get(DATE_CREATED), new DateValue(sdf.parse(contactMap.get("DATE_CREATED_UTC").toString())));
                 row.addValue(keys.get(DATE_UPDATED), new DateValue(sdf.parse(contactMap.get("DATE_UPDATED_UTC").toString())));
                 row.addValue(keys.get(ORGANISATION_COUNT), 1);
+
+                List contactInfos = (List) contactMap.get("CONTACTINFOS");
+                if (contactInfos != null) {
+                    for (Object contactInfoObj : contactInfos) {
+                        Map contactInfoMap = (Map) contactInfoObj;
+                        String type = contactInfoMap.get("TYPE").toString();
+                        String label = contactInfoMap.get("LABEL").toString();
+                        String detail = contactInfoMap.get("DETAIL").toString();
+                        if ("PHONE".equals(type) && "Work".equals(label)) {
+                            row.addValue(keys.get(WORK_PHONE), detail);
+                        } else if ("EMAIL".equals(type) && "Work".equals(label)) {
+                            row.addValue(keys.get(WORK_EMAIL), detail);
+                        }
+                    }
+                }
+                List addresses = (List) contactMap.get("ADDRESSES");
+                if (addresses != null) {
+                    for (Object mapObject : addresses) {
+                        Map map = (Map) mapObject;
+                        String addressType = map.get("ADDRESS_TYPE").toString();
+                        if ("WORK".equals(addressType)) {
+                            row.addValue(WORK_STATE, map.get("STATE").toString());
+                            row.addValue(WORK_COUNTRY, map.get("COUNTRY").toString());
+                            row.addValue(WORK_POSTAL, map.get("POSTCODE").toString());
+                            row.addValue(WORK_ADDRESS, map.get("STREET").toString());
+                            row.addValue(WORK_CITY, map.get("CITY").toString());
+                        }
+                    }
+                }
+                StringBuilder sb = new StringBuilder();
+                List contacts = (List) contactMap.get("TAGS");
+                if (contacts != null) {
+                    for (Object obj : contacts) {
+                        Map map = (Map) obj;
+                        sb.append(map.get("TAG_NAME").toString()).append(",");
+                    }
+                }
+                if (sb.length() > 0) {
+                    sb.deleteCharAt(sb.length() - 1);
+                }
+                row.addValue(keys.get(ORGANISATION_TAGS), sb.toString());
             }
             return dataSet;
         } catch (Exception e) {
