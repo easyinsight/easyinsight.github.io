@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.ReportQueryNodeKey;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.database.Database;
@@ -24,6 +25,7 @@ public class CompositeFeedNode implements Serializable {
     private String dataSourceName;
     private int dataSourceType;
     private int refreshBehavior;
+    private long reportID;
 
     public CompositeFeedNode() {
     }
@@ -85,6 +87,14 @@ public class CompositeFeedNode implements Serializable {
         this.dataFeedID = dataFeedID;
     }
 
+    public long getReportID() {
+        return reportID;
+    }
+
+    public void setReportID(long reportID) {
+        this.reportID = reportID;
+    }
+
     public void store(Connection conn, Long compositeFeedID) throws SQLException {
         PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO COMPOSITE_NODE (DATA_FEED_ID, COMPOSITE_FEED_ID, X, Y) " +
                 "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
@@ -99,6 +109,18 @@ public class CompositeFeedNode implements Serializable {
     }
 
     public QueryStateNode createQueryStateNode(EIConnection conn, List<AnalysisItem> analysisItems, InsightRequestMetadata insightRequestMetadata) {
-        return new QueryStateNode(getDataFeedID(), FeedRegistry.instance().getFeed(getDataFeedID(), conn), conn, analysisItems, insightRequestMetadata);
+        if (reportID > 0) {
+            return new ReportQueryStateNode(reportID, conn, analysisItems, insightRequestMetadata);
+        } else {
+            return new QueryStateNode(getDataFeedID(), FeedRegistry.instance().getFeed(getDataFeedID(), conn), conn, analysisItems, insightRequestMetadata);
+        }
+    }
+
+    public QueryNodeKey createQueryNodeKey() {
+        if (reportID > 0) {
+            return new ReportQueryNodeKey(reportID);
+        } else {
+            return new DataSourceQueryNodeKey(dataFeedID);
+        }
     }
 }

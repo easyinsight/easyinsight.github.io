@@ -144,6 +144,32 @@ public class ExportService {
         }
     }
 
+    public void seleniumDashboardDraw(long requestID, List<Page> pages, boolean landscapeOrientation) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SELENIUM_PROCESSOR_ID, ACCOUNT_ID FROM SELENIUM_REQUEST WHERE SELENIUM_REQUEST_ID = ?");
+            queryStmt.setLong(1, requestID);
+            ResultSet rs = queryStmt.executeQuery();
+            rs.next();
+            long processorID = rs.getLong(1);
+            System.out.println("received " + requestID);
+            SeleniumPostProcessor processor = SeleniumPostProcessor.loadProcessor(processorID, conn);
+            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM SELENIUM_REQUEST WHERE SELENIUM_REQUEST_ID = ?");
+            clearStmt.setLong(1, requestID);
+            clearStmt.executeUpdate();
+            processor.processDashboardPDF(pages, conn, requestID, processorID, landscapeOrientation);
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
     public void archive(long dataSourceID) {
 
         try {
@@ -471,6 +497,8 @@ public class ExportService {
                         analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
                     html = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, true, includeTitle);
+                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TEXT) {
+                    html = ExportService.textReportToHtml(analysisDefinition, conn, insightRequestMetadata);
                 } else {
                     ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
                     html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, new ExportProperties(true, true));
@@ -1299,6 +1327,23 @@ public class ExportService {
             }
         });
         return new VListInfo(dColl, columns);
+    }
+
+    public static String textReportToHtml(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
+        DataSet dataSet = DataService.listDataSet(listDefinition, insightRequestMetadata, conn);
+        WSTextDefinition wsTextDefinition = (WSTextDefinition) listDefinition;
+        StringBuilder sb = new StringBuilder();
+        for (IRow row : dataSet.getRows()) {
+            for (int i = 0; i < wsTextDefinition.getColumns().size(); i++) {
+                AnalysisItem item = wsTextDefinition.getColumns().get(i);
+                Value value = row.getValue(item);
+                sb.append(value.toString());
+                if (i < wsTextDefinition.getColumns().size() - 1) {
+                    sb.append(" ");
+                }
+            }
+        }
+        return sb.toString();
     }
 
     public static String kpiReportToHtmlTable(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean sendIfNoData, boolean includeTitle) throws SQLException {

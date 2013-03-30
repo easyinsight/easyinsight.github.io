@@ -38,4 +38,8 @@ public interface IJoin {
     boolean isOptimized();
 
     void reconcile(List<CompositeFeedNode> compositeFeedNodes, List<AnalysisItem> fields);
+
+    QueryNodeKey sourceQueryNodeKey();
+
+    QueryNodeKey targetQueryNodeKey();
 }

@@ -26,4 +26,5 @@ public interface AnalysisTypes {
     public static final String TREND_GRID = "TrendGrid";
     public static final String DIAGRAM = "Diagram";
     public static final String SUMMARY = "Summary";
+    public static final String TEXT = "Text";
 }

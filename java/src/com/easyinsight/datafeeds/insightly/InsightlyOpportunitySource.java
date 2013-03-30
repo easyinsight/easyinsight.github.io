@@ -50,7 +50,7 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(OPPORTUNITY_ID, NAME, DETAILS, DATE_CREATED, DATE_UPDATED, OPPORTUNITY_COUNT, BID_CURRENCY, BID_AMOUNT, BID_TYPE,
-                BID_DURATION, FORECAST_CLOSE_DATE, ACTUAL_CLOSE_DATE, CATEGORY, STAGE, STATE, RESPONSIBLE_USER, RESPONSIBLE_CREATOR);
+                BID_DURATION, FORECAST_CLOSE_DATE, ACTUAL_CLOSE_DATE, CATEGORY, STAGE, STATE, RESPONSIBLE_USER, RESPONSIBLE_CREATOR, PROBABILITY);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -92,8 +92,13 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
         fields.add(new AnalysisDateDimension(keys.get(FORECAST_CLOSE_DATE), true, AnalysisDateDimension.DAY_LEVEL));
         fields.add(new AnalysisDateDimension(keys.get(ACTUAL_CLOSE_DATE), true, AnalysisDateDimension.DAY_LEVEL));
         fields.add(new AnalysisMeasure(keys.get(OPPORTUNITY_COUNT), AggregationTypes.SUM));
+        Key probabilityKey = keys.get(PROBABILITY);
+        if (probabilityKey == null) {
+            probabilityKey = new NamedKey(PROBABILITY);
+        }
+        fields.add(new AnalysisMeasure(probabilityKey, PROBABILITY, AggregationTypes.AVERAGE, true, FormattingConfiguration.PERCENTAGE));
         fields.add(new AnalysisMeasure(keys.get(BID_DURATION), AggregationTypes.SUM));
-        fields.add(new AnalysisMeasure(keys.get(BID_AMOUNT), AggregationTypes.SUM));
+        fields.add(new AnalysisMeasure(keys.get(BID_AMOUNT), BID_AMOUNT, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
         return fields;
     }
 

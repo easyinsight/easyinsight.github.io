@@ -163,6 +163,59 @@ public class AnalysisService {
         }
     }
 
+    public List<JoinOverride> generateForAddons(List<JoinOverride> existingOverrides, long dataSourceID, List<AnalysisItem> items,
+                                                List<AddonReport> newAddonReports, List<AddonReport> removedAddonReports) {
+        if (existingOverrides == null || existingOverrides.size() == 0) {
+            existingOverrides = new ArrayList<JoinOverride>();
+            ReportJoins reportJoins = determineOverrides(dataSourceID, items);
+            for (List<JoinOverride> overrides : reportJoins.getJoinOverrideMap().values()) {
+                existingOverrides.addAll(overrides);
+            }
+        }
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            for (AddonReport newAddonReport : newAddonReports) {
+                // get fields for addon report
+                List<AnalysisItem> addonFields = new ArrayList<AnalysisItem>();
+                for (AnalysisItem item : items) {
+                    Key key = item.getKey();
+                    if (key.hasReport(newAddonReport.getReportID())) {
+                        addonFields.add(item);
+                    }
+                }
+                int dimensionCount = 0;
+                AnalysisItem dimension = null;
+                for (AnalysisItem item : addonFields) {
+                    if (item.getType() == AnalysisItemTypes.DIMENSION) {
+                        dimensionCount++;
+                        dimension = item;
+                    }
+                }
+                if (dimensionCount == 1) {
+                    ReportKey key = (ReportKey) dimension.getKey();
+                    Key parentKey = key.getParentKey();
+                    AnalysisItem matchItem = null;
+                    for (AnalysisItem item : items) {
+                        if (item.getType() == AnalysisItemTypes.DIMENSION && item.getKey().equals(parentKey)) {
+                            matchItem = item;
+                            break;
+                        }
+                    }
+                    if (matchItem != null) {
+                        JoinOverride joinOverride = new JoinOverride();
+                        joinOverride.setDataSourceID(dataSourceID);
+                        joinOverride.setSourceItem(matchItem);
+                        joinOverride.setTargetItem(dimension);
+                        existingOverrides.add(joinOverride);
+                    }
+                }
+            }
+            return existingOverrides;
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public ReportJoins determineOverrides(long dataSourceID, List<AnalysisItem> items) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         ReportJoins reportJoins = new ReportJoins();

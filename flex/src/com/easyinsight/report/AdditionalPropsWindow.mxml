@@ -2,6 +2,7 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         creationComplete="onCreation()">
     <mx:Script><![CDATA[
+        import com.easyinsight.SimpleReportEditor;
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItemWrapper;
@@ -22,6 +23,12 @@
         private var _dataSourceID:int;
         private var _analysisDefinition:AnalysisDefinition;
         private var _dataView:DataViewFactory;
+        private var _reportEditor:SimpleReportEditor;
+
+
+        public function set reportEditor(value:SimpleReportEditor):void {
+            _reportEditor = value;
+        }
 
         private function onCreation():void {
             stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
@@ -30,8 +37,12 @@
         override protected function createChildren():void {
             super.createChildren();
             if (!_joinsCustomizable) {
-                hbox.removeChild(customizeJoinsBox);
+                hbox2.removeChild(customizeJoinsBox);
+                hbox2.removeChild(addonReportsBox);
             }
+            /*if (_analysisDefinition.urlKey == null) {
+                hbox.removeChild(revisionsBox);
+            }*/
         }
 
         private function onMouseDown(event:MouseEvent):void {
@@ -59,6 +70,7 @@
 
         public function joinControl():void {
             var window:ReportJoinWindow = new ReportJoinWindow();
+            window.addonReports = _analysisDefinition.addonReports;
             var items:ArrayCollection = new ArrayCollection();
             for each (var wrapper:AnalysisItemWrapper in _wrappers) {
                 items.addItem(wrapper.analysisItem);
@@ -76,6 +88,13 @@
             _analysisDefinition.joinOverrides = event.joins;
             _dataView.refresh();
         }
+
+        /*private function revisions():void {
+            var window:RevisionWindow = new RevisionWindow();
+            window.reportURLKey = _analysisDefinition.urlKey;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }*/
 
         private var _joinsCustomizable:Boolean;
 
@@ -125,6 +144,11 @@
             dispatchEvent(new AnalysisChangedEvent());
             _dataView.refresh();
         }
+
+        private function addonReports():void {
+            _reportEditor.addonReportStuff();
+            PopUpManager.removePopUp(this);
+        }
         ]]></mx:Script>
     <mx:VBox paddingLeft="10" paddingRight="10" horizontalAlign="center">
         <mx:HBox id="hbox">
@@ -158,6 +182,23 @@
                         height="60"
                         width="130" textAlign="center"/>
             </mx:VBox>
+            <!--<mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                     backgroundColor="#FFFFFF" height="120"
+                     width="150" cornerRadius="8" buttonMode="true" id="revisionsBox"
+                     mouseOver="revisionsBox.setStyle('backgroundColor', 0xDDDDDD)"
+                     mouseOut="revisionsBox.setStyle('backgroundColor', 0xFFFFFF)"
+                     click="revisions()"
+                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                <mx:Image source="@Embed(source='../../../../assets/branchx16.png')"/>
+                <mx:Text text="Revisions" fontSize="14" selectable="false"/>
+                <mx:TextArea
+                        text="View previous revisions of this report"
+                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                        height="60"
+                        width="130" textAlign="center"/>
+            </mx:VBox>-->
+        </mx:HBox>
+        <mx:HBox id="hbox2">
             <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                      backgroundColor="#FFFFFF" height="120"
                      width="150" cornerRadius="8" buttonMode="true" id="customizeJoinsBox"
@@ -169,6 +210,21 @@
                 <mx:Text text="Customize Joins" fontSize="14" selectable="false"/>
                 <mx:TextArea
                         text="Customize the connections between data sources"
+                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                        height="60"
+                        width="130" textAlign="center"/>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                     backgroundColor="#FFFFFF" height="120"
+                     width="150" cornerRadius="8" buttonMode="true" id="addonReportsBox"
+                     mouseOver="addonReportsBox.setStyle('backgroundColor', 0xDDDDDD)"
+                     mouseOut="addonReportsBox.setStyle('backgroundColor', 0xFFFFFF)"
+                     click="addonReports()"
+                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                <mx:Image source="@Embed(source='../../../../assets/branchx16.png')"/>
+                <mx:Text text="Add on Reports" fontSize="14" selectable="false"/>
+                <mx:TextArea
+                        text="Add another report as a source of fields for this report"
                         fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
                         height="60"
                         width="130" textAlign="center"/>

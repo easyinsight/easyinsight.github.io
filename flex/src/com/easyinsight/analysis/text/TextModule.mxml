@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.Value;
+
+        import mx.collections.ArrayCollection;
+        import mx.events.FlexEvent;
+
+        [Bindable]
+        private var text:String;
+
+        private var textReport:TextReport;
+
+        private function blah():void {
+            if (this.width == 0) {
+                addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdate);
+            } else {
+                reportText.maxWidth = this.width;
+            }
+        }
+
+        private function onUpdate(event:FlexEvent):void {
+            removeEventListener(FlexEvent.UPDATE_COMPLETE, onUpdate);
+            reportText.maxWidth = this.width;
+        }
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+            blah();
+            textReport = analysisDefinition as TextReport;
+            fontSize = textReport.fontSize;
+            fontColor = textReport.fontColor;
+            var str:String = "";
+            for each (var obj:Object in dataSet) {
+                for (var i:int = 0; i < textReport.columns.length; i++) {
+                    var item:AnalysisItem = textReport.columns.getItemAt(i) as AnalysisItem;
+                    var val:Value = obj[item.qualifiedName()];
+                    if (val.type() == Value.EMPTY) {
+                        continue;
+                    }
+                    str += val.toString();
+                    /*if (i < (textReport.columns.length - 1)) {
+                        str += " ";
+                    }*/
+                }
+            }
+            this.text = str;
+        }
+
+        [Bindable]
+        private var fontSize:int;
+
+        [Bindable]
+        private var fontColor:uint;
+
+        public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }
+
+        public function preserveValues():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:Text htmlText="{text}" id="reportText" styleName="myHelvetica" fontSize="{fontSize}" color="{fontColor}"/>
+</mx:Canvas>

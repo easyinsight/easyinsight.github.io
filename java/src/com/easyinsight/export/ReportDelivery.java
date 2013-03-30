@@ -271,7 +271,7 @@ public class ReportDelivery extends ScheduledDelivery {
         }
         insertFilterStmt.close();
         if (deliveryExtension != null) {
-            deliveryExtension.save(conn, deliveryID, 0);
+            deliveryExtension.save(conn, deliveryID, 0, 0);
         }
     }
 
@@ -319,7 +319,7 @@ public class ReportDelivery extends ScheduledDelivery {
                 session.close();
             }
             queryStmt.close();
-            setDeliveryExtension(DeliveryExtension.load(conn, reportDeliveryID, 0, reportFormat));
+            setDeliveryExtension(DeliveryExtension.load(conn, reportDeliveryID, 0, reportFormat, 0));
         } else {
             queryStmt.close();
             throw new RuntimeException("Orphan activity");

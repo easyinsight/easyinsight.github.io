@@ -7,7 +7,9 @@
         import com.easyinsight.feedassembly.ConnectionDeleteEvent;
         import com.easyinsight.feedassembly.DSPickJoinWindow;
         import com.easyinsight.feedassembly.JoinSelectionEvent;
+        import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
 
         import com.easyinsight.util.ProgressAlert;
@@ -147,6 +149,8 @@
 
         private var selectedDataSource:DataSourceDescriptor;
 
+        public var addonReports:ArrayCollection;
+
         private function populateJoins(dataSource:DataSourceDescriptor):void {
             if (connections != null) {
                 var saveJoins:ArrayCollection = new ArrayCollection();
@@ -162,7 +166,14 @@
                 }
                 customConnectionMap[String(selectedDataSource.id)] = saveJoins;
             }
-            dataSources = dataSourceMap[String(dataSource.id)] as ArrayCollection;
+            var sources:ArrayCollection = dataSourceMap[String(dataSource.id)] as ArrayCollection;
+            for each (var addonReport:AddonReport in addonReports) {
+                var insightDescriptor:InsightDescriptor = new InsightDescriptor();
+                insightDescriptor.id = addonReport.reportID;
+                insightDescriptor.name = addonReport.reportName;
+                sources.addItem(insightDescriptor);
+            }
+            dataSources = sources;
             connections = new ArrayCollection();
             if (startJoins == null || startJoins.length == 0) {
                 var joins:ArrayCollection = joinMap[String(dataSource.id)];
@@ -170,15 +181,20 @@
                     connections.addItem(join.toConnection());
                 }
             } else {
+
                 var customJoins:ArrayCollection = customConnectionMap[String(dataSource.id)] as ArrayCollection;
                 for each (var customJoin:JoinOverride in customJoins) {
                     var customConnection:CompositeFeedConnection = customJoin.toConnection();
-                    for each (var ds:DataSourceDescriptor in dataSources) {
-                        if (customConnection.sourceFeedID == ds.id) {
-                            customConnection.sourceFeedName = ds.name;
+                    for each (var desc:EIDescriptor in dataSources) {
+                        if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.sourceFeedID) {
+                            customConnection.sourceFeedName = desc.name;
+                        } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.sourceReportID) {
+                            customConnection.sourceFeedName = desc.name;
                         }
-                        if (customConnection.targetFeedID == ds.id) {
-                            customConnection.targetFeedName = ds.name;
+                        if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.targetFeedID) {
+                            customConnection.targetFeedName = desc.name;
+                        } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.targetReportID) {
+                            customConnection.targetFeedName = desc.name;
                         }
                     }
                     connections.addItem(customConnection);

@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
@@ -15,7 +16,7 @@ import java.util.*;
  */
 public class AnalysisBasedFeed extends Feed {
 
-    private WSAnalysisDefinition analysisDefinition;    
+    private WSAnalysisDefinition analysisDefinition;
 
     public FeedType getDataFeedType() {
         return FeedType.ANALYSIS_BASED;
@@ -29,32 +30,83 @@ public class AnalysisBasedFeed extends Feed {
         this.analysisDefinition = analysisDefinition;
     }
 
-    public List<AnalysisItem> getFields() {
+    /*public List<AnalysisItem> getFields() {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
-        Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), null);
-        return feed.getFields();
-    }
-
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, List<FilterDefinition> otherFilters, FilterDefinition requester) throws ReportException {
-        WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
-        Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
-        return feed.getMetadata(analysisItem, null, conn, report, otherFilters, requester);
-    }
+        return new ArrayList<AnalysisItem>(analysisDefinition.getAllAnalysisItems());
+    }*/
 
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
-
-        Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
-
-        if (analysisDefinition.retrieveFilterDefinitions() != null) {
-            if (filters == null) {
-                filters = new ArrayList<FilterDefinition>();
-            }
-            filters.addAll(analysisDefinition.retrieveFilterDefinitions());
+        List<FilterDefinition> reportFilters = new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions());
+        List<AnalysisItem> fields = new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values());
+        Map<Key, Key> map = new HashMap<Key, Key>();
+        Map<String, AnalysisItem> map1 = new HashMap<String, AnalysisItem>();
+        for (AnalysisItem analysisItem : analysisItems) {
+            map1.put(analysisItem.getOriginalDisplayName(), analysisItem);
         }
-        DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
-
-        return new DerivedDataSourcePipeline().setup(getAnalysisDefinition(), this, insightRequestMetadata).toDataSet(dataSet);
+        Map<FilterDefinition, AnalysisItem> filterMap = new HashMap<FilterDefinition, AnalysisItem>();
+        for (FilterDefinition filter : filters) {
+            if (filter.getField() != null) {
+                for (AnalysisItem analysisItem : fields) {
+                    if (analysisItem.toDisplay().equals(filter.getField().getOriginalDisplayName())) {
+                        filterMap.put(filter, filter.getField());
+                        filter.setField(analysisItem);
+                        break;
+                    }
+                }
+            }
+            analysisDefinition.getFilterDefinitions().add(filter);
+        }
+        for (AnalysisItem analysisItem : fields) {
+            AnalysisItem mapped = map1.get(analysisItem.toDisplay());
+            if (mapped != null) {
+                map.put(analysisItem.createAggregateKey(), mapped.createAggregateKey());
+            }
+        }
+        DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
+        // map this data set back into the original one
+        for (Map.Entry<Key, Key> entry : map.entrySet()) {
+            dataSet.replaceKey(entry.getKey(), entry.getValue());
+        }
+        analysisDefinition.setFilterDefinitions(reportFilters);
+        for (Map.Entry<FilterDefinition, AnalysisItem> entry : filterMap.entrySet()) {
+            entry.getKey().setField(entry.getValue());
+        }
+        return dataSet;
     }
+
+    /*
+   @Override
+   public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
+       WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
+       Map<Key, Key> map = new HashMap<Key, Key>();
+       for (AnalysisItem analysisItem : analysisItems) {
+           if (analysisItem.getKey() instanceof ReportKey) {
+               ReportKey reportKey = (ReportKey) analysisItem.getKey();
+               Key existing = analysisItem.createAggregateKey();
+               analysisItem.setKey(reportKey.getParentKey());
+               analysisItem.clearCachedKey();
+               map.put(analysisItem.createAggregateKey(), existing);
+           }
+       }
+       DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
+       // map this data set back into the original one
+       for (Map.Entry<Key, Key> entry : map.entrySet()) {
+           for (AnalysisItem analysisItem : analysisItems) {
+               if (map.containsKey(analysisItem.createAggregateKey())) {
+                   analysisItem.clearCachedKey();
+                   analysisItem.setKey(map.get(analysisItem.createAggregateKey()));
+               }
+           }
+           dataSet.replaceKey(entry.getKey(), entry.getValue());
+       }
+       for (Map.Entry<Key, Key> entry : map.entrySet()) {
+           for (IRow row : dataSet.getRows()) {
+               row.removeValue(entry.getKey());
+           }
+       }
+       return dataSet;
+   }
+    */
 }

@@ -13,7 +13,6 @@ import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import com.itextpdf.text.DocumentException;
-import com.xerox.amazonws.common.Result;
 import com.xerox.amazonws.sns.NotificationService;
 import com.xerox.amazonws.sqs2.Message;
 import com.xerox.amazonws.sqs2.MessageQueue;
@@ -143,9 +142,28 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 deliveryInfo.setLabel(reports.getString(6));
                 deliveryInfo.setType(DeliveryInfo.REPORT);
                 deliveryInfo.setFilters(getCustomFiltersForMultipleDelivery(reports.getLong(5), conn));
-                deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, 0, reports.getLong(5), deliveryInfo.getFormat()));
+                deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, 0, reports.getLong(5), deliveryInfo.getFormat(), 0));
                 infos.add(deliveryInfo);
             }
+
+            PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD.DASHBOARD_NAME, DELIVERY_INDEX, DELIVERY_FORMAT," +
+                    "DELIVERY_TO_DASHBOARD_ID, DELIVERY_LABEL FROM DELIVERY_TO_DASHBOARD, DASHBOARD WHERE GENERAL_DELIVERY_ID = ? AND " +
+                    "DELIVERY_TO_DASHBOARD.dashboard_id = dashboard.dashboard_id");
+            getDashboardStmt.setLong(1, id);
+
+            ResultSet dashboards = getDashboardStmt.executeQuery();
+            while (dashboards.next()) {
+                DeliveryInfo deliveryInfo = new DeliveryInfo();
+                deliveryInfo.setId(dashboards.getLong(1));
+                deliveryInfo.setName(dashboards.getString(2));
+                deliveryInfo.setIndex(dashboards.getInt(3));
+                deliveryInfo.setFormat(ReportDelivery.PDF);
+                deliveryInfo.setLabel(dashboards.getString(6));
+                deliveryInfo.setType(DeliveryInfo.DASHBOARD);
+                deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, 0, 0, deliveryInfo.getFormat(), dashboards.getLong(5)));
+                infos.add(deliveryInfo);
+            }
+
             PreparedStatement getScorecardStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD_NAME, DELIVERY_INDEX, DELIVERY_FORMAT FROM delivery_to_scorecard, scorecard WHERE GENERAL_DELIVERY_ID = ? AND " +
                     "delivery_to_scorecard.scorecard_id = scorecard.scorecard_id");
             getScorecardStmt.setLong(1, id);
@@ -402,17 +420,74 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 return new DeliveryResult(ExportService.exportScorecard(deliveryInfo.getId(), insightRequestMetadata, conn));
             }
         } else if (deliveryInfo.getFormat() == ReportDelivery.PDF || deliveryInfo.getFormat() == ReportDelivery.PNG) {
-            WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
-            if (deliveryInfo.getFormat() == ReportDelivery.PDF && (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID)) {
-                analysisDefinition.updateMetadata();
-                updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
-                byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
-                String reportName = analysisDefinition.getName();
-                return new DeliveryResult(new AttachmentInfo(bytes, reportName + ".pdf", "application/pdf"));
+            if (deliveryInfo.getType() == DeliveryInfo.REPORT) {
+                WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
+                if (deliveryInfo.getFormat() == ReportDelivery.PDF && (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST ||
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB ||
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID)) {
+                    analysisDefinition.updateMetadata();
+                    updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
+                    byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
+                    String reportName = analysisDefinition.getName();
+                    return new DeliveryResult(new AttachmentInfo(bytes, reportName + ".pdf", "application/pdf"));
+                } else {
+                    long id = new SeleniumLauncher().requestSeleniumDrawForReport(deliveryInfo.getId(), activityID, SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn,
+                            deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
+                    System.out.println("launched " + id);
+                    String topicName = ConfigLoader.instance().getReportDeliveryQueue();
+                    String queueName = topicName + InetAddress.getLocalHost().getHostName().replace(".", "") + count;
+                    MessageQueue msgQueue = SQSUtils.connectToQueue(queueName, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+                    NotificationService notificationService = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+                    notificationService.createTopic(topicName);
+                    notificationService.subscribe("arn:aws:sns:us-east-1:808335860417:" + topicName, "sqs", "arn:aws:sqs:us-east-1:808335860417:" + queueName);
+                    msgQueue.setQueueAttribute("Policy", QUEUE_POLICY_FORMAT.replace("{0}", queueName).replace("{1}", topicName));
+
+                    msgQueue.setEncoding(false);
+                    int timeout = 0;
+                    while (timeout < 120) {
+                        Message message = msgQueue.receiveMessage();
+                        if (message == null) {
+                            timeout++;
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException ex) {
+                                // ignore
+                            }
+                        } else {
+                            timeout++;
+                            JSONObject jo = (JSONObject) JSONValue.parse(message.getMessageBody());
+                            String body = (String) jo.get("Message");
+                            msgQueue.deleteMessage(message);
+                            String[] parts = body.split("\\|");
+                            long responseID = Long.parseLong(parts[0]);
+                            System.out.println("got response of " + responseID + ", looking for " + id);
+                            if (responseID == id) {
+                                long pdfID = Long.parseLong(parts[1]);
+                                System.out.println("retrieving and returning " + pdfID);
+                                PreparedStatement getStmt = conn.prepareStatement("SELECT PNG_IMAGE FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ?");
+                                getStmt.setLong(1, pdfID);
+                                ResultSet rs = getStmt.executeQuery();
+                                rs.next();
+                                byte[] bytes = rs.getBytes(1);
+                                String deliveryName;
+                                if (deliveryInfo.getName() == null || "".equals(deliveryInfo.getName())) {
+                                    deliveryName = "export";
+                                } else {
+                                    deliveryName = deliveryInfo.getName();
+                                }
+                                if (deliveryInfo.getFormat() == ReportDelivery.PDF) {
+                                    return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".pdf", "application/pdf"));
+                                } else {
+                                    return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".png", "image/png"));
+                                }
+                            } else {
+                                System.out.println("does not match, ignoring");
+                            }
+                        }
+                    }
+                }
             } else {
-                long id = new SeleniumLauncher().requestSeleniumDrawForReport(deliveryInfo.getId(), activityID, SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn,
+                long id = new SeleniumLauncher().requestSeleniumDrawForDashboard(deliveryInfo.getId(), activityID, SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn,
                         deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
                 System.out.println("launched " + id);
                 String topicName = ConfigLoader.instance().getReportDeliveryQueue();
@@ -543,7 +618,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             List<FilterDefinition> customFilters = getCustomFilters(deliveryInfoRS.getLong(9), conn);
 
             deliveryInfo.setFilters(customFilters);
-            deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, deliveryInfoRS.getLong(9), 0, deliveryFormat));
+            deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, deliveryInfoRS.getLong(9), 0, deliveryFormat, 0));
 
             boolean sendIfNoData = deliveryInfoRS.getBoolean(10);
 
@@ -739,6 +814,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
             table = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, sendIfNoData, includeTitle);
+        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TEXT) {
+            table = ExportService.textReportToHtml(analysisDefinition, conn, insightRequestMetadata);
         } else {
             ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
             if (listDataResults.getRows().length == 0 && !sendIfNoData) {

@@ -23,6 +23,7 @@ import com.easyinsight.analysis.gauge.GaugeDefinition;
 import com.easyinsight.analysis.heatmap.HeatMapDefinition;
 import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.analysis.summary.SummaryDefinition;
+import com.easyinsight.analysis.text.TextReport;
 import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.trend.TrendDefinition;
@@ -344,6 +345,9 @@ public class StyleConfiguration {
         }
         if (report is TrendGridDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show KPI Name", "showKPIName", TrendGridDefinition(report).showKPIName, report));
+        }
+        if (report is TextReport) {
+            items.addItem(new ColorReportFormItem("Text Color", "fontColor", TextReport(report).fontColor, report));
         }
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
         items.addItem(new CheckBoxReportFormItem("Filter Optimization", "lookupTableOptimization", report.lookupTableOptimization, report));

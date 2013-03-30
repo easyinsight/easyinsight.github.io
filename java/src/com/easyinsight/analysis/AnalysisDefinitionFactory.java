@@ -153,6 +153,11 @@ public class AnalysisDefinitionFactory {
             trendDefinitionState.setDayWindow(String.valueOf(wsTrendDefinition.getDayWindow()));
             trendDefinitionState.setLinks(wsTrendDefinition.getLinks());
             analysisDefinitionState = trendDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TEXT)) {
+            WSTextDefinition wsTextDefinition = (WSTextDefinition) wsAnalysisDefinition;
+            TextDefinitionState textDefinitionState = new TextDefinitionState();
+            textDefinitionState.setTextReportID(wsTextDefinition.getTextReportID());
+            analysisDefinitionState = textDefinitionState;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());
         }
@@ -162,6 +167,15 @@ public class AnalysisDefinitionFactory {
         for (ReportProperty reportProperty : analysisDefinition.getProperties()) {
             reportProperty.cleanup();
         }
+        List<ReportStub> reportStubs = new ArrayList<ReportStub>();
+        if (wsAnalysisDefinition.getAddonReports() != null) {
+            for (AddonReport addonReport : wsAnalysisDefinition.getAddonReports()) {
+                ReportStub reportStub = new ReportStub();
+                reportStub.setReportID(addonReport.getReportID());
+                reportStubs.add(reportStub);
+            }
+        }
+        analysisDefinition.setReportStubs(reportStubs);
         analysisDefinition.setUrlKey(wsAnalysisDefinition.getUrlKey());
         analysisDefinition.setJoinOverrides(wsAnalysisDefinition.getJoinOverrides());
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);

@@ -35,6 +35,13 @@ Application {
     font-thickness: 4;
 }
 
+.myHelvetica {
+    font-grid-fit-type: 'subpixel';
+    font-family: 'Helvetica Neue';
+    font-sharpness: 1;
+    font-thickness: 56;
+}
+
 .boldStyleArgh {
     font-grid-fit-type: 'subpixel';
     font-family: 'Open Sans Bold';

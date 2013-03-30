@@ -9,6 +9,8 @@ import com.easyinsight.analysis.Key;
 	{
 		public var sourceJoin:Key;
 		public var targetJoin:Key;
+        public var sourceReportID:int;
+        public var targetReportID:int;
 		public var sourceFeedID:int;
 		public var targetFeedID:int;
         public var sourceItem:AnalysisItem;

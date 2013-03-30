@@ -14,9 +14,9 @@ import java.util.Set;
 public class QueryData {
     public DataSet dataSet;
     public Set<AnalysisItem> neededItems = new HashSet<AnalysisItem>();
-    public Set<Long> ids = new HashSet<Long>();
+    public Set<QueryNodeKey> ids = new HashSet<QueryNodeKey>();
 
-    QueryData(long id) {
+    QueryData(QueryNodeKey id) {
         ids.add(id);
     }
 }

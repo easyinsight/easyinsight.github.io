@@ -73,6 +73,7 @@
         <mapping class="com.easyinsight.analysis.HeatMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.FormDefinitionState"/>
         <mapping class="com.easyinsight.analysis.VerticalListDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.TextDefinitionState"/>
         <mapping class="com.easyinsight.analysis.CombinedVerticalListDefinitionState"/>
         <mapping class="com.easyinsight.analysis.CompareYearsDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TrendDefinitionState"/>
@@ -114,6 +115,7 @@
         <mapping class="com.easyinsight.analysis.VerticalListReportExtension"/>
         <mapping class="com.easyinsight.analysis.definitions.TrendColumn"/>
         <mapping class="com.easyinsight.analysis.DiagramLink"/>
+        <mapping class="com.easyinsight.analysis.ReportStub"/>
 
         <mapping class="com.easyinsight.preferences.ApplicationSkinSettings"/>
 
@@ -148,6 +150,7 @@
         <mapping class="com.easyinsight.core.Key"/>
         <mapping class="com.easyinsight.core.NamedKey"/>
         <mapping class="com.easyinsight.core.DerivedKey"/>
+        <mapping class="com.easyinsight.core.ReportKey"/>
         <mapping class="com.easyinsight.users.Account"/>
         <mapping class="com.easyinsight.users.BandwidthUsage" />
         <mapping class="com.easyinsight.users.AccountCreditCardBillingInfo" />

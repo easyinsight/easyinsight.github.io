@@ -2,7 +2,6 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:report="com.easyinsight.report.*"
                    xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()" backgroundAlpha=".9">
     <mx:Script><![CDATA[
-
         private function onCreation():void {
             stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
         }
@@ -10,8 +9,18 @@
         private function onMouseDown(event:MouseEvent):void {
             var result:Boolean = hitTestPoint(event.stageX, event.stageY);
             if (!result) {
+                if (stage) {
+                    stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+                }
                 close();
             }
+        }
+
+        override public function close():void {
+            if (stage) {
+                stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+            }
+            super.close();
         }
         ]]></mx:Script>
     <mx:HBox id="topBox">

@@ -178,13 +178,13 @@ public abstract class Feed implements Serializable {
         WSListDefinition tempList = new WSListDefinition();
         if (report != null) {
             tempList.setMarmotScript(report.getMarmotScript());
+            tempList.setAddonReports(report.getAddonReports());
         }
         tempList.setFilterDefinitions(new ArrayList<FilterDefinition>());
         if (report != null && report.getAddedItems() != null && report.getAddedItems().size() > 0) {
             tempList.setAddedItems(report.getAddedItems());
         }
         List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
-        // Kerry Skitch, 562-968
         columns.add(analysisItem);
         tempList.setDataFeedID(getFeedID());
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();

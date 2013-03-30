@@ -184,6 +184,8 @@ public class GeneralDelivery extends ScheduledDelivery {
         long id = Database.instance().getAutoGenKey(insertStmt);
         PreparedStatement insertReportStmt = conn.prepareStatement("INSERT INTO delivery_to_report (general_delivery_id, report_id, delivery_index, delivery_format, delivery_label, send_if_no_data) values (?, ?, ?, ?, ?, ?)", 
                 Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement insertDashboardStmt = conn.prepareStatement("INSERT INTO delivery_to_dashboard (general_delivery_id, dashboard_id, delivery_index, delivery_format, delivery_label, send_if_no_data) values (?, ?, ?, ?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS);
         PreparedStatement insertScorecardStmt = conn.prepareStatement("INSERT INTO delivery_to_scorecard (general_delivery_id, scorecard_id, delivery_index, delivery_format) values (?, ?, ?, ?)");
         PreparedStatement insertFilterStmt = conn.prepareStatement("INSERT INTO delivery_to_report_to_filter (delivery_to_report_id, filter_id) values (?, ?)");
 
@@ -212,7 +214,19 @@ public class GeneralDelivery extends ScheduledDelivery {
                     session.close();
                 }
                 if (deliveryInfo.getDeliveryExtension() != null) {
-                    deliveryInfo.getDeliveryExtension().save(conn, 0, insertReportID);
+                    deliveryInfo.getDeliveryExtension().save(conn, 0, insertReportID, 0);
+                }
+            } else if (deliveryInfo.getType() == DeliveryInfo.DASHBOARD) {
+                insertDashboardStmt.setLong(1, id);
+                insertDashboardStmt.setLong(2, deliveryInfo.getId());
+                insertDashboardStmt.setInt(3, index++);
+                insertDashboardStmt.setInt(4, deliveryInfo.getFormat());
+                insertDashboardStmt.setString(5, deliveryInfo.getLabel());
+                insertDashboardStmt.setBoolean(6, deliveryInfo.isSendIfNoData());
+                insertDashboardStmt.execute();
+                long insertDashboardID = Database.instance().getAutoGenKey(insertDashboardStmt);
+                if (deliveryInfo.getDeliveryExtension() != null) {
+                    deliveryInfo.getDeliveryExtension().save(conn, 0, 0, insertDashboardID);
                 }
             } else if (deliveryInfo.getType() == DeliveryInfo.SCORECARD) {
                 insertScorecardStmt.setLong(1, id);
@@ -277,7 +291,7 @@ public class GeneralDelivery extends ScheduledDelivery {
                     session.close();
                 }
                 deliveryInfo.setFilters(customFilters);
-                deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, 0, deliveryInfoID, deliveryInfo.getFormat()));
+                deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, 0, deliveryInfoID, deliveryInfo.getFormat(), 0));
                 infos.add(deliveryInfo);
             }
             getFilterStmt.close();
@@ -296,6 +310,25 @@ public class GeneralDelivery extends ScheduledDelivery {
                 infos.add(deliveryInfo);
             }
             getScorecardStmt.close();
+            PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD_NAME, DELIVERY_INDEX, DELIVERY_FORMAT, DELIVERY_TO_DASHBOARD_ID, DATA_SOURCE_ID, DELIVERY_LABEL, SEND_IF_NO_DATA FROM DELIVERY_TO_DASHBOARD, DASHBOARD WHERE GENERAL_DELIVERY_ID = ? AND " +
+                    "delivery_to_dashboard.dashboard_id = dashboard.dashboard_id");
+
+            getDashboardStmt.setLong(1, id);
+            ResultSet dashboardRS = getDashboardStmt.executeQuery();
+            while (dashboardRS.next()) {
+                DeliveryInfo deliveryInfo = new DeliveryInfo();
+                deliveryInfo.setId(dashboardRS.getLong(1));
+                deliveryInfo.setName(dashboardRS.getString(2));
+                deliveryInfo.setIndex(dashboardRS.getInt(3));
+                deliveryInfo.setFormat(dashboardRS.getInt(4));
+                long deliveryInfoID = dashboardRS.getInt(5);
+                deliveryInfo.setDataSourceID(dashboardRS.getLong(6));
+                deliveryInfo.setLabel(dashboardRS.getString(7));
+                deliveryInfo.setSendIfNoData(dashboardRS.getBoolean(8));
+                deliveryInfo.setType(DeliveryInfo.DASHBOARD);
+                infos.add(deliveryInfo);
+                deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, 0, 0, deliveryInfo.getFormat(), deliveryInfoID));
+            }
             Collections.sort(infos, new Comparator<DeliveryInfo>() {
 
                 public int compare(DeliveryInfo deliveryInfo, DeliveryInfo deliveryInfo1) {
