@@ -195,6 +195,12 @@ public class FeedType implements Serializable {
 
     public static final FeedType SERVER_POSTGRES = new FeedType(170);
 
+    public static final FeedType TRELLO_COMPOSITE = new FeedType(171);
+    public static final FeedType TRELLO_BOARD = new FeedType(172);
+    public static final FeedType TRELLO_LIST = new FeedType(173);
+    public static final FeedType TRELLO_CARD = new FeedType(174);
+    public static final FeedType TRELLO_CARD_HISTORY = new FeedType(175);
+
     public FeedType() {
     }
 

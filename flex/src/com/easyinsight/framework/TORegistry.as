@@ -5,6 +5,7 @@ import com.easyinsight.administration.feed.GoogleFeedDefinition;
 import com.easyinsight.administration.feed.PersistableStringValue;
 import com.easyinsight.administration.feed.PersistableValue;
 import com.easyinsight.administration.sharing.UserStub;
+import com.easyinsight.analysis.AddonReport;
 import com.easyinsight.analysis.AnalysisCalculation;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItemFault;
@@ -61,6 +62,7 @@ import com.easyinsight.analysis.gauge.GaugeDefinition;
 import com.easyinsight.analysis.heatmap.HeatMapDefinition;
 import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.analysis.summary.SummaryDefinition;
+import com.easyinsight.analysis.text.TextReport;
 import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
@@ -95,6 +97,7 @@ import com.easyinsight.datasources.MySQLDatabaseConnection;
 import com.easyinsight.datasources.OracleDatabaseConnection;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.PostgresDatabaseConnection;
+import com.easyinsight.datasources.TrelloCompositeSource;
 
 //import com.easyinsight.datasources.ReportDataSourceDefinition;
 import com.easyinsight.datasources.SQLServerDatabaseConnection;
@@ -197,6 +200,7 @@ public class TORegistry {
         var filter9:NamedFilterReference;
         var filter10:FlatDateFilterDefinition;
         var icon:Icon;
+        var addonReport:AddonReport;
         var scorecard:Scorecard;
         var persString:PersistableStringValue;
         var persValue:PersistableValue;
@@ -278,6 +282,7 @@ public class TORegistry {
         var stackedBar:StackedBarChartDefinition;
         var vert:VerticalListDefinition;
         var combVert:CombinedVerticalListDefinition;
+        var text1:TextReport;
         var summary:SummaryDefinition;
         var gauge:GaugeDefinition;
         var gantt:GanttReport;
@@ -306,6 +311,7 @@ public class TORegistry {
         var sqlServer:SQLServerDatabaseConnection;
         var oracle:OracleDatabaseConnection;
         var postgres:PostgresDatabaseConnection;
+        var trello:TrelloCompositeSource;
     }
 }
 }
