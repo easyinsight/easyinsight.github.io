@@ -9,6 +9,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.email.UserStub;
+import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
@@ -59,6 +60,34 @@ public class Dashboard implements Cloneable, Serializable {
     private int stackFill2End;
     private boolean fillStackHeaders;
     private int reportHorizontalPadding = 20;
+
+    private ImageDescriptor headerImage;
+    private int headerTextColor;
+    private int headerBackgroundColor;
+
+    public ImageDescriptor getHeaderImage() {
+        return headerImage;
+    }
+
+    public void setHeaderImage(ImageDescriptor headerImage) {
+        this.headerImage = headerImage;
+    }
+
+    public int getHeaderTextColor() {
+        return headerTextColor;
+    }
+
+    public void setHeaderTextColor(int headerTextColor) {
+        this.headerTextColor = headerTextColor;
+    }
+
+    public int getHeaderBackgroundColor() {
+        return headerBackgroundColor;
+    }
+
+    public void setHeaderBackgroundColor(int headerBackgroundColor) {
+        this.headerBackgroundColor = headerBackgroundColor;
+    }
 
     public int getReportHorizontalPadding() {
         return reportHorizontalPadding;
