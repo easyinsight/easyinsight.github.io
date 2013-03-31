@@ -17,6 +17,10 @@ Application {
     fillColors: #ffffff, #ffffff;
 }
 
+.fallThroughFonts {
+    font-family: "Helvetica Neue", "Helvetica";
+}
+
 /*@font-face {
     src: url("/com/easyinsight/skin/osx/opensans.swf");
     fontFamily: "Open Sans";

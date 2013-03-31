@@ -65,5 +65,5 @@
             return true;
         }
         ]]></mx:Script>
-    <mx:Text htmlText="{text}" id="reportText" styleName="myHelvetica" fontSize="{fontSize}" color="{fontColor}"/>
+    <mx:Text htmlText="{text}" id="reportText" fontSize="{fontSize}" color="{fontColor}" styleName="fallThroughFonts"/>
 </mx:Canvas>
