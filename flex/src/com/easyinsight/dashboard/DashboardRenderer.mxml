@@ -2,6 +2,9 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*" width="100%"
          paddingLeft="10" paddingRight="10" paddingBottom="10" horizontalScrollPolicy="off"
         verticalGap="0">
+    <mx:Metadata>
+        [Event(name="dashboardLoad", type="com.easyinsight.dashboard.DashboardReportLoadEvent")]
+    </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.filtering.AnalysisItemFilterDefinition;
         import com.easyinsight.filtering.FilterDefinition;

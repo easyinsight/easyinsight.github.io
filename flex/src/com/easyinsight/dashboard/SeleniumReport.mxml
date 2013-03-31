@@ -212,6 +212,9 @@
                 imageLoader.load(event.reportInfo.headerImage.id);
             }
             dataViewFactory.filterDefinitions = event.reportInfo.report.filterDefinitions;
+            if (headerArea != null && headerArea.parent && !showHeader) {
+                canvas.removeChild(headerArea);
+            }
             dataViewFactory.refresh();
         }
 
@@ -223,9 +226,6 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            /*if (!showHeader) {
-             canvas.removeChild(headerArea);
-             }*/
         }
 
         private var imageLoader:ImageLoader;

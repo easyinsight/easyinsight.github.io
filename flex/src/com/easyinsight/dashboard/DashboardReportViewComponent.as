@@ -172,6 +172,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
     private function onData(event:EmbeddedDataServiceEvent):void {
         this.report = event.analysisDefinition;
+        dispatchEvent(new DashboardReportLoadEvent(DashboardReportLoadEvent.DASHBOARD_REPORT_LOAD));
     }
 
     private function createAdditionalFilters(filterMap:Object):ArrayCollection {
@@ -203,9 +204,13 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     public function toggleFilters(showFilters:Boolean):void {
         if (hasFilters) {
             if (!showFilters) {
-                removeChild(transformContainer);
+                if (transformContainer.parent) {
+                    removeChild(transformContainer);
+                }
             } else {
-                addChildAt(transformContainer, dashboardReport.showLabel ? 1 : 0);
+                if (!transformContainer.parent) {
+                    addChildAt(transformContainer, dashboardReport.showLabel ? 1 : 0);
+                }
             }
         }
     }

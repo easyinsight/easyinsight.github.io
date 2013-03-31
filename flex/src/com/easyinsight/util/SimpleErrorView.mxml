@@ -24,7 +24,7 @@
     ]]>
     </mx:Script>
     <mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-        <util:AutoSizeTextArea text="{errorMessage}" fontSize="20" editable="false" focusEnabled="false" width="400"/>
+        <mx:Text text="{errorMessage}" fontSize="20" width="400"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Close" fontSize="14" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
