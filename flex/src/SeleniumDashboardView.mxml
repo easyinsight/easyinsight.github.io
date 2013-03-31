@@ -22,16 +22,7 @@
         import mx.rpc.events.ResultEvent;
 
         [Bindable]
-        private var urlKey:String;
-
-        [Bindable]
-        private var reportType:int;
-
-        [Bindable]
-        private var dataSourceID:int;
-
-        [Bindable]
-        private var reportName:String;
+        private var urlKey:int;
 
         private var userName:String;
 
@@ -46,7 +37,7 @@
         [Bindable]
         private var reportHeight:int;
 
-        [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf",fontName="Lucida Grande", fontStyle="normal")]
+        [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf", fontName="Lucida Grande", fontStyle="normal")]
         private var myNormalLucida:Class;
 
         [Embed(source="/com/easyinsight/skin/osx/opensans.swf", fontName="Open Sans", fontStyle="normal")]
@@ -60,16 +51,14 @@
             Font.registerFont(openSans);
             Font.registerFont(openSansBold);
             Constants.setup();
-            this.urlKey = String(Application.application.parameters.analysisID);
-            this.reportType = int(Application.application.parameters.reportType);
-            this.dataSourceID = int(Application.application.parameters.dataSourceID);
-            this.reportName = String(Application.application.parameters.reportName);
+            PopupMenuFactory.menuFactory = new DefaultMenuFactory();
+            this.urlKey = int(Application.application.parameters.dashboardID);
             this.userName = String(Application.application.parameters.userName);
             this.password = String(Application.application.parameters.password);
             this.requestID = int(Application.application.parameters.seleniumID);
             this.reportWidth = int(Application.application.parameters.reportWidth);
             this.reportHeight = int(Application.application.parameters.reportHeight);
-            showHeader = Application.application.parameters.showHeader == "true";
+            showHeader = Boolean(Application.application.parameters.showHeader);
             // session check
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             PopupMenuFactory.reportFactory = new EmbedReportContextMenuFactory();
@@ -100,31 +89,33 @@
                 }
                 var token:AsyncToken = userService.channelSet.login(userName, password);
                 token.addResponder(new AsyncResponder(
-                    function (event:ResultEvent, token:Object = null):void {
-                        switch (event.result) {
-                            case "success":
-                                User.initializeUser(authResult);
-                                User.getInstance().userName = authResult.userName;
-                                stackIndex = 1;                                
-                                break;
-                            default:
-                                Alert.show("failed!");
-                        }
-                    },
-                    function (event:FaultEvent, token:Object = null):void {
-                        switch (event.fault.faultCode) {
-                            case "Client.Authentication":
-                            default:
-                        Alert.show(event.fault.faultString);
-                        }
-                    }));
-                }
+                        function (event:ResultEvent, token:Object = null):void {
+                            switch (event.result) {
+                                case "success":
+                                    User.initializeUser(authResult);
+                                    User.getInstance().userName = authResult.userName;
+                                    stackIndex = 1;
+                                    break;
+                                default:
+                                    Alert.show("failed!");
+                            }
+                        },
+                        function (event:FaultEvent, token:Object = null):void {
+                            switch (event.fault.faultCode) {
+                                case "Client.Authentication":
+                                default:
+                                    Alert.show(event.fault.faultString);
+                            }
+                        }));
+            }
         }
 
         [Bindable]
         private var stackIndex:int = 0;
 
-		]]>
+        [Bindable]
+        public var orientation:String;
+        ]]>
 	</mx:Script>
     <mx:RemoteObject id="userService" destination="login">
         <mx:method name="seleniumCheck" result="authenticated()"/>
@@ -133,8 +124,7 @@
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
     <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
         <mx:Box/>
-        <dashboard:SeleniumReport id="panel" urlKey="{urlKey}" reportName="{reportName}" seleniumID="{requestID}"
-                                      dataSourceID="{dataSourceID}" reportType="{reportType}"
-                                      reportWidth="{reportWidth}" reportHeight="{reportHeight}" showHeader="{showHeader}"/>
+        <dashboard:SeleniumDashboard id="panel" dashboardID="{urlKey}" seleniumID="{requestID}"
+                                      width="{reportWidth}" height="{reportHeight}" showHeader="{showHeader}"/>
     </mx:ViewStack>
 </mx:Application>

@@ -23,6 +23,7 @@ public class ReportDelivery extends ScheduledDelivery implements IDeliverable {
     public var dataSourceID:int;
     public var deliveryLabel:String;
     public var sendIfNoData:Boolean = true;
+    public var deliveryExtension:DeliveryExtension;
 
     public function ReportDelivery() {
         super();
@@ -53,6 +54,10 @@ public class ReportDelivery extends ScheduledDelivery implements IDeliverable {
             return deliveryLabel;
         }
         return describe;
+    }
+
+    public function setDeliveryExtension(extension:DeliveryExtension):void {
+        this.deliveryExtension = extension;
     }
 
     public function setFormat(format:int):void {

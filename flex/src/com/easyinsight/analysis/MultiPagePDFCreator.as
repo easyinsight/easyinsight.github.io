@@ -63,31 +63,31 @@ public class MultiPagePDFCreator {
             master.copyPixels(reportBitmap, new Rectangle(0, 0, coreView.width, coreView.height), new Point(0, 0));
         }
 
-        var scale:Number = coreView.width > pageWidth ? (pageWidth / coreView.width) : 1;
+        //var scale:Number = coreView.width > pageWidth ? (pageWidth / coreView.width) : 1;
 
-        var scaleHeight:int = pageHeight / scale;
+        //var scaleHeight:int = pageHeight / scale;
 
-        var pages:int = Math.ceil(height / scaleHeight);
+        var pages:int = Math.ceil(height / pageHeight);
 
         for (var i:int = 0; i < pages; i++) {
             var bdPage:BitmapData;
             var bytes:ByteArray;
-            if (scale < 1) {
+            /*if (scale < 1) {
                 var copyWidth:int = pageWidth / scale;
                 var copyHeight:int = pageHeight / scale;
                 bdPage = new BitmapData(copyWidth, copyHeight + 10);
                 bdPage.copyPixels(master, new Rectangle(0, i * copyHeight, copyWidth, copyHeight), new Point(0, 0));
-                var data:BitmapData = resizeImage(bdPage, pageWidth, pageHeight);
-                bytes = encoder.encode(data);
-            } else {
-                bdPage = new BitmapData(pageWidth, pageHeight + 10);
-                bdPage.copyPixels(master, new Rectangle(0, i * pageHeight, pageWidth, pageHeight), new Point(0, 0));
+                //var data:BitmapData = resizeImage(bdPage, pageWidth, pageHeight);
                 bytes = encoder.encode(bdPage);
-            }
+            } else {*/
+                bdPage = new BitmapData(coreView.width, pageHeight + 10);
+                bdPage.copyPixels(master, new Rectangle(0, i * pageHeight, coreView.width, pageHeight), new Point(0, 0));
+                bytes = encoder.encode(bdPage);
+            //}
 
             var page:Page = new Page();
             page.bytes = bytes;
-            page.width = pageWidth;
+            page.width = coreView.width;
             page.height = pageHeight;
             pageList.addItem(page);
         }

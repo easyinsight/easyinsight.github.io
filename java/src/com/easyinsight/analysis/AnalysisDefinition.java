@@ -166,7 +166,6 @@ public class AnalysisDefinition implements Cloneable {
             if (entry.getValue() != null) {
                 entry.getValue().afterLoad();
             }
-            System.out.println(entry.getValue().getKey().getClass().getName());
             if (entry.getValue() != null && entry.getValue().getKey().getClass().getName().equals("com.easyinsight.core.Key")) {
                 iter.remove();
             }

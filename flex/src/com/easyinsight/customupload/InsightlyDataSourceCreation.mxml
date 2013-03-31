@@ -38,6 +38,7 @@
             return true;
         }
         ]]></mx:Script>
+    <mx:Text text="You can find your Insightly API Key under My Info - User Settings in your Insightly interface." maxWidth="350"/>
     <mx:Form>
         <mx:FormItem label="Insightly API Key:" direction="horizontal">
             <mx:TextInput id="apiKeyInput" fontWeight="normal" fontFamily="Lucida Grande" text="{apiKey}" width="350"/>

@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private var _deliveryInfo:DeliveryInfo;
+
+        public function set deliveryInfo(value:DeliveryInfo):void {
+            _deliveryInfo = value;
+        }
+
+        private var dashboardID:int;
+        private var deliveryExtension:DeliveryExtension;
+
+        [Bindable]
+        private var showHeader:Boolean;
+
+        [Bindable]
+        private var orientation:String = "Landscape";
+
+        [Bindable]
+        private var pdfWidth:int = 1000;
+
+        [Bindable]
+        private var pdfHeight:int = 600;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (dashboardID != _deliveryInfo.id) {
+                dashboardID = _deliveryInfo.id;
+                deliveryExtension = _deliveryInfo.deliveryExtension;
+                if (deliveryExtension != null) {
+                    showHeader = PDFDeliveryExtension(deliveryExtension).showHeader;
+                    pdfWidth = PDFDeliveryExtension(deliveryExtension).width;
+                    pdfHeight = PDFDeliveryExtension(deliveryExtension).height;
+                    orientation = PDFDeliveryExtension(deliveryExtension).orientation;
+                }
+            }
+        }
+
+        public function save():void {
+            _deliveryInfo.id = dashboardID;
+            var ext:PDFDeliveryExtension = new PDFDeliveryExtension();
+            ext.showHeader = showHeaderCheckBox.selected;
+            ext.width = widthStepper.value;
+            ext.height = heightStepper.value;
+            ext.orientation = orientationBox.selectedItem as String;
+            _deliveryInfo.deliveryExtension = ext;
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Show Header:">
+            <mx:CheckBox id="showHeaderCheckBox" selected="{showHeader}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Width:">
+            <mx:NumericStepper id="widthStepper" value="{pdfWidth}" maximum="3000" minimum="100"/>
+        </mx:FormItem>
+        <mx:FormItem label="Height:">
+            <mx:NumericStepper id="heightStepper" value="{pdfHeight}" maximum="3000" minimum="100"/>
+        </mx:FormItem>
+        <mx:FormItem label="Orientation:">
+            <mx:ComboBox id="orientationBox">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>Landscape</mx:String>
+                            <mx:String>Portrait</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox width="100%">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

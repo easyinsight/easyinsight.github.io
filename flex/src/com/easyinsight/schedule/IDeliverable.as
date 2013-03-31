@@ -9,6 +9,7 @@ package com.easyinsight.schedule {
 import mx.collections.ArrayCollection;
 
 public interface IDeliverable {
+    function setDeliveryExtension(extension:DeliveryExtension):void;
     function setFormat(format:int):void;
     function setFilters(filters:ArrayCollection):void;
     function setName(name:String):void;
