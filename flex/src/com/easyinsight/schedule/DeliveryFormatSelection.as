@@ -41,6 +41,8 @@ public class DeliveryFormatSelection extends HBox {
                 {label: "HTML Table", data: 4}]);
         } else if (deliveryInfo.type == DeliveryInfo.SCORECARD) {
             comboBox.dataProvider = new ArrayCollection([ {label: "HTML Table", data: 4}]);
+        } else if (deliveryInfo.type == DeliveryInfo.DASHBOARD) {
+            comboBox.dataProvider = new ArrayCollection([ {label: "PDF", data: 3}]);
         }
         if (deliveryInfo.format == 0) {
             deliveryInfo.format = comboBox.dataProvider.getItemAt(0).data;

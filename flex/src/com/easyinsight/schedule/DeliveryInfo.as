@@ -14,6 +14,7 @@ public class DeliveryInfo implements IDeliverable {
 
     public static const REPORT:int = 1;
     public static const SCORECARD:int = 2;
+    public static const DASHBOARD:int = 3;
 
     public var name:String;
     public var filters:ArrayCollection;
@@ -24,8 +25,13 @@ public class DeliveryInfo implements IDeliverable {
     public var format:int;
     public var label:String;
     public var sendIfNoData:Boolean = true;
+    public var deliveryExtension:DeliveryExtension;
 
     public function DeliveryInfo() {
+    }
+
+    public function setDeliveryExtension(extension:DeliveryExtension):void {
+        this.deliveryExtension = extension;
     }
 
     public function setFormat(format:int):void {

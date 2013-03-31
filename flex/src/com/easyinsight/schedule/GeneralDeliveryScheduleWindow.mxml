@@ -189,6 +189,13 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        private function addDashboard():void {
+            var window:AddDashboardWindow = new AddDashboardWindow();
+            window.addEventListener(DeliveryInfoEvent.ADD_REPORT, onNewDeliveryInfo, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         [Bindable]
         private var deliveryInfos:ArrayCollection = new ArrayCollection();
 
@@ -207,10 +214,17 @@
         }
 
         private function onEdit(event:DeliveryInfoEvent):void {
-            var window:ReportDeliveryWindow = new ReportDeliveryWindow();
-            window.deliveryInfo = event.deliveryInfo;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+            if (event.deliveryInfo.type == DeliveryInfo.REPORT) {
+                var window:ReportDeliveryWindow = new ReportDeliveryWindow();
+                window.deliveryInfo = event.deliveryInfo;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            } else {
+                var dashboardWindow:DashboardDeliveryWindow = new DashboardDeliveryWindow();
+                dashboardWindow.deliveryInfo = event.deliveryInfo;
+                PopUpManager.addPopUp(dashboardWindow, this, true);
+                PopUpUtil.centerPopUp(dashboardWindow);
+            }
         }
 
         private function addScorecard():void {
@@ -242,6 +256,7 @@
                 </mx:Form>
                 <mx:HBox>
                     <util:SaveButton label="Add Report..." click="addReport()"/>
+                    <util:SaveButton label="Add Dashboard..." click="addDashboard()"/>
                     <util:SaveButton label="Add Scorecard..." click="addScorecard()"/>
                 </mx:HBox>
                 <mx:DataGrid dataProvider="{deliveryInfos}" rowHeight="28">

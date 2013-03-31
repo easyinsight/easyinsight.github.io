@@ -34,6 +34,8 @@ public class DeliveryExtension {
                 PDFDeliveryExtension pdfDeliveryExtension = new PDFDeliveryExtension();
                 pdfDeliveryExtension.setShowHeader(rs.getBoolean(1));
                 pdfDeliveryExtension.setDisplayType(rs.getBoolean(2));
+                pdfDeliveryExtension.setWidth(rs.getInt(3));
+                pdfDeliveryExtension.setHeight(rs.getInt(4));
                 return pdfDeliveryExtension;
             }
         }
