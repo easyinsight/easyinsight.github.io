@@ -8,6 +8,8 @@ import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.preferences.ApplicationSkin;
+import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.util.RandomTextGenerator;
@@ -276,6 +278,33 @@ public class DashboardService {
         } catch (Exception e) {
             LogClass.error("On retrieving dashboard " + dashboardID, e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public Dashboard getDashboardViewWithHeader(long dashboardID) {
+        Dashboard dashboard = getDashboardView(dashboardID);
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT USER.USER_ID, USER.ACCOUNT_ID FROM USER_TO_DASHBOARD, USER WHERE USER_TO_DASHBOARD.DASHBOARD_ID = ? AND " +
+                    "USER_TO_DASHBOARD.USER_ID = USER.USER_ID");
+            stmt.setLong(1, dashboard.getId());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                long userID = rs.getLong(1);
+                long accountID = rs.getLong(2);
+                ApplicationSkin skin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
+                dashboard.setHeaderImage(skin.getReportHeaderImage());
+                dashboard.setHeaderBackgroundColor(skin.getReportBackgroundColor());
+                dashboard.setHeaderTextColor(skin.getReportTextColor());
+            }
+            return dashboard;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException();
+        } finally {
+            session.close();
+            Database.closeConnection(conn);
         }
     }
 
