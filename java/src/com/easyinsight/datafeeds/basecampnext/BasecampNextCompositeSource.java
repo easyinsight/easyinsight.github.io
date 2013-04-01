@@ -4,6 +4,7 @@ import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.config.ConfigLoader;
+import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -132,6 +133,14 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
         return null;
     }
 
+   /* @Override
+    public boolean checkDateTime(String name, Key key) {
+        if (BasecampNextTodoSource.TODO_COMPLETED_AT.equals(name)) {
+            return false;
+        }
+        return true;
+    }*/
+
     @Override
     public void exchangeTokens(EIConnection conn, HttpServletRequest httpRequest, String externalPin) throws Exception {
         try {
@@ -185,6 +194,14 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.BASECAMP_NEXT_CALENDAR);
         feedTypes.add(FeedType.BASECAMP_NEXT_PEOPLE);
         return feedTypes;
+    }
+
+    @Override
+    public boolean checkDateTime(String name, Key key) {
+        if (BasecampNextTodoSource.TODO_DUE_AT.equals(name)) {
+            return false;
+        }
+        return true;
     }
 
     @Override

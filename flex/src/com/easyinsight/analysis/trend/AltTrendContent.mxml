@@ -20,7 +20,7 @@
                     var mFormatter:Formatter = trendOutcome.measure.getFormatter();
                     var value:String = mFormatter.format(trendOutcome.now.getValue());
                     /*width = Math.max(width,  uiComp.measureText(value).width);
-                    width += trendDef.majorFontSize;*/
+                     width += trendDef.majorFontSize;*/
                     trendOutcome.dataSourceID = trendDef.dataFeedID;
                     trends.addItem(trendOutcome);
                 }
@@ -46,7 +46,7 @@
 
         ]]></mx:Script>
     <mx:Text id="uiComp" fontSize="32" visible="false"/>
-    <mx:Box id="vbox" width="100%" horizontalAlign="center" styleName="myFontStyle">
+    <mx:Box id="vbox" width="100%" horizontalAlign="center" styleName="myFontStyle" verticalAlign="middle" height="100%">
 
     </mx:Box>
     <!--<mx:List id="list" fontSize="14" selectable="false" itemRenderer="com.easyinsight.analysis.trend.AltTrendRenderer" variableRowHeight="true"/>-->

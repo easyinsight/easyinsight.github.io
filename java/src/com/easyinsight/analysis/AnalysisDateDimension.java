@@ -141,7 +141,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
     }
 
     public boolean isTimeshift() {
-        return dateOnlyField && timeshift;
+        return !dateOnlyField && timeshift;
     }
 
     public void setTimeshift(boolean timeshift) {

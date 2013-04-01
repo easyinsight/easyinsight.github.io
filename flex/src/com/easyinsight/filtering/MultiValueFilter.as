@@ -1,8 +1,6 @@
 package com.easyinsight.filtering {
 
-import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
@@ -12,11 +10,8 @@ import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
-import mx.controls.Alert;
-
 import mx.controls.Button;
 import mx.controls.CheckBox;
-import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.core.UIComponent;
 import mx.managers.PopUpManager;
@@ -28,31 +23,19 @@ public class MultiValueFilter extends HBox implements IFilter {
     private var deleteButton:Button;
     private var _analysisItems:ArrayCollection;
 
-    private var _report:AnalysisDefinition;
-    private var _otherFilters:ArrayCollection;
-    private var _dashboard:Dashboard;
-
     private var _loadingFromReport:Boolean = false;
-
-    private var filterValues:Button;
 
 
     public function set loadingFromReport(value:Boolean):void {
         _loadingFromReport = value;
     }
 
-    public function MultiValueFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition, otherFilters:ArrayCollection, dashboard:Dashboard) {
+    public function MultiValueFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
         super();
         _analysisItem = analysisItem;
         _feedID = feedID;
         _reportID = reportID;
         _dashboardID = dashboardID;
-        _report = report;
-        _dashboard = dashboard;
-        _otherFilters = otherFilters;
-        filterValues = new Button();
-        filterValues.styleName = "multiFilterButton";
-        setStyle("verticalAlign", "middle");
     }
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -76,7 +59,7 @@ public class MultiValueFilter extends HBox implements IFilter {
             var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
             window.feedID = _feedID;
             window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
-            window.detailClass = MultiValueFilterEditWindow;
+            window.detailClass = MultiValueFilterWindow;
             window.analysisItems = _analysisItems;
             window.filterDefinition = _filterDefinition;
             PopUpManager.addPopUp(window, this, true);
@@ -87,9 +70,6 @@ public class MultiValueFilter extends HBox implements IFilter {
             window2.dashboardID = _dashboardID;
             window2.embeddedFilter = _filterDefinition;
             window2.dataSourceID = _feedID;
-            window2.report = _report;
-            window2.otherFilters = _otherFilters;
-            window2.dashboard = _dashboard;
             window2.addEventListener("updated", onUpdated, false, 0, true);
             PopUpManager.addPopUp(window2, this, true);
             PopUpUtil.centerPopUpWithY(window2, 40);
@@ -97,12 +77,10 @@ public class MultiValueFilter extends HBox implements IFilter {
     }
 
     private function onUpdated(event:Event):void {
-        updateFilterLabel();
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 
     private function onFilterEdit(event:FilterEditEvent):void {
-        updateFilterLabel();
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
     }
 
@@ -114,33 +92,28 @@ public class MultiValueFilter extends HBox implements IFilter {
 
     override protected function createChildren():void {
         super.createChildren();
-        this.setStyle("horizontalGap", 2);
-        if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
-            var checkbox:CheckBox = new CheckBox();
-            checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
-            checkbox.toolTip = "Click to disable this filter.";
-            checkbox.addEventListener(Event.CHANGE, onChange);
-            addChild(checkbox);
-        }
-
+        //if (!_filterEditable) {
+        var checkbox:CheckBox = new CheckBox();
+        checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
+        checkbox.toolTip = "Click to disable this filter.";
+        checkbox.addEventListener(Event.CHANGE, onChange);
+        addChild(checkbox);
+        //}
 
         var labelText:UIComponent;
-        if (_filterEditable) {
-            labelText = new LinkButton();
-            labelText.addEventListener(MouseEvent.CLICK, edit);
-            LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
-        } else {
-            labelText = new Label();
-            Label(labelText).text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
-        }
-        labelText.styleName = "filterLabel";
+        labelText = new LinkButton();
+        labelText.setStyle("fontSize", 12);
+        labelText.addEventListener(MouseEvent.CLICK, edit);
+        labelText.setStyle("textDecoration", "underline");
+        LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         addChild(labelText);
 
-        filterValues.maxWidth = 150;
-        filterValues.addEventListener(MouseEvent.CLICK, showFilter);
-        updateFilterLabel();
-        addChild(filterValues);
-
+        /*if (editButton == null) {
+         editButton = new Button();
+         editButton.addEventListener(MouseEvent.CLICK, edit);
+         editButton.setStyle("icon", ImageConstants.EDIT_ICON);
+         editButton.toolTip = "Edit";
+         }*/
         if (_filterEditable) {
 
             if (deleteButton == null) {
@@ -166,39 +139,6 @@ public class MultiValueFilter extends HBox implements IFilter {
         } else {
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
         }
-    }
-
-    private function showFilter(event:MouseEvent):void {
-        var window2:EmbeddedMultiValueFilterWindow = new EmbeddedMultiValueFilterWindow();
-        window2.reportID = _reportID;
-        window2.dashboardID = _dashboardID;
-        window2.embeddedFilter = _filterDefinition;
-        window2.dataSourceID = _feedID;
-        window2.report = _report;
-        window2.otherFilters = _otherFilters;
-        window2.dashboard = _dashboard;
-        window2.addEventListener("updated", onUpdated, false, 0, true);
-        PopUpManager.addPopUp(window2, this, true);
-        PopUpUtil.centerPopUpWithY(window2, 40);
-    }
-
-    private function updateFilterLabel():void {
-        if (_filterDefinition && _filterDefinition.filteredValues) {
-            if (_filterDefinition.filteredValues.length == 1) {
-                filterValues.label = _filterDefinition.filteredValues.getItemAt(0).toString();
-                if (filterValues.label == "")
-                    filterValues.label = "[ No Value ]";
-
-            } else {
-                filterValues.label = _filterDefinition.filteredValues.length + " Item" + ((_filterDefinition.filteredValues.length == 1) ? "" : "s");
-            }
-        } else {
-            filterValues.label = ""
-        }
-        filterValues.toolTip = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
-            if (a == "") return "[ No Value ]";
-            return a.toString();
-        }).sort().join(", ");
     }
 
     public function toInclusive(filterValues:ArrayCollection):void {
@@ -256,10 +196,6 @@ public class MultiValueFilter extends HBox implements IFilter {
 
     public function set showLabel(show:Boolean):void {
         _showLabel = show;
-    }
-
-    public function regenerate():void {
-
     }
 }
 }

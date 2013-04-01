@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"  implements="com.easyinsight.filtering.IFilterDetailEditor">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+
+        private var _filterDefinition:FilterDefinition;
+
+        public function makeUpdates():FilterDefinition {
+            var filterValueDefinition:FilterValueDefinition;
+            if (!(_filterDefinition is FilterValueDefinition)) {
+                filterValueDefinition = new FilterValueDefinition();
+                filterValueDefinition.applyBeforeAggregation = _filterDefinition.applyBeforeAggregation;
+                filterValueDefinition.field = _filterDefinition.field;
+                filterValueDefinition.singleValue = true;
+                filterValueDefinition.autoComplete = false;
+                filterValueDefinition.newType = true;
+                _filterDefinition = filterValueDefinition;
+            } else {
+                FilterValueDefinition(_filterDefinition).singleValue = false;
+                FilterValueDefinition(_filterDefinition).newType = true;
+            }
+            return _filterDefinition;
+        }
+
+        public function set filterDefinition(filterDefinition:FilterDefinition):void {
+            _filterDefinition = filterDefinition;
+            if (_filterDefinition is FilterValueDefinition) {
+                excludeEmpty = FilterValueDefinition(_filterDefinition).excludeEmpty;
+                allOption = FilterValueDefinition(_filterDefinition).allOption;
+            }
+        }
+
+        public function set feedID(feedID:int):void {
+        }
+
+        private var _fields:ArrayCollection;
+
+        [Bindable]
+        private var allOption:Boolean;
+
+        [Bindable]
+        private var excludeEmpty:Boolean;
+
+        public function set fields(value:ArrayCollection):void {
+            _fields = value;
+        }
+
+        private function onTypeChange():void {
+            if (typeGroup.selectedValue == "single") {
+                dispatchEvent(new FilterEditEvent(_filterDefinition, _filterDefinition, ComboBoxFilterWindow));
+            } else if (typeGroup.selectedValue == "pattern") {
+                dispatchEvent(new FilterEditEvent(_filterDefinition, _filterDefinition, PatternFilterWindow));
+            } else if (typeGroup.selectedValue == "autoComplete") {
+                dispatchEvent(new FilterEditEvent(_filterDefinition, _filterDefinition, AutoCompleteFilterWindow));
+            }
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <mx:RadioButtonGroup id="typeGroup" change="onTypeChange()"/>
+        <mx:RadioButton group="{typeGroup}" label="Single Value" value="single"/>
+        <mx:RadioButton group="{typeGroup}" label="Multi Value" selected="true" value="multi"/>
+        <mx:RadioButton group="{typeGroup}" label="Pattern Match" value="pattern"/>
+        <mx:RadioButton group="{typeGroup}" label="Auto Complete" value="autoComplete"/>
+    </mx:HBox>
+</mx:VBox>

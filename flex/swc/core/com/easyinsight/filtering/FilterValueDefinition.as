@@ -15,6 +15,7 @@ import mx.collections.ArrayCollection;
     public var excludeEmpty:Boolean;
     public var allOption:Boolean;
     public var cachedValues:AnalysisItemResultMetadata;
+    public var newType:Boolean;
 
 		public function FilterValueDefinition()
 		{

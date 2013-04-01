@@ -39,22 +39,22 @@ public class VerticalDataGrid extends AdvancedDataGrid {
     }
 
     /*override protected function drawHorizontalLine(s:Sprite, rowIndex:int, color:uint, y:Number):void
-    {
-        var g:Graphics = s.graphics;
+     {
+     var g:Graphics = s.graphics;
 
-        var offset:Number = 0;
+     var offset:Number = 0;
 
-        for ( var i:int = 0; i < _headerRows; i++)
-            offset += columns[i].width;
+     for ( var i:int = 0; i < _headerRows; i++)
+     offset += columns[i].width;
 
-        if (lockedRowCount > 0 && rowIndex == lockedRowCount-1)
-            g.lineStyle(1, 0);
-        else
-            g.lineStyle(1, color);
+     if (lockedRowCount > 0 && rowIndex == lockedRowCount-1)
+     g.lineStyle(1, 0);
+     else
+     g.lineStyle(1, color);
 
-        g.moveTo(offset, y);
-        g.lineTo(unscaledWidth - viewMetrics.left - viewMetrics.right, y);
-    }*/
+     g.moveTo(offset, y);
+     g.lineTo(unscaledWidth - viewMetrics.left - viewMetrics.right, y);
+     }*/
 
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
@@ -64,7 +64,7 @@ public class VerticalDataGrid extends AdvancedDataGrid {
         }
 
         var headerBG:UIComponent =
-            UIComponent(listContent.getChildByName("rowHeaderBG"));
+                UIComponent(listContent.getChildByName("rowHeaderBG"));
 
         if (!headerBG)
         {
@@ -106,14 +106,14 @@ public class VerticalDataGrid extends AdvancedDataGrid {
     }
 
     /*override protected function drawVerticalLine(s:Sprite, colIndex:int, color:uint, x:Number):void
-    {
-        //draw our vertical lines
-        var g:Graphics = s.graphics;
-        if (lockedColumnCount > 0 && colIndex == lockedColumnCount - 1)
-            g.lineStyle(1, color, 100);
-        else
-            super.drawVerticalLine(s, colIndex, color, x);
-    }*/
+     {
+     //draw our vertical lines
+     var g:Graphics = s.graphics;
+     if (lockedColumnCount > 0 && colIndex == lockedColumnCount - 1)
+     g.lineStyle(1, color, 100);
+     else
+     super.drawVerticalLine(s, colIndex, color, x);
+     }*/
 
     private function getRowHeadersWidth():Number
     {
@@ -126,7 +126,7 @@ public class VerticalDataGrid extends AdvancedDataGrid {
     }
 
     override protected function drawRowBackground(s:Sprite, rowIndex:int,
-                                         y:Number, height:Number, color:uint, dataIndex:int):void
+                                                  y:Number, height:Number, color:uint, dataIndex:int):void
     {
         var background:Shape;
         if (rowIndex < s.numChildren)
@@ -146,8 +146,8 @@ public class VerticalDataGrid extends AdvancedDataGrid {
         // Height is usually as tall is the items in the row, but not if
         // it would extend below the bottom of listContent
         var height:Number = Math.min(height,
-                                     listContent.height -
-                                     y);
+                listContent.height -
+                        y);
 
         var g:Graphics = background.graphics;
         g.clear();

@@ -105,7 +105,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
         deleteStmt.executeUpdate();
         deleteStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO mysql_database_connection (data_source_id, host_name, server_port, database_name," +
-                "database_username, database_password, query_string, rebuild_fields) values (?, ?, ?, ?, ?, ?, ?, ?)");
+                "database_username, database_password, query_string, rebuild_fields, timeout) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, host);
         insertStmt.setInt(3, port);
@@ -122,6 +122,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
         }
         insertStmt.setString(7, getQuery());
         insertStmt.setBoolean(8, isRebuildFields());
+        insertStmt.setInt(9, getTimeout());
         insertStmt.execute();
         insertStmt.close();
     }
@@ -130,7 +131,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
         PreparedStatement loadStmt = conn.prepareStatement("SELECT host_name, server_port, database_name, database_username," +
-                "database_password, query_string, rebuild_fields FROM mysql_database_connection WHERE data_source_id = ?");
+                "database_password, query_string, rebuild_fields, timeout FROM mysql_database_connection WHERE data_source_id = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
@@ -144,6 +145,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
             }
             setQuery(rs.getString(6));
             setRebuildFields(rs.getBoolean(7));
+            setTimeout(rs.getInt(8));
         }
         loadStmt.close();
     }

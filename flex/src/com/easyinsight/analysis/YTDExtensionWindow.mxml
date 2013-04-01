@@ -16,6 +16,7 @@
             var ext:YTDReportFieldExtension = new YTDReportFieldExtension();
             ext.benchmark = dateComboBox.selectedItem as AnalysisItem;
             ext.lineAbove = verticalLineBox.selected;
+            ext.alwaysShow = alwaysShowBox.selected;
             analysisItem.reportFieldExtension = ext;
         }
 
@@ -26,6 +27,7 @@
                 if (ext.benchmark != null) {
                     selectedValue = ext.benchmark.display;
                 }
+                alwaysShow = ext.alwaysShow;
                 verticalLineAbove = ext.lineAbove;
             }
         }
@@ -37,7 +39,7 @@
                     dateFields.addItem(analysisItemWrapper.analysisItem);
                 }
             }
-            rowCount = Math.min(15, dateFields.length);
+            rowCount = Math.min(10, dateFields.length);
             dateFields.addItemAt({ display: '[ No Benchmark ]'}, 0);
             this.dateFields = dateFields;
         }
@@ -45,11 +47,15 @@
         [Bindable]
         private var rowCount:int;
 
+
         [Bindable]
         private var selectedValue:String;
-        
+
         [Bindable]
         private var verticalLineAbove:Boolean;
+
+        [Bindable]
+        private var alwaysShow:Boolean;
         ]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="Which field should serve as a benchmark?">
@@ -58,6 +64,9 @@
         </mx:FormItem>
         <mx:FormItem label="Draw a vertical line over this field:">
             <mx:CheckBox id="verticalLineBox" selected="{verticalLineAbove}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Always show this field:">
+            <mx:CheckBox id="alwaysShowBox" selected="{alwaysShow}"/>
         </mx:FormItem>
     </mx:Form>
 

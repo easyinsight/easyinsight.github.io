@@ -24,8 +24,9 @@ public class SeleniumLauncher {
 
     private static final String URL = "/app/selenium/selenium.jsp?userName={0}&password={1}&seleniumID={2}&dataSourceID={3}&reportID={4}&reportType={5}&width={6}&height={7}";
 
-    public void requestSeleniumDrawForEmail(long accountActivityID, long userID, long accountID, EIConnection conn) throws SQLException {
-        EmailSeleniumPostProcessor processor = new EmailSeleniumPostProcessor(accountActivityID);
+    public long requestSeleniumDrawForReport(long reportID, long accountActivityID, long userID, long accountID, EIConnection conn,
+                                             int actionType, DeliveryExtension deliveryExtension) throws SQLException {
+        EmailSeleniumPostProcessor processor = new EmailSeleniumPostProcessor(accountActivityID, actionType);
         long id = processor.save(conn);
         String userName = RandomTextGenerator.generateText(50);
         String password = RandomTextGenerator.generateText(50);
@@ -40,17 +41,21 @@ public class SeleniumLauncher {
         insertStmt.execute();
         String seleniumID = String.valueOf(Database.instance().getAutoGenKey(insertStmt));
         PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.title, ANALYSIS.data_feed_id, ANALYSIS.report_type, ANALYSIS.url_key FROM " +
-                "ANALYSIS, REPORT_DELIVERY, SCHEDULED_ACCOUNT_ACTIVITY WHERE ANALYSIS.analysis_id = REPORT_DELIVERY.report_id AND " +
-                "REPORT_DELIVERY.scheduled_account_activity_id = ?");
-        queryStmt.setLong(1, accountActivityID);
+                "ANALYSIS WHERE ANALYSIS.analysis_id = ?");
+        queryStmt.setLong(1, reportID);
         ResultSet rs = queryStmt.executeQuery();
         rs.next();
         String dataSourceID = String.valueOf(rs.getLong(2));
         String reportType = String.valueOf(rs.getInt(3));
         String urlKey = rs.getString(4);
         String url = MessageFormat.format(URL, userName, password, seleniumID, dataSourceID, urlKey, reportType, "1000", "800");
+        if (deliveryExtension != null) {
+            url += deliveryExtension.toURL();
+        }
         queryStmt.close();
+        System.out.println(url);
         launchRequest(url);
+        return id;
     }
 
     public long requestSeleniumDrawForMobile(long reportID, long userID, long accountID, EIConnection conn, int width, int height) throws SQLException {

@@ -9,7 +9,6 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemWrapper;
 import com.easyinsight.dashboard.Dashboard;
-import com.easyinsight.filtering.AnalysisItemFilterDefinition;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.display.DisplayObject;
@@ -18,11 +17,9 @@ import flash.ui.ContextMenu;
 import flash.ui.ContextMenuItem;
 
 import flash.utils.Dictionary;
-import flash.utils.getQualifiedClassName;
 
 import flexlib.containers.FlowBox;
 
-import mx.collections.ArrayCollection;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
@@ -242,9 +239,13 @@ public class TransformContainer extends HBox
                             _dashboard);
                 }
             } else {
-                filter = new MultiValueFilter(_feedID, filterDefinition.field, _reportID,  _dashboardID,  _report,
+                if (filterValueDefinition.newType) {
+                    filter = new NewMultiValueFilter(_feedID, filterDefinition.field, _reportID,  _dashboardID,  _report,
                                             _loadingFromReport ? ((_report != null && _report.filterDefinitions != null) ? _report.filterDefinitions : filterDefinitions) : filterDefinitions,
                                             _dashboard);
+                } else {
+                    filter = new MultiValueFilter(_feedID, filterDefinition.field, _reportID,  _dashboardID);
+                }
             }
         } else if (filterDefinition.getType() == FilterDefinition.DATE) {
             filter = new SliderDateFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report);
@@ -516,8 +517,8 @@ public class TransformContainer extends HBox
                             label = AnalysisItemFilterDefinition(event.filter.filterDefinition).targetItem.display;
                         }
                         ComboBoxFilter(child).regenerate(label);
-                    } else if (child is MultiValueFilter) {
-                        MultiValueFilter(child).regenerate();
+                    } else if (child is NewMultiValueFilter) {
+                        NewMultiValueFilter(child).regenerate();
                     }
 
                 }
@@ -569,6 +570,7 @@ public class TransformContainer extends HBox
     }
 
     public function commandFilterAdd2(filter:IFilter, launchWindow:Boolean):void {
+
         commandFilterAdd(filter);
         if (launchWindow) {
             if (filter is SliderMeasureFilter) {
@@ -577,6 +579,8 @@ public class TransformContainer extends HBox
                 PatternFilter(filter).edit(null);
             } else if (filter is MultiValueFilter) {
                 MultiValueFilter(filter).edit(null);
+            } else if (filter is NewMultiValueFilter) {
+                NewMultiValueFilter(filter).showFilter(null);
             }
         }
         if (filter is ComboBoxFilter) {
@@ -657,67 +661,6 @@ public class TransformContainer extends HBox
 
     private function filterDeleted(event:FilterDeletionEvent):void {
         dispatchEvent(new CommandEvent(new FilterDeleteCommand(this, event.getFilter())));
-    }
-
-    public function processRawFilterData(filterRawData:FilterRawData, includeFilter:Boolean):void {
-        for (var i:int = 0; i < filterRawData.getKeys().length; i++) {
-            var key:AnalysisItem = filterRawData.getKeys().getItemAt(i) as AnalysisItem;
-            var values:ArrayCollection = filterRawData.getValues(key);
-            var uniqueValues:ArrayCollection = new ArrayCollection();
-            for each (var val:Object in values) {
-                if (uniqueValues.getItemIndex(val) == -1) {
-                    uniqueValues.addItem(val);
-                }
-            }
-            var filter:IFilter = null;
-                // doesn't exist yet, create it
-                var filterDefinition:FilterDefinition;
-                if (key.hasType(AnalysisItemTypes.DATE)) {
-                    var filterDateRangeDefinition:FilterDateRangeDefinition = new FilterDateRangeDefinition();
-                    filterDateRangeDefinition.field = key;
-                    filterDefinition = filterDateRangeDefinition;
-                    filter = new SliderDateFilter(_feedID, key, _reportID, _dashboardID);
-                } else if (key.hasType(AnalysisItemTypes.DIMENSION)) {
-                    var filterValueDefinition:FilterValueDefinition = new FilterValueDefinition();
-                    filterValueDefinition.field = key;
-                    filterValueDefinition.filteredValues = uniqueValues;
-                    filterValueDefinition.inclusive = includeFilter;
-                    filterDefinition = filterValueDefinition;
-                    if (values.length == 1 && includeFilter) {
-                        filter = new ComboBoxFilter(_feedID, key, _reportID, _dashboardID, _report, filterDefinitions, _dashboard);
-                    } else {
-                        filter = new MultiValueFilter(_feedID, key, _reportID, _dashboardID, _report, filterDefinitions, _dashboard);
-                    }
-                } else if (key.hasType(AnalysisItemTypes.MEASURE)) {
-                    var filterMeasureRangeDefinition:FilterRangeDefinition = new FilterRangeDefinition();
-                    filterMeasureRangeDefinition.field = key;
-                    filterDefinition = filterMeasureRangeDefinition;
-                    filter = new SliderMeasureFilter(_feedID, key);
-                    var min:Number = Number.MAX_VALUE;
-                    var max:Number = Number.MIN_VALUE;
-                    for each (var valO:Object in uniqueValues) {
-                        var num:Number = Number(valO);
-                        if (num < min) {
-                            min = num;
-                        }
-                        if (num > max) {
-                            max = num;
-                        }
-                    }
-                    if (includeFilter) {
-                        filterMeasureRangeDefinition.currentEndValueDefined = true;
-                        filterMeasureRangeDefinition.currentEndValue = max;
-                        filterMeasureRangeDefinition.currentStartValueDefined = true;
-                        filterMeasureRangeDefinition.currentStartValue = min;
-                    } else {
-
-                    }
-                }
-                filterMap[key.qualifiedName()] = filter;
-                filter.filterDefinition = filterDefinition;
-                initializeFilter(filter, true);
-
-        }
     }
 
     public function updateState():Boolean {

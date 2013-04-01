@@ -152,8 +152,5 @@
     <mx:Button click="dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { dashboardID: _dashboard.id})))" styleName="grayButton" labelPlacement="right"
                id="editButton" label="Edit the Dashboard" icon="{ImageConstants.EDIT_ICON}" visible="{editable}"/>
     <mx:Spacer width="100%"/>
-    <mx:Label text="{dashboardName}" maxWidth="350"
-              fontSize="14" toolTip="{description}"/>
-    <mx:Spacer width="100%"/>
     <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
 </mx:HBox>

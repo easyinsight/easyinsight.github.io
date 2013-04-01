@@ -4,10 +4,12 @@ import mx.formatters.Formatter;
 public class TimeStringFormatter extends Formatter{
 
     private var baseInterval:int = 1;
+    private var precision:int;
 
-    public function TimeStringFormatter(baseInterval:int) {
+    public function TimeStringFormatter(baseInterval:int, precision:int) {
         super();
         this.baseInterval = baseInterval;
+        this.precision = precision;
     }
 
     override public function format(value:Object):String {
@@ -25,7 +27,7 @@ public class TimeStringFormatter extends Formatter{
             // < 1 minute
             var seconds:uint = num / 1000;
             var milliseconds:uint = num % 1000;
-            if (milliseconds == 0) {
+            if (milliseconds == 0 || precision == 0) {
                 resultString = seconds + "s";
             } else {
                 resultString = seconds + "s:" + milliseconds+"ms";
@@ -34,7 +36,7 @@ public class TimeStringFormatter extends Formatter{
             // < 1 hour
             var minutes:uint = num / (60 * 1000);
             var secondsRemainder:uint = (num / 1000) % 60;
-            if (secondsRemainder == 0) {
+            if (secondsRemainder == 0 || precision == 0) {
                 resultString = minutes + "m";
             } else {
                 resultString = minutes + "m:" + secondsRemainder + "s";
@@ -43,7 +45,7 @@ public class TimeStringFormatter extends Formatter{
             // < 24 hours
             var hours:uint = num / (60000 * 60);
             var minutesRemainder:uint = num % 24;
-            if (minutesRemainder == 0) {
+            if (minutesRemainder == 0 || precision == 0) {
                 resultString = hours + "h";
             } else {
                 resultString = hours + "h:" + minutesRemainder + "m";
@@ -52,7 +54,7 @@ public class TimeStringFormatter extends Formatter{
             var dayVal:uint = (60000 * 60 * 24);
             var days:uint = num / dayVal;
             var dayRemainder:uint = (num / (60000 * 60)) % 24;
-            if (dayRemainder == 0) {
+            if (dayRemainder == 0 || precision == 0) {
                 resultString = days + "d";
             } else {
                 resultString = days + "d:" + dayRemainder + "h";

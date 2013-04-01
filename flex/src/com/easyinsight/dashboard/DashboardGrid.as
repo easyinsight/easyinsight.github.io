@@ -17,6 +17,8 @@ public class DashboardGrid extends DashboardElement {
     public var backgroundColor:uint = 0xFFFFFF;
     public var backgroundAlpha:Number = 0;
 
+    // 713-595-1352
+    public var showLabel:Boolean;
     public var gridItems:ArrayCollection;
 
     public function DashboardGrid() {

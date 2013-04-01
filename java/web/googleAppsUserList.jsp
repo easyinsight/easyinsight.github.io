@@ -10,6 +10,7 @@
 <%@ page import="com.google.gdata.data.appsforyourdomain.provisioning.UserEntry" %>
 <!DOCTYPE html>
 <%@ page import="com.easyinsight.users.User" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -100,7 +101,7 @@
                 </div>
                 <div class="row" style="padding-top:20px">
                     <div class="span4" style="padding-top: 4px">
-                        <a style="font-size:20px" href="<%= (String) session.getAttribute("googleCallbackURL") %>">I'll Do It Later</a>
+                        <a style="font-size:20px" href="<%=RedirectUtil.getURL(request, "/app/")%>">I'll Do It Later</a>
                     </div>
                     <div class="span3">
                         <div style="float:right">

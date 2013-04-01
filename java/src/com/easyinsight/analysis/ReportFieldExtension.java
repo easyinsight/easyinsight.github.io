@@ -8,8 +8,9 @@ import org.hibernate.Session;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+
 
 /**
  * User: jamesboe
@@ -39,7 +40,7 @@ public class ReportFieldExtension implements Cloneable, Serializable {
         return reportFieldExtension;
     }
 
-    public List<AnalysisItem> getAnalysisItems(boolean getEverything) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         return new ArrayList<AnalysisItem>();
     }
 

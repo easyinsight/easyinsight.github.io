@@ -154,7 +154,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
                 editorComp = IDashboardEditorComponent(DashboardElementFactory.createEditorUIComponent(element, dashboardEditorMetadata));
             }
             dropBox.addChild(DisplayObject(editorComp));
-            editorComp.initialRetrieve();
+            //editorComp.initialRetrieve();
         } else {
             dropBox.setStyle("backgroundColor", 0xFFFFFF);
             dropBox.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
@@ -162,6 +162,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
             var dropTextArea:TextArea = new TextArea();
             dropTextArea.setStyle("backgroundAlpha", 0);
             dropTextArea.setStyle("fontSize", 12);
+            dropTextArea.editable = false;
             dropTextArea.text = "Drag a control or report from the left side options to here.";
             dropTextArea.width = 200;
             dropBox.addChild(dropTextArea);

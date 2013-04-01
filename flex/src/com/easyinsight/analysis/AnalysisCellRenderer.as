@@ -230,16 +230,18 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         if (rext != null && rext.align != null) {
             align = rext.align.toLowerCase();
         }
+        var fontName:String = _report.getFont();
         if (_report.getFont() == "Open Sans" && !bold) {
             styleName = "myFontStyle";
         } else if (_report.getFont() == "Open Sans" && bold) {
             styleName = "boldStyle";
+            fontName = "Open Sans Bold";
         }
         this.newColor = color;
-        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, bold, null, false);
+        utf = new UITextFormat(this.systemManager, fontName, _report.fontSize, color, bold, null, false);
         utf.align = align;
         if (hyperlinked) {
-            hyperlinkedUTF = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, bold, null, true);
+            hyperlinkedUTF = new UITextFormat(this.systemManager, fontName, _report.fontSize, color, bold, null, true);
             hyperlinkedUTF.align = align;
         }
         if (hyperlinked && !hasLinks) {
@@ -264,7 +266,6 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
             this.background = false;
         }
         new StandardContextWindow(analysisItem, passThrough, this, value, _report);
-
         UIComponentGlobals.layoutManager.invalidateProperties(this);
         invalidateSize();
         invalidateProperties();

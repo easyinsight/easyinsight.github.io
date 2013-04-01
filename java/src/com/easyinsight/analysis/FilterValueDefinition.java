@@ -5,9 +5,6 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.sql.Types;
@@ -21,40 +18,51 @@ import java.sql.SQLException;
  * Time: 2:57:56 PM
  */
 @Entity
-@Table(name = "value_based_filter")
-@PrimaryKeyJoinColumn(name = "filter_id")
+@Table(name="value_based_filter")
+@PrimaryKeyJoinColumn(name="filter_id")
 public class FilterValueDefinition extends FilterDefinition {
-    @Column(name = "inclusive")
+    @Column(name="inclusive")
     private boolean inclusive = true;
     @Transient
     private List<Object> filteredValues;
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "filter_to_value",
-            joinColumns = @JoinColumn(name = "filter_id"),
-            inverseJoinColumns = @JoinColumn(name = "value_id"))
+    @OneToMany(cascade= CascadeType.ALL)
+    @JoinTable(name="filter_to_value",
+               joinColumns=@JoinColumn(name="filter_id"),
+               inverseJoinColumns=@JoinColumn(name="value_id"))
     private Set<PersistableValue> persistedValues;
-    @Column(name = "single_value")
+    @Column(name="single_value")
     private boolean singleValue;
 
-    @Column(name = "auto_complete")
+    @Column(name="auto_complete")
     private boolean autoComplete;
 
-    @Column(name = "exclude_empty")
+    @Column(name="exclude_empty")
     private boolean excludeEmpty;
 
-    @Column(name = "all_option")
-    private boolean allOption;
+    @Column(name="all_option")
+    private boolean allOption = true;
+
+    @Column(name="new_type")
+    private boolean newType = false;
 
     @Transient
     private AnalysisItemResultMetadata cachedValues;
 
-    public FilterValueDefinition() {
+    public FilterValueDefinition() {        
     }
 
     public FilterValueDefinition(AnalysisItem field, boolean inclusive, List<Object> filteredValues) {
         super(field);
         this.inclusive = inclusive;
         this.filteredValues = filteredValues;
+    }
+
+    public boolean isNewType() {
+        return newType;
+    }
+
+    public void setNewType(boolean newType) {
+        this.newType = newType;
     }
 
     public AnalysisItemResultMetadata getCachedValues() {
@@ -113,7 +121,7 @@ public class FilterValueDefinition extends FilterDefinition {
         this.inclusive = inclusive;
     }
 
-    public List<Object> getFilteredValues() {
+     public List<Object> getFilteredValues() {
         return filteredValues;
     }
 
@@ -149,7 +157,7 @@ public class FilterValueDefinition extends FilterDefinition {
             }
             filter.setPersistedValues(values);
         }
-        List<Object> transferValues = new ArrayList<Object>();
+        List<Object> transferValues = new ArrayList<Object>();        
         for (PersistableValue filterDefinitionValue : filter.getPersistedValues()) {
             transferValues.add(filterDefinitionValue.toValue());
         }
@@ -380,45 +388,6 @@ public class FilterValueDefinition extends FilterDefinition {
     }
 
     @Override
-    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
-        JSONObject filter = new JSONObject();
-        filter.put("name", label(true));
-        filter.put("type", "single");
-        filter.put("id", getFilterID());
-
-
-        String existingChoice = null;
-        if (!getFilteredValues().isEmpty()) {
-            Object obj = getFilteredValues().get(0);
-            if (obj != null) {
-                existingChoice = obj.toString();
-            }
-        }
-        AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, 0, 0, filterHTMLMetadata.getReport());
-        if (metadata.getReportFault() != null) {
-            return null;
-        }
-        AnalysisDimensionResultMetadata dimensionMetadata = (AnalysisDimensionResultMetadata) metadata;
-        ArrayList<String> stringList = new ArrayList<String>();
-        for (Value value : dimensionMetadata.getValues()) {
-            stringList.add(value.toHTMLString());
-        }
-
-        Collections.sort(stringList);
-        if (isAllOption()) {
-            stringList.add(0, "All");
-        }
-        if (isExcludeEmpty()) {
-            stringList.remove("");
-        }
-        JSONArray valueList = new JSONArray(stringList);
-        filter.put("selected", existingChoice);
-
-        filter.put("values", valueList);
-        return filter;
-    }
-
-    @Override
     public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
         AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, 0, 0, filterHTMLMetadata.getReport());
@@ -426,7 +395,7 @@ public class FilterValueDefinition extends FilterDefinition {
             return "";
         }
         AnalysisDimensionResultMetadata dimensionMetadata = (AnalysisDimensionResultMetadata) metadata;
-        String filterName = "filter" + getFilterID();
+        String filterName = "filter"+getFilterID();
         if (singleValue) {
 
             String onChange;
@@ -438,7 +407,7 @@ public class FilterValueDefinition extends FilterDefinition {
                 sb.append(checkboxHTML(filterHTMLMetadata.getFilterKey(), filterHTMLMetadata.createOnChange()));
             }
             sb.append(label(true));
-            sb.append("<select class=\"filterSelect\" id=\"" + filterName + "\" onchange=\"" + onChange + "\">");
+            sb.append("<select class=\"filterSelect\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
 
 
             List<String> stringList = new ArrayList<String>();
@@ -478,16 +447,16 @@ public class FilterValueDefinition extends FilterDefinition {
             sb.append("<div id=\"").append(divID).append("\" class=\"modal hide\">");
             sb.append("<div class=\"modal-body\">");
             sb.append("<div class=\"control-group\">");
-            sb.append("<label class=\"control-label\" for=\"" + filterName + "\">Available Values</label>");
+            sb.append("<label class=\"control-label\" for=\""+filterName+"\">Available Values</label>");
             sb.append("<div class=\"controls\">");
             int size = Math.min(15, dimensionMetadata.getValues().size());
             sb.append("<ul class=\"unstyled\" id=\"");
             sb.append(filterName);
             sb.append("\">");
 
-            for (Value value : dimensionMetadata.getValues()) {
+            for( Value value: dimensionMetadata.getValues()) {
                 sb.append("<li><input type='checkbox'");
-                if (filteredValues.contains(value)) {
+                if(filteredValues.contains(value)) {
                     sb.append(" checked='checked'");
                 }
                 sb.append(" /> <span class='cb_filter_value'>");
@@ -508,7 +477,7 @@ public class FilterValueDefinition extends FilterDefinition {
             sb.append("</div>");
             sb.append("</div>");
             sb.append("<div class=\"modal-footer\">\n" +
-                    "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiFilter('" + filterName + "','" + filterHTMLMetadata.getFilterKey() + "'," + filterHTMLMetadata.createOnChange() + ")\">˝Send</button>\n" +
+                    "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiFilter('"+filterName+"','"+filterHTMLMetadata.getFilterKey()+"',"+filterHTMLMetadata.createOnChange()+")\">˝Send</button>\n" +
                     "        <button class=\"btn\" data-dismiss=\"modal\" type=\"button\">Cancel</button>\n" +
                     "    </div>");
             sb.append("</div>");
@@ -516,7 +485,7 @@ public class FilterValueDefinition extends FilterDefinition {
             if (!isToggleEnabled()) {
                 sb.append(checkboxHTML(filterHTMLMetadata.getFilterKey(), filterHTMLMetadata.createOnChange()));
             }
-            sb.append("<a href=\"#" + divID + "\" data-toggle=\"modal\">").append(label(false)).append("</a></div>");
+            sb.append("<a href=\"#"+divID+"\" data-toggle=\"modal\">").append(label(false)).append("</a></div>");
         }
         return sb.toString();
     }
