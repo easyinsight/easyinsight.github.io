@@ -56,7 +56,7 @@ public class DeliveryActions extends HBox {
 
     override public function set data(val:Object):void {
         deliveryInfo = val as DeliveryInfo;
-        showEdit = deliveryInfo.type == DeliveryInfo.REPORT;
+        showEdit = deliveryInfo.type == DeliveryInfo.REPORT || deliveryInfo.type == DeliveryInfo.DASHBOARD;
     }
 
     override public function get data():Object {

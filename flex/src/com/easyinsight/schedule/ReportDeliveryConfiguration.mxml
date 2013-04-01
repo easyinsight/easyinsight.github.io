@@ -1,5 +1,14 @@
 <?xml version="1.0"?>
 <mx:Form xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:states>
+        <mx:State name="pdf">
+            <mx:AddChild>
+                <mx:FormItem label="Show Header:">
+                    <mx:CheckBox id="showHeaderCheckBox" selected="{showHeader}"/>
+                </mx:FormItem>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
     <mx:Script><![CDATA[
         private var _reports:ArrayCollection;
 
@@ -8,6 +17,19 @@
         private var _formatValue:String;
 
         private var _reportChangeable:Boolean = true;
+
+        private var _showHeader:Boolean;
+
+        [Bindable(event="showHeaderChanged")]
+        public function get showHeader():Boolean {
+            return _showHeader;
+        }
+
+        public function set showHeader(value:Boolean):void {
+            if (_showHeader == value) return;
+            _showHeader = value;
+            dispatchEvent(new Event("showHeaderChanged"));
+        }
 
         [Bindable(event="reportChangeableChanged")]
         public function get reportChangeable():Boolean {
@@ -25,6 +47,9 @@
             super.commitProperties();
             if (!_reportChangeable && reportComboBoxItem.parent) {
                 removeChild(reportComboBoxItem);
+            }
+            if (_formatValue == "3") {
+                currentState = "pdf";
             }
         }
 
@@ -89,7 +114,20 @@
                 activity.setName(reportComboBox.selectedItem.name);
             }
             activity.setLabel(deliveryLabelInput.text);
-            activity.setSendOnNoData(sendOnNoDataCheckbox.selected)
+            activity.setSendOnNoData(sendOnNoDataCheckbox.selected);
+            var ext:DeliveryExtension = null;
+            if (int(outputFormatBox.selectedItem.data) == 3) {
+                var pdfExtension:PDFDeliveryExtension = new PDFDeliveryExtension();
+                pdfExtension.showHeader = showHeaderCheckBox.selected;
+                ext = pdfExtension;
+            }
+            activity.setDeliveryExtension(ext);
+        }
+
+        public function set deliveryExtension(extension:DeliveryExtension):void {
+            if (extension != null && extension is PDFDeliveryExtension) {
+                showHeader = PDFDeliveryExtension(extension).showHeader;
+            }
         }
 
         private var _deliveryLabel:String;
@@ -118,6 +156,14 @@
             _sendOnNoData = value;
             dispatchEvent(new Event("sendOnNoDataChanged"));
         }
+
+        private function onOutputChange():void {
+            if (int(outputFormatBox.selectedItem.data) == 3) {
+                currentState = "pdf";
+            } else {
+                currentState = "";
+            }
+        }
         ]]></mx:Script>
     <mx:FormItem label="Report:" id="reportComboBoxItem">
         <util:SmartComboBox dataProvider="{reports}" selectedValue="{reportID}" selectedProperty="id"
@@ -131,7 +177,7 @@
     </mx:FormItem>
     <mx:FormItem label="Output Format:">
         <util:SmartComboBox id="outputFormatBox" selectedValue="{formatValue}" selectedProperty="data"
-                            labelField="label">
+                            labelField="label" change="onOutputChange()">
             <util:dataProvider>
                 <mx:ArrayCollection>
                     <mx:Array>

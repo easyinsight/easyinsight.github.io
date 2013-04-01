@@ -31,10 +31,16 @@ class QueryStateNode {
     public Feed feed;
     private String pipelineName;
     private Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+    private QueryNodeKey queryNodeKey;
+
+    QueryStateNode() {
+
+    }
 
     QueryStateNode(long feedID, Feed feed, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata) {
         this.feedID = feedID;
-        queryData = new QueryData(feedID);
+        queryNodeKey = new DataSourceQueryNodeKey(feedID);
+        queryData = new QueryData(queryNodeKey);
         this.feed = feed;
         this.conn = conn;
         dataSourceName = feed.getName();
@@ -50,6 +56,10 @@ class QueryStateNode {
                 }
             }
         }
+    }
+
+    public QueryNodeKey queryNodeKey() {
+        return queryNodeKey;
     }
 
     public boolean handles(AnalysisItem analysisItem) {

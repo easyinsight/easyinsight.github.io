@@ -1,6 +1,7 @@
 package com.easyinsight.core;
 
 import com.easyinsight.database.Database;
+import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.util.List;
@@ -32,6 +33,16 @@ public class DerivedKey extends Key {
         super.afterLoad();
         parentKey = (Key) Database.deproxy(parentKey);
         parentKey.afterLoad();
+    }
+
+    @Override
+    public void beforeSave(Session session) {
+        super.beforeSave(session);
+        if (parentKey.getKeyID() == 0) {
+            session.save(parentKey);
+        } else {
+            session.merge(parentKey);
+        }
     }
 
     @Override

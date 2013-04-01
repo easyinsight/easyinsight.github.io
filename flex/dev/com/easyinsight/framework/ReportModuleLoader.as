@@ -24,6 +24,7 @@ import com.easyinsight.analysis.gauge.GaugeModule;
 import com.easyinsight.analysis.heatmap.HeatMapModule;
 import com.easyinsight.analysis.list.ListModule;
 import com.easyinsight.analysis.summary.SummaryModule;
+import com.easyinsight.analysis.text.TextModule;
 import com.easyinsight.analysis.tree.TreeModule;
 import com.easyinsight.analysis.trend.TrendGridModule;
 import com.easyinsight.analysis.trend.TrendModule;
@@ -140,6 +141,9 @@ public class ReportModuleLoader extends EventDispatcher {
                 break;
             case "SummaryModule.swf":
                 module = new SummaryModule();
+                break;
+            case "TextModule.swf":
+                module = new TextModule();
                 break;
         }
         return module;

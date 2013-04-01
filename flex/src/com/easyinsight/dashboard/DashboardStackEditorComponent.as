@@ -91,21 +91,6 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
             dashboardStack.gridItems.addItem(eTemp);
         }
         super.createChildren();
-        /*if (dashboardStack.count == 0) {
-            var window:StackDimensionsWindow = new StackDimensionsWindow();
-            window.dashboardStack = dashboardStack;
-            window.addEventListener(GridDimensionEvent.GRID_DIMENSION, onDimensions, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }*/
-        /*var button:Button = new Button();
-        button.label = "Add";
-        button.addEventListener(MouseEvent.CLICK, addStackElement);
-        getButtonsBox().addChild(button);*/
-         /*else {
-            recreateStructure();
-        }*/
-
     }
     
     private function deletePage(event:DashboardStackEvent):void {

@@ -13,6 +13,9 @@ import java.sql.SQLException;
 public class PDFDeliveryExtension extends DeliveryExtension {
     private boolean showHeader;
     private boolean displayType;
+    private int width;
+    private int height;
+    private String orientation = "Landscape";
 
     public boolean isDisplayType() {
         return displayType;
@@ -30,13 +33,37 @@ public class PDFDeliveryExtension extends DeliveryExtension {
         this.showHeader = showHeader;
     }
 
-    @Override
-    public String toURL() {
-        return "&showHeader=" + showHeader;
+    public String getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(String orientation) {
+        this.orientation = orientation;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
     }
 
     @Override
-    public void save(EIConnection conn, long deliveryID, long deliveryToReportID) throws SQLException {
+    public String toURL() {
+        return "&showHeader=" + showHeader + "&orientation=" + orientation+"&pdfWidth="+width+"&pdfHeight="+height;
+    }
+
+    @Override
+    public void save(EIConnection conn, long deliveryID, long deliveryToReportID, long dashboardID) throws SQLException {
         if (deliveryID > 0) {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM pdf_delivery_extension WHERE report_delivery_id = ?");
             deleteStmt.setLong(1, deliveryID);
@@ -45,10 +72,10 @@ public class PDFDeliveryExtension extends DeliveryExtension {
             insertStmt.setLong(1, deliveryID);
             insertStmt.setBoolean(2, showHeader);
             insertStmt.setBoolean(3, displayType);
-            insertStmt.setInt(4, 0);
-            insertStmt.setInt(5, 0);
+            insertStmt.setInt(4, width);
+            insertStmt.setInt(5, height);
             insertStmt.execute();
-        } else {
+        } else if (deliveryToReportID > 0) {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM pdf_delivery_extension WHERE delivery_to_report_id = ?");
             deleteStmt.setLong(1, deliveryToReportID);
             deleteStmt.executeUpdate();
@@ -56,8 +83,19 @@ public class PDFDeliveryExtension extends DeliveryExtension {
             insertStmt.setLong(1, deliveryToReportID);
             insertStmt.setBoolean(2, showHeader);
             insertStmt.setBoolean(3, displayType);
-            insertStmt.setInt(4, 0);
-            insertStmt.setInt(5, 0);
+            insertStmt.setInt(4, width);
+            insertStmt.setInt(5, height);
+            insertStmt.execute();
+        } else {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM pdf_delivery_extension WHERE delivery_to_dashboard_id = ?");
+            deleteStmt.setLong(1, dashboardID);
+            deleteStmt.executeUpdate();
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO pdf_delivery_extension (delivery_to_dashboard_id, show_header, export_mode, width, height) values (?, ?, ?, ?, ?)");
+            insertStmt.setLong(1, dashboardID);
+            insertStmt.setBoolean(2, showHeader);
+            insertStmt.setBoolean(3, displayType);
+            insertStmt.setInt(4, width);
+            insertStmt.setInt(5, height);
             insertStmt.execute();
         }
     }

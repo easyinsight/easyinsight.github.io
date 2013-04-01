@@ -6,6 +6,7 @@ import mx.collections.ArrayCollection;
 public class FeedNode {
 
     public var children:ArrayCollection;
+    public var addonReportID:int;
 
     public function FeedNode() {
     }

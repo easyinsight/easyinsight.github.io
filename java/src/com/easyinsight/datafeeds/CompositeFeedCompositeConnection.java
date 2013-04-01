@@ -43,6 +43,14 @@ public class CompositeFeedCompositeConnection implements Serializable, IJoin {
         return false;
     }
 
+    /*
+    compositejoin("Basecamp Rates", "Basecamp testie test test delete me",
+    "Basecamp Rates - Todo Completer",
+    "Basecamp testie test test delete me - Todo Completer",
+    "Basecamp Rates - Todo List Name",
+    "Basecamp testie test test delete me - Todo List Name")
+     */
+
     public void reconcile(List<CompositeFeedNode> nodes, List<AnalysisItem> fields) {
         
         for (CompositeFeedNode node : nodes) {
@@ -64,7 +72,15 @@ public class CompositeFeedCompositeConnection implements Serializable, IJoin {
             }
         }
     }
-    
+
+    public QueryNodeKey sourceQueryNodeKey() {
+        return new DataSourceQueryNodeKey(sourceFeedID);
+    }
+
+    public QueryNodeKey targetQueryNodeKey() {
+        return new DataSourceQueryNodeKey(targetFeedID);
+    }
+
     private Long sourceFeedID;
     private Long targetFeedID;
     

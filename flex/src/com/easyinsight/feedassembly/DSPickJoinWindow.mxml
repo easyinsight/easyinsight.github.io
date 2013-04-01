@@ -6,6 +6,9 @@
 
         import com.easyinsight.analysis.DerivedKey;
         import com.easyinsight.analysis.FeedMetadata;
+        import com.easyinsight.analysis.ReportKey;
+        import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -43,7 +46,11 @@
 
         private var sourceID:int;
 
+        private var sourceIDType:int = EIDescriptor.DATA_SOURCE;
+
         private var targetID:int;
+
+        private var targetIDType:int = EIDescriptor.DATA_SOURCE;
 
         public var metadataFields:ArrayCollection;
 
@@ -70,7 +77,17 @@
                     sourceFeedName = sourceDataBox.selectedItem.name;
                     targetFeedName = targetDataBox.selectedItem.name;
                     sourceID = sourceDataBox.selectedItem.id;
+                    if (sourceDataBox.selectedItem is InsightDescriptor) {
+                        sourceIDType = EIDescriptor.REPORT;
+                    } else {
+                        sourceIDType = EIDescriptor.DATA_SOURCE;
+                    }
                     targetID = targetDataBox.selectedItem.id;
+                    if (targetDataBox.selectedItem is InsightDescriptor) {
+                        targetIDType = EIDescriptor.REPORT;
+                    } else {
+                        targetIDType = EIDescriptor.DATA_SOURCE;
+                    }
                     if (_mode == USE_SPECIFIED_FIELDS) {
                         populateFields1();
                         index = 1;
@@ -98,7 +115,7 @@
             }
 
             var sort:Sort = new Sort();
-            sort.fields = [ new SortField("display", false) ];
+            sort.fields = [ new SortField("display", true) ];
 
             sourceFields.sort = sort;
             sourceFields.refresh();
@@ -119,11 +136,18 @@
                     } else if (dKey.feedID == targetID) {
                         targetFields.addItem(field);
                     }
+                } else if (field.key is ReportKey) {
+                    var rKey:ReportKey = field.key as ReportKey;
+                    if (rKey.reportID == sourceID) {
+                        sourceFields.addItem(field);
+                    } else if (rKey.reportID == targetID) {
+                        targetFields.addItem(field);
+                    }
                 }
             }
 
             var sort:Sort = new Sort();
-            sort.fields = [ new SortField("display", false) ];
+            sort.fields = [ new SortField("display", true) ];
 
             sourceFields.sort = sort;
             sourceFields.refresh();
@@ -134,7 +158,7 @@
 
         private function populateFields2(response:CompositeResponse):void {
             var sort:Sort = new Sort();
-            sort.fields = [ new SortField("display", false) ];
+            sort.fields = [ new SortField("display", true) ];
 
             var groupingSourceFields:ArrayCollection = new ArrayCollection();
             for each (var field:AnalysisItem in response.firstFields) {
@@ -176,8 +200,16 @@
         private function join():void {
             var connects:ArrayCollection = new ArrayCollection();
             var connect:CompositeFeedConnection = new CompositeFeedConnection();
-            connect.sourceFeedID = sourceID;
-            connect.targetFeedID = targetID;
+            if (sourceIDType == EIDescriptor.DATA_SOURCE) {
+                connect.sourceFeedID = sourceID;
+            } else if (sourceIDType == EIDescriptor.REPORT) {
+                connect.sourceReportID = sourceID;
+            }
+            if (targetIDType == EIDescriptor.DATA_SOURCE) {
+                connect.targetFeedID = targetID;
+            } else if (targetIDType == EIDescriptor.REPORT) {
+                connect.targetReportID = targetID;
+            }
             connect.sourceItem = sourceBox.selectedItem as AnalysisItem;
             connect.targetItem = targetBox.selectedItem as AnalysisItem;
             connect.sourceFeedName = sourceFeedName;

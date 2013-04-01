@@ -245,6 +245,8 @@ public class FunctionFactory {
             return new Quarters();
         } else if (s.equals("multimeasurestogrouping")) {
             return new MultiMeasureToGrouping();
+        } else if (s.equals("format")) {
+            return new Format();
         } else {
             return null;
         }

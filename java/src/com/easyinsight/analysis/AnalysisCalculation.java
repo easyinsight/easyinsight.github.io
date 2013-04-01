@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
+import com.easyinsight.core.ReportKey;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.logging.LogClass;
@@ -125,46 +126,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
             }
 
         }
-        CalculationTreeNode tree;
-        Set<KeySpecification> specs;
 
-            ICalculationTreeVisitor visitor;
-            CalculationsParser.startExpr_return ret;
-
-            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
-            CommonTokenStream tokes = new CommonTokenStream();
-            tokes.setTokenSource(lexer);
-            CalculationsParser parser = new CalculationsParser(tokes);
-            parser.setTreeAdaptor(new NodeFactory());
-
-            try {
-                ret = parser.startExpr();
-                tree = (CalculationTreeNode) ret.getTree();
-
-                visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
-                tree.accept(visitor);
-            }  catch (FunctionException fe) {
-                throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
-            } catch (ReportException re) {
-                throw re;
-            } catch (Exception e) {
-                if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
-                    throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + toDisplay() + ".", this));
-                }
-                LogClass.error("On calculating " + calculationString, e);
-                String message;
-                if (e.getMessage() == null) {
-                    message = "Internal error";
-                } else {
-                    message = e.getMessage();
-                }
-                throw new ReportException(new AnalysisItemFault(message + " in calculating " + calculationString, this));
-            }
-
-            VariableListVisitor variableVisitor = new VariableListVisitor();
-            tree.accept(variableVisitor);
-
-            specs = variableVisitor.getVariableList();
 
 
 
@@ -173,6 +135,51 @@ public class AnalysisCalculation extends AnalysisMeasure {
         if (!structure.onOrAfter(structure.getInsightRequestMetadata().getDerived(this))) {
             return analysisItemList;
         }
+
+        if (getKey() instanceof ReportKey) {
+            return analysisItemList;
+        }
+
+        CalculationTreeNode tree;
+        Set<KeySpecification> specs;
+
+        ICalculationTreeVisitor visitor;
+        CalculationsParser.startExpr_return ret;
+
+        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
+        CommonTokenStream tokes = new CommonTokenStream();
+        tokes.setTokenSource(lexer);
+        CalculationsParser parser = new CalculationsParser(tokes);
+        parser.setTreeAdaptor(new NodeFactory());
+
+        try {
+            ret = parser.startExpr();
+            tree = (CalculationTreeNode) ret.getTree();
+
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            tree.accept(visitor);
+        }  catch (FunctionException fe) {
+            throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
+                throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + toDisplay() + ".", this));
+            }
+            LogClass.error("On calculating " + calculationString, e);
+            String message;
+            if (e.getMessage() == null) {
+                message = "Internal error";
+            } else {
+                message = e.getMessage();
+            }
+            throw new ReportException(new AnalysisItemFault(message + " in calculating " + calculationString, this));
+        }
+
+        VariableListVisitor variableVisitor = new VariableListVisitor();
+        tree.accept(variableVisitor);
+
+        specs = variableVisitor.getVariableList();
 
         /*if (!includeFilters && isApplyBeforeAggregation()) return analysisItemList;
 

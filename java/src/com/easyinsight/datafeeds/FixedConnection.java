@@ -62,6 +62,14 @@ public class FixedConnection implements Serializable, IJoin {
 
     }
 
+    public QueryNodeKey sourceQueryNodeKey() {
+        return new DataSourceQueryNodeKey(sourceFeedID);
+    }
+
+    public QueryNodeKey targetQueryNodeKey() {
+        return new DataSourceQueryNodeKey(targetFeedID);
+    }
+
     private Long sourceFeedID;
     private Long targetFeedID;
 

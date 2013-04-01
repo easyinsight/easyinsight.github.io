@@ -79,6 +79,14 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         parser.setTreeAdaptor(new NodeFactory());
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+
+
+        List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
+
+        if (!structure.onOrAfter(structure.getInsightRequestMetadata().getDerived(this))) {
+            return analysisItemList;
+        }
+
         try {
             ret = parser.startExpr();
             tree = (CalculationTreeNode) ret.getTree();
@@ -113,12 +121,6 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
 
         Set<KeySpecification> specs = variableVisitor.getVariableList();
 
-        List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
-
-        if (!structure.onOrAfter(getPipelineName())) {
-            return analysisItemList;
-        }
-
         for (KeySpecification spec : specs) {
             AnalysisItem analysisItem;
             try {
@@ -127,7 +129,12 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
+                for (AnalysisItem analysisItem1 : analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure)) {
+                    if (structure.getInsightRequestMetadata().getPipelines(analysisItem).isEmpty()) {
+                        structure.getInsightRequestMetadata().getPipelines(analysisItem).add(structure.getInsightRequestMetadata().getDerived(this));
+                    }
+                    analysisItemList.add(analysisItem1);
+                }
             }
         }
 

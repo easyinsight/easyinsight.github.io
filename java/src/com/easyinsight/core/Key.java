@@ -1,9 +1,13 @@
 package com.easyinsight.core;
 
+import com.easyinsight.analysis.AnalysisDefinition;
+import org.hibernate.Session;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -27,6 +31,14 @@ public class Key implements Comparable<Key>, Serializable, Cloneable {
         return false;
     }
 
+    public void beforeSave(Session session) {
+
+    }
+
+    public void updateIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
+
+    }
+
     public void afterLoad() {
 
     }
@@ -36,6 +48,10 @@ public class Key implements Comparable<Key>, Serializable, Cloneable {
     }
 
     public boolean hasDataSource(long dataSourceID) {
+        return false;
+    }
+
+    public boolean hasReport(long reportID) {
         return false;
     }
     

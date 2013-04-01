@@ -48,6 +48,7 @@ import com.easyinsight.datafeeds.test.TestGammaDataSource;
 import com.easyinsight.datafeeds.twilio.TwilioSomethingSource;*/
 
 import com.easyinsight.datafeeds.treasuredata.TreasureDataQuerySource;
+import com.easyinsight.datafeeds.trello.*;
 import com.easyinsight.datafeeds.wholefoods.WholeFoodsSource;
 /*import com.easyinsight.datafeeds.xero.XeroAccountSource;
 import com.easyinsight.datafeeds.xero.XeroBankTransactionSource;
@@ -291,6 +292,11 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.SERVER_SQL_SERVER, SQLServerDatabaseConnection.class);
         registerType(FeedType.SERVER_ORACLE, OracleDatabaseConnection.class);
         registerType(FeedType.SERVER_POSTGRES, PostgresDatabaseConnection.class);
+        registerType(FeedType.TRELLO_COMPOSITE, TrelloCompositeSource.class);
+        registerType(FeedType.TRELLO_CARD, TrelloCardSource.class);
+        registerType(FeedType.TRELLO_BOARD, TrelloBoardSource.class);
+        registerType(FeedType.TRELLO_LIST, TrelloListSource.class);
+        registerType(FeedType.TRELLO_CARD_HISTORY, TrelloCardHistorySource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

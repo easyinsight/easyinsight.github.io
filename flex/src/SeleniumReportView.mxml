@@ -12,6 +12,7 @@
         import com.easyinsight.framework.TORegistry;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.report.EmbedReportContextMenuFactory;
 
         import mx.controls.Alert;
         import mx.messaging.config.ServerConfig;
@@ -48,10 +49,17 @@
         [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf",fontName="Lucida Grande", fontStyle="normal")]
         private var myNormalLucida:Class;
 
+        [Embed(source="/com/easyinsight/skin/osx/opensans.swf", fontName="Open Sans", fontStyle="normal")]
+        private var openSans:Class;
+
+        [Embed(source="/com/easyinsight/skin/osx/opensansbold.swf", fontName="Open Sans Bold", fontWeight="bold")]
+        private var openSansBold:Class;
+
         private function handleFlashVars():void {
             Font.registerFont(myNormalLucida);
+            Font.registerFont(openSans);
+            Font.registerFont(openSansBold);
             Constants.setup();
-            PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             this.urlKey = String(Application.application.parameters.analysisID);
             this.reportType = int(Application.application.parameters.reportType);
             this.dataSourceID = int(Application.application.parameters.dataSourceID);
@@ -61,9 +69,15 @@
             this.requestID = int(Application.application.parameters.seleniumID);
             this.reportWidth = int(Application.application.parameters.reportWidth);
             this.reportHeight = int(Application.application.parameters.reportHeight);
+            showHeader = Application.application.parameters.showHeader == "true";
             // session check
+            PopupMenuFactory.menuFactory = new DefaultMenuFactory();
+            PopupMenuFactory.reportFactory = new EmbedReportContextMenuFactory();
             userService.getBuildPath.send();
         }
+
+        [Bindable]
+        private var showHeader:Boolean;
 
         private function gotBuildPath():void {
             var basicInfo:BasicInfo = userService.getBuildPath.lastResult as BasicInfo;
@@ -121,6 +135,6 @@
         <mx:Box/>
         <dashboard:SeleniumReport id="panel" urlKey="{urlKey}" reportName="{reportName}" seleniumID="{requestID}"
                                       dataSourceID="{dataSourceID}" reportType="{reportType}"
-                                      reportWidth="{reportWidth}" reportHeight="{reportHeight}"/>
+                                      reportWidth="{reportWidth}" reportHeight="{reportHeight}" showHeader="{showHeader}"/>
     </mx:ViewStack>
 </mx:Application>

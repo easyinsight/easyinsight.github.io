@@ -89,6 +89,7 @@
                 dataSourceID = _activity.dataSourceID;
                 customFilters = _activity.customFilters;
                 sendOnNoData = _activity.sendIfNoData;
+                deliveryExtension = _activity.deliveryExtension;
             } else {
                 if (_fixedReportID != 0) {
                     dataSourceID = _fixedReportDataSourceID;
@@ -192,7 +193,7 @@
         private function gotReports():void {
             reports = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
             var sort:Sort = new Sort();
-            sort.fields = [ new SortField("name")];
+            sort.fields = [ new SortField("name", true)];
             reports.sort = sort;
             reports.refresh();
             if (reports.length > 0 && _fixedReportID == 0 && reportID == 0) {
@@ -293,6 +294,9 @@
 
         [Bindable]
         private var sendOnNoData:Boolean = true;
+
+        [Bindable]
+        private var deliveryExtension:DeliveryExtension;
         ]]></mx:Script>
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="addOrUpdateSchedule" result="saved()"/>
@@ -308,7 +312,7 @@
             <mx:VBox label="Report" paddingLeft="10" paddingTop="10">
                 <schedule:ReportDeliveryConfiguration id="deliveryConfiguration" reportChangeable="{reportChangeable}"
                         reports="{reports}" reportID="{reportID}" formatValue="{formatValue}" deliveryLabel="{deliveryLabel}"
-                        sendOnNoData="{sendOnNoData}"/>
+                        sendOnNoData="{sendOnNoData}" deliveryExtension="{deliveryExtension}"/>
             </mx:VBox>
             <schedule:FilterDeliveryConfiguration label="Filters" paddingLeft="10" paddingRight="10" id="filterConfiguration"
                     customFilters="{customFilters}" reportID="{reportID}" dataSourceID="{dataSourceID}"/>

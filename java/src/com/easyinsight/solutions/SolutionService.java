@@ -630,6 +630,7 @@ public class SolutionService {
             //childReport.setFolder(EIDescriptor.OTHER_VIEW);
             AnalysisDefinition alreadyInstalled = alreadyInstalledMap.get(childReport.getAnalysisID());
             if (alreadyInstalled == null) {
+                childReport.createBlazeDefinition();
                 AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, childReport, new ArrayList<AnalysisItem>(map.values()));
                 copyReport.setFolder(toFolder);
                 reportReplacementMap.put(childReport.getAnalysisID(), copyReport);
@@ -664,7 +665,7 @@ public class SolutionService {
         }
 
         for (AnalysisDefinition copiedReport : reportList) {
-            copiedReport.updateReportIDs(reportReplacementMap, dashboardReplacementMap);
+            copiedReport.updateReportIDs(reportReplacementMap, dashboardReplacementMap, session);
         }
         
         for (Dashboard copiedDashboard : dashboardReplacementMap.values()) {
@@ -763,6 +764,7 @@ public class SolutionService {
         for (AnalysisDefinition child : reports.values()) {
             AnalysisDefinition alreadyInstalled = alreadyInstalledMap.get(child.getAnalysisID());
             if (alreadyInstalled == null) {
+                child.createBlazeDefinition();
                 AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child, new ArrayList<AnalysisItem>(map.values()));
                 if (child.getAnalysisID() != reportID) {
                     copyReport.setFolder(EIDescriptor.OTHER_VIEW);
@@ -795,7 +797,7 @@ public class SolutionService {
         }
 
         for (AnalysisDefinition copiedReport : reportList) {
-            copiedReport.updateReportIDs(reportReplacementMap, dashboardReplacementMap);
+            copiedReport.updateReportIDs(reportReplacementMap, dashboardReplacementMap, session);
         }
 
         for (Dashboard copiedDashboard : dashboardList) {

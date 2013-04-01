@@ -17,6 +17,10 @@ Application {
     fillColors: #ffffff, #ffffff;
 }
 
+.fallThroughFonts {
+    font-family: "Helvetica Neue", "Helvetica";
+}
+
 /*@font-face {
     src: url("/com/easyinsight/skin/osx/opensans.swf");
     fontFamily: "Open Sans";
@@ -33,6 +37,13 @@ Application {
     font-family: 'Open Sans';
     font-sharpness: -221;
     font-thickness: 4;
+}
+
+.myHelvetica {
+    font-grid-fit-type: 'subpixel';
+    font-family: 'Helvetica Neue';
+    font-sharpness: 1;
+    font-thickness: 56;
 }
 
 .boldStyleArgh {

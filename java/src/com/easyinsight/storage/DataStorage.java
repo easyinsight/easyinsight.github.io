@@ -364,7 +364,11 @@ public class DataStorage implements IDataStorage {
                     dataSourceType == FeedType.HIGHRISE_CONTACT_NOTES.getType() || dataSourceType == FeedType.HIGHRISE_DEAL_NOTES.getType() ||
                     dataSourceType == FeedType.HIGHRISE_EMAILS.getType() || dataSourceType == FeedType.BASECAMP_TIME.getType() ||
                     dataSourceType == FeedType.BASECAMP.getType() || dataSourceType == FeedType.CONSTANT_CONTACT_CONTACT_TO_CONTACT_LIST.getType() ||
-                    dataSourceType == FeedType.CONSTANT_CONTACT_CAMPAIGN_RESULTS.getType() || dataSourceType == FeedType.QUICKBASE_CHILD.getType()) {
+                    dataSourceType == FeedType.CONSTANT_CONTACT_CAMPAIGN_RESULTS.getType() || dataSourceType == FeedType.QUICKBASE_CHILD.getType() ||
+                    dataSourceType == FeedType.SQL_SERVER.getType() || dataSourceType == FeedType.MYSQL.getType() ||
+                    dataSourceType == FeedType.SERVER_SQL_SERVER.getType() || dataSourceType == FeedType.DATABASE_CONNECTION.getType() ||
+                    dataSourceType == FeedType.SERVER_POSTGRES.getType() || dataSourceType == FeedType.SERVER_ORACLE.getType() ||
+                    dataSourceType == FeedType.ORACLE.getType() || dataSourceType == FeedType.SERVER_MYSQL.getType()) {
                 return dataLength;
             } else if (dataSourceType == FeedType.HIGHRISE_ACTIVITIES.getType()) {
                 return 0;

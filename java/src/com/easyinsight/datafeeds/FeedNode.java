@@ -16,8 +16,17 @@ import java.io.Serializable;
 public abstract class FeedNode implements Serializable {
 
     private List<FeedNode> children = new ArrayList<FeedNode>();
+    private long addonReportID;
 
     public FeedNode() {
+    }
+
+    public long getAddonReportID() {
+        return addonReportID;
+    }
+
+    public void setAddonReportID(long addonReportID) {
+        this.addonReportID = addonReportID;
     }
 
     public List<FeedNode> getChildren() {
