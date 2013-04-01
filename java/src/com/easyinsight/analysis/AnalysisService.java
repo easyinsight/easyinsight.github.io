@@ -850,7 +850,16 @@ public class AnalysisService {
                     sourceItem = findTargetItem(compositeFeedConnection, dataSource.getFields());
                     targetItem = findSourceItem(compositeFeedConnection, dataSource.getFields());
                 }
-                matchItems.add(targetItem);
+                if (targetItem == null) {
+                    if (compositeFeedConnection.getTargetItem() != null) {
+                        System.out.println("Could not find " + compositeFeedConnection.getTargetItem().toDisplay() + " for data source " + compositeFeedConnection.getTargetFeedName());
+                    } else {
+                        System.out.println("Could not find " + compositeFeedConnection.getTargetJoin().toKeyString() + " for data source " + compositeFeedConnection.getTargetFeedName());
+                    }
+                }
+                if (targetItem != null) {
+                    matchItems.add(targetItem);
+                }
                 if (sourceItem != null && targetItem != null) {
                     List<JoinLabelOption> options = new ArrayList<JoinLabelOption>();
                     WSListDefinition target = new WSListDefinition();
