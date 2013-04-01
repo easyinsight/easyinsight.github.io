@@ -146,7 +146,15 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
                 row.addValue(keys.get(NAME), getValue(contactMap, "OPPORTUNITY_NAME"));
                 row.addValue(keys.get(DETAILS), getValue(contactMap, "OPPORTUNITY_DETAILS"));
                 row.addValue(keys.get(BID_TYPE), getValue(contactMap, "BID_TYPE"));
-                row.addValue(keys.get(STATE), getValue(contactMap, "OPPORTUNITY_STATE"));
+                Value opportunityState = getValue(contactMap, "OPPORTUNITY_STATE");
+                if ("LOST".equals(opportunityState.toString())) {
+                    opportunityState = new StringValue("Lost");
+                } else if ("PENDING".equals(opportunityState.toString())) {
+                    opportunityState = new StringValue("Pending");
+                } else if ("WON".equals(opportunityState.toString())) {
+                    opportunityState = new StringValue("Won");
+                }
+                row.addValue(keys.get(STATE), opportunityState);
                 row.addValue(keys.get(PROBABILITY), getValue(contactMap, "PROBABILITY"));
                 row.addValue(keys.get(BID_CURRENCY), getValue(contactMap, "BID_CURRENCY"));
                 row.addValue(keys.get(BID_AMOUNT), getValue(contactMap, "BID_AMOUNT"));
@@ -188,10 +196,15 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
                 if (forecastObj != null) {
                     row.addValue(keys.get(FORECAST_CLOSE_DATE), new DateValue(sdf.parse(forecastObj.toString())));
                 }
-                Object actualCloseObj = contactMap.get("ACTUAL_CLOSE_DATE");
-                if (actualCloseObj != null) {
-                    row.addValue(keys.get(ACTUAL_CLOSE_DATE), new DateValue(sdf.parse(actualCloseObj.toString())));
-                }
+                /*Object actualCloseObj = contactMap.get("ACTUAL_CLOSE_DATE");
+                System.out.println(actualCloseObj);
+                if (actualCloseObj != null) {*/
+                    if ("Won".equals(opportunityState.toString())) {
+                        row.addValue(keys.get(ACTUAL_CLOSE_DATE), new DateValue(sdf.parse(contactMap.get("DATE_UPDATED_UTC").toString())));
+                    } else {
+                        //row.addValue(keys.get(ACTUAL_CLOSE_DATE), new DateValue(sdf.parse(actualCloseObj.toString())));
+                    }
+                //}
                 row.addValue(keys.get(OPPORTUNITY_COUNT), 1);
             }
             return dataSet;

@@ -4,6 +4,8 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Value;
 
+import java.util.Calendar;
+
 /**
  * User: James Boe
  * Date: May 18, 2009
@@ -22,6 +24,7 @@ public class TypeTransformComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         //DataSet targetSet = new DataSet();
+        Calendar calendar = Calendar.getInstance();
         for (IRow row : dataSet.getRows()) {
             //IRow targetRow = targetSet.createRow();
             for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
@@ -32,7 +35,7 @@ public class TypeTransformComponent implements IComponent {
                         shift = ((AnalysisDateDimension) analysisItem).isTimeshift();
                     }
                 }
-                Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift);
+                Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift, calendar);
                 if (transformedValue != value) {
                     row.addValue(analysisItem.createAggregateKey(), transformedValue);
                 }

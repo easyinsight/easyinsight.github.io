@@ -33,7 +33,6 @@ public class JSONUploadContext extends UploadContext {
     private String password;
     private String jsonPath;
     private String nextPagePath;
-    private String resultsJSONPath;
 
     private transient UploadFormat uploadFormat;
     private transient UserUploadService.RawUploadData rawUploadData;
@@ -166,7 +165,6 @@ public class JSONUploadContext extends UploadContext {
         jsonDataSource.setPassword(password);
         jsonDataSource.setJsonPath(jsonPath);
         jsonDataSource.setNextPageString(nextPagePath);
-        jsonDataSource.setResultsJSONPath(resultsJSONPath);
         long id = jsonDataSource.create(conn, analysisItems, null);
         jsonDataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, "", null, true, new ArrayList<ReportFault>());
         return id;
@@ -223,13 +221,5 @@ public class JSONUploadContext extends UploadContext {
 
     public void setNextPagePath(String nextPagePath) {
         this.nextPagePath = nextPagePath;
-    }
-
-    public String getResultsJSONPath() {
-        return resultsJSONPath;
-    }
-
-    public void setResultsJSONPath(String resultsJSONPath) {
-        this.resultsJSONPath = resultsJSONPath;
     }
 }

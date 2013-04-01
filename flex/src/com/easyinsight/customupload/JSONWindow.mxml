@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
-	title="Data Source Creation">
+	title="Data Source Creation" backgroundColor="#FFFFFF" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+    <util:states>
+        <mx:State name="JSONData">
+            <mx:AddChild relativeTo="{primaryBox}">
+                <mx:VBox horizontalAlign="center" creationComplete="PopUpUtil.centerPopUp(this)">
+                    <mx:Label text="Results:"/>
+                    <mx:TextArea width="400" height="200" editable="false" text="{jsonResult}" borderStyle="solid" fontSize="10" borderThickness="1"/>
+                    <mx:Text text="{fieldLine}" width="400"/>
+                    <mx:List dataProvider="{fieldNames}" width="400" height="80" visible="{showFieldList}" fontSize="10"/>
+                    <mx:HBox verticalAlign="middle">
+                        <mx:Label text="{pageText}"/>
+                        <util:SaveButton label="Previous Page" click="testPreviousPage()" enabled="{previousPageEnabled}" fontSize="12"/>
+                        <util:SaveButton label="Next Page" click="testNextPage()" enabled="{nextPageEnabled}" fontSize="12"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+    </util:states>
 	<mx:Script>
     <![CDATA[
         import com.easyinsight.customupload.wizard.JSONUploadContext;
@@ -9,6 +26,8 @@
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
 
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
@@ -33,6 +52,60 @@
         [Bindable]
         private var resultCount:String;
 
+        [Bindable]
+        private var showFieldList:Boolean;
+
+        [Bindable]
+        private var fieldLine:String;
+
+        [Bindable]
+        private var pageText:String;
+
+        [Bindable]
+        private var fieldNames:ArrayCollection;
+
+        [Bindable]
+        private var pageIndex:int = 1;
+
+        [Bindable]
+        private var previousPageEnabled:Boolean;
+
+        [Bindable]
+        private var nextPageEnabled:Boolean;
+
+        private function testNextPage():void {
+            pageIndex++;
+            test();
+        }
+
+        private function testPreviousPage():void {
+            pageIndex--;
+            test();
+        }
+
+        private function test():void {
+            ProgressAlert.alert(this, "Testing...", null, uploadService.describeJSON);
+            uploadService.describeJSON.send(userNameInput.text, passwordInput.text, int(methodGroup.selectedValue), urlInput.text, jsonPathInput.text, "",
+                    nextPageInput.text, pageIndex);
+        }
+
+        private function described():void {
+            var jsonSetup:JSONSetup = uploadService.describeJSON.lastResult as JSONSetup;
+            if (nextPageInput.text != "" && jsonSetup.fields.length > 0) {
+                nextPageEnabled = true;
+            }
+            previousPageEnabled = pageIndex > 1;
+            pageText = "Page " + pageIndex;
+            if (jsonSetup.results > 0) {
+                pageText += (", total result count = " + jsonSetup.results);
+            }
+            jsonResult = jsonSetup.result;
+            fieldNames = jsonSetup.fields;
+            showFieldList = (fieldNames != null && fieldNames.length > 0) || pageIndex > 1;
+            fieldLine = jsonSetup.fieldLine;
+            currentState = "JSONData";
+        }
+
         private function next():void {
             urlInput.errorString = null;
             var results:Array = Validator.validateAll([urlValidator]);
@@ -46,7 +119,6 @@
                 ds.password = passwordInput.text;
                 ds.jsonPath = jsonPathInput.text;
                 ds.nextPagePath = nextPageInput.text;
-                ds.resultsJSONPath = resultCountInput.text;
                 ProgressAlert.alert(this, "Validating and testing...", null, uploadService.analyzeUpload);
                 uploadService.analyzeUpload.send(ds);
             }
@@ -62,7 +134,6 @@
                 ds.password = passwordInput.text;
                 ds.jsonPath = jsonPathInput.text;
                 ds.nextPagePath = nextPageInput.text;
-                ds.resultsJSONPath = resultCountInput.text;
                 var window:SpreadsheetWizard = new SpreadsheetWizard();
                 window.uploadContext = ds;
                 window.fields = uploadResponse.infos;
@@ -79,46 +150,50 @@
         }
 
         [Bindable]
+        private var jsonResult:String;
+
+        [Bindable]
         private var instructions:String = "The JSON data source needs to point at an array of objects. For example, the target might look like [{label1:X,date1:2011-09-05,value1:5},{label1:Y,date1:2012-04-03,value1:5}]. If the array is deeper inside the returned JSON, you can use JSONPath to specify how to find the array. For example, the path of $.results would retrieve the array found under the results property.";
         ]]>
 	</mx:Script>
 	<mx:RemoteObject id="uploadService" destination="userUpload">
 		<mx:method name="analyzeUpload" result="created()"/>
+		<mx:method name="describeJSON" result="described()"/>
 	</mx:RemoteObject>
     <mx:StringValidator id="urlValidator" source="{urlInput}" property="text" minLength="1"/>
-    <mx:VBox backgroundColor="#FFFFFF" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
-        <mx:TextArea text="{instructions}" borderStyle="none" editable="false" width="650" height="65" fontSize="11"/>
-        <mx:Form>
-            <mx:FormItem label="JSON URL:" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
-            </mx:FormItem>
-            <mx:FormItem label="Basic Auth User Name (optional):" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonUserName}" width="350"/>
-            </mx:FormItem>
-            <mx:FormItem label="Basic Auth Password (optional):" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="passwordInput" displayAsPassword="true" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonPassword}" width="350"/>
-            </mx:FormItem>
-            <mx:FormItem label="HTTP Method:" fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
-                <mx:RadioButtonGroup id="methodGroup" selectedValue="{httpValue}"/>
-                <mx:RadioButton groupName="methodGroup" label="GET" value="1" id="getOption"/>
-                <mx:RadioButton groupName="methodGroup" label="POST" value="2" id="postOption"/>
-            </mx:FormItem>
-            <mx:FormItem label="JSONPath (optional):" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="jsonPathInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonPath}" width="350"/>
-            </mx:FormItem>
-        </mx:Form>
-        <mx:TextArea text="If the target JSON API requires paging, you can specify how to page through the data with these next two settings. First, specify a JSONPath expression for retrieving the total number of results. For example, $.total to retrieve a property called total. Next, add the paging URL. Use \{n\} to represent the page number, for example http://etc/source.json?page=\{n\}." borderStyle="none" editable="false" width="650" height="65" fontSize="11"/>
-        <mx:Form>
-            <mx:FormItem label="Result Count JSONPath (optional):" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="resultCountInput" fontWeight="normal" fontFamily="Lucida Grande" text="{resultCount}" width="350"/>
-            </mx:FormItem>
-            <mx:FormItem label="Next Page URL (optional):" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="nextPageInput" fontWeight="normal" fontFamily="Lucida Grande" text="{nextPage}" width="350"/>
-            </mx:FormItem>
-        </mx:Form>
-        <mx:HBox width="100%" horizontalAlign="center">
-            <util:SaveButton label="Finish" click="next()" id="nextButton"/>
-            <util:CancelButton label="Cancel" click="cancel()"/>
-        </mx:HBox>
-    </mx:VBox>
+    <mx:HBox  id="primaryBox">
+        <mx:VBox>
+            <mx:TextArea text="{instructions}" borderStyle="none" editable="false" width="650" height="65" fontSize="11"/>
+            <mx:Form>
+                <mx:FormItem label="JSON URL:" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="Basic Auth User Name (optional):" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonUserName}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="Basic Auth Password (optional):" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="passwordInput" displayAsPassword="true" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonPassword}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="HTTP Method:" fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
+                    <mx:RadioButtonGroup id="methodGroup" selectedValue="{httpValue}"/>
+                    <mx:RadioButton groupName="methodGroup" label="GET" value="1" id="getOption"/>
+                    <mx:RadioButton groupName="methodGroup" label="POST" value="2" id="postOption"/>
+                </mx:FormItem>
+                <mx:FormItem label="JSONPath (optional):" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="jsonPathInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonPath}" width="350"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Text text="If the target JSON API requires paging, you can specify how to page through the data by adding a paging URL. Use \{n\} to represent the page number, for example http://etc/source.json?page=\{n\}." width="650" fontSize="11"/>
+            <mx:Form>
+                <mx:FormItem label="Next Page URL (optional):" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="nextPageInput" fontWeight="normal" fontFamily="Lucida Grande" text="{nextPage}" width="350"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
+    </mx:HBox>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Test" click="test()"/>
+        <util:CancelButton label="Cancel" click="cancel()"/>
+        <util:SaveButton label="Finish" click="next()" id="nextButton" enabled="{showFieldList}"/>
+    </mx:HBox>
 </util:EITitleWindow>

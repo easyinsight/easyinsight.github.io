@@ -23,6 +23,7 @@ public class JSONDataSource extends ServerDataSourceDefinition {
     public var httpMethod:int;
     public var nextPageString:String;
     public var resultsJSONPath:String;
+    public var liveSource:Boolean;
 
     public function JSONDataSource() {
     }

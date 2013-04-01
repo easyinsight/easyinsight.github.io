@@ -302,11 +302,29 @@ public class CompositeFeed extends Feed {
             insightRequestMetadata.getSuggestions().add(new IntentionSuggestion("No Join in Data",
                     "We weren't able to find a way to join data on " + getName() + ".",
                     IntentionSuggestion.SCOPE_REPORT, IntentionSuggestion.WARNING_JOIN_FAILURE, IntentionSuggestion.WARNING));
+            Map<QueryStateNode, DataSet> map = new HashMap<QueryStateNode, DataSet>();
+
             DataSet dataSet = new DataSet();
+            boolean oneRowData = true;
             for (QueryStateNode queryStateNode : neededNodes.values()) {
                 DataSet childSet = queryStateNode.produceDataSet(insightRequestMetadata);
-                for (IRow row : childSet.getRows()) {
-                    dataSet.addRow(row);
+                if (childSet.getRows().size() > 1) {
+                    oneRowData = false;
+                }
+                map.put(queryStateNode, childSet);
+            }
+            if (oneRowData) {
+                IRow baseRow = dataSet.createRow();
+                for (DataSet childSet : map.values()) {
+                    for (IRow row : childSet.getRows()) {
+                        baseRow.addValues(row.getValues());
+                    }
+                }
+            } else {
+                for (DataSet childSet : map.values()) {
+                    for (IRow row : childSet.getRows()) {
+                        dataSet.addRow(row);
+                    }
                 }
             }
             return dataSet;
@@ -437,7 +455,7 @@ public class CompositeFeed extends Feed {
                             FilterDefinition filter = filterMap.get(myConn);
                             if (filter == null && myConn instanceof CompositeFeedConnection) {
                                 QueryStateNode joinTargetNode;
-                                if (sourceNode.feedID == myConn.getSourceFeedID()) {
+                                if (sourceNode.queryNodeKey().equals(myConn.sourceQueryNodeKey())) {
                                     joinTargetNode = queryNodeMap.get(myConn.targetQueryNodeKey());
                                 } else {
                                     joinTargetNode = queryNodeMap.get(myConn.sourceQueryNodeKey());
@@ -453,7 +471,7 @@ public class CompositeFeed extends Feed {
 
                 QueryData targetQueryData = map.get(targetNode.queryNodeKey());
                 boolean swapped = false;
-                if (last.connection.getSourceFeedID() != sourceNode.feedID) {
+                if (!last.connection.sourceQueryNodeKey().equals(sourceNode.queryNodeKey())) {
                     swapped = true;
                     QueryStateNode swap = sourceNode;
                     sourceNode = targetNode;
@@ -528,7 +546,7 @@ public class CompositeFeed extends Feed {
                             FilterDefinition filter = filterMap.get(myConn);
                             if (filter == null && myConn instanceof CompositeFeedConnection) {
                                 QueryStateNode targetNode;
-                                if (sourceNode.feedID == myConn.getSourceFeedID()) {
+                                if (sourceNode.queryNodeKey().equals(myConn.sourceQueryNodeKey())) {
                                     targetNode = queryNodeMap.get(myConn.targetQueryNodeKey());
                                 } else {
                                     targetNode = queryNodeMap.get(myConn.sourceQueryNodeKey());

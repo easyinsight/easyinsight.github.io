@@ -18,8 +18,6 @@
         private var httpValue:String;
         [Bindable]
         private var nextPage:String;
-        [Bindable]
-        private var resultCount:String;
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:JSONDataSource = feedDefinition as JSONDataSource;
@@ -30,7 +28,7 @@
             jsonPassword = ds.password;
             httpValue = String(ds.httpMethod);
             nextPage = ds.nextPageString;
-            resultCount = ds.resultsJSONPath;
+            liveSource = ds.liveSource;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
@@ -41,12 +39,15 @@
             ds.password = passwordInput.text;
             ds.jsonPath = jsonPathInput.text;
             ds.nextPageString = nextPageInput.text;
-            ds.resultsJSONPath = resultCountInput.text;
+            ds.liveSource = liveSourceCheckbox.selected;
         }
 
         public function validate():Boolean {
             return true;
         }
+
+        [Bindable]
+        private var liveSource:Boolean;
 
         [Bindable]
         private var instructions:String = "The JSON data source needs to point at an array of objects. For example, the target might look like [{label1:X,date1:2011-09-05,value1:5},{label1:Y,date1:2012-04-03,value1:5}]. If the array is deeper inside the returned JSON, you can use JSONPath to specify how to find the array.";
@@ -73,11 +74,13 @@
     </mx:Form>
     <mx:TextArea text="If the target JSON API requires paging, you can specify how to page through the data with these next two settings. First, specify a JSONPath expression for retrieving the total number of results. For example, $.total to retrieve a property called total. Next, add the paging URL. Use \{n\} to represent the page number, for example http://etc/source.json?page=\{n\}." borderStyle="none" editable="false" width="650" height="65" fontSize="11"/>
     <mx:Form>
-        <mx:FormItem label="Result Count JSONPath (optional):" fontFamily="Tahoma" fontWeight="bold">
-            <mx:TextInput id="resultCountInput" fontWeight="normal" fontFamily="Lucida Grande" text="{resultCount}" width="350"/>
-        </mx:FormItem>
         <mx:FormItem label="Next Page URL (optional):" fontFamily="Tahoma" fontWeight="bold">
             <mx:TextInput id="nextPageInput" fontWeight="normal" fontFamily="Lucida Grande" text="{nextPage}" width="350"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:Form>
+        <mx:FormItem label="Live Source:">
+            <mx:CheckBox id="liveSourceCheckbox" selected="{liveSource}"/>
         </mx:FormItem>
     </mx:Form>
 </mx:VBox>

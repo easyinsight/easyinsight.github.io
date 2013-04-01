@@ -2,6 +2,8 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 
+import java.util.Calendar;
+
 /**
  * User: James Boe
  * Date: Jul 8, 2008
@@ -28,7 +30,8 @@ public class AnalysisMeasureResultMetadata extends AnalysisItemResultMetadata {
     }
 
    public void addValue(AnalysisItem analysisItem, Value value, InsightRequestMetadata insightRequestMetadata) {
-        Double doubleValue = analysisItem.transformValue(value, insightRequestMetadata, false).toDouble();
+       Calendar calendar = Calendar.getInstance();
+        Double doubleValue = analysisItem.transformValue(value, insightRequestMetadata, false, calendar).toDouble();
         if (doubleValue != null) {
             if (lowestValue == null) {
                 lowestValue = doubleValue;

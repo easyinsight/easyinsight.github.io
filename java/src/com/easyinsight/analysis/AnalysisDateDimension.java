@@ -194,9 +194,9 @@ public class AnalysisDateDimension extends AnalysisDimension {
             return new EmptyValue();
     }
 
-    private transient Calendar calendar;
+    //private transient Calendar calendar;
 
-    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata, boolean timezoneShift) {
+    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata, boolean timezoneShift, Calendar calendar) {
         if (cachedDateFormat == null) {
             if (customDateFormat == null) {
                 cachedDateFormat = defaultDateFormat;
