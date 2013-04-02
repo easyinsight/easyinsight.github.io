@@ -112,6 +112,7 @@
                     event.solution.dataSourceType == DataSourceType.HARVEST_COMPOSITE ||
                     event.solution.dataSourceType == DataSourceType.PIVOTAL_TRACKER ||
                     event.solution.dataSourceType == DataSourceType.SENDGRID ||
+                    event.solution.dataSourceType == DataSourceType.TRELLO ||
                     event.solution.dataSourceType == DataSourceType.BATCHBOOK2 ||
                     event.solution.dataSourceType == DataSourceType.BATCHBOOK ||
                     event.solution.dataSourceType == DataSourceType.YOUTRACK ||

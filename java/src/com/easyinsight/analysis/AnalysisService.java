@@ -1010,6 +1010,31 @@ public class AnalysisService {
         }
     }
 
+    public FilterDateTest generate(String startDate, String endDate) {
+        try {
+            FilterDateTest filterDateTest = new FilterDateTest();
+            InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+            if (startDate != null) {
+                Value value = new ReportCalculation(startDate).filterApply(null, null, new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
+                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                filterDateTest.setStartDate(value.toString());
+            } else {
+                filterDateTest.setStartDate("");
+            }
+            if (endDate != null) {
+                Value value = new ReportCalculation(endDate).filterApply(null, null, new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
+                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                filterDateTest.setEndDate(value.toString());
+            } else {
+                filterDateTest.setEndDate("");
+            }
+            return filterDateTest;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public DrillThroughResponse drillThrough(DrillThrough drillThrough, Object dataObj, AnalysisItem analysisItem,
                                              WSAnalysisDefinition report, String altKey) {
         try {
@@ -1214,19 +1239,6 @@ public class AnalysisService {
                             filterValueDefinition.setInclusive(true);
                             filterValueDefinition.setFilteredValues(Arrays.asList(data.get(grouping.qualifiedName())));
                             filters.add(filterValueDefinition);
-                        }
-                        if (grouping.getFilters() != null) {
-                            for (FilterDefinition filter : grouping.getFilters()) {
-                                FilterDefinition clone;
-                                try {
-                                    clone = filter.clone();
-                                } catch (CloneNotSupportedException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                clone.setToggleEnabled(true);
-                                clone.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                                filters.add(clone);
-                            }
                         }
                     }
                 }

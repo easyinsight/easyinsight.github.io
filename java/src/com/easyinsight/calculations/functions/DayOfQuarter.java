@@ -48,7 +48,7 @@ public class DayOfQuarter extends Function {
 
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
-                int i = 0;
+                int i = 1;
                 int month = cal.get(Calendar.MONTH);
                 int firstMonth = month / 3 * 3;
                 cal.set(Calendar.MONTH, firstMonth);
@@ -56,7 +56,7 @@ public class DayOfQuarter extends Function {
                 int quarter = month / 3;
                 int newQuarter = quarter;
                 while (quarter == newQuarter) {
-                    if (cal.get(Calendar.DAY_OF_YEAR) == dayToSet) {
+                    if (i == dayToSet) {
                         break;
                     }
                     cal.add(Calendar.DAY_OF_YEAR, 1);
