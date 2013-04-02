@@ -1215,19 +1215,6 @@ public class AnalysisService {
                             filterValueDefinition.setFilteredValues(Arrays.asList(data.get(grouping.qualifiedName())));
                             filters.add(filterValueDefinition);
                         }
-                        if (grouping.getFilters() != null) {
-                            for (FilterDefinition filter : grouping.getFilters()) {
-                                FilterDefinition clone;
-                                try {
-                                    clone = filter.clone();
-                                } catch (CloneNotSupportedException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                clone.setToggleEnabled(true);
-                                clone.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                                filters.add(clone);
-                            }
-                        }
                     }
                 }
             }
