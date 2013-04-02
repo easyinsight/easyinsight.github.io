@@ -32,6 +32,9 @@
     <jsp:include page="reportDashboardHeader.jsp"/>
     <script type="text/javascript">
         var dashboardJSON = <%= dashboard.toJSON(filterHTMLMetadata) %>;
+        function afterRefresh() {
+
+        }
     </script>
     <script type="text/javascript" src="/js/dashboard.js"></script>
 

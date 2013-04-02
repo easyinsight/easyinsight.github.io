@@ -3,8 +3,10 @@
         <div class="tabbable">
             <ul class="nav nav-pills" id="<%- id %>">
                 <% _.each(stack_items, function(e, i, l) { %>
-                <li<%- i == 0 ? ' class=active' : '' %>>
-                <a class="argh" data-toggle="tab" href="#stack_<%- id %>_<%- e.item.id %>"><%- typeof(e.label) == "undefined" ? ("Stack Item " + i) : e.label %></a>
+                <li
+                <%- i == 0 ? ' class=active' : '' %>>
+                <a class="argh" data-toggle="tab" href="#stack_<%- id %>_<%- e.item.id %>"><%- typeof(e.label) ==
+                    "undefined" ? ("Stack Item " + i) : e.label %></a>
                 </li>
                 <% }) %>
             </ul>
@@ -36,7 +38,8 @@
         <div>
             <div class="dasbhoardReportHeader"><strong><%- report.name %></strong></div>
         </div>
-        <div<%- typeof(preferredHeight) == "undefined" ? '' : ' style="height:' + preferredHeight + '"' %>>
+        <div
+        <%- typeof(preferredHeight) == "undefined" ? '' : ' style="height:' + preferredHeight + '"' %>>
         <div class="dashboardReportDiv" id="<%= report.id %>">
             <div class="reportArea" id="<%= report.id %>ReportArea">
             </div>
@@ -57,7 +60,8 @@
 <script type="text/template" id="single_value_filter_template">
     <label for="<%- id %>"><%- name %><select>
         <% _.each(values, function(e, i , l) { %>
-        <option<%= selected == e ? ' selected="selected"' : ''%>><%- e %></option>
+        <option
+        <%= selected == e ? ' selected="selected"' : ''%>><%- e %></option>
         <% }) %>
     </select></label>
 </script>
@@ -65,11 +69,21 @@
 <script type="text/template" id="dashboard_template">
     <div>
         <% _.each(filters, function(e, i, l) { %>
-            <%= Filter.create(e) %>
+        <%= Filter.create(e) %>
         <% }) %>
     </div>
     <div>
         <%= dashboardComponent(base) %>
     </div>
 </script>
+
+<script type="text/template" id="gauge_template">
+    <div style="text-align:center">
+        <canvas class="gauge" width="200" height="200" id="gauge<%= id %>"></canvas>
+    </div>
+    <% if(benchmark) { %>
+    <div class="gaugeBenchmark" id="benchmark<%= id %>"></div>
+    <% } %>
+</script>
 </div>
+

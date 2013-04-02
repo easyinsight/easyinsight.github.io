@@ -1,4 +1,4 @@
-window.drawDiagram = function (j, selector, reportID) {
+window.drawDiagram = function (j, selector, reportID, afterRefresh) {
     var diagram = j;
 
     function createNode(node, key) {
@@ -212,30 +212,34 @@ window.drawDiagram = function (j, selector, reportID) {
         var context = canvas.getContext("2d");
 
         for (i in diagram["links"]) {
+
             var link = diagram["links"][i];
-            var fromNode = mapping[link["from"]];
-            var toNode = mapping[link["to"]];
-            var direction = getDirection(fromNode, toNode);
+            if(typeof(link) != "function") {
+                var fromNode = mapping[link["from"]];
+                var toNode = mapping[link["to"]];
+                var direction = getDirection(fromNode, toNode);
 
-            var fromCoords = attachPointXY(fromNode, direction);
+                var fromCoords = attachPointXY(fromNode, direction);
 
-            var toCoords = attachPointXY(toNode, ORDER[(ORDER.indexOf(direction) + 2) % ORDER.length]);
-            var points = getMidPoints(fromCoords, toCoords, direction);
-            context.beginPath();
-            context.moveTo(fromCoords.x, fromCoords.y);
-            context.strokeStyle = "#1F1F45";
-            context.lineWidth = 3;
-            context.lineCap = "square"
+                var toCoords = attachPointXY(toNode, ORDER[(ORDER.indexOf(direction) + 2) % ORDER.length]);
+                var points = getMidPoints(fromCoords, toCoords, direction);
+                context.beginPath();
+                context.moveTo(fromCoords.x, fromCoords.y);
+                context.strokeStyle = "#1F1F45";
+                context.lineWidth = 3;
+                context.lineCap = "square"
 
 
-            var point;
-            for (point in points) {
-                if (typeof(point) != "function") {
-                    context.lineTo(points[point].x, points[point].y);
+                var point;
+                for (point in points) {
+                    if (typeof(points[point]) != "function") {
+
+                        context.lineTo(points[point].x, points[point].y);
+                    }
                 }
+                context.stroke();
+                drawArrow(context, points[1], points[2]);
             }
-            context.stroke();
-            drawArrow(context, points[1], points[2]);
         }
         afterRefresh();
 

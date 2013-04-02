@@ -185,6 +185,18 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
 
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
+        JSONObject fullObject = getJsonObject(htmlReportMetadata);
+
+
+        String argh = fullObject.toString();
+        argh = argh.replaceAll("\"", "");
+
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        String customHeight = htmlReportMetadata.createStyleProperties().toString();
+        return "$.getJSON('/app/columnChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getBarChartCallback('" + targetDiv + "', " + argh + ",false," + customHeight + "))";
+    }
+
+    private JSONObject getJsonObject(HTMLReportMetadata htmlReportMetadata) {
         String color;
         String color2;
         JSONArray colorObj = new JSONArray();
@@ -284,13 +296,17 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
+        return fullObject;
+    }
 
-
-        String argh = fullObject.toString();
-        argh = argh.replaceAll("\"", "");
-
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties();
-        return "$.getJSON('/app/columnChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getBarChartCallback('" + targetDiv + "', " + argh + ",false," + customHeight + "))";
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject areaChart = new JSONObject();
+        areaChart.put("type", "bar");
+        areaChart.put("key", getUrlKey());
+        areaChart.put("url", "/app/columnChart");
+        areaChart.put("parameters", getJsonObject(htmlReportMetadata));
+        areaChart.put("styles", htmlReportMetadata.createStyleProperties());
+        return areaChart;
     }
 }

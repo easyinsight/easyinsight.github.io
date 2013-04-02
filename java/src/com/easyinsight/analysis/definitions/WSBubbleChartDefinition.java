@@ -128,6 +128,17 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
+        JSONObject object = getJsonObject();
+        String argh = object.toString();
+        argh = argh.replaceAll("\"", "");
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        String customHeight = htmlReportMetadata.createStyleProperties().toString();
+        argh = "$.getJSON('/app/bubbleChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ",false," + customHeight + "))";
+        System.out.println(argh);
+        return argh;
+    }
+
+    private JSONObject getJsonObject() {
         JSONObject params;
         JSONObject object = new JSONObject();
         try {
@@ -154,12 +165,17 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        String argh = object.toString();
-        argh = argh.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties();
-        argh = "$.getJSON('/app/bubbleChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('"+ targetDiv + "', " + argh + ",false,"+customHeight+"))";
-        System.out.println(argh);
-        return argh;
+        return object;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject areaChart = new JSONObject();
+        areaChart.put("type", "bubble");
+        areaChart.put("key", getUrlKey());
+        areaChart.put("url", "/app/bubbleChart");
+        areaChart.put("parameters", getJsonObject());
+        areaChart.put("styles", htmlReportMetadata.createStyleProperties());
+        return areaChart;
     }
 }

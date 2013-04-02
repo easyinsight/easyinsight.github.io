@@ -183,7 +183,7 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
 
     @Override
     public String rootHTML() {
-        String root = "<div style=\"text-align:center\"><canvas class=\"gauge\" width=\"200\" height=\"200\" id=\"gauge"+getUrlKey()+"\"></canvas></div>";
+        String root = "<div style=\"text-align:center\"><canvas class=\"gauge\" width=\"200\" height=\"200\" id=\"gauge" + getUrlKey() + "\"></canvas></div>";
         if (getBenchmarkMeasure() != null) {
             root += "<div class=\"gaugeBenchmark\" id=\"benchmark" + getUrlKey() + "\"></div>";
         }
@@ -195,22 +195,7 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         StringBuilder sb = new StringBuilder();
         String gaugePropertiesString;
         try {
-            JSONArray bands = new JSONArray();
-            JSONObject band1 = new JSONObject();
-            band1.put("color", "'"+String.format("#%06X", (0xFFFFFF & color1))+"'");
-            band1.put("start", 0);
-            band1.put("end", alertPoint1);
-            bands.put(band1);
-            JSONObject band2 = new JSONObject();
-            band2.put("color", "'" + String.format("#%06X", (0xFFFFFF & color2)) + "'");
-            band2.put("start", alertPoint1);
-            band2.put("end", alertPoint2);
-            bands.put(band2);
-            JSONObject band3 = new JSONObject();
-            band3.put("color", "'" + String.format("#%06X", (0xFFFFFF & color3)) + "'");
-            band3.put("start", alertPoint2);
-            band3.put("end", getMaxValue());
-            bands.put(band3);
+            JSONArray bands = getJsonArray();
             gaugePropertiesString = bands.toString();
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -218,8 +203,28 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         gaugePropertiesString = gaugePropertiesString.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
 
-        String sss = "$.getJSON('/app/gauge?reportID="+getUrlKey()+timezoneOffset+"&' + strParams, Gauge.getCallback('" +targetDiv +"', '" + getUrlKey() + "', " + gaugePropertiesString + ", " + maxValue+"))";
+        String sss = "$.getJSON('/app/gauge?reportID=" + getUrlKey() + timezoneOffset + "&' + strParams, Gauge.getCallback('" + targetDiv + "', '" + getUrlKey() + "', " + gaugePropertiesString + ", " + maxValue + "))";
         return sss;
+    }
+
+    private JSONArray getJsonArray() throws JSONException {
+        JSONArray bands = new JSONArray();
+        JSONObject band1 = new JSONObject();
+        band1.put("color", "'" + String.format("#%06X", (0xFFFFFF & color1)) + "'");
+        band1.put("start", 0);
+        band1.put("end", alertPoint1);
+        bands.put(band1);
+        JSONObject band2 = new JSONObject();
+        band2.put("color", "'" + String.format("#%06X", (0xFFFFFF & color2)) + "'");
+        band2.put("start", alertPoint1);
+        band2.put("end", alertPoint2);
+        bands.put(band2);
+        JSONObject band3 = new JSONObject();
+        band3.put("color", "'" + String.format("#%06X", (0xFFFFFF & color3)) + "'");
+        band3.put("start", alertPoint2);
+        band3.put("end", getMaxValue());
+        bands.put(band3);
+        return bands;
     }
 
     @Override
@@ -230,5 +235,16 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         return Arrays.asList("/js/AquaGauge.js", "/js/helper.js", "/js/visualizations/util.js", "/js/visualizations/gauge.js");
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject list = new JSONObject();
+        list.put("type", "gauge");
+        list.put("key", getUrlKey());
+        list.put("url", "/app/gauge");
+        list.put("properties", getJsonArray());
+        list.put("max", maxValue);
+        return list;
     }
 }

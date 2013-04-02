@@ -177,6 +177,7 @@ public class DashboardReport extends DashboardElement {
         WSAnalysisDefinition reportDefinition = new AnalysisService().openAnalysisDefinition(report.getId());
         JSONObject reportJSON = new JSONObject();
         reportJSON.put("type", "report");
+        reportJSON.put("id", report.getUrlKey());
         JSONObject reportDataJSON = new JSONObject();
         reportDataJSON.put("name", report.getName());
         reportDataJSON.put("id", report.getUrlKey());

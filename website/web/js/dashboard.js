@@ -2,6 +2,9 @@ var stack;
 var grid;
 var textTemplate;
 var reportTemplate;
+
+var gaugeTemplate;
+
 var dashboard;
 
 var dashboardComponent = function (obj) {
@@ -18,35 +21,80 @@ var dashboardComponent = function (obj) {
 
 var Filter;
 
-var renderReport = function(obj) {
-    if(obj.metadata.type == "pie") {
+var afterRefresh = function(selector) {
+    return function() {
+        selector.hide();
+    }
+}
+
+var renderReport = function (obj) {
+    if (obj.metadata.type == "pie") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
         $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(), Chart.getPieChartCallback(obj.id, w, {}))
     }
-    else if(obj.metadata.type == "diagram") {
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(), function(data) { window.drawDiagram(data, $("#" + obj.id + " .reportArea"), obj.id)})
+    else if (obj.metadata.type == "diagram") {
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(), function (data) {
+            window.drawDiagram(data, $("#" + obj.id + " .reportArea"), obj.id, afterRefresh($("#" + obj.id + " .noData")));
+        })
     }
-    else if(obj.metadata.type == "list") {
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(), List.getCallback(obj.id + "ReportArea", obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns))
+    else if (obj.metadata.type == "list") {
+        $.ajax({
+            dataType: "text",
+            url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(),
+            success: List.getCallback(obj.id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns)
+        });
+    } else if (obj.metadata.type == "bar") {
+        var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
+        eval("var w = " + v);
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(), Chart.getBarChartCallback(obj.id, w, true, obj.metadata.styles));
+    } else if (obj.metadata.type == "column") {
+        var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
+        eval("var w = " + v);
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(), Chart.getColumnChartCallback(obj.id, w, obj.metadata.styles));
+    }
+    else if (obj.metadata.type == "area" || obj.metadata.type == "bubble" || obj.metadata.type == "plot" || obj.metadata.type == "line") {
+        var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
+        eval("var w = " + v);
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(), Chart.getCallback(obj.id, w, true, obj.metadata.styles));
+    } else if (obj.metadata.type == "stacked_bar") {
+        var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
+        eval("var w = " + v);
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(), Chart.getStackedBarChart(obj.id, w, obj.metadata.styles));
+    } else if (obj.metadata.type == "stacked_column") {
+        var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
+        eval("var w = " + v);
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(), Chart.getStackedColumnChart(obj.id, w, obj.metadata.styles));
+    } else if (obj.metadata.type == "gauge") {
+        $("#" + obj.id + " .reportArea").html(gaugeTemplate({id: obj.id, benchmark: null }))
+        var v = JSON.stringify(obj.metadata.properties).replace(/\"/g, "");
+        eval("var w = " + v);
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(), Gauge.getCallback(obj.id + "ReportArea", obj.id, w, obj.metadata.max))
+    } else {
+        $.get(obj.metadata.url + '?reportID=' + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(), function (data) {
+            Utils.noData(data, function () {
+                $('#' + obj.id + " .reportArea").html(data);
+            }, null, obj.id);
+        });
+
+
     }
 }
 
-var findReports = function(obj) {
-    if(obj.type == "report") {
-
+var findReports = function (obj) {
+    if (obj.type == "report") {
         return obj.report;
-    } else if(obj.type == "grid") {
+    } else if (obj.type == "grid") {
         var v = [];
-        for(var i = 0;i < obj.grid.length;i++) {
-            for(var j = 0;j < obj.grid[i].length;j++) {
+        for (var i = 0; i < obj.grid.length; i++) {
+            for (var j = 0; j < obj.grid[i].length; j++) {
                 v = _.flatten(v.concat(findReports(obj.grid[i][j])));
             }
         }
         return v;
-    } else if(obj.type == "stack") {
+    } else if (obj.type == "stack") {
         var w = [];
-        for(var k = 0;k < obj.stack_items.length;k++) {
+        for (var k = 0; k < obj.stack_items.length; k++) {
             w = _.flatten(w.concat(findReports(obj.stack_items[k].item)));
         }
         return w;
@@ -73,10 +121,13 @@ $(function () {
         grid = _.template($("#grid", s).html());
         reportTemplate = _.template($("#report_template", s).html());
         textTemplate = _.template($("#text_template", s).html());
+        gaugeTemplate = _.template($("#gauge_template", s).html());
+
         $("#base").append(dashboard(dashboardJSON));
         var reports = findReports(dashboardJSON["base"]);
-        for(var i = 0;i < reports.length;i++) {
+        for (var i = 0; i < reports.length; i++) {
             renderReport(reports[i]);
         }
     })
 })
+

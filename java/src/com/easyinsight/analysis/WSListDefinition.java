@@ -238,7 +238,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
 
             String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
 
-            return "$.get('/app/htmlExport?reportID=" + getUrlKey() +"&embedded="+htmlReportMetadata.isEmbedded()+ "&" + timezoneOffset + "&'+ strParams, List.getCallback('" + targetDiv + "', " + jsonProperties() + ", " + analysisItemMap.toString() +", " + columns.size() + "));";
+            return "$.get('/app/htmlExport?reportID=" + getUrlKey() +"&embedded="+htmlReportMetadata.isEmbedded()+ "&" + timezoneOffset + "&'+ strParams, List.getCallback('" + targetDiv + "', " + jsonProperties().toString() + ", " + analysisItemMap.toString() +", " + columns.size() + "));";
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -285,7 +285,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         multiLineHeaders = findBooleanProperty(properties, "multiLineHeaders", false);
     }
 
-    public String jsonProperties() {
+    public JSONObject jsonProperties() {
 
         JSONObject p = new JSONObject();
         try {
@@ -298,7 +298,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return p.toString();
+        return p;
     }
 
     public List<ReportProperty> createProperties() {

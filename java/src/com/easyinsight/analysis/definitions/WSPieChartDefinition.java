@@ -87,7 +87,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         String argh = data.toString();
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties();
+        String customHeight = htmlReportMetadata.createStyleProperties().toString();
         String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getPieChartCallback('" + targetDiv + "', " + argh + ","+customHeight+"))";
         return xyz;
     }
@@ -125,6 +125,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         pie.put("parameters", getParameters(htmlReportMetadata));
         pie.put("key", getUrlKey());
         pie.put("type", "pie");
+        pie.put("styles", htmlReportMetadata.createStyleProperties());
         pie.put("url", "/app/columnChart");
         return pie;
     }
