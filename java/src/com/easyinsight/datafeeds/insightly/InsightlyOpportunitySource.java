@@ -149,8 +149,8 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
                 Value opportunityState = getValue(contactMap, "OPPORTUNITY_STATE");
                 if ("LOST".equals(opportunityState.toString())) {
                     opportunityState = new StringValue("Lost");
-                } else if ("PENDING".equals(opportunityState.toString())) {
-                    opportunityState = new StringValue("Pending");
+                } else if ("OPEN".equals(opportunityState.toString())) {
+                    opportunityState = new StringValue("Open");
                 } else if ("WON".equals(opportunityState.toString())) {
                     opportunityState = new StringValue("Won");
                 }
