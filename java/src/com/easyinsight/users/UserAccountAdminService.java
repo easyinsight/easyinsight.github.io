@@ -30,6 +30,52 @@ import java.util.Date;
  */
 public class UserAccountAdminService {
 
+    public void resendInvite(long userID) {
+        SecurityUtil.authorizeAccountAdmin();
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+            if (user.getAccount().getAccountID() != user.getAccount().getAccountID()) {
+                throw new SecurityException();
+            }
+            final String adminFirstName = admin.getFirstName();
+            final String adminName = admin.getName();
+            final String userEmail = user.getEmail();
+            final String userName = user.getUserName();
+            final String password = RandomTextGenerator.generateText(12);
+            final String accountName = admin.getAccount().getName();
+            final String loginURL;
+            if (user.getAccount().isSubdomainEnabled()) {
+                loginURL = "https://therapyworks.easy-insight.com/";
+            } else {
+                loginURL = "https://www.easy-insight.com/app";
+            }
+            final String adminEmail = admin.getEmail();
+            user.setPassword(PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256"));
+            user.setHashType("SHA-256");
+
+            final String sso;
+            if (user.getAccount().getExternalLogin() != null) {
+                sso = user.getAccount().getExternalLogin().toSSOMessage();
+            } else {
+                sso = "";
+            }
+
+            session.update(user);
+            session.flush();
+            new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password, accountName, loginURL, adminEmail, sso);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
     public String convertUser(long userID, boolean designer) {
         SecurityUtil.authorizeAccountAdmin();
         EIConnection conn = Database.instance().getConnection();

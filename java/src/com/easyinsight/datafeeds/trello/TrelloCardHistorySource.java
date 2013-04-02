@@ -1,9 +1,6 @@
 package com.easyinsight.datafeeds.trello;
 
-import com.easyinsight.analysis.AnalysisDimension;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.ReportException;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
@@ -60,8 +57,8 @@ public class TrelloCardHistorySource extends TrelloBaseSource {
         fields.add(new AnalysisDimension(keys.get(HISTORY_ID)));
         fields.add(new AnalysisDimension(keys.get(FROM_LIST)));
         fields.add(new AnalysisDimension(keys.get(TO_LIST)));
-        fields.add(new AnalysisDimension(keys.get(HISTORY_TIME)));
-        fields.add(new AnalysisDimension(keys.get(HISTORY_COUNT)));
+        fields.add(new AnalysisDateDimension(keys.get(HISTORY_TIME), true, AnalysisDateDimension.DAY_LEVEL));
+        fields.add(new AnalysisMeasure(keys.get(HISTORY_COUNT), AggregationTypes.SUM));
         return fields;
     }
 

@@ -359,21 +359,12 @@ public class DataStorage implements IDataStorage {
         if (countRS.next()) {
             long dataLength = countRS.getLong("Data_length");
             long indexLength = countRS.getLong("Index_length");
-            if (dataSourceType == FeedType.CONSTANT_CONTACT_CONTACTS.getType() || dataSourceType == FeedType.HIGHRISE_CONTACTS.getType()
-                    || dataSourceType == FeedType.HIGHRISE_CONTACT_NOTES.getType() || dataSourceType == FeedType.HIGHRISE_CASE_NOTES.getType() ||
-                    dataSourceType == FeedType.HIGHRISE_CONTACT_NOTES.getType() || dataSourceType == FeedType.HIGHRISE_DEAL_NOTES.getType() ||
-                    dataSourceType == FeedType.HIGHRISE_EMAILS.getType() || dataSourceType == FeedType.BASECAMP_TIME.getType() ||
-                    dataSourceType == FeedType.BASECAMP.getType() || dataSourceType == FeedType.CONSTANT_CONTACT_CONTACT_TO_CONTACT_LIST.getType() ||
-                    dataSourceType == FeedType.CONSTANT_CONTACT_CAMPAIGN_RESULTS.getType() || dataSourceType == FeedType.QUICKBASE_CHILD.getType() ||
-                    dataSourceType == FeedType.SQL_SERVER.getType() || dataSourceType == FeedType.MYSQL.getType() ||
-                    dataSourceType == FeedType.SERVER_SQL_SERVER.getType() || dataSourceType == FeedType.DATABASE_CONNECTION.getType() ||
-                    dataSourceType == FeedType.SERVER_POSTGRES.getType() || dataSourceType == FeedType.SERVER_ORACLE.getType() ||
-                    dataSourceType == FeedType.ORACLE.getType() || dataSourceType == FeedType.SERVER_MYSQL.getType()) {
-                return dataLength;
-            } else if (dataSourceType == FeedType.HIGHRISE_ACTIVITIES.getType()) {
+            if (dataSourceType == FeedType.HIGHRISE_ACTIVITIES.getType()) {
+                // 339,656,704
                 return 0;
+            } else {
+                return dataLength;
             }
-            return dataLength + indexLength;
         } else {
             return 0;
         }
@@ -1319,7 +1310,8 @@ public class DataStorage implements IDataStorage {
                 AnalysisDateDimension analysisDateDimension = (AnalysisDateDimension) analysisItem;
                 int prevLevel = analysisDateDimension.getDateLevel();
                 analysisDateDimension.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
-                Value transformedValue = analysisItem.transformValue(value, new InsightRequestMetadata(), false);
+                Calendar calendar = Calendar.getInstance();
+                Value transformedValue = analysisItem.transformValue(value, new InsightRequestMetadata(), false, calendar);
                 analysisDateDimension.setDateLevel(prevLevel);
                 if (transformedValue.type() == Value.EMPTY)
                     insertStmt.setNull(i++, Types.DATE);

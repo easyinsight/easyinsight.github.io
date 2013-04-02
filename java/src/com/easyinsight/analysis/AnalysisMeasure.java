@@ -2,12 +2,12 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
-import com.easyinsight.pipeline.Pipeline;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
@@ -145,10 +145,9 @@ public class AnalysisMeasure extends AnalysisItem {
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> analysisItems = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
         if (currencyField != null) {
-            if (structure.getInsightRequestMetadata().getPipelines(currencyField).isEmpty()) {
-                structure.getInsightRequestMetadata().getPipelines(currencyField).add(Pipeline.BEFORE);
+            if (includeFilters) {
+                analysisItems.add(currencyField);
             }
-            analysisItems.add(currencyField);
         }
         return analysisItems;
     }
@@ -222,7 +221,7 @@ public class AnalysisMeasure extends AnalysisItem {
         return getType() + ":" + aggregation + ":" + toDisplay();
     }
 
-    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata, boolean timezoneShift) {
+    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata, boolean timezoneShift, Calendar calendar) {
         if (getAggregation() == AggregationTypes.COUNT_DISTINCT) {
             return value;
         }

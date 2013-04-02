@@ -202,13 +202,15 @@ public class GeneralDelivery extends ScheduledDelivery {
                 long insertReportID = Database.instance().getAutoGenKey(insertReportStmt);
                 Session session = Database.instance().createSession(conn);
                 try {
-                    for (FilterDefinition customFilter : deliveryInfo.getFilters()) {
-                        customFilter.beforeSave(session);
-                        session.saveOrUpdate(customFilter);
-                        session.flush();
-                        insertFilterStmt.setLong(1, insertReportID);
-                        insertFilterStmt.setLong(2, customFilter.getFilterID());
-                        insertFilterStmt.execute();
+                    if (deliveryInfo.getFilters() != null) {
+                        for (FilterDefinition customFilter : deliveryInfo.getFilters()) {
+                            customFilter.beforeSave(session);
+                            session.saveOrUpdate(customFilter);
+                            session.flush();
+                            insertFilterStmt.setLong(1, insertReportID);
+                            insertFilterStmt.setLong(2, customFilter.getFilterID());
+                            insertFilterStmt.execute();
+                        }
                     }
                 } finally {
                     session.close();

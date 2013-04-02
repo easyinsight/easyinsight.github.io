@@ -10,6 +10,8 @@ import com.easyinsight.datafeeds.basecampnext.BasecampNextAccount;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
 import com.easyinsight.datafeeds.database.ServerDatabaseConnection;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
+import com.easyinsight.datafeeds.json.JSONDataSource;
+import com.easyinsight.datafeeds.json.JSONSetup;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.scorecard.DataSourceRefreshEvent;
@@ -1405,6 +1407,16 @@ public class UserUploadService {
                 feedStorage.updateDataFeedConfiguration(sourceToRefresh, conn);
             }
             return changed;
+        }
+    }
+
+    public JSONSetup describeJSON(String userName, String password, int httpMethod, String url, String jsonPath, String jsonResultPath, String nextPageLink, int page) {
+        SecurityUtil.getUserID();
+        try {
+            return JSONDataSource.jsonString(userName, password, httpMethod, url, jsonPath, jsonResultPath, nextPageLink, page);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
         }
     }
 }

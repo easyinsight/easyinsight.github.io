@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.trello;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -12,9 +13,12 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.Connection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -39,7 +43,7 @@ public class TrelloCardSource extends TrelloBaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(CARD_NAME, CARD_ID, CARD_BOARD_ID, CARD_LIST_ID);
+        return Arrays.asList(CARD_NAME, CARD_ID, CARD_BOARD_ID, CARD_LIST_ID, CARD_DUE_AT, CARD_DESCRIPTION, CARD_CLOSED);
     }
 
     @Override
@@ -64,6 +68,7 @@ public class TrelloCardSource extends TrelloBaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             DefaultHttpClient httpClient = new DefaultHttpClient();
             JSONArray boards = runRequest("https://api.trello.com/1/members/me/boards", httpClient, (TrelloCompositeSource) parentDefinition);
             for (int i = 0 ; i < boards.length(); i++) {
@@ -91,7 +96,14 @@ public class TrelloCardSource extends TrelloBaseSource {
                     row.addValue(CARD_NAME, card.get("name").toString());
                     row.addValue(CARD_BOARD_ID, card.get("idBoard").toString());
                     row.addValue(CARD_LIST_ID, card.get("idList").toString());
-                    JSONArray history = runRequest("https://api.trello.com/1/cards/"+card.get("id")+"/actions?filter=updateCard:idList", httpClient, (TrelloCompositeSource) parentDefinition);
+                    row.addValue(CARD_CLOSED, card.get("closed").toString());
+                    try {
+                        Date dueDate = sdf.parse(card.get("due").toString());
+                        row.addValue(CARD_DUE_AT, new DateValue(dueDate));
+                    } catch (ParseException e) {
+                        // ignore
+                    }
+                    /*JSONArray history = runRequest("https://api.trello.com/1/cards/"+card.get("id")+"/actions?filter=updateCard:idList", httpClient, (TrelloCompositeSource) parentDefinition);
                     // for each item in history
                     for (int k = 0; k < history.length(); k++) {
                         JSONObject historyObject = (JSONObject) history.get(k);
@@ -99,7 +111,7 @@ public class TrelloCardSource extends TrelloBaseSource {
                         String newList = ((JSONObject)((JSONObject) historyObject.get("data")).get("listAfter")).get("id").toString();
                         System.out.println("Argh");
                     }
-                    System.out.println("blah");
+                    System.out.println("blah");*/
                 }
             }
         } catch (Exception e) {
