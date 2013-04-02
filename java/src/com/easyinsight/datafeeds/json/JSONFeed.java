@@ -136,6 +136,9 @@ public class JSONFeed extends Feed {
                 }
 
                 page++;
+                if (page > 500) {
+                    break;
+                }
                 hasMorePages = pageResults > 0 && nextPageString != null && !"".equals(nextPageString);
             } while (hasMorePages);
         } catch (ReportException re) {
