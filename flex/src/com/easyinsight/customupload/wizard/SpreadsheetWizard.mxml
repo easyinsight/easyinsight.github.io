@@ -97,8 +97,13 @@
             //UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
             try {
                 var response:UploadResponse = uploadService.createDataSource.lastResult as UploadResponse;
-                PopUpManager.removePopUp(this);
-                User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(response.feedID)));
+                if (response.successful) {
+                    PopUpManager.removePopUp(this);
+                    User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(response.feedID)));
+                } else {
+                    PopUpManager.removePopUp(this);
+                    Alert.show(response.failureMessage);
+                }
             } catch(e:Error) {
                 Alert.show(e.message);
             }
