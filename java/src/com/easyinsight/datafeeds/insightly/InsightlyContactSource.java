@@ -11,6 +11,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -171,7 +172,11 @@ public class InsightlyContactSource extends InsightlyBaseSource {
                         if (field.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                             Object obj = contactMap.get(field.getKey().toKeyString());
                             if (obj != null) {
-                                row.addValue(field.getKey(), sdf.parse(obj.toString()));
+                                try {
+                                    row.addValue(field.getKey(), sdf.parse(obj.toString()));
+                                } catch (ParseException e) {
+
+                                }
                             }
                         } else {
                             row.addValue(field.getKey(), getValue(contactMap, field.getKey().toKeyString()));
