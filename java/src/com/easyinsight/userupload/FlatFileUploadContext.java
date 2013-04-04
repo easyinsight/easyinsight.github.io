@@ -11,12 +11,21 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
-* User: jamesboe
-* Date: Mar 27, 2010
-* Time: 3:21:36 PM
-*/
+ * User: jamesboe
+ * Date: Mar 27, 2010
+ * Time: 3:21:36 PM
+ */
 public class FlatFileUploadContext extends UploadContext {
     private byte[] bytes;
+    private int type;
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
 
     public byte[] getBytes() {
         return bytes;
@@ -30,11 +39,22 @@ public class FlatFileUploadContext extends UploadContext {
 
     @Override
     public String validateUpload(EIConnection conn) throws SQLException {
-        try {
-            uploadFormat = new UploadFormatTester().determineFormat(bytes);
-        } catch (InvalidFormatException e) {
-            return e.getMessage();
+
+        switch (type) {
+            case 1:
+                uploadFormat = new CsvFileUploadFormat();
+                break;
+            case 2:
+                uploadFormat = new ExcelUploadFormat();
+                break;
+            case 3:
+                uploadFormat = new XSSFExcelUploadFormat();
+                break;
+            default:
+                uploadFormat = null;
+                break;
         }
+
         if (uploadFormat == null) {
             return "Sorry, we couldn't figure out what type of file you tried to upload. Supported types are Excel 1997-2008 and delimited text files.";
         } else {

@@ -21,6 +21,8 @@
 
         private var uploadID:Number;
 
+        public var type:int;
+
         // Called when the "Browse" button is clicked
         public function doBrowse( event:Event ):void
         {
@@ -34,6 +36,7 @@
             finishingSection.visible = true;
             var context:FlatFileUploadContext = new FlatFileUploadContext();
             context.bytes = fileData;
+            context.type = type;
             uploadService.analyzeUpload.send(context);
             
         }

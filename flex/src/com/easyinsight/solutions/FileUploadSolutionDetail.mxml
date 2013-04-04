@@ -9,8 +9,9 @@
 
         import mx.managers.PopUpManager;
 
-        private function install():void {
+        private function install(type:int):void {
             var userUpload:UserUpload = UserUpload(PopUpManager.createPopUp(this, UserUpload, true));
+            userUpload.type = type;
             userUpload.addEventListener(AnalyzeEvent.ANALYZE, uploadConfigComplete, false, 0, true);
             PopUpUtil.centerPopUp(userUpload);
         }
@@ -34,10 +35,15 @@
                 <mx:Spacer width="100%"/>
             </mx:HBox>
             <mx:HRule width="100%" strokeColor="#333333"/>
-            <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
-                <mx:Button label="Upload a File" fontSize="20" click="install()" styleName="grayButton"
+            <mx:HBox id="controlsBox" width="100%" horizontalAlign="center">
+                <mx:Button label="Upload a CSV" fontSize="20" click="install(1)" styleName="grayButton"
                            id="installButton"/>
-            </mx:Box>
+                <mx:Button label="Upload an Excel (.xsl) File" fontSize="20" click="install(2)" styleName="grayButton"
+                           id="installButton2"/>
+                <mx:Button label="Upload an Excel (.xslx) File" fontSize="20" click="install(3)" styleName="grayButton"
+                           id="installButton3"/>
+
+            </mx:HBox>
             <mx:HRule width="100%" strokeColor="#333333"/>
             <mx:TextArea
                     text="You can upload Excel (1997-2007) spreadsheets or comma or tab separated text files here. The file should have a header row, with data in the subsequent cells, as shown below:"
