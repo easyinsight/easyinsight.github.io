@@ -127,11 +127,6 @@
                 window.addEventListener(AnalyzeEvent.ANALYZE, uploadConfigComplete, false, 0, true);
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
-            } else if (event.solution.dataSourceType == DataSourceType.STATIC) {
-                var userUpload:UserUpload = new UserUpload();
-                userUpload.addEventListener(AnalyzeEvent.ANALYZE, uploadConfigComplete, false, 0, true);
-                PopUpManager.addPopUp(userUpload, this, true);
-                PopUpUtil.centerPopUp(userUpload);
             } else {
                 var detail:IPerspective = SolutionDetailFactory.createDetailPage(event.solution, false);
                 dispatchEvent(new ListingChangeEvent(detail));
