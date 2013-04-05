@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                    creationComplete="feedService.getDescriptorsForDataSource.send(_dataSourceID)">
+         creationComplete="feedService.getDescriptorsForDataSource.send(_dataSourceID)">
     <mx:Script><![CDATA[
         import com.easyinsight.quicksearch.EIDescriptor;
 
@@ -103,6 +103,15 @@
                     urlInput.setFocus();
                     urlInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
                 }
+            } else {
+                reportChooser.errorString = "";
+                if(reportChooser.selectedItem == null) {
+                    valid = false;
+                    reportChooser.errorString = "Please select a report.";
+                    reportChooser.setFocus();
+                    reportChooser.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                }
+
             }
             return valid;
         }
@@ -131,6 +140,7 @@
                 if (_link != null && _link is URLLink) {
                     typeChanged = true;
                 }
+
                 var drillThrough:DrillThrough = new DrillThrough();
                 drillThrough.defaultLink = drillthroughDefaultLinkCheckbox.selected;
                 drillThrough.label = "";
@@ -146,12 +156,13 @@
                 drillThrough.miniWindow = miniWindowCheckbox.selected;
                 drillThrough.marmotScript = scriptArea.text;
                 _link = drillThrough;
+
             }
             if (valid) {
                 /*if (!typeChanged) {
-                    Alert.show("type didn't change, assigning to " + linkID);
-                    _link.linkID = linkID;
-                }*/
+                 Alert.show("type didn't change, assigning to " + linkID);
+                 _link.linkID = linkID;
+                 }*/
 
                 if (firstLink == null) {
                     dispatchEvent(new LinkMetadataEvent(LinkMetadataEvent.LINK_DEFINED, _link));
@@ -181,7 +192,8 @@
 
     <mx:HBox width="100%" horizontalAlign="center">
         <mx:RadioButton group="{typeGroup}" label="URL" value="URL" click="stackIndex = 0" fontSize="16"/>
-        <mx:RadioButton group="{typeGroup}" label="Drillthrough" value="Drillthrough" click="stackIndex = 1" fontSize="16"/>
+        <mx:RadioButton group="{typeGroup}" label="Drillthrough" value="Drillthrough" click="stackIndex = 1"
+                        fontSize="16"/>
     </mx:HBox>
     <mx:ViewStack id="viewStack" resizeToContent="true" creationPolicy="all"
                   selectedIndex="{stackIndex}">
@@ -198,8 +210,9 @@
         <mx:VBox>
             <mx:HBox>
                 <mx:Label text="Target Report:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
-                <util:SmartComboBox id="reportChooser" dataProvider="{reports}" labelField="name" selectedProperty="qualifiedName"
-                        selectedValue="{qualifiedName}" rowCount="12" maxWidth="400"/>
+                <util:SmartComboBox id="reportChooser" dataProvider="{reports}" labelField="name"
+                                    selectedProperty="qualifiedName"
+                                    selectedValue="{qualifiedName}" rowCount="12" maxWidth="400" />
             </mx:HBox>
             <mx:HBox>
                 <mx:Label text="Use Popup Window:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
@@ -223,13 +236,15 @@
             </mx:HBox>
             <mx:HBox>
                 <mx:Label text="Scripting:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
-                <mx:TextArea text="{script}" width="450" height="70" editable="true" id="scriptArea" borderStyle="inset" borderThickness="1"/>
+                <mx:TextArea text="{script}" width="450" height="70" editable="true" id="scriptArea" borderStyle="inset"
+                             borderThickness="1"/>
             </mx:HBox>
         </mx:VBox>
     </mx:ViewStack>
     <mx:Spacer height="100%"/>
     <mx:HBox width="100%" horizontalAlign="center">
-        <util:CancelButton label="Clear Link" click="dispatchEvent(new LinkMetadataEvent(LinkMetadataEvent.LINK_DELETED, _link))"/>
+        <util:CancelButton label="Clear Link"
+                           click="dispatchEvent(new LinkMetadataEvent(LinkMetadataEvent.LINK_DELETED, _link))"/>
     </mx:HBox>
     <mx:StringValidator id="urlValidator" property="text" source="{urlInput}" minLength="3" maxLength="200"/>
 </mx:VBox>
