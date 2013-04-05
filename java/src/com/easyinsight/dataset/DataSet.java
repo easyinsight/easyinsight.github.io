@@ -183,7 +183,7 @@ public class DataSet implements Serializable, Cloneable {
             StringBuilder keyBuilder = new StringBuilder();
             for (AnalysisDimension dimension : ourDimensions) {
                 Value dimensionValue = row.getValue(dimension.createAggregateKey());
-                keyBuilder.append(dimension.qualifiedName()).append(":").append(dimensionValue.toString()).append(":");
+                keyBuilder.append(dimension.qualifiedName()).append(":").append(dimensionValue.performantString()).append(":");
             }
             for (AnalysisDimension dimension : ungroupedDimensions) {
                 if (uniqueItems != null && uniqueItems.size() > 0) {

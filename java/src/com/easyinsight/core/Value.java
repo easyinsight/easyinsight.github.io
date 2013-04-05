@@ -101,4 +101,21 @@ public abstract class Value implements Serializable, Comparable<Value>, Cloneabl
     public abstract int type();
 
     public abstract Double toDouble();
+
+    public String toString() {
+        return super.toString();
+    }
+
+    private transient String cached;
+
+    public String performantString() {
+        if (cached == null) {
+            cached = createPerformantString();
+        }
+        return cached;
+    }
+
+    public String createPerformantString() {
+        return toString();
+    }
 }
