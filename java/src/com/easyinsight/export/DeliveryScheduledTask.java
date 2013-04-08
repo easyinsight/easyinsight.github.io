@@ -184,8 +184,10 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
             String senderName = null;
             String senderEmail = null;
-            PreparedStatement getSernderStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, REPORT_DELIVERY WHERE REPORT_DELIVERY.sender_user_id = user.user_id and " +
-                    "REPORT_DELIVERY.scheduled_account_activity_id = ?");
+            /*
+            TODO: fix
+            PreparedStatement getSernderStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, GENERAL_DELIVERY WHERE GENERAL_DELIVERY.sender_user_id = user.user_id and " +
+                    "GENERAL_DELIVERY.scheduled_account_activity_id = ?");
             getSernderStmt.setLong(1, activityID);
             ResultSet senderRS = getSernderStmt.executeQuery();
             if (senderRS.next()) {
@@ -195,7 +197,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 senderName = userFirstName + " " + userLastName;
                 senderEmail = email;
             }
-            getSernderStmt.close();
+            getSernderStmt.close();*/
 
             Collections.sort(infos, new Comparator<DeliveryInfo>() {
 
@@ -344,6 +346,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             }
                         }
                         latch.countDown();
+                    } catch (ReportException re) {
+                        LogClass.error(re.getReportFault().toString(), re);
+                        latch.countDown();
                     } catch (Exception e) {
                         LogClass.error(e);
                         latch.countDown();
@@ -357,6 +362,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
         latch.await();
         tpe.shutdown();
 
+        if (bodyElements.size() == 0 && attachmentInfos.size() == 0) {
+            return;
+        }
         for (String bodyElement : bodyElements) {
             emailBody += bodyElement;
         }
@@ -388,6 +396,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setUtcOffset(timezoneOffset);
         if (deliveryInfo.getFormat() == ReportDelivery.EXCEL || deliveryInfo.getFormat() == ReportDelivery.EXCEL_2007) {
+            System.out.println("Running report " + deliveryInfo.getId() + " for Excel delivery");
             WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
             analysisDefinition.updateMetadata();
             if (deliveryInfo.getLabel() != null && !"".equals(deliveryInfo.getLabel())) {
@@ -406,6 +415,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             }
         } else if (deliveryInfo.getFormat() == ReportDelivery.HTML_TABLE) {
             if (deliveryInfo.getType() == DeliveryInfo.REPORT) {
+                System.out.println("Running report " + deliveryInfo.getId() + " for HTML delivery");
                 WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
                 analysisDefinition.updateMetadata();
                 if (deliveryInfo.getLabel() != null && !"".equals(deliveryInfo.getLabel())) {
@@ -417,20 +427,24 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     return new DeliveryResult(table);
                 }
             } else if (deliveryInfo.getType() == DeliveryInfo.SCORECARD) {
+                System.out.println("Running scorecard " + deliveryInfo.getId() + " for HTML delivery");
                 return new DeliveryResult(ExportService.exportScorecard(deliveryInfo.getId(), insightRequestMetadata, conn));
             }
         } else if (deliveryInfo.getFormat() == ReportDelivery.PDF || deliveryInfo.getFormat() == ReportDelivery.PNG) {
             if (deliveryInfo.getType() == DeliveryInfo.REPORT) {
+
                 WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
                 if (deliveryInfo.getFormat() == ReportDelivery.PDF && (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID)) {
+                    System.out.println("Running report " + deliveryInfo.getId() + " for inline PDF delivery");
                     analysisDefinition.updateMetadata();
                     updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
                     byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
                     String reportName = analysisDefinition.getName();
                     return new DeliveryResult(new AttachmentInfo(bytes, reportName + ".pdf", "application/pdf"));
                 } else {
+                    System.out.println("Running report " + deliveryInfo.getId() + " for selenium PDF or PNG delivery");
                     long id = new SeleniumLauncher().requestSeleniumDrawForReport(deliveryInfo.getId(), activityID, SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn,
                             deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
                     System.out.println("launched " + id);
@@ -444,7 +458,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
                     msgQueue.setEncoding(false);
                     int timeout = 0;
-                    while (timeout < 120) {
+                    while (timeout < 300) {
                         Message message = msgQueue.receiveMessage();
                         if (message == null) {
                             timeout++;
@@ -485,8 +499,10 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             }
                         }
                     }
+                    LogClass.error("Failed to generate Selenium report for " + deliveryInfo.getId() + ", ended up timing out.");
                 }
             } else {
+                System.out.println("Running dashboard " + deliveryInfo.getId() + " for Selenium delivery");
                 long id = new SeleniumLauncher().requestSeleniumDrawForDashboard(deliveryInfo.getId(), activityID, SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn,
                         deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
                 System.out.println("launched " + id);
@@ -500,7 +516,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
                 msgQueue.setEncoding(false);
                 int timeout = 0;
-                while (timeout < 120) {
+                while (timeout < 300) {
                     Message message = msgQueue.receiveMessage();
                     if (message == null) {
                         timeout++;
@@ -541,6 +557,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         }
                     }
                 }
+                LogClass.error("Failed to generate Selenium dashboard for " + deliveryInfo.getId() + ", ended up timing out.");
             }
         }
         return null;

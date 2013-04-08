@@ -1,5 +1,8 @@
 package com.easyinsight.admin;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.text.MessageFormat;
 
@@ -13,7 +16,8 @@ public class HealthInfo implements Serializable {
     private static final String HEALTH_XML = "\t\t<health>\r\n\t\t\t<currentMemory>{0}</currentMemory>\r\n" +
             "\t\t\t<freeMemory>{1}</freeMemory>\r\n\t\t\t<maxMemory>{2}</maxMemory>\r\n\t\t\t<threadCount>{3}</threadCount>\r\n" +
             "\t\t\t<activeDBConnections>{4}</activeDBConnections>\r\n\t\t\t<activeUsers>{5}</activeUsers>\r\n\t\t\t<systemLoadAverage>{6}</systemLoadAverage>\r\n" +
-            "\t\t\t<clientCount>{7}</clientCount>\r\n\t\t\t<server>{8}</server>\r\n\t\t</health>\r\n";
+            "\t\t\t<clientCount>{7}</clientCount>\r\n\t\t\t<server>{8}</server>\r\n\t\t\t<schedulerThreads>{9}/{10}</schedulerThreads>\n" +
+            "\t\t\t<claimed>{11}</claimed>\r\n\t\t</health>\r\n";
 
     private long currentMemory;
     private long freeMemory;
@@ -29,11 +33,39 @@ public class HealthInfo implements Serializable {
     private double systemLoadAverage;
     private long compilationTime;
     private int clientCount;
+
+    private int maxSchedulerThreads;
+    private int currentSchedulerThreads;
     private String server;
+    private int claimedTasks;
 
     public String toXML() {
         return MessageFormat.format(HEALTH_XML, currentMemory, freeMemory, maxMemory, threadCount, activeDBConnections,
-                activeUsers, systemLoadAverage, clientCount, server);
+                activeUsers, systemLoadAverage, clientCount, server, currentSchedulerThreads, maxSchedulerThreads, claimedTasks);
+    }
+
+    public int getClaimedTasks() {
+        return claimedTasks;
+    }
+
+    public void setClaimedTasks(int claimedTasks) {
+        this.claimedTasks = claimedTasks;
+    }
+
+    public int getMaxSchedulerThreads() {
+        return maxSchedulerThreads;
+    }
+
+    public void setMaxSchedulerThreads(int maxSchedulerThreads) {
+        this.maxSchedulerThreads = maxSchedulerThreads;
+    }
+
+    public int getCurrentSchedulerThreads() {
+        return currentSchedulerThreads;
+    }
+
+    public void setCurrentSchedulerThreads(int currentSchedulerThreads) {
+        this.currentSchedulerThreads = currentSchedulerThreads;
     }
 
     public String getServer() {
@@ -154,5 +186,28 @@ public class HealthInfo implements Serializable {
 
     public void setActiveUsers(int activeUsers) {
         this.activeUsers = activeUsers;
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("current_memory", currentMemory);
+        jo.put("free_memory", freeMemory);
+        jo.put("max_memory", maxMemory);
+        jo.put("thread_count", threadCount);
+        jo.put("active_db_connections", activeDBConnections);
+        jo.put("idle_db_connections", idleDBConnections);
+        jo.put("active_users", activeUsers);
+        jo.put("major_collection_count", majorCollectionCount);
+        jo.put("major_collection_time", majorCollectionTime);
+        jo.put("minor_collection_count", minorCollectionCount);
+        jo.put("minor_collection_time", minorCollectionTime);
+        jo.put("system_load_average", systemLoadAverage);
+        jo.put("compilation_time", compilationTime);
+        jo.put("client_count", clientCount);
+        jo.put("server", server);
+        jo.put("current_scheduler_threads", currentSchedulerThreads);
+        jo.put("max_scheduler_threads", maxSchedulerThreads);
+        jo.put("claimed_tasks", claimedTasks);
+        return jo;
     }
 }

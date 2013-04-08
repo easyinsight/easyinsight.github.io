@@ -90,6 +90,11 @@
     </rule>
 
     <rule>
+        <from>/admin/health.json</from>
+        <to>/admin/health?format=json</to>
+    </rule>
+
+    <rule>
         <from>/embeddedDashboard/([A-Za-z0-9]+)</from>
         <to>/embed/embeddedDashboard.jsp?dashboardID=$1</to>
     </rule>
