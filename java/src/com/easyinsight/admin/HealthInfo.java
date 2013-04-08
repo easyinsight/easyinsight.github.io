@@ -13,7 +13,8 @@ public class HealthInfo implements Serializable {
     private static final String HEALTH_XML = "\t\t<health>\r\n\t\t\t<currentMemory>{0}</currentMemory>\r\n" +
             "\t\t\t<freeMemory>{1}</freeMemory>\r\n\t\t\t<maxMemory>{2}</maxMemory>\r\n\t\t\t<threadCount>{3}</threadCount>\r\n" +
             "\t\t\t<activeDBConnections>{4}</activeDBConnections>\r\n\t\t\t<activeUsers>{5}</activeUsers>\r\n\t\t\t<systemLoadAverage>{6}</systemLoadAverage>\r\n" +
-            "\t\t\t<clientCount>{7}</clientCount>\r\n\t\t\t<server>{8}</server>\r\n\t\t</health>\r\n";
+            "\t\t\t<clientCount>{7}</clientCount>\r\n\t\t\t<server>{8}</server>\r\n\t\t\t<schedulerThreads>{9}/{10}</schedulerThreads>\n" +
+            "\t\t\t<claimed>{11}</claimed>\r\n\t\t</health>\r\n";
 
     private long currentMemory;
     private long freeMemory;
@@ -29,11 +30,39 @@ public class HealthInfo implements Serializable {
     private double systemLoadAverage;
     private long compilationTime;
     private int clientCount;
+
+    private int maxSchedulerThreads;
+    private int currentSchedulerThreads;
     private String server;
+    private int claimedTasks;
 
     public String toXML() {
         return MessageFormat.format(HEALTH_XML, currentMemory, freeMemory, maxMemory, threadCount, activeDBConnections,
-                activeUsers, systemLoadAverage, clientCount, server);
+                activeUsers, systemLoadAverage, clientCount, server, currentSchedulerThreads, maxSchedulerThreads, claimedTasks);
+    }
+
+    public int getClaimedTasks() {
+        return claimedTasks;
+    }
+
+    public void setClaimedTasks(int claimedTasks) {
+        this.claimedTasks = claimedTasks;
+    }
+
+    public int getMaxSchedulerThreads() {
+        return maxSchedulerThreads;
+    }
+
+    public void setMaxSchedulerThreads(int maxSchedulerThreads) {
+        this.maxSchedulerThreads = maxSchedulerThreads;
+    }
+
+    public int getCurrentSchedulerThreads() {
+        return currentSchedulerThreads;
+    }
+
+    public void setCurrentSchedulerThreads(int currentSchedulerThreads) {
+        this.currentSchedulerThreads = currentSchedulerThreads;
     }
 
     public String getServer() {

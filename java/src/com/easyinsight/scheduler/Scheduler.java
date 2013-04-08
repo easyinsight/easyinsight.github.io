@@ -35,6 +35,8 @@ public class Scheduler {
     private boolean running = false;
     private Thread thread;
 
+    private int claimed = 0;
+
     private static Scheduler instance;
 
     public static Scheduler instance() {
@@ -48,7 +50,7 @@ public class Scheduler {
     // simplest level...
 
     private Scheduler() {
-        executor = new ThreadPoolExecutor(5, 5, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+        executor = new ThreadPoolExecutor(TASK_LIMIT, TASK_LIMIT, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
         timer = new Timer("Scheduler Timer");        
     }
 
@@ -205,17 +207,20 @@ public class Scheduler {
     private List<ScheduledTask> claimScheduledTasks() {
         List<ScheduledTask> results;
         Session session = Database.instance().createSession();
+        int curClaimed = 0;
         try {
             session.getTransaction().begin();
             Query query = session.createQuery("from ScheduledTask where status = ?").
                 setInteger(0, ScheduledTask.SCHEDULED);
-            query.setMaxResults(TASK_LIMIT);
+            query.setMaxResults(executor.getMaximumPoolSize() - executor.getActiveCount());
             results = query.list();
             for (ScheduledTask task : results) {
                 task.setStatus(ScheduledTask.RUNNING);
                 session.update(task);
+                curClaimed++;
             }
             session.getTransaction().commit();
+            claimed = claimed + curClaimed;
         } catch (Exception e) {
             LogClass.error(e);
             session.getTransaction().rollback();
@@ -285,4 +290,11 @@ public class Scheduler {
         }
     }
 
+    public ThreadPoolExecutor getExecutor() {
+        return executor;
+    }
+
+    public int getClaimed() {
+        return claimed;
+    }
 }
