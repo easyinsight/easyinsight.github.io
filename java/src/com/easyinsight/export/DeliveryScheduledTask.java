@@ -499,6 +499,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             }
                         }
                     }
+                    LogClass.error("Failed to generate Selenium report for " + deliveryInfo.getId() + ", ended up timing out.");
                 }
             } else {
                 System.out.println("Running dashboard " + deliveryInfo.getId() + " for Selenium delivery");
@@ -515,7 +516,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
                 msgQueue.setEncoding(false);
                 int timeout = 0;
-                while (timeout < 120) {
+                while (timeout < 300) {
                     Message message = msgQueue.receiveMessage();
                     if (message == null) {
                         timeout++;
@@ -556,6 +557,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         }
                     }
                 }
+                LogClass.error("Failed to generate Selenium dashboard for " + deliveryInfo.getId() + ", ended up timing out.");
             }
         }
         return null;
