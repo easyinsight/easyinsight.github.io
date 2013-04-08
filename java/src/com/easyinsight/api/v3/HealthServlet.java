@@ -6,6 +6,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import org.apache.jcs.JCS;
+import org.json.JSONArray;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -32,7 +33,9 @@ public class HealthServlet extends HttpServlet {
             queryStmt.setBoolean(1, true);
             ResultSet rs = queryStmt.executeQuery();
             List<Status> statusList = new ArrayList<Status>();
+            JSONArray arr = new JSONArray();
             while (rs.next()) {
+
                 String host = rs.getString(1);
                 Status status = (Status) JCS.getInstance("servers").get(host);
 
@@ -52,6 +55,10 @@ public class HealthServlet extends HttpServlet {
                 } else {
                     statusList.add(status);
                 }
+
+                if("json".equals(req.getParameter("format"))) {
+                    arr.put(status.toJSON());
+                }
             }
             StringBuilder xmlBuilder = new StringBuilder();
             xmlBuilder.append("<response>\r\n");
@@ -70,7 +77,10 @@ public class HealthServlet extends HttpServlet {
                 xmlBuilder.append("\t</server>\r\n");
             }
             xmlBuilder.append("</response>");
-            resp.getOutputStream().write(xmlBuilder.toString().getBytes());
+            if("json".equals(req.getParameter("format")))
+                resp.getOutputStream().write(arr.toString().getBytes());
+            else
+                resp.getOutputStream().write(xmlBuilder.toString().getBytes());
             resp.getOutputStream().flush();
         } catch (Exception e) {
             LogClass.error(e);

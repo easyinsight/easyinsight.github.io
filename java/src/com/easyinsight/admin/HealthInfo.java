@@ -1,5 +1,8 @@
 package com.easyinsight.admin;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.text.MessageFormat;
 
@@ -183,5 +186,28 @@ public class HealthInfo implements Serializable {
 
     public void setActiveUsers(int activeUsers) {
         this.activeUsers = activeUsers;
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("current_memory", currentMemory);
+        jo.put("free_memory", freeMemory);
+        jo.put("max_memory", maxMemory);
+        jo.put("thread_count", threadCount);
+        jo.put("active_db_connections", activeDBConnections);
+        jo.put("idle_db_connections", idleDBConnections);
+        jo.put("active_users", activeUsers);
+        jo.put("major_collection_count", majorCollectionCount);
+        jo.put("major_collection_time", majorCollectionTime);
+        jo.put("minor_collection_count", minorCollectionCount);
+        jo.put("minor_collection_time", minorCollectionTime);
+        jo.put("system_load_average", systemLoadAverage);
+        jo.put("compilation_time", compilationTime);
+        jo.put("client_count", clientCount);
+        jo.put("server", server);
+        jo.put("current_scheduler_threads", currentSchedulerThreads);
+        jo.put("max_scheduler_threads", maxSchedulerThreads);
+        jo.put("claimed_tasks", claimedTasks);
+        return jo;
     }
 }

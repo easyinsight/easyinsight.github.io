@@ -1,5 +1,8 @@
 package com.easyinsight.admin;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -61,5 +64,17 @@ public class Status implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject jo = new JSONObject();
+
+        jo.put("message", message);
+        jo.put("extended_message", extendedMessage);
+        jo.put("code", code);
+        jo.put("extended_code", extendedCode);
+        jo.put("time", time);
+        jo.put("health_info", healthInfo.toJSON());
+        return jo;
     }
 }
