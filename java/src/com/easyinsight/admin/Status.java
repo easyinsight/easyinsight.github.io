@@ -67,14 +67,19 @@ public class Status implements Serializable {
     }
 
     public JSONObject toJSON() throws JSONException {
-        JSONObject jo = new JSONObject();
+        JSONObject jo;
+        if(healthInfo != null) {
+            jo = new JSONObject(healthInfo.toJSON().toString());
+        } else {
+            jo = new JSONObject();
+        }
 
         jo.put("message", message);
         jo.put("extended_message", extendedMessage);
         jo.put("code", code);
         jo.put("extended_code", extendedCode);
         jo.put("time", time);
-        jo.put("health_info", healthInfo.toJSON());
+
         return jo;
     }
 }
