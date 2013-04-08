@@ -31,7 +31,7 @@ public class LogClass {
     }
 
     public static void error(String message) {
-        Thread.dumpStack();
+
         if(ConfigLoader.instance().isProduction()) {
             try {
                 String username = null;
@@ -50,7 +50,7 @@ public class LogClass {
     }
 
     public static void error(String message, Throwable e) {
-        Thread.dumpStack();
+
         if(ConfigLoader.instance().isProduction()) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream writer = new PrintStream(baos);
@@ -73,7 +73,7 @@ public class LogClass {
     }
 
     public static void error(Throwable e) {
-        Thread.dumpStack();
+
         if(ConfigLoader.instance().isProduction()) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream writer = new PrintStream(baos);
@@ -96,7 +96,7 @@ public class LogClass {
     }
 
     public static void apiError(Throwable e) {
-        Thread.dumpStack();
+
         if(ConfigLoader.instance().isProduction()) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream writer = new PrintStream(baos);
