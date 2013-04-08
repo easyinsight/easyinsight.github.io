@@ -346,6 +346,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             }
                         }
                         latch.countDown();
+                    } catch (ReportException re) {
+                        LogClass.error(re.getReportFault().toString(), re);
+                        latch.countDown();
                     } catch (Exception e) {
                         LogClass.error(e);
                         latch.countDown();
@@ -455,7 +458,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
                     msgQueue.setEncoding(false);
                     int timeout = 0;
-                    while (timeout < 120) {
+                    while (timeout < 300) {
                         Message message = msgQueue.receiveMessage();
                         if (message == null) {
                             timeout++;
