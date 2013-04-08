@@ -101,6 +101,7 @@ public class CompositeFeed extends Feed {
                     } else {
                         if ("com.easyinsight.core.Key".equals(joinOverride.getSourceItem().getKey().getClass().getName()) ||
                                 "com.easyinsight.core.Key".equals(joinOverride.getTargetItem().getKey().getClass().getName())) {
+                            System.out.println("Bypassing bad state join.");
                             continue;
                         }
                         CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection();
@@ -110,6 +111,10 @@ public class CompositeFeed extends Feed {
                         compositeFeedConnection.setTargetItems(Arrays.asList(joinOverride.getTargetItem()));
                         compositeFeedConnection.setSourceFeedName(joinOverride.getSourceName());
                         compositeFeedConnection.setTargetFeedName(joinOverride.getTargetName());
+                        compositeFeedConnection.setSourceJoinOnOriginal(joinOverride.isSourceJoinOriginal());
+                        compositeFeedConnection.setTargetJoinOnOriginal(joinOverride.isTargetJoinOriginal());
+                        compositeFeedConnection.setSourceOuterJoin(joinOverride.isSourceOuterJoin());
+                        compositeFeedConnection.setTargetOuterJoin(joinOverride.isTargetOuterJoin());
                         if (joinOverride.getSourceItem().getKey() instanceof DerivedKey) {
                             compositeFeedConnection.setSourceFeedID(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID());
                         } else {
@@ -314,6 +319,7 @@ public class CompositeFeed extends Feed {
                 map.put(queryStateNode, childSet);
             }
             if (oneRowData) {
+                System.out.println("No join found, merging into a single result row.");
                 IRow baseRow = dataSet.createRow();
                 for (DataSet childSet : map.values()) {
                     for (IRow row : childSet.getRows()) {
@@ -321,6 +327,7 @@ public class CompositeFeed extends Feed {
                     }
                 }
             } else {
+                System.out.println("No join found, appending rows.");
                 for (DataSet childSet : map.values()) {
                     for (IRow row : childSet.getRows()) {
                         dataSet.addRow(row);
@@ -500,15 +507,22 @@ public class CompositeFeed extends Feed {
                     }
                 }
                 System.out.println("joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName);
+
+                /*if (sourceQueryData.dataSet == targetQueryData.dataSet) {
+                    dataSet = sourceQueryData.dataSet;
+                } else {*/
+                if (sourceQueryData.dataSet == targetQueryData.dataSet) {
+
+                }
                 MergeAudit mergeAudit;
                 if (last.connection.isTargetJoinOnOriginal()) {
                     mergeAudit = last.connection.merge(sourceQueryData.dataSet, targetNode.originalDataSet,
-                        sourceQueryData.neededItems, targetQueryData.neededItems,
-                        sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID, operations);
+                            sourceQueryData.neededItems, targetQueryData.neededItems,
+                            sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID, operations);
                 } else {
                     mergeAudit = last.connection.merge(sourceQueryData.dataSet, targetQueryData.dataSet,
-                        sourceQueryData.neededItems, targetQueryData.neededItems,
-                        sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID, operations);
+                            sourceQueryData.neededItems, targetQueryData.neededItems,
+                            sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID, operations);
                 }
                 dataSet = mergeAudit.getDataSet();
                 operations = mergeAudit.getOperations();
@@ -517,14 +531,11 @@ public class CompositeFeed extends Feed {
                 sourceQueryData.dataSet = dataSet;
                 sourceQueryData.neededItems.addAll(targetQueryData.neededItems);
                 sourceQueryData.ids.addAll(targetQueryData.ids);
-                /*auditBuilder.append("<h1>" + "After joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName + "</h1>");
-                auditBuilder.append(ExportService.dataSetToHTMLTable(sourceQueryData.neededItems, dataSet, conn, insightRequestMetadata));*/
                 for (QueryNodeKey id : sourceQueryData.ids) {
                     map.put(id, sourceQueryData);
                 }
             }
         } else {
-
             ClosestFirstIterator<QueryStateNode, Edge> iter = new ClosestFirstIterator<QueryStateNode, Edge>(reducedGraph, firstVertex);
             while (iter.hasNext()) {
                 QueryStateNode sourceNode = iter.next();
@@ -603,6 +614,10 @@ public class CompositeFeed extends Feed {
                     }
 
                     System.out.println("joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName + " with " + sourceQueryData.dataSet.getRows().size() + " and " + targetQueryData.dataSet.getRows().size());
+                    if (sourceQueryData.dataSet == targetQueryData.dataSet) {
+
+                    }
+
                     MergeAudit mergeAudit = last.connection.merge(sourceQueryData.dataSet, targetQueryData.dataSet,
                             sourceQueryData.neededItems, targetQueryData.neededItems,
                             sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID, operations);
@@ -615,6 +630,7 @@ public class CompositeFeed extends Feed {
                     for (QueryNodeKey id : sourceQueryData.ids) {
                         map.put(id, sourceQueryData);
                     }
+
                 }
 
             }
