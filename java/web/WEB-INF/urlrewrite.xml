@@ -90,8 +90,8 @@
     </rule>
 
     <rule>
-        <from>/app/admin/health.json</from>
-        <to>/app/admin/health?format=json</to>
+        <from>/admin/health.json</from>
+        <to>/admin/health?format=json</to>
     </rule>
 
     <rule>
