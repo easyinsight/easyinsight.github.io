@@ -7,6 +7,7 @@ import com.easyinsight.datafeeds.freshbooks.FreshbooksCompositeSource;
 import com.easyinsight.datafeeds.harvest.HarvestCompositeSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 //import com.easyinsight.datafeeds.xero.XeroCompositeSource;
+import com.easyinsight.datafeeds.trello.TrelloCompositeSource;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.datafeeds.FeedType;
@@ -162,7 +163,13 @@ public class TokenService {
                 FlexContext.getHttpRequest().getSession().setAttribute("redirectTarget", redirectType);
                 FlexContext.getHttpRequest().getSession().setAttribute("dataSourceID", dataSource.getApiKey());
                 return new OAuthResponse(clientRequest.getLocationUri(), true);
-
+            } else if (type == FeedType.TRELLO_COMPOSITE.getType()) {
+                consumer = new CommonsHttpOAuthConsumer(TrelloCompositeSource.KEY,
+                        TrelloCompositeSource.SECRET_KEY);
+                consumer.setMessageSigner(new HmacSha1MessageSigner());
+                provider = new CommonsHttpOAuthProvider(
+                        "https://trello.com/1/OAuthGetRequestToken", "https://trello.com/1/OAuthGetAccessToken", "https://trello.com/1/OAuthAuthorizeToken?name=EasyInsight&expiration=never");
+                //return new OAuthResponse("https://trello.com/1/authorize?key="+TrelloCompositeSource.KEY+"&name=EasyInsight&expiration=never&response_type=token", true);
             } else {
                 throw new RuntimeException();
             }
