@@ -247,6 +247,8 @@ public class FunctionFactory {
             return new MultiMeasureToGrouping();
         } else if (s.equals("format")) {
             return new Format();
+        } else if (s.equals("decimaldegrees")) {
+            return new DecimalDegrees();
         } else {
             return null;
         }
