@@ -224,7 +224,17 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                             break;
 
                         case Types.DATE:
+                            Date d = rs.getDate(i);
+                            if(!rs.wasNull()) {
+                                row.addValue(analysisItem.getKey(), d);
+                            }
+                            break;
                         case Types.TIME:
+                            Time t = rs.getTime(i);
+                            if(!rs.wasNull()) {
+                                row.addValue(analysisItem.getKey(), new Date(t.getTime()));
+                            }
+                            break;
                         case Types.TIMESTAMP:
                             Timestamp timestamp = rs.getTimestamp(i);
                             if (!rs.wasNull()) {
