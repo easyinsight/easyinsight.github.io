@@ -1,7 +1,9 @@
 package com.easyinsight.admin;
 
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.scheduler.Scheduler;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import flex.management.runtime.messaging.client.FlexClientManagerControlMBean;
@@ -39,6 +41,11 @@ public class AdminProcessor {
             healthInfo.setThreadCount(threadMXBean.getThreadCount());
             healthInfo.setSystemLoadAverage(ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage());
             healthInfo.setCompilationTime(ManagementFactory.getCompilationMXBean().getTotalCompilationTime());
+            if(ConfigLoader.instance().isTaskRunner()) {
+                healthInfo.setCurrentSchedulerThreads(Scheduler.instance().getExecutor().getActiveCount());
+                healthInfo.setMaxSchedulerThreads(Scheduler.instance().getExecutor().getMaximumPoolSize());
+                healthInfo.setClaimedTasks(Scheduler.instance().getClaimed());
+            }
             for (GarbageCollectorMXBean garbageBean : ManagementFactory.getGarbageCollectorMXBeans()) {
                 if ("Copy".equals(garbageBean.getName())) {
                     healthInfo.setMinorCollectionCount(garbageBean.getCollectionCount());

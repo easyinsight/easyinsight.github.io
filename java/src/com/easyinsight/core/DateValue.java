@@ -89,6 +89,14 @@ public class DateValue extends Value implements Serializable {
 
     private transient DateFormat cachedFormat;
 
+    public String createPerformantString() {
+        if (date != null) {
+            return String.valueOf(date.getTime());
+        } else {
+            return "";
+        }
+    }
+
     public DateValue(Date date) {
         this.date = date;
     }

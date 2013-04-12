@@ -75,16 +75,21 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                 }
                 if (newGuess == null) {
                     try {
-                        double numericValue = NumericValue.produceDoubleValueStrict(stringValue.getValue());
-                        if (numericValue == 0) {
-                            SimpleDateFormat dateFormat = guessDate(stringValue.getValue());
-                            if (dateFormat != null) {
-                                newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.DAY_LEVEL, dateFormat.toPattern());
-                            } else {
-                                newGuess = new AnalysisDimension(tag, true);
-                            }
+                        String keyName = tag.toDisplayName();
+                        if (keyName.toLowerCase().contains("id")) {
+                            newGuess = new AnalysisDimension(tag, true);
                         } else {
-                            newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
+                            double numericValue = NumericValue.produceDoubleValueStrict(stringValue.getValue());
+                            if (numericValue == 0) {
+                                SimpleDateFormat dateFormat = guessDate(stringValue.getValue());
+                                if (dateFormat != null) {
+                                    newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.DAY_LEVEL, dateFormat.toPattern());
+                                } else {
+                                    newGuess = new AnalysisDimension(tag, true);
+                                }
+                            } else {
+                                newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
+                            }
                         }
                     } catch (NumberFormatException e) {
                         SimpleDateFormat dateFormat = guessDate(stringValue.getValue());
@@ -104,13 +109,18 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                     newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.DAY_LEVEL);
                     break;
                 case Value.NUMBER:
-                    NumericValue numericValue = (NumericValue) value;
-                    double doubleValue = numericValue.getValue();
-                    long intValue = (long) doubleValue;
-                    if (doubleValue == intValue && intValue >= 1980 && intValue <= 2014) {
-                        newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, "yyyy");
+                    String keyName = tag.toDisplayName();
+                    if (keyName.toLowerCase().contains("id")) {
+                        newGuess = new AnalysisDimension(tag, true);
                     } else {
-                        newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
+                        NumericValue numericValue = (NumericValue) value;
+                        double doubleValue = numericValue.getValue();
+                        long intValue = (long) doubleValue;
+                        if (doubleValue == intValue && intValue >= 1980 && intValue <= 2014) {
+                            newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, "yyyy");
+                        } else {
+                            newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
+                        }
                     }
                     break;
                 case Value.STRING:

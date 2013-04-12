@@ -56,6 +56,31 @@ public class BenchmarkManager {
         new InternalPublishService().addRow("Internal Monitoring", row);
     }
 
+    public static void measureTask(ScheduledTaskBenchmarkInfo info) {
+
+        Row row = new Row();
+        StringPair serverPair = new StringPair();
+        serverPair.setKey("Server");
+        serverPair.setValue(info.getServer());
+        StringPair type = new StringPair();
+        type.setKey("Type");
+        type.setValue(info.getType());
+
+        row.setStringPairs(new StringPair[] { serverPair, type });
+        NumberPair feedID = createNumberPair("Feed ID", info.getFeedID());
+        NumberPair deliveryID = createNumberPair("Delivery ID", info.getDeliveryID());
+        row.setNumberPairs(new NumberPair[] { feedID, deliveryID });
+
+        DatePair start = new DatePair();
+        start.setKey("Start Time");
+        start.setValue(info.getStart());
+        DatePair end = new DatePair();
+        end.setKey("End Time");
+        end.setValue(info.getEnd());
+        row.setDatePairs(new DatePair[] { start, end });
+        new InternalPublishService().addRow("Scheduled Task Benchmarks", row);
+    }
+
     public static void recordBenchmark(String category, long time) {
         Connection conn = Database.instance().getConnection();
         try {

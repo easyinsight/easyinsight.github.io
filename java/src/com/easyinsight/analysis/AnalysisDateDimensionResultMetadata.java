@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
 
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -33,7 +34,8 @@ public class AnalysisDateDimensionResultMetadata extends AnalysisItemResultMetad
     public void addValue(AnalysisItem analysisItem, Value value, InsightRequestMetadata insightRequestMetadata) {
         AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
         dateDim.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
-        value = analysisItem.transformValue(value, insightRequestMetadata, true);
+        Calendar calendar = Calendar.getInstance();
+        value = analysisItem.transformValue(value, insightRequestMetadata, true, calendar);
         if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
             Date date = dateValue.getDate();

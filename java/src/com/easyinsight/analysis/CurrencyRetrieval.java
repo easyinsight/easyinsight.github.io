@@ -44,7 +44,7 @@ public class CurrencyRetrieval {
         if (toEuroRate == null || fromEuroRate == null) {
             return amount;
         }
-        return amount * toEuroRate / fromEuroRate;
+        return amount / toEuroRate * fromEuroRate;
     }
 
     public void retrieve() throws Exception {

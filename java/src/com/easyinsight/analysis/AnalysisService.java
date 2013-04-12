@@ -850,7 +850,16 @@ public class AnalysisService {
                     sourceItem = findTargetItem(compositeFeedConnection, dataSource.getFields());
                     targetItem = findSourceItem(compositeFeedConnection, dataSource.getFields());
                 }
-                matchItems.add(targetItem);
+                if (targetItem == null) {
+                    if (compositeFeedConnection.getTargetItem() != null) {
+                        System.out.println("Could not find " + compositeFeedConnection.getTargetItem().toDisplay() + " for data source " + compositeFeedConnection.getTargetFeedName());
+                    } else {
+                        System.out.println("Could not find " + compositeFeedConnection.getTargetJoin().toKeyString() + " for data source " + compositeFeedConnection.getTargetFeedName());
+                    }
+                }
+                if (targetItem != null) {
+                    matchItems.add(targetItem);
+                }
                 if (sourceItem != null && targetItem != null) {
                     List<JoinLabelOption> options = new ArrayList<JoinLabelOption>();
                     WSListDefinition target = new WSListDefinition();
@@ -998,6 +1007,31 @@ public class AnalysisService {
                 }
             }
             return match;
+        }
+    }
+
+    public FilterDateTest generate(String startDate, String endDate) {
+        try {
+            FilterDateTest filterDateTest = new FilterDateTest();
+            InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+            if (startDate != null) {
+                Value value = new ReportCalculation(startDate).filterApply(null, null, new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
+                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                filterDateTest.setStartDate(value.toString());
+            } else {
+                filterDateTest.setStartDate("");
+            }
+            if (endDate != null) {
+                Value value = new ReportCalculation(endDate).filterApply(null, null, new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
+                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                filterDateTest.setEndDate(value.toString());
+            } else {
+                filterDateTest.setEndDate("");
+            }
+            return filterDateTest;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -1205,19 +1239,6 @@ public class AnalysisService {
                             filterValueDefinition.setInclusive(true);
                             filterValueDefinition.setFilteredValues(Arrays.asList(data.get(grouping.qualifiedName())));
                             filters.add(filterValueDefinition);
-                        }
-                        if (grouping.getFilters() != null) {
-                            for (FilterDefinition filter : grouping.getFilters()) {
-                                FilterDefinition clone;
-                                try {
-                                    clone = filter.clone();
-                                } catch (CloneNotSupportedException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                clone.setToggleEnabled(true);
-                                clone.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                                filters.add(clone);
-                            }
                         }
                     }
                 }

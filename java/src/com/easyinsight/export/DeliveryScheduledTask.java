@@ -1,6 +1,8 @@
 package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.benchmark.BenchmarkManager;
+import com.easyinsight.benchmark.ScheduledTaskBenchmarkInfo;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -13,6 +15,7 @@ import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import com.itextpdf.text.DocumentException;
+import com.xerox.amazonws.common.Result;
 import com.xerox.amazonws.sns.NotificationService;
 import com.xerox.amazonws.sqs2.Message;
 import com.xerox.amazonws.sqs2.MessageQueue;
@@ -49,25 +52,25 @@ import java.util.concurrent.*;
 public class DeliveryScheduledTask extends ScheduledTask {
 
     private static final String QUEUE_POLICY_FORMAT = "{\n" +
-                        "  \"Version\": \"2008-10-17\",\n" +
-                        "  \"Id\": \"arn:aws:sqs:us-east-1:808335860417:{0}/SQSDefaultPolicy\",\n" +
-                        "  \"Statement\": [\n" +
-                        "    {\n" +
-                        "      \"Sid\": \"Sid1363034700583\",\n" +
-                        "      \"Effect\": \"Allow\",\n" +
-                        "      \"Principal\": {\n" +
-                        "        \"AWS\": \"*\"\n" +
-                        "      },\n" +
-                        "      \"Action\": \"SQS:SendMessage\",\n" +
-                        "      \"Resource\": \"arn:aws:sqs:us-east-1:808335860417:{0}\",\n" +
-                        "      \"Condition\": {\n" +
-                        "        \"ArnEquals\": {\n" +
-                        "          \"aws:SourceArn\": \"arn:aws:sns:us-east-1:808335860417:{1}\"\n" +
-                        "        }\n" +
-                        "      }\n" +
-                        "    }\n" +
-                        "  ]\n" +
-                        "}";
+            "  \"Version\": \"2008-10-17\",\n" +
+            "  \"Id\": \"arn:aws:sqs:us-east-1:808335860417:{0}/SQSDefaultPolicy\",\n" +
+            "  \"Statement\": [\n" +
+            "    {\n" +
+            "      \"Sid\": \"Sid1363034700583\",\n" +
+            "      \"Effect\": \"Allow\",\n" +
+            "      \"Principal\": {\n" +
+            "        \"AWS\": \"*\"\n" +
+            "      },\n" +
+            "      \"Action\": \"SQS:SendMessage\",\n" +
+            "      \"Resource\": \"arn:aws:sqs:us-east-1:808335860417:{0}\",\n" +
+            "      \"Condition\": {\n" +
+            "        \"ArnEquals\": {\n" +
+            "          \"aws:SourceArn\": \"arn:aws:sns:us-east-1:808335860417:{1}\"\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
 
 
     @Column(name = "scheduled_account_activity_id")
@@ -85,6 +88,12 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
         // identify the type of activity
 
+        ScheduledTaskBenchmarkInfo info = new ScheduledTaskBenchmarkInfo();
+        info.setStart(new Date());
+        info.setType("Delivery");
+        info.setDeliveryID(activityID);
+        info.setServer(InetAddress.getLocalHost().getHostName());
+
         PreparedStatement typeStmt = conn.prepareStatement("SELECT SCHEDULED_ACCOUNT_ACTIVITY.activity_type FROM SCHEDULED_ACCOUNT_ACTIVITY WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         typeStmt.setLong(1, activityID);
@@ -92,7 +101,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         if (typeRS.next()) {
             int type = typeRS.getInt(1);
             if (type == ScheduledActivity.REPORT_DELIVERY) {
-                reportDelivery(conn);        
+                reportDelivery(conn);
             } else if (type == ScheduledActivity.SCORECARD_DELIVERY) {
                 scorecardDelivery(conn);
             } else if (type == ScheduledActivity.GENERAL_DELIVERY) {
@@ -100,8 +109,10 @@ public class DeliveryScheduledTask extends ScheduledTask {
             }
         }
         typeStmt.close();
+        info.setEnd(new Date());
+        BenchmarkManager.measureTask(info);
     }
-    
+
     private static class DeliveryResult {
         private String body;
         private AttachmentInfo attachmentInfo;
@@ -184,8 +195,10 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
             String senderName = null;
             String senderEmail = null;
-            PreparedStatement getSernderStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, REPORT_DELIVERY WHERE REPORT_DELIVERY.sender_user_id = user.user_id and " +
-                    "REPORT_DELIVERY.scheduled_account_activity_id = ?");
+            /*
+            TODO: fix
+            PreparedStatement getSernderStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, GENERAL_DELIVERY WHERE GENERAL_DELIVERY.sender_user_id = user.user_id and " +
+                    "GENERAL_DELIVERY.scheduled_account_activity_id = ?");
             getSernderStmt.setLong(1, activityID);
             ResultSet senderRS = getSernderStmt.executeQuery();
             if (senderRS.next()) {
@@ -195,7 +208,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 senderName = userFirstName + " " + userLastName;
                 senderEmail = email;
             }
-            getSernderStmt.close();
+            getSernderStmt.close();*/
 
             Collections.sort(infos, new Comparator<DeliveryInfo>() {
 
@@ -206,7 +219,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
             PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
                     "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID FROM USER, ACCOUNT " +
-                        "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
+                    "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
             queryStmt.setInt(1, Account.ACTIVE);
             queryStmt.setInt(2, Account.TRIAL);
             queryStmt.setLong(3, ownerID);
@@ -226,8 +239,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     userName, ownerID, accountAdmin, userPersonaID);
 
 
-
-            PreparedStatement emailQueryStmt = conn.prepareStatement("SELECT EMAIL_ADDRESS FROM delivery_to_email where scheduled_account_activity_id = ?");
+            PreparedStatement emailQueryStmt = conn.prepareStatement("SELECT EMAIL_ADDRESS FROM delivery_to_email WHERE scheduled_account_activity_id = ?");
             emailQueryStmt.setLong(1, activityID);
             List<String> emails = new ArrayList<String>();
             ResultSet emailRS = emailQueryStmt.executeQuery();
@@ -237,7 +249,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             }
             emailQueryStmt.close();
 
-            PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME, PERSONA_ID, USER.USER_ID, USER.ACCOUNT_ADMIN, USER.USERNAME FROM USER, delivery_to_user WHERE delivery_to_user.scheduled_account_activity_id = ? and " +
+            PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME, PERSONA_ID, USER.USER_ID, USER.ACCOUNT_ADMIN, USER.USERNAME FROM USER, delivery_to_user WHERE delivery_to_user.scheduled_account_activity_id = ? AND " +
                     "delivery_to_user.user_id = user.user_id");
             userStmt.setLong(1, activityID);
             ResultSet rs = userStmt.executeQuery();
@@ -253,7 +265,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
             PreparedStatement groupStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME, PERSONA_ID, USER.USER_ID, USER.ACCOUNT_ADMIN, USER.USERNAME " +
                     "FROM USER, delivery_to_group, group_to_user_join WHERE " +
-                    "delivery_to_group.scheduled_account_activity_id = ? AND delivery_to_group.group_id = group_to_user_join.group_id and group_to_user_join.user_id = user.user_id");
+                    "delivery_to_group.scheduled_account_activity_id = ? AND delivery_to_group.group_id = group_to_user_join.group_id AND group_to_user_join.user_id = user.user_id");
             groupStmt.setLong(1, activityID);
             ResultSet groupRS = groupStmt.executeQuery();
             while (groupRS.next()) {
@@ -315,9 +327,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
     }
 
     private void sendEmails(final EIConnection conn, String subject, String body, boolean htmlEmail, final int timezoneOffset,
-                              List<DeliveryInfo> infos, final int accountType, final int firstDayOfWeek, final long accountID,
-                              List<UserInfo> users, List<String> emails, final UserInfo firstUser, @Nullable final String personaName, String senderEmail, String senderName,
-                              final boolean sendIfNoData)
+                            List<DeliveryInfo> infos, final int accountType, final int firstDayOfWeek, final long accountID,
+                            List<UserInfo> users, List<String> emails, final UserInfo firstUser, @Nullable final String personaName, String senderEmail, String senderName,
+                            final boolean sendIfNoData)
             throws InterruptedException, SQLException, MessagingException, UnsupportedEncodingException {
         String emailBody = body;
         BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
@@ -328,14 +340,13 @@ public class DeliveryScheduledTask extends ScheduledTask {
         int i = 0;
         for (DeliveryInfo dInfo : infos) {
             final DeliveryInfo deliveryInfo = dInfo;
-            final int count = i++;
             tpe.execute(new Runnable() {
 
                 public void run() {
                     SecurityUtil.populateThreadLocal(firstUser.userName, firstUser.userID, accountID, accountType, firstUser.accountAdmin, firstDayOfWeek, personaName);
                     EIConnection ourConn = Database.instance().getConnection();
                     try {
-                        DeliveryResult deliveryResult = handleDeliveryInfo(deliveryInfo, ourConn, timezoneOffset, sendIfNoData, count);
+                        DeliveryResult deliveryResult = handleDeliveryInfo(deliveryInfo, ourConn, timezoneOffset, sendIfNoData);
                         if (deliveryResult != null) {
                             if (deliveryResult.body != null) {
                                 bodyElements.add(deliveryResult.body);
@@ -343,6 +354,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                                 attachmentInfos.add(deliveryResult.attachmentInfo);
                             }
                         }
+                        latch.countDown();
+                    } catch (ReportException re) {
+                        LogClass.error(re.getReportFault().toString(), re);
                         latch.countDown();
                     } catch (Exception e) {
                         LogClass.error(e);
@@ -357,6 +371,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
         latch.await();
         tpe.shutdown();
 
+        if (bodyElements.size() == 0 && attachmentInfos.size() == 0) {
+            return;
+        }
         for (String bodyElement : bodyElements) {
             emailBody += bodyElement;
         }
@@ -384,10 +401,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
         deliveryAuditStmt.close();
     }
 
-    private DeliveryResult handleDeliveryInfo(DeliveryInfo deliveryInfo, EIConnection conn, int timezoneOffset, boolean sendIfNoData, int count) throws Exception {
+    private DeliveryResult handleDeliveryInfo(DeliveryInfo deliveryInfo, EIConnection conn, int timezoneOffset, boolean sendIfNoData) throws Exception {
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setUtcOffset(timezoneOffset);
         if (deliveryInfo.getFormat() == ReportDelivery.EXCEL || deliveryInfo.getFormat() == ReportDelivery.EXCEL_2007) {
+            System.out.println("Running report " + deliveryInfo.getId() + " for Excel delivery");
             WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
             analysisDefinition.updateMetadata();
             if (deliveryInfo.getLabel() != null && !"".equals(deliveryInfo.getLabel())) {
@@ -406,6 +424,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             }
         } else if (deliveryInfo.getFormat() == ReportDelivery.HTML_TABLE) {
             if (deliveryInfo.getType() == DeliveryInfo.REPORT) {
+                System.out.println("Running report " + deliveryInfo.getId() + " for HTML delivery");
                 WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
                 analysisDefinition.updateMetadata();
                 if (deliveryInfo.getLabel() != null && !"".equals(deliveryInfo.getLabel())) {
@@ -417,34 +436,110 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     return new DeliveryResult(table);
                 }
             } else if (deliveryInfo.getType() == DeliveryInfo.SCORECARD) {
+                System.out.println("Running scorecard " + deliveryInfo.getId() + " for HTML delivery");
                 return new DeliveryResult(ExportService.exportScorecard(deliveryInfo.getId(), insightRequestMetadata, conn));
             }
         } else if (deliveryInfo.getFormat() == ReportDelivery.PDF || deliveryInfo.getFormat() == ReportDelivery.PNG) {
             if (deliveryInfo.getType() == DeliveryInfo.REPORT) {
+
                 WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
                 if (deliveryInfo.getFormat() == ReportDelivery.PDF && (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID)) {
+                    System.out.println("Running report " + deliveryInfo.getId() + " for inline PDF delivery");
                     analysisDefinition.updateMetadata();
                     updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
                     byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
                     String reportName = analysisDefinition.getName();
                     return new DeliveryResult(new AttachmentInfo(bytes, reportName + ".pdf", "application/pdf"));
                 } else {
+                    System.out.println("Running report " + deliveryInfo.getId() + " for selenium PDF or PNG delivery");
                     long id = new SeleniumLauncher().requestSeleniumDrawForReport(deliveryInfo.getId(), activityID, SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn,
                             deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
                     System.out.println("launched " + id);
                     String topicName = ConfigLoader.instance().getReportDeliveryQueue();
-                    String queueName = topicName + InetAddress.getLocalHost().getHostName().replace(".", "") + count;
+                    String queueName = topicName + InetAddress.getLocalHost().getHostName().replace(".", "") + Thread.currentThread().getId();
+                    System.out.println("Queue: " + queueName);
                     MessageQueue msgQueue = SQSUtils.connectToQueue(queueName, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                     NotificationService notificationService = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                     notificationService.createTopic(topicName);
-                    notificationService.subscribe("arn:aws:sns:us-east-1:808335860417:" + topicName, "sqs", "arn:aws:sqs:us-east-1:808335860417:" + queueName);
+                    Result<String> result = notificationService.subscribe("arn:aws:sns:us-east-1:808335860417:" + topicName, "sqs", "arn:aws:sqs:us-east-1:808335860417:" + queueName);
+
                     msgQueue.setQueueAttribute("Policy", QUEUE_POLICY_FORMAT.replace("{0}", queueName).replace("{1}", topicName));
 
                     msgQueue.setEncoding(false);
+                    try {
+                        int timeout = 0;
+                        while (timeout < 300) {
+                            Message message = msgQueue.receiveMessage();
+                            if (message == null) {
+                                timeout++;
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException ex) {
+                                    // ignore
+                                }
+                            } else {
+                                timeout++;
+                                JSONObject jo = (JSONObject) JSONValue.parse(message.getMessageBody());
+                                String body = (String) jo.get("Message");
+                                msgQueue.deleteMessage(message);
+                                String[] parts = body.split("\\|");
+                                long responseID = Long.parseLong(parts[0]);
+                                System.out.println("got response of " + responseID + ", looking for " + id);
+                                if (responseID == id) {
+                                    long pdfID = Long.parseLong(parts[1]);
+                                    System.out.println("retrieving and returning " + pdfID);
+                                    PreparedStatement getStmt = conn.prepareStatement("SELECT PNG_IMAGE FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ?");
+                                    getStmt.setLong(1, pdfID);
+                                    ResultSet rs = getStmt.executeQuery();
+                                    rs.next();
+                                    byte[] bytes = rs.getBytes(1);
+                                    String deliveryName;
+                                    if (deliveryInfo.getName() == null || "".equals(deliveryInfo.getName())) {
+                                        deliveryName = "export";
+                                    } else {
+                                        deliveryName = deliveryInfo.getName();
+                                    }
+                                    if (deliveryInfo.getFormat() == ReportDelivery.PDF) {
+                                        return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".pdf", "application/pdf"));
+                                    } else {
+                                        return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".png", "image/png"));
+                                    }
+                                } else {
+                                    System.out.println("does not match, ignoring");
+                                }
+                            }
+                        }
+                    } finally {
+                        try {
+                            notificationService.unsubscribe(result.getResult());
+                            msgQueue.deleteQueue();
+                        } catch (Exception e) {
+                            LogClass.error(e);
+                        }
+                    }
+                    LogClass.error("Failed to generate Selenium report for " + deliveryInfo.getId() + ", ended up timing out.");
+                }
+            } else {
+                System.out.println("Running dashboard " + deliveryInfo.getId() + " for Selenium delivery");
+                long id = new SeleniumLauncher().requestSeleniumDrawForDashboard(deliveryInfo.getId(), activityID, SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn,
+                        deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
+                System.out.println("launched " + id);
+                String topicName = ConfigLoader.instance().getReportDeliveryQueue();
+                String queueName = topicName + InetAddress.getLocalHost().getHostName().replace(".", "") + Thread.currentThread().getId();
+                System.out.println("Queue: " + queueName);
+                MessageQueue msgQueue = SQSUtils.connectToQueue(queueName, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+                NotificationService notificationService = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+                notificationService.createTopic(topicName);
+                Result<String> result = notificationService.subscribe("arn:aws:sns:us-east-1:808335860417:" + topicName, "sqs", "arn:aws:sqs:us-east-1:808335860417:" + queueName);
+                msgQueue.setQueueAttribute("Policy", QUEUE_POLICY_FORMAT.replace("{0}", queueName).replace("{1}", topicName));
+
+                msgQueue.setEncoding(false);
+
+                try {
                     int timeout = 0;
-                    while (timeout < 120) {
+                    while (timeout < 300) {
                         Message message = msgQueue.receiveMessage();
                         if (message == null) {
                             timeout++;
@@ -485,62 +580,15 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             }
                         }
                     }
-                }
-            } else {
-                long id = new SeleniumLauncher().requestSeleniumDrawForDashboard(deliveryInfo.getId(), activityID, SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn,
-                        deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
-                System.out.println("launched " + id);
-                String topicName = ConfigLoader.instance().getReportDeliveryQueue();
-                String queueName = topicName + InetAddress.getLocalHost().getHostName().replace(".", "") + count;
-                MessageQueue msgQueue = SQSUtils.connectToQueue(queueName, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-                NotificationService notificationService = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-                notificationService.createTopic(topicName);
-                notificationService.subscribe("arn:aws:sns:us-east-1:808335860417:" + topicName, "sqs", "arn:aws:sqs:us-east-1:808335860417:" + queueName);
-                msgQueue.setQueueAttribute("Policy", QUEUE_POLICY_FORMAT.replace("{0}", queueName).replace("{1}", topicName));
-
-                msgQueue.setEncoding(false);
-                int timeout = 0;
-                while (timeout < 120) {
-                    Message message = msgQueue.receiveMessage();
-                    if (message == null) {
-                        timeout++;
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException ex) {
-                            // ignore
-                        }
-                    } else {
-                        timeout++;
-                        JSONObject jo = (JSONObject) JSONValue.parse(message.getMessageBody());
-                        String body = (String) jo.get("Message");
-                        msgQueue.deleteMessage(message);
-                        String[] parts = body.split("\\|");
-                        long responseID = Long.parseLong(parts[0]);
-                        System.out.println("got response of " + responseID + ", looking for " + id);
-                        if (responseID == id) {
-                            long pdfID = Long.parseLong(parts[1]);
-                            System.out.println("retrieving and returning " + pdfID);
-                            PreparedStatement getStmt = conn.prepareStatement("SELECT PNG_IMAGE FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ?");
-                            getStmt.setLong(1, pdfID);
-                            ResultSet rs = getStmt.executeQuery();
-                            rs.next();
-                            byte[] bytes = rs.getBytes(1);
-                            String deliveryName;
-                            if (deliveryInfo.getName() == null || "".equals(deliveryInfo.getName())) {
-                                deliveryName = "export";
-                            } else {
-                                deliveryName = deliveryInfo.getName();
-                            }
-                            if (deliveryInfo.getFormat() == ReportDelivery.PDF) {
-                                return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".pdf", "application/pdf"));
-                            } else {
-                                return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".png", "image/png"));
-                            }
-                        } else {
-                            System.out.println("does not match, ignoring");
-                        }
+                } finally {
+                    try {
+                        notificationService.unsubscribe(result.getResult());
+                        msgQueue.deleteQueue();
+                    } catch (Exception e) {
+                        LogClass.error(e);
                     }
                 }
+                LogClass.error("Failed to generate Selenium dashboard for " + deliveryInfo.getId() + ", ended up timing out.");
             }
         }
         return null;
@@ -549,7 +597,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
     private void scorecardDelivery(EIConnection conn) throws Exception {
         ScorecardDeliveryUtils.scorecardDelivery(conn, activityID);
     }
-    
+
     private List<FilterDefinition> getCustomFilters(long reportDeliveryID, EIConnection conn) throws SQLException {
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         Session session = Database.instance().createSession(conn);
@@ -622,7 +670,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
             boolean sendIfNoData = deliveryInfoRS.getBoolean(10);
 
-            PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT USER_ID FROM user_to_analysis where analysis_id = ?");
+            PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT USER_ID FROM user_to_analysis WHERE analysis_id = ?");
 
             findOwnerStmt.setLong(1, reportID);
             ResultSet ownerRS = findOwnerStmt.executeQuery();
@@ -653,102 +701,57 @@ public class DeliveryScheduledTask extends ScheduledTask {
             UserInfo defaultUser = new UserInfo(queryRS.getString("USER.email"), queryRS.getString("USER.first_name"), queryRS.getString("USER.name"),
                     userName, ownerID, accountAdmin, userPersonaID);
 
-                Set<UserInfo> userInfoSet = new HashSet<UserInfo>();
-                PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME, USER.PERSONA_ID, USER.USER_ID, USER.ACCOUNT_ADMIN, USER.USERNAME FROM USER, delivery_to_user WHERE delivery_to_user.scheduled_account_activity_id = ? and " +
-                        "delivery_to_user.user_id = user.user_id");
-                userStmt.setLong(1, activityID);
-                ResultSet rs = userStmt.executeQuery();
-                while (rs.next()) {
-                    String userEmail = rs.getString(1);
-                    String userFirstName = rs.getString(2);
-                    String userLastName = rs.getString(3);
-                    userInfoSet.add(new UserInfo(userEmail, userFirstName, userLastName, rs.getString(7), rs.getLong(5), rs.getBoolean(6), rs.getLong(4)));
-                }
-                userStmt.close();
+            Set<UserInfo> userInfoSet = new HashSet<UserInfo>();
+            PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME, USER.PERSONA_ID, USER.USER_ID, USER.ACCOUNT_ADMIN, USER.USERNAME FROM USER, delivery_to_user WHERE delivery_to_user.scheduled_account_activity_id = ? AND " +
+                    "delivery_to_user.user_id = user.user_id");
+            userStmt.setLong(1, activityID);
+            ResultSet rs = userStmt.executeQuery();
+            while (rs.next()) {
+                String userEmail = rs.getString(1);
+                String userFirstName = rs.getString(2);
+                String userLastName = rs.getString(3);
+                userInfoSet.add(new UserInfo(userEmail, userFirstName, userLastName, rs.getString(7), rs.getLong(5), rs.getBoolean(6), rs.getLong(4)));
+            }
+            userStmt.close();
 
-                PreparedStatement groupStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME, USER.PERSONA_ID, USER.USER_ID, USER.ACCOUNT_ADMIN, USER.USERNAME FROM USER, delivery_to_group, group_to_user_join WHERE " +
-                        "delivery_to_group.scheduled_account_activity_id = ? AND delivery_to_group.group_id = group_to_user_join.group_id and group_to_user_join.user_id = user.user_id");
-                groupStmt.setLong(1, activityID);
-                ResultSet groupRS = groupStmt.executeQuery();
-                while (groupRS.next()) {
-                    String userEmail = groupRS.getString(1);
-                    String userFirstName = groupRS.getString(2);
-                    String userLastName = groupRS.getString(3);
-                    userInfoSet.add(new UserInfo(userEmail, userFirstName, userLastName, groupRS.getString(7), groupRS.getLong(5), groupRS.getBoolean(6), groupRS.getLong(4)));
-                }
-                groupStmt.close();
-                String senderName = null;
-                String senderEmail = null;
-                PreparedStatement getSernderStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, REPORT_DELIVERY WHERE REPORT_DELIVERY.sender_user_id = user.user_id and " +
-                        "REPORT_DELIVERY.scheduled_account_activity_id = ?");
-                getSernderStmt.setLong(1, activityID);
-                ResultSet senderRS = getSernderStmt.executeQuery();
-                if (senderRS.next()) {
-                    senderEmail = senderRS.getString(1);
-                    String senderFIrstName = senderRS.getString(2);
-                    String senderLastName = senderRS.getString(3);
-                    senderName = senderFIrstName + " " + senderLastName;
-                }
-                getSernderStmt.close();
+            PreparedStatement groupStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME, USER.PERSONA_ID, USER.USER_ID, USER.ACCOUNT_ADMIN, USER.USERNAME FROM USER, delivery_to_group, group_to_user_join WHERE " +
+                    "delivery_to_group.scheduled_account_activity_id = ? AND delivery_to_group.group_id = group_to_user_join.group_id AND group_to_user_join.user_id = user.user_id");
+            groupStmt.setLong(1, activityID);
+            ResultSet groupRS = groupStmt.executeQuery();
+            while (groupRS.next()) {
+                String userEmail = groupRS.getString(1);
+                String userFirstName = groupRS.getString(2);
+                String userLastName = groupRS.getString(3);
+                userInfoSet.add(new UserInfo(userEmail, userFirstName, userLastName, groupRS.getString(7), groupRS.getLong(5), groupRS.getBoolean(6), groupRS.getLong(4)));
+            }
+            groupStmt.close();
+            String senderName = null;
+            String senderEmail = null;
+            PreparedStatement getSernderStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, REPORT_DELIVERY WHERE REPORT_DELIVERY.sender_user_id = user.user_id AND " +
+                    "REPORT_DELIVERY.scheduled_account_activity_id = ?");
+            getSernderStmt.setLong(1, activityID);
+            ResultSet senderRS = getSernderStmt.executeQuery();
+            if (senderRS.next()) {
+                senderEmail = senderRS.getString(1);
+                String senderFIrstName = senderRS.getString(2);
+                String senderLastName = senderRS.getString(3);
+                senderName = senderFIrstName + " " + senderLastName;
+            }
+            getSernderStmt.close();
 
-                PreparedStatement emailQueryStmt = conn.prepareStatement("SELECT EMAIL_ADDRESS FROM delivery_to_email where scheduled_account_activity_id = ?");
-                emailQueryStmt.setLong(1, activityID);
-                List<String> emails = new ArrayList<String>();
-                ResultSet emailRS = emailQueryStmt.executeQuery();
-                while (emailRS.next()) {
-                    String emailAddy = emailRS.getString(1);
-                    emails.add(emailAddy);
-                }
-                emailQueryStmt.close();
+            PreparedStatement emailQueryStmt = conn.prepareStatement("SELECT EMAIL_ADDRESS FROM delivery_to_email WHERE scheduled_account_activity_id = ?");
+            emailQueryStmt.setLong(1, activityID);
+            List<String> emails = new ArrayList<String>();
+            ResultSet emailRS = emailQueryStmt.executeQuery();
+            while (emailRS.next()) {
+                String emailAddy = emailRS.getString(1);
+                emails.add(emailAddy);
+            }
+            emailQueryStmt.close();
 
-                blah(userInfoSet, conn, subject, body, htmlEmail, timezoneOffset, Arrays.asList(deliveryInfo), accountType, firstDayOfWeek, accountID,
-                        emails, defaultUser, senderEmail, senderName, sendIfNoData);
+            blah(userInfoSet, conn, subject, body, htmlEmail, timezoneOffset, Arrays.asList(deliveryInfo), accountType, firstDayOfWeek, accountID,
+                    emails, defaultUser, senderEmail, senderName, sendIfNoData);
 
-                /*SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
-
-                try {
-                    if (deliveryFormat == ReportDelivery.EXCEL || deliveryFormat == ReportDelivery.EXCEL_2007) {
-                        WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
-                        analysisDefinition.updateMetadata();
-                        updateReportWithCustomFilters(analysisDefinition, customFilters);
-                        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-                        insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata, sendIfNoData, deliveryFormat == ReportDelivery.EXCEL_2007);
-                        if (bytes != null) {
-                            String reportName = analysisDefinition.getName();
-                            sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
-                        }
-                    } else if (deliveryFormat == ReportDelivery.HTML_TABLE) {
-                        WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
-                        analysisDefinition.updateMetadata();
-                        updateReportWithCustomFilters(analysisDefinition, customFilters);
-                        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-                        insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData, true, new ExportProperties(true, true));
-                        if (table != null) {
-                            sendNoAttachEmails(conn, table, activityID, subject, body, htmlEmail, ScheduledActivity.REPORT_DELIVERY);
-                        }
-                    } else if (deliveryFormat == ReportDelivery.PNG) {
-                        new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn, EmailSeleniumPostProcessor.SEND_ON_RESPONSE);
-                    } else if (deliveryFormat == ReportDelivery.PDF) {
-                        WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
-                        if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST ||
-                                analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB ||
-                                analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID) {
-                            analysisDefinition.updateMetadata();
-                            updateReportWithCustomFilters(analysisDefinition, customFilters);
-                            InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-                            insightRequestMetadata.setUtcOffset(timezoneOffset);
-                            byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
-                            String reportName = analysisDefinition.getName();
-                            sendEmails(conn, bytes, reportName + ".pdf", accountID, "application/pdf", activityID);
-                        } else {
-                            new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn, EmailSeleniumPostProcessor.SEND_ON_RESPONSE);
-                        }
-                    }
-                } finally {
-                    SecurityUtil.clearThreadLocal();
-                }*/
             queryStmt.close();
         }
         getInfoStmt.close();
@@ -812,7 +815,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.FORM || analysisDefinition.getReportType() == WSAnalysisDefinition.TREND) {
             table = analysisDefinition.toExportHTML(conn, insightRequestMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
+                analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
             table = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, sendIfNoData, includeTitle);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TEXT) {
             table = ExportService.textReportToHtml(analysisDefinition, conn, insightRequestMetadata);
@@ -828,8 +831,6 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
         return table;
     }
-
-
 
 
 }

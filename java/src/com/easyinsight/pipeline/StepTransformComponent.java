@@ -6,6 +6,8 @@ import com.easyinsight.analysis.DataResults;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.dataset.DataSet;
 
+import java.util.Calendar;
+
 /**
  * User: James Boe
  * Date: May 18, 2009
@@ -22,11 +24,12 @@ public class StepTransformComponent implements IComponent {
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
+        Calendar calendar = Calendar.getInstance();
         for (IRow row : dataSet.getRows()) {
             if (target == null) {
-                row.addValue(analysisStep.createAggregateKey(), analysisStep.transformValue(row.getValue(analysisStep.createAggregateKey()), pipelineData.getInsightRequestMetadata(), false));
+                row.addValue(analysisStep.createAggregateKey(), analysisStep.transformValue(row.getValue(analysisStep.createAggregateKey()), pipelineData.getInsightRequestMetadata(), false, calendar));
             } else {
-                row.addValue(target.createAggregateKey(), target.transformValue(row.getValue(target.createAggregateKey()), pipelineData.getInsightRequestMetadata(), false));
+                row.addValue(target.createAggregateKey(), target.transformValue(row.getValue(target.createAggregateKey()), pipelineData.getInsightRequestMetadata(), false, calendar));
             }
         }
         return dataSet;

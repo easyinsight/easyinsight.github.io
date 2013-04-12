@@ -62,6 +62,8 @@
         [Bindable]
         private var createLabel:String = "Create User";
 
+        private var lastLoginDate:Date;
+
         public function set user(userTransferObject:UserTransferObject):void {
             this.userID = userTransferObject.userID;
             this.userName = userTransferObject.userName;
@@ -74,6 +76,7 @@
             this.viewID = userTransferObject.fixedDashboardID;
             this.autoRefresh = userTransferObject.autoRefreshReports;
             this.invoiceRecipient = userTransferObject.invoiceRecipient;
+            this.lastLoginDate = userTransferObject.lastLoginDate;
             createLabel = "Update User";
         }
 
@@ -95,6 +98,9 @@
         private function initHandlers():void {
             if (userID == 0) {
                 currentState = "initialCreate";
+                resendButton.parent.removeChild(resendButton);
+            } else if (lastLoginDate != null) {
+                resendButton.parent.removeChild(resendButton);
             }
             BindingUtils.bindProperty(accountAdminCheckbox, "selected", this, "accountAdmin");
             validators = [ emailValidator, userNameValidator, fullNameValidator ];
@@ -232,6 +238,15 @@
                 Alert.show(result);
             }
         }
+
+        private function resendInvitation():void {
+            ProgressAlert.alert(this, "Resending the invitation email...", "The invitation email should have been resent.", creationService.resendInvite);
+            creationService.resendInvite.send(userID);
+        }
+
+        private function resent():void {
+
+        }
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
@@ -281,6 +296,7 @@
     </mx:TabNavigator>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="{createLabel}" click="save()"/>
+        <util:SaveButton label="Resend Invitation" click="resendInvitation()" id="resendButton"/>
         <util:SaveButton label="Convert to Viewer" click="convertToViewer()" id="convertButton"/>
         <util:CancelButton label="Cancel" click="cancel()"/>
     </mx:HBox>
@@ -291,5 +307,6 @@
 		<mx:method name="addUserToAccount" result="created()"/>		
 		<mx:method name="updateUser" result="updated()"/>
         <mx:method name="convertUser" result="converted()"/>
+        <mx:method name="resendInvite" result="resent()"/>
 	</mx:RemoteObject>
 </util:EISlimWindow>

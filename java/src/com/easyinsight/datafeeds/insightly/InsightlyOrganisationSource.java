@@ -12,6 +12,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -163,7 +164,11 @@ public class InsightlyOrganisationSource extends InsightlyBaseSource {
                         if (field.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                             Object obj = contactMap.get(field.getKey().toKeyString());
                             if (obj != null) {
-                                row.addValue(field.getKey(), sdf.parse(obj.toString()));
+                                try {
+                                    row.addValue(field.getKey(), sdf.parse(obj.toString()));
+                                } catch (ParseException e) {
+
+                                }
                             }
                         } else {
                             row.addValue(field.getKey(), getValue(contactMap, field.getKey().toKeyString()));
@@ -178,9 +183,9 @@ public class InsightlyOrganisationSource extends InsightlyBaseSource {
                 if (contactInfos != null) {
                     for (Object contactInfoObj : contactInfos) {
                         Map contactInfoMap = (Map) contactInfoObj;
-                        String type = contactInfoMap.get("TYPE").toString();
-                        String label = contactInfoMap.get("LABEL").toString();
-                        String detail = contactInfoMap.get("DETAIL").toString();
+                        String type = getValue(contactInfoMap, "TYPE").toString();
+                        String label = getValue(contactInfoMap, "LABEL").toString();
+                        Value detail = getValue(contactInfoMap, "DETAIL");
                         if ("PHONE".equals(type) && "Work".equals(label)) {
                             row.addValue(keys.get(WORK_PHONE), detail);
                         } else if ("EMAIL".equals(type) && "Work".equals(label)) {
@@ -192,13 +197,13 @@ public class InsightlyOrganisationSource extends InsightlyBaseSource {
                 if (addresses != null) {
                     for (Object mapObject : addresses) {
                         Map map = (Map) mapObject;
-                        String addressType = map.get("ADDRESS_TYPE").toString();
+                        String addressType = getValue(map, "ADDRESS_TYPE").toString();
                         if ("WORK".equals(addressType)) {
-                            row.addValue(WORK_STATE, map.get("STATE").toString());
-                            row.addValue(WORK_COUNTRY, map.get("COUNTRY").toString());
-                            row.addValue(WORK_POSTAL, map.get("POSTCODE").toString());
-                            row.addValue(WORK_ADDRESS, map.get("STREET").toString());
-                            row.addValue(WORK_CITY, map.get("CITY").toString());
+                            row.addValue(WORK_STATE, getValue(map, "STATE"));
+                            row.addValue(WORK_COUNTRY, getValue(map, "COUNTRY"));
+                            row.addValue(WORK_POSTAL, getValue(map, "POSTCODE"));
+                            row.addValue(WORK_ADDRESS, getValue(map, "STREET"));
+                            row.addValue(WORK_CITY, getValue(map, "CITY"));
                         }
                     }
                 }

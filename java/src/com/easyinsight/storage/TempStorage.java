@@ -11,10 +11,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -291,7 +288,8 @@ public class TempStorage implements IDataStorage {
                 AnalysisDateDimension analysisDateDimension = (AnalysisDateDimension) analysisItem;
                 int prevLevel = analysisDateDimension.getDateLevel();
                 analysisDateDimension.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
-                Value transformedValue = analysisItem.transformValue(value, new InsightRequestMetadata(), false);
+                Calendar calendar = Calendar.getInstance();
+                Value transformedValue = analysisItem.transformValue(value, new InsightRequestMetadata(), false, calendar);
                 analysisDateDimension.setDateLevel(prevLevel);
                 if (transformedValue.type() == Value.EMPTY)
                     insertStmt.setNull(i++, Types.DATE);

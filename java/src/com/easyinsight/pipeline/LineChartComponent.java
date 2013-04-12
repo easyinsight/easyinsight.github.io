@@ -20,6 +20,7 @@ public class LineChartComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         if (pipelineData.getReport() != null) {
+            Calendar calendar = Calendar.getInstance();
             WSLineChartDefinition lineChartDefinition = (WSLineChartDefinition) pipelineData.getReport();
             if (lineChartDefinition.isFillInZero()) {
                 lineChartDefinition.fillInZeroes(dataSet, pipelineData.getInsightRequestMetadata());
@@ -50,7 +51,7 @@ public class LineChartComponent implements IComponent {
                 for (IRow row : dataSet.getRows()) {
                     Value xAxisValue = row.getValue(lineChartDefinition.getXaxis());
                     Value measureValue = row.getValue(measure);
-                    Value aggregated = trend.transformValue(xAxisValue, new InsightRequestMetadata(), false);
+                    Value aggregated = trend.transformValue(xAxisValue, new InsightRequestMetadata(), false, calendar);
                     Aggregation aggregation = map.get(aggregated);
                     if (aggregation == null) {
                         aggregation = new AggregationFactory(measure, false).getAggregation(AggregationTypes.AVERAGE);
