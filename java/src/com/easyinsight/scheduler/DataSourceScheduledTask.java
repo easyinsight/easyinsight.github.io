@@ -3,6 +3,8 @@ package com.easyinsight.scheduler;
 import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.analysis.ReportFault;
+import com.easyinsight.benchmark.BenchmarkManager;
+import com.easyinsight.benchmark.ScheduledTaskBenchmarkInfo;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -19,6 +21,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Column;
+import java.net.InetAddress;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -49,6 +52,11 @@ public class DataSourceScheduledTask extends ScheduledTask {
 
     protected void execute(Date now, EIConnection conn) throws Exception {
         try {
+            ScheduledTaskBenchmarkInfo info = new ScheduledTaskBenchmarkInfo();
+            info.setFeedID(dataSourceID);
+            info.setType("Refresh");
+            info.setStart(new Date());
+            info.setServer(InetAddress.getLocalHost().getHostName());
             if (!validate(conn)) return;
             FeedDefinition base = feedStorage.getFeedDefinitionData(dataSourceID, conn);
             if (!(base instanceof IServerDataSourceDefinition)) {
@@ -106,7 +114,11 @@ public class DataSourceScheduledTask extends ScheduledTask {
                         SecurityUtil.clearThreadLocal();
                     }
                 }
+
+
             }
+
+            BenchmarkManager.measureTask(info);
         } catch (ReportException re) {
             configurationProblem(conn, re.getReportFault().toString());
         } catch (Exception e) {

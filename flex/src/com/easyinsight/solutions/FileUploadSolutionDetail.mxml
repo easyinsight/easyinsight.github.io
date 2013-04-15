@@ -38,9 +38,9 @@
             <mx:HBox id="controlsBox" width="100%" horizontalAlign="center">
                 <mx:Button label="Upload a CSV" fontSize="20" click="install(1)" styleName="grayButton"
                            id="installButton"/>
-                <mx:Button label="Upload an Excel (.xsl) File" fontSize="20" click="install(2)" styleName="grayButton"
+                <mx:Button label="Upload an Excel (.xls) File" fontSize="20" click="install(2)" styleName="grayButton"
                            id="installButton2"/>
-                <mx:Button label="Upload an Excel (.xslx) File" fontSize="20" click="install(3)" styleName="grayButton"
+                <mx:Button label="Upload an Excel (.xlsx) File" fontSize="20" click="install(3)" styleName="grayButton"
                            id="installButton3"/>
 
             </mx:HBox>
