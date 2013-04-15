@@ -1,6 +1,8 @@
 package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.benchmark.BenchmarkManager;
+import com.easyinsight.benchmark.ScheduledTaskBenchmarkInfo;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -86,7 +88,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
         // identify the type of activity
 
-        long start = Calendar.getInstance().getTimeInMillis();
+        ScheduledTaskBenchmarkInfo info = new ScheduledTaskBenchmarkInfo();
+        info.setStart(new Date());
+        info.setType("Delivery");
+        info.setDeliveryID(activityID);
+        info.setServer(InetAddress.getLocalHost().getHostName());
 
         PreparedStatement typeStmt = conn.prepareStatement("SELECT SCHEDULED_ACCOUNT_ACTIVITY.activity_type FROM SCHEDULED_ACCOUNT_ACTIVITY WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
@@ -103,6 +109,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
             }
         }
         typeStmt.close();
+        info.setEnd(new Date());
+        BenchmarkManager.measureTask(info);
     }
 
     private static class DeliveryResult {
@@ -744,51 +752,6 @@ public class DeliveryScheduledTask extends ScheduledTask {
             blah(userInfoSet, conn, subject, body, htmlEmail, timezoneOffset, Arrays.asList(deliveryInfo), accountType, firstDayOfWeek, accountID,
                     emails, defaultUser, senderEmail, senderName, sendIfNoData);
 
-                /*SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
-
-                try {
-                    if (deliveryFormat == ReportDelivery.EXCEL || deliveryFormat == ReportDelivery.EXCEL_2007) {
-                        WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
-                        analysisDefinition.updateMetadata();
-                        updateReportWithCustomFilters(analysisDefinition, customFilters);
-                        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-                        insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata, sendIfNoData, deliveryFormat == ReportDelivery.EXCEL_2007);
-                        if (bytes != null) {
-                            String reportName = analysisDefinition.getName();
-                            sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
-                        }
-                    } else if (deliveryFormat == ReportDelivery.HTML_TABLE) {
-                        WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
-                        analysisDefinition.updateMetadata();
-                        updateReportWithCustomFilters(analysisDefinition, customFilters);
-                        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-                        insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData, true, new ExportProperties(true, true));
-                        if (table != null) {
-                            sendNoAttachEmails(conn, table, activityID, subject, body, htmlEmail, ScheduledActivity.REPORT_DELIVERY);
-                        }
-                    } else if (deliveryFormat == ReportDelivery.PNG) {
-                        new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn, EmailSeleniumPostProcessor.SEND_ON_RESPONSE);
-                    } else if (deliveryFormat == ReportDelivery.PDF) {
-                        WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
-                        if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST ||
-                                analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB ||
-                                analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID) {
-                            analysisDefinition.updateMetadata();
-                            updateReportWithCustomFilters(analysisDefinition, customFilters);
-                            InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-                            insightRequestMetadata.setUtcOffset(timezoneOffset);
-                            byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
-                            String reportName = analysisDefinition.getName();
-                            sendEmails(conn, bytes, reportName + ".pdf", accountID, "application/pdf", activityID);
-                        } else {
-                            new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn, EmailSeleniumPostProcessor.SEND_ON_RESPONSE);
-                        }
-                    }
-                } finally {
-                    SecurityUtil.clearThreadLocal();
-                }*/
             queryStmt.close();
         }
         getInfoStmt.close();
