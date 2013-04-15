@@ -12,23 +12,28 @@ import java.text.NumberFormat;
  */
 public class DecimalDegrees extends Function {
     public Value evaluate() {
-        String blah = params.get(0).toString();
-        String degrees = blah.substring(0, blah.indexOf("¡")).trim();
-        String minutes = blah.substring(blah.indexOf("¡") + 1, blah.indexOf("'")).trim();
-        String seconds = blah.substring(blah.indexOf("'") + 1, blah.indexOf("\"")).trim();
-        char direction = blah.charAt(blah.length() - 1);
-        System.out.println(degrees + " - " + minutes + " - " + seconds + " - " + direction);
-        double d = Double.parseDouble(degrees);
-        double m = Double.parseDouble(minutes) / 60.0;
-        double s = Double.parseDouble(seconds) / 3600.0;
-        double result = d + m + s;
-        if (direction == 'S' || direction == 'W') {
-            result *= -1;
+        try {
+            String blah = params.get(0).toString().trim();
+            String degrees = blah.substring(0, blah.indexOf("¡")).trim();
+            String minutes = blah.substring(blah.indexOf("¡") + 1, blah.indexOf("'")).trim();
+            String seconds = blah.substring(blah.indexOf("'") + 1, blah.length() - 1).trim();
+            char direction = blah.charAt(blah.length() - 1);
+            System.out.println(degrees + " - " + minutes + " - " + seconds + " - " + direction);
+            double d = Double.parseDouble(degrees);
+            double m = Double.parseDouble(minutes) / 60.0;
+            double s = Double.parseDouble(seconds) / 3600.0;
+            double result = d + m + s;
+            if (direction == 'S' || direction == 'W') {
+                result *= -1;
+            }
+            NumberFormat dFormat = NumberFormat.getInstance();
+            dFormat.setMaximumFractionDigits(6);
+            String str = dFormat.format(result);
+            return new StringValue(str);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new EmptyValue();
         }
-        NumberFormat dFormat = NumberFormat.getInstance();
-        dFormat.setMaximumFractionDigits(6);
-        String str = dFormat.format(result);
-        return new StringValue(str);
     }
 
     public int getParameterCount() {
