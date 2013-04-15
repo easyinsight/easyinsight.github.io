@@ -89,7 +89,9 @@ public abstract class SeleniumPostProcessor {
             System.out.println("sending PDF of " + requestID + " to queue");
             NotificationService ns = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             ns.createTopic(topicName);
+            System.out.println("notifying " + processorID + "|" + id);
             ns.publish("arn:aws:sns:us-east-1:808335860417:" + topicName, processorID + "|" + id, null);
+
         } catch (Exception e) {
             LogClass.error(e);
         }
