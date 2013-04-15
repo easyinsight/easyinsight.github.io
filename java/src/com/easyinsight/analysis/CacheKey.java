@@ -8,11 +8,11 @@ import java.util.List;
 * Date: 11/13/12
 * Time: 3:57 PM
 */
-class CacheKey implements Serializable {
+public class CacheKey implements Serializable {
     private long reportID;
     private List<String> customFilters;
 
-    CacheKey(long reportID, List<String> customFilters) {
+    public CacheKey(long reportID, List<String> customFilters) {
         this.reportID = reportID;
         this.customFilters = customFilters;
     }

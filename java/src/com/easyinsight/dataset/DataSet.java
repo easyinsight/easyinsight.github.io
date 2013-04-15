@@ -26,16 +26,29 @@ public class DataSet implements Serializable, Cloneable {
 
     private List<DataSet> additionalSets = new ArrayList<DataSet>();
 
+    private long time;
+
     public DataSet() {
         rows = new ArrayList<IRow>();
+        time = System.currentTimeMillis();
     }
 
     public DataSet(int rowSize) {
         rows = new ArrayList<IRow>(rowSize);
+        time = System.currentTimeMillis();
     }
 
     public DataSet(List<IRow> rows) {
         this.rows = rows;
+        time = System.currentTimeMillis();
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 
     public void addSet(DataSet dataSet) {

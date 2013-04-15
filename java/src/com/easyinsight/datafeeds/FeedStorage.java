@@ -993,8 +993,8 @@ public class FeedStorage {
 
     public List<DataSourceDescriptor> getDataSources(long userID, long accountID, EIConnection conn) throws SQLException {
         RolePrioritySet<DataSourceDescriptor> descriptorList = new RolePrioritySet<DataSourceDescriptor>();
-        getMyDataSources(userID, conn, descriptorList);
-        getAccountDataSources(conn, accountID, descriptorList);
+        Set<Long> sources = getMyDataSources(userID, conn, descriptorList);
+        getAccountDataSources(conn, accountID, descriptorList, sources);
         getGroupDataSources(userID, conn, descriptorList);
         List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
         for (EIDescriptor dataSource : descriptorList.values()) {
@@ -1005,35 +1005,27 @@ public class FeedStorage {
         return dataSources;
     }
 
-    private void getMyDataSources(long userID, EIConnection conn, RolePrioritySet<DataSourceDescriptor> descriptorList) throws SQLException {
+    private Set<Long> getMyDataSources(long userID, EIConnection conn, RolePrioritySet<DataSourceDescriptor> descriptorList) throws SQLException {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
                 "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, ROLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, DATA_FEED.create_date, DATA_FEED.account_visible, DATA_FEED.api_key, refresh_behavior" +
                 " FROM (UPLOAD_POLICY_USERS, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) WHERE " +
                 "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.VISIBLE = ?");
-        PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT FIRST_NAME, NAME FROM USER, UPLOAD_POLICY_USERS WHERE UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
-                "UPLOAD_POLICY_USERS.FEED_ID = ?");
+
         queryStmt.setLong(1, userID);
         queryStmt.setBoolean(2, true);
-
+        String name = SecurityUtil.getUserName();
+        Set<Long> dataSourceIDs = new HashSet<Long>();
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
             long dataFeedID = rs.getLong(1);
+            dataSourceIDs.add(dataFeedID);
             String feedName = rs.getString(2);
             long feedSize = rs.getLong(3);
             int feedType = rs.getInt(4);
             int userRole = rs.getInt(5);
             Timestamp lastTime = rs.getTimestamp(6);
             Timestamp createDate = rs.getTimestamp(7);
-            findOwnerStmt.setLong(1, dataFeedID);
-            ResultSet ownerRS = findOwnerStmt.executeQuery();
-            String name;
-            if (ownerRS.next()) {
-                String firstName = ownerRS.getString(1);
-                String lastName = ownerRS.getString(2);
-                name = firstName != null ? firstName + " " + lastName : lastName;
-            } else {
-                name = "";
-            }
+
             Date lastDataTime = null;
             if (lastTime != null) {
                 lastDataTime = new Date(lastTime.getTime());
@@ -1047,10 +1039,10 @@ public class FeedStorage {
             descriptorList.add(feedDescriptor);
         }
         queryStmt.close();
-        findOwnerStmt.close();
+        return dataSourceIDs;
     }
 
-    private void getAccountDataSources(EIConnection conn, long accountID, RolePrioritySet<DataSourceDescriptor> descriptorList) throws SQLException {
+    private void getAccountDataSources(EIConnection conn, long accountID, RolePrioritySet<DataSourceDescriptor> descriptorList, Set<Long> existingIDs) throws SQLException {
 
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
                 "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, DATA_FEED.create_date, DATA_FEED.account_visible, DATA_FEED.api_key, refresh_behavior " +
@@ -1064,6 +1056,9 @@ public class FeedStorage {
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
             long dataFeedID = rs.getLong(1);
+            if (existingIDs.contains(dataFeedID)) {
+                continue;
+            }
             String feedName = rs.getString(2);
             long feedSize = rs.getLong(3);
             int feedType = rs.getInt(4);

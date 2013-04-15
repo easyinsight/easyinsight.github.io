@@ -37,7 +37,8 @@ public class InsightDescriptor extends EIDescriptor {
         setRole(role);
     }
 
-    public InsightDescriptor(long id, String name, long dataFeedID, int reportType, String urlKey, Date creationDate, String ownerName, int role, boolean accountVisible, int folder) {
+    public InsightDescriptor(long id, String name, long dataFeedID, int reportType, String urlKey, Date creationDate, String ownerName, int role,
+                             boolean accountVisible, int folder, String description) {
         super(name, id, urlKey, accountVisible);
         this.dataFeedID = dataFeedID;
         this.reportType = reportType;
@@ -45,6 +46,7 @@ public class InsightDescriptor extends EIDescriptor {
         setAuthor(ownerName);
         setRole(role);
         setFolder(folder);
+        setDescription(description);
     }
 
     public Date getLastDataTime() {
