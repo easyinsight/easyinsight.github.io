@@ -47,6 +47,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
         JSONArray jsonObject = null;
         int retryCount = 0;
         do {
+            String responseString = null;
             try {
                 httpClient.executeMethod(restMethod);
                 if (lastRefreshDate != null && lastRefreshDate.getTime() >= 100) {
@@ -75,7 +76,8 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    jsonObject = new JSONArray(restMethod.getResponseBodyAsString());
+                    responseString = restMethod.getResponseBodyAsString();
+                    jsonObject = new JSONArray(responseString);
                     restMethod.releaseConnection();
                     successful = true;
                 }
@@ -93,6 +95,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
             } catch (ReportException re) {
                 throw re;
             } catch (Throwable e) {
+                System.out.println("Response on " + "https://basecamp.com/"+parentDefinition.getEndpoint()+"/api/v1/" + path + " generated " + responseString);
                 throw new RuntimeException(e);
             }
         } while (!successful && retryCount < 10);
@@ -118,6 +121,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
         JSONObject jsonObject = null;
         int retryCount = 0;
         do {
+            String responseString = null;
             try {
                 httpClient.executeMethod(restMethod);
                 if (restMethod.getStatusCode() == 429 || restMethod.getStatusCode() == 502 || restMethod.getStatusCode() == 503 ||
@@ -128,7 +132,8 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    jsonObject = new JSONObject(restMethod.getResponseBodyAsString());
+                    responseString = restMethod.getResponseBodyAsString();
+                    jsonObject = new JSONObject(responseString);
                     successful = true;
                 }
             } catch (IOException e) {
@@ -146,6 +151,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
             } catch (ReportException re) {
                 throw re;
             } catch (Throwable e) {
+                System.out.println("Response on " + "https://basecamp.com/"+parentDefinition.getEndpoint()+"/api/v1/" + path + " generated " + responseString);
                 throw new RuntimeException(e);
             }
         } while (!successful && retryCount < 10);
@@ -166,6 +172,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
         JSONObject jsonObject = null;
         int retryCount = 0;
         do {
+            String responseString = null;
             try {
                 client.executeMethod(restMethod);
                 if (restMethod.getStatusCode() == 429 || restMethod.getStatusCode() == 502 || restMethod.getStatusCode() == 503 ||
@@ -176,7 +183,8 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    jsonObject = new JSONObject(restMethod.getResponseBodyAsString());
+                    responseString = restMethod.getResponseBodyAsString();
+                    jsonObject = new JSONObject(responseString);
                     successful = true;
                 }
             } catch (IOException e) {
@@ -194,6 +202,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
             } catch (ReportException re) {
                 throw re;
             } catch (Throwable e) {
+                System.out.println("Response on " + "https://basecamp.com/"+parentDefinition.getEndpoint()+"/api/v1/" + path + " generated " + responseString);
                 throw new RuntimeException(e);
             }
         } while (!successful && retryCount < 10);
