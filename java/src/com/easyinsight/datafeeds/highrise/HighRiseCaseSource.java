@@ -81,11 +81,17 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
         Builder builder = new Builder();
         Map<String, String> peopleCache = new HashMap<String, String>();
         try {
-           /* EIPageInfo info = new EIPageInfo();
-            info.currentPage = 1;
-            do {*/
+            int offset = 0;
+            int caseCount;
+            do {
                 loadingProgress(0, 1, "Synchronizing with cases...", callDataID);
-                Document companies = runRestRequest("/kases/open.xml", client, builder, url, true, false, parentDefinition);
+                Document companies;
+                if (offset == 0) {
+                    companies = runRestRequest("/kases/open.xml", client, builder, url, true, false, parentDefinition);
+                } else {
+                    companies = runRestRequest("/kases/open.xml?n=" + offset, client, builder, url, true, false, parentDefinition);
+                }
+                caseCount = 0;
                 Nodes companyNodes = companies.query("/kases/kase");
                 for (int i = 0; i < companyNodes.size(); i++) {
                     IRow row = ds.createRow();
@@ -112,7 +118,7 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
                     row.addValue(OWNER, retrieveUserInfo(client, builder, peopleCache, personId, url, parentDefinition));
                     String authorID = queryField(companyNode, "author-id/text()");
                     row.addValue(AUTHOR, retrieveUserInfo(client, builder, peopleCache, authorID, url, parentDefinition));
-
+                    caseCount++;
                     Document tags = runRestRequest("/kases/"+id+"/tags.xml", client, builder, url, true, false, parentDefinition);
                     Nodes tagNodes = tags.query("/tags/tag");
                     StringBuilder tagBuilder = new StringBuilder();
@@ -126,8 +132,18 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
                         row.addValue(TAGS, tagString);
                     }
                 }
-                companies = runRestRequest("/kases/closed.xml", client, builder, url, true, false, parentDefinition);
-                companyNodes = companies.query("/kases/kase");
+                offset += 500;
+            } while (caseCount == 500);
+            offset = 0;
+            do {
+                Document companies;
+                if (offset == 0) {
+                    companies = runRestRequest("/kases/closed.xml", client, builder, url, true, false, parentDefinition);
+                } else {
+                    companies = runRestRequest("/kases/closed.xml?n=" + offset, client, builder, url, true, false, parentDefinition);
+                }
+                caseCount = 0;
+                Nodes companyNodes = companies.query("/kases/kase");
                 for (int i = 0; i < companyNodes.size(); i++) {
                     IRow row = ds.createRow();
                     Node companyNode = companyNodes.get(i);
@@ -153,7 +169,7 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
                     row.addValue(OWNER, retrieveUserInfo(client, builder, peopleCache, personId, url, parentDefinition));
                     String authorID = queryField(companyNode, "author-id/text()");
                     row.addValue(AUTHOR, retrieveUserInfo(client, builder, peopleCache, authorID, url, parentDefinition));
-
+                    caseCount++;
                     Document tags = runRestRequest("/kases/"+id+"/tags.xml", client, builder, url, true, false, parentDefinition);
                     Nodes tagNodes = tags.query("/tags/tag");
                     StringBuilder tagBuilder = new StringBuilder();
@@ -167,7 +183,8 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
                         row.addValue(TAGS, tagString);
                     }
                 }
-            //} while(info.currentPage++ < info.MaxPages);
+                offset += 500;
+            } while (caseCount == 500);
 
         } catch (ReportException re) {
             throw re;
