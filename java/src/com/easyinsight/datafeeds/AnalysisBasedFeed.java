@@ -1,11 +1,13 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.core.Key;
+import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.pipeline.DerivedDataSourcePipeline;
+import com.easyinsight.logging.LogClass;
+import org.apache.jcs.access.exception.CacheException;
 
 import java.util.*;
 
@@ -40,10 +42,15 @@ public class AnalysisBasedFeed extends Feed {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
         List<FilterDefinition> reportFilters = new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions());
         List<AnalysisItem> fields = new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values());
-        Map<Key, Key> map = new HashMap<Key, Key>();
-        Map<String, AnalysisItem> map1 = new HashMap<String, AnalysisItem>();
+        Map<Key, List<Key>> map = new HashMap<Key, List<Key>>();
+        Map<String, List<AnalysisItem>> map1 = new HashMap<String, List<AnalysisItem>>();
         for (AnalysisItem analysisItem : analysisItems) {
-            map1.put(analysisItem.getOriginalDisplayName(), analysisItem);
+            List<AnalysisItem> items = map1.get(analysisItem.getOriginalDisplayName());
+            if (items == null) {
+                items = new ArrayList<AnalysisItem>();
+                map1.put(analysisItem.getOriginalDisplayName(), items);
+            }
+            items.add(analysisItem);
         }
         Map<FilterDefinition, AnalysisItem> filterMap = new HashMap<FilterDefinition, AnalysisItem>();
         for (FilterDefinition filter : filters) {
@@ -59,54 +66,51 @@ public class AnalysisBasedFeed extends Feed {
             analysisDefinition.getFilterDefinitions().add(filter);
         }
         for (AnalysisItem analysisItem : fields) {
-            AnalysisItem mapped = map1.get(analysisItem.toDisplay());
-            if (mapped != null) {
-                map.put(analysisItem.createAggregateKey(), mapped.createAggregateKey());
+            List<AnalysisItem> items = map1.get(analysisItem.toDisplay());
+            if (items != null) {
+                for (AnalysisItem mapped : items) {
+                    List<Key> keys = map.get(analysisItem.createAggregateKey());
+                    if (keys == null) {
+                        keys = new ArrayList<Key>();
+                        map.put(analysisItem.createAggregateKey(), keys);
+                    }
+                    keys.add(mapped.createAggregateKey());
+                }
+            }
+        }
+        CacheKey cacheKey = null;
+        if (analysisDefinition.isCacheable()) {
+            List<String> filterStrings = new ArrayList<String>();
+            XMLMetadata xmlMetadata = new XMLMetadata();
+            xmlMetadata.setConn(conn);
+            for (FilterDefinition filter : filters) {
+                filterStrings.add(filter.toXML(xmlMetadata).toXML());
+            }
+            cacheKey = new CacheKey(analysisDefinition.getAnalysisID(), filterStrings);
+            DataSet embeddedResults = ReportCache.instance().getAddonResults(analysisDefinition.getDataFeedID(), cacheKey, analysisDefinition.getCacheMinutes());
+            if (embeddedResults != null) {
+                LogClass.debug("*** Returning from cache");
+                return embeddedResults;
             }
         }
         DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
         // map this data set back into the original one
-        for (Map.Entry<Key, Key> entry : map.entrySet()) {
-            dataSet.replaceKey(entry.getKey(), entry.getValue());
+        for (Map.Entry<Key, List<Key>> entry : map.entrySet()) {
+            for (Key key : entry.getValue()) {
+                dataSet.replaceKey(entry.getKey(), key);
+            }
         }
         analysisDefinition.setFilterDefinitions(reportFilters);
         for (Map.Entry<FilterDefinition, AnalysisItem> entry : filterMap.entrySet()) {
             entry.getKey().setField(entry.getValue());
         }
+        if (cacheKey != null) {
+            try {
+                ReportCache.instance().storeAddonReport(analysisDefinition.getDataFeedID(), cacheKey, dataSet);
+            } catch (CacheException e) {
+                LogClass.debug(e.getMessage());
+            }
+        }
         return dataSet;
     }
-
-    /*
-   @Override
-   public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
-       WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
-       Map<Key, Key> map = new HashMap<Key, Key>();
-       for (AnalysisItem analysisItem : analysisItems) {
-           if (analysisItem.getKey() instanceof ReportKey) {
-               ReportKey reportKey = (ReportKey) analysisItem.getKey();
-               Key existing = analysisItem.createAggregateKey();
-               analysisItem.setKey(reportKey.getParentKey());
-               analysisItem.clearCachedKey();
-               map.put(analysisItem.createAggregateKey(), existing);
-           }
-       }
-       DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
-       // map this data set back into the original one
-       for (Map.Entry<Key, Key> entry : map.entrySet()) {
-           for (AnalysisItem analysisItem : analysisItems) {
-               if (map.containsKey(analysisItem.createAggregateKey())) {
-                   analysisItem.clearCachedKey();
-                   analysisItem.setKey(map.get(analysisItem.createAggregateKey()));
-               }
-           }
-           dataSet.replaceKey(entry.getKey(), entry.getValue());
-       }
-       for (Map.Entry<Key, Key> entry : map.entrySet()) {
-           for (IRow row : dataSet.getRows()) {
-               row.removeValue(entry.getKey());
-           }
-       }
-       return dataSet;
-   }
-    */
 }
