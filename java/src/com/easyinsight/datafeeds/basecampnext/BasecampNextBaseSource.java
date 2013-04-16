@@ -69,7 +69,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     throw new ReportException(new DataSourceConnectivityReportFault("We were unable to retrieve the list of projects for this Basecamp account. Check that you created this connection under the right 37Signals user, and if so, that your Basecamp account is still active. If this problem persists, contact support@easy-insight.com.", parentDefinition));
                 }
                 if (restMethod.getStatusCode() == 429 || restMethod.getStatusCode() == 502 || restMethod.getStatusCode() == 503 ||
-                        restMethod.getStatusCode() == 504) {
+                        restMethod.getStatusCode() == 504 || restMethod.getStatusCode() == 408) {
                     retryCount++;
                     try {
                         Thread.sleep(20000);
@@ -125,7 +125,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
             try {
                 httpClient.executeMethod(restMethod);
                 if (restMethod.getStatusCode() == 429 || restMethod.getStatusCode() == 502 || restMethod.getStatusCode() == 503 ||
-                        restMethod.getStatusCode() == 504) {
+                        restMethod.getStatusCode() == 504 || restMethod.getStatusCode() == 408) {
                     retryCount++;
                     try {
                         Thread.sleep(20000);
@@ -176,7 +176,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
             try {
                 client.executeMethod(restMethod);
                 if (restMethod.getStatusCode() == 429 || restMethod.getStatusCode() == 502 || restMethod.getStatusCode() == 503 ||
-                        restMethod.getStatusCode() == 504) {
+                        restMethod.getStatusCode() == 504 || restMethod.getStatusCode() == 408) {
                     retryCount++;
                     try {
                         Thread.sleep(20000);

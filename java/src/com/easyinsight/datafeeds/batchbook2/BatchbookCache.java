@@ -112,7 +112,7 @@ public class BatchbookCache extends Batchbook2BaseSource {
                 Map company = (Map) companyObject;
                 Stuff stuff = new Stuff();
                 stuff.setPart1(company.get("company_id").toString());
-                stuff.setPart2((company.get("current")).toString());
+                stuff.setPart2((String) company.get("current"));
                 stuff.setPart3((String) company.get("job_title"));
                 companyStuff.add(stuff);
             }

@@ -37,7 +37,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -433,7 +432,10 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
                 String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData, true, new ExportProperties(true, true));
                 if (table != null) {
+                    System.out.println("Returning HTML table for " + deliveryInfo.getId());
                     return new DeliveryResult(table);
+                } else {
+                    System.out.println("No data found for HTML table for " + deliveryInfo.getId() + " with send if no data = " + sendIfNoData);
                 }
             } else if (deliveryInfo.getType() == DeliveryInfo.SCORECARD) {
                 System.out.println("Running scorecard " + deliveryInfo.getId() + " for HTML delivery");
@@ -825,6 +827,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 return null;
             }
             if (listDataResults.getReportFault() != null) {
+                System.out.println("\tReport fault on " + analysisDefinition.getAnalysisID() + " - " + listDataResults.getReportFault().toString());
                 return null;
             }
             table = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, exportProperties);

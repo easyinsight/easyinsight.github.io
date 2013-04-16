@@ -1944,7 +1944,10 @@ public class ExportService {
             if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
                 textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
             }
-            int headerPosition = positionMap.get(analysisItem);
+            Short headerPosition = positionMap.get(analysisItem);
+            if (headerPosition == null) {
+                continue;
+            }
             int width;
             if (textReportFieldExtension != null && textReportFieldExtension.getFixedWidth() > 0) {
                 width = Math.max(textReportFieldExtension.getFixedWidth() / 15 * 256, 5000);
