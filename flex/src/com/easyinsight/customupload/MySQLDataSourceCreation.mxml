@@ -95,7 +95,7 @@
                 <mx:TextInput id="databasePasswordInput" fontWeight="normal" fontFamily="Lucida Grande" width="350" displayAsPassword="true"/>
             </mx:FormItem>
             <mx:FormItem label="Connection Timeout (minutes):" labelWidth="200">
-                <mx:NumericStepper id="timeoutInput" fontWeight="normal" fontFamily="Lucida Grande" value="{connTimeout}"/>
+                <mx:NumericStepper id="timeoutInput" fontWeight="normal" fontFamily="Lucida Grande" value="{connTimeout}" maximum="30"/>
             </mx:FormItem>
         </mx:Form>
         <mx:HRule width="100%"/>

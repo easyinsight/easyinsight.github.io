@@ -46,10 +46,10 @@
             <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
         </mx:FormItem>
         <mx:FormItem label="User Name:" direction="horizontal">
-            <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+            <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" width="350"/>
         </mx:FormItem>
         <mx:FormItem label="Password:" direction="horizontal">
-            <mx:TextInput id="passwordInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350" displayAsPassword="true"/>
+            <mx:TextInput id="passwordInput" fontWeight="normal" fontFamily="Lucida Grande" width="350" displayAsPassword="true"/>
         </mx:FormItem>
 	</mx:Form>
 </mx:VBox>
