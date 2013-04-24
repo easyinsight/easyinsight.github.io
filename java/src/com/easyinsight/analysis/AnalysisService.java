@@ -56,14 +56,14 @@ public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
 
-    public String generateDescription(WSAnalysisDefinition report) {
+    /*public String generateDescription(WSAnalysisDefinition report) {
         try {
             return report.generateDescription();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     public List<Revision> showHistory(String urlKey) {
         List<Revision> revisions = new ArrayList<Revision>();
