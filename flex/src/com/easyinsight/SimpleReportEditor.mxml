@@ -21,7 +21,7 @@
                                               intentionTrigger="onIntentionEvent(event)"
                                               suggestions="{suggestions}" dataSource="{dataSourceInfo}"
                                               dataView="{dataView}" backgroundColor="#CFCFDF" backgroundAlpha="1"
-                                              id="suggestionSummary"/>
+                                              id="suggestionSummary" simpleReportEditor="{this}"/>
             </mx:AddChild>
         </mx:State>
     </skin:states>
@@ -649,6 +649,7 @@
                 addEventListener(ReportEditorFieldEvent.ITEM_FILTER, filterField);
                 addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
                 addEventListener(AnalysisItemCopyEvent.ITEM_COPY, onCopy);
+
                 addEventListener(AddedItemUpdateEvent.UPDATE, onFieldUpdate);
                 addEventListener(AnalysisItemDeleteEvent.ANALYSIS_ITEM_DELETE, onAnalysisItemDelete);
                 addEventListener(CommandEvent.COMMAND, onCommand);
@@ -689,7 +690,7 @@
             }
         }
 
-        private function onCopy(event:AnalysisItemCopyEvent):void {
+        public function onCopy(event:AnalysisItemCopyEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
             var wrapper:AnalysisItemWrapper;
             if (event.wrapper == null) {

@@ -33,12 +33,15 @@ public class IntentionSuggestion {
     public static final int CONFIGURE_GAUGE = 15;
     public static final int SUGGESTION_TASK_ADD = 16;
     public static final int WARNING_JOIN_FAILURE = 17;
+    public static final int FILTERED_FIELD = 18;
+    public static final int DISTINCT_COUNT = 19;
 
     private String headline;
     private String description;
     private int scope;
     private int type;
     private Integer priority;
+    private boolean requiresServerCallback = true;
 
     public IntentionSuggestion() {
     }
@@ -49,6 +52,19 @@ public class IntentionSuggestion {
         this.scope = scope;
         this.type = type;
         this.priority = priority;
+    }
+
+    public IntentionSuggestion(String headline, String description, int scope, int type, Integer priority, boolean requiresServerCallback) {
+        this(headline, description, scope, type, priority);
+        this.requiresServerCallback = requiresServerCallback;
+    }
+
+    public boolean isRequiresServerCallback() {
+        return requiresServerCallback;
+    }
+
+    public void setRequiresServerCallback(boolean requiresServerCallback) {
+        this.requiresServerCallback = requiresServerCallback;
     }
 
     public Integer getPriority() {

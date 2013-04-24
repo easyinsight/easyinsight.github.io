@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" backgroundColor="#FFFFFF" paddingBottom="10"
+        paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemCopyEvent;
+        import com.easyinsight.analysis.AnalysisItemNode;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.Value;
+
+        import mx.collections.ArrayCollection;
+
+        protected function copyField(analysisItem:AnalysisItem, onComplete:Function, copies:int = 1):void {
+            onCopyComplete = onComplete;
+            analysisService.cloneItem.send(analysisItem, copies);
+        }
+
+        private var onCopyComplete:Function;
+
+        public var dataSourceID:int;
+        [Bindable]
+        public var analysisItems:ArrayCollection;
+
+
+        protected function addField(field:AnalysisItem):void {
+            var node:AnalysisItemNode = new AnalysisItemNode();
+            node.analysisItem = field;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
+            dispatchEvent(new AnalysisItemCopyEvent(AnalysisItemCopyEvent.ITEM_COPY, field, wrapper));
+        }
+
+        private function cloned():void {
+            var fields:ArrayCollection = analysisService.cloneItem.lastResult as ArrayCollection;
+            onCopyComplete.call(this, fields);
+        }
+
+        protected function getMetadata(analysisItem:AnalysisItem,  onComplete:Function):void {
+            onMetadataComplete = onComplete;
+            dataService.getAnalysisItemMetadata.send(dataSourceID, analysisItem, 0, 0, 0);
+        }
+
+        private var onMetadataComplete:Function;
+
+        private function gotMetadata():void {
+            var metadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisDimensionResultMetadata;
+            var strings:ArrayCollection = new ArrayCollection();
+            for each (var value:Value in metadata.values) {
+                strings.addItem(value.getValue());
+            }
+            onMetadataComplete.call(this, strings);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="cloneItem" result="cloned()" />
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="data" id="dataService">
+        <mx:method name="getAnalysisItemMetadata" result="gotMetadata()"/>
+    </mx:RemoteObject>
+</util:EITitleWindow>

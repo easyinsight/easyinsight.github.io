@@ -2,16 +2,14 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         creationComplete="onCreation()">
     <mx:Script><![CDATA[
+        import com.easyinsight.SimpleReportEditor;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.DataViewFactory;
-        import com.easyinsight.datasources.DataSourceDisplay;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.TransformContainer;
         import com.easyinsight.util.PopUpUtil;
-        import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
 
@@ -31,6 +29,16 @@
         private var _wrappers:ArrayCollection;
 
         private var _dataSourceDisplay:DataSourceInfo;
+
+        private var _simpleReportEditor:SimpleReportEditor;
+
+        public function get simpleReportEditor():SimpleReportEditor {
+            return _simpleReportEditor;
+        }
+
+        public function set simpleReportEditor(value:SimpleReportEditor):void {
+            _simpleReportEditor = value;
+        }
 
         public function set dataSourceDisplay(value:DataSourceInfo):void {
             _dataSourceDisplay = value;
@@ -81,7 +89,11 @@
         }
 
         private function onIntentionChoice(event:IntentionEvent):void {
-            analysisService.getIntentions.send(_report, _fields, event.suggestion.scope, event.suggestion.type);
+            if (event.suggestion.requiresServerCallback) {
+                analysisService.getIntentions.send(_report, _fields, event.suggestion.scope, event.suggestion.type);
+            } else {
+                new SuggestionFactory(simpleReportEditor).argh(event.suggestion.type, _fields, _report.dataFeedID);
+            }
         }
 
         private function gotIntentions():void {

@@ -23,6 +23,7 @@ import com.easyinsight.util.RandomTextGenerator;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 import org.hibernate.Session;
+import org.hibernate.exception.LockAcquisitionException;
 
 /**
  * User: James Boe
@@ -86,21 +87,29 @@ public class AnalysisStorage {
     public WSAnalysisDefinition getAnalysisDefinition(long analysisID) {
         WSAnalysisDefinition analysisDefinition = fromCache(analysisID);
         if (analysisDefinition != null) return analysisDefinition;
-        Session session = Database.instance().createSession();
-        try {
-            session.beginTransaction();
-            List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
-            if (results.size() > 0) {
-                AnalysisDefinition savedReport = (AnalysisDefinition) results.get(0);
-                savedReport.validate();
-                analysisDefinition = savedReport.createBlazeDefinition();
+        int retries = 0;
+        while (retries < MAX_RETRIES && analysisDefinition == null) {
+            retries++;
+            Session session = Database.instance().createSession();
+            try {
+                session.beginTransaction();
+                List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
+                if (results.size() > 0) {
+                    AnalysisDefinition savedReport = (AnalysisDefinition) results.get(0);
+                    savedReport.validate();
+                    analysisDefinition = savedReport.createBlazeDefinition();
+                }
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+                if (e instanceof LockAcquisitionException && retries < MAX_RETRIES) {
+                    // lock acquisition exception, ignore
+                } else {
+                    throw new RuntimeException(e);
+                }
+            } finally {
+                session.close();
             }
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
         }
         cacheReport(analysisDefinition);
         return analysisDefinition;
@@ -125,24 +134,34 @@ public class AnalysisStorage {
         return analysisDefinition;
     }
 
+    public static final int MAX_RETRIES = 5;
+
     public WSAnalysisDefinition getAnalysisDefinition(long analysisID, Connection conn) {
         WSAnalysisDefinition analysisDefinition = fromCache(analysisID);
         if (analysisDefinition != null) return analysisDefinition;
-        Session session = Database.instance().createSession(conn);
-        try {
-            session.beginTransaction();
-            List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
-            if (results.size() > 0) {
-                AnalysisDefinition savedReport = (AnalysisDefinition) results.get(0);
-                savedReport.validate();
-                analysisDefinition = savedReport.createBlazeDefinition();
+        int retries = 0;
+        while (retries < MAX_RETRIES && analysisDefinition == null) {
+            retries++;
+            Session session = Database.instance().createSession(conn);
+            try {
+                session.beginTransaction();
+                List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
+                if (results.size() > 0) {
+                    AnalysisDefinition savedReport = (AnalysisDefinition) results.get(0);
+                    savedReport.validate();
+                    analysisDefinition = savedReport.createBlazeDefinition();
+                }
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+                if (e instanceof LockAcquisitionException && retries < MAX_RETRIES) {
+                    // lock acquisition exception, ignore
+                } else {
+                    throw new RuntimeException(e);
+                }
+            } finally {
+                session.close();
             }
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
         }
         cacheReport(analysisDefinition);
         return analysisDefinition;
