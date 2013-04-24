@@ -375,6 +375,7 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
             overlayIndex = 0;
             try {
                 _report = event.analysisDefinition;
+                postProcess(_report);
                 if (event.hasData) {
                     showReport();
                     _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, new Object(), event.additionalProperties);
@@ -389,6 +390,19 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
                 stackTrace = e.getStackTrace();
                 overlayIndex = 3;
             }
+        }
+
+    }
+
+    private var postProcessors:ArrayCollection = new ArrayCollection();
+
+    public function registerPostProcessor(processor:IReportPostProcessor):void {
+        postProcessors.addItem(processor);
+    }
+
+    private function postProcess(report:AnalysisDefinition):void {
+        for each (var p:IReportPostProcessor in postProcessors) {
+            p.processReport(report);
         }
 
     }

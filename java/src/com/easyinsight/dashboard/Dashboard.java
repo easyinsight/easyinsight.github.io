@@ -60,10 +60,19 @@ public class Dashboard implements Cloneable, Serializable {
     private int stackFill2End;
     private boolean fillStackHeaders;
     private int reportHorizontalPadding = 20;
+    private Link defaultDrillthrough;
 
     private ImageDescriptor headerImage;
     private int headerTextColor;
     private int headerBackgroundColor;
+
+    public Link getDefaultDrillthrough() {
+        return defaultDrillthrough;
+    }
+
+    public void setDefaultDrillthrough(Link defaultDrillthrough) {
+        this.defaultDrillthrough = defaultDrillthrough;
+    }
 
     public ImageDescriptor getHeaderImage() {
         return headerImage;
@@ -362,7 +371,11 @@ public class Dashboard implements Cloneable, Serializable {
     }
 
     public Set<Long> containedReports() {
-        return rootElement.containedReports();
+        Set<Long> reports = rootElement.containedReports();
+        if (defaultDrillthrough != null) {
+            reports.add(((DrillThrough) defaultDrillthrough).getReportID());
+        }
+        return reports;
     }
 
     private void cleanup(AnalysisItem analysisItem, boolean changingDataSource) {
@@ -383,6 +396,11 @@ public class Dashboard implements Cloneable, Serializable {
         List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
 
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+
+        if (getDefaultDrillthrough() != null) {
+            Link clone = getDefaultDrillthrough().clone();
+            dashboard.setDefaultDrillthrough(clone);
+        }
 
         for (FilterDefinition persistableFilterDefinition : this.filters) {
             filterDefinitions.add(persistableFilterDefinition.clone());
@@ -451,6 +469,9 @@ public class Dashboard implements Cloneable, Serializable {
     }
 
     public void updateIDs(Map<Long, AnalysisDefinition> reportReplacementMap, List<AnalysisItem> allFields, boolean changingDataSource, FeedDefinition dataSource) {
+        if (getDefaultDrillthrough() != null) {
+            getDefaultDrillthrough().updateReportIDs(reportReplacementMap, new HashMap<Long, Dashboard>());
+        }
         getRootElement().updateReportIDs(reportReplacementMap, allFields, changingDataSource, dataSource);
     }
     

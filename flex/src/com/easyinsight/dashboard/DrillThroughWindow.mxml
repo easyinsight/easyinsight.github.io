@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.DrillThrough;
+        import com.easyinsight.quicksearch.EIDescriptor;
+
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        public var reports:ArrayCollection;
+
+        private var linkID:int;
+
+        [Bindable]
+        private var linkLabel:String;
+
+        [Bindable]
+        private var defaultLink:Boolean = true;
+
+        [Bindable]
+        private var qualifiedName:String;
+
+        [Bindable]
+        private var miniWindow:Boolean;
+
+        [Bindable]
+        private var allFilters:Boolean;
+
+        [Bindable]
+        private var showFilters:Boolean;
+
+        [Bindable]
+        private var createFiltersOnGroupings:Boolean;
+
+        private var _drillthrough:DrillThrough;
+
+        public function set drillthrough(value:DrillThrough):void {
+            _drillthrough = value;
+            drillthroughExists = value != null;
+            invalidateProperties();
+        }
+
+        [Bindable]
+        private var drillthroughExists:Boolean;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (_drillthrough != null) {
+                miniWindow = _drillthrough.miniWindow;
+                if (_drillthrough.reportID > 0) {
+                    qualifiedName = EIDescriptor.REPORT + "-" + _drillthrough.reportID;
+                } else if (_drillthrough.dashboardID > 0) {
+                    qualifiedName = EIDescriptor.DASHBOARD + "-" + _drillthrough.dashboardID;
+                }
+                defaultLink = _drillthrough.defaultLink;
+                showFilters = _drillthrough.showDrillThroughFilters;
+                createFiltersOnGroupings = _drillthrough.filterRowGroupings;
+                allFilters = _drillthrough.addAllFilters;
+            }
+        }
+
+        public function save():DrillThrough {
+            if (!enableDrillthroughCheckbox.selected) {
+                return null;
+            }
+            var drillthrough:DrillThrough = new DrillThrough();
+            drillthrough.miniWindow = miniWindowCheckbox.selected;
+            drillthrough.defaultLink = drillthroughDefaultLinkCheckbox.selected;
+            drillthrough.showDrillThroughFilters = showFiltersCheckbox.selected;
+            drillthrough.addAllFilters = allCheckbox.selected;
+            drillthrough.filterRowGroupings = createFiltersOnRowGroupingsCheckbox.selected;
+            drillthrough.reportID = reportChooser.selectedItem.id;
+            return drillthrough;
+        }
+        ]]></mx:Script>
+    <mx:CheckBox id="enableDrillthroughCheckbox" label="Do you want to set up a default drillthrough for all reports in this dashboard?" selected="{drillthroughExists}"/>
+    <mx:HBox enabled="{enableDrillthroughCheckbox.selected}">
+        <mx:Label text="Target Report:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
+        <util:SmartComboBox id="reportChooser" dataProvider="{reports}" labelField="name"
+                            selectedProperty="qualifiedName"
+                            selectedValue="{qualifiedName}" rowCount="12" maxWidth="400" />
+    </mx:HBox>
+    <mx:HBox enabled="{enableDrillthroughCheckbox.selected}">
+        <mx:Label text="Use Popup Window:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:CheckBox label="" id="miniWindowCheckbox" selected="{miniWindow}"/>
+    </mx:HBox>
+    <mx:HBox enabled="{enableDrillthroughCheckbox.selected}">
+        <mx:Label text="Default Link:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:CheckBox id="drillthroughDefaultLinkCheckbox" selected="{defaultLink}"/>
+    </mx:HBox>
+    <mx:HBox enabled="{enableDrillthroughCheckbox.selected}">
+        <mx:Label text="Pass Through All Report Filters:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:CheckBox id="allCheckbox" selected="{allFilters}"/>
+    </mx:HBox>
+    <mx:HBox enabled="{enableDrillthroughCheckbox.selected}">
+        <mx:Label text="Show Filters On Target Report:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:CheckBox id="showFiltersCheckbox" selected="{showFilters}"/>
+    </mx:HBox>
+    <mx:HBox enabled="{enableDrillthroughCheckbox.selected}">
+        <mx:Label text="Create Filters on Row Groupings:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:CheckBox id="createFiltersOnRowGroupingsCheckbox" selected="{createFiltersOnGroupings}"/>
+    </mx:HBox>
+</mx:VBox>

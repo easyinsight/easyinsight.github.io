@@ -3,13 +3,12 @@ package com.easyinsight.dashboard;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.Feed;
-import com.easyinsight.datafeeds.FeedConsumer;
-import com.easyinsight.datafeeds.FeedRegistry;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.ApplicationSkinSettings;
+import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.util.RandomTextGenerator;
@@ -129,6 +128,29 @@ public class DashboardService {
             session.close();
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
+        }
+    }
+
+    public Dashboard saveAs(Dashboard dashboard, String name) {
+        SecurityUtil.authorizeDashboard(dashboard.getId());
+        try {
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dashboard.getDataSourceID());
+            UserStub userStub = new UserStub();
+            userStub.setUserID(SecurityUtil.getUserID());
+            dashboard.setAdministrators(Arrays.asList((FeedConsumer) userStub));
+
+            Dashboard clonedDashboard = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), false, dataSource.getFields(), dataSource);
+            clonedDashboard.setUrlKey(RandomTextGenerator.generateText(15));
+            clonedDashboard.setCreationDate(new Date());
+            clonedDashboard.setAuthorName(SecurityUtil.getUserName());
+            clonedDashboard.setUpdateDate(new Date());
+            clonedDashboard.setTemporary(false);
+            clonedDashboard.setName(name);
+            saveDashboard(clonedDashboard);
+            return clonedDashboard;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
         }
     }
 

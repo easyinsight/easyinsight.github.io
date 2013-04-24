@@ -1,4 +1,5 @@
 package com.easyinsight.dashboard {
+import com.easyinsight.analysis.Link;
 import com.easyinsight.datasources.DataSourceInfo;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.skin.ImageDescriptor;
@@ -49,6 +50,8 @@ public class Dashboard {
     public var headerImage:ImageDescriptor;
     public var headerTextColor:int;
     public var headerBackgroundColor:int;
+
+    public var defaultDrillthrough:Link;
 
     public function Dashboard() {
     }
