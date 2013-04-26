@@ -12,6 +12,8 @@ public class ConstantContactDataSource extends CompositeServerDataSource {
     public var tokenKey:String;
     public var tokenSecret:String;
     public var briefMode:Boolean;
+    public var accessToken:String;
+    public var refreshToken:String;
 
     public function ConstantContactDataSource() {
         super();

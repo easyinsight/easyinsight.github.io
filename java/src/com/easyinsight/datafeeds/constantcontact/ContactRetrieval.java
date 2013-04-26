@@ -1,6 +1,10 @@
 package com.easyinsight.datafeeds.constantcontact;
 
 import com.csvreader.CsvReader;
+import com.easyinsight.analysis.DataSourceConnectivityReportFault;
+import com.easyinsight.analysis.ReportException;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.ParsingException;
@@ -11,6 +15,8 @@ import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.signature.HmacSha1MessageSigner;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
@@ -22,6 +28,8 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -45,7 +53,7 @@ public class ContactRetrieval {
 
         final DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm aa zzz");
 
-        String file = retrieveFile("active", ccSource);
+        String file = retrieveFile("Active", ccSource);
         CsvReader csvReader = new CsvReader(new ByteArrayInputStream(file.getBytes()), Charset.forName("UTF-8"));
         csvReader.readHeaders();
         while (csvReader.readRecord()) {
@@ -76,91 +84,72 @@ public class ContactRetrieval {
         return contacts;
     }
 
-    private String retrieveFile(String contactListID, ConstantContactCompositeSource ccSource) throws OAuthMessageSignerException, OAuthExpectationFailedException, OAuthCommunicationException, IOException, ParsingException, InterruptedException {
-        Document doc = startBulkUpload(contactListID, ccSource);
-        String id = doc.query("/entry/id/text()").get(0).getValue();
+    private String retrieveFile(String contactListID, ConstantContactCompositeSource ccSource) throws OAuthMessageSignerException, OAuthExpectationFailedException, OAuthCommunicationException, IOException, ParsingException, InterruptedException, ParseException, JSONException {
+        String id = startBulkUpload(contactListID, ccSource);
+
 
         System.out.println(id);
 
-        id = id.replace("http://", "https://");
-
-        id = id.substring(0, 45) + ccSource.getCcUserName() + id.substring(id.indexOf("/activities"));
+        id = "https://api.constantcontact.com/v2/activities/" + id + "?api_key=" + ConstantContactCompositeSource.KEY;
 
         boolean found = false;
 
-        OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
-        consumer.setMessageSigner(new HmacSha1MessageSigner());
-        consumer.setTokenWithSecret(ccSource.getTokenKey(), ccSource.getTokenSecret());
-        HttpGet httpRequest = new HttpGet(id);
-        httpRequest.setHeader("Accept", "application/xml");
-        httpRequest.setHeader("Content-Type", "application/xml");
-        consumer.sign(httpRequest);
+        HttpClient httpClient = new HttpClient();
 
-        org.apache.http.client.HttpClient client = new DefaultHttpClient();
-        ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
-            public String handleResponse(final HttpResponse response)
-                    throws IOException {
-                StatusLine statusLine = response.getStatusLine();
-                if (statusLine.getStatusCode() >= 300) {
-                    throw new HttpResponseException(statusLine.getStatusCode(),
-                            statusLine.getReasonPhrase());
-                }
-
-                HttpEntity entity = response.getEntity();
-                return entity == null ? null : EntityUtils.toString(entity, "UTF-8");
-            }
-        };
 
         do {
-            String string = client.execute(httpRequest, responseHandler);
-            string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
-            string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
-            string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
-            Document result = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
-            String status = result.query("/entry/content/Activity/Status/text()").get(0).getValue();
+            GetMethod getMethod = new GetMethod(id);
+            getMethod.setRequestHeader("Authorization", "Bearer " + ccSource.getAccessToken());
+            getMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
+            getMethod.setRequestHeader("User-Agent", "Easy Insight (http://www.easy-insight.com/)");
+            httpClient.executeMethod(getMethod);
+            Map results = (Map) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(getMethod.getResponseBodyAsString());
+            String status = results.get("status").toString();
             System.out.println(status);
             if ("COMPLETE".equals(status)) {
                 found = true;
+            } else if ("ERROR".equals(status)) {
+                throw new ReportException(new DataSourceConnectivityReportFault("Contact retrieval error.", ccSource));
             } else {
                 Thread.sleep(5000);
             }
         } while (!found);
 
-        HttpGet getFile = new HttpGet(id + ".csv");
-        consumer.sign(getFile);
-
-        return client.execute(getFile, responseHandler);
+        GetMethod getFile = new GetMethod(id + ".csv" + "?api_key=" + ConstantContactCompositeSource.KEY);
+        getFile.setRequestHeader("Authorization", "Bearer " + ccSource.getAccessToken());
+        getFile.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
+        getFile.setRequestHeader("User-Agent", "Easy Insight (http://www.easy-insight.com/)");
+        httpClient.executeMethod(getFile);
+        return getFile.getResponseBodyAsString();
     }
 
-    private static Document startBulkUpload(String listID, ConstantContactCompositeSource ccSource) throws OAuthMessageSignerException, OAuthExpectationFailedException, OAuthCommunicationException, IOException, ParsingException {
-        org.apache.commons.httpclient.HttpClient client = new org.apache.commons.httpclient.HttpClient();
+    private static String startBulkUpload(String listID, ConstantContactCompositeSource ccSource) throws OAuthMessageSignerException, OAuthExpectationFailedException, OAuthCommunicationException, IOException, ParsingException, JSONException, ParseException {
+        HttpClient client = new HttpClient();
 
-        OAuthConsumer consumer = new CommonsHttp3OAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
-        consumer.setMessageSigner(new HmacSha1MessageSigner());
-        consumer.setTokenWithSecret(ccSource.getTokenKey(), ccSource.getTokenSecret());
 
-        PostMethod postMethod = new PostMethod("https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/activities");
-        postMethod.setRequestHeader("Accept", "application/xml");
-        postMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        List<String> columns = Arrays.asList("EMAIL%20ADDRESS", "FIRST%20NAME", "LAST%20NAME", "JOB%20TITLE", "COMPANY%20NAME", "WORK%20PHONE", "HOME%20PHONE", "CITY", "STATE", "COUNTRY", "POSTAL%20CODE",
-                "CUSTOM%20FIELD%201", "CUSTOM%20FIELD%202", "CUSTOM%20FIELD%203", "CUSTOM%20FIELD%204", "CUSTOM%20FIELD%205",
-                "CUSTOM%20FIELD%206", "CUSTOM%20FIELD%207", "CUSTOM%20FIELD%208", "CUSTOM%20FIELD%209", "CUSTOM%20FIELD%2010",
-                "CUSTOM%20FIELD%2011", "CUSTOM%20FIELD%2012", "CUSTOM%20FIELD%2013", "CUSTOM%20FIELD%2014", "CUSTOM%20FIELD%2015");
-        StringBuilder sb = new StringBuilder();
-        for (String column : columns) {
-            sb.append("columns=").append(column).append("&");
-        }
-        String ops = "activityType=EXPORT_CONTACTS&fileType=CSV&exportOptDate=true&exportOptSource=true&exportListName=true&sortBy=DATE_DESC&"+sb.toString()+"listId="+
-        URLEncoder.encode("http://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/lists/" + listID, "UTF-8");
-        RequestEntity requestEntity = new StringRequestEntity(ops, "application/x-www-form-urlencoded", "UTF-8");
-        postMethod.setRequestEntity(requestEntity);
-        consumer.sign(postMethod);
+
+        PostMethod postMethod = new PostMethod("https://api.constantcontact.com/v2/activities/exportcontacts?api_key=" + ConstantContactCompositeSource.KEY);
+        System.out.println(postMethod.getURI().toString());
+        postMethod.setRequestHeader("Authorization", "Bearer " + ccSource.getAccessToken());
+        postMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
+        postMethod.setRequestHeader("User-Agent", "Easy Insight (http://www.easy-insight.com/)");
+        JSONObject requestObject = new JSONObject();
+        requestObject.put("file_type", "CSV");
+        requestObject.put("sort_by", "EMAIL_ADDRESS");
+        requestObject.put("export_date_added", true);
+        requestObject.put("export_added_by", true);
+        requestObject.put("lists", Arrays.asList(listID));
+        requestObject.put("column_names", Arrays.asList("Email Address", "First Name", "Last Name", "Job Title", "Company Name", "Work Phone",
+                "Home Phone", "City", "US State/CA Province", "Country", "Zip/Postal Code",
+                "Custom field 1", "Custom field 2", "Custom field 3", "Custom field 4", "Custom field 5",
+                "Custom field 6", "Custom field 7", "Custom field 8", "Custom field 9", "Custom field 10",
+                "Custom field 11", "Custom field 12", "Custom field 13", "Custom field 14", "Custom field 15"));
+        StringRequestEntity entity = new StringRequestEntity(requestObject.toString(), "application/json", "UTF-8");
+        postMethod.setRequestEntity(entity);
+        System.out.println(requestObject.toString());
         client.executeMethod(postMethod);
-        String string = postMethod.getResponseBodyAsString();
-        System.out.println(string);
-        string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
-        string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
-        string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
-        return new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+        System.out.println(postMethod.getResponseBodyAsString());
+        Map results = (Map) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(postMethod.getResponseBodyAsString());
+        return results.get("id").toString();
     }
 }

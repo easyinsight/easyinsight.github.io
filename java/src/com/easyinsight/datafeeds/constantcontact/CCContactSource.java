@@ -8,35 +8,15 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
-import com.easyinsight.storage.IWhere;
-import com.easyinsight.storage.StringWhere;
 import nu.xom.*;
-import oauth.signpost.OAuthConsumer;
-import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
-import oauth.signpost.commonshttp3.CommonsHttp3OAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
-import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
-import oauth.signpost.signature.HmacSha1MessageSigner;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.sql.Connection;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -158,6 +138,13 @@ public class CCContactSource extends ConstantContactBaseSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
+            return cleanRetrieval((ConstantContactCompositeSource) parentDefinition, IDataStorage);
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        /*try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
             ContactListCache cache = ccSource.getOrCreateContactListCache();
             cache.getOrCreateContactLists(ccSource);
@@ -203,7 +190,7 @@ public class CCContactSource extends ConstantContactBaseSource {
             throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
+        }*/
     }
 
     protected boolean clearsData(FeedDefinition parentSource) {
@@ -215,270 +202,115 @@ public class CCContactSource extends ConstantContactBaseSource {
         return CONTACT_ID;
     }
 
-    private DataSet incrementalRetrieval(FeedDefinition parentDefinition, ConstantContactCompositeSource ccSource, Date lastRefreshDate, IDataStorage IDataStorage) throws Exception {
-        DataSet dataSet = new DataSet();
-        boolean hasMoreData;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        String refreshString = simpleDateFormat.format(lastRefreshDate);
-        String url = "https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/contacts?updatedsince=" + refreshString + "&listtype=active";
-        Key contactKey = parentDefinition.getField(CONTACT_ID).toBaseKey();
-        org.apache.http.client.HttpClient client = new DefaultHttpClient();
-        Document doc = query(url,
-                ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition, client);
-
-        do {
-
-            hasMoreData = false;
-
-            Nodes nodes = doc.query("/feed/entry");
-
-            for (int i = 0; i < nodes.size(); i++) {
-                dataSet = new DataSet();
-                IRow row = dataSet.createRow();
-                Node node = nodes.get(i);
-                String contactIDLink = queryField(node, "id/text()");
-                contactIDLink = contactIDLink.replace("http:", "https:");
-                String id = contactIDLink.split("/")[7];
-                if (ccSource.isBriefMode()) {
-                    row.addValue(CONTACT_EMAIL, queryField(node, "content/Contact/EmailAddress/text()"));
-                    row.addValue(CONTACT_EMAIL_TYPE, queryField(node, "content/Contact/EmailType/text()"));
-                    row.addValue(CONTACT_NAME, queryField(node, "content/Contact/Name/text()"));
-                    row.addValue(CONTACT_STATUS, queryField(node, "content/Contact/Status/text()"));
-                    row.addValue(CONTACT_COUNT, 1);
-                } else {
-                    Document details = query(contactIDLink, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition, client);
-                    row.addValue(CONTACT_EMAIL, queryField(details, "/entry/content/Contact/EmailAddress/text()"));
-                    row.addValue(CONTACT_EMAIL_TYPE, queryField(details, "/entry/content/Contact/EmailType/text()"));
-                    row.addValue(CONTACT_ID, id);
-                    row.addValue(CONTACT_STATUS, queryField(details, "/entry/content/Contact/Status/text()"));
-                    row.addValue(CONTACT_NAME, queryField(details, "/entry/content/Contact/Name/text()"));
-                    row.addValue(CONTACT_FIRST_NAME, queryField(details, "/entry/content/Contact/FirstName/text()"));
-                    row.addValue(CONTACT_LAST_NAME, queryField(details, "/entry/content/Contact/LastName/text()"));
-                    row.addValue(CONTACT_COMPANY, queryField(details, "/entry/content/Contact/CompanyName/text()"));
-                    row.addValue(CONTACT_JOB_TITLE, queryField(details, "/entry/content/Contact/JobTitle/text()"));
-                    row.addValue(CONTACT_HOME_PHONE, queryField(details, "/entry/content/Contact/HomePhone/text()"));
-                    row.addValue(CONTACT_WORK_PHONE, queryField(details, "/entry/content/Contact/WorkPhone/text()"));
-                    row.addValue(CONTACT_CITY, queryField(details, "/entry/content/Contact/City/text()"));
-                    row.addValue(CONTACT_STATE, queryField(details, "/entry/content/Contact/StateName/text()"));
-                    row.addValue(CONTACT_COUNTRY, queryField(details, "/entry/content/Contact/CountryName/text()"));
-                    row.addValue(CONTACT_POSTAL, queryField(details, "/entry/content/Contact/PostalCode/text()"));
-                    row.addValue(CONTACT_NOTE, queryField(details, "/entry/content/Contact/Note/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD1, queryField(details, "/entry/content/Contact/CustomField1/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD2, queryField(details, "/entry/content/Contact/CustomField2/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD3, queryField(details, "/entry/content/Contact/CustomField3/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD4, queryField(details, "/entry/content/Contact/CustomField4/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD5, queryField(details, "/entry/content/Contact/CustomField5/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD6, queryField(details, "/entry/content/Contact/CustomField6/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD7, queryField(details, "/entry/content/Contact/CustomField7/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD8, queryField(details, "/entry/content/Contact/CustomField8/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD9, queryField(details, "/entry/content/Contact/CustomField9/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD10, queryField(details, "/entry/content/Contact/CustomField10/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD11, queryField(details, "/entry/content/Contact/CustomField11/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD12, queryField(details, "/entry/content/Contact/CustomField12/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD13, queryField(details, "/entry/content/Contact/CustomField13/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD14, queryField(details, "/entry/content/Contact/CustomField14/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD15, queryField(details, "/entry/content/Contact/CustomField15/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD16, queryField(details, "/entry/content/Contact/CustomField16/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD17, queryField(details, "/entry/content/Contact/CustomField17/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD18, queryField(details, "/entry/content/Contact/CustomField18/text()"));
-                    row.addValue(CONTACT_CREATED_ON, new DateValue(DATE_FORMAT.parse(queryField(details, "/entry/content/Contact/InsertTime/text()"))));
-                    row.addValue(CONTACT_UPDATED_ON, new DateValue(DATE_FORMAT.parse(queryField(details, "/entry/content/Contact/LastUpdateTime/text()"))));
-                    row.addValue(CONTACT_COUNT, 1);
-                }
-                StringWhere userWhere = new StringWhere(contactKey, id);
-                IDataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
-            }
-            Nodes links = doc.query("/feed/link");
-
-            for (int i = 0; i < links.size(); i++) {
-                Element link = (Element) links.get(i);
-                Attribute attribute = link.getAttribute("rel");
-                if (attribute != null && "next".equals(attribute.getValue())) {
-                    String linkURL = link.getAttribute("href").getValue();
-                    hasMoreData = true;
-                    doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition, client);
-                    break;
-                }
-            }
-        } while (hasMoreData);
-        return dataSet;
-    }
-
-    private DataSet cleanRetrieval(FeedDefinition parentDefinition, ConstantContactCompositeSource ccSource, IDataStorage IDataStorage) throws Exception, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException, ParseException {
+    private DataSet cleanRetrieval(ConstantContactCompositeSource ccSource, IDataStorage IDataStorage) throws Exception, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException, ParseException {
         DataSet dataSet = new DataSet();
 
-        boolean hasMoreData;
-
-        System.out.println("Started retrieving contacts...");
-
-        org.apache.http.client.HttpClient client = new DefaultHttpClient();
-
-        Document doc = query("https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/contacts", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition, client);
+        HttpClient client = new HttpClient();
+        Map result = query("https://api.constantcontact.com/v2/contacts?limit=500&api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+        Map meta = (Map) result.get("meta");
+        String nextLink = null;
+        if (meta != null) {
+            Map pagination = (Map) meta.get("pagination");
+            if (pagination != null) {
+                Object nextLinkObject = pagination.get("next_link");
+                if (nextLinkObject != null) {
+                    nextLink = "https://api.constantcontact.com" + nextLinkObject.toString() + "&api_key=" + ConstantContactCompositeSource.KEY;
+                }
+            }
+        }
 
         int size = 0;
+        boolean hasMoreData;
         do {
-
+            List results = (List) result.get("results");
             hasMoreData = false;
-
-            Nodes nodes = doc.query("/feed/entry");
-
-            for (int i = 0; i < nodes.size(); i++) {
+            for (Object obj : results) {
+                Map node = (Map) obj;
                 IRow row = dataSet.createRow();
-                Node node = nodes.get(i);
-                String contactIDLink = queryField(node, "id/text()");
-                contactIDLink = contactIDLink.replace("http:", "https:");
-                String id = contactIDLink.split("/")[7];
-                if (ccSource.isBriefMode()) {
-                    row.addValue(CONTACT_EMAIL, queryField(node, "content/Contact/EmailAddress/text()"));
-                    row.addValue(CONTACT_EMAIL_TYPE, queryField(node, "content/Contact/EmailType/text()"));
-                    row.addValue(CONTACT_NAME, queryField(node, "content/Contact/Name/text()"));
-                    row.addValue(CONTACT_STATUS, queryField(node, "content/Contact/Status/text()"));
-                    row.addValue(CONTACT_COUNT, 1);
-                } else {
-                    Document details = query(contactIDLink, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition, client);
-                    row.addValue(CONTACT_EMAIL, queryField(details, "/entry/content/Contact/EmailAddress/text()"));
-                    row.addValue(CONTACT_EMAIL_TYPE, queryField(details, "/entry/content/Contact/EmailType/text()"));
-                    row.addValue(CONTACT_ID, id);
-                    row.addValue(CONTACT_STATUS, queryField(details, "/entry/content/Contact/Status/text()"));
-                    row.addValue(CONTACT_NAME, queryField(details, "/entry/content/Contact/Name/text()"));
-                    row.addValue(CONTACT_FIRST_NAME, queryField(details, "/entry/content/Contact/FirstName/text()"));
-                    row.addValue(CONTACT_LAST_NAME, queryField(details, "/entry/content/Contact/LastName/text()"));
-                    row.addValue(CONTACT_COMPANY, queryField(details, "/entry/content/Contact/CompanyName/text()"));
-                    row.addValue(CONTACT_JOB_TITLE, queryField(details, "/entry/content/Contact/JobTitle/text()"));
-                    row.addValue(CONTACT_HOME_PHONE, queryField(details, "/entry/content/Contact/HomePhone/text()"));
-                    row.addValue(CONTACT_WORK_PHONE, queryField(details, "/entry/content/Contact/WorkPhone/text()"));
-                    row.addValue(CONTACT_CITY, queryField(details, "/entry/content/Contact/City/text()"));
-                    row.addValue(CONTACT_STATE, queryField(details, "/entry/content/Contact/StateName/text()"));
-                    row.addValue(CONTACT_COUNTRY, queryField(details, "/entry/content/Contact/CountryName/text()"));
-                    row.addValue(CONTACT_POSTAL, queryField(details, "/entry/content/Contact/PostalCode/text()"));
-                    row.addValue(CONTACT_NOTE, queryField(details, "/entry/content/Contact/Note/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD1, queryField(details, "/entry/content/Contact/CustomField1/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD2, queryField(details, "/entry/content/Contact/CustomField2/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD3, queryField(details, "/entry/content/Contact/CustomField3/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD4, queryField(details, "/entry/content/Contact/CustomField4/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD5, queryField(details, "/entry/content/Contact/CustomField5/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD6, queryField(details, "/entry/content/Contact/CustomField6/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD7, queryField(details, "/entry/content/Contact/CustomField7/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD8, queryField(details, "/entry/content/Contact/CustomField8/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD9, queryField(details, "/entry/content/Contact/CustomField9/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD10, queryField(details, "/entry/content/Contact/CustomField10/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD11, queryField(details, "/entry/content/Contact/CustomField11/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD12, queryField(details, "/entry/content/Contact/CustomField12/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD13, queryField(details, "/entry/content/Contact/CustomField13/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD14, queryField(details, "/entry/content/Contact/CustomField14/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD15, queryField(details, "/entry/content/Contact/CustomField15/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD16, queryField(details, "/entry/content/Contact/CustomField16/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD17, queryField(details, "/entry/content/Contact/CustomField17/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD18, queryField(details, "/entry/content/Contact/CustomField18/text()"));
-                    row.addValue(CONTACT_CREATED_ON, new DateValue(DATE_FORMAT.parse(queryField(details, "/entry/content/Contact/InsertTime/text()"))));
-                    row.addValue(CONTACT_UPDATED_ON, new DateValue(DATE_FORMAT.parse(queryField(details, "/entry/content/Contact/LastUpdateTime/text()"))));
-                    row.addValue(CONTACT_COUNT, 1);
-
+                row.addValue(CONTACT_EMAIL, ((Map) ((List) node.get("email_addresses")).get(0)).get("email_address").toString());
+                row.addValue(CONTACT_ID, node.get("id").toString());
+                row.addValue(CONTACT_NAME, node.get("first_name").toString() + " " + node.get("last_name"));
+                row.addValue(CONTACT_FIRST_NAME, node.get("first_name").toString());
+                row.addValue(CONTACT_LAST_NAME, node.get("last_name").toString());
+                row.addValue(CONTACT_COMPANY, node.get("company_name").toString());
+                row.addValue(CONTACT_JOB_TITLE, node.get("job_title").toString());
+                row.addValue(CONTACT_HOME_PHONE, node.get("home_phone").toString());
+                row.addValue(CONTACT_WORK_PHONE, node.get("work_phone").toString());
+                List addresses = (List) node.get("addresses");
+                if (addresses != null && addresses.size() > 0) {
+                    Map addressNode = (Map) addresses.get(0);
+                    row.addValue(CONTACT_CITY, addressNode.get("city").toString());
+                    row.addValue(CONTACT_STATE, addressNode.get("state_code").toString());
+                    row.addValue(CONTACT_COUNTRY, addressNode.get("country_code").toString());
+                    row.addValue(CONTACT_POSTAL, addressNode.get("postal_code").toString());
                 }
+                List customFields = (List) node.get("custom_fields");
+                if (customFields != null) {
+                    for (Object customFieldObj : customFields) {
+                        Map customFieldMap = (Map) customFieldObj;
+                        String name = customFieldMap.get("name").toString();
+                        String value = customFieldMap.get("value").toString();
+                        if (name.equals("CustomField1")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD1, value);
+                        } else if (name.equals("CustomField2")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD2, value);
+                        } else if (name.equals("CustomField2")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD2, value);
+                        } else if (name.equals("CustomField3")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD3, value);
+                        } else if (name.equals("CustomField4")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD4, value);
+                        } else if (name.equals("CustomField5")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD5, value);
+                        } else if (name.equals("CustomField6")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD6, value);
+                        } else if (name.equals("CustomField7")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD7, value);
+                        } else if (name.equals("CustomField8")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD8, value);
+                        } else if (name.equals("CustomField9")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD9, value);
+                        } else if (name.equals("CustomField10")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD10, value);
+                        } else if (name.equals("CustomField11")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD11, value);
+                        } else if (name.equals("CustomField12")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD12, value);
+                        } else if (name.equals("CustomField13")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD13, value);
+                        } else if (name.equals("CustomField14")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD14, value);
+                        } else if (name.equals("CustomField15")) {
+                            row.addValue(CONTACT_CUSTOM_FIELD15, value);
+                        }
+                    }
+                }
+                row.addValue(CONTACT_COUNT, 1);
+                row.addValue(CONTACT_CREATED_ON, new DateValue(DATE_FORMAT.parse(node.get("created_date").toString())));
+                row.addValue(CONTACT_UPDATED_ON, new DateValue(DATE_FORMAT.parse(node.get("created_date").toString())));
                 size++;
                 if (size == 250) {
                     IDataStorage.insertData(dataSet);
                     dataSet = new DataSet();
                 }
             }
-            Nodes links = doc.query("/feed/link");
-
-            for (int i = 0; i < links.size(); i++) {
-                Element link = (Element) links.get(i);
-                Attribute attribute = link.getAttribute("rel");
-                if (attribute != null && "next".equals(attribute.getValue())) {
-                    String linkURL = link.getAttribute("href").getValue();
-                    hasMoreData = true;
-                    doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition, client);
-                    break;
+            if (nextLink != null) {
+                result = query(nextLink, ccSource, client);
+                meta = (Map) result.get("meta");
+                nextLink = null;
+                if (meta != null) {
+                    Map pagination = (Map) meta.get("pagination");
+                    if (pagination != null) {
+                        Object nextLinkObject = pagination.get("next_link");
+                        if (nextLinkObject != null) {
+                            nextLink = "https://api.constantcontact.com" + nextLinkObject.toString() + "&api_key=" + ConstantContactCompositeSource.KEY;
+                        }
+                    }
                 }
+                hasMoreData = true;
             }
         } while (hasMoreData);
         IDataStorage.insertData(dataSet);
-        System.out.println("Finished retrieving contacts...");
         return null;
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        // get contact lists
-
-        Document doc = startBulkUpload("5", null);
-        String id = doc.query("/entry/id/text()").get(0).getValue();
-
-        System.out.println(id);
-
-        id = id.replace("http://", "https://");
-        
-        boolean found = false;
-
-        OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
-        consumer.setMessageSigner(new HmacSha1MessageSigner());
-        consumer.setTokenWithSecret("01d2d931-2df6-4cb8-88ca-e9f4c90c8bea", "ZKiEPe1wkLtIjmwpUHelXWKP3rE6gkVMaMqi");
-        HttpGet httpRequest = new HttpGet(id);
-        httpRequest.setHeader("Accept", "application/xml");
-        httpRequest.setHeader("Content-Type", "application/xml");
-        consumer.sign(httpRequest);
-
-        org.apache.http.client.HttpClient client = new DefaultHttpClient();
-        ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
-            public String handleResponse(final HttpResponse response)
-                    throws IOException {
-                StatusLine statusLine = response.getStatusLine();
-                if (statusLine.getStatusCode() >= 300) {
-                    throw new HttpResponseException(statusLine.getStatusCode(),
-                            statusLine.getReasonPhrase());
-                }
-
-                HttpEntity entity = response.getEntity();
-                return entity == null ? null : EntityUtils.toString(entity, "UTF-8");
-            }
-        };
-        
-        do {
-            String string = client.execute(httpRequest, responseHandler);
-            string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
-            string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
-            string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
-            Document result = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
-            String status = result.query("/entry/content/Activity/Status/text()").get(0).getValue();
-            System.out.println(status);
-            if ("COMPLETE".equals(status)) {
-                found = true;
-            } else {
-                Thread.sleep(5000);
-            }
-        } while (!found);
-
-        HttpGet getFile = new HttpGet(id + ".csv");
-        consumer.sign(getFile);
-
-        String file = client.execute(getFile, responseHandler);
-
-        System.out.println(file);
-    }
-
-    private static Document startBulkUpload(String listID, ConstantContactCompositeSource ccSource) throws OAuthMessageSignerException, OAuthExpectationFailedException, OAuthCommunicationException, IOException, ParsingException {
-        org.apache.commons.httpclient.HttpClient client = new org.apache.commons.httpclient.HttpClient();
-
-        OAuthConsumer consumer = new CommonsHttp3OAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
-        consumer.setMessageSigner(new HmacSha1MessageSigner());
-        consumer.setTokenWithSecret("01d2d931-2df6-4cb8-88ca-e9f4c90c8bea", "ZKiEPe1wkLtIjmwpUHelXWKP3rE6gkVMaMqi");
-
-        PostMethod postMethod = new PostMethod("https://api.constantcontact.com/ws/customers"+ccSource.getCcUserName()+"/activities");
-        postMethod.setRequestHeader("Accept", "application/xml");
-        postMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        String ops = "activityType=EXPORT_CONTACTS&fileType=CSV&exportOptDate=true&exportOptSource=true&exportListName=true&sortBy=DATE_DESC&columns=EMAIL%20ADDRESS&columns=FIRST%20NAME&listId="+
-                URLEncoder.encode("http://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/lists/" + listID, "UTF-8");
-        RequestEntity requestEntity = new StringRequestEntity(ops, "application/x-www-form-urlencoded", "UTF-8");
-        postMethod.setRequestEntity(requestEntity);
-        consumer.sign(postMethod);
-        client.executeMethod(postMethod);
-        String string = postMethod.getResponseBodyAsString();
-        System.out.println(string);
-        string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
-        string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
-        string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
-        return new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
     }
 }
