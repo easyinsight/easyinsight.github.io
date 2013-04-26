@@ -68,6 +68,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             if (cases != includeCaseNotes || companies != includeCompanyNotes || deals != includeDealNotes ||
                     contacts != includeContactNotes || emails != includeEmails) {
                 setLastRefreshStart(null);
+
             }
         }
     }
@@ -160,6 +161,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private transient HighriseCompanyCache highriseCompanyCache;
     private transient HighriseCustomFieldsCache customFieldsCache;
     private transient Map<String, String> contactToCompanyCache;
+    private transient Map<String, String> dealToCompanyCache;
     private transient HighriseTaskCache taskCache;
 
     public int getDataSourceType() {
@@ -502,11 +504,13 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             if (isContactLinkable(analysisItem)) {
                 removeURLLinkIfExists("/people/["+HighRiseContactSource.CONTACT_ID+"]", analysisItem);
                 URLLink urlLink = new URLLink();
+                urlLink.setDefaultLink(true);
                 urlLink.setUrl(getUrl() + "/people/["+HighRiseContactSource.CONTACT_ID+"]");
                 urlLink.setLabel("View Contact in Highrise...");
                 analysisItem.getLinks().add(urlLink);
             } else if (isCompanyLinkable(analysisItem)) {
                 URLLink urlLink = new URLLink();
+                urlLink.setDefaultLink(true);
                 removeURLLinkIfExists("/companies/["+HighRiseCompanySource.COMPANY_ID+"]", analysisItem);
                 urlLink.setUrl(getUrl() + "/companies/["+HighRiseCompanySource.COMPANY_ID+"]");
                 urlLink.setLabel("View Company in Highrise...");
@@ -514,12 +518,14 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             } else if (isDealLinkable(analysisItem)) {
                 removeURLLinkIfExists("/deals/["+HighRiseDealSource.DEAL_ID+"]", analysisItem);
                 URLLink urlLink = new URLLink();
+                urlLink.setDefaultLink(true);
                 urlLink.setUrl(getUrl() + "/deals/["+HighRiseDealSource.DEAL_ID+"]");
                 urlLink.setLabel("View Deal in Highrise...");
                 analysisItem.getLinks().add(urlLink);
             } else if (isCaseLinkable(analysisItem)) {
                 removeURLLinkIfExists("/kases/["+HighRiseCaseSource.CASE_ID+"]", analysisItem);
                 URLLink urlLink = new URLLink();
+                urlLink.setDefaultLink(true);
                 urlLink.setUrl(getUrl() + "/kases/["+HighRiseCaseSource.CASE_ID+"]");
                 urlLink.setLabel("View Case in Highrise...");
                 analysisItem.getLinks().add(urlLink);
