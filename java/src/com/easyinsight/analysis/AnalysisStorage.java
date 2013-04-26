@@ -298,12 +298,19 @@ public class AnalysisStorage {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, " +
                 "ANALYSIS.create_date, analysis.account_visible, analysis.folder, analysis.description FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
                 "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? AND temporary_report = ?");
+        PreparedStatement userStmt = conn.prepareStatement("SELECT USER.FIRST_NAME, USER.NAME FROM USER WHERE USER_ID = ?");
+        userStmt.setLong(1, userID);
+        ResultSet nameRS = userStmt.executeQuery();
+        nameRS.next();
+        String firstName = nameRS.getString(1);
+        String lastName = nameRS.getString(2);
+        String name = firstName != null ? firstName + " " + lastName : lastName;
+        userStmt.close();
         queryStmt.setLong(1, userID);
         queryStmt.setBoolean(2, false);
         Set<Long> reportIDs = new HashSet<Long>();
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
-            String name = SecurityUtil.getUserName();
             long reportID = rs.getLong(1);
             reportIDs.add(reportID);
             InsightDescriptor descriptor = new InsightDescriptor(reportID, rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), new Date(rs.getTimestamp(6).getTime()), name, Roles.OWNER,
@@ -326,16 +333,16 @@ public class AnalysisStorage {
             ownerStmt.setLong(1, accountRS.getLong(1));
             ownerStmt.setInt(2, Roles.OWNER);
             ResultSet ownerRS = ownerStmt.executeQuery();
-            String name;
+            String ownerName;
             if (ownerRS.next()) {
-                String firstName = ownerRS.getString(1);
-                String lastName = ownerRS.getString(2);
-                name = firstName != null ? firstName + " " + lastName : lastName;
+                String ownerFirstName = ownerRS.getString(1);
+                String ownerLastName = ownerRS.getString(2);
+                ownerName = ownerFirstName != null ? ownerFirstName + " " + ownerLastName : ownerLastName;
             } else {
-                name = "";
+                ownerName = "";
             }
             descriptors.add(new InsightDescriptor(reportID, accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5),
-                    new Date(accountRS.getTimestamp(6).getTime()), name, Roles.SHARER, accountRS.getBoolean(7), accountRS.getInt(8), accountRS.getString(9)));
+                    new Date(accountRS.getTimestamp(6).getTime()), ownerName, Roles.SHARER, accountRS.getBoolean(7), accountRS.getInt(8), accountRS.getString(9)));
         }
         queryAccountStmt.close();
         PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, " +
@@ -349,16 +356,16 @@ public class AnalysisStorage {
             ownerStmt.setLong(1, groupRS.getLong(1));
             ownerStmt.setInt(2, Roles.OWNER);
             ResultSet ownerRS = ownerStmt.executeQuery();
-            String name;
+            String ownerName;
             if (ownerRS.next()) {
-                String firstName = ownerRS.getString(1);
-                String lastName = ownerRS.getString(2);
-                name = firstName != null ? firstName + " " + lastName : lastName;
+                String ownerFirstName = ownerRS.getString(1);
+                String ownerLastName = ownerRS.getString(2);
+                ownerName = ownerFirstName != null ? ownerFirstName + " " + ownerLastName : ownerLastName;
             } else {
-                name = "";
+                ownerName = "";
             }
             descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5),
-                    new Date(groupRS.getTimestamp(7).getTime()), name, groupRS.getInt(6), groupRS.getBoolean(8), groupRS.getInt(9), groupRS.getString(10)));
+                    new Date(groupRS.getTimestamp(7).getTime()), ownerName, groupRS.getInt(6), groupRS.getBoolean(8), groupRS.getInt(9), groupRS.getString(10)));
         }
         userGroupStmt.close();
         ownerStmt.close();

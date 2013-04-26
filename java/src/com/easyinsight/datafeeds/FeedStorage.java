@@ -993,7 +993,15 @@ public class FeedStorage {
 
     public List<DataSourceDescriptor> getDataSources(long userID, long accountID, EIConnection conn) throws SQLException {
         RolePrioritySet<DataSourceDescriptor> descriptorList = new RolePrioritySet<DataSourceDescriptor>();
-        Set<Long> sources = getMyDataSources(userID, conn, descriptorList);
+        PreparedStatement userStmt = conn.prepareStatement("SELECT USER.FIRST_NAME, USER.NAME FROM USER WHERE USER_ID = ?");
+        userStmt.setLong(1, userID);
+        ResultSet rs = userStmt.executeQuery();
+        rs.next();
+        String firstName = rs.getString(1);
+        String lastName = rs.getString(2);
+        String name = firstName != null ? firstName + " " + lastName : lastName;
+        userStmt.close();
+        Set<Long> sources = getMyDataSources(userID, conn, descriptorList, name);
         getAccountDataSources(conn, accountID, descriptorList, sources);
         getGroupDataSources(userID, conn, descriptorList);
         List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
@@ -1005,7 +1013,7 @@ public class FeedStorage {
         return dataSources;
     }
 
-    private Set<Long> getMyDataSources(long userID, EIConnection conn, RolePrioritySet<DataSourceDescriptor> descriptorList) throws SQLException {
+    private Set<Long> getMyDataSources(long userID, EIConnection conn, RolePrioritySet<DataSourceDescriptor> descriptorList, String name) throws SQLException {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
                 "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, ROLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, DATA_FEED.create_date, DATA_FEED.account_visible, DATA_FEED.api_key, refresh_behavior" +
                 " FROM (UPLOAD_POLICY_USERS, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) WHERE " +
@@ -1013,7 +1021,6 @@ public class FeedStorage {
 
         queryStmt.setLong(1, userID);
         queryStmt.setBoolean(2, true);
-        String name = SecurityUtil.getUserName();
         Set<Long> dataSourceIDs = new HashSet<Long>();
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
