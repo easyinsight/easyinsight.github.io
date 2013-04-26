@@ -48,7 +48,7 @@
                 }
             }
             var sort:Sort = new Sort();
-            sort.fields = [ new SortField("display", false) ];
+            sort.fields = [ new SortField("display", true) ];
             availableDimensions.sort = sort;
             availableDimensions.refresh();
         }
