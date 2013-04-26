@@ -3,6 +3,7 @@ package com.easyinsight.users;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
+import com.easyinsight.datafeeds.constantcontact.ConstantContactCompositeSource;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksCompositeSource;
 import com.easyinsight.datafeeds.harvest.HarvestCompositeSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
@@ -88,10 +89,25 @@ public class TokenService {
                         freshbooksCompositeSource.getUrl() + "/oauth/oauth_request.php", freshbooksCompositeSource.getUrl() + "/oauth/oauth_access.php",
                         freshbooksCompositeSource.getUrl() + "/oauth/oauth_authorize.php");
             } else if (type == FeedType.CONSTANT_CONTACT.getType()) {
-                consumer = new DefaultOAuthConsumer("cec7e39c-25fc-43e6-a423-bf02de492d87", "ee72ddd074804402966863aad91b9687");
-                provider = new DefaultOAuthProvider(
-                        "https://oauth.constantcontact.com/ws/oauth/request_token", "https://oauth.constantcontact.com/ws/oauth/access_token",
-                        "https://oauth.constantcontact.com/ws/oauth/confirm_access");
+                ConstantContactCompositeSource constantContactCompositeSource = (ConstantContactCompositeSource) dataSource;
+                OAuthClientRequest request;
+                if (ConfigLoader.instance().isProduction()) {
+                    request = OAuthClientRequest
+                            .authorizationLocation("https://oauth2.constantcontact.com/oauth2/oauth/siteowner/authorize")
+                            .setClientId(ConstantContactCompositeSource.KEY)
+                            .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
+                            .buildQueryMessage();
+                } else {
+                    request = OAuthClientRequest
+                            .authorizationLocation("https://oauth2.constantcontact.com/oauth2/oauth/siteowner/authorize")
+                            .setClientId(ConstantContactCompositeSource.KEY)
+                            .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
+                            .buildQueryMessage();
+                }
+                session.setAttribute("redirectTarget", redirectType);
+                session.setAttribute("dataSourceID", dataSource.getApiKey());
+                // https://oauth2.constantcontact.com/oauth2/oauth/siteowner/authorize?response_type=code&redirect_uri=https%3A%2F%2Fstaging.easy-insight.com%2Fapp%2Foauth&client_id=hzt8g9gd27c7fbge3qyscwku
+                return new OAuthResponse(request.getLocationUri(), true);
             } else if (type == FeedType.GOOGLE.getType()) {
                 consumer = new CommonsHttpOAuthConsumer("www.easy-insight.com", "OG0zlkZFPIe7JdHfLB8qXXYv");
                 consumer.setMessageSigner(new HmacSha1MessageSigner());
