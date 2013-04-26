@@ -31,6 +31,9 @@ import mx.collections.ArrayCollection;
 		}
 
         override public function getFont():String {
+            if (customFontFamily != null && customFontFamily != "" && useCustomFontFamily) {
+                return customFontFamily;
+            }
             if (fontName == "Lucida Grande" || fontName == "Open Sans") {
                 return fontName;
             } else {
