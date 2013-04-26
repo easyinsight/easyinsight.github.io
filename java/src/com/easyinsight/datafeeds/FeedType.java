@@ -201,6 +201,16 @@ public class FeedType implements Serializable {
     public static final FeedType TRELLO_CARD = new FeedType(174);
     public static final FeedType TRELLO_CARD_HISTORY = new FeedType(175);
 
+    public static final FeedType CONSTANT_CONTACT_LINKS = new FeedType(176);
+    public static final FeedType INFUSIONSOFT_COMPOSITE = new FeedType(177);
+    public static final FeedType INFUSIONSOFT_LEAD = new FeedType(178);
+    public static final FeedType INFUSIONSOFT_STAGE = new FeedType(179);
+    public static final FeedType INFUSIONSOFT_STAGE_HISTORY = new FeedType(180);
+    public static final FeedType INFUSIONSOFT_COMPANIES = new FeedType(181);
+    public static final FeedType INFUSIONSOFT_CONTACTS = new FeedType(182);
+    public static final FeedType INFUSIONSOFT_AFFILIATES = new FeedType(183);
+    public static final FeedType INFUSIONSOFT_JOBS = new FeedType(184);
+
     public FeedType() {
     }
 
