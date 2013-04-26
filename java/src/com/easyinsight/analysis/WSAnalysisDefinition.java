@@ -11,10 +11,12 @@ import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.pipeline.*;
 
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.Serializable;
 
 import com.easyinsight.preferences.ImageDescriptor;
+import com.easyinsight.security.SecurityUtil;
 import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.Transient;
@@ -106,6 +108,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private int maxHeaderWidth = 600;
     private int cacheMinutes;
     private boolean manualButRunFirst;
+    private String customFontFamily;
+    private boolean useCustomFontFamily;
 
     private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
@@ -115,6 +119,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private List<AddonReport> addonReports;
 
     private boolean rowsEditable;
+
+    protected String generateDescription() {
+        return "";
+    }
 
     public List<AddonReport> getAddonReports() {
         return addonReports;
@@ -130,6 +138,22 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setManualButRunFirst(boolean manualButRunFirst) {
         this.manualButRunFirst = manualButRunFirst;
+    }
+
+    public String getCustomFontFamily() {
+        return customFontFamily;
+    }
+
+    public void setCustomFontFamily(String customFontFamily) {
+        this.customFontFamily = customFontFamily;
+    }
+
+    public boolean isUseCustomFontFamily() {
+        return useCustomFontFamily;
+    }
+
+    public void setUseCustomFontFamily(boolean useCustomFontFamily) {
+        this.useCustomFontFamily = useCustomFontFamily;
     }
 
     public int getCacheMinutes() {
@@ -817,11 +841,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
         adHocExecution = findBooleanProperty(properties, "adHocExecution", false);
         cacheable = findBooleanProperty(properties, "cacheable", false);
         manualButRunFirst = findBooleanProperty(properties, "manualButRunFirst", false);
+        customFontFamily = findStringProperty(properties, "customFontFamily", "");
+        useCustomFontFamily = findBooleanProperty(properties, "useCustomFontFamily", false);
     }
 
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = new ArrayList<ReportProperty>();
         properties.add(new ReportStringProperty("fontName", fontName));
+        properties.add(new ReportStringProperty("customFontFamily", customFontFamily));
         properties.add(new ReportNumericProperty("fontSize", fontSize));
         properties.add(new ReportNumericProperty("cacheMinutes", cacheMinutes));
         properties.add(new ReportNumericProperty("headerFontSize", headerFontSize));
@@ -835,6 +862,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("adHocExecution", adHocExecution));
         properties.add(new ReportBooleanProperty("cacheable", cacheable));
         properties.add(new ReportBooleanProperty("manualButRunFirst", manualButRunFirst));
+        properties.add(new ReportBooleanProperty("useCustomFontFamily", useCustomFontFamily));
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }
@@ -977,5 +1005,45 @@ public abstract class WSAnalysisDefinition implements Serializable {
         List<INestedComponent> components = new ArrayList<INestedComponent>();
         components.add(new SimpleNestedComponent());
         return components;
+    }
+
+    protected String createdOn() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        if (getDateCreated() == null) {
+            return sdf.format(new Date());
+        }
+        return sdf.format(getDateCreated());
+    }
+
+    protected String author() {
+        if (getAuthorName() == null) {
+            return SecurityUtil.getUserName();
+        }
+        return getAuthorName();
+    }
+
+    protected String summarize(List<AnalysisItem> columns) {
+        StringBuilder sb = new StringBuilder();
+        if (columns.size() > 0) {
+            for (int i = 0; i < columns.size(); i++) {
+                AnalysisItem item = columns.get(i);
+                sb.append(item.toDisplay());
+                if (i < (columns.size() - 2)) {
+                    sb.append(", ");
+                } else if (i == (columns.size() - 2)) {
+                    sb.append(" and ");
+                }
+            }
+        }
+
+        return sb.toString();
+    }
+
+    protected String summarizeFilters(Collection<FilterDefinition> filters) {
+        StringBuilder sb = new StringBuilder();
+        if (filters != null && filters.size() > 0) {
+            sb.append(" with ").append(filters.size()).append(" filters");
+        }
+        return sb.toString();
     }
 }
