@@ -5,6 +5,7 @@
                     xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadResponse;
+        import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
 
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -12,6 +13,7 @@
         import com.easyinsight.kpi.TutorialButtons;
         import com.easyinsight.kpi.TutorialPanel;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -99,7 +101,10 @@
                 var response:UploadResponse = uploadService.createDataSource.lastResult as UploadResponse;
                 if (response.successful) {
                     PopUpManager.removePopUp(this);
-                    User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(response.feedID)));
+                    //User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(response.feedID)));
+                    var dataSourceDescriptor:DataSourceDescriptor = new DataSourceDescriptor();
+                    dataSourceDescriptor.id = response.feedID;
+                    User.getEventNotifier().dispatchEvent(new NavigationEvent("Home", null, { dataSourceDescriptor: dataSourceDescriptor, freshInstall: true}));
                 } else {
                     PopUpManager.removePopUp(this);
                     Alert.show(response.failureMessage);
