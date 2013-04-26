@@ -50,7 +50,11 @@ public class Concat extends Function {
             if (value.type() == Value.EMPTY) {
                 continue;
             }
-            sb.append(row.getValue(targetField)).append(", ");
+            String str = value.toString().trim();
+            if ("".equals(str)) {
+                continue;
+            }
+            sb.append(str).append(", ");
         }
         if (sb.length() > 0) {
             sb.deleteCharAt(sb.length() - 1);
