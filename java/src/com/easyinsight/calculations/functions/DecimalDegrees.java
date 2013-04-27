@@ -13,9 +13,10 @@ import java.text.NumberFormat;
 public class DecimalDegrees extends Function {
     public Value evaluate() {
         try {
+            char c = 176;
             String blah = params.get(0).toString().trim();
-            String degrees = blah.substring(0, blah.indexOf("¡")).trim();
-            String minutes = blah.substring(blah.indexOf("¡") + 1, blah.indexOf("'")).trim();
+            String degrees = blah.substring(0, blah.indexOf(c)).trim();
+            String minutes = blah.substring(blah.indexOf(c) + 1, blah.indexOf("'")).trim();
             String seconds = blah.substring(blah.indexOf("'") + 1, blah.length() - 1).trim();
             char direction = blah.charAt(blah.length() - 1);
             System.out.println(degrees + " - " + minutes + " - " + seconds + " - " + direction);

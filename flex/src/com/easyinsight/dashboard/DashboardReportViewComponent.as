@@ -20,7 +20,6 @@ import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
-import mx.controls.Alert;
 import mx.controls.Label;
 
 public class DashboardReportViewComponent extends VBox implements IDashboardViewComponent  {
@@ -217,7 +216,10 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
     private var hasFilters:Boolean = false;
 
+
+
     private function onReportSetup(event:ReportSetupEvent):void {
+        viewFactory.registerPostProcessor(new ReportDashboardPostProcessor(dashboardEditorMetadata));
         var filterDefinitions:ArrayCollection = event.reportInfo.report.filterDefinitions;
         //viewFactory.filterDefinitions = filterDefinitions;
         if (event.reportInfo.report.filterDefinitions.length > 0) {

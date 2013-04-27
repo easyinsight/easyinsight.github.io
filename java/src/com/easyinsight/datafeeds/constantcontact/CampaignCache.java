@@ -1,13 +1,13 @@
 package com.easyinsight.datafeeds.constantcontact;
 
 import com.easyinsight.datafeeds.FeedDefinition;
-import nu.xom.*;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -20,47 +20,65 @@ public class CampaignCache extends ConstantContactBaseSource {
     public List<Campaign> getOrCreateCampaigns(ConstantContactCompositeSource ccSource) throws Exception {
         if (campaigns == null) {
             campaigns = new ArrayList<Campaign>();
-            org.apache.http.client.HttpClient client = new DefaultHttpClient();
-            Document doc = query("https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns", ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource, client);
+            HttpClient client = new HttpClient();
+            Map result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+            Map meta = (Map) result.get("meta");
+            String nextLink = null;
+            if (meta != null) {
+                Map pagination = (Map) meta.get("pagination");
+                if (pagination != null) {
+                    Object nextLinkObject = pagination.get("next_link");
+                    if (nextLinkObject != null) {
+                        nextLink = nextLinkObject.toString();
+                    }
+                }
+            }
+
             boolean hasMoreData;
             do {
+                List campaigns = (List) result.get("results");
                 hasMoreData = false;
-                Nodes nodes = doc.query("/feed/entry");
-                for (int i = 0; i < nodes.size(); i++) {
-    
-                    Node node = nodes.get(i);
-                    Date date = null;
-                    String dateString = queryField(node, "content/Campaign/Date/text()");
-                    if (dateString != null) {
-                        date = DATE_FORMAT.parse(dateString);
-                        long time = date.getTime();
-    
-                        long delta = System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 90;
-                        if (time < delta) {
-                            continue;
+                for (Object obj : campaigns) {
+                    Map node = (Map) obj;
+                    String id = node.get("id").toString();
+                    String name = node.get("name").toString();
+                    String status = node.get("status").toString();
+                    Map xyz = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/"+id+"?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                    List clickthroughDetails = (List) xyz.get("click_through_details");
+                    List<CCCampaignLink> links = new ArrayList<CCCampaignLink>();
+                    if (clickthroughDetails != null) {
+                        for (Object clickObj : clickthroughDetails) {
+                            Map clickthroughMap = (Map) clickObj;
+                            String clickID = clickthroughMap.get("url_uid").toString();
+                            String url = clickthroughMap.get("url").toString();
+                            CCCampaignLink link = new CCCampaignLink();
+                            link.setId(clickID);
+                            link.setUrl(url);
+                            links.add(link);
                         }
-    
                     }
-                    
-                    String idString = node.query("id/text()").get(0).getValue();
-                    String id = idString.split("/")[7];
-                    String name = node.query("content/Campaign/Name/text()").get(0).getValue();
-                    String status = node.query("content/Campaign/Status/text()").get(0).getValue();
-                    campaigns.add(new Campaign(name, id, status, date, null));
+                    Date lastRun;
+                    if (node.get("last_run_date") != null) {
+                        lastRun = DATE_FORMAT.parse(node.get("last_run_date").toString());
+                    } else {
+                        lastRun = new Date(1);
+                    }
+                    this.campaigns.add(new Campaign(name, id, status, lastRun, null, links));
                 }
-                Nodes links = doc.query("/feed/link");
-    
-                for (int i = 0; i < links.size(); i++) {
-                    Element link = (Element) links.get(i);
-                    Attribute attribute = link.getAttribute("rel");
-                    if (attribute != null && "next".equals(attribute.getValue())) {
-                        String linkURL = link.getAttribute("href").getValue();
-                        hasMoreData = true;
-                        String linkURLString = "https://api.constantcontact.com" + linkURL;
-                        linkURLString = linkURLString.substring(0, 45) + ccSource.getCcUserName() + linkURLString.substring(linkURLString.indexOf("/campaigns"));
-                        doc = query(linkURLString, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource, client);
-                        break;
+                if (nextLink != null) {
+                    result = query(nextLink, ccSource, client);
+                    meta = (Map) result.get("meta");
+                    nextLink = null;
+                    if (meta != null) {
+                        Map pagination = (Map) meta.get("pagination");
+                        if (pagination != null) {
+                            Object nextLinkObject = pagination.get("next_link");
+                            if (nextLinkObject != null) {
+                                nextLink = nextLinkObject.toString();
+                            }
+                        }
                     }
+                    hasMoreData = true;
                 }
             } while (hasMoreData);
         }

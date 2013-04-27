@@ -1,6 +1,7 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.analysis.Link;
 import com.easyinsight.core.RolePrioritySet;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -11,10 +12,7 @@ import com.easyinsight.email.UserStub;
 import com.easyinsight.security.Roles;
 import org.hibernate.Session;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -226,13 +224,23 @@ public class DashboardStorage {
     }
 
     public void saveDashboard(Dashboard dashboard, EIConnection conn) throws SQLException {
+        if (dashboard.getDefaultDrillthrough() != null) {
+            Session session = Database.instance().createSession(conn);
+            try {
+                dashboard.getDefaultDrillthrough().beforeSave();
+                session.saveOrUpdate(dashboard.getDefaultDrillthrough());
+                session.flush();
+            } finally {
+                session.close();
+            }
+        }
         if (dashboard.getId() == 0) {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD (DASHBOARD_NAME, URL_KEY, " +
                     "ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE, UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, TEMPORARY_DASHBOARD," +
                     "PUBLIC_VISIBLE, border_color, border_thickness, background_color, padding," +
                     "recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing," +
-                    "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding, default_link) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             insertStmt.setString(1, dashboard.getName());
             insertStmt.setString(2, dashboard.getUrlKey());
             insertStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -260,6 +268,11 @@ public class DashboardStorage {
             insertStmt.setInt(25, dashboard.getStackFill2End());
             insertStmt.setBoolean(26, dashboard.isFillStackHeaders());
             insertStmt.setInt(27, dashboard.getReportHorizontalPadding());
+            if (dashboard.getDefaultDrillthrough() == null) {
+                insertStmt.setNull(28, Types.BIGINT);
+            } else {
+                insertStmt.setLong(28, dashboard.getDefaultDrillthrough().getLinkID());
+            }
             insertStmt.execute();
             dashboard.setId(Database.instance().getAutoGenKey(insertStmt));
             insertStmt.close();
@@ -268,7 +281,8 @@ public class DashboardStorage {
                     "URL_KEY = ?, ACCOUNT_VISIBLE = ?, UPDATE_DATE = ?, DESCRIPTION = ?, EXCHANGE_VISIBLE = ?, AUTHOR_NAME = ?, TEMPORARY_DASHBOARD = ?," +
                     "PUBLIC_VISIBLE = ?, border_color = ?, border_thickness = ?, background_color = ?, padding = ?," +
                     "recommended_exchange = ?, ytd_date = ?, ytd_override = ?, marmotscript = ?, folder = ?, absolute_sizing = ?," +
-                    "stack_fill1_start = ?, stack_fill1_end = ?, stack_fill2_start = ?, stack_fill2_end = ?, stack_fill_enabled = ?, report_horizontal_padding = ? WHERE DASHBOARD_ID = ?");
+                    "stack_fill1_start = ?, stack_fill1_end = ?, stack_fill2_start = ?, stack_fill2_end = ?, stack_fill_enabled = ?, report_horizontal_padding = ?," +
+                    "default_link = ? WHERE DASHBOARD_ID = ?");
             updateStmt.setString(1, dashboard.getName());
             updateStmt.setString(2, dashboard.getUrlKey());
             updateStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -294,7 +308,12 @@ public class DashboardStorage {
             updateStmt.setInt(23, dashboard.getStackFill2End());
             updateStmt.setBoolean(24, dashboard.isFillStackHeaders());
             updateStmt.setInt(25, dashboard.getReportHorizontalPadding());
-            updateStmt.setLong(26, dashboard.getId());
+            if (dashboard.getDefaultDrillthrough() == null) {
+                updateStmt.setNull(26, Types.BIGINT);
+            } else {
+                updateStmt.setLong(26, dashboard.getDefaultDrillthrough().getLinkID());
+            }
+            updateStmt.setLong(27, dashboard.getId());
             updateStmt.executeUpdate();
             updateStmt.close();
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ?");
@@ -353,7 +372,7 @@ public class DashboardStorage {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, URL_KEY, ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE," +
                     "UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, temporary_dashboard, public_visible, border_color, border_thickness," +
                 "background_color, padding, recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing," +
-                "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding, default_link FROM DASHBOARD WHERE DASHBOARD_ID = ?");
         queryStmt.setLong(1, dashboardID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -386,6 +405,15 @@ public class DashboardStorage {
             dashboard.setStackFill2End(rs.getInt(25));
             dashboard.setFillStackHeaders(rs.getBoolean(26));
             dashboard.setReportHorizontalPadding(rs.getInt(27));
+            Long defaultLink = rs.getLong(28);
+            if (!rs.wasNull()) {
+                Session session = Database.instance().createSession(conn);
+                try {
+                    dashboard.setDefaultDrillthrough((Link) session.createQuery("from Link where linkID = ?").setLong(0, defaultLink).list().get(0));
+                } finally {
+                    session.close();
+                }
+            }
             PreparedStatement findElementsStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, ELEMENT_TYPE FROM " +
                     "DASHBOARD_ELEMENT, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ? AND DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID = DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID");
             findElementsStmt.setLong(1, dashboardID);

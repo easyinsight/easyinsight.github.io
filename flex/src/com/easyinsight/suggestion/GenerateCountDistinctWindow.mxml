@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<suggestion:QuickActionWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:suggestion="com.easyinsight.suggestion.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AggregationTypes;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisMeasure;
+
+        import mx.managers.PopUpManager;
+
+        private function generate():void {
+            var grouping:AnalysisItem = groupings.selectedAnalysisItem();
+            var measure:AnalysisMeasure = new AnalysisMeasure();
+            measure.key = grouping.key;
+            measure.aggregation = AggregationTypes.COUNT_DISTINCT;
+            measure.concrete = false;
+            measure.displayName = grouping.display + " Count";
+            addField(measure);
+        }
+
+        ]]></mx:Script>
+    <mx:Text maxWidth="400" text="This action will create a count measure representing the distinct number of values for the specified grouping."/>
+    <mx:Form>
+        <mx:FormItem label="Grouping:">
+            <suggestion:Fields id="groupings" fields="{analysisItems}" typeRestrictor="{AnalysisItemTypes.DIMENSION}"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton click="generate()" label="Create"/>
+        <util:CancelButton click="PopUpManager.removePopUp(this)" label="Cancel"/>
+    </mx:HBox>
+</suggestion:QuickActionWindow>

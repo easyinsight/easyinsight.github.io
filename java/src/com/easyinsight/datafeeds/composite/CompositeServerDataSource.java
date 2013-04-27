@@ -136,7 +136,8 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             feedTypeMap.put(feedDefinition.getFeedType(), feedDefinition);
         }
 
-        newSource = newSource || getFeedType().getType() == FeedType.ZENDESK_COMPOSITE.getType();
+        newSource = newSource || getFeedType().getType() == FeedType.ZENDESK_COMPOSITE.getType() ||
+                getFeedType().getType() == FeedType.CONSTANT_CONTACT.getType();
 
         for (FeedType feedType : feedTypes) {
             FeedDefinition existing = feedTypeMap.get(feedType);

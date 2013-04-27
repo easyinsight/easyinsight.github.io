@@ -104,6 +104,8 @@ import mx.controls.Alert;
         public var maxHeaderWidth:int = 600;
         public var cacheMinutes:int;
         public var manualButRunFirst:Boolean;
+        public var customFontFamily:String;
+        public var useCustomFontFamily:Boolean;
 
 		public function AnalysisDefinition()
 		{

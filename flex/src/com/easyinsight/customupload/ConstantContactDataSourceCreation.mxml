@@ -20,13 +20,11 @@
 
         public function get dataSourceDefinition():FeedDefinitionData {
             var source:ConstantContactDataSource = new ConstantContactDataSource();
-            source.ccUserName = userNameInput.text;
             return source;
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:ConstantContactDataSource = feedDefinition as ConstantContactDataSource;
-            userName = ds.ccUserName;
             this.def = ds;
         }
 
@@ -37,28 +35,14 @@
             return install;
         }
 
-        [Bindable]
-        private var userName:String;
-
-        public function get savesCredentials():Boolean {
-            return false;
-        }
-
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:ConstantContactDataSource = feedDefinition as ConstantContactDataSource;
-            ds.ccUserName = userNameInput.text;
         }
 
         private function install(event:MouseEvent = null):void {
-            var results:Array = Validator.validateAll([userNameValidator]);
-            if (results.length > 0) {
-                userNameInput.setFocus();
-                userNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
-            } else {
-                updateDataSource(def);
-                ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
-                tokenService.getOAuthURL.send(63, true, null, def, def.visible ? 2 : 1);
-            }
+            updateDataSource(def);
+            ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
+            tokenService.getOAuthURL.send(63, true, null, def, def.visible ? 2 : 1);
         }
 
         private function gotURL():void {
@@ -76,14 +60,7 @@
         private var stackIndex:int = 0;
 
         public function validate():Boolean {
-            userNameInput.errorString = null;
             installButton.errorString = null;
-            var results:Array = Validator.validateAll([userNameValidator]);
-            if (results.length > 0) {
-                userNameInput.setFocus();
-                userNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
-                return false;
-            }
 
             if (stackIndex == 0) {
                 installButton.errorString = "You need to authorize Easy Insight to access your Constant Contact data.";
@@ -96,12 +73,6 @@
     <mx:RemoteObject destination="tokenService" id="tokenService">
         <mx:method name="getOAuthURL" result="gotURL()"/>
     </mx:RemoteObject>
-    <mx:HBox>
-        <mx:Label text="Constant Contact User Name:"/>
-        <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" width="250" text="{userName}"/>
-    </mx:HBox>
     <mx:TextArea text="Clicking Authorize will navigate your browser to your Constant Contact account. Upon granting access, you will be redirected back to Easy Insight to finish the connection process." borderStyle="none"
             backgroundAlpha="0" editable="false" selectable="false" width="450" height="50"/>
-
-    <mx:StringValidator id="userNameValidator" source="{userNameInput}" property="text" minLength="1"/>
 </mx:VBox>

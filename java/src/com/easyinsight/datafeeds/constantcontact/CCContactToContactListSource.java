@@ -50,7 +50,6 @@ public class CCContactToContactListSource extends ConstantContactBaseSource {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
             List<ContactList> contactLists = ccSource.getOrCreateContactListCache().getOrCreateContactLists(ccSource);
-            System.out.println("Started retrieving contact list members...");
             DataSet dataSet = new DataSet();
             for (ContactList contactList : contactLists) {
                 for (String userEmail : contactList.getUsers()) {
@@ -59,10 +58,6 @@ public class CCContactToContactListSource extends ConstantContactBaseSource {
                     row.addValue(CONTACT_LIST_ID, contactList.getId());
                 }
             }
-            
-
-
-            System.out.println("Finished retrieving contact list members");
             return dataSet;
         } catch (ReportException re) {
             throw re;

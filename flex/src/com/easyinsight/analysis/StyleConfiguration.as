@@ -160,6 +160,7 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("Show Rollover Icon", "rolloverIcon", ListDefinition(report).rolloverIcon, report, null, true));
             items.addItem(new CheckBoxReportFormItem("Word Wrap Headers", "multiLineHeaders", ListDefinition(report).multiLineHeaders, report, null, true));
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
+            items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
         }
         if (report is CrosstabDefinition) {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
@@ -320,15 +321,18 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Column Width", "columnWidth", VerticalListDefinition(report).columnWidth, report, 100, 400));
             items.addItem(new TextReportFormItem("Pattern Name", "patternName", VerticalListDefinition(report).patternName, report));
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
+            items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
         }
         if (report is CompareYearsDefinition) {
             items.addItem(new TextReportFormItem("Pattern Name", "patternName", CompareYearsDefinition(report).patternName, report));
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
+            items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
         }
         if (report is YTDDefinition) {
             items.addItem(new NumericReportFormItem("Custom Aggregation", "firstAggregation", YTDDefinition(report).firstAggregation, report, 1, 15));
             items.addItem(new TextReportFormItem("Sum Label", "ytdLabel", YTDDefinition(report).ytdLabel, report));
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
+            items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
         }
         if (report is BubbleChartDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show Labels", "showLabels", BubbleChartDefinition(report).showLabels, report));

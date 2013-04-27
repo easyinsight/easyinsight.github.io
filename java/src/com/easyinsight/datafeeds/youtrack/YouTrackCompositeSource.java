@@ -1,6 +1,9 @@
 package com.easyinsight.datafeeds.youtrack;
 
+import com.easyinsight.PasswordStorage;
+import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -15,11 +18,10 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.IOException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * User: jamesboe
@@ -86,15 +88,19 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
-        super.exchangeTokens(conn, request, externalPin);
-        if (ytUserName != null && !"".equals(ytUserName) && ytPassword != null && !"".equals(ytPassword)) {
-            HttpClient httpClient = new HttpClient();
-            PostMethod postMethod = new PostMethod(url+"/rest/user/login?login="+ytUserName+"&password="+ytPassword);
-            httpClient.executeMethod(postMethod);
-            cookie = postMethod.getResponseHeader("Set-Cookie").getValue();
-            ytUserName = null;
-            ytPassword = null;
+    protected void beforeRefresh(Date lastRefreshTime) {
+        super.beforeRefresh(lastRefreshTime);
+        try {
+            if (ytUserName != null && !"".equals(ytUserName) && ytPassword != null && !"".equals(ytPassword)) {
+                HttpClient httpClient = new HttpClient();
+                PostMethod postMethod = new PostMethod(url+"/rest/user/login?login="+ytUserName+"&password="+ytPassword);
+                postMethod.setRequestHeader("Connection", "keep-alive");
+                postMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                httpClient.executeMethod(postMethod);
+                cookie = postMethod.getResponseHeader("Set-Cookie").getValue();
+            }
+        } catch (IOException e) {
+            throw new ReportException(new DataSourceConnectivityReportFault("Invalid credentials.", this));
         }
     }
 
@@ -105,10 +111,16 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO YOUTRACK_SOURCE (URL, COOKIE, DATA_SOURCE_ID) VALUES (?, ?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO YOUTRACK_SOURCE (URL, COOKIE, DATA_SOURCE_ID, YT_USERNAME, YT_PASSWORD) VALUES (?, ?, ?, ?, ?)");
         insertStmt.setString(1, url);
         insertStmt.setString(2, cookie);
         insertStmt.setLong(3, getDataFeedID());
+        insertStmt.setString(4, getYtUserName());
+        if (getYtPassword() != null) {
+            insertStmt.setString(5, PasswordStorage.encryptString(getYtPassword()));
+        } else {
+            insertStmt.setNull(5, Types.BIGINT);
+        }
         insertStmt.execute();
         insertStmt.close();
     }
@@ -116,12 +128,17 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement getStmt = conn.prepareStatement("SELECT URL, COOKIE FROM YOUTRACK_SOURCE WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement getStmt = conn.prepareStatement("SELECT URL, COOKIE, YT_USERNAME, YT_PASSWORD FROM YOUTRACK_SOURCE WHERE DATA_SOURCE_ID = ?");
         getStmt.setLong(1, getDataFeedID());
         ResultSet rs = getStmt.executeQuery();
         if (rs.next()) {
             url = rs.getString(1);
             cookie = rs.getString(2);
+            ytUserName = rs.getString(3);
+            ytPassword = rs.getString(4);
+            if (ytPassword != null) {
+                ytPassword = PasswordStorage.decryptString(ytPassword);
+            }
         }
         getStmt.close();
     }

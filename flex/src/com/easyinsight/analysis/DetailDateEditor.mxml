@@ -19,6 +19,7 @@
                 dateLevel = date.dateLevel;
                 dateFormat = date.customDateFormat;
                 outputFormat = date.outputDateFormat;
+                dateTime = !date.dateOnlyField;
             }
         }
 
@@ -26,12 +27,16 @@
             super.save(analysisItem);
             var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
             date.dateLevel = dateBox.selectedItem.data;
+            date.dateOnlyField = !dateTimeCheckbox.selected;
             date.customDateFormat = customFormatInput.text;
             date.outputDateFormat = outputFormatInput.text;
         }
 
         [Bindable]
         private var outputFormat:String;
+
+        [Bindable]
+        private var dateTime:Boolean;
         ]]></mx:Script>
     <mx:FormItem label="Date Level:" direction="horizontal">
         <util:SmartComboBox id="dateBox" rowCount="12" selectedValue="{dateLevel}" selectedProperty="data">
@@ -52,6 +57,9 @@
                 <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
             </mx:ArrayCollection>
         </util:SmartComboBox>
+    </mx:FormItem>
+    <mx:FormItem label="Date Time:">
+        <mx:CheckBox id="dateTimeCheckbox" selected="{dateTime}"/>
     </mx:FormItem>
     <mx:FormItem label="Custom Input Format (leave blank for default):">
         <mx:TextInput id="customFormatInput" text="{dateFormat}"/>

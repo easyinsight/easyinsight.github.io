@@ -236,6 +236,8 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         } else if (_report.getFont() == "Open Sans" && bold) {
             styleName = "boldStyle";
             fontName = "Open Sans Bold";
+        } else if (_report.useCustomFontFamily) {
+            fontName = null;
         }
         this.newColor = color;
         utf = new UITextFormat(this.systemManager, fontName, _report.fontSize, color, bold, null, false);

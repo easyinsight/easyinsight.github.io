@@ -22,7 +22,7 @@
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
-        import com.easyinsight.scorecard.ScorecardDescriptor;
+
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ActionDashboardLog;
         import com.easyinsight.util.PopUpUtil;
@@ -65,6 +65,30 @@
                 ProgressAlert.alert(this, "Retrieving data...", null, dashboardService.getDashboard);
                 dashboardService.getDashboard.send(_dashboardID);
             }
+        }
+
+        private function saveAs():void {
+            var box:DashboardBox = dashboardCanvas.getChildAt(0) as DashboardBox;
+            var results:Array = [];
+            box.validate(results);
+            if (results.length == 0) {
+                box.save();
+                _dashboard.rootElement = box.element;
+                _dashboard.dataSourceID = dataSourceID;
+                _dashboard.filters = transformContainer.getFilterDefinitions();
+                var saveDialog:DashboardSaveAsDialog = new DashboardSaveAsDialog();
+                saveDialog.dashboard = _dashboard;
+                saveDialog.addEventListener(SavedDashboardEvent.SAVED_DASHBOARD, saveAsDashboard);
+                PopUpManager.addPopUp(saveDialog, this, true);
+                PopUpUtil.centerPopUp(saveDialog);
+            } else {
+                Alert.show(results[0]);
+            }
+
+        }
+
+        private function saveAsDashboard(event:SavedDashboardEvent):void {
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {dashboardID:event.dashboard.id})));
         }
 
         private var _startDataSourceID:int;
@@ -125,6 +149,7 @@
         private var metadata:DashboardEditorMetadata = new DashboardEditorMetadata();
 
         private function gotDashboard():void {
+            saveAsEnabled = true;
             _dashboard = dashboardService.getDashboard.lastResult as Dashboard;
             if (!_dashboard.absoluteSizing) {
                 vbox.percentHeight = 100;
@@ -213,6 +238,7 @@
 
         private function onSave(event:DashboardSaveEvent):void {
             dashboardChanged = false;
+            saveAsEnabled = true;
             dashboardViewable = true;
             this._dashboard = event.dashboard;
         }
@@ -244,6 +270,7 @@
         private function configureDashboard():void {
             var window:DashboardWindow = new DashboardWindow();
             window.dashboard = _dashboard;
+            window.reports = availableReports;
             window.addEventListener(Event.CHANGE, onDashboardChange, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
@@ -440,6 +467,9 @@
         private function refreshReports():void {
             analysisService.getInsightDescriptorsForDataSource.send(dataSourceID);
         }
+
+        [Bindable]
+        private var saveAsEnabled:Boolean = false;
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptorsForDataSource" result="gotReports()"/>
@@ -458,6 +488,9 @@
                    toolTip="Close" labelPlacement="right" label="Close Editor" styleName="grayButton"/>
         <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
                    toolTip="Save" labelPlacement="right" label="Save" styleName="grayButton"/>
+        <mx:Button id="saveAsButton" icon="@Embed(source='../../../../assets/save_as.png')" click="saveAs()"
+                   toolTip="Save As" enabled="{saveAsEnabled}" label="Save As"
+                   labelPlacement="right" styleName="grayButton"/>
         <mx:Button icon="@Embed(source='../../../../assets/document_edit.png')" click="configureDashboard()"
                    toolTip="Configure Dashboard" label="Configure Dashboard" labelPlacement="right"
                    styleName="grayButton"/>

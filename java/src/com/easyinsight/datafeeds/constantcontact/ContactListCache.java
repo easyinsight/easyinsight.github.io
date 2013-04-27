@@ -1,18 +1,16 @@
 package com.easyinsight.datafeeds.constantcontact;
 
-import com.easyinsight.analysis.IRow;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.dataset.DataSet;
 import nu.xom.*;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -26,40 +24,20 @@ public class ContactListCache extends ConstantContactBaseSource {
 
     public List<ContactList> getOrCreateContactLists(ConstantContactCompositeSource ccSource) throws Exception, OAuthExpectationFailedException, ParsingException, OAuthMessageSignerException, OAuthCommunicationException {
         if (contactLists == null) {
+            HttpClient client = new HttpClient();
+
             contactLists = new ArrayList<ContactList>();
-            org.apache.http.client.HttpClient client = new DefaultHttpClient();
-            Document doc = query("https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/lists", ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource, client);
-            boolean hasMoreData;
-            do {
-                hasMoreData = false;
-                Nodes nodes = doc.query("/feed/entry");
-                for (int i = 0; i < nodes.size(); i++) {
-    
-                    
-                    Node node = nodes.get(i);
-                    String idString = node.query("id/text()").get(0).getValue();
-                    String id = idString.split("/")[7];
-                    String name = node.query("content/ContactList/Name/text()").get(0).getValue();
-                    String shortName = node.query("content/ContactList/ShortName/text()").get(0).getValue();
-                    contactLists.add(new ContactList(id, name, shortName));
-                }
-    
-                Nodes links = doc.query("/feed/link");
-    
-                for (int i = 0; i < links.size(); i++) {
-                    Element link = (Element) links.get(i);
-                    Attribute attribute = link.getAttribute("rel");
-                    if (attribute != null && "next".equals(attribute.getValue())) {
-                        String linkURL = link.getAttribute("href").getValue();
-                        hasMoreData = true;
-                        String linkURLString = "https://api.constantcontact.com" + linkURL;
-                        linkURLString = linkURLString.substring(0, 45) + ccSource.getCcUserName() + linkURLString.substring(linkURLString.indexOf("/lists"));
-                        doc = query(linkURLString, ccSource.getTokenKey(), ccSource.getTokenSecret(), ccSource, client);
-                        break;
-                    }
-                }
-            } while (hasMoreData);
-            contacts = new ContactRetrieval().retrieve(ccSource, contactLists);
+            List campaigns = queryList("https://api.constantcontact.com/v2/lists?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+
+
+            for (Object obj : campaigns) {
+                Map node = (Map) obj;
+                String id = node.get("id").toString();
+                String name = node.get("name").toString();
+                contactLists.add(new ContactList(id, name, name));
+            }
+
+            //contacts = new ContactRetrieval().retrieve(ccSource, contactLists);
         }
         return contactLists;
     }

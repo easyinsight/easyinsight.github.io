@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<suggestion:QuickActionWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:suggestion="com.easyinsight.suggestion.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.filtering.FilterValueDefinition;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        private function generate():void {
+            var grouping:AnalysisItem = groupings.selectedAnalysisItem();
+            getMetadata(grouping, gotMetadata);
+        }
+
+
+        private var fieldFilters:ArrayCollection;
+
+        private function gotMetadata(strings:ArrayCollection):void {
+
+            fieldFilters = new ArrayCollection();
+            for each (var string:String in strings) {
+                if (string == null || string == "") {
+                    continue;
+                }
+                var filter:FilterValueDefinition = new FilterValueDefinition();
+                filter.filteredValues = new ArrayCollection([string]);
+                filter.inclusive = true;
+                filter.field = groupings.selectedAnalysisItem();
+                filter.singleValue = true;
+                fieldFilters.addItem(filter);
+            }
+            var measure:AnalysisItem = measures.selectedAnalysisItem();
+            copyField(measure, copied, fieldFilters.length);
+        }
+
+        private function copied(fields:ArrayCollection):void {
+            for (var i:int = 0; i < fields.length; i++) {
+                var field:AnalysisItem = fields[i] as AnalysisItem;
+                field.filters = new ArrayCollection([ fieldFilters.getItemAt(i)]);
+                field.displayName = FilterValueDefinition(fieldFilters.getItemAt(i)).filteredValues.getItemAt(0).toString() + " " + measures.selectedAnalysisItem().display;
+                addField(field);
+            }
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:Text maxWidth="400" text="This action will create a copy of the specified measure for each value for the specified grouping."/>
+    <mx:Form>
+        <mx:FormItem label="Measure:">
+            <suggestion:Fields id="measures" fields="{analysisItems}" typeRestrictor="{AnalysisItemTypes.MEASURE}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Grouping for Filter:">
+            <suggestion:Fields id="groupings" fields="{analysisItems}" typeRestrictor="{AnalysisItemTypes.DIMENSION}"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton click="generate()" label="Create"/>
+        <util:CancelButton click="PopUpManager.removePopUp(this)" label="Cancel"/>
+    </mx:HBox>
+</suggestion:QuickActionWindow>

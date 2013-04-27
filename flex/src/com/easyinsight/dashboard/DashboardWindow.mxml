@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
-<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                   xmlns:dashboard="com.easyinsight.dashboard.*">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.DrillThrough;
         import com.easyinsight.analysis.ReportFormItem;
         import com.easyinsight.analysis.StyleConfiguration;
 
@@ -30,6 +32,9 @@
         [Bindable]
         private var accountVisible:Boolean;
 
+        [Bindable]
+        public var reports:ArrayCollection;
+
         protected override function createChildren():void {
             super.createChildren();
             items = StyleConfiguration.getDashboardItems(_dashboard);
@@ -55,6 +60,7 @@
                 _dashboard.accountVisible = accountVisibleCheckbox.selected;
                 _dashboard.publicVisible = publiclyVisibleCheckbox.selected;
                 _dashboard.exchangeVisible = exchangeVisibleCheckbox.selected;
+                _dashboard.defaultDrillthrough = drillWindow.save();
                 for each (var item:ReportFormItem in items) {
                     item.save();
                 }
@@ -62,8 +68,12 @@
             }
         }
 
+        [Bindable]
+        private var drillthrough:DrillThrough;
+
         public function set dashboard(value:Dashboard):void {
             _dashboard = value;
+            drillthrough = _dashboard.defaultDrillthrough as DrillThrough;
             dashboardName = _dashboard.name;
             dashboardDescription = _dashboard.description;
             publicVisible =_dashboard.publicVisible;
@@ -100,6 +110,7 @@
 
             </mx:Form>
         </mx:Box>
+        <dashboard:DrillThroughWindow label="Default Drillthrough" id="drillWindow" reports="{reports}" drillthrough="{drillthrough}"/>
     </mx:TabNavigator>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="Save" click="save()"/>

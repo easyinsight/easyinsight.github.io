@@ -21,6 +21,7 @@ import com.easyinsight.datafeeds.harvest.*;
 import com.easyinsight.datafeeds.highrise.*;
 /*import com.easyinsight.datafeeds.kashoo.KashooBusinessSource;
 import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;*/
+import com.easyinsight.datafeeds.infusionsoft.*;
 import com.easyinsight.datafeeds.insightly.*;
 import com.easyinsight.datafeeds.json.JSONDataSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
@@ -297,6 +298,15 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.TRELLO_BOARD, TrelloBoardSource.class);
         registerType(FeedType.TRELLO_LIST, TrelloListSource.class);
         registerType(FeedType.TRELLO_CARD_HISTORY, TrelloCardHistorySource.class);
+        registerType(FeedType.CONSTANT_CONTACT_LINKS, CCCampaignLinkSource.class);
+        registerType(FeedType.INFUSIONSOFT_COMPOSITE, InfusionsoftCompositeSource.class);
+        registerType(FeedType.INFUSIONSOFT_LEAD, InfusionsoftLeadSource.class);
+        registerType(FeedType.INFUSIONSOFT_STAGE, InfusionsoftStageSource.class);
+        registerType(FeedType.INFUSIONSOFT_STAGE_HISTORY, InfusionsoftStageMoveSource.class);
+        registerType(FeedType.INFUSIONSOFT_AFFILIATES, InfusionsoftAffiliateSource.class);
+        registerType(FeedType.INFUSIONSOFT_COMPANIES, InfusionsoftCompanySource.class);
+        registerType(FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftContactSource.class);
+        registerType(FeedType.INFUSIONSOFT_JOBS, InfusionsoftJobSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

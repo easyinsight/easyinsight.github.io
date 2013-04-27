@@ -4,6 +4,7 @@
         [Event(name="intentionTrigger", type="com.easyinsight.suggestion.IntentionTriggerEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
+        import com.easyinsight.SimpleReportEditor;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.DataViewFactory;
@@ -15,6 +16,16 @@
         import mx.managers.PopUpManager;
 
         private var _suggestions:ArrayCollection;
+
+        private var _simpleReportEditor:SimpleReportEditor;
+
+        public function get simpleReportEditor():SimpleReportEditor {
+            return _simpleReportEditor;
+        }
+
+        public function set simpleReportEditor(value:SimpleReportEditor):void {
+            _simpleReportEditor = value;
+        }
 
         public function set suggestions(value:ArrayCollection):void {
             _suggestions = value;
@@ -46,37 +57,28 @@
             }
         }
 
-        private function applySuggestion(event:ApplySuggestionEvent):void {
-            var items:ArrayCollection = new ArrayCollection();
-            for each (var wrapper:AnalysisItemWrapper in _fields) {
-                items.addItem(wrapper.analysisItem);
+        private function applySuggestion(suggestion:IntentionSuggestion):void {
+            if (suggestion.requiresServerCallback) {
+                var items:ArrayCollection = new ArrayCollection();
+                for each (var wrapper:AnalysisItemWrapper in _fields) {
+                    items.addItem(wrapper.analysisItem);
+                }
+                analysisService.getIntentions.send(_report, items, suggestion.scope, suggestion.type);
+            } else {
+                new SuggestionFactory(simpleReportEditor).argh(suggestion.type, _fields, _report.dataFeedID);
             }
-            var suggestion:IntentionSuggestion = event.suggestion;
-            analysisService.getIntentions.send(_report, items, suggestion.scope, suggestion.type);
         }
 
         private function suggest1():void {
-            var confirmWindow:IntentionConfirmWindow = new IntentionConfirmWindow();
-            confirmWindow.suggestion = _suggestions.getItemAt(0) as IntentionSuggestion;
-            confirmWindow.addEventListener(ApplySuggestionEvent.APPLY_SUGGESTION, applySuggestion, false, 0, true);
-            PopUpManager.addPopUp(confirmWindow, this, true);
-            PopUpUtil.centerPopUp(confirmWindow);
+            applySuggestion(IntentionSuggestion(_suggestions.getItemAt(0)));
         }
 
         private function suggest2():void {
-            var confirmWindow:IntentionConfirmWindow = new IntentionConfirmWindow();
-            confirmWindow.suggestion = _suggestions.getItemAt(1) as IntentionSuggestion;
-            confirmWindow.addEventListener(ApplySuggestionEvent.APPLY_SUGGESTION, applySuggestion, false, 0, true);
-            PopUpManager.addPopUp(confirmWindow, this, true);
-            PopUpUtil.centerPopUp(confirmWindow);
+            applySuggestion(IntentionSuggestion(_suggestions.getItemAt(1)));
         }
 
         private function suggest3():void {
-            var confirmWindow:IntentionConfirmWindow = new IntentionConfirmWindow();
-            confirmWindow.suggestion = _suggestions.getItemAt(2) as IntentionSuggestion;
-            confirmWindow.addEventListener(ApplySuggestionEvent.APPLY_SUGGESTION, applySuggestion, false, 0, true);
-            PopUpManager.addPopUp(confirmWindow, this, true);
-            PopUpUtil.centerPopUp(confirmWindow);
+            applySuggestion(IntentionSuggestion(_suggestions.getItemAt(2)));
         }
 
         private var _fields:ArrayCollection;
@@ -138,6 +140,7 @@
             }
             var window:IntentionListWindow = new IntentionListWindow();
             window.addEventListener(IntentionTriggerEvent.INTENTION_TRIGGER, onIntentionEvent);
+            window.simpleReportEditor = simpleReportEditor;
             window.report = _report;
             window.fields = items;
             window.allFields = _availableFields;

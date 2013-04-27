@@ -56,6 +56,15 @@ public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
 
+    /*public String generateDescription(WSAnalysisDefinition report) {
+        try {
+            return report.generateDescription();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }*/
+
     public List<Revision> showHistory(String urlKey) {
         List<Revision> revisions = new ArrayList<Revision>();
         EIConnection conn = Database.instance().getConnection();
@@ -1314,6 +1323,32 @@ public class AnalysisService {
         }
     }
 
+    public List<AnalysisItem> cloneItem(AnalysisItem analysisItem, int copies) {
+        try {
+            List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
+            for (int i = 0; i < copies; i++) {
+                AnalysisItem copy = analysisItem.clone();
+                if (copy instanceof AnalysisHierarchyItem ||
+                        copy instanceof AnalysisCalculation ||
+                        copy instanceof DerivedAnalysisDateDimension ||
+                        copy instanceof DerivedAnalysisDimension) {
+                    Key key = new NamedKey("Copy of " + analysisItem.toDisplay());
+                    copy.setKey(key);
+                    copy.setDisplayName("Copy of " + analysisItem.toDisplay());
+                } else {
+                    copy.setOriginalDisplayName(analysisItem.toDisplay());
+                    copy.setDisplayName("Copy of " + analysisItem.toDisplay());
+                }
+                copy.setConcrete(false);
+                clones.add(copy);
+            }
+            return clones;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public List<InsightDescriptor> getInsightDescriptorsForDataSource(long dataSourceID) {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
@@ -1887,6 +1922,7 @@ public class AnalysisService {
     public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report, EIConnection conn) throws SQLException {
         List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
         Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID());
+        suggestions.addAll(commonIntentions());
         DataSourceInfo dataSourceInfo = feed.createSourceInfo(conn);
         FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID(), conn);
         suggestions.addAll(dataSource.suggestIntentions(report, dataSourceInfo));
@@ -1897,6 +1933,17 @@ public class AnalysisService {
                 return intentionSuggestion.getPriority().compareTo(intentionSuggestion1.getPriority());
             }
         });
+        return suggestions;
+    }
+
+    private List<IntentionSuggestion> commonIntentions() {
+        List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+        suggestions.add(new IntentionSuggestion("Create a Filtered Field",
+                "Create a copy of the specified measure for each value for the specified grouping.",
+                IntentionSuggestion.SCOPE_REPORT, IntentionSuggestion.FILTERED_FIELD, IntentionSuggestion.OTHER, false));
+        suggestions.add(new IntentionSuggestion("Create a Distinct Count",
+                "Create a distinct count of the specified grouping.",
+                IntentionSuggestion.SCOPE_REPORT, IntentionSuggestion.DISTINCT_COUNT, IntentionSuggestion.OTHER, false));
         return suggestions;
     }
 
