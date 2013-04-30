@@ -1,9 +1,15 @@
 package com.easyinsight.datafeeds.constantcontact;
 
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.logging.LogClass;
+import nu.xom.ParsingException;
+import oauth.signpost.exception.OAuthCommunicationException;
+import oauth.signpost.exception.OAuthExpectationFailedException;
+import oauth.signpost.exception.OAuthMessageSignerException;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -66,7 +72,12 @@ public class CampaignCache extends ConstantContactBaseSource {
                     this.campaigns.add(new Campaign(name, id, status, lastRun, null, links));
                 }
                 if (nextLink != null) {
-                    result = query(nextLink, ccSource, client);
+                    try {
+                        result = query(nextLink, ccSource, client);
+                    } catch (IllegalArgumentException iae) {
+                        LogClass.error(iae.getMessage() + " on " + nextLink);
+                        return this.campaigns;
+                    }
                     meta = (Map) result.get("meta");
                     nextLink = null;
                     if (meta != null) {
@@ -74,7 +85,7 @@ public class CampaignCache extends ConstantContactBaseSource {
                         if (pagination != null) {
                             Object nextLinkObject = pagination.get("next_link");
                             if (nextLinkObject != null) {
-                                nextLink = nextLinkObject.toString();
+                                nextLink = "https://api.constantcontact.com" + nextLinkObject.toString();
                             }
                         }
                     }
