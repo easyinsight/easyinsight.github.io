@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.core.InsightDescriptor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +18,17 @@ public abstract class FeedNode implements Serializable {
 
     private List<FeedNode> children = new ArrayList<FeedNode>();
     private long addonReportID;
+    private InsightDescriptor addonReportDescriptor;
 
     public FeedNode() {
+    }
+
+    public InsightDescriptor getAddonReportDescriptor() {
+        return addonReportDescriptor;
+    }
+
+    public void setAddonReportDescriptor(InsightDescriptor addonReportDescriptor) {
+        this.addonReportDescriptor = addonReportDescriptor;
     }
 
     public long getAddonReportID() {

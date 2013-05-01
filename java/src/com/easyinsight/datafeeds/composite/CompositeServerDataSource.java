@@ -19,6 +19,8 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -273,6 +275,8 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         boolean changed = false;
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
+            long startTime = System.currentTimeMillis();
+            // record start time
             if (getFeedType().getType() == FeedType.BATCHBOOK_COMPOSITE.getType()) {
                 conn.commit();
                 conn.setAutoCommit(true);
@@ -331,6 +335,16 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 serverDataSourceDefinition.applyTempLoad(conn, accountID, this, lastRefreshTime, tempTable, fullRefresh, warnings);
             }
             refreshDone();
+            // record end time
+            long elapsed = System.currentTimeMillis() - startTime;
+            PreparedStatement timeStmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_REFRESH_AUDIT (DATA_SOURCE_ID, ACCOUNT_ID, REFRESH_DATE, ELAPSED, SERVER_ID) VALUES (?, ?, ?, ?, ?)");
+            timeStmt.setLong(1, getDataFeedID());
+            timeStmt.setLong(2, accountID);
+            timeStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            timeStmt.setLong(4, elapsed);
+            timeStmt.setString(5, "");
+            timeStmt.execute();
+            timeStmt.close();
         } finally {
             DataTypeMutex.mutex().unlock(getFeedType());
         }
