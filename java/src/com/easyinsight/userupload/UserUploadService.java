@@ -936,11 +936,27 @@ public class UserUploadService {
                 return new CredentialsResponse(false, "Your account level is no longer valid for this data source connection.", feedID);
             }*/
             final FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID);
+            EIConnection timeConn = Database.instance().getConnection();
+            int avgTime;
+            try {
+                PreparedStatement avgElapsed = timeConn.prepareStatement("SELECT AVG(ELAPSED) FROM DATA_SOURCE_REFRESH_AUDIT WHERE DATA_SOURCE_ID = ? AND REFRESH_DATE >= ?");
+                avgElapsed.setLong(1, feedID);
+                long oneMonth = 1000L * 60 * 60 * 24 * 30;
+                long time = System.currentTimeMillis() - oneMonth;
+                avgElapsed.setTimestamp(2, new Timestamp(time));
+                ResultSet rs = avgElapsed.executeQuery();
+                rs.next();
+                avgTime = rs.getInt(1);
+                avgElapsed.close();
+            } finally {
+                Database.closeConnection(timeConn);
+            }
             if ((feedDefinition.getDataSourceType() != DataSourceInfo.LIVE)) {
                 if (DataSourceMutex.mutex().lock(feedDefinition.getDataFeedID())) {
                     final String callID = ServiceUtil.instance().longRunningCall(feedDefinition.getDataFeedID());
                     credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
                     credentialsResponse.setCallDataID(callID);
+                    credentialsResponse.setEstimatedDuration(avgTime);
                     final String userName = SecurityUtil.getUserName();
                     final long userID = SecurityUtil.getUserID();
                     final long accountID = SecurityUtil.getAccountID();
@@ -1017,11 +1033,13 @@ public class UserUploadService {
                     }).start();
                 } else {
                     credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
+                    credentialsResponse.setEstimatedDuration(avgTime);
                 }
             } else {
                 feedDefinition.setVisible(true);
                 feedStorage.updateDataFeedConfiguration(feedDefinition);
                 credentialsResponse = new CredentialsResponse(true, feedID);
+                credentialsResponse.setEstimatedDuration(avgTime);
             }
             return credentialsResponse;
         } catch (Throwable e) {

@@ -14,6 +14,7 @@ import com.easyinsight.framework.Credentials;
         public var dataSourceID:int;
         public var reportFault:ReportFault;
         public var callDataID:String;
+        public var estimatedDuration:int;
 		
 		public function CredentialsResponse()
 		{
