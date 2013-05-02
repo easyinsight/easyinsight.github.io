@@ -35,7 +35,7 @@ public class CampaignCache extends ConstantContactBaseSource {
                 if (pagination != null) {
                     Object nextLinkObject = pagination.get("next_link");
                     if (nextLinkObject != null) {
-                        nextLink = nextLinkObject.toString();
+                        nextLink = "https://api.constantcontact.com" + nextLinkObject.toString();
                     }
                 }
             }
