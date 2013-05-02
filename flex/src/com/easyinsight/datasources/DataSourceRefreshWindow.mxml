@@ -60,9 +60,9 @@
                         estimated = response.estimatedDuration;
                         updateEstimateString();
                     } else {
-                        if (estimateBox.parent) {
+                        /*if (estimateBox.parent) {
                             estimateBox.parent.removeChild(estimateBox);
-                        }
+                        }*/
                     }
                     callDataID = response.callDataID;
                     timer = new Timer(5000, 0);
@@ -179,9 +179,9 @@
     <mx:Canvas width="500">
         <mx:ViewStack selectedIndex="{index}" resizeToContent="true" width="100%">
             <mx:VBox horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="30" width="100%">
-                <mx:HBox id="estimateBox">
+                <!--<mx:HBox id="estimateBox">
                     <mx:Label text="{estimateString}"/>
-                </mx:HBox>
+                </mx:HBox>-->
                 <mx:ProgressBar indeterminate="true" id="progressBar" label="" labelPlacement="right"/>
                 <mx:Label selectable="false" maxWidth="400" text="{asyncLabel}" fontSize="14"/>
                 <mx:Button label="Cancel" click="closeWindow()"/>
