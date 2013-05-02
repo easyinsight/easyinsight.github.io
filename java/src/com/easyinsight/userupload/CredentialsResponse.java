@@ -15,6 +15,7 @@ public class CredentialsResponse {
     private long dataSourceID;
     private ReportFault reportFault;
     private String callDataID;
+    private long estimatedDuration;
 
     public CredentialsResponse() {
     }
@@ -33,6 +34,14 @@ public class CredentialsResponse {
         this.successful = successful;
         this.failureMessage = failureMessage;
         this.dataSourceID = dataSourceID;
+    }
+
+    public long getEstimatedDuration() {
+        return estimatedDuration;
+    }
+
+    public void setEstimatedDuration(long estimatedDuration) {
+        this.estimatedDuration = estimatedDuration;
     }
 
     public String getCallDataID() {

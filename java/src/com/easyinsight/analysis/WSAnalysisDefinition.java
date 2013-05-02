@@ -435,7 +435,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         AnalysisDateDimension date = new AnalysisDateDimension();
                         date.setDateLevel(baseDate.getDateLevel());
                         date.setOutputDateFormat(baseDate.getOutputDateFormat());
-                        date.setDateOnlyField(baseDate.isDateOnlyField());
+                        date.setDateOnlyField(baseDate.isDateOnlyField() || baseDate.hasType(AnalysisItemTypes.DERIVED_DATE));
                         clone = date;
                     } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                         AnalysisMeasure baseMeasure = (AnalysisMeasure) item;

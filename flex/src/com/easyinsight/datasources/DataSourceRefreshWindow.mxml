@@ -13,6 +13,7 @@
 
         import mx.controls.Alert;
         import mx.core.UIComponent;
+        import mx.formatters.NumberFormatter;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
         import mx.rpc.events.ResultEvent;
@@ -55,6 +56,14 @@
                 }
             } else {
                 if (response.callDataID != null) {
+                    if (response.estimatedDuration > 0) {
+                        estimated = response.estimatedDuration;
+                        updateEstimateString();
+                    } else {
+                        /*if (estimateBox.parent) {
+                            estimateBox.parent.removeChild(estimateBox);
+                        }*/
+                    }
                     callDataID = response.callDataID;
                     timer = new Timer(5000, 0);
                     timer.addEventListener(TimerEvent.TIMER, onTimer);
@@ -68,7 +77,22 @@
 
         private var callDataID:String;
 
+        private function updateEstimateString():void {
+            var nf:NumberFormatter = new NumberFormatter();
+            nf.precision = 0;
+            if (estimated <= 0) {
+                estimateString = "Should be done soon!";
+            } else if (estimated < (1000 * 60)) {
+                estimateString = "Estimated Time Remaining: " + nf.format(estimated / 1000) + " seconds";
+            } else {
+                estimateString = "Estimated Time Remaining: " + nf.format(estimated / 1000 / 60) + " minutes";
+            }
+        }
+
         private function onTimer(event:TimerEvent):void {
+            elapsed += 5000;
+            estimated -= 5000;
+            updateEstimateString();
             asyncService.getCallData.send(callDataID);
         }
 
@@ -119,6 +143,13 @@
             }
         }
 
+        private var elapsed:int = 0;
+
+        private var estimated:int = 0;
+
+        [Bindable]
+        private var estimateString:String;
+
         private var timer:Timer;
 
         private function onCancel(event:Event):void {
@@ -148,6 +179,9 @@
     <mx:Canvas width="500">
         <mx:ViewStack selectedIndex="{index}" resizeToContent="true" width="100%">
             <mx:VBox horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="30" width="100%">
+                <!--<mx:HBox id="estimateBox">
+                    <mx:Label text="{estimateString}"/>
+                </mx:HBox>-->
                 <mx:ProgressBar indeterminate="true" id="progressBar" label="" labelPlacement="right"/>
                 <mx:Label selectable="false" maxWidth="400" text="{asyncLabel}" fontSize="14"/>
                 <mx:Button label="Cancel" click="closeWindow()"/>

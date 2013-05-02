@@ -1070,7 +1070,9 @@ public class AnalysisService {
                 }
             } else {
                 if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-
+                    if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                        //
+                    }
                 } else {
                     if (report.getReportType() == WSAnalysisDefinition.HEATMAP) {
                         CoordinateValue coordinateValue = (CoordinateValue) data.get(analysisItem.qualifiedName());
@@ -1312,7 +1314,9 @@ public class AnalysisService {
                 copy.setKey(key);
                 copy.setDisplayName("Copy of " + analysisItem.toDisplay());
             } else {
-                copy.setOriginalDisplayName(analysisItem.toDisplay());
+                if (!(analysisItem.getKey() instanceof ReportKey)) {
+                    copy.setOriginalDisplayName(analysisItem.toDisplay());
+                }
                 copy.setDisplayName("Copy of " + analysisItem.toDisplay());
             }
             copy.setConcrete(false);

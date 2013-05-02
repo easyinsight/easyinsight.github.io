@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.calculations.FunctionException;
+import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.ReportKey;
 import com.easyinsight.core.XMLMetadata;
@@ -149,7 +150,7 @@ public class DataService {
                 AnalysisDateDimension date = new AnalysisDateDimension();
                 date.setDateLevel(baseDate.getDateLevel());
                 date.setOutputDateFormat(baseDate.getOutputDateFormat());
-                date.setDateOnlyField(baseDate.isDateOnlyField());
+                date.setDateOnlyField(baseDate.isDateOnlyField() || baseDate.hasType(AnalysisItemTypes.DERIVED_DATE));
                 clone = date;
             } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                 AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
@@ -176,6 +177,7 @@ public class DataService {
             clone.updateIDs(replacements);
         }
         FolderNode folderNode = new FolderNode();
+        folderNode.setAddonReportDescriptor(new InsightDescriptor(report.getAnalysisID(), report.getName(), report.getDataFeedID(), report.getReportType(), report.getUrlKey(), 0, false));
         folderNode.setAddonReportID(addonReportID);
         FeedFolder feedFolder = new FeedFolder();
         feedFolder.setName(report.getName());
