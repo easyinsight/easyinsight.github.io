@@ -35,7 +35,7 @@ public class CampaignCache extends ConstantContactBaseSource {
                 if (pagination != null) {
                     Object nextLinkObject = pagination.get("next_link");
                     if (nextLinkObject != null) {
-                        nextLink = "https://api.constantcontact.com" + nextLinkObject.toString();
+                        nextLink = "https://api.constantcontact.com" + nextLinkObject.toString() + "&api_key=" + ConstantContactCompositeSource.KEY;;
                     }
                 }
             }
@@ -74,7 +74,7 @@ public class CampaignCache extends ConstantContactBaseSource {
                 if (nextLink != null) {
                     try {
                         result = query(nextLink, ccSource, client);
-                    } catch (IllegalArgumentException iae) {
+                    } catch (Exception iae) {
                         LogClass.error(iae.getMessage() + " on " + nextLink);
                         return this.campaigns;
                     }
@@ -85,7 +85,7 @@ public class CampaignCache extends ConstantContactBaseSource {
                         if (pagination != null) {
                             Object nextLinkObject = pagination.get("next_link");
                             if (nextLinkObject != null) {
-                                nextLink = "https://api.constantcontact.com" + nextLinkObject.toString();
+                                nextLink = "https://api.constantcontact.com" + nextLinkObject.toString() + "&api_key=" + ConstantContactCompositeSource.KEY;;
                             }
                         }
                     }
