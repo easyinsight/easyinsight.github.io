@@ -317,6 +317,10 @@ public class UserUploadService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
+            long startTime = System.currentTimeMillis();
+            if (userID == 60) {
+
+            }
             List<EIDescriptor> objects = new ArrayList<EIDescriptor>();
             List<EIDescriptor> results = new ArrayList<EIDescriptor>();
             List<DataSourceDescriptor> dataSources;
@@ -326,6 +330,7 @@ public class UserUploadService {
                 dataSources = feedStorage.getDataSourcesForGroup(userID, groupID, conn);
             }
 
+            long dsTime = System.currentTimeMillis();
 
 
             Iterator<DataSourceDescriptor> dataSourceIter = dataSources.iterator();
@@ -338,10 +343,17 @@ public class UserUploadService {
 
             AnalysisStorage analysisStorage = new AnalysisStorage();
 
+            long dashboardTime = 0;
+            long reportTime = 0;
+            long scorecardTime = 0;
+
             if (groupID == 0) {
                 objects.addAll(new DashboardStorage().getDashboards(userID, accountID, conn).values());
+                dashboardTime = System.currentTimeMillis();
                 objects.addAll(analysisStorage.getReports(userID, accountID, conn).values());
+                reportTime = System.currentTimeMillis();
                 objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn).values());
+                scorecardTime = System.currentTimeMillis();
             } else {
                 objects.addAll(analysisStorage.getReportsForGroup(groupID, conn).values());
                 objects.addAll(new DashboardStorage().getDashboardForGroup(groupID, conn).values());
@@ -378,6 +390,8 @@ public class UserUploadService {
                 }
             }
             getFoldersStmt.close();
+
+            long folderTime = System.currentTimeMillis();
 
             if (groupID != 0) {
                 int role = SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
@@ -434,6 +448,8 @@ public class UserUploadService {
                 iter.remove();
             }
 
+            long dsOwnerTime = System.currentTimeMillis();
+
             if (!placeholder.getChildren().isEmpty()) {
                 dataSources.add(placeholder);
             }
@@ -456,6 +472,8 @@ public class UserUploadService {
                 }
             }
             results.addAll(dataSources);
+
+            long lookupTime = System.currentTimeMillis();
 
             if (groupID != 0) {
                 int role = SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
@@ -486,6 +504,13 @@ public class UserUploadService {
                     return name1.compareToIgnoreCase(name2);
                 }
             });
+
+            if (userID == 60) {
+                System.out.println("Data Source Time: " + (dsTime - startTime) + ", Dashboard Time = " + (dashboardTime - dsTime)
+                        + ", Report Time = " + (dashboardTime - reportTime) + ", Scorecard Time = " + (scorecardTime - reportTime)
+                        + ", Folder Time = " + (folderTime - scorecardTime)
+                        + ", Data Source Owner Time = " + (dsOwnerTime - folderTime) + ", Lookup Table Time = " + (lookupTime - dsOwnerTime));
+            }
 
             int dataSourceCount = 0;
             int reportCount = 0;

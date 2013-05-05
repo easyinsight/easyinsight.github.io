@@ -489,6 +489,11 @@ public class DataStorage implements IDataStorage {
         dropStmt.execute();
     }
 
+    public void alter(Key key) throws SQLException {
+        PreparedStatement stmt = storageConn.prepareStatement("ALTER TABLE " + getTableName() + " ADD " + key.toSQL() + " DOUBLE DEFAULT NULL");
+        stmt.execute();
+    }
+
 
     private static class FieldMigration {
         // private int previousType;
@@ -1470,13 +1475,23 @@ public class DataStorage implements IDataStorage {
         try {
             //if (dataSourceType == FeedType.DATABASE_CONNECTION.getType() || dataSourceType == FeedType.SALESFORCE_SUB.getType()) {
                 //if (metadata.getMetadataID() > 0) {
-                    PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_ID = ? AND " +
-                            "VERSION = ?");
-                    deleteStmt.setLong(1, dataFeedID);
-                    deleteStmt.setInt(2, metadata.getVersion());
-                    deleteStmt.executeUpdate();
-                    deleteStmt.close();
-                //}
+            try {
+                PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_ID = ? AND " +
+                        "VERSION = ?");
+                deleteStmt.setLong(1, dataFeedID);
+                deleteStmt.setInt(2, metadata.getVersion());
+                deleteStmt.executeUpdate();
+                deleteStmt.close();
+            } catch (SQLException e) {
+                // retry once?
+                PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_ID = ? AND " +
+                        "VERSION = ?");
+                deleteStmt.setLong(1, dataFeedID);
+                deleteStmt.setInt(2, metadata.getVersion());
+                deleteStmt.executeUpdate();
+                deleteStmt.close();
+            }
+            //}
             /*} else {
                 if (metadata.getMetadataID() > 0) {
                     PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_PERSISTENCE_METADATA_ID = ?");
@@ -1486,15 +1501,25 @@ public class DataStorage implements IDataStorage {
                 }
             }*/
 
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO FEED_PERSISTENCE_METADATA (FEED_ID, " +
-                    "VERSION, SIZE, DATABASE_NAME, LAST_DATA_TIME) VALUES (?, ?, ?, ?, ?)");
-            insertStmt.setLong(1, dataFeedID);
-            insertStmt.setInt(2, metadata.getVersion());
-            insertStmt.setLong(3, metadata.getSize());
-            insertStmt.setString(4, metadata.getDatabase());
-            insertStmt.setTimestamp(5, new Timestamp(metadata.getLastData().getTime()));
-            insertStmt.execute();
-            insertStmt.close();
+            try {
+                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO FEED_PERSISTENCE_METADATA (FEED_ID, " +
+                        "VERSION, SIZE, DATABASE_NAME, LAST_DATA_TIME) VALUES (?, ?, ?, ?, ?)");
+                insertStmt.setLong(1, dataFeedID);
+                insertStmt.setInt(2, metadata.getVersion());
+                insertStmt.setLong(3, metadata.getSize());
+                insertStmt.setString(4, metadata.getDatabase());
+                insertStmt.setTimestamp(5, new Timestamp(metadata.getLastData().getTime()));
+                insertStmt.execute();
+                insertStmt.close();
+            } catch (SQLException e) {
+                // retry once?
+                PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_ID = ? AND " +
+                        "VERSION = ?");
+                deleteStmt.setLong(1, dataFeedID);
+                deleteStmt.setInt(2, metadata.getVersion());
+                deleteStmt.executeUpdate();
+                deleteStmt.close();
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
