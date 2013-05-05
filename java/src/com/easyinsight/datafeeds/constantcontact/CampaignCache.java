@@ -74,7 +74,7 @@ public class CampaignCache extends ConstantContactBaseSource {
                 if (nextLink != null) {
                     try {
                         result = query(nextLink, ccSource, client);
-                    } catch (IllegalArgumentException iae) {
+                    } catch (Exception iae) {
                         LogClass.error(iae.getMessage() + " on " + nextLink);
                         return this.campaigns;
                     }
