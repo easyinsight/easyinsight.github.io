@@ -86,8 +86,30 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
     }
 
     @Override
-    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject areaChart = super.toJSON(htmlReportMetadata);
+        areaChart.put("type", "area");
+        areaChart.put("key", getUrlKey());
+        areaChart.put("url", "/app/twoAxisChart");
+        areaChart.put("parameters", getJsonObject());
+        areaChart.put("styles", htmlReportMetadata.createStyleProperties());
+        return areaChart;
+    }
 
+    @Override
+    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
+        JSONObject object = getJsonObject();
+        String argh = object.toString();
+        argh = argh.replaceAll("\"", "");
+
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        String customHeight = htmlReportMetadata.createStyleProperties().toString();
+        argh = "$.getJSON('/app/twoAxisChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true, " + customHeight + "))";
+        System.out.println(argh);
+        return argh;
+    }
+
+    private JSONObject getJsonObject() {
         JSONObject params;
         JSONObject object = new JSONObject();
         try {
@@ -140,16 +162,6 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        String argh = object.toString();
-        argh = argh.replaceAll("\"", "");
-
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        /*argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {afterRefresh();\n" +
-                "                var s1 = data[\"values\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");\n})";*/
-        String customHeight = htmlReportMetadata.createStyleProperties();
-        argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true, " + customHeight + "))";
-        System.out.println(argh);
-        return argh;
+        return object;
     }
 }

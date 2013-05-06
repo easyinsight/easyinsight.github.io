@@ -29,14 +29,15 @@ public class HTMLReportMetadata {
         this.embedded = embedded;
     }
 
-    public String createStyleProperties() {
+    public JSONObject createStyleProperties() {
         try {
             JSONObject params = new JSONObject();
-            params.put("customHeight", customHeight);
-            params.put("verticalMargin", verticalMargin);
-            String argh = params.toString();
-            argh = argh.replaceAll("\"", "");
-            return argh;
+            if(customHeight > 0)
+                params.put("customHeight", customHeight);
+            if(verticalMargin > 0)
+                params.put("verticalMargin", verticalMargin);
+            return params;
+
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

@@ -1,0 +1,187 @@
+<div>
+    <script type="text/template" id="stack">
+        <div>
+            <% _.each(filters, function(e, i, l) { %>
+            <%= Filter.create(e) %>
+            <% }) %>
+        </div>
+        <div class="tabbable">
+            <ul class="nav nav-pills" id="<%- id %>">
+                <% _.each(stack_items, function(e, i, l) { %>
+                <li
+                <%- i == 0 ? ' class=active' : '' %>>
+                <a class="argh" data-toggle="tab" href="#stack_<%- id %>_<%- e.item.id %>"><%- typeof(e.label) ==
+                    "undefined" ? ("Stack Item " + i) : e.label %></a>
+                </li>
+                <% }) %>
+            </ul>
+            <div class="tab-content">
+
+                <% _.each(stack_items, function(e, i, l) { %>
+                <div id="stack_<%- id %>_<%- e.item.id %>" class="tab-pane<%- i == 0 ? ' active' : '' %>">
+                    <%= dashboardComponent(e.item) %>
+                </div>
+                <% }) %>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="grid">
+        <div>
+            <% _.each(filters, function(e, i, l) { %>
+            <%= Filter.create(e) %>
+            <% }) %>
+        </div>
+        <div class="container-fluid">
+            <% _.each(grid, function(e, i, l) { %>
+            <div class="row-fluid<%- ((i - l.length) == 1) ? '' : ' marginal' %>">
+                <% _.each(e, function(a, j, m) { %>
+                <div class="span<%- Math.max(2, Math.floor(12 / m.length)) %> dashboard_grid">
+                    <%= dashboardComponent(a) %>
+                </div>
+                <% }) %>
+            </div>
+            <% }) %>
+        </div>
+    </script>
+
+    <script type="text/template" id="report_template">
+        <div>
+            <div class="dasbhoardReportHeader"><strong><%- report.name %></strong></div>
+        </div>
+        <div>
+            <% _.each(report.metadata.filters, function(e, i, l) { %>
+            <%= Filter.create(e) %>
+            <% }) %>
+        </div>
+        <div>
+            <div class="dashboardReportDiv" id="<%= report.id %>">
+                <div class="reportArea" id="<%= report.id %>ReportArea"<%- typeof(preferredHeight) == "undefined" ? '' : ' style=height:' + preferredHeight + '' %>>
+                </div>
+                <div class="noData">
+                    Loading the report...
+                </div>
+            </div>
+        </div>
+</script>
+
+<script type="text/template" id="text_template">
+    <% _.each(item.split("\r"), function(e, i, l) { %>
+    <%- e %> <br/>
+    <% }) %>
+</script>
+
+
+<script type="text/template" id="single_value_filter_template">
+    <div class="filter">
+        <%= Filter.base_filter(data) %>
+        <select id="filter<%= data.id %>" class="single_filter">
+            <% _.each(data.values, function(e, i , l) { %>
+            <option
+            <%= data.selected == e ? ' selected="selected"' : ''%>><%- e == "" ? "[ No Value ]" : e %></option>
+            <% }) %>
+        </select>
+    </div>
+</script>
+
+<script type="text/template" id="multi_value_filter_template">
+    <div class="filter">
+        <%= Filter.base_filter(data) %> <a href="#filter<%= data.id %>_modal" data-toggle="modal">
+        <button id="filter<%= data.id %>" class="btn multi_filter"><% if(data.selected.length == 1) { %><%-
+            data.selected[0] %><% } else { %><%- data.selected.length %> Items<% } %>
+        </button>
+    </a>
+    </div>
+
+    <div id="filter<%= data.id %>_modal" class="modal hide">
+        <div class="modal-body">
+            <div class="control-group">
+                <label class="control-label">Available Values</label>
+                <ul class="unstyled">
+                    <li><input class="cb_all_choice" type="checkbox"<% if(data.selected.indexOf("All") != -1) { %>
+                        checked="checked"<% } %> />
+                        <span class="cb_filter_value">All</span>
+                    </li>
+                    <% _.each(data.values, function(e,i,l) { %>
+                    <li><input class="cb_filter_choice" type="checkbox"<% if(data.selected.indexOf(e) != -1 ||
+                        data.selected.indexOf("All") !=
+                        -1) { %> checked="checked"<%}%> /> <span class="cb_filter_value"><%- e == "" ? "[ No Value ]" : e %></span>
+                    </li>
+                    <% }) %>
+                </ul>
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn multi_value_save" data-dismiss="modal">Save</button>
+            <button class="btn" data-dismiss="modal">Cancel</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="rolling_date_filter_template">
+    <div class="filter"><%= Filter.base_filter(data) %>
+        <select id="filter<%= data.id %>_type" class="rolling_filter_type">
+            <option value="19"<% if(data.interval_type == "19") { %> selected="selected"<%}%>>All</option>
+            <option value="1"<% if(data.interval_type == "1") { %> selected="selected"<%}%>>Last Day</option>
+            <option value="2"<% if(data.interval_type == "2") { %> selected="selected"<%}%>>Last 7 Days</option>
+            <option value="3"<% if(data.interval_type == "3") { %> selected="selected"<%}%>>Last 30 Days</option>
+            <option value="4"<% if(data.interval_type == "4") { %> selected="selected"<%}%>>Last 90 Days</option>
+            <option value="5"<% if(data.interval_type == "5") { %> selected="selected"<%}%>>Last 365 Days</option>
+            <option value="6"<% if(data.interval_type == "6") { %> selected="selected"<%}%>>Today</option>
+            <option value="7"<% if(data.interval_type == "7") { %> selected="selected"<%}%>>Week to Date</option>
+            <option value="8"<% if(data.interval_type == "8") { %> selected="selected"<%}%>>Month to Date</option>
+            <option value="9"<% if(data.interval_type == "9") { %> selected="selected"<%}%>>Quarter to Date</option>
+            <option value="10"<% if(data.interval_type == "10") { %> selected="selected"<%}%>>Year to Date</option>
+            <option value="12"<% if(data.interval_type == "12") { %> selected="selected"<%}%>>Last Full Day</option>
+            <option value="13"<% if(data.interval_type == "13") { %> selected="selected"<%}%>>Last Full Week</option>
+            <option value="14"<% if(data.interval_type == "14") { %> selected="selected"<%}%>>Last Full Month</option>
+            <option value="18"<% if(data.interval_type == "18") { %> selected="selected"<%}%>>Custom</option>
+        </select>
+        <span class="custom<% if(data.interval_type != "18") { %> hide<% } %>">
+            <select id="filter<%=data.id%>_custom_direction" class="rolling_filter_direction">
+                <option value="0">Last</option>
+                <option value="1">Next</option>
+                <option value="2">Before</option>
+                <option value="3">After</option>
+            </select>
+            <input id="filter<%=data.id%>_custom_value" type="text" class="rolling_filter_value" />
+            <select id="filter<%=data.id%>_custom_interval" style="margin-left:10px;width:80px" class="rolling_filter_interval">
+                <option value="2">Days</option>
+                <option value="3">Weeks</option>
+                <option value="4">Months</option>
+                <option value="5">Years</option>
+            </select>
+        </span>
+    </div>
+</script>
+
+<script type="text/template" id="dashboard_template">
+    <div>
+        <% _.each(filters, function(e, i, l) { %>
+        <%= Filter.create(e) %>
+        <% }) %>
+    </div>
+    <div>
+        <%= dashboardComponent(base) %>
+    </div>
+</script>
+
+<script type="text/template" id="gauge_template">
+    <div style="text-align:center">
+        <canvas class="gauge" width="200" height="200" id="gauge<%= id %>"></canvas>
+    </div>
+    <% if(benchmark) { %>
+    <div class="gaugeBenchmark" id="benchmark<%= id %>"></div>
+    <% } %>
+</script>
+
+<script type="text/template" id="filter_base">
+
+    <% if(checkbox) { %>
+    <input id="filter<%=id%>_enabled" class="filter_enabled" type="checkbox" <% if(enabled) { %>checked="checked" <%}%>/>
+    <% } %>
+    <%- label %>
+</script>
+</div>
+

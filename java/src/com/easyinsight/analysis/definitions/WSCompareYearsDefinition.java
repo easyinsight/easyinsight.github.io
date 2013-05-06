@@ -1,6 +1,8 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -117,5 +119,14 @@ public class WSCompareYearsDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("columnWidth", columnWidth));
         properties.add(new ReportStringProperty("patternName", patternName));
         return properties;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject list = super.toJSON(htmlReportMetadata);
+        list.put("type", "compare_years");
+        list.put("key", getUrlKey());
+        list.put("url", "/app/htmlExport");
+        return list;
     }
 }

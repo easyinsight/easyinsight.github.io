@@ -11,6 +11,8 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.scorecard.Scorecard;
 import org.hibernate.Session;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.sql.PreparedStatement;
@@ -54,6 +56,10 @@ public abstract class DashboardElement implements Cloneable, Serializable {
 
     private int preferredWidth;
     private int preferredHeight;
+
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
+        return new JSONObject();
+    }
 
     public long getElementServerID() {
         return elementServerID;

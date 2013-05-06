@@ -14,6 +14,9 @@ import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.util.RandomTextGenerator;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 import java.io.Serializable;
@@ -507,5 +510,17 @@ public class Dashboard implements Cloneable, Serializable {
 
     public int requiredInitCount() {
         return getRootElement().requiredInitCount();
+    }
+
+    public JSONObject toJSON(FilterHTMLMetadata metadata) throws JSONException {
+        JSONObject dashboard = new JSONObject();
+        JSONArray filterArray = new JSONArray();
+        for(FilterDefinition filter : filters) {
+            filterArray.put(filter.toJSON(metadata));
+        }
+        dashboard.put("filters", filterArray);
+        dashboard.put("base", getRootElement().toJSON(metadata));
+        dashboard.put("id", getId());
+        return dashboard;
     }
 }
