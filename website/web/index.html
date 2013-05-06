@@ -25,15 +25,17 @@
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
 </head>
 <body>
+<div id="whiteDiv"></div>
 <div id="topMenuDiv"></div>
-<div id="blackIntroDiv"></div>
-<div id="trialDiv"></div>
+<div id="blackIntroDiv" style="height: 380px"></div>
+<div id="trialDiv" style="margin-top: 488px"></div>
 <div id="pageBase">
     <div id="topBar">
         <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
         <div class="signupHeadline">
             <a href="/app/">Customer Login</a>
             <a href="/app/newaccount/">Free Trial</a>
+            <a href="/app/whatsnew.jsp">What's New</a>
             <a href="contactus.html">Contact Us</a>
         </div>
     </div>
@@ -45,25 +47,36 @@
         <a class="inactive" href="/api.html">Developers</a>
     </div>
 
-    <div id="coreContent">
-        <div class="coreContentBlock">
+    <div id="coreContent" style="height: 380px;text-align: center">
+        <!--<div class="coreContentBlock">
             <h2 class="coreContentHeader">Drag. Drop. Done. Business Intelligence Made Easy.</h2>
             <p class="coreContentParagraph">
                 Whether it's simply better reporting against your SaaS system of choice or full organization analytics, Easy Insight gives you the best blend of power and ease of use, all delivered through the cloud at an affordable price for the small business.
             </p>
+        </div>-->
+        <div>
+            <div style="padding-top:10px;margin:0;float: left;padding-left: 30px">
+                <a href="images/Order_Fulfillment_Dashboard_Lg.png" rel="lightbox-highrise"
+                   title=""><img src="images/Order_Fulfillment_Dashboard_Index.png" alt="Basecamp Overview"/></a>
+            </div>
+            <div style="padding-top:10px;margin:0">
+                <a href="images/Highrise_DB_Overview_LG.png" rel="lightbox-highrise"
+                   title=""><img src="images/Highrise_DB_Overview.png" alt="Basecamp Analysis"/></a>
+
+            </div>
         </div>
-        <div style="padding-top:10px;margin:0px;float:right">
-            <a href="http://www.youtube.com/watch?v=ltxcGbgUmto" class="vidbox" rel="vidbox"><img
+        <div style="font-size:24px;color:#FFFFFF;padding-top:25px;width: 100%;text-align: center">Drag. Drop. Done. Business Intelligence Made Easy.</div>
+        <!--<div style="padding-top:10px;margin:0px;float:right">
+            <a href="http://www.youtube.com/watch?v=EjHWh2zE9js&vq=hd720" class="vidbox" rel="vidbox"><img
                     style="padding:0px 10px 6px" src="/images/IntroStart.jpg"
                     alt="Introduction to Easy Insight Screencast"/></a>
             <div align="center" style="font-size:18px;color:#FFFFFF">Watch a Four Minute Demo</div>
-        </div>
+        </div>-->
     </div>
     <div id="trialBar">
         <div id="trialBarLeft">30 Day Free Trial, No Credit Card Required</div>
-        <a href="/app/newaccount/"><img src="/images/TryEasyInsight.png"
-                                        alt="Easy Insight Free Trial"/></a>
-        <div id="trialBarRight">More Info? Call 1 (720) 285-8652</div>
+        <a href="/app/newaccount" class="btn btn-primary btn-large" style="margin-top: 8px">Try Easy Insight Now!</a>
+        <div class="trialBarRight">Need More Info? <a href="/contactus.html">Contact Us</a></div>
     </div>
     <div id="contentHeaderStart"></div>
         <div id="midContent">
