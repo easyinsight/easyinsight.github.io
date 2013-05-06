@@ -169,7 +169,7 @@ var renderReports = function (obj, dashboardID, force) {
 }
 
 $(function () {
-    $.get("/template.html", function (data) {
+    $.get("/js/template.html", function (data) {
         var s = $(data);
 
 

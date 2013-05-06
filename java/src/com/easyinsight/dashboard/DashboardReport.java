@@ -183,6 +183,7 @@ public class DashboardReport extends DashboardElement {
         reportDataJSON.put("id", report.getUrlKey());
         reportDataJSON.put("metadata", reportDefinition.toJSON(new HTMLReportMetadata()));
         reportJSON.put("report", reportDataJSON);
+        reportJSON.put("show_label", isShowLabel());
 
         if(getPreferredHeight() > 0)
             reportJSON.put("preferredHeight", getPreferredHeight());

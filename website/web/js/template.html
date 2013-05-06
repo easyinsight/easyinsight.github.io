@@ -46,9 +46,11 @@
     </script>
 
     <script type="text/template" id="report_template">
+        <% if(show_label) { %>
         <div>
             <div class="dasbhoardReportHeader"><strong><%- report.name %></strong></div>
         </div>
+        <% } %>
         <div>
             <% _.each(report.metadata.filters, function(e, i, l) { %>
             <%= Filter.create(e) %>
