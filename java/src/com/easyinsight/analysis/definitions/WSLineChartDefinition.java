@@ -574,7 +574,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
 
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
-        JSONObject pie = new JSONObject();
+        JSONObject pie = super.toJSON(htmlReportMetadata);
         pie.put("parameters", getJsonObject());
         pie.put("key", getUrlKey());
         pie.put("type", "line");

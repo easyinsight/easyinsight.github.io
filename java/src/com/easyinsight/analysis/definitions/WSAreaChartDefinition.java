@@ -87,7 +87,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
 
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
-        JSONObject areaChart = new JSONObject();
+        JSONObject areaChart = super.toJSON(htmlReportMetadata);
         areaChart.put("type", "area");
         areaChart.put("key", getUrlKey());
         areaChart.put("url", "/app/twoAxisChart");

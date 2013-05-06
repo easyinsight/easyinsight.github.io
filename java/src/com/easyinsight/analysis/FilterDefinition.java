@@ -27,8 +27,8 @@ import java.util.*;
  * Time: 9:47:18 PM
  */
 @Entity
-@Table(name="filter")
-@Inheritance(strategy= InheritanceType.JOINED)
+@Table(name = "filter")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class FilterDefinition implements Serializable, Cloneable {
 
     public static final int VALUE = 1;
@@ -48,45 +48,45 @@ public class FilterDefinition implements Serializable, Cloneable {
     public static final int MONTH_CUTOFF = 15;
 
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinColumn(name="analysis_item_id")
+    @JoinColumn(name = "analysis_item_id")
     private AnalysisItem field;
-    @Column(name="apply_before_aggregation")
+    @Column(name = "apply_before_aggregation")
     private boolean applyBeforeAggregation = true;
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="filter_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "filter_id")
     private long filterID;
-    @Column(name="intrinsic")
+    @Column(name = "intrinsic")
     private boolean intrinsic;
-    @Column(name="enabled")
+    @Column(name = "enabled")
     private boolean enabled = true;
-    @Column(name="show_on_report_view")
+    @Column(name = "show_on_report_view")
     private boolean showOnReportView = true;
-    @Column(name="filter_name")
+    @Column(name = "filter_name")
     private String filterName;
-    @Column(name="column_level_template")
+    @Column(name = "column_level_template")
     private boolean templateFilter;
-    @Column(name="toggle_enabled")
+    @Column(name = "toggle_enabled")
     private boolean toggleEnabled;
-    @Column(name="minimum_role")
+    @Column(name = "minimum_role")
     private int minimumRole = 4;
 
-    @Column(name="parent_filters")
+    @Column(name = "parent_filters")
     private String parentFilters;
 
-    @Column(name="not_condition")
+    @Column(name = "not_condition")
     private boolean notCondition;
 
-    @Column(name="marmotscript")
+    @Column(name = "marmotscript")
     private String marmotScript;
 
-    @Column(name="trend_filter")
+    @Column(name = "trend_filter")
     private boolean trendFilter;
 
-    @Column(name="field_choice_filter_label")
+    @Column(name = "field_choice_filter_label")
     private String fieldChoiceFilterLabel;
 
-    @Column(name="section")
+    @Column(name = "section")
     private int section;
 
     @Transient
@@ -441,7 +441,13 @@ public class FilterDefinition implements Serializable, Cloneable {
     }
 
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
-        return null;
+        JSONObject jo = new JSONObject();
+        jo.put("id", getFilterID());
+        jo.put("checkbox", isToggleEnabled());
+        jo.put("enabled", isEnabled());
+
+        jo.put("label", label(true));
+        return jo;
     }
 
 
@@ -461,7 +467,7 @@ public class FilterDefinition implements Serializable, Cloneable {
     }
 
     protected String checkboxHTML(String key, String function) {
-        String str = "<input style=\"margin-right:5px\" type=\"checkbox\" id=\"filter"+getFilterID()+"enabled\" onchange=\"filterEnable('filter"+getFilterID()+"', '"+key+"',"+function+")\"";
+        String str = "<input style=\"margin-right:5px\" type=\"checkbox\" id=\"filter" + getFilterID() + "enabled\" onchange=\"filterEnable('filter" + getFilterID() + "', '" + key + "'," + function + ")\"";
         if (isEnabled()) {
             str += " checked=\"on\"";
         }

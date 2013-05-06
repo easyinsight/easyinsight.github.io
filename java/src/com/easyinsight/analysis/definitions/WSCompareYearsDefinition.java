@@ -123,7 +123,7 @@ public class WSCompareYearsDefinition extends WSAnalysisDefinition {
 
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
-        JSONObject list = new JSONObject();
+        JSONObject list = super.toJSON(htmlReportMetadata);
         list.put("type", "compare_years");
         list.put("key", getUrlKey());
         list.put("url", "/app/htmlExport");

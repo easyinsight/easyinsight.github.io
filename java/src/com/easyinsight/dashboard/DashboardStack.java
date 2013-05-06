@@ -350,6 +350,11 @@ public class DashboardStack extends DashboardElement {
         JSONObject stack = new JSONObject();
         stack.put("id", getElementID());
         stack.put("type", "stack");
+        JSONArray filters = new JSONArray();
+        for (FilterDefinition f : getFilters()) {
+            filters.put(f.toJSON(metadata));
+        }
+        stack.put("filters", filters);
         JSONArray stackItems = new JSONArray();
         stack.put("stack_items", stackItems);
         for (DashboardStackItem item : getGridItems()) {

@@ -143,7 +143,6 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
         JSONObject object = new JSONObject();
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
-
             JSONObject seriesDefaults = new JSONObject();
             seriesDefaults.put("renderer", "$.jqplot.BubbleRenderer");
             JSONObject axes = new JSONObject();
@@ -153,7 +152,6 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
             axes.put("yaxis", yAxis);
             jsonParams.put("axes", axes);
             JSONObject rendererOptions = new JSONObject();
-            //rendererOptions.put("fillToZero", "true");
             rendererOptions.put("bubbleGradients", "true");
             seriesDefaults.put("rendererOptions", rendererOptions);
             seriesDefaults.put("shadow", true);
@@ -170,7 +168,7 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
 
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
-        JSONObject areaChart = new JSONObject();
+        JSONObject areaChart = super.toJSON(htmlReportMetadata);
         areaChart.put("type", "bubble");
         areaChart.put("key", getUrlKey());
         areaChart.put("url", "/app/bubbleChart");

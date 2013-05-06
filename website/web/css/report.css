@@ -10,3 +10,19 @@ body {
 #problemHTML {
     display: none;
 }
+
+.rolling_filter_type {
+    width: 125px;
+}
+
+.rolling_filter_direction {
+    width: 70px;
+}
+
+.rolling_filter_value {
+    width: 70px;
+}
+
+.filter {
+    display: inline-block;
+}

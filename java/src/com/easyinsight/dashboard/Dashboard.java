@@ -499,6 +499,7 @@ public class Dashboard implements Cloneable, Serializable {
         }
         dashboard.put("filters", filterArray);
         dashboard.put("base", getRootElement().toJSON(metadata));
+        dashboard.put("id", getId());
         return dashboard;
     }
 }

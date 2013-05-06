@@ -176,7 +176,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
 
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
-        JSONObject list = new JSONObject();
+        JSONObject list = super.toJSON(htmlReportMetadata);
         list.put("type", "trend_definition");
         list.put("key", getUrlKey());
         list.put("url", "/app/htmlExport");

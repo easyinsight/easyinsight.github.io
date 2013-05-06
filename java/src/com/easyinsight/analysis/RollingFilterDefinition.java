@@ -9,6 +9,8 @@ import com.easyinsight.datafeeds.Feed;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.antlr.runtime.RecognitionException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.sql.PreparedStatement;
@@ -263,6 +265,17 @@ public class RollingFilterDefinition extends FilterDefinition {
             }
         }
         return start;
+    }
+
+    @Override
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
+        JSONObject jo = super.toJSON(filterHTMLMetadata);
+        jo.put("type", "rolling");
+        jo.put("interval_type", interval);
+        jo.put("direction", customBeforeOrAfter);
+        jo.put("value", customIntervalAmount);
+        jo.put("interval", customIntervalType);
+        return jo;
     }
 
     @Override

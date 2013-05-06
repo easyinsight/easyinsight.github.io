@@ -121,7 +121,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
 
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
-        JSONObject pie = new JSONObject();
+        JSONObject pie = super.toJSON(htmlReportMetadata);
         pie.put("parameters", getParameters(htmlReportMetadata));
         pie.put("key", getUrlKey());
         pie.put("type", "pie");

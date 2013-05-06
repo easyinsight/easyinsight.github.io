@@ -53,7 +53,7 @@ public class WSDiagramDefinition extends WSKPIDefinition {
 
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
-        JSONObject diagram = new JSONObject();
+        JSONObject diagram = super.toJSON(htmlReportMetadata);
         diagram.put("key", getUrlKey());
         diagram.put("type", "diagram");
         diagram.put("url", "/app/diagramChart");
