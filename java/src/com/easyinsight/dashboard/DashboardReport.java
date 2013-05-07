@@ -185,8 +185,6 @@ public class DashboardReport extends DashboardElement {
         reportJSON.put("report", reportDataJSON);
         reportJSON.put("show_label", isShowLabel());
 
-        if(getPreferredHeight() > 0)
-            reportJSON.put("preferredHeight", getPreferredHeight());
         return reportJSON;
     }
 

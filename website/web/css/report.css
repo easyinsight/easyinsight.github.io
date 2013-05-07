@@ -26,3 +26,13 @@ body {
 .filter {
     display: inline-block;
 }
+
+.dashboard_grid {
+    display: inline-block;
+    vertical-align: top;
+    max-width: 100%;
+}
+
+.grid_header {
+    background-color: #CCCCCC;
+}

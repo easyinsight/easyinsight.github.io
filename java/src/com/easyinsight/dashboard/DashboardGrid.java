@@ -268,6 +268,10 @@ public class DashboardGrid extends DashboardElement {
         }
         grid.put("filters", filters);
         grid.put("id", getElementID());
+
+        grid.put("show_label", showLabel);
+        grid.put("label", getLabel());
+
         JSONArray jsonRows = new JSONArray();
         for(int i = 0;i < rows;i++) {
             JSONArray jsonColumns = new JSONArray();
@@ -277,6 +281,7 @@ public class DashboardGrid extends DashboardElement {
             }
             jsonRows.put(jsonColumns);
         }
+
         grid.put("grid", jsonRows);
         return grid;
     }

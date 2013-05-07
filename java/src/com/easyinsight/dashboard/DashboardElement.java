@@ -58,7 +58,13 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     private int preferredHeight;
 
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
-        return new JSONObject();
+        JSONObject jo = new JSONObject();
+        if(getPreferredWidth() > 0)
+            jo.put("preferredWidth", getPreferredWidth());
+        if(getPreferredHeight() > 0)
+            jo.put("preferredHeight", getPreferredHeight());
+
+        return jo;
     }
 
     public long getElementServerID() {

@@ -71,7 +71,7 @@ public class DashboardText extends DashboardElement {
 
     @Override
     public JSONObject toJSON(FilterHTMLMetadata metadata) throws JSONException {
-        JSONObject textObject = new JSONObject();
+        JSONObject textObject = super.toJSON(metadata);
         textObject.put("id", getElementID());
         textObject.put("type", "text");
         textObject.put("item", text);
