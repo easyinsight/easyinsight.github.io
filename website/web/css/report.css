@@ -33,6 +33,11 @@ body {
     max-width: 100%;
 }
 
+.dashboard_base {
+    background-color: #ffffff;
+}
+
 .grid_header {
     background-color: #CCCCCC;
+    width: 100%;
 }

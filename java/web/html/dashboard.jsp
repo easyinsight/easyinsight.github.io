@@ -50,7 +50,6 @@
             <div class="span6">
                 <ul class="breadcrumb reportBreadcrumb">
                     <li><a href="/app/html/">Data Sources</a> <span class="divider">/</span></li>
-                    </li>
                 </ul>
             </div>
             <div class="span6">
@@ -91,11 +90,13 @@
             </div>
         </div>
     </div>
-    <div class="container" style="padding-top:10px">
+    <div class="container dashboard_base well" style="padding-top:10px">
         <jsp:include page="refreshingDataSource.jsp"/>
-
+        <div class="row-fluid">
+            <div id="base" class="span12"></div>
+        </div>
     </div>
-    <div id="base"></div>
+
 </div>
 
 
