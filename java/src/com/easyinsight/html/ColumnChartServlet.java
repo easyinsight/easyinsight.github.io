@@ -111,7 +111,6 @@ public class ColumnChartServlet extends HtmlServlet {
                     val.put(row.getValue(measureItem).toDouble());
                 }
                 if (seriesDefaults.get("pointLabels") != null && seriesDefaults.has("pointLabels")) {
-//                    String s = "<span style='color:" + String.format("#%06X", (0xFFFFFF & fontColor)) + ";font-size:" + fontSize + "px'>" + row.getValue(measureItem).toDouble() + "</span>";
                     ((JSONArray) ((JSONObject) seriesDefaults.get("pointLabels")).get("labels")).put(row.getValue(measureItem).toDouble());
                 }
             }
@@ -120,9 +119,6 @@ public class ColumnChartServlet extends HtmlServlet {
         object.put("ticks", ticks);
 
         object.put("values", blahArray);
-
-
-        System.out.println(object.toString());
         response.setContentType("application/json");
         response.getOutputStream().write(object.toString().getBytes());
         response.getOutputStream().flush();

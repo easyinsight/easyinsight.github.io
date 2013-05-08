@@ -4,6 +4,8 @@ import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.NewHierarchyIntention;
 import com.easyinsight.pipeline.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -234,5 +236,16 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
         List<INestedComponent> components = new ArrayList<INestedComponent>();
         components.add(new HierarchyComponent((AnalysisHierarchyItem) hierarchy));
         return components;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject list = super.toJSON(htmlReportMetadata);
+        list.put("type", "tree");
+        list.put("key", getUrlKey());
+        list.put("url", "/app/htmlExport");
+
+
+        return list;
     }
 }

@@ -18,6 +18,9 @@ import java.io.Serializable;
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.security.SecurityUtil;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.Transient;
 
@@ -1046,5 +1049,15 @@ public abstract class WSAnalysisDefinition implements Serializable {
             sb.append(" with ").append(filters.size()).append(" filters");
         }
         return sb.toString();
+    }
+
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject jo = new JSONObject();
+        JSONArray filters = new JSONArray();
+        for(FilterDefinition f : getFilterDefinitions()) {
+            filters.put(f.toJSON(new FilterHTMLMetadata(this)));
+        }
+        jo.put("filters", filters);
+        return jo;
     }
 }

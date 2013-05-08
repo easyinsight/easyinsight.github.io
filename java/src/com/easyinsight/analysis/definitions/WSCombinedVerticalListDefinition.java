@@ -1,6 +1,8 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashSet;
 import java.util.List;
@@ -80,7 +82,7 @@ public class WSCombinedVerticalListDefinition extends WSAnalysisDefinition {
         this.reports = reports;
     }
 
-     @Override
+    @Override
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         headerWidth = (int) findNumberProperty(properties, "headerWidth", 140);
@@ -94,5 +96,14 @@ public class WSCombinedVerticalListDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("columnWidth", columnWidth));
         properties.add(new ReportBooleanProperty("removeEmptyRows", removeEmptyRows));
         return properties;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject list = super.toJSON(htmlReportMetadata);
+        list.put("type", "vertical_list");
+        list.put("key", getUrlKey());
+        list.put("url", "/app/htmlExport");
+        return list;
     }
 }

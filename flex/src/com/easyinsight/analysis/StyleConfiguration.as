@@ -67,6 +67,7 @@ public class StyleConfiguration {
         var items:ArrayCollection = new ArrayCollection();
         items.addItem(new NumericReportFormItem("Preferred Width", "preferredWidth", dashboardElement.preferredWidth, dashboardElement, 0, 2000));
         items.addItem(new NumericReportFormItem("Preferred Height", "preferredHeight", dashboardElement.preferredHeight, dashboardElement, 0, 2000));
+        items.addItem(new NumericReportFormItem("HTML Width", "htmlWidth", dashboardElement.htmlWidth, dashboardElement, 0, 2000));
         if (dashboardElement is DashboardGrid || dashboardElement is DashboardStack) {
             items.addItem(new TextReportFormItem("Label", "label", dashboardElement.label, dashboardElement));
             items.addItem(new NumericReportFormItem("Padding Left", "paddingLeft", dashboardElement.paddingLeft, dashboardElement, 0, 100));

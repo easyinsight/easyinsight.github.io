@@ -8,6 +8,7 @@ import com.easyinsight.intention.ReportPropertiesIntention;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ListSummaryComponent;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.SQLException;
@@ -233,22 +234,40 @@ public class WSListDefinition extends WSAnalysisDefinition {
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         try {
-            JSONObject analysisItemMap = new JSONObject();
-            for (AnalysisItem i : columns) {
-                if (i.getSortSequence() > 0) {
-                    JSONArray array = new JSONArray();
-                    array.put(String.valueOf(i.getItemPosition()));
-                    array.put(i.getSort() == 2 ? "desc" : "asc");
-                    analysisItemMap.put(String.valueOf(i.getSortSequence()), array);
-                }
-            }
+            JSONObject analysisItemMap = getAnalysisItemMap();
 
             String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
 
-            return "$.get('/app/htmlExport?reportID=" + getUrlKey() +"&embedded="+htmlReportMetadata.isEmbedded()+ "&" + timezoneOffset + "&'+ strParams, List.getCallback('" + targetDiv + "', " + jsonProperties() + ", " + analysisItemMap.toString() +", " + columns.size() + "));";
+            return "$.get('/app/htmlExport?reportID=" + getUrlKey() +"&embedded="+htmlReportMetadata.isEmbedded()+ "&" + timezoneOffset + "&'+ strParams, List.getCallback('" + targetDiv + "', " + jsonProperties().toString() + ", " + analysisItemMap.toString() +", " + columns.size() + "));";
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private JSONObject getAnalysisItemMap() throws JSONException {
+        JSONObject analysisItemMap = new JSONObject();
+        for (AnalysisItem i : columns) {
+            if (i.getSortSequence() > 0) {
+                JSONArray array = new JSONArray();
+                array.put(String.valueOf(i.getItemPosition()));
+                array.put(i.getSort() == 2 ? "desc" : "asc");
+                analysisItemMap.put(String.valueOf(i.getSortSequence()), array);
+            }
+        }
+        return analysisItemMap;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject list = super.toJSON(htmlReportMetadata);
+        list.put("type", "list");
+        list.put("key", getUrlKey());
+        list.put("url", "/app/htmlExport");
+        list.put("properties", jsonProperties());
+        list.put("sorting", getAnalysisItemMap());
+        list.put("columns", columns.size());
+
+        return list;
     }
 
     @Override
@@ -266,7 +285,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         multiLineHeaders = findBooleanProperty(properties, "multiLineHeaders", false);
     }
 
-    public String jsonProperties() {
+    public JSONObject jsonProperties() {
 
         JSONObject p = new JSONObject();
         try {
@@ -279,7 +298,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return p.toString();
+        return p;
     }
 
     public List<ReportProperty> createProperties() {

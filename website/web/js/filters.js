@@ -74,7 +74,8 @@ function updateMultiFilter(name, key, refreshFunction) {
 
     var selects = $("#" + name + " li input:checked");
     var selectVals = $.map(selects, function(e, i) {
-        return $(".cb_filter_value", $(e).parent()).html();
+        var s = $(".cb_filter_value", $(e).parent()).html();
+        return s == "[ No Value ]" ? "" : s;
 
     })
 

@@ -10,3 +10,34 @@ body {
 #problemHTML {
     display: none;
 }
+
+.rolling_filter_type {
+    width: 125px;
+}
+
+.rolling_filter_direction {
+    width: 70px;
+}
+
+.rolling_filter_value {
+    width: 70px;
+}
+
+.filter {
+    display: inline-block;
+}
+
+.dashboard_grid {
+    display: inline-block;
+    vertical-align: top;
+    max-width: 100%;
+}
+
+.dashboard_base {
+    background-color: #ffffff;
+}
+
+.grid_header {
+    background-color: #CCCCCC;
+    width: 100%;
+}
