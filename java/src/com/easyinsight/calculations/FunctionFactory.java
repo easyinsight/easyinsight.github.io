@@ -205,6 +205,8 @@ public class FunctionFactory {
             return new GreaterThanOrEqual();
         } else if (s.equals("next")) {
             return new NextRecord();
+        } else if (s.equals("nextfromnow")) {
+            return new NextFromNowRecord();
         } else if (s.equals("previous")) {
             return new PreviousRecord();
         } else if (s.equals("first")) {
