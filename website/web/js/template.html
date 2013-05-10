@@ -154,19 +154,27 @@
         </select>
         <span class="custom<% if(data.interval_type != "18") { %> hide<% } %>">
             <select id="filter<%=data.id%>_custom_direction" class="rolling_filter_direction">
-                <option value="0">Last</option>
-                <option value="1">Next</option>
-                <option value="2">Before</option>
-                <option value="3">After</option>
+                <option value="0"<% if(data.direction == "0") {%> selected="selected"<% } %>>Last</option>
+                <option value="1"<% if(data.direction == "1") {%> selected="selected"<% } %>>Next</option>
+                <option value="2"<% if(data.direction == "2") {%> selected="selected"<% } %>>Before</option>
+                <option value="3"<% if(data.direction == "3") {%> selected="selected"<% } %>>After</option>
             </select>
-            <input id="filter<%=data.id%>_custom_value" type="text" class="rolling_filter_value" />
+            <input id="filter<%=data.id%>_custom_value" type="text" class="rolling_filter_value" value="<%- data.value %>" />
             <select id="filter<%=data.id%>_custom_interval" style="margin-left:10px;width:80px" class="rolling_filter_interval">
-                <option value="2">Days</option>
-                <option value="3">Weeks</option>
-                <option value="4">Months</option>
-                <option value="5">Years</option>
+                <option value="2"<% if(data.interval == "2") { %> selected="selected"<% } %>>Days</option>
+                <option value="3"<% if(data.interval == "3") { %> selected="selected"<% } %>>Weeks</option>
+                <option value="4"<% if(data.interval == "4") { %> selected="selected"<% } %>>Months</option>
+                <option value="5"<% if(data.interval == "5") { %> selected="selected"<% } %>>Years</option>
             </select>
         </span>
+    </div>
+</script>
+
+
+<script type="text/template" id="absolute_date_filter_template">
+    <div class="filter">
+        <%= Filter.base_filter(data) %> <input id="filter<%=data.id%>_date_start" type="text" class="start_date_filter date_filter_input" readonly="readonly" value="<%- data.start_date %>" />
+        <input id="filter<%=data.id%>_date_end" type="text" class="end_date_filter date_filter_input" readonly="readonly" value="<%- data.end_date %>" />
     </div>
 </script>
 

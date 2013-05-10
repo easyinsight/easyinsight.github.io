@@ -25,6 +25,7 @@ body {
 
 .filter {
     display: inline-block;
+    vertical-align: middle;
 }
 
 .dashboard_grid {
@@ -49,6 +50,7 @@ body {
 .filters {
     text-align: left;
     width: 100%;
+    vertical-align: top;
 }
 
 .dashboard_text {
@@ -60,4 +62,9 @@ body {
     position: absolute;
     top: 50%;
     margin-top: -25%;
+}
+
+.date_filter_input {
+    width: 80px;
+    margin: 0px;
 }
