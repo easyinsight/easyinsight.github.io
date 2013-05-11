@@ -1251,7 +1251,7 @@ public class ExportService {
             }
             sb.append("<tr style=\"" + ytdTRStyle + "\">");
             //AnalysisMeasure baseMeasure = (AnalysisMeasure) map.get("baseMeasure");
-            sb.append("<td style=\"white-space: nowrap;\">");
+            sb.append("<td style=\"white-space: nowrap;"+cellStyle+"\">");
             sb.append(baseMeasure.toDisplay());
             sb.append("</td>");
             for (SortInfo sortInfo : vListInfo.columns) {
@@ -1321,6 +1321,11 @@ public class ExportService {
                 Value measureValue = row.getValue(analysisMeasure.createAggregateKey());
                 if (measureValue.toDouble() != 0) {
                     atLeastOneValue = true;
+                } else if (analysisMeasure.getReportFieldExtension() != null && analysisMeasure.getReportFieldExtension() instanceof VerticalListReportExtension) {
+                    VerticalListReportExtension verticalListReportExtension = (VerticalListReportExtension) analysisMeasure.getReportFieldExtension();
+                    if (verticalListReportExtension.isAlwaysShow()) {
+                        atLeastOneValue = true;
+                    }
                 }
                 map.put(columnValue, measureValue);
                 map.put(columnValue + "measure", analysisMeasure);
@@ -1463,7 +1468,7 @@ public class ExportService {
             if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof VerticalListReportExtension) {
                 VerticalListReportExtension ytdReportFieldExtension = (VerticalListReportExtension) baseMeasure.getReportFieldExtension();
                 if (ytdReportFieldExtension.isLineAbove()) {
-                    ytdTRStyle += "border-top: solid 1px black";
+                    ytdTRStyle += "border-top: solid 1px black;";
                 }
                 if (ytdReportFieldExtension.isAlwaysShow()) {
                     alwaysShow = true;
@@ -1475,10 +1480,10 @@ public class ExportService {
                 cellStyle = "padding:2px;text-align:right";
             }
             if (baseMeasure.isUnderline()) {
-                ytdTRStyle += ";border-bottom:solid 1px black";
+                ytdTRStyle += "border-bottom:solid 1px black";
             }
             sb.append("<tr style=\"" + ytdTRStyle + "\">");
-            sb.append("<td style=\"white-space: nowrap; ").append(cellStyle).append("\">").append(baseMeasure.toDisplay()).append("</td>");
+            sb.append("<td style=\"white-space: nowrap;text-align:left;").append(cellStyle).append("\">").append(baseMeasure.toDisplay()).append("</td>");
 
             for (String header : ytdStuff.getHeaders()) {
                 if (alwaysShow) {
@@ -1547,12 +1552,14 @@ public class ExportService {
 
             String ytdTRStyle = "";
             AnalysisMeasure baseMeasure = ytdValue.getAnalysisMeasure();
+            boolean alwaysShow = false;
             if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
                 YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) baseMeasure.getReportFieldExtension();
                 if (ytdReportFieldExtension.isLineAbove()) {
-                    ytdTRStyle += "border-top: solid 1px black";
+                    ytdTRStyle += "border-top: solid 1px black;";
                 }
                 if (ytdReportFieldExtension.isAlwaysShow()) {
+                    alwaysShow = true;
                     cellStyle = "padding:2px;text-align:left;font-weight:bold";
                 } else {
                     cellStyle = "padding:2px;text-align:right";
@@ -1561,7 +1568,7 @@ public class ExportService {
                 cellStyle = "padding:2px;text-align:right";
             }
             if (baseMeasure.isUnderline()) {
-                ytdTRStyle += ";border-bottom:solid 1px black";
+                ytdTRStyle += "border-bottom:solid 1px black";
             }
 
             sb.append("<tr style=\"" + ytdTRStyle + "\">");
@@ -1577,6 +1584,8 @@ public class ExportService {
                     if (timeIntervalValue != null) {
                         Value value = timeIntervalValue.getValue();
                         sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                    } else {
+                        sb.append("<td style=\"").append(cellStyle).append("</td>");
                     }
                 }
                 sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
@@ -1585,6 +1594,13 @@ public class ExportService {
                 if (ytdValue.getBenchmarkMeasure() != null) {
                     sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
                     sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                } else {
+                    sb.append("<td style=\"").append(cellStyle).append("</td>");
+                    sb.append("<td style=\"").append(cellStyle).append("</td>");
+                }
+            } else if (alwaysShow) {
+                for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
+                    sb.append("<td style=\"").append(cellStyle).append("</td>");
                 }
             }
             sb.append("</tr>");
