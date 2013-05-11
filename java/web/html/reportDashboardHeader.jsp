@@ -15,14 +15,14 @@
 <script type="text/javascript" src="/js/color.js"></script>
 <script type="text/javascript" src="/js/helper.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.gradientPieRenderer.js"></script>
-<script type="text/javascript" src="/js/plugins/jqplot.canvasTextRenderer.min.js"></script>
+<script type="text/javascript" src="/js/plugins/jqplot.canvasTextRenderer.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.pointLabels.min.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.cursor.min.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.highlighter.min.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.gradientBarRenderer.js"></script>
-<script type="text/javascript" src="/js/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+<script type="text/javascript" src="/js/plugins/jqplot.categoryAxisRenderer.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
-<script type="text/javascript" src="/js/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+<script type="text/javascript" src="/js/plugins/jqplot.canvasAxisTickRenderer.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.bubbleRenderer.min.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.dateAxisRenderer.min.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.enhancedLegendRenderer.min.js"></script>

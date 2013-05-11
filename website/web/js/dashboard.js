@@ -42,6 +42,8 @@ var toFilterString = function (f) {
             return [z, "filter" + f.id + "direction=" + f.direction, "filter" + f.id + "value=" + f.value, "filter" + f.id + "interval=" + f.interval ]
         else
             return z;
+    } else if (f.type == "date_range") {
+        return ["filter" + f.id + "start=" + f.start_date, "filter" + f.id + "end=" + f.end_date ]
     }
     else
         return ["filter" + f["id"] + "direction=0", "filter" + f["id"] + "value=1", "filter" + f["id"] + "interval=2"];
@@ -169,6 +171,8 @@ var renderReports = function (obj, dashboardID, force) {
 }
 
 $(function () {
+    Date.firstDayOfWeek = 0;
+    Date.format = 'yyyy/mm/dd';
     $.get("/js/template.html", function (data) {
         var s = $(data);
 
@@ -182,11 +186,13 @@ $(function () {
                     return Filter.multiple(obj);
                 else if (obj.type == "rolling")
                     return Filter.rolling(obj);
-
+                else if (obj.type == "date_range")
+                    return Filter.date_range(obj);
             },
             single: _.template($("#single_value_filter_template", s).html(), null, {variable: "data"}),
             multiple: _.template($("#multi_value_filter_template", s).html(), null, {variable: "data"}),
             rolling: _.template($("#rolling_date_filter_template", s).html(), null, {variable: "data"}),
+            date_range: _.template($("#absolute_date_filter_template", s).html(), null, {variable: "data"}),
             base_filter: _.template($("#filter_base", s).html())
 
         };
@@ -314,7 +320,29 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], true);
             }
-        })
+        });
+
+        $(".start_date_filter").datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
+            var z = $(e.target);
+            var f = filterMap[z.attr("id").split("_")[0]];
+            f.filter.start_date = z.val();
+            if (f.parent == null) {
+                renderReports(graph, dashboardJSON["id"], true);
+            } else {
+                renderReports(f.parent, dashboardJSON["id"], true);
+            }
+        });
+
+        $(".end_date_filter").datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
+            var z = $(e.target);
+            var f = filterMap[z.attr("id").split("_")[0]];
+            f.filter.end_date = z.val();
+            if (f.parent == null) {
+                renderReports(graph, dashboardJSON["id"], true);
+            } else {
+                renderReports(f.parent, dashboardJSON["id"], true);
+            }
+        });
 
         $('a[data-toggle="tab"]').on('shown', function (e) {
             renderReports(stackMap[$(e.target).parent().parent().attr("id")], dashboardJSON["id"], false);

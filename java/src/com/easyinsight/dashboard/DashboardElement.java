@@ -63,9 +63,10 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         JSONObject jo = new JSONObject();
         if(getPreferredWidth() > 0)
             jo.put("preferredWidth", getPreferredWidth());
+        else if (getHtmlWidth() > 0)
+            jo.put("preferredWidth", getHtmlWidth());
         if(getPreferredHeight() > 0)
             jo.put("preferredHeight", getPreferredHeight());
-
         return jo;
     }
 
