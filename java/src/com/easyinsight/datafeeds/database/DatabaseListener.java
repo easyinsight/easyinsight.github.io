@@ -132,7 +132,9 @@ public class DatabaseListener implements Runnable {
                                 }
                             } catch (Exception e) {
                                 LogClass.error(e);
-                                conn.rollback();
+                                if (!conn.getAutoCommit()) {
+                                    conn.rollback();
+                                }
                                 try {
                                     MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                                     if (e.getCause() == null) {

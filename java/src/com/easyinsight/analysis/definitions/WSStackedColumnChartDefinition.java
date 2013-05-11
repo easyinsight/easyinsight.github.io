@@ -181,6 +181,19 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
+        JSONObject fullObject = getJsonObject(htmlReportMetadata);
+        String argh = fullObject.toString();
+        argh = argh.replaceAll("\"", "");
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        String customHeight = htmlReportMetadata.createStyleProperties().toString();
+        String xyz = "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getStackedColumnChart('"+ targetDiv + "', " + argh + ","+customHeight+"))";
+        /*return "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {\n" +
+                "                var s1 = data[\"values\"];\n" +
+                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";*/
+        return xyz;
+    }
+
+    private JSONObject getJsonObject(HTMLReportMetadata htmlReportMetadata) {
         JSONObject params;
         JSONObject fullObject = new JSONObject();
         try {
@@ -212,15 +225,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        String argh = fullObject.toString();
-        argh = argh.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties();
-        String xyz = "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getStackedColumnChart('"+ targetDiv + "', " + argh + ","+customHeight+"))";
-        /*return "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {\n" +
-                "                var s1 = data[\"values\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";*/
-        return xyz;
+        return fullObject;
     }
 
     protected JSONArray getSeriesColors() {
@@ -270,4 +275,15 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
             }
             return newColors;
         }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject pie = super.toJSON(htmlReportMetadata);
+        pie.put("parameters", getJsonObject(htmlReportMetadata));
+        pie.put("key", getUrlKey());
+        pie.put("type", "stacked_column");
+        pie.put("styles", htmlReportMetadata.createStyleProperties());
+        pie.put("url", "/app/stackedChart");
+        return pie;
+    }
 }

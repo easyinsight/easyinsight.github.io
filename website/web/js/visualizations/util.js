@@ -10,7 +10,9 @@ Utils = {
             $("#" + target + " .reportArea").hide();
             $("#" + target + " .noData").show();
         }
-        afterRefresh();
+        if(typeof(afterRefresh) != "undefined") {
+            afterRefresh();
+        }
     }
 };
 

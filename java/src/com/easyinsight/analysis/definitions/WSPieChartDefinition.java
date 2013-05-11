@@ -83,6 +83,16 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
+        JSONObject data = getParameters(htmlReportMetadata);
+        String argh = data.toString();
+        argh = argh.replaceAll("\"", "");
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        String customHeight = htmlReportMetadata.createStyleProperties().toString();
+        String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getPieChartCallback('" + targetDiv + "', " + argh + ","+customHeight+"))";
+        return xyz;
+    }
+
+    private JSONObject getParameters(HTMLReportMetadata htmlReportMetadata) {
         JSONObject params;
         JSONObject data = new JSONObject();
         try {
@@ -106,11 +116,17 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        String argh = data.toString();
-        argh = argh.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties();
-        String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getPieChartCallback('" + targetDiv + "', " + argh + ","+customHeight+"))";
-        return xyz;
+        return data;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject pie = super.toJSON(htmlReportMetadata);
+        pie.put("parameters", getParameters(htmlReportMetadata));
+        pie.put("key", getUrlKey());
+        pie.put("type", "pie");
+        pie.put("styles", htmlReportMetadata.createStyleProperties());
+        pie.put("url", "/app/columnChart");
+        return pie;
     }
 }

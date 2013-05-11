@@ -25,6 +25,7 @@ public class DashboardElement {
     public var preferredWidth:int;
     public var preferredHeight:int;
     public var forceScrollingOff:Boolean;
+    public var htmlWidth:int;
 
     public var dashboardLevel:int;
 

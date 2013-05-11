@@ -189,6 +189,47 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
 
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
+        JSONObject fullObject = getJsonObject(htmlReportMetadata);
+
+
+        String argh = fullObject.toString();
+        argh = argh.replaceAll("\"", "");
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        /*AnalysisItem xAxis = getXaxis();
+        DrillThrough drillThrough = null;
+        if (xAxis.getLinks() != null) {
+            for (Link link : xAxis.getLinks()) {
+                if (link instanceof DrillThrough && link.isDefaultLink()) {
+                    drillThrough = (DrillThrough) link;
+                }
+            }
+        }
+
+        String drillString = "";
+        if (drillThrough != null) {
+            StringBuilder paramBuilder = new StringBuilder();
+            paramBuilder.append("reportID=").append(getUrlKey()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(xAxis.getAnalysisItemID());
+            drillString = paramBuilder.toString();
+        }*/
+        String styleProps = htmlReportMetadata.createStyleProperties().toString();
+
+        String xyz = "$.getJSON('/app/columnChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getColumnChartCallback('" + targetDiv + "', " + argh + "," + styleProps + "))";
+        return xyz;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+
+        JSONObject areaChart = new JSONObject();
+        areaChart.put("type", "column");
+        areaChart.put("key", getUrlKey());
+        areaChart.put("url", "/app/columnChart");
+        areaChart.put("parameters", getJsonObject(htmlReportMetadata));
+        areaChart.put("styles", htmlReportMetadata.createStyleProperties());
+        return areaChart;
+    }
+
+    private JSONObject getJsonObject(HTMLReportMetadata htmlReportMetadata) {
         String color;
         String color2;
         if (useChartColor) {
@@ -272,30 +313,6 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-
-
-        String argh = fullObject.toString();
-        argh = argh.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        /*AnalysisItem xAxis = getXaxis();
-        DrillThrough drillThrough = null;
-        if (xAxis.getLinks() != null) {
-            for (Link link : xAxis.getLinks()) {
-                if (link instanceof DrillThrough && link.isDefaultLink()) {
-                    drillThrough = (DrillThrough) link;
-                }
-            }
-        }
-
-        String drillString = "";
-        if (drillThrough != null) {
-            StringBuilder paramBuilder = new StringBuilder();
-            paramBuilder.append("reportID=").append(getUrlKey()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(xAxis.getAnalysisItemID());
-            drillString = paramBuilder.toString();
-        }*/
-        String styleProps = htmlReportMetadata.createStyleProperties();
-
-        String xyz = "$.getJSON('/app/columnChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getColumnChartCallback('" + targetDiv + "', " + argh + "," + styleProps + "))";
-        return xyz;
+        return fullObject;
     }
 }

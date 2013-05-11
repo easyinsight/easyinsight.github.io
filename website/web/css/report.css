@@ -10,3 +10,61 @@ body {
 #problemHTML {
     display: none;
 }
+
+.rolling_filter_type {
+    width: 125px;
+}
+
+.rolling_filter_direction {
+    width: 70px;
+}
+
+.rolling_filter_value {
+    width: 70px;
+}
+
+.filter {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.dashboard_grid {
+    display: inline-block;
+    vertical-align: top;
+    max-width: 100%;
+
+}
+
+.dashboard_base {
+    background-color: #ffffff;
+    text-align: center;
+}
+
+.grid_header {
+    background-color: #CCCCCC;
+    width: 100%;
+    padding: 10px 30px 10px 10px;
+    margin: 0px -20px 5px;
+}
+
+.filters {
+    text-align: left;
+    width: 100%;
+    vertical-align: top;
+}
+
+.dashboard_text {
+    text-align: left;
+    position: relative;
+}
+
+.inner_dashboard_text {
+    position: absolute;
+    top: 50%;
+    margin-top: -25%;
+}
+
+.date_filter_input {
+    width: 80px;
+    margin: 0px;
+}

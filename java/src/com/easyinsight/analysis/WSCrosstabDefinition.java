@@ -1,5 +1,8 @@
 package com.easyinsight.analysis;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.*;
 
 /**
@@ -14,7 +17,7 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
     private List<AnalysisItem> measures;
     private long crosstabDefinitionID;
     private int headerBackgroundColor = 0x333333;
-    private int headerTextColor= 0xFFFFFF;
+    private int headerTextColor = 0xFFFFFF;
     private int summaryBackgroundColor = 0x555555;
     private int summaryTextColor = 0xFFFFFF;
     private String align;
@@ -139,5 +142,14 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("summaryBackgroundColor", summaryBackgroundColor));
         properties.add(new ReportStringProperty("align", align));
         return properties;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+        JSONObject list = super.toJSON(htmlReportMetadata);
+        list.put("type", "crosstab");
+        list.put("key", getUrlKey());
+        list.put("url", "/app/htmlExport");
+        return list;
     }
 }
