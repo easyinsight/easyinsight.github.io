@@ -40,6 +40,11 @@ public class AnalysisBasedFeed extends Feed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
+        InsightRequestMetadata localInsightRequestMetadata = new InsightRequestMetadata();
+        localInsightRequestMetadata.setTargetCurrency(insightRequestMetadata.getTargetCurrency());
+        localInsightRequestMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+        localInsightRequestMetadata.setIp(insightRequestMetadata.getIp());
+        localInsightRequestMetadata.setNow(insightRequestMetadata.getNow());
         List<FilterDefinition> reportFilters = new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions());
         List<AnalysisItem> fields = new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values());
         Map<Key, List<Key>> map = new HashMap<Key, List<Key>>();
@@ -93,7 +98,7 @@ public class AnalysisBasedFeed extends Feed {
                 return embeddedResults;
             }
         }
-        DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
+        DataSet dataSet = DataService.listDataSet(analysisDefinition, localInsightRequestMetadata, conn);
         // map this data set back into the original one
         for (Map.Entry<Key, List<Key>> entry : map.entrySet()) {
             for (Key key : entry.getValue()) {
