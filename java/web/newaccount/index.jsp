@@ -83,7 +83,7 @@
     </div>
     <div class="trialBar">
 
-        Have questions? Call 1 (720) 285-8652 or email us at <a href="mailto:sales@easy-insight.com">sales@easy-insight.com</a>.
+        Have questions? Call 1 (720) 316-8174 or email us at <a href="mailto:sales@easy-insight.com">sales@easy-insight.com</a>.
     </div>
     <div id="contentHeaderStart"></div>
     <div id="midContent">
