@@ -1,10 +1,9 @@
 <div>
     <script type="text/template" id="stack">
-        <div class="filters">
-            <% _.each(filters, function(e, i, l) { %>
-            <%= Filter.create(e) %>
-            <% }) %>
-        </div>
+        <%= Filter.filters(filters) %>
+        <% if(stack_items.length == 1) { %>
+            <%= dashboardComponent(stack_items[0].item) %>
+        <% } else { %>
         <div class="tabbable">
             <ul class="nav nav-pills" id="<%- id %>">
                 <% _.each(stack_items, function(e, i, l) { %>
@@ -24,15 +23,17 @@
                 <% }) %>
             </div>
         </div>
+        <% } %>
     </script>
 
     <script type="text/template" id="grid">
-        <div class="filters">
-            <% _.each(filters, function(e, i, l) { %>
-            <%= Filter.create(e) %>
-            <% }) %>
-        </div>
-        <div class="container-fluid">
+        <% var autoSize = _.every(grid, function(e, i, l) {
+            return _.every(e, function(f, j, m) {
+                return typeof(f.preferredWidth) == "undefined";
+            });
+        }) %>
+        <%= Filter.filters(filters) %>
+        <div class="container-fluid span12">
             <% if(show_label) { %>
             <div class="row-fluid grid_header">
                 <%- label %>
@@ -41,7 +42,7 @@
             <% _.each(grid, function(e, i, l) { %>
             <div class="row-fluid">
                 <% _.each(e, function(a, j, m) { %>
-                <div class="dashboard_grid">
+                <div class="dashboard_grid<% if(autoSize) { %> span<%- Math.floor(12 / e.length) %><% } %>">
                     <%= dashboardComponent(a) %>
                 </div>
                 <% }) %>
@@ -56,11 +57,7 @@
             <div class="dasbhoardReportHeader"><strong><%- report.name %></strong></div>
         </div>
         <% } %>
-        <div class="filters">
-            <% _.each(report.metadata.filters, function(e, i, l) { %>
-            <%= Filter.create(e) %>
-            <% }) %>
-        </div>
+        <%= Filter.filters(report.metadata.filters) %>
         <div>
             <div class="dashboardReportDiv" id="<%= report.id %>">
                 <div class="reportArea" id="<%= report.id %>ReportArea"<%
@@ -74,14 +71,15 @@
 </script>
 
 <script type="text/template" id="text_template">
-    <div class="dashboard_text"<%
+    <% var vCenter = typeof(preferredHeight) != "undefined"; %>
+    <div class="dashboard_text<%if(vCenter) { %> dashboard_text_valign<% } %>"<%
     if(typeof(preferredHeight) != "undefined" || typeof(preferredWidth) != "undefined") { %> style="<% if(typeof(preferredHeight) != "undefined") { %>height:<%- preferredHeight %>px;<% } %><%
     if(typeof(preferredWidth) != "undefined") { %>width:<%- preferredWidth %>px;<% } %>"<% } %>>
-    <div class="inner_dashboard_text">
+    <% if(vCenter) {%><div class="inner_dashboard_text"><% } %>
     <% _.each(item.split("\r"), function(e, i, l) { %>
     <%- e %> <br/>
     <% }) %>
-        </div>
+        <%if(vCenter){%></div><% } %>
     </div>
 </script>
 
@@ -178,12 +176,16 @@
     </div>
 </script>
 
-<script type="text/template" id="dashboard_template">
+<script type="text/template" id="filters_template">
     <div class="filters">
-        <% _.each(filters, function(e, i, l) { %>
-        <%= Filter.create(e) %>
-        <% }) %>
-    </div>
+            <% _.each(_.select(filter_values, function(e, i, l) { return e.visible }), function(e, i, l) { %>
+            <%= Filter.create(e) %>
+            <% }) %>
+        </div>
+</script>
+
+<script type="text/template" id="dashboard_template">
+    <%= Filter.filters(filters) %>
     <div>
         <%= dashboardComponent(base) %>
     </div>
@@ -200,7 +202,7 @@
 
 <script type="text/template" id="filter_base">
 
-    <% if(checkbox) { %>
+    <% if(!checkbox) { %>
     <input id="filter<%=id%>_enabled" class="filter_enabled" type="checkbox" <% if(enabled) { %>checked="checked" <%}%>/>
     <% } %>
     <%- label %>
