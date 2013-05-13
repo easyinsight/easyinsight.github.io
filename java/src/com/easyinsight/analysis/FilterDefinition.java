@@ -445,8 +445,9 @@ public class FilterDefinition implements Serializable, Cloneable {
         jo.put("id", getFilterID());
         jo.put("checkbox", isToggleEnabled());
         jo.put("enabled", isEnabled());
-
+        jo.put("type", "other");
         jo.put("label", label(true));
+        jo.put("visible", isShowOnReportView());
         return jo;
     }
 

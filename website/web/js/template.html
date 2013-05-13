@@ -1,10 +1,6 @@
 <div>
     <script type="text/template" id="stack">
-        <div class="filters">
-            <% _.each(filters, function(e, i, l) { %>
-            <%= Filter.create(e) %>
-            <% }) %>
-        </div>
+        <%= Filter.filters(filters) %>
         <% if(stack_items.length == 1) { %>
             <%= dashboardComponent(stack_items[0].item) %>
         <% } else { %>
@@ -36,11 +32,7 @@
                 return typeof(f.preferredWidth) == "undefined";
             });
         }) %>
-        <div class="filters">
-            <% _.each(filters, function(e, i, l) { %>
-            <%= Filter.create(e) %>
-            <% }) %>
-        </div>
+        <%= Filter.filters(filters) %>
         <div class="container-fluid span12">
             <% if(show_label) { %>
             <div class="row-fluid grid_header">
@@ -65,11 +57,8 @@
             <div class="dasbhoardReportHeader"><strong><%- report.name %></strong></div>
         </div>
         <% } %>
-        <div class="filters">
-            <% _.each(report.metadata.filters, function(e, i, l) { %>
-            <%= Filter.create(e) %>
-            <% }) %>
-        </div>
+        <% console.log(JSON.stringify(report.metadata.filters)) %>
+        <%= Filter.filters(report.metadata.filters) %>
         <div>
             <div class="dashboardReportDiv" id="<%= report.id %>">
                 <div class="reportArea" id="<%= report.id %>ReportArea"<%
@@ -188,12 +177,16 @@
     </div>
 </script>
 
-<script type="text/template" id="dashboard_template">
+<script type="text/template" id="filters_template">
     <div class="filters">
-        <% _.each(filters, function(e, i, l) { %>
-        <%= Filter.create(e) %>
-        <% }) %>
-    </div>
+            <% _.each(_.select(filter_values, function(e, i, l) { return e.visible }), function(e, i, l) { %>
+            <%= Filter.create(e) %>
+            <% }) %>
+        </div>
+</script>
+
+<script type="text/template" id="dashboard_template">
+    <%= Filter.filters(filters) %>
     <div>
         <%= dashboardComponent(base) %>
     </div>
