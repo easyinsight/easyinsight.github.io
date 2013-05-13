@@ -57,7 +57,6 @@
             <div class="dasbhoardReportHeader"><strong><%- report.name %></strong></div>
         </div>
         <% } %>
-        <% console.log(JSON.stringify(report.metadata.filters)) %>
         <%= Filter.filters(report.metadata.filters) %>
         <div>
             <div class="dashboardReportDiv" id="<%= report.id %>">
