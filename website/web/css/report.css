@@ -55,6 +55,9 @@ body {
 
 .dashboard_text {
     text-align: left;
+}
+
+.dashboard_text_valign {
     position: relative;
 }
 
