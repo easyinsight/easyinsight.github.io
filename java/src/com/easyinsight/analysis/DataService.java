@@ -398,14 +398,14 @@ public class DataService {
                 trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
             }
             List<TrendOutcome> targetOutcomes = new ArrayList<TrendOutcome>();
-            for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+            /*for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
                 for (TrendOutcome trendOutcome : trendOutcomes) {
                     if (trendOutcome.getMeasure().equals(analysisItem)) {
                         targetOutcomes.add(trendOutcome);
                         break;
                     }
                 }
-            }
+            }*/
             trendOutcomes = targetOutcomes;
             EmbeddedTrendDataResults trendDataResults = new EmbeddedTrendDataResults();
             trendDataResults.setTrendOutcomes(trendOutcomes);
@@ -845,14 +845,14 @@ public class DataService {
             trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
         }
         List<TrendOutcome> targetOutcomes = new ArrayList<TrendOutcome>();
-        for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+        /*for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
             for (TrendOutcome trendOutcome : trendOutcomes) {
                 if (trendOutcome.getMeasure().equals(analysisItem)) {
                     targetOutcomes.add(trendOutcome);
                     break;
                 }
             }
-        }
+        }*/
         trendOutcomes = targetOutcomes;
         TrendDataResults trendDataResults = new TrendDataResults();
         trendDataResults.setTrendOutcomes(trendOutcomes);
