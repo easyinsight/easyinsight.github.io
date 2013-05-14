@@ -119,4 +119,8 @@ public class ReportKey extends Key {
         result = 31 * result + (int) (reportID ^ (reportID >>> 32));
         return result;
     }
+
+    public String urlKeyString(XMLMetadata xmlMetadata) {
+        return reportID + "-" + parentKey.urlKeyString(xmlMetadata);
+    }
 }

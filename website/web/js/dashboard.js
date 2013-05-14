@@ -193,7 +193,8 @@ $(function () {
             multiple: _.template($("#multi_value_filter_template", s).html(), null, {variable: "data"}),
             rolling: _.template($("#rolling_date_filter_template", s).html(), null, {variable: "data"}),
             date_range: _.template($("#absolute_date_filter_template", s).html(), null, {variable: "data"}),
-            base_filter: _.template($("#filter_base", s).html())
+            base_filter: _.template($("#filter_base", s).html()),
+            filters: _.template($("#filters_template", s).html(), null, {variable: "filter_values"})
 
         };
         dashboard = _.template($("#dashboard_template", s).html());

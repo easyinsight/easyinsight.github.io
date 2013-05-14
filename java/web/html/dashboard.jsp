@@ -21,6 +21,7 @@
         long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
         Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
         FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, false);
+        DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
 
 %>
 <head>
@@ -49,7 +50,14 @@
         <div class="container">
             <div class="span6">
                 <ul class="breadcrumb reportBreadcrumb">
+
                     <li><a href="/app/html/">Data Sources</a> <span class="divider">/</span></li>
+                    <li>
+                        <a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
+                        </a><span class="divider">/</span></li>
+                    <li class="active"><%= StringEscapeUtils.escapeHtml(dashboard.getName()) %>
+                    </li>
+
                 </ul>
             </div>
             <div class="span6">

@@ -175,7 +175,7 @@ public class DashboardReport extends DashboardElement {
     @Override
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
         WSAnalysisDefinition reportDefinition = new AnalysisService().openAnalysisDefinition(report.getId());
-        JSONObject reportJSON = new JSONObject();
+        JSONObject reportJSON = super.toJSON(filterHTMLMetadata);
         reportJSON.put("type", "report");
         reportJSON.put("id", report.getUrlKey());
         JSONObject reportDataJSON = new JSONObject();
