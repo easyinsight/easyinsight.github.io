@@ -406,7 +406,7 @@ public class DataService {
                     }
                 }
             }*/
-            trendOutcomes = targetOutcomes;
+            //trendOutcomes = targetOutcomes;
             EmbeddedTrendDataResults trendDataResults = new EmbeddedTrendDataResults();
             trendDataResults.setTrendOutcomes(trendOutcomes);
             trendDataResults.setDataSourceInfo(dataSourceInfo);
@@ -853,7 +853,7 @@ public class DataService {
                 }
             }
         }*/
-        trendOutcomes = targetOutcomes;
+        //trendOutcomes = targetOutcomes;
         TrendDataResults trendDataResults = new TrendDataResults();
         trendDataResults.setTrendOutcomes(trendOutcomes);
         trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
