@@ -65,5 +65,8 @@ public class DashboardScorecardEditorComponent extends VBox implements IDashboar
 
     public function toggleFilters(showFilters:Boolean):void {
     }
+
+    public function toggleControls(show:Boolean):void {
+    }
 }
 }

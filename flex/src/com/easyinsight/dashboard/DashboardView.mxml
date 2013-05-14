@@ -163,9 +163,6 @@
                 headerArea.visible = false;
                 descriptionBox.includeInLayout = false;
             }
-            /*if (dashboard.backgroundColor == 0xFFFFFF) {
-             setStyle("backgroundColor", 0xFFFFFF);
-             }*/
             if (_fixedID) {
                 setStyle("paddingLeft", 0);
                 setStyle("paddingTop", 0);

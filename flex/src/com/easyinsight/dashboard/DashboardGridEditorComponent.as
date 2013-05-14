@@ -100,35 +100,68 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
 
     private var viewChildren:ArrayCollection;
 
+
+
     private function recreateStructure():void {
         removeAllChildren();
+        var dashboardAbsoluteHeight:Boolean = false;
+        if (dashboardEditorMetadata != null) {
+            if (dashboardEditorMetadata.dashboard.absoluteSizing) {
+                dashboardAbsoluteHeight = true;
+            }
+        }
         viewChildren = new ArrayCollection();
         for (var i:int = 0; i < dashboardGrid.rows; i++) {
             var gridRow:GridRow = new GridRow();
             gridRow.horizontalScrollPolicy = "off";
             gridRow.verticalScrollPolicy = "off";
-            gridRow.percentWidth = 100;
-            gridRow.percentHeight = 100;
+            var gridHeight:Boolean = false;
             addChild(gridRow);
             for (var j:int = 0; j < dashboardGrid.columns; j++) {
                 var e:DashboardGridItem = findItem(i, j);
                 var gridItem:GridItem = new GridItem();
                 gridItem.horizontalScrollPolicy = "off";
                 gridItem.verticalScrollPolicy = "off";
+                gridItem.setStyle("horizontalAlign", "center");
                 gridItem.setStyle("borderThickness", 1);
                 gridItem.setStyle("borderStyle", "solid");
-                gridItem.percentWidth = 100;
                 gridItem.percentHeight = 100;
                 var box:DashboardBox = new DashboardBox();
                 viewChildren.addItem(box);
                 box.dashboardEditorMetadata = dashboardEditorMetadata;
                 if (e != null && e.dashboardElement != null) {
                     box.element = e.dashboardElement;
+                    var comp:IDashboardViewComponent = DashboardElementFactory.createViewUIComponent(e.dashboardElement, dashboardEditorMetadata, dashboardGrid) as IDashboardViewComponent;
+                    var childSizeInfo:SizeInfo = comp.obtainPreferredSizeInfo();
+                    if (childSizeInfo.preferredWidth == 0) {
+                        gridItem.percentWidth = 100;
+                    } else {
+                        gridItem.percentWidth = NaN;
+                    }
+
+                    if (dashboardAbsoluteHeight) {
+                        gridHeight = true;
+                        gridItem.percentHeight = NaN;
+                    } else {
+                        if (childSizeInfo.preferredHeight == 0 && !childSizeInfo.autoCalcHeight) {
+                            gridItem.percentHeight = 100;
+                        } else {
+                            gridHeight = true;
+                            gridItem.percentHeight = NaN;
+                        }
+                    }
+                } else {
+                    gridItem.percentWidth = 100;
                 }
                 gridItem.addChild(box);
                 gridRow.addChild(gridItem);
             }
+            gridRow.percentWidth = 100;
+            if (!gridHeight && !dashboardAbsoluteHeight) {
+                gridRow.percentHeight = 100;
+            }
         }
+        initialRetrieve();
     }
 
     private function onDimensions(event:GridDimensionEvent):void {
@@ -150,6 +183,24 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
             }
         }
         return null;
+    }
+
+    public function toggleControls(show:Boolean):void {
+        for (var i:int = 0; i < dashboardGrid.rows; i++) {
+            var row:GridRow = getChildAt(i) as GridRow;
+            for (var j:int = 0; j < dashboardGrid.columns; j++) {
+                var item:GridItem = row.getChildAt(j) as GridItem;
+                if (show) {
+                    item.setStyle("borderThickness", 1);
+                    item.setStyle("borderStyle", "solid");
+                } else {
+                    item.setStyle("borderThickness", 0);
+                    item.setStyle("borderStyle", "none");
+                }
+                var box:DashboardBox = item.getChildAt(0) as DashboardBox;
+                box.toggleControls(show);
+            }
+        }
     }
 
     public function validate(results:Array):void {

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:filtering="com.easyinsight.filtering.*" xmlns:easyinsight="com.easyinsight.*"
-         xmlns:analysis="com.easyinsight.analysis.*"
+         xmlns:analysis="com.easyinsight.analysis.*" xmlns:report="com.easyinsight.report.*"
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%" creationComplete="populateData()"
          verticalScrollPolicy="off" horizontalScrollPolicy="off">
     <mx:Script><![CDATA[
@@ -18,6 +18,7 @@
         import com.easyinsight.code.MarmotScriptWindow;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -58,8 +59,7 @@
             controls.addItem(new DashboardControl("Text", DashboardTextElement));
             this.availableControls = controls;
             if (_dashboardID == 0) {
-                ProgressAlert.alert(this, "Retrieving reports...", null, feedService.searchForSubscribedFeeds);
-                feedService.searchForSubscribedFeeds.send();
+                setupNewDashboard();
             } else {
                 dashboardViewable = true;
                 ProgressAlert.alert(this, "Retrieving data...", null, dashboardService.getDashboard);
@@ -124,6 +124,20 @@
         [Bindable]
         private var availableScorecards:ArrayCollection = new ArrayCollection();
 
+        private function gotDashboardMetadata():void {
+            var metadata:NewDashboardMetadata = dashboardService.getDashboardEditorMetadata.lastResult as NewDashboardMetadata;
+            availableReports = new ArrayCollection();
+            var reportList:ArrayCollection = metadata.availableReports;
+            for each (var report:InsightDescriptor in reportList) {
+                availableReports.addItem(report);
+            }
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name", true) ];
+            availableReports.sort = sort;
+            availableReports.refresh();
+            dataSource = metadata.dataSourceInfo;
+        }
+
         private function gotReports():void {
             availableReports = new ArrayCollection();
             var reportList:ArrayCollection = analysisService.getInsightDescriptorsForDataSource.lastResult as ArrayCollection;
@@ -143,7 +157,7 @@
              window.addEventListener(DashboardSetupEvent.DASHBOARD_SETUP, onDimensions, false, 0, true);
              PopUpManager.addPopUp(window, this, true);
              PopUpUtil.centerPopUp(window);*/
-            onDimensions(null);
+
         }
 
         private var metadata:DashboardEditorMetadata = new DashboardEditorMetadata();
@@ -156,6 +170,7 @@
                 dashboardCanvas.percentHeight = 100;
             }
             dataSourceID = _dashboard.dataSourceID;
+            dataSource = _dashboard.dataSourceInfo;
             metadata.dataSourceID = dataSourceID;
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.dashboardAdminID = String(_dashboard.urlKey);
@@ -182,17 +197,19 @@
             UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.EDIT, _dashboardID));
         }
 
+        [Bindable]
         private var rootView:IDashboardViewComponent;
 
-        private function onDimensions(event:DashboardSetupEvent):void {
+        private function setupNewDashboard():void {
             var box:DashboardBox = new DashboardBox();
             box.dashboardEditorMetadata = metadata;
+            rootView = box;
             dashboardCanvas.addChild(box);
             _dashboard = new Dashboard();
             metadata.dashboard = _dashboard;
             dataSourceID = _startDataSourceID;
-            ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource);
-            analysisService.getInsightDescriptorsForDataSource.send(dataSourceID);
+            ProgressAlert.alert(this, "Retrieving reports...", null, dashboardService.getDashboardEditorMetadata);
+            dashboardService.getDashboardEditorMetadata.send(dataSourceID);
             dataService.getFeedMetadata.send(dataSourceID);
             //_dashboard.rootElement = grid;
         }
@@ -424,7 +441,11 @@
 
         override protected function measure():void {
             super.measure();
-            vbox.width = Application(Application.application).width - controls.width - 30;
+            if (controls.parent) {
+                vbox.width = Application(Application.application).width - controls.width - 30;
+            } else {
+                vbox.width = Application(Application.application).width - 30;
+            }
             vbox.maxHeight = Application(Application.application).height - headers.height - filtersBox.height - 20;
             lastFiltersHeight = filtersBox.height;
         }
@@ -468,6 +489,37 @@
             analysisService.getInsightDescriptorsForDataSource.send(dataSourceID);
         }
 
+        private function toggleEditorControls():void {
+            if (controls.parent) {
+                toggleButton.label = "Hide Editor Controls";
+                controls.parent.removeChild(controls);
+                DashboardBox(rootView).toggleControls(false);
+            } else {
+                toggleButton.label = "Show Editor Controls";
+                coreHBox.addChildAt(controls, 0);
+                DashboardBox(rootView).toggleControls(true);
+            }
+            invalidateSize();
+        }
+
+        [Bindable]
+        [Embed(source="../../../../assets/refresh.png")]
+        private var refreshIcon:Class;
+
+        private var _dataSource:DataSourceInfo;
+
+
+        [Bindable(event="dataSourceChanged")]
+        public function get dataSource():DataSourceInfo {
+            return _dataSource;
+        }
+
+        public function set dataSource(value:DataSourceInfo):void {
+            if (_dataSource == value) return;
+            _dataSource = value;
+            dispatchEvent(new Event("dataSourceChanged"));
+        }
+
         [Bindable]
         private var saveAsEnabled:Boolean = false;
         ]]></mx:Script>
@@ -476,6 +528,7 @@
     </mx:RemoteObject>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="getDashboard" result="gotDashboard()"/>
+        <mx:method name="getDashboardEditorMetadata" result="gotDashboardMetadata()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="data" id="dataService">
         <mx:method name="getFeedMetadata" result="gotFeedMetadata()"/>
@@ -491,6 +544,9 @@
         <mx:Button id="saveAsButton" icon="@Embed(source='../../../../assets/save_as.png')" click="saveAs()"
                    toolTip="Save As" enabled="{saveAsEnabled}" label="Save As"
                    labelPlacement="right" styleName="grayButton"/>
+        <report:RefreshButton styleName="grayButton" labelPlacement="right"
+                              id="refreshButton" toolTip="Refresh this dashboard" label="Refresh" viewFactory="{rootView}"
+                              dataSource="{dataSource}" icon="{refreshIcon}"/>
         <mx:Button icon="@Embed(source='../../../../assets/document_edit.png')" click="configureDashboard()"
                    toolTip="Configure Dashboard" label="Configure Dashboard" labelPlacement="right"
                    styleName="grayButton"/>
@@ -502,11 +558,12 @@
                                          toolTip="Actions"
                                          icon="@Embed(source='../../../../assets/businessman_edit.png')"
                 />
+        <mx:Button styleName="grayButton" id="toggleButton" label="Hide Editor Controls" click="toggleEditorControls()"/>
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
     </mx:HBox>
     <mx:HBox width="100%" height="100%" paddingLeft="10" paddingRight="10" verticalScrollPolicy="off"
-             horizontalScrollPolicy="off">
+             horizontalScrollPolicy="off" id="coreHBox">
         <mx:VBox height="100%" horizontalAlign="center" width="200" paddingTop="20" paddingBottom="20" id="controls">
             <mx:Label text="Controls" fontSize="14"/>
             <mx:List id="controlsList" dataProvider="{availableControls}" labelField="name" dragEnabled="true"
