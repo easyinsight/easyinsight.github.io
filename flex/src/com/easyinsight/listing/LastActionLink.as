@@ -19,21 +19,33 @@ import com.easyinsight.util.MultiLineLinkButton;
 import flash.events.MouseEvent;
 
 import mx.containers.HBox;
+import mx.controls.Text;
 
-public class LastActionLink extends HBox {
+public class LastActionLink extends Text {
 
     private var actionLog:ActionLog;
 
-    private var button:MultiLineLinkButton;
-
     public function LastActionLink() {
-        button = new MultiLineLinkButton();
-        //button.styleName = "grayButton";
-        button.addEventListener(MouseEvent.CLICK, onClick);
-        button.width = 180;
-        button.setStyle("fontSize", 12);
-        horizontalScrollPolicy = "off";
-        verticalScrollPolicy = "off";
+        styleName = "fallThroughFonts";
+        setStyle("color", 0x222222);
+        addEventListener(MouseEvent.CLICK, onClick);
+        addEventListener(MouseEvent.ROLL_OVER, onRollover);
+        addEventListener(MouseEvent.ROLL_OUT, onRollout);
+        setStyle("textAlign", "center");
+        this.width = 180;
+        useHandCursor = true;
+        buttonMode = true;
+        mouseEnabled = true;
+        mouseChildren = false;
+        selectable = false;
+    }
+
+    private function onRollover(event:MouseEvent):void {
+        setStyle("textDecoration", "underline");
+    }
+
+    private function onRollout(event:MouseEvent):void {
+        setStyle("textDecoration", "none");
     }
 
     private function onClick(event:MouseEvent):void {
@@ -54,15 +66,10 @@ public class LastActionLink extends HBox {
         }
     }
 
-    override protected function createChildren():void {
-        super.createChildren();
-        addChild(button);
-    }
-
     override public function set data(val:Object):void {
         actionLog = val as ActionLog;
         if (actionLog != null) {
-            button.label = actionLog.display;
+            this.text = actionLog.display;
         }
     }
 
