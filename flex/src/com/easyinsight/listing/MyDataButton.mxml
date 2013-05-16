@@ -92,5 +92,5 @@
         <mx:Label text="Recent Actions" fontSize="16"/>
     <mx:HRule width="50" strokeColor="#CCCCCC"/>
         <mx:List dataProvider="{recentActions}" backgroundAlpha="0" borderStyle="none" height="100%"
-                itemRenderer="com.easyinsight.listing.LastActionLink" variableRowHeight="true" verticalScrollPolicy="off"/>
+                itemRenderer="com.easyinsight.listing.LastActionLink" variableRowHeight="true" verticalScrollPolicy="off" selectable="false"/>
 </mx:VBox>

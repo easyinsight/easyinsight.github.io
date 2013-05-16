@@ -30,8 +30,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     private var report:AnalysisDefinition;
 
     public function DashboardReportViewComponent() {
-        super();        
-        //setStyle("cornerRadius", 10);
+        super();
         setStyle("horizontalAlign", "center");
         setStyle("verticalAlign", "middle");
         setStyle("verticalGap", 5);
@@ -39,8 +38,6 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         setStyle("paddingRight", 5);
         setStyle("paddingTop", 5);
         setStyle("paddingBottom", 5);
-        /*setStyle("backgroundColor", 0xFFFFFF);
-        setStyle("backgroundAlpha", 1);*/
     }
 
     public function stackPopulate(positions:DashboardStackPositions):void {
@@ -70,7 +67,27 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         } else {
             percentHeight = NaN;
         }
+        if (labelBox && !dashboardReport.showLabel) {
+            removeChild(labelBox);
+            labelBox = null;
+        } else if (getChildren().length != 0 && !labelBox && dashboardReport.showLabel) {
+            var blah:Box = new Box();
+            blah.height = 24;
+            blah.setStyle("backgroundColor", 0xDDDDDD);
+            blah.setStyle("borderThickness", 1);
+            blah.setStyle("borderStyle", "solid");
+            blah.percentWidth = 100;
+            blah.setStyle("horizontalAlign", "center");
+            var label:Label = new Label();
+            label.setStyle("fontSize", 14);
+            label.text = dashboardReport.report.name;
+            blah.addChild(label);
+            addChildAt(blah, 0);
+            labelBox = blah;
+        }
     }
+
+    private var labelBox:Box;
 
     protected override function createChildren():void {
         super.createChildren();
@@ -121,6 +138,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             label.text = dashboardReport.report.name;
             blah.addChild(label);
             addChild(blah);
+            labelBox = blah;
             addChild(viewFactory);
         } else {
             addChild(viewFactory);

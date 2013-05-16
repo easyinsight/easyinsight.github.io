@@ -95,9 +95,11 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         dropBox.setStyle("backgroundColor", 0xFFDDDD);
     }
 
+    private var topCanvas:Canvas;
+
     protected override function createChildren():void {
         super.createChildren();
-        var topCanvas:Canvas = new Canvas();
+        topCanvas = new Canvas();
         topCanvas.percentWidth = 100;
         topCanvas.setStyle("backgroundColor", 0xDDDDDD);
         labelText = new Label();
@@ -137,7 +139,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         dropBox.setStyle("paddingTop", 5);*/
         dropBox.percentHeight = 100;
         dropBox.percentWidth = 100;
-        dropBox.setStyle("verticalAlign", "middle");
+        //dropBox.setStyle("verticalAlign", "middle");
         dropBox.setStyle("horizontalAlign", "center");
         addChild(dropBox);
         if (element != null) {
@@ -149,7 +151,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
                 topBox.addChildAt(addButton, 0);
             }
             updateText();
-            dropBox.setStyle("backgroundColor", 0xEEEEEE);
+            dropBox.setStyle("backgroundColor", 0xFFFFFF);
             if (editorComp == null) {
                 editorComp = IDashboardEditorComponent(DashboardElementFactory.createEditorUIComponent(element, dashboardEditorMetadata));
             }
@@ -240,6 +242,26 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         }
         var comp:IDashboardEditorComponent = dropBox.getChildAt(0) as IDashboardEditorComponent;
         return comp.validate(results);
+    }
+
+
+
+    public function toggleControls(show:Boolean):void {
+        if (!show) {
+            setStyle("borderStyle", "none");
+            setStyle("borderThickness", 0);
+            topCanvas.parent.removeChild(topCanvas);
+        } else {
+            setStyle("borderStyle", "solid");
+            setStyle("borderThickness", 1);
+            addChildAt(topCanvas, 0);
+        }
+        if (dropBox.getChildren().length > 0) {
+            var comp:IDashboardEditorComponent = dropBox.getChildAt(0) as IDashboardEditorComponent;
+            if (comp != null) {
+                comp.toggleControls(show);
+            }
+        }
     }
 
     public function save():void {

@@ -1,6 +1,7 @@
 package com.easyinsight.calculations.functions;
 
 import com.easyinsight.calculations.Function;
+import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.IFunction;
 import com.easyinsight.core.*;
 
@@ -18,8 +19,16 @@ public class EIDateFormatFunction extends Function implements IFunction {
         if (value.type() == Value.EMPTY) {
             return value;
         }
-        DateValue dateValue = (DateValue) value;
-        Date date = dateValue.getDate();
+        Date date;
+        if (value.type() == Value.DATE) {
+            DateValue dateValue = (DateValue) value;
+            date = dateValue.getDate();
+        } else if (value.type() == Value.NUMBER) {
+            date = new Date(value.toDouble().longValue());
+        } else {
+            throw new FunctionException("We couldn't parse the value of " + value.toString() + " as a date.");
+        }
+
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(minusQuotes(getParameter(1)).toString());
         return new StringValue(simpleDateFormat.format(date));
     }

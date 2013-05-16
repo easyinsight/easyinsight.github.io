@@ -76,5 +76,8 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
 
     public function toggleFilters(showFilters:Boolean):void {
     }
+
+    public function toggleControls(show:Boolean):void {
+    }
 }
 }

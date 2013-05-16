@@ -103,13 +103,6 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
                         gridItem.percentHeight = NaN;
                     }
                 }
-
-                if (e.dashboardElement is DashboardReport || e.dashboardElement is DashboardTextElement) {
-                    /*gridItem.setStyle("paddingLeft", 5);
-                    gridItem.setStyle("paddingRight", 5);
-                    gridItem.setStyle("paddingTop", 5);
-                    gridItem.setStyle("paddingBottom", 5);*/
-                }
                 gridItem.setStyle("horizontalAlign", "center");
 
                 viewChildren.addItem(child);
