@@ -98,6 +98,7 @@
         import mx.binding.utils.ChangeWatcher;
 
         import mx.collections.ArrayCollection;
+        import mx.collections.HierarchicalData;
         import mx.collections.ICollectionView;
         import mx.collections.IHierarchicalCollectionView;
         import mx.collections.Sort;
@@ -535,6 +536,9 @@
                     }
                 }
                 dataView.availableFields = wrappers;
+                var f:FixedHierarchicalCollectionView = new FixedHierarchicalCollectionView(new HierarchicalData(availableFields));
+                f.filterFunction = filterFunction;
+                fieldGrid.dataProvider = f;
                 if (openState != null) {
                     for each (var availableWrapper:AnalysisItemWrapper in availableFields) {
                         var open:Boolean = openState[availableWrapper.displayName];
@@ -657,7 +661,6 @@
                 dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
                 transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
 
-                fieldGrid.dataProvider.filterFunction = filterFunction;
                 try {
                     var hints:String = User.getSharedObject().data["reportHints"];
                     if (hints == null || hints == "y") {
@@ -1266,10 +1269,6 @@
                                                  dragComplete="onDragComplete(event)"
                                                  showHeaders="false"
                                                  groupItemRenderer="{rendererFactory}" x="0" y="84">
-
-                    <easyinsight:dataProvider>
-                        <mx:HierarchicalData source="{availableFields}"/>
-                    </easyinsight:dataProvider>
                     <easyinsight:columns>
                         <mx:AdvancedDataGridColumn headerText="" dataField="displayName"/>
                     </easyinsight:columns>

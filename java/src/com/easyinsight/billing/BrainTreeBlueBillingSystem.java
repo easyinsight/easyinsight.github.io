@@ -308,7 +308,11 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
 
 
     public void updateSubscriptionCard(CreditCard curCC, Subscription currentSubscription) {
+        System.out.println("updating subscription id: " + currentSubscription.getId());
         SubscriptionRequest sr = new SubscriptionRequest().paymentMethodToken(curCC.getToken());
-        gateway.subscription().update(currentSubscription.getId(), sr);
+        Result<Subscription> result = gateway.subscription().update(currentSubscription.getId(), sr);
+        if(!result.isSuccess()) {
+            System.out.println(result.getMessage());
+        }
     }
 }
