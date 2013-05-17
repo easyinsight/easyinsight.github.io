@@ -209,7 +209,27 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 return rollingFilterDefinition.getStartDate().getTime();
         }
         //if (!((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
-
+        if (interval == DAY_TO_NOW) {
+            int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
+            int year = cal.get(Calendar.YEAR);
+            int time = insightRequestMetadata.getUtcOffset() / 60;
+            String string;
+            if (time > 0) {
+                string = "GMT-"+Math.abs(time);
+            } else if (time < 0) {
+                string = "GMT+"+Math.abs(time);
+            } else {
+                string = "GMT";
+            }
+            TimeZone timeZone = TimeZone.getTimeZone(string);
+            cal.setTimeZone(timeZone);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            cal.set(Calendar.DAY_OF_YEAR, dayOfYear);
+            cal.set(Calendar.YEAR, year);
+        } else {
             int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
             int year = cal.get(Calendar.YEAR);
             cal.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -219,6 +239,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             cal.set(Calendar.MILLISECOND, 0);
             cal.set(Calendar.DAY_OF_YEAR, dayOfYear);
             cal.set(Calendar.YEAR, year);
+        }
         //}
         return cal.getTimeInMillis();
     }
