@@ -229,6 +229,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             cal.set(Calendar.MILLISECOND, 0);
             cal.set(Calendar.DAY_OF_YEAR, dayOfYear);
             cal.set(Calendar.YEAR, year);
+            System.out.println("Day To Now has time of " + cal.getTime());
         } else {
             int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
             int year = cal.get(Calendar.YEAR);
