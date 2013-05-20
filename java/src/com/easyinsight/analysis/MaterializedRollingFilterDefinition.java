@@ -228,7 +228,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 string = "GMT";
             }
             DateTime dateTime = new DateTime(cal.getTime());
-            DateTime translated = dateTime.toDateTime(DateTimeZone.forOffsetHours(time));
+            DateTime translated = dateTime.toDateTime(DateTimeZone.forOffsetHours(-time));
             System.out.println("now has " + translated.toDate());
             return translated.toDate().getTime();
         } else {
