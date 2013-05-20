@@ -118,15 +118,34 @@ public class AnalysisDateDimension extends AnalysisDimension {
         this.dateLevel = dateLevel;
     }
 
+    public AnalysisDateDimension(Key key, String displayName, int dateLevel, boolean dateOnly) {
+        super(key, displayName);
+        this.dateLevel = dateLevel;
+        this.dateOnlyField = dateOnly;
+    }
+
     public AnalysisDateDimension(Key key, boolean group, int dateLevel, String customDateFormat) {
         super(key, group);
         this.dateLevel = dateLevel;
         this.customDateFormat = customDateFormat;
     }
 
+    public AnalysisDateDimension(Key key, boolean group, int dateLevel, String customDateFormat, boolean dateOnly) {
+        super(key, group);
+        this.dateLevel = dateLevel;
+        this.customDateFormat = customDateFormat;
+        this.dateOnlyField = dateOnly;
+    }
+
     public AnalysisDateDimension(String key, boolean group, int dateLevel) {
         super(key, group);
         this.dateLevel = dateLevel;
+    }
+
+    public AnalysisDateDimension(String key, boolean group, int dateLevel, boolean dateOnly) {
+        super(key, group);
+        this.dateLevel = dateLevel;
+        this.dateOnlyField = dateOnly;
     }
 
     public AnalysisDateDimension() {
@@ -296,6 +315,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 }
 
                 finalDate = calendar.getTime();
+                System.out.println("final date = " + finalDate + " with " + timezoneShift);
                 if (outputDateFormat != null && outputDateFormat.length() > 0) {
                     try {
                         resultValue = new StringValue(new SimpleDateFormat(outputDateFormat).format(calendar.getTime()), new DateValue(finalDate), new NumericValue(finalDate.getTime()));

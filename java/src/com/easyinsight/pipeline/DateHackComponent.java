@@ -36,6 +36,7 @@ public class DateHackComponent implements IComponent {
                     Value value = row.getValue(date);
                     if (value != null && value.type() == Value.DATE) {
                         DateValue dateValue = (DateValue) value;
+                        System.out.println("for " + date.toDisplay() + ", value = " + value.toString() + " with shift = " + date.isTimeshift());
                         dateValue.calculate(date.isTimeshift() ? shiftedCal : cal);
                     }
                 }
