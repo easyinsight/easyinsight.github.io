@@ -417,8 +417,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     public boolean checkDateTime(String name, Key key) {
         if (BaseCampTimeSource.DATE.equals(name) || BaseCampTodoSource.MILESTONE_COMPLETED_ON.equals(name) ||
                 BaseCampTodoSource.MILESTONE_CREATED_ON.equals(name) || BaseCampTodoSource.DEADLINE.equals(name) ||
-                BaseCampTodoSource.CREATEDDATE.equals(name) || BaseCampTodoSource.COMPLETEDDATE.equals(name) ||
-                BaseCampTodoSource.DUEON.equals(name)) {
+                BaseCampTodoSource.CREATEDDATE.equals(name) || BaseCampTodoSource.COMPLETEDDATE.equals(name)) {
             return false;
         }
         return true;
