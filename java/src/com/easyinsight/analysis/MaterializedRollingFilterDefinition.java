@@ -221,7 +221,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             } else {
                 string = "GMT";
             }
-            TimeZone timeZone = TimeZone.getTimeZone("GMT");
+            TimeZone timeZone = TimeZone.getTimeZone(string);
 
             /*cal.set(Calendar.HOUR_OF_DAY, 0);
             cal.set(Calendar.MINUTE, 0);
