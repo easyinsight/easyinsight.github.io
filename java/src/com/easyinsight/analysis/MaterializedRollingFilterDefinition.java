@@ -212,6 +212,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         }
         //if (!((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
         if (interval == DAY_TO_NOW) {
+            Calendar cal1 = Calendar.getInstance();
             int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
             int year = cal.get(Calendar.YEAR);
             int time = insightRequestMetadata.getUtcOffset() / 60;
@@ -229,8 +230,8 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);*/
-            cal.set(Calendar.DAY_OF_YEAR, dayOfYear);
-            cal.set(Calendar.YEAR, year);
+            cal1.set(Calendar.DAY_OF_YEAR, dayOfYear);
+            cal1.set(Calendar.YEAR, year);
             DateTime dateTime = new DateTime(cal.getTimeInMillis(), DateTimeZone.forTimeZone(timeZone));
             System.out.println("at this point, we have a date time of " + dateTime);
             DateTime hourCopy = dateTime.hourOfDay().setCopy(0);
