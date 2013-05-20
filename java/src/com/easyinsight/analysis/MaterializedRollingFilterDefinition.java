@@ -232,7 +232,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             cal.set(Calendar.MILLISECOND, 0);*/
             cal1.set(Calendar.DAY_OF_YEAR, dayOfYear);
             cal1.set(Calendar.YEAR, year);
-            DateTime dateTime = new DateTime(cal.getTimeInMillis(), DateTimeZone.forTimeZone(timeZone));
+            DateTime dateTime = new DateTime(cal1.getTimeInMillis(), DateTimeZone.forTimeZone(timeZone));
             System.out.println("at this point, we have a date time of " + dateTime);
             DateTime hourCopy = dateTime.hourOfDay().setCopy(0);
             System.out.println("after copy, we have " + hourCopy);
