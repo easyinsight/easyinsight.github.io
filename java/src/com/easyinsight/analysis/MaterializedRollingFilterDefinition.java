@@ -235,11 +235,22 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             cal1.set(Calendar.YEAR, year);
             DateTime dateTime = new DateTime(cal1.getTimeInMillis(), DateTimeZone.forTimeZone(timeZone));
             System.out.println("at this point, we have a date time of " + dateTime);
-            DateTime hourCopy = dateTime.hourOfDay().setCopy(0).minuteOfHour().setCopy(0).secondOfMinute().setCopy(0).millisOfSecond().setCopy(0);
+            int dayOfYear2 = dateTime.dayOfYear().get();
+            int year2 = dateTime.dayOfYear().get();
+            cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+            cal.set(Calendar.DAY_OF_YEAR, dayOfYear2);
+            cal.set(Calendar.YEAR, year2);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            System.out.println("and now we have " + cal.getTime());
+            /*DateTime hourCopy = dateTime.hourOfDay().setCopy(0).minuteOfHour().setCopy(0).secondOfMinute().setCopy(0).millisOfSecond().setCopy(0);
             System.out.println("after copy, we have " + hourCopy);
             long millis = hourCopy.getMillis();
             System.out.println("and now, we have " + new Date(millis));
-            return hourCopy.getMillis();
+            return hourCopy.getMillis();*/
+
         } else {
             int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
             int year = cal.get(Calendar.YEAR);
