@@ -315,7 +315,6 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 }
 
                 finalDate = calendar.getTime();
-                System.out.println("final date = " + finalDate + " with " + timezoneShift);
                 if (outputDateFormat != null && outputDateFormat.length() > 0) {
                     try {
                         resultValue = new StringValue(new SimpleDateFormat(outputDateFormat).format(calendar.getTime()), new DateValue(finalDate), new NumericValue(finalDate.getTime()));
