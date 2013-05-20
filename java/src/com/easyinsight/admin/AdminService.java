@@ -272,6 +272,7 @@ public class AdminService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
+            LogClass.error("INVOCATION OF ADMIN CLEAR DATA SOURCE ON " + dataSourceID);
             FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
             try {
                 feedDefinition.delete(conn);
@@ -357,12 +358,13 @@ public class AdminService {
     }*/
 
     public Collection<ActionLog> getRecentActions() {
+        long start = System.currentTimeMillis();
         EIConnection conn = Database.instance().getConnection();
         try {
             Collection<ActionLog> actions = new LinkedHashSet<ActionLog>();
             PreparedStatement queryDSStmt = conn.prepareStatement("SELECT action_data_source_log.data_source_id, action_log.action_type, data_feed.feed_name, action_log.action_date from " +
                     "data_feed, action_data_source_log, action_log where action_log.action_log_id = action_data_source_log.action_log_id and " +
-                    "action_data_source_log.data_source_id = data_feed.data_feed_id and action_log.user_id = ? order by action_log.action_date desc");
+                    "action_data_source_log.data_source_id = data_feed.data_feed_id and action_log.user_id = ?");
             queryDSStmt.setLong(1, SecurityUtil.getUserID());
             ResultSet dsRS = queryDSStmt.executeQuery();
             while (dsRS.next()) {
@@ -374,7 +376,7 @@ public class AdminService {
             }
             PreparedStatement queryReportStmt = conn.prepareStatement("SELECT action_report_log.report_id, action_log.action_type, analysis.data_feed_id," +
                     "analysis.report_type, analysis.title, analysis.url_key, action_log.action_date from analysis, action_log, action_report_log where action_log.action_log_id = action_report_log.action_log_id and " +
-                    "action_report_log.report_id = analysis.analysis_id and action_log.user_id = ? order by action_log.action_date desc");
+                    "action_report_log.report_id = analysis.analysis_id and action_log.user_id = ?");
             queryReportStmt.setLong(1, SecurityUtil.getUserID());
             ResultSet reportRS = queryReportStmt.executeQuery();
             while (reportRS.next()) {
@@ -389,7 +391,7 @@ public class AdminService {
             }
             PreparedStatement queryScorecardStmt = conn.prepareStatement("SELECT action_scorecard_log.scorecard_id, action_log.action_type, scorecard.data_source_id," +
                     "scorecard.scorecard_name, scorecard.url_key, action_log.action_date from scorecard, action_log, action_scorecard_log where action_log.action_log_id = action_scorecard_log.action_log_id and " +
-                    "action_scorecard_log.scorecard_id = scorecard.scorecard_id and action_log.user_id = ? order by action_log.action_date desc");
+                    "action_scorecard_log.scorecard_id = scorecard.scorecard_id and action_log.user_id = ?");
             queryScorecardStmt.setLong(1, SecurityUtil.getUserID());
             ResultSet scorecardRS = queryScorecardStmt.executeQuery();
             while (scorecardRS.next()) {
@@ -403,7 +405,7 @@ public class AdminService {
             }
             PreparedStatement queryDashboardStmt = conn.prepareStatement("SELECT action_dashboard_log.dashboard_id, action_log.action_type, dashboard.data_source_id," +
                     "dashboard.dashboard_name, dashboard.url_key, action_log.action_date from dashboard, action_log, action_dashboard_log where action_log.action_log_id = action_dashboard_log.action_log_id and " +
-                    "action_dashboard_log.dashboard_id = dashboard.dashboard_id and action_log.user_id = ? order by action_log.action_date desc");
+                    "action_dashboard_log.dashboard_id = dashboard.dashboard_id and action_log.user_id = ?");
             queryDashboardStmt.setLong(1, SecurityUtil.getUserID());
             ResultSet dashboardRS = queryDashboardStmt.executeQuery();
             while (dashboardRS.next()) {
@@ -425,6 +427,7 @@ public class AdminService {
             if (actionList.size() > 10) {
                 actionList = actionList.subList(0, 10);
             }
+            System.out.println((System.currentTimeMillis() - start) + " for actions");
             return actionList;
         } catch (Exception e) {
             LogClass.error(e);
@@ -432,6 +435,7 @@ public class AdminService {
         } finally {
             Database.closeConnection(conn);
         }
+
     }
 
     public Collection<ActionLog> getRecentHTMLActions() {
