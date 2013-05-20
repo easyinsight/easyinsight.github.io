@@ -150,7 +150,7 @@ public class DataService {
                 AnalysisDateDimension date = new AnalysisDateDimension();
                 date.setDateLevel(baseDate.getDateLevel());
                 date.setOutputDateFormat(baseDate.getOutputDateFormat());
-                date.setDateOnlyField(baseDate.isDateOnlyField() || baseDate.hasType(AnalysisItemTypes.DERIVED_DATE));
+                date.setDateOnlyField(baseDate.isDateOnlyField());
                 clone = date;
             } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                 AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
@@ -1328,6 +1328,24 @@ public class DataService {
         }
     }
 
+    private Map<String, DataResults> simpleCache = new WeakHashMap<String, DataResults>();
+
+    private String cacheReportResults(DataResults dataResults) {
+        return null;
+    }
+
+    private void truncateResults(DataResults dataResults) {
+
+    }
+
+    public DataResults moreResults(String uid) {
+        DataResults results = simpleCache.get(uid);
+        if (results == null) {
+
+        }
+        return null;
+    }
+
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         try {
             UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
@@ -1340,6 +1358,7 @@ public class DataService {
                 String ip = FlexContext.getHttpRequest().getRemoteAddr();
                 System.out.println(ip);
             }
+            boolean tooManyResults = false;
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
@@ -1351,6 +1370,10 @@ public class DataService {
             }
             results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             suggestions.addAll(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+            if (tooManyResults) {
+                cacheReportResults(results);
+                truncateResults(results);
+            }
             results.setSuggestions(suggestions);
             return results;
         } catch (ReportException dae) {
