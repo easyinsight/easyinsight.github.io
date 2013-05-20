@@ -2,6 +2,8 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import java.util.Date;
 import java.util.Calendar;
@@ -210,6 +212,10 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         }
         //if (!((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
         if (interval == DAY_TO_NOW) {
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
             int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
             int year = cal.get(Calendar.YEAR);
             int time = insightRequestMetadata.getUtcOffset() / 60;
@@ -221,15 +227,10 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             } else {
                 string = "GMT";
             }
-            TimeZone timeZone = TimeZone.getTimeZone(string);
-            cal.setTimeZone(timeZone);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            cal.set(Calendar.DAY_OF_YEAR, dayOfYear);
-            cal.set(Calendar.YEAR, year);
-            System.out.println("Day To Now has time of " + cal.getTime());
+            DateTime dateTime = new DateTime(cal.getTime());
+            DateTime translated = dateTime.toDateTime(DateTimeZone.forOffsetHours(time));
+            System.out.println("now has " + translated.toDate());
+            return translated.toDate().getTime();
         } else {
             int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
             int year = cal.get(Calendar.YEAR);
