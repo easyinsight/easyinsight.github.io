@@ -287,8 +287,9 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
 
                                     String dueOnString = queryField(todoItem, "due-at/text()");
                                     Date dueOnDate = null;
-                                    if (dueOnString != null)
+                                    if (dueOnString != null) {
                                         dueOnDate = df.parse(dueOnString);
+                                    }
 
                                     IRow row = ds.createRow();
                                     row.addValue(keys.get(PROJECTNAME), projectName);
@@ -315,6 +316,7 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
                                     row.addValue(keys.get(MILESTONE_COMPLETED_ON), milestoneCompletedOn);
                                     row.addValue(keys.get(MILESTONE_OWNER), milestoneOwner);
                                     if (dueOnDate != null) {
+                                        System.out.println("for " + queryField(todoItem, "content/text()") + " , date string = " + dueOnString + " which parsed into " + dueOnDate);
                                         row.addValue(keys.get(DUEON), new DateValue(dueOnDate));
                                     }
                                     row.addValue(keys.get(CREATORNAME), creatorName);
