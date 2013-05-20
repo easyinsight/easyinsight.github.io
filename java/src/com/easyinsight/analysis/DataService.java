@@ -150,7 +150,7 @@ public class DataService {
                 AnalysisDateDimension date = new AnalysisDateDimension();
                 date.setDateLevel(baseDate.getDateLevel());
                 date.setOutputDateFormat(baseDate.getOutputDateFormat());
-                date.setDateOnlyField(baseDate.isDateOnlyField());
+                date.setDateOnlyField(baseDate.isDateOnlyField() || baseDate.hasType(AnalysisItemTypes.DERIVED_DATE));
                 clone = date;
             } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                 AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
@@ -1330,20 +1330,28 @@ public class DataService {
 
     private Map<String, DataResults> simpleCache = new WeakHashMap<String, DataResults>();
 
-    private String cacheReportResults(DataResults dataResults) {
-        return null;
+    private String cacheReportResults(long reportID, DataResults dataResults) {
+        String uid = reportID + String.valueOf(System.currentTimeMillis());
+        dataResults.setUid(uid);
+        simpleCache.put(uid, dataResults);
+        return uid;
     }
 
     private void truncateResults(DataResults dataResults) {
 
+        ListDataResults listDataResults = (ListDataResults) dataResults;
+        ListRow[] truncatedRows = new ListRow[1000];
+        System.arraycopy(listDataResults.getRows(), 0, truncatedRows, 0, 1000);
+        listDataResults.setRows(truncatedRows);
     }
 
-    public DataResults moreResults(String uid) {
+    public DataResults moreResults(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, String uid) {
         DataResults results = simpleCache.get(uid);
         if (results == null) {
-
+            return list(analysisDefinition, insightRequestMetadata);
+        } else {
+            return results;
         }
-        return null;
     }
 
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
@@ -1371,7 +1379,7 @@ public class DataService {
             results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             suggestions.addAll(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
             if (tooManyResults) {
-                cacheReportResults(results);
+                cacheReportResults(analysisDefinition.getAnalysisID(), results);
                 truncateResults(results);
             }
             results.setSuggestions(suggestions);
