@@ -2,6 +2,8 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import java.util.Date;
 import java.util.Calendar;
@@ -229,15 +231,12 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             cal.set(Calendar.MILLISECOND, 0);*/
             cal.set(Calendar.DAY_OF_YEAR, dayOfYear);
             cal.set(Calendar.YEAR, year);
-            Calendar cal2 = Calendar.getInstance(timeZone);
-            cal2.set(Calendar.HOUR_OF_DAY, 0);
-            cal2.set(Calendar.MINUTE, 0);
-            cal2.set(Calendar.SECOND, 0);
-            cal2.set(Calendar.MILLISECOND, 0);
-            cal2.setTimeInMillis(cal.getTimeInMillis());
+            DateTime dateTime = new DateTime(cal.getTimeInMillis(), DateTimeZone.forTimeZone(timeZone));
+            System.out.println("at this point, we have a date time of " + dateTime);
+            DateTime hourCopy = dateTime.hourOfDay().setCopy(0);
+            System.out.println("after copy, we have " + hourCopy);
 
-            System.out.println("Day To Now has time of " + cal2.getTime());
-            return cal2.getTimeInMillis();
+            return hourCopy.getMillis();
         } else {
             int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
             int year = cal.get(Calendar.YEAR);
