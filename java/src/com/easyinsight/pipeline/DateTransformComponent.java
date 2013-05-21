@@ -28,7 +28,13 @@ public class DateTransformComponent implements IComponent {
             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 shift = ((AnalysisDateDimension) analysisItem).isTimeshift();
             }*/
-            Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), false, calendar);
+            boolean timezoneShift = false;
+            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                timezoneShift = date.isTimeshift();
+                System.out.println("using " + timezoneShift + " for " + date.toDisplay());
+            }
+            Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), timezoneShift, calendar);
 
             row.addValue(analysisItem.createAggregateKey(), transformedValue);
 

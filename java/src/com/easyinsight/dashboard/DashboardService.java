@@ -1,6 +1,7 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -38,6 +39,23 @@ public class DashboardService {
     }
 
     private DashboardStorage dashboardStorage = new DashboardStorage();
+
+    public NewDashboardMetadata getDashboardEditorMetadata(long dataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            List<InsightDescriptor> reports = new AnalysisStorage().getInsightDescriptorsForDataSource(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), dataSourceID, conn);
+            NewDashboardMetadata dashboardEditorMetadata = new NewDashboardMetadata();
+            dashboardEditorMetadata.setAvailableReports(reports);
+            Feed feed = FeedRegistry.instance().getFeed(dataSourceID, conn);
+            dashboardEditorMetadata.setDataSourceInfo(feed.createSourceInfo(conn));
+            return dashboardEditorMetadata;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
 
     public long canAccessDashboard(String urlKey) {
         try {

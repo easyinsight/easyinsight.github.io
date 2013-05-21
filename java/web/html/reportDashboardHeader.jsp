@@ -21,7 +21,7 @@
 <script type="text/javascript" src="/js/plugins/jqplot.highlighter.min.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.gradientBarRenderer.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.categoryAxisRenderer.js"></script>
-<script type="text/javascript" src="/js/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+<script type="text/javascript" src="/js/plugins/jqplot.canvasAxisLabelRenderer.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.canvasAxisTickRenderer.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.bubbleRenderer.min.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.dateAxisRenderer.min.js"></script>

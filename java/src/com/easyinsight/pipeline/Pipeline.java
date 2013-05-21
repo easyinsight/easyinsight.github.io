@@ -136,7 +136,7 @@ public abstract class Pipeline {
     }
 
     public Pipeline setup(Set<AnalysisItem> analysisItems, List<AnalysisItem> allFields, InsightRequestMetadata insightRequestMetadata) {
-        pipelineData = new PipelineData(null, analysisItems, null, allFields, new HashMap<String, String>(), analysisItems, null);
+        pipelineData = new PipelineData(null, analysisItems, insightRequestMetadata, allFields, new HashMap<String, String>(), analysisItems, null);
         components = generatePipelineCommands(analysisItems, analysisItems, new ArrayList<FilterDefinition>(), null, allFields, insightRequestMetadata);
         return this;
     }

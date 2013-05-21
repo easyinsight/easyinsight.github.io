@@ -76,23 +76,19 @@ public class DashboardStorage {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id, dashboard.account_visible, dashboard.folder from " +
                 "dashboard, user_to_dashboard, user where user.account_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
                 "dashboard.temporary_dashboard = ? and dashboard.account_visible = ? and user_to_dashboard.user_id = user.user_id");
-        PreparedStatement ownerStmt = conn.prepareStatement("SELECT user.first_name, user.name from user, user_to_dashboard where " +
-                "user.user_id = user_to_dashboard.user_id and user_to_dashboard.dashboard_id = ?");
+        PreparedStatement userStmt = conn.prepareStatement("SELECT USER.FIRST_NAME, USER.NAME FROM USER WHERE USER_ID = ?");
+        userStmt.setLong(1, userID);
+        ResultSet nameRS = userStmt.executeQuery();
+        nameRS.next();
+        String firstName = nameRS.getString(1);
+        String lastName = nameRS.getString(2);
+        String name = firstName != null ? firstName + " " + lastName : lastName;
+        userStmt.close();
         queryStmt.setLong(1, accountID);
         queryStmt.setBoolean(2, false);
         queryStmt.setBoolean(3, true);
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
-            ownerStmt.setLong(1, rs.getLong(1));
-            ResultSet ownerRS = ownerStmt.executeQuery();
-            String name;
-            if (ownerRS.next()) {
-                String firstName = ownerRS.getString(1);
-                String lastName = ownerRS.getString(2);
-                name = firstName != null ? firstName + " " + lastName : lastName;
-            } else {
-                name = "";
-            }
             dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.SHARER, name, rs.getBoolean(5), rs.getInt(6)));
         }
         queryStmt.close();
@@ -104,16 +100,6 @@ public class DashboardStorage {
         ueryAccountStmt.setBoolean(2, false);
         ResultSet accountRS = ueryAccountStmt.executeQuery();
         while (accountRS.next()) {
-            ownerStmt.setLong(1, accountRS.getLong(1));
-            ResultSet ownerRS = ownerStmt.executeQuery();
-            String name;
-            if (ownerRS.next()) {
-                String firstName = ownerRS.getString(1);
-                String lastName = ownerRS.getString(2);
-                name = firstName != null ? firstName + " " + lastName : lastName;
-            } else {
-                name = "";
-            }
             dashboards.add(new DashboardDescriptor(accountRS.getString(2), accountRS.getLong(1), accountRS.getString(3), accountRS.getLong(4), Roles.OWNER, name, accountRS.getBoolean(5),
                     accountRS.getInt(6)));
         }
@@ -127,20 +113,9 @@ public class DashboardStorage {
         dashboardGroupStmt.setBoolean(2, false);
         ResultSet dashboardRS = dashboardGroupStmt.executeQuery();
         while (dashboardRS.next()) {
-            ownerStmt.setLong(1, dashboardRS.getLong(1));
-            ResultSet ownerRS = ownerStmt.executeQuery();
-            String name;
-            if (ownerRS.next()) {
-                String firstName = ownerRS.getString(1);
-                String lastName = ownerRS.getString(2);
-                name = firstName != null ? firstName + " " + lastName : lastName;
-            } else {
-                name = "";
-            }
             dashboards.add(new DashboardDescriptor(dashboardRS.getString(2), dashboardRS.getLong(1),  dashboardRS.getString(4), dashboardRS.getLong(3), Roles.SUBSCRIBER, name,
                     dashboardRS.getBoolean(7), dashboardRS.getInt(8)));
         }
-        ownerStmt.close();
         dashboardGroupStmt.close();
         return dashboards;
     }

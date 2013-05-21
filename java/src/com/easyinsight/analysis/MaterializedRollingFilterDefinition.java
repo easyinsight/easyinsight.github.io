@@ -2,6 +2,8 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import java.util.Date;
 import java.util.Calendar;
@@ -209,7 +211,47 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 return rollingFilterDefinition.getStartDate().getTime();
         }
         //if (!((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
+        if (interval == DAY_TO_NOW) {
+            Calendar cal1 = Calendar.getInstance();
+            int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
+            int year = cal.get(Calendar.YEAR);
+            int time = insightRequestMetadata.getUtcOffset() / 60;
+            String string;
+            if (time > 0) {
+                string = "GMT-"+Math.abs(time);
+            } else if (time < 0) {
+                string = "GMT+"+Math.abs(time);
+            } else {
+                string = "GMT";
+            }
+            TimeZone timeZone = TimeZone.getTimeZone(string);
 
+            /*cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);*/
+            // 210-878-5904
+            cal1.set(Calendar.DAY_OF_YEAR, dayOfYear);
+            cal1.set(Calendar.YEAR, year);
+            DateTime dateTime = new DateTime(cal1.getTimeInMillis(), DateTimeZone.forTimeZone(timeZone));
+            System.out.println("at this point, we have a date time of " + dateTime);
+            int dayOfYear2 = dateTime.dayOfYear().get();
+            int year2 = dateTime.year().get();
+            cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+            cal.set(Calendar.DAY_OF_YEAR, dayOfYear2);
+            cal.set(Calendar.YEAR, year2);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            System.out.println("and now we have " + cal.getTime());
+            /*DateTime hourCopy = dateTime.hourOfDay().setCopy(0).minuteOfHour().setCopy(0).secondOfMinute().setCopy(0).millisOfSecond().setCopy(0);
+            System.out.println("after copy, we have " + hourCopy);
+            long millis = hourCopy.getMillis();
+            System.out.println("and now, we have " + new Date(millis));
+            return hourCopy.getMillis();*/
+
+        } else {
             int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
             int year = cal.get(Calendar.YEAR);
             cal.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -219,6 +261,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             cal.set(Calendar.MILLISECOND, 0);
             cal.set(Calendar.DAY_OF_YEAR, dayOfYear);
             cal.set(Calendar.YEAR, year);
+        }
         //}
         return cal.getTimeInMillis();
     }

@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.SuggestedUser;
 import com.easyinsight.userupload.UploadPolicy;
@@ -397,11 +398,15 @@ public class FeedDefinition implements Cloneable, Serializable {
         }
     }
 
+    protected List<AnalysisItem> fieldsForFeed() {
+        return getFields();
+    }
+
     private void populateFeedFields(Feed feed, List<AnalysisItem> kpis) {
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>();
-        allFields.addAll(getFields());
+        allFields.addAll(fieldsForFeed());
         allFields.addAll(kpis);
         for (AnalysisItem field : allFields) {
             try {
@@ -666,6 +671,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public void delete(Connection conn) throws SQLException {
+        LogClass.info("USER " + SecurityUtil.getUserID() + " DELETING DATA SOURCE " + dataFeedID);
         onDelete(conn);
         
         // cascade into base classes - see http://bugs.mysql.com/bug.php?id=13102 as to why this code sucks.

@@ -17,9 +17,11 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
 
     public function DashboardTextEditorComponent() {
         super();
+        styleName = "myFontStyle";
         /*setStyle("verticalAlign", "middle");
         setStyle("horizontalAlign", "center");*/
-
+        setStyle("backgroundColor", 0x666666);
+        setStyle("backgroundAlpha", 1);
     }
 
     public function stackPopulate(positions:DashboardStackPositions):void {
@@ -27,29 +29,27 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
-        return new SizeInfo();
+        return new SizeInfo(dashboardText.preferredWidth, dashboardText.preferredHeight);
     }
 
     protected override function createChildren():void {
         super.createChildren();
         textArea = new TextArea();
-        var sizeInfo:SizeInfo = obtainPreferredSizeInfo();
-        if (sizeInfo.preferredWidth > 0) {
-            width = dashboardText.preferredWidth;
-            textArea.width = dashboardText.preferredWidth;
+        textArea.setStyle("fontSize", dashboardText.fontSize);
+        textArea.setStyle("color", dashboardText.color);
+        if (dashboardText.preferredHeight == 0) {
+            textArea.percentHeight = 100;
+            this.percentHeight = 100;
         } else {
-            percentWidth = 100;
-            textArea.percentWidth = 100;
-        }
-        if (sizeInfo.preferredHeight > 0) {
-            height = dashboardText.preferredHeight;
             textArea.height = dashboardText.preferredHeight;
-        } else if (dashboardEditorMetadata.dashboard.absoluteSizing) {
-            height = 400;
-            textArea.height = 400;
+            this.height = dashboardText.preferredHeight;
+        }
+        if (dashboardText.preferredWidth == 0) {
+            textArea.percentWidth = 100;
+            this.percentWidth = 100;
         } else {
-            height = 400;
-            textArea.height = 400;
+            textArea.width = dashboardText.preferredWidth;
+            this.width = dashboardText.preferredWidth;
         }
         textArea.editable = true;
         textArea.text = dashboardText.text;
@@ -83,6 +83,16 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
     }
 
     public function toggleFilters(showFilters:Boolean):void {
+    }
+
+    public function toggleControls(show:Boolean):void {
+        if (show) {
+            setStyle("horizontalAlign", "left");
+            setStyle("verticalAlign", "top");
+        } else {
+            setStyle("horizontalAlign", "center");
+            setStyle("verticalAlign", "middle");
+        }
     }
 }
 }
