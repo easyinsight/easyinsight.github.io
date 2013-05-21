@@ -23,6 +23,7 @@ public class XMLImportMetadata {
     private List<AnalysisItem> additionalReportItems = new ArrayList<AnalysisItem>();
     private Map<String, AnalysisItem> unknownMappings = new HashMap<String, AnalysisItem>();
     private Set<String> unknownFields = new HashSet<String>();
+    private Map<String, String> dataSourceMappings;
 
     public String getValue(Node node, String query) {
         Nodes nodes = node.query(query);
@@ -66,6 +67,8 @@ public class XMLImportMetadata {
 
     public FeedDefinition dataSourceForURLKey(String urlKey) {
         try {
+            if(dataSourceMappings.containsKey(urlKey))
+                urlKey = dataSourceMappings.get(urlKey);
             PreparedStatement stmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE API_KEY = ?");
             stmt.setString(1, urlKey);
             ResultSet rs = stmt.executeQuery();
@@ -76,5 +79,13 @@ public class XMLImportMetadata {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void setDataSourceMappings(Map<String, String> dataSourceMappings) {
+        this.dataSourceMappings = dataSourceMappings;
+    }
+
+    public Map<String, String> getDataSourceMappings() {
+        return dataSourceMappings;
     }
 }

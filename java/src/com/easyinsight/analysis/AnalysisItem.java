@@ -922,13 +922,16 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         FeedDefinition baseSource = dataSources.get(dataSources.size() - 1);
         AnalysisItem baseItem = baseSource.findAnalysisItemByKey(baseKey);
         if (baseItem == null) {
+            boolean found = false;
             for (AnalysisItem analysisItem1 : xmlImportMetadata.getAdditionalReportItems()) {
                 if (analysisItem1.getKey().toKeyString().equals(baseKey)) {
                     analysisItem.setKey(analysisItem1.getKey());
+                    found = true;
                     break;
                 }
             }
-            xmlImportMetadata.addUnknownField(baseKey);
+            if(!found)
+                xmlImportMetadata.addUnknownField(baseKey);
         } else {
             //Key parentKey = baseItem.getKey();
             if (dataSources.size() > 1) {
