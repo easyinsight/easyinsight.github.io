@@ -154,8 +154,8 @@
     // return width along the x axis
     // will check first to see if an element exists.
     // if not, will return the computed text box width.
-    $.jqplot.CanvasAxisTickRenderer.prototype.getWidth = function(ctx) {
-        if (this._elem) {
+    $.jqplot.CanvasAxisTickRenderer.prototype.getWidth = function(ctx, override) {
+        if (this._elem && !override) {
          return this._elem.outerWidth(true);
         }
         else {
@@ -168,8 +168,8 @@
     };
     
     // return height along the y axis.
-    $.jqplot.CanvasAxisTickRenderer.prototype.getHeight = function(ctx) {
-        if (this._elem) {
+    $.jqplot.CanvasAxisTickRenderer.prototype.getHeight = function(ctx, override) {
+        if (this._elem && !override) {
          return this._elem.outerHeight(true);
         }
         else {

@@ -32,3 +32,4 @@
 
 
 <link href="/css/report.css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="/css/jquery.jqplot.css" />

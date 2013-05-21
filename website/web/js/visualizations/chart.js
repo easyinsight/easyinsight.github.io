@@ -6,6 +6,7 @@ Chart = {
                     var labels = data["labels"];
                     params.jqplotOptions.legend = $.extend({}, params.jqplotOptions.legend, {show:true, labels:labels});
                 }
+                params.jqplotOptions.grid = $.extend({}, params.jqplotOptions.grid, {borderWidth:0, shadow:false});
                 var s1 = data["values"];
                 var customHeight = styleProps["customHeight"];
                 if (customHeight > -1) {
