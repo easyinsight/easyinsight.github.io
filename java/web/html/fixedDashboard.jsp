@@ -42,7 +42,7 @@
     <script type="text/javascript" src="/js/plugins/jqplot.barRenderer.min.js"></script>
     <script type="text/javascript" src="/js/plugins/jqplot.categoryAxisRenderer.min.js"></script>
     <script type="text/javascript" src="/js//plugins/jqplot.pointLabels.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/css/jquery.jqplot.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/jquery.jqplot.css" />
     <script type="text/javascript">
 
         var filterBase = {};

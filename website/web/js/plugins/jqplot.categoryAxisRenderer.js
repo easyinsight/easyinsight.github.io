@@ -510,14 +510,44 @@
         
         if (this.show) {
             if (this.name == 'xaxis' || this.name == 'x2axis') {
+                var maxHeight = 0;
                 for (i=0; i<ticks.length; i++) {
                     var t = ticks[i];
+                    var dist = (this.u2p(.5) - this.u2p(0));
+                    var aa =  Math.floor(dist - 2);
+                    if(dist < t._textRenderer.height) {
+                        t._textRenderer.fontSize = aa + "px";
+                        if(aa < 9) {
+
+                            var modifier = 30;
+                            if(t.angle < 0) {
+                                t.angle = t.angle - modifier;
+                            } else {
+                                t.angle = t.angle + modifier;
+                            }
+                            t._textRenderer.angle = (t.angle * Math.PI / 180.0);
+                        }
+                    }
+
                     if (t.show && t.showLabel) {
                         var shim;
-                        
+
                         if (t.constructor == $.jqplot.CanvasAxisTickRenderer && t.angle) {
                             // will need to adjust auto positioning based on which axis this is.
                             var temp = (this.name == 'xaxis') ? 1 : -1;
+                            var ee = t._elem.get(0)
+                            var c = ee.getContext("2d");
+                            t._textRenderer.setWidth(c);
+                            t._textRenderer.setHeight();
+                            var hh = t.getHeight(c, true);
+                            var ww = t.getWidth(c, true);
+                            ee.width = ww;
+                            ee.height = hh;
+                            ee.style.width = ww;
+                            ee.style.height = hh;
+                            if(hh > maxHeight)
+                                maxHeight = hh;
+
                             switch (t.labelPosition) {
                                 case 'auto':
                                     // position at end
@@ -547,8 +577,9 @@
                             shim = -t.getWidth()/2;
                         }
                         var val = this.u2p(t.value) + shim + 'px';
-                        t._elem.css('left', val);
                         t.pack();
+                        t._elem.css('left', val);
+
                     }
                 }
                 
@@ -558,6 +589,11 @@
                     this._label._elem.css('left', offmin + pixellength/2 - w/2 + 'px');
                     if (this.name == 'xaxis') {
                         this._label._elem.css('bottom', '0px');
+                        var a = this._label._elem.outerHeight(true);
+                        var b = this._label._elem.parent().height();
+                        var c = this._label._elem.parent().parent().height();
+                        this._label._elem.parent().css("height", (a + hh) + "px");
+                        this._label._elem.parent().parent().css("height", (c + (this._label._elem.parent().height() - b)) + "px");
                         labeledge = ['bottom', this._label._elem.outerHeight(true)];
                     }
                     else {
