@@ -19,6 +19,15 @@ public abstract class DataResults {
     private ReportFault reportFault;
     private List<IntentionSuggestion> suggestions;
     private String reportLog;
+    private String uid;
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
 
     public String getReportLog() {
         return reportLog;
