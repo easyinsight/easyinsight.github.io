@@ -871,14 +871,7 @@ public class AnalysisDefinition implements Cloneable {
         report.setAccountVisible(Boolean.parseBoolean(root.getAttribute("accountVisible").getValue()));
         report.setPubliclyVisible(Boolean.parseBoolean(root.getAttribute("publiclyVisible").getValue()));
         report.setMarketplaceVisible(Boolean.parseBoolean(root.getAttribute("exchangeVisible").getValue()));
-        Nodes fieldNodes = root.query("fields/analysisItem");
-        Map<String, AnalysisItem> reportStructure = new HashMap<String, AnalysisItem>();
-        for (int i = 0; i < fieldNodes.size(); i++) {
-            Element fieldNode = (Element) fieldNodes.get(i);
-            AnalysisItem analysisItem = AnalysisItem.fromXML(fieldNode, xmlImportMetadata);
-            String structureID = fieldNode.getAttribute("structureID").getValue();
-            reportStructure.put(structureID, analysisItem);
-        }
+
         Nodes additionalFieldNodes = root.query("additionalFields/analysisItem");
         List<AnalysisItem> additionalFields = new ArrayList<AnalysisItem>();
         for (int i = 0; i < additionalFieldNodes.size(); i++) {
@@ -887,6 +880,18 @@ public class AnalysisDefinition implements Cloneable {
             additionalFields.add(analysisItem);
         }
         report.setAddedItems(additionalFields);
+
+        xmlImportMetadata.setAdditionalReportItems(additionalFields);
+
+        Nodes fieldNodes = root.query("fields/analysisItem");
+        Map<String, AnalysisItem> reportStructure = new HashMap<String, AnalysisItem>();
+        for (int i = 0; i < fieldNodes.size(); i++) {
+            Element fieldNode = (Element) fieldNodes.get(i);
+            AnalysisItem analysisItem = AnalysisItem.fromXML(fieldNode, xmlImportMetadata);
+            String structureID = fieldNode.getAttribute("structureID").getValue();
+            reportStructure.put(structureID, analysisItem);
+        }
+
         report.setMarmotScript(xmlImportMetadata.getValue(root, "marmotScript/text()"));
         report.setDescription(xmlImportMetadata.getValue(root, "description/text()"));
         report.setReportRunMarmotScript(xmlImportMetadata.getValue(root, "reportRunMarmotScript/text()"));

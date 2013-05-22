@@ -26,8 +26,8 @@ import org.hibernate.proxy.HibernateProxy;
  * Time: 11:09:03 PM
  */
 @Entity
-@Table(name="analysis_item")
-@Inheritance(strategy=InheritanceType.JOINED)
+@Table(name = "analysis_item")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public static final int ORDER_DEFAULT = 0;
@@ -37,8 +37,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     // if we fold out key into its own class...
 
-    @OneToOne (fetch = FetchType.LAZY)
-    @JoinColumn(name="item_key_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_key_id")
     private Key key;
 
     @Transient
@@ -47,39 +47,40 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Transient
     private transient long dataSourceID;
 
-    @Column(name="concrete")
+    @Column(name = "concrete")
     private boolean concrete = true;
 
-    @Column(name="lookup_table_id")
+    @Column(name = "lookup_table_id")
     private Long lookupTableID;
 
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="analysis_item_id")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "analysis_item_id")
     private long analysisItemID;
 
-    @Column(name="original_display_name")
+    @Column(name = "original_display_name")
     private String originalDisplayName;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name="formatting_configuration_id")
+    @JoinColumn(name = "formatting_configuration_id")
     private FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
 
-    @Column(name="hidden")
+    @Column(name = "hidden")
     private boolean hidden = false;
 
-    @Column(name="display_name")
+    @Column(name = "display_name")
     private String displayName;
 
-    @Column(name="sort_sequence")
+    @Column(name = "sort_sequence")
     private int sortSequence;
 
-    @Column(name="tooltip")
+    @Column(name = "tooltip")
     private String tooltip;
 
-    @Column(name="sort")
+    @Column(name = "sort")
     private int sort;
 
-    @Column(name="width")
+    @Column(name = "width")
     private int width;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -88,20 +89,20 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             inverseJoinColumns = @JoinColumn(name = "filter_id", nullable = false))
     private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
 
-    @Column(name="high_is_good")
+    @Column(name = "high_is_good")
     private boolean highIsGood;
 
-    @Column(name="key_column")
+    @Column(name = "key_column")
     private boolean keyColumn;
 
-    @Column(name="label_column")
+    @Column(name = "label_column")
     private boolean labelColumn;
 
-    @Column(name="item_position")
+    @Column(name = "item_position")
     private int itemPosition;
 
-    @OneToOne (fetch = FetchType.LAZY)
-    @JoinColumn(name="sort_item_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sort_item_id")
     private AnalysisItem sortItem;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -110,11 +111,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             inverseJoinColumns = @JoinColumn(name = "link_id", nullable = false))
     private List<Link> links = new ArrayList<Link>();
 
-    @OneToOne (fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "report_field_extension_id")
     private ReportFieldExtension reportFieldExtension;
 
-    @Column(name="marmotscript")
+    @Column(name = "marmotscript")
     private String marmotScript;
 
     // field connection
@@ -122,14 +123,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Transient
     private transient String folder;
 
-    @OneToOne (fetch = FetchType.LAZY)
-    @JoinColumn(name="from_field_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "from_field_id")
     private AnalysisItem fromField;
 
-    @Column(name="kpi")
+    @Column(name = "kpi")
     private boolean kpi;
 
-    @Column(name="field_type")
+    @Column(name = "field_type")
     private int fieldType;
 
     /*@Transient
@@ -507,7 +508,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             sortItem = replacementMap.getField(sortItem);
         }
     }
-    
+
     private AnalysisItem findMatch(Key key, Collection<AnalysisItem> analysisItems) {
         if (key instanceof DerivedKey) {
             for (AnalysisItem analysisItem : analysisItems) {
@@ -519,7 +520,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
         return null;
     }
-    
+
     protected List<AnalysisItem> measureFilters(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         if (includeFilters && getFilters().size() > 0) {
@@ -552,7 +553,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         analysisItemList.add(this);
         analysisItemSet.add(this);
         analysisItemList.addAll(measureFilters(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
-        
+
         if (getLookupTableID() != null && getLookupTableID() > 0 && includeFilters) {
             LookupTable lookupTable = new FeedService().getLookupTable(getLookupTableID());
             if (lookupTable != null) {
@@ -906,7 +907,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         // so a derived key is going to be XXXXX:Blah or XXXXX:YYYYY:Blah
 
         String keyString = fieldNode.getAttribute("key").getValue();
-        String[] keyParts = keyString.split("-");
+        String[] keyParts = keyString.split("\\|");
         String baseKey = keyParts[keyParts.length - 1];
 
         List<FeedDefinition> dataSources = new ArrayList<FeedDefinition>();
@@ -930,8 +931,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                     break;
                 }
             }
-            if(!found)
-                xmlImportMetadata.addUnknownField(baseKey);
+            if (!found) {
+                if (analysisItem.hasType(AnalysisItemTypes.CALCULATION) || analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE) ||
+                        analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION) || analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                    analysisItem.setKey(new NamedKey(baseKey));
+                } else {
+                    xmlImportMetadata.addUnknownField(baseKey);
+                }
+            }
         } else {
             //Key parentKey = baseItem.getKey();
             if (dataSources.size() > 1) {
@@ -948,7 +955,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                     }
                 }
             }
+
             analysisItem.setKey(baseItem.getKey());
+        }
+        if (analysisItem.getKey() == null) {
+            analysisItem.setKey(new NamedKey(baseKey));
         }
         Nodes filters = fieldNode.query("filters/filter");
         for (int i = 0; i < filters.size(); i++) {
@@ -982,9 +993,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public Link defaultLink() {
-        if(getLinks() != null)
-            for(Link l : getLinks()) {
-                if(l.isDefaultLink())
+        if (getLinks() != null)
+            for (Link l : getLinks()) {
+                if (l.isDefaultLink())
                     return l;
             }
 

@@ -77,6 +77,7 @@ public class XMLImportMetadata {
             stmt.close();
             return new FeedStorage().getFeedDefinitionData(id, conn);
         } catch (SQLException e) {
+            System.out.println("trying to find urlKey: " + urlKey);
             throw new RuntimeException(e);
         }
     }

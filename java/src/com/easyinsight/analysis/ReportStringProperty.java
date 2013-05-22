@@ -56,8 +56,10 @@ public class ReportStringProperty extends ReportProperty {
     }
 
     protected void customFromXML(Element element) {
-        if(element.getAttribute("propertyName") != null && element.getChildCount() > 0) {
+        if(element.getAttribute("propertyName") != null) {
             setPropertyName(element.getAttribute("propertyName").getValue());
+        }
+        if(element.getChildCount() > 0) {
             value = element.getChild(0).getValue();
         }
     }
