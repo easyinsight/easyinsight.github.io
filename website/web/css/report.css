@@ -43,8 +43,8 @@ body {
 .grid_header {
     background-color: #CCCCCC;
     width: 100%;
-    padding: 10px 30px 10px 10px;
-    margin: 0px -20px 5px;
+    padding: 10px 0px 10px 0px;
+    margin: 0px -49px 10px 0px
 }
 
 .filters {
@@ -70,4 +70,10 @@ body {
 .date_filter_input {
     width: 80px;
     margin: 0px;
+}
+
+.nav-pills > li {
+    float: none;
+    width: 100px;
+    display: inline-block;
 }

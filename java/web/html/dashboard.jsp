@@ -90,21 +90,9 @@
 </div>
 
 <div class="container-fluid">
+    <jsp:include page="refreshingDataSource.jsp"/>
 
-    <div class="container">
-        <div class="row-fluid" id="filterRow">
-            <div class="span12">
-
-            </div>
-        </div>
-    </div>
-    <div class="container dashboard_base well" style="padding-top:10px">
-        <jsp:include page="refreshingDataSource.jsp"/>
-        <div class="row-fluid">
-            <div id="base" class="span12"></div>
-        </div>
-    </div>
-
+    <div id="base" />
 </div>
 
 

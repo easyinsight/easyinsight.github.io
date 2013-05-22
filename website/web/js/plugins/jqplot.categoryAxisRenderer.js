@@ -516,17 +516,23 @@
                     var dist = (this.u2p(.5) - this.u2p(0));
                     var aa =  Math.floor(dist - 2);
                     if(dist < t._textRenderer.height) {
-                        t._textRenderer.fontSize = aa + "px";
-                        if(aa < 9) {
+                        if(aa < 12) {
 
-                            var modifier = 30;
+                            var modifier = 20 + 8 * (12 - aa);
+                            aa = Math.max(5, aa);
+                            if(modifier < 90)
+                                aa = 10;
+
                             if(t.angle < 0) {
                                 t.angle = t.angle - modifier;
                             } else {
                                 t.angle = t.angle + modifier;
                             }
+
+                            t.angle = Math.min(t.angle, 90);
                             t._textRenderer.angle = (t.angle * Math.PI / 180.0);
                         }
+                        t._textRenderer.fontSize = aa + "px";
                     }
 
                     if (t.show && t.showLabel) {

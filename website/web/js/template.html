@@ -5,7 +5,7 @@
             <%= dashboardComponent(stack_items[0].item) %>
         <% } else { %>
         <div class="tabbable">
-            <ul class="nav nav-pills" id="<%- id %>">
+            <ul class="nav nav-pills" id="<%- id %>" style="text-align:center;">
                 <% _.each(stack_items, function(e, i, l) { %>
                 <li
                 <%- i == 0 ? ' class=active' : '' %>>
@@ -185,9 +185,12 @@
 </script>
 
 <script type="text/template" id="dashboard_template">
-    <%= Filter.filters(filters) %>
-    <div>
-        <%= dashboardComponent(base) %>
+    <div class="container"><%= Filter.filters(filters) %></div>
+    <div class="container dashboard_base well" style="padding-top:10px">
+
+        <div class="row-fluid">
+            <div class="span12"><%= dashboardComponent(base) %></div>
+        </div>
     </div>
 </script>
 
