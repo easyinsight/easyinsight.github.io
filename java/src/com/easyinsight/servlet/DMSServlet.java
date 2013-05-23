@@ -3,6 +3,7 @@ package com.easyinsight.servlet;
 import com.easyinsight.admin.HealthListener;
 import com.easyinsight.analysis.CurrencyRetrieval;
 import com.easyinsight.analysis.ReportCache;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.migration.Migrations;
@@ -20,6 +21,7 @@ import com.easyinsight.eventing.*;
 import com.easyinsight.scorecard.LongKPIRefreshEvent;
 import com.easyinsight.scorecard.LongKPIRefreshListener;
 import com.easyinsight.util.ServiceUtil;
+import net.spy.memcached.MemcachedClient;
 import org.apache.jcs.JCS;
 
 import javax.servlet.http.HttpServlet;
@@ -74,6 +76,7 @@ public class DMSServlet extends HttpServlet {
                 if (ConfigLoader.instance().isTaskRunner()) {
                     scheduler.start();
                 }
+                MemCachedManager.initialize();
                 healthListener = new HealthListener();
                 Thread thread = new Thread(healthListener);
                 thread.setDaemon(true);
@@ -103,6 +106,7 @@ public class DMSServlet extends HttpServlet {
         DatabaseManager.instance().shutdown();
         EventDispatcher.instance().setRunning(false);
         EventDispatcher.instance().interrupt();
+        MemCachedManager.instance().shutdown();
         if (DatabaseListener.instance() != null) {
             DatabaseListener.instance().stop();
         }
