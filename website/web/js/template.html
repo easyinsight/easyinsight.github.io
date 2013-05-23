@@ -1,6 +1,6 @@
 <div>
     <script type="text/template" id="stack">
-        <%= Filter.filters(filters) %>
+
         <% if(stack_items.length == 1) { %>
             <%= dashboardComponent(stack_items[0].item) %>
         <% } else { %>
@@ -9,11 +9,12 @@
                 <% _.each(stack_items, function(e, i, l) { %>
                 <li
                 <%- i == 0 ? ' class=active' : '' %>>
-                <a class="argh" data-toggle="tab" href="#stack_<%- id %>_<%- e.item.id %>"><%- typeof(e.label) ==
-                    "undefined" ? ("Stack Item " + i) : e.label %></a>
+                <a class="argh" data-toggle="tab" href="#stack_<%- id %>_<%- e.item.id %>"><%- (typeof(e.label) ==
+                    "undefined" || e.label == "") ? ("Stack Item " + i) : e.label %></a>
                 </li>
                 <% }) %>
             </ul>
+            <%= Filter.filters(filters) %>
             <div class="tab-content">
 
                 <% _.each(stack_items, function(e, i, l) { %>
