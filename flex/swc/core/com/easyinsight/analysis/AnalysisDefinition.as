@@ -106,6 +106,7 @@ import mx.controls.Alert;
         public var manualButRunFirst:Boolean;
         public var customFontFamily:String;
         public var useCustomFontFamily:Boolean;
+    public var generalSizeLimit:int;
 
 		public function AnalysisDefinition()
 		{
