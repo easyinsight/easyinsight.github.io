@@ -132,6 +132,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
                 Label(filterLabel).text = label;
             }
         }
+        comboBox.enabled = false;
         _filterDefinition.filteredValues = new ArrayCollection(["All"]);
         dataService = new RemoteObject();
         dataService.destination = "data";
