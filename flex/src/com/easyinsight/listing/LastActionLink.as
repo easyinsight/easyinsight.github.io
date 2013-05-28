@@ -33,6 +33,7 @@ public class LastActionLink extends Text {
         addEventListener(MouseEvent.ROLL_OUT, onRollout);
         setStyle("textAlign", "center");
         this.width = 180;
+        this.maxWidth = 180;
         useHandCursor = true;
         buttonMode = true;
         mouseEnabled = true;
