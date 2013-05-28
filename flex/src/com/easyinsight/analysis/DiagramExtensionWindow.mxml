@@ -83,7 +83,7 @@
             }
             var noComp:Object = { display: "[ No Comparison ]"};
             dateFields.addItemAt(noComp, 0);
-            rowCount = Math.min(15, dateFields.length);
+            rowCount = Math.min(10, dateFields.length);
             this.dateFields = dateFields;
         }
 
