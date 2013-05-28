@@ -14,6 +14,7 @@ public class DataResults {
     public var additionalProperties:Object;
     public var auditMessages:ArrayCollection;
     public var suggestions:ArrayCollection;
+    public var uid:String;
 
     public function DataResults() {
     }

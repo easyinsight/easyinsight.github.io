@@ -7,25 +7,18 @@
  */
 package com.easyinsight.analysis.verticallist {
 import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.DataResults;
 import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.IReportDataService;
 import com.easyinsight.analysis.ListDataResults;
-import com.easyinsight.analysis.ListDataResults;
+import com.easyinsight.analysis.RequestParams;
 import com.easyinsight.analysis.service.ListDataService;
-import com.easyinsight.datasources.DataSourceInfo;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.framework.InsightRequestMetadata;
 
-import flash.events.EventDispatcher;
-
 import mx.collections.ArrayCollection;
-
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
-
 import mx.rpc.remoting.RemoteObject;
 
 public class VerticalListService extends ListDataService implements IReportDataService {
@@ -41,7 +34,7 @@ public class VerticalListService extends ListDataService implements IReportDataS
 
     private var report:AnalysisDefinition;
 
-    override public function retrieveData(definition:AnalysisDefinition, refreshAllSources:Boolean):void {
+    override public function retrieveData(definition:AnalysisDefinition, refreshAllSources:Boolean, requestParams:RequestParams):void {
         this.report = definition;
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();

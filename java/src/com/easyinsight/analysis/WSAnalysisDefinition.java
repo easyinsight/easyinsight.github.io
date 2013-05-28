@@ -113,6 +113,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean manualButRunFirst;
     private String customFontFamily;
     private boolean useCustomFontFamily;
+    private int generalSizeLimit;
 
     private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
@@ -125,6 +126,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     protected String generateDescription() {
         return "";
+    }
+
+    public int getGeneralSizeLimit() {
+        return generalSizeLimit;
+    }
+
+    public void setGeneralSizeLimit(int generalSizeLimit) {
+        this.generalSizeLimit = generalSizeLimit;
     }
 
     public List<AddonReport> getAddonReports() {
@@ -847,6 +856,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         manualButRunFirst = findBooleanProperty(properties, "manualButRunFirst", false);
         customFontFamily = findStringProperty(properties, "customFontFamily", "");
         useCustomFontFamily = findBooleanProperty(properties, "useCustomFontFamily", false);
+        generalSizeLimit = (int) findNumberProperty(properties, "generalSizeLimit", 0);
     }
 
     public List<ReportProperty> createProperties() {
@@ -867,6 +877,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("cacheable", cacheable));
         properties.add(new ReportBooleanProperty("manualButRunFirst", manualButRunFirst));
         properties.add(new ReportBooleanProperty("useCustomFontFamily", useCustomFontFamily));
+        properties.add(new ReportNumericProperty("generalSizeLimit", generalSizeLimit));
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }

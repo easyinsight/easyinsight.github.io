@@ -1,13 +1,15 @@
 package com.easyinsight.analysis.service {
-
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.CrossTabDataResults;
 import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.IReportDataService;
+import com.easyinsight.analysis.RequestParams;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.framework.InsightRequestMetadata;
+
 import flash.events.EventDispatcher;
+
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -41,7 +43,7 @@ public class CrosstabDataService extends EventDispatcher implements IReportDataS
 
     private var report:AnalysisDefinition;
 
-    public function retrieveData(definition:AnalysisDefinition, refreshAll:Boolean):void {
+    public function retrieveData(definition:AnalysisDefinition, refreshAllSources:Boolean, requestParams:RequestParams):void {
         this.report = definition;
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();

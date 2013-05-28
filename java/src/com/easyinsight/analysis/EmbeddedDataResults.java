@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 public class EmbeddedDataResults extends EmbeddedResults {
     private AnalysisItem[] headers = new AnalysisItem[0];
     private ListRow[] rows = new ListRow[0];
+    private String uid;
 
     public EmbeddedDataResults() {
     }
@@ -12,6 +13,14 @@ public class EmbeddedDataResults extends EmbeddedResults {
         this.definition = results.definition;
         this.rows = results.rows;
         this.dataSourceInfo = results.dataSourceInfo;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public AnalysisItem[] getHeaders() {

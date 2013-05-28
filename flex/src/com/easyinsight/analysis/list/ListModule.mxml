@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" implements="com.easyinsight.analysis.IReportRenderer"
-        width="100%" height="100%" creationComplete="globalListeners()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
+         xmlns:util="com.easyinsight.util.*" implements="com.easyinsight.analysis.IReportRenderer"
+         width="100%" height="100%" creationComplete="globalListeners()" horizontalScrollPolicy="off"
+         verticalScrollPolicy="off">
    <mx:states>
         <mx:State name="keywordSearch">
             <mx:AddChild position="0">
@@ -39,6 +41,7 @@
         import com.easyinsight.analysis.LookupTableDateCellRenderer;
         import com.easyinsight.analysis.NumericValue;
         import com.easyinsight.analysis.OrderedSortField;
+        import com.easyinsight.analysis.ReportPagingEvent;
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.StringValue;
         import com.easyinsight.analysis.TextCellRenderer;
@@ -46,6 +49,7 @@
         import com.easyinsight.analysis.Value;
         import com.easyinsight.etl.LookupPair;
         import com.easyinsight.etl.LookupTable;
+        import com.easyinsight.util.SaveButton;
 
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
@@ -185,11 +189,41 @@
             return color;
         }
 
+        private var showingAll:Boolean = false;
+
+        private var showAllHBox:HBox;
+
+        private var resultsUID:String;
+
+        private function onClick(event:MouseEvent):void {
+            dispatchEvent(new ReportPagingEvent(ReportPagingEvent.SHOW_ALL, resultsUID));
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var def:ListDefinition = analysisDefinition as ListDefinition;
             //dataGrid.setStyle("fontFamily", def.getFont());
             if (def.useCustomFontFamily) {
                 dataGrid.setStyle("fontFamily", def.getFont());
+            }
+            var uid:String = additionalProperties["cappedResults"];
+            if (uid) {
+                this.resultsUID = uid;
+                if (showAllHBox == null) {
+                    showAllHBox = new HBox();
+                    showAllHBox.percentWidth = 100;
+                    showAllHBox.setStyle("horizontalAlign", "center");
+                    var button:SaveButton = new SaveButton();
+                    button.label = "Load More Rows";
+                    button.addEventListener(MouseEvent.CLICK, onClick);
+                    showAllHBox.addChild(button);
+                    addChild(showAllHBox);
+                }
+            } else {
+                this.resultsUID = null;
+                if (showAllHBox != null) {
+                    removeChild(showAllHBox);
+                    showAllHBox = null;
+                }
             }
             dataGrid.setStyle("fontSize", def.fontSize);
             dataGrid.setStyle("color", def.textColor);
@@ -616,7 +650,8 @@
         [Bindable]
         private var stackIndex:int = 0;
 
-        public function clearContents():void {
+        private function loadMoreRows():void {
+
         }
         ]]></mx:Script>
     <mx:RemoteObject id="feedService" destination="feeds">
@@ -630,7 +665,6 @@
                     horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
                     verticalGridLines="true"
                     borderStyle="none" variableRowHeight="true"/>
-
             <!--<analysis:ListViewGrid id="dataGrid" dataProvider="{myDataSet}" height="100%"
                                dragEnter="dragEnterHandler(event)" dragComplete="dragCompleteHandler(event)"
                                dragDrop="dragDropHandler(event)" selectionMode="none"

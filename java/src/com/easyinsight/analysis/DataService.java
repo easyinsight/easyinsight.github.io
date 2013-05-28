@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
+//import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.Key;
@@ -19,6 +20,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.StandardReportPipeline;
 import flex.messaging.FlexContext;
+//import net.spy.memcached.MemcachedClient;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -620,8 +622,43 @@ public class DataService {
         return new ArrayList<FilterDefinition>();
     }
 
+    private String cacheEmbeddedReportResults(long reportID, EmbeddedDataResults dataResults) {
+        String uid = reportID + String.valueOf(System.currentTimeMillis());
+        dataResults.setUid(uid);
+        /*MemcachedClient client = MemCachedManager.instance();
+        client.add(uid, 0, dataResults);*/
+        simpleEmbeddedCache.put(uid, dataResults);
+        return uid;
+    }
+
+    private EmbeddedDataResults truncateEmbeddedResults(EmbeddedDataResults dataResults, int limit) throws CloneNotSupportedException {
+        EmbeddedDataResults copyResults = (EmbeddedDataResults) dataResults.clone();
+        ListRow[] truncatedRows = new ListRow[limit];
+        System.arraycopy(dataResults.getRows(), 0, truncatedRows, 0, limit);
+        copyResults.setRows(truncatedRows);
+        return copyResults;
+    }
+
+    public EmbeddedDataResults moreEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
+                                              InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters, String uid) {
+        /*MemcachedClient client = MemCachedManager.instance();
+        EmbeddedDataResults results = (EmbeddedDataResults) client.get(uid);*/
+        EmbeddedDataResults results = simpleEmbeddedCache.get(uid);
+        if (results == null) {
+            return (EmbeddedDataResults) getEmbeddedResults(reportID, dataSourceID, customFilters, insightRequestMetadata, drillThroughFilters, true);
+        } else {
+            results.getAdditionalProperties().put("cappedResults", null);
+            return results;
+        }
+    }
+
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters) {
+        return getEmbeddedResults(reportID, dataSourceID, customFilters, insightRequestMetadata, drillThroughFilters, false);
+    }
+
+    public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
+                                              InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters, boolean ignoreCache) {
         try {
             UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         } catch (InterruptedException e) {
@@ -656,6 +693,18 @@ public class DataService {
             EmbeddedResults results = getEmbeddedResultsForReport(analysisDefinition, customFilters, insightRequestMetadata, drillThroughFilters, conn);
             if (cacheKey != null) {
                 ReportCache.instance().storeReport(dataSourceID, cacheKey, results);
+            }
+            boolean tooManyResults = false;
+            if (results instanceof EmbeddedDataResults) {
+                EmbeddedDataResults listDataResults = (EmbeddedDataResults) results;
+                if (!ignoreCache && analysisDefinition.getGeneralSizeLimit() > 0 && (listDataResults.getRows().length > analysisDefinition.getGeneralSizeLimit())) {
+                    tooManyResults = true;
+                }
+            }
+            if (tooManyResults) {
+                cacheEmbeddedReportResults(analysisDefinition.getAnalysisID(), (EmbeddedDataResults) results);
+                results = truncateEmbeddedResults((EmbeddedDataResults) results, analysisDefinition.getGeneralSizeLimit());
+                results.getAdditionalProperties().put("cappedResults", ((EmbeddedDataResults) results).getUid());
             }
             conn.commit();
             return results;
@@ -1329,32 +1378,43 @@ public class DataService {
     }
 
     private Map<String, DataResults> simpleCache = new WeakHashMap<String, DataResults>();
+    private Map<String, EmbeddedDataResults> simpleEmbeddedCache = new WeakHashMap<String, EmbeddedDataResults>();
 
     private String cacheReportResults(long reportID, DataResults dataResults) {
         String uid = reportID + String.valueOf(System.currentTimeMillis());
         dataResults.setUid(uid);
         simpleCache.put(uid, dataResults);
+        /*MemcachedClient client = MemCachedManager.instance();
+        client.add(uid, 0, dataResults);*/
         return uid;
     }
 
-    private void truncateResults(DataResults dataResults) {
-
+    private DataResults truncateResults(DataResults dataResults, int limit) throws CloneNotSupportedException {
         ListDataResults listDataResults = (ListDataResults) dataResults;
-        ListRow[] truncatedRows = new ListRow[1000];
-        System.arraycopy(listDataResults.getRows(), 0, truncatedRows, 0, 1000);
-        listDataResults.setRows(truncatedRows);
+        ListDataResults copyResults = (ListDataResults) listDataResults.clone();
+        ListRow[] truncatedRows = new ListRow[limit];
+        System.arraycopy(listDataResults.getRows(), 0, truncatedRows, 0, limit);
+        copyResults.setRows(truncatedRows);
+        return copyResults;
     }
 
     public DataResults moreResults(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, String uid) {
+        //MemcachedClient client = MemCachedManager.instance();
+        //DataResults results = (DataResults) client.get(uid);
         DataResults results = simpleCache.get(uid);
         if (results == null) {
-            return list(analysisDefinition, insightRequestMetadata);
+            return list(analysisDefinition, insightRequestMetadata, true);
         } else {
+            results.getAdditionalProperties().put("cappedResults", null);
             return results;
         }
     }
 
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        return list(analysisDefinition, insightRequestMetadata, false);
+    }
+
+    public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean ignoreCache) {
         try {
             UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         } catch (InterruptedException e) {
@@ -1366,11 +1426,18 @@ public class DataService {
                 String ip = FlexContext.getHttpRequest().getRemoteAddr();
                 System.out.println(ip);
             }
-            boolean tooManyResults = false;
+
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
+            boolean tooManyResults = false;
+            if (results instanceof ListDataResults) {
+                ListDataResults listDataResults = (ListDataResults) results;
+                if (!ignoreCache && analysisDefinition.getGeneralSizeLimit() > 0 && (listDataResults.getRows().length > analysisDefinition.getGeneralSizeLimit())) {
+                    tooManyResults = true;
+                }
+            }
             List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
             suggestions.addAll(insightRequestMetadata.getSuggestions());
             if (analysisDefinition.isLogReport()) {
@@ -1380,7 +1447,8 @@ public class DataService {
             suggestions.addAll(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
             if (tooManyResults) {
                 cacheReportResults(analysisDefinition.getAnalysisID(), results);
-                truncateResults(results);
+                results = truncateResults(results, analysisDefinition.getGeneralSizeLimit());
+                results.getAdditionalProperties().put("cappedResults", results.getUid());
             }
             results.setSuggestions(suggestions);
             return results;
@@ -1526,24 +1594,26 @@ public class DataService {
                 StringTokenizer toker = new StringTokenizer(analysisDefinition.getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
-                    try {
-                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
-                    } catch (FunctionException fe) {
-                        throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + line + ".", null));
-                    } catch (ReportException re) {
-                        throw re;
-                    } catch (Exception e) {
-                        if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
-                            throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + line + ".", null));
+                    if (!line.startsWith("assignfiltervalue")) {
+                        try {
+                            new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                        } catch (FunctionException fe) {
+                            throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + line + ".", null));
+                        } catch (ReportException re) {
+                            throw re;
+                        } catch (Exception e) {
+                            if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(e.getMessage())) {
+                                throw new ReportException(new AnalysisItemFault("Syntax error in the calculation of " + line + ".", null));
+                            }
+                            LogClass.error("On calculating " + line, e);
+                            String message;
+                            if (e.getMessage() == null) {
+                                message = "Internal error";
+                            } else {
+                                message = e.getMessage();
+                            }
+                            throw new ReportException(new AnalysisItemFault(message + " in calculating " + line, null));
                         }
-                        LogClass.error("On calculating " + line, e);
-                        String message;
-                        if (e.getMessage() == null) {
-                            message = "Internal error";
-                        } else {
-                            message = e.getMessage();
-                        }
-                        throw new ReportException(new AnalysisItemFault(message + " in calculating " + line, null));
                     }
                 }
             }

@@ -1,18 +1,18 @@
 package com.easyinsight.analysis.service {
-
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.EmbeddedDataResults;
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.IEmbeddedDataService;
+import com.easyinsight.analysis.RequestParams;
 import com.easyinsight.analysis.Value;
 import com.easyinsight.dashboard.OptimizedDataServiceEvent;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.InsightRequestMetadata;
 
 import flash.events.EventDispatcher;
+
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -80,7 +80,7 @@ public class EmbeddedOptimizedDataService extends EventDispatcher implements IEm
         dataRemoteSource.getOptimizedResults.send(reportIDs, dataSourceID, filters, insightRequestMetadata);
     }
 
-    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection):void {
+    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams):void {
     }
 }
 }

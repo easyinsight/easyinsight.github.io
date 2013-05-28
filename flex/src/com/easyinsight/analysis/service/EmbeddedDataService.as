@@ -1,14 +1,15 @@
 package com.easyinsight.analysis.service {
-
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.EmbeddedDataResults;
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.IEmbeddedDataService;
+import com.easyinsight.analysis.RequestParams;
 import com.easyinsight.analysis.Value;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.InsightRequestMetadata;
 
 import flash.events.EventDispatcher;
+
 import mx.collections.ArrayCollection;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
@@ -24,6 +25,7 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
         dataRemoteSource = new RemoteObject();
         dataRemoteSource.destination = "data";
         dataRemoteSource.getEmbeddedResults.addEventListener(ResultEvent.RESULT, processListData);
+        dataRemoteSource.moreEmbeddedResults.addEventListener(ResultEvent.RESULT, processMoreListData);
         dataRemoteSource.getEmbeddedResults.addEventListener(FaultEvent.FAULT, onFault);
     }
 
@@ -72,15 +74,25 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
-    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection,
-            noCache:Boolean, hierarchyOverrides:ArrayCollection):void {
+    private function processMoreListData(event:ResultEvent):void {
+        var listData:EmbeddedDataResults = dataRemoteSource.moreEmbeddedResults.lastResult as EmbeddedDataResults;
+        dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, translate(listData), listData.definition, listData.dataSourceAccessible,
+                listData.reportFault, listData.dataSourceInfo, listData.additionalProperties, listData.rows != null && listData.rows.length > 0));
+        dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
+    }
+
+    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var insightRequestMetadata:InsightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.refreshAllSources = refreshAll;
         insightRequestMetadata.utcOffset = new Date().getTimezoneOffset();
         insightRequestMetadata.noCache = noCache;
         insightRequestMetadata.hierarchyOverrides = hierarchyOverrides;
-        dataRemoteSource.getEmbeddedResults.send(reportID, dataSourceID, filters, insightRequestMetadata, drillthroughFilters);
+        if (requestParams.uid == null) {
+            dataRemoteSource.getEmbeddedResults.send(reportID, dataSourceID, filters, insightRequestMetadata, drillthroughFilters);
+        } else {
+            dataRemoteSource.moreEmbeddedResults.send(reportID, dataSourceID, filters, insightRequestMetadata, drillthroughFilters, requestParams.uid);
+        }
     }
 }
 }
