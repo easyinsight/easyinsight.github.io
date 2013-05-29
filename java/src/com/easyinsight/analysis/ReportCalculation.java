@@ -468,7 +468,9 @@ public class ReportCalculation {
             calculationMetadata.setReport(report);
             calculationMetadata.setInsightRequestMetadata(insightRequestMetadata);
             calculationMetadata.setConnection(conn);
-            calculationMetadata.setDataSource(feed.getDataSource());
+        if (feed != null) {
+                calculationMetadata.setDataSource(feed.getDataSource());
+        }
             Collection<FilterDefinition> allFilters = new ArrayList<FilterDefinition>();
             if (report.getFilterDefinitions() != null) {
                 allFilters.addAll(report.getFilterDefinitions());

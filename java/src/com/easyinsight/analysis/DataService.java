@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.definitions.*;
 //import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.FunctionException;
+import com.easyinsight.calculations.FunctionFactory;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.ReportKey;
@@ -1594,7 +1595,7 @@ public class DataService {
                 StringTokenizer toker = new StringTokenizer(analysisDefinition.getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
-                    if (!line.startsWith("assignfiltervalue")) {
+                    if (!FunctionFactory.functionRunsOnReportLoad(line)) {
                         try {
                             new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
                         } catch (FunctionException fe) {
