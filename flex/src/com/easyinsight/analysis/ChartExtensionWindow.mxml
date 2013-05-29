@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+         implements="com.easyinsight.analysis.IReportExtensionEditor" label="Chart"
+        paddingLeft="20" paddingBottom="20" paddingRight="20" paddingTop="20" horizontalAlign="center">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var dateFields:ArrayCollection;
+
+        [Bindable]
+        private var fields:ArrayCollection;
+
+        private var _analysisItem:AnalysisItem;
+
+        public function save(analysisItem:AnalysisItem):void {
+            var ext:ChartReportFieldExtension = new ChartReportFieldExtension();
+            ext.goal = altTrendComboBox.selectedItem as AnalysisItem;
+            analysisItem.reportFieldExtension = ext;
+        }
+
+        public function set analysisItem(analysisItem:AnalysisItem):void {
+            _analysisItem = analysisItem;
+            var ext:ChartReportFieldExtension = _analysisItem.reportFieldExtension as ChartReportFieldExtension;
+            if (ext != null) {
+                if (ext.goal != null) {
+                    selectedValue = ext.goal.display;
+                }
+            }
+        }
+
+        public function set analysisItems(analysisItems:ArrayCollection):void {
+            var fields:ArrayCollection = new ArrayCollection();
+            for each (var analysisItemWrapper:AnalysisItemWrapper in analysisItems) {
+                if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    fields.addItem(analysisItemWrapper.analysisItem);
+                }
+            }
+            var noTrend:Object = {display:"[ No Goal Measure ] "};
+            fields.addItemAt(noTrend, 0);
+            altRowCount = Math.min(10, fields.length);
+            this.fields = fields;
+        }
+
+        [Bindable]
+        private var rowCount:int;
+
+        [Bindable]
+        private var altRowCount:int;
+
+
+        [Bindable]
+        private var selectedValue:String;
+
+        ]]></mx:Script>
+    <mx:HRule/>
+    <mx:Form width="100%">
+        <mx:FormItem label="Explicitly compare with this measure:" labelWidth="350">
+            <util:SmartComboBox dataProvider="{fields}" id="altTrendComboBox" labelField="display" selectedValue="{selectedValue}" selectedProperty="display"
+                                rowCount="{altRowCount}"/>
+        </mx:FormItem>
+    </mx:Form>
+
+
+</mx:VBox>
