@@ -814,7 +814,7 @@
                 // every series will have a chance to set doforce to false.  once it is set to 
                 // false, it cannot be reset to true.
                 // If any series attached to axis is not a bar, wont force 0.
-                if (doforce && s.renderer.constructor !== $.jqplot.BarRenderer) {
+                if (doforce && s.renderer.constructor !== $.jqplot.BarRenderer && s.renderer.constructor !== $.jqplot.GradientBarRenderer) {
                     doforce = false;
                 }
 
@@ -822,7 +822,7 @@
                     doforce = false;
                 }
 
-                else if (doforce && s.renderer.constructor === $.jqplot.BarRenderer) {
+                else if (doforce && (s.renderer.constructor === $.jqplot.BarRenderer || s.renderer.constructor === $.jqplot.GradientBarRenderer)) {
                     if (s.barDirection == 'vertical' && this.name != 'xaxis' && this.name != 'x2axis') { 
                         if (this._options.pad != null || this._options.padMin != null) {
                             doforce = false;
@@ -2734,7 +2734,7 @@
                 // mess up preParseSeriesOptionsHooks at this point.
                 $.extend(true, temp, sopts);
                 var dir = 'vertical';
-                if (temp.renderer === $.jqplot.BarRenderer && temp.rendererOptions && temp.rendererOptions.barDirection == 'horizontal') {
+                if ((temp.renderer === $.jqplot.BarRenderer || temp.renderer === $.jqplot.GradientBarRenderer) && temp.rendererOptions && temp.rendererOptions.barDirection == 'horizontal') {
                     dir = 'horizontal';
                     temp._stackAxis = 'x';
                     temp._primaryAxis = '_yaxis';
@@ -3238,6 +3238,7 @@
                 hp = s._highlightThreshold;
                 switch (s.renderer.constructor) {
                     case $.jqplot.BarRenderer:
+                    case $.jqplot.GradientBarRenderer:
                         x = gridpos.x;
                         y = gridpos.y;
                         for (j=0; j<s._barPoints.length; j++) {
@@ -6483,7 +6484,7 @@
                             }
                             var dp = (vmax - vmin) / vmax;
                             // is this sries a bar?
-                            if (s.renderer.constructor == $.jqplot.BarRenderer) {
+                            if (s.renderer.constructor == $.jqplot.BarRenderer || s.renderer.constructor == $.jqplot.GradientBarRenderer) {
                                 // if no negative values and could also check range.
                                 if (vmin >= 0 && (s.fillToZero || dp > 0.1)) {
                                     forceMinZero = true;
@@ -8364,7 +8365,7 @@
             if (s.renderer.constructor == $.jqplot.LineRenderer) {
                 th.series.push(new LineSeriesProperties());
             }
-            else if (s.renderer.constructor == $.jqplot.BarRenderer) {
+            else if (s.renderer.constructor == $.jqplot.BarRenderer || s.renderer.constructor == $.jqplot.GradientBarRenderer) {
                 th.series.push(new BarSeriesProperties());
             }
             else if (s.renderer.constructor == $.jqplot.PieRenderer) {

@@ -19,6 +19,7 @@
 <script type="text/javascript" src="/js/plugins/jqplot.pointLabels.min.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.cursor.min.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.highlighter.min.js"></script>
+<script type="text/javascript" src="/js/plugins/jqplot.barRenderer.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.gradientBarRenderer.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.categoryAxisRenderer.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.canvasAxisLabelRenderer.js"></script>

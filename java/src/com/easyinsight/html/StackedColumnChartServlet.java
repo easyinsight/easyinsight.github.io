@@ -24,6 +24,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
         JSONArray createArray(Double measure, Integer index);
 
         public Integer getIndex(JSONArray jsonArray) throws JSONException;
+        public Double getMeasure(JSONArray jsonArray) throws JSONException;
     }
 
     private static class ColumnPopulator implements Populator {
@@ -38,6 +39,10 @@ public class StackedColumnChartServlet extends HtmlServlet {
         public Integer getIndex(JSONArray jsonArray) throws JSONException {
             return jsonArray.getInt(0);
         }
+
+        public Double getMeasure(JSONArray jsonArray) throws JSONException {
+            return jsonArray.getDouble(1);
+        }
     }
 
     private static class BarPopulator implements Populator {
@@ -51,6 +56,10 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
         public Integer getIndex(JSONArray jsonArray) throws JSONException {
             return jsonArray.getInt(1);
+        }
+
+        public Double getMeasure(JSONArray jsonArray) throws JSONException {
+            return jsonArray.getDouble(0);
         }
     }
 
@@ -169,6 +178,30 @@ public class StackedColumnChartServlet extends HtmlServlet {
                     }
                 }
             });
+        }
+
+        if(seriesMap.entrySet().size() > 0) {
+            Map.Entry<String, List<JSONArray>> first = null;
+            for(Map.Entry<String, List<JSONArray>> entry : seriesMap.entrySet()) {
+                first = entry;
+                break;
+            }
+            for(JSONArray jsonArray : first.getValue()) {
+                Integer curIndex = populator.getIndex(jsonArray);
+                Double total = 0.0;
+                for(Map.Entry<String, List<JSONArray>> entry : seriesMap.entrySet()) {
+                    Double curVal = 0.0;
+                    for(JSONArray arr : entry.getValue()) {
+                        if(populator.getIndex(arr).equals(curIndex)) {
+                            curVal = populator.getMeasure(arr);
+                            break;
+                        }
+                    }
+                    System.out.println(curVal);
+                    total = total + curVal;
+                }
+                System.out.println(curIndex + ": " + total);
+            }
         }
 
         JSONArray blahs = new JSONArray();

@@ -139,7 +139,7 @@
     $.jqplot.PointLabels.init = function (target, data, seriesDefaults, opts, plot){
         var options = $.extend(true, {}, seriesDefaults, opts);
         options.pointLabels = options.pointLabels || {};
-        if (this.renderer.constructor === $.jqplot.BarRenderer && this.barDirection === 'horizontal' && !options.pointLabels.location) {
+        if ((this.renderer.constructor === $.jqplot.BarRenderer || this.renderer.constructor == $.jqplot.GradientBarRenderer) && this.barDirection === 'horizontal' && !options.pointLabels.location) {
             options.pointLabels.location = 'e';
         }
         // add a pointLabels attribute to the series plugins
@@ -154,7 +154,7 @@
         if (p.seriesLabelIndex != null) {
             labelIdx = p.seriesLabelIndex;
         }
-        else if (this.renderer.constructor === $.jqplot.BarRenderer && this.barDirection === 'horizontal') {
+        else if ((this.renderer.constructor === $.jqplot.BarRenderer || this.renderer.constructor == $.jqplot.GradientBarRenderer) && this.barDirection === 'horizontal') {
            labelIdx = (this._plotData[0].length < 3) ? 0 : this._plotData[0].length -1;
         }
         else {
@@ -173,7 +173,7 @@
             else {
                 // var d = this._plotData;
                 var d = this.data;
-                if (this.renderer.constructor === $.jqplot.BarRenderer && this.waterfall) {
+                if ((this.renderer.constructor === $.jqplot.BarRenderer || this.renderer.constructor === $.jqplot.GradientBarRenderer) && this.waterfall) {
                     d = this._data;
                 }
                 if (d.length && d[0].length) {
@@ -336,7 +336,7 @@
                     }
                 }
 
-                if (this.renderer.constructor == $.jqplot.BarRenderer) {
+                if (this.renderer.constructor == $.jqplot.BarRenderer || this.renderer.constructor == $.jqplot.GradientBarRenderer) {
                     if (this.barDirection == "vertical") {
                         ell += this._barNudge;
                     }
