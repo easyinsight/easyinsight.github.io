@@ -372,7 +372,11 @@ public class AdminService {
                 int actionType = dsRS.getInt(2);
                 String dataSourceName = dsRS.getString(3);
                 Date actionDate = new Date(dsRS.getTimestamp(4).getTime());
-                actions.add(new ActionDataSourceLog(dataSourceID, dataSourceName, actionType, actionDate));
+                ActionLog actionLog = new ActionDataSourceLog(dataSourceID, dataSourceName, actionType, actionDate);
+                if (actions.contains(actionLog)) {
+                    actions.remove(actionLog);
+                }
+                actions.add(actionLog);
             }
             PreparedStatement queryReportStmt = conn.prepareStatement("SELECT action_report_log.report_id, action_log.action_type, analysis.data_feed_id," +
                     "analysis.report_type, analysis.title, analysis.url_key, action_log.action_date from analysis, action_log, action_report_log where action_log.action_log_id = action_report_log.action_log_id and " +
@@ -387,7 +391,11 @@ public class AdminService {
                 String reportName = reportRS.getString(5);
                 String urlKey = reportRS.getString(6);
                 Date actionDate = new Date(reportRS.getTimestamp(7).getTime());
-                actions.add(new ActionReportLog(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey, Roles.OWNER, false), actionType, actionDate));
+                ActionReportLog actionReportLog = new ActionReportLog(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey, Roles.OWNER, false), actionType, actionDate);
+                if (actions.contains(actionReportLog)) {
+                    actions.remove(actionReportLog);
+                }
+                actions.add(actionReportLog);
             }
             PreparedStatement queryScorecardStmt = conn.prepareStatement("SELECT action_scorecard_log.scorecard_id, action_log.action_type, scorecard.data_source_id," +
                     "scorecard.scorecard_name, scorecard.url_key, action_log.action_date from scorecard, action_log, action_scorecard_log where action_log.action_log_id = action_scorecard_log.action_log_id and " +
@@ -401,7 +409,11 @@ public class AdminService {
                 String reportName = scorecardRS.getString(4);
                 String urlKey = scorecardRS.getString(5);
                 Date actionDate = new Date(scorecardRS.getTimestamp(6).getTime());
-                actions.add(new ActionScorecardLog(new ScorecardDescriptor(reportName, scorecardID, urlKey, dataSourceID, false), actionType, actionDate));
+                ActionScorecardLog actionScorecardLog = new ActionScorecardLog(new ScorecardDescriptor(reportName, scorecardID, urlKey, dataSourceID, false), actionType, actionDate);
+                if (actions.contains(actionScorecardLog)) {
+                    actions.remove(actionScorecardLog);
+                }
+                actions.add(actionScorecardLog);
             }
             PreparedStatement queryDashboardStmt = conn.prepareStatement("SELECT action_dashboard_log.dashboard_id, action_log.action_type, dashboard.data_source_id," +
                     "dashboard.dashboard_name, dashboard.url_key, action_log.action_date from dashboard, action_log, action_dashboard_log where action_log.action_log_id = action_dashboard_log.action_log_id and " +
@@ -415,13 +427,23 @@ public class AdminService {
                 String dashboardName = dashboardRS.getString(4);
                 String urlKey = dashboardRS.getString(5);
                 Date actionDate = new Date(dashboardRS.getTimestamp(6).getTime());
-                actions.add(new ActionDashboardLog(new DashboardDescriptor(dashboardName, dashboardID, urlKey, dataSourceID, Roles.OWNER, null, false), actionType, actionDate));
+                ActionLog log = new ActionDashboardLog(new DashboardDescriptor(dashboardName, dashboardID, urlKey, dataSourceID, Roles.OWNER, null, false), actionType, actionDate);
+                if (actions.contains(log)) {
+                    actions.remove(log);
+                }
+                actions.add(log);
             }
             List<ActionLog> actionList = new ArrayList<ActionLog>(actions);
             Collections.sort(actionList, new Comparator<ActionLog>() {
 
                 public int compare(ActionLog actionLog, ActionLog actionLog1) {
-                    return actionLog1.getActionDate().compareTo(actionLog.getActionDate());
+                    if (actionLog.getActionDate().before(actionLog1.getActionDate())) {
+                        return 1;
+                    } else if (actionLog.getActionDate().after(actionLog1.getActionDate())) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
                 }
             });
             if (actionList.size() > 10) {
