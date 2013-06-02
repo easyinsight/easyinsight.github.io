@@ -8,6 +8,7 @@
 package com.easyinsight.analysis.service {
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.IEmbeddedDataService;
+import com.easyinsight.analysis.RequestParams;
 import com.easyinsight.analysis.ytd.EmbeddedCompareYearsResult;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.InsightRequestMetadata;
@@ -15,11 +16,8 @@ import com.easyinsight.framework.InsightRequestMetadata;
 import flash.events.EventDispatcher;
 
 import mx.collections.ArrayCollection;
-
 import mx.rpc.events.FaultEvent;
-
 import mx.rpc.events.ResultEvent;
-
 import mx.rpc.remoting.RemoteObject;
 
 public class EmbeddedCompareYearsService extends EventDispatcher implements IEmbeddedDataService {
@@ -46,8 +44,7 @@ public class EmbeddedCompareYearsService extends EventDispatcher implements IEmb
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
-    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection,
-                                 noCache:Boolean, hierarchyOverrides:ArrayCollection):void {
+    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var insightRequestMetadata:InsightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.refreshAllSources = refreshAll;

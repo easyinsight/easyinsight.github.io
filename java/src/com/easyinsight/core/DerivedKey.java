@@ -111,7 +111,7 @@ public class DerivedKey extends Key {
     }
 
     public String urlKeyString(XMLMetadata xmlMetadata) {
-        return xmlMetadata.urlKeyForDataSourceID(feedID) + "-" + parentKey.urlKeyString(xmlMetadata);
+        return xmlMetadata.urlKeyForDataSourceID(feedID) + "|" + parentKey.urlKeyString(xmlMetadata);
     }
 
     @Override

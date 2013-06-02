@@ -17,16 +17,16 @@ import java.util.*;
  * Time: 2:32:26 PM
  */
 @Entity
-@Table(name="analysis_hierarchy_item")
-@PrimaryKeyJoinColumn(name="analysis_item_id")
+@Table(name = "analysis_hierarchy_item")
+@PrimaryKeyJoinColumn(name = "analysis_item_id")
 public class AnalysisHierarchyItem extends AnalysisDimension {
-    @OneToOne (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name="hierarchy_level_id")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "hierarchy_level_id")
     private HierarchyLevel hierarchyLevel;
-    @OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(name="analysis_hierarchy_item_to_hierarchy_level",
-        joinColumns = @JoinColumn(name="analysis_item_id", nullable = false),
-        inverseJoinColumns = @JoinColumn(name="hierarchy_level_id", nullable = false))
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "analysis_hierarchy_item_to_hierarchy_level",
+            joinColumns = @JoinColumn(name = "analysis_item_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "hierarchy_level_id", nullable = false))
     private List<HierarchyLevel> hierarchyLevels;
 
     @Override
@@ -172,7 +172,7 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         super.reportSave(session);
 
         // clear out any bad rows from the hierarchy
-        
+
         Iterator<HierarchyLevel> levelIter = hierarchyLevels.iterator();
         while (levelIter.hasNext()) {
             HierarchyLevel hierarchyLevel = levelIter.next();
@@ -207,6 +207,11 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         int result = super.hashCode();
         result = 31 * result + hierarchyLevel.hashCode();
         return result;
+    }
+
+    @Override
+    public int actualType() {
+        return AnalysisItemTypes.HIERARCHY;
     }
 
     /*@Override

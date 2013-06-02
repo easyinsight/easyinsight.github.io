@@ -112,6 +112,7 @@
         <mapping class="com.easyinsight.analysis.DiagramReportFieldExtension"/>
         <mapping class="com.easyinsight.analysis.TextReportFieldExtension"/>
         <mapping class="com.easyinsight.analysis.YTDReportFieldExtension"/>
+        <mapping class="com.easyinsight.analysis.ChartReportFieldExtension"/>
         <mapping class="com.easyinsight.analysis.VerticalListReportExtension"/>
         <mapping class="com.easyinsight.analysis.definitions.TrendColumn"/>
         <mapping class="com.easyinsight.analysis.DiagramLink"/>

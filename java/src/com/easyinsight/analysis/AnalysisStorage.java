@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.calculations.FunctionFactory;
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -99,6 +100,21 @@ public class AnalysisStorage {
                     savedReport.validate();
                     analysisDefinition = savedReport.createBlazeDefinition();
                 }
+                InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                if (analysisDefinition.getMarmotScript() != null) {
+                    StringTokenizer toker = new StringTokenizer(analysisDefinition.getMarmotScript(), "\r\n");
+                    while (toker.hasMoreTokens()) {
+                        String line = toker.nextToken();
+                        if (FunctionFactory.functionRunsOnReportLoad(line)) {
+                            try {
+                                new ReportCalculation(line).apply(analysisDefinition, new ArrayList<AnalysisItem>(), new HashMap<String, List<AnalysisItem>>(),
+                                    new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                            } catch (Exception e) {
+                                LogClass.error(e);
+                            }
+                        }
+                    }
+                }
                 session.getTransaction().commit();
             } catch (Exception e) {
                 session.getTransaction().rollback();
@@ -150,6 +166,21 @@ public class AnalysisStorage {
                     AnalysisDefinition savedReport = (AnalysisDefinition) results.get(0);
                     savedReport.validate();
                     analysisDefinition = savedReport.createBlazeDefinition();
+                }
+                InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                if (analysisDefinition.getMarmotScript() != null) {
+                    StringTokenizer toker = new StringTokenizer(analysisDefinition.getMarmotScript(), "\r\n");
+                    while (toker.hasMoreTokens()) {
+                        String line = toker.nextToken();
+                        if (FunctionFactory.functionRunsOnReportLoad(line)) {
+                            try {
+                                new ReportCalculation(line).apply(analysisDefinition, new ArrayList<AnalysisItem>(), new HashMap<String, List<AnalysisItem>>(),
+                                        new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                            } catch (Exception e) {
+                                LogClass.error(e);
+                            }
+                        }
+                    }
                 }
                 session.getTransaction().commit();
             } catch (Exception e) {

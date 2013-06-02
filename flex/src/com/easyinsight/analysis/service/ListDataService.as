@@ -1,10 +1,10 @@
 package com.easyinsight.analysis.service {
-
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.IReportDataService;
 import com.easyinsight.analysis.ListDataResults;
+import com.easyinsight.analysis.RequestParams;
 import com.easyinsight.analysis.Value;
 import com.easyinsight.filtering.AnalysisItemFilterDefinition;
 import com.easyinsight.filtering.FilterDefinition;
@@ -14,6 +14,7 @@ import com.easyinsight.framework.InsightRequestMetadata;
 import com.easyinsight.framework.InvalidFieldsEvent;
 
 import flash.events.EventDispatcher;
+
 import mx.collections.ArrayCollection;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
@@ -30,6 +31,7 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         dataRemoteSource = new RemoteObject();
         dataRemoteSource.destination = "data";
         dataRemoteSource.list.addEventListener(ResultEvent.RESULT, processListData);
+        dataRemoteSource.moreResults.addEventListener(ResultEvent.RESULT, processMoreListData);
         dataRemoteSource.list.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
     }
 
@@ -92,19 +94,37 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
+    private function processMoreListData(event:ResultEvent):void {
+        var listData:ListDataResults = dataRemoteSource.moreResults.lastResult as ListDataResults;
+        if (listData.invalidAnalysisItemIDs != null && listData.invalidAnalysisItemIDs.length > 0) {
+            dispatchEvent(new InvalidFieldsEvent(listData.invalidAnalysisItemIDs, listData.feedMetadata));
+        }
+        var serviceData:ServiceData = translate(listData, report);
+        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, serviceData.data,
+                listData.dataSourceInfo, listData.additionalProperties, listData.auditMessages, listData.reportFault,
+                listData.limitedResults, listData.maxResults, listData.limitResults, listData.suggestions, serviceData.data.length > 0));
+        dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
+    }
+
     private var report:AnalysisDefinition;
 
     private function retrieve():void {
         
     }
 
-    public function retrieveData(definition:AnalysisDefinition, refreshAllSources:Boolean):void {
+    public function retrieveData(definition:AnalysisDefinition, refreshAllSources:Boolean, requestParams:RequestParams):void {
+
         this.report = definition;
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.utcOffset = new Date().getTimezoneOffset();
         metadata.refreshAllSources = refreshAllSources;
-        dataRemoteSource.list.send(definition, metadata);
+        if (requestParams.uid == null) {
+            dataRemoteSource.list.send(definition, metadata, requestParams != null && requestParams.showAll);
+        } else {
+            dataRemoteSource.moreResults.send(definition, metadata, requestParams.uid);
+        }
+
     }
 }
 }

@@ -100,9 +100,16 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         _reportPaddingWidth = value;
     }
 
+    private var resultsUID:String;
+
+    private function onShowAll(event:ReportPagingEvent):void {
+        resultsUID = event.uid;
+        forceRetrieve();
+    }
+
     override protected function createChildren():void {
         super.createChildren();
-
+        addEventListener(ReportPagingEvent.SHOW_ALL, onShowAll);
         _dataService = new _reportDataService();
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
@@ -321,9 +328,15 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
                         filters.addItem(filter);
                     }
                 }
-                _dataService.retrieveData(reportID, dataSourceID, filters, false, drillthroughFilters, _noCache, overrides);
+                _dataService.retrieveData(reportID, dataSourceID, filters, false, drillthroughFilters, _noCache, overrides, createRequestParams());
             }
         }
+    }
+
+    private function createRequestParams():RequestParams {
+        var requestParams:RequestParams = new RequestParams();
+        requestParams.uid = resultsUID;
+        return requestParams;
     }
 
     private var overrideObj:Object = new Object();
@@ -357,7 +370,7 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         for each (var hierarchyOverride:AnalysisItemOverride in overrideObj) {
             overrides.addItem(hierarchyOverride);
         }
-        _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, false, drillthroughFilters, _noCache, overrides);
+        _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, false, drillthroughFilters, _noCache, overrides, createRequestParams());
     }
 
     private var _usePreferredHeight:Boolean = false;

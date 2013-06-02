@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.InfusionsoftCompositeSource;
+
+        import mx.controls.Button;
+
+        [Bindable]
+        private var url:String;
+
+        [Bindable]
+        private var apiKey:String;
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var obj:InfusionsoftCompositeSource = new InfusionsoftCompositeSource();
+            obj.url = urlInput.text;
+            obj.infusionApiKey = userNameInput.text;
+            return obj;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:InfusionsoftCompositeSource = feedDefinition as InfusionsoftCompositeSource;
+            url = ds.url;
+            apiKey = ds.infusionApiKey;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:InfusionsoftCompositeSource = feedDefinition as InfusionsoftCompositeSource;
+            ds.url = urlInput.text;
+            ds.infusionApiKey = userNameInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <mx:Label text="Infusionsoft URL:" width="250" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+    </mx:HBox>
+    <mx:TextArea width="700" text="Your Infusionsoft URL is the browser URL you normally use to connect to Infusionsoft. For example, if you access Infusionsoft as xyz.infusionsoft.com, put xyz in as the Basecamp URL."
+            editable="false" selectable="false" focusEnabled="false" fontSize="12"/>
+    <mx:HBox>
+        <mx:Label text="Infusionsoft API Key:" width="250" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" width="350"/>
+    </mx:HBox>
+    <mx:Label text="You can find the token on your Infusionsoft page under My Info - API Token." fontSize="12"/>
+</mx:VBox>

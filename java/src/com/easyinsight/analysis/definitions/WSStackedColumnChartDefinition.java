@@ -1,6 +1,8 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.pipeline.GoalComponent;
+import com.easyinsight.pipeline.IComponent;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,6 +26,18 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     private int labelInsideFontColor;
     private boolean useInsideLabelFontColor;
     private List<MultiColor> multiColors = new ArrayList<MultiColor>();
+
+    @Override
+    public List<IComponent> createComponents() {
+        List<IComponent> components = super.createComponents();
+        if (getXaxis() != null && getXaxis().getReportFieldExtension() != null && getXaxis().getReportFieldExtension() instanceof ChartReportFieldExtension) {
+            ChartReportFieldExtension cfre = (ChartReportFieldExtension) getXaxis().getReportFieldExtension();
+            if (cfre.getGoal() != null) {
+                components.add(new GoalComponent(cfre.getGoal()));
+            }
+        }
+        return components;
+    }
 
     public List<MultiColor> getMultiColors() {
         return multiColors;
@@ -161,13 +175,14 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
-        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
-        includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
+
+        includes.add("/js/plugins/jqplot.categoryAxisRenderer.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/visualizations/chart.js");
         includes.add("/js/visualizations/util.js");
+//        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
         return includes;
     }
 

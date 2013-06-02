@@ -13,6 +13,7 @@
 
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.ChartDefinition;
+        import com.easyinsight.analysis.ChartReportFieldExtension;
         import com.easyinsight.analysis.ClickUtil;
 
         import com.easyinsight.analysis.CustomChangeEvent;
@@ -20,6 +21,7 @@
         import com.easyinsight.analysis.Link;
         import com.easyinsight.analysis.MultiColor;
         import com.easyinsight.analysis.SortFunctionFactory;
+        import com.easyinsight.analysis.Value;
         import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.EILegend;
 
@@ -31,6 +33,8 @@
         import mx.charts.ColumnChart;
         import mx.charts.Legend;
         import mx.charts.LinearAxis;
+        import mx.charts.chartClasses.CartesianCanvasValue;
+        import mx.charts.chartClasses.CartesianDataCanvas;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
         import mx.charts.events.ChartItemEvent;
@@ -39,6 +43,7 @@
         import mx.charts.series.items.ColumnSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
+        import mx.controls.Label;
         import mx.events.FlexEvent;
         import mx.formatters.Formatter;
         import mx.graphics.IFill;
@@ -90,12 +95,56 @@
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
         }
 
+        private var dataCanvas:CartesianDataCanvas;
+
+        private function drawGoalLine(data:ArrayCollection, additionalProps:Object):void {
+            if (xAxisItem.reportFieldExtension != null && xAxisItem.reportFieldExtension is ChartReportFieldExtension) {
+                var cfre:ChartReportFieldExtension = xAxisItem.reportFieldExtension as ChartReportFieldExtension;
+                if (cfre.goal != null) {
+                    var value:Value = additionalProps["goal" + cfre.goal.qualifiedName()];
+
+                    if (value != null) {
+                        var num:Number = Number(value.getValue());
+                        var left:Object = (data).getItemAt(0);
+                        var midPoint:int = data.length / 2;
+                        var mid:Object = data.getItemAt(midPoint);
+                        var right:Object = (data).getItemAt((data).length - 1);
+                        dataCanvas.clear();
+
+
+                        //dataCanvas.addDataChild(hbox);
+                        dataCanvas.lineStyle(4,
+                                0x888888,
+                                .75,
+                                true,
+                                LineScaleMode.NORMAL,
+                                CapsStyle.ROUND,
+                                JointStyle.MITER,
+                                2
+                        );
+
+                        dataCanvas.moveTo(new CartesianCanvasValue(left[xAxisItem.qualifiedName()], -200), num);
+                        //dataCanvas.moveTo(left[xAxisItem.qualifiedName()], 300000);
+                        //dataCanvas.moveTo("James Boe", 500000);
+                        dataCanvas.lineTo(new CartesianCanvasValue(right[xAxisItem.qualifiedName()], 200), num);
+                        /*var label:Label = new Label();
+                         label.text = "Goal";
+                         dataCanvas.addDataChild(label, new CartesianCanvasValue(mid[xAxisItem.qualifiedName()], -50), 300000);*/
+                    }
+                }
+            }
+
+        }
+
         private function createChart():void {
             if (columnChart == null) {
 
                 // define the chart itself
 
                 columnChart = new ColumnChart();
+                dataCanvas = new CartesianDataCanvas();
+                dataCanvas.includeInRanges = true;
+                columnChart.annotationElements = [ dataCanvas ];
 
                 columnChart.percentHeight = 100;
                 columnChart.percentWidth = 100;
@@ -312,6 +361,7 @@
                 }
 
                 columnChart.dataProvider = dataObjs;
+                drawGoalLine(dataObjs, additionalProperties);
             } else {
                 if (columnChartDef.measures != null && columnChartDef.measures.length > 0 && columnChartDef.xaxis != null) stackIndex = 2;
                 else stackIndex = 1;

@@ -1,19 +1,20 @@
 <div>
     <script type="text/template" id="stack">
-        <%= Filter.filters(filters) %>
+
         <% if(stack_items.length == 1) { %>
             <%= dashboardComponent(stack_items[0].item) %>
         <% } else { %>
         <div class="tabbable">
-            <ul class="nav nav-pills" id="<%- id %>">
+            <ul class="nav nav-pills" id="<%- id %>" style="text-align:center;">
                 <% _.each(stack_items, function(e, i, l) { %>
                 <li
                 <%- i == 0 ? ' class=active' : '' %>>
-                <a class="argh" data-toggle="tab" href="#stack_<%- id %>_<%- e.item.id %>"><%- typeof(e.label) ==
-                    "undefined" ? ("Stack Item " + i) : e.label %></a>
+                <a class="argh" data-toggle="tab" href="#stack_<%- id %>_<%- e.item.id %>"><%- (typeof(e.label) ==
+                    "undefined" || e.label == "") ? ("Stack Item " + i) : e.label %></a>
                 </li>
                 <% }) %>
             </ul>
+            <%= Filter.filters(filters) %>
             <div class="tab-content">
 
                 <% _.each(stack_items, function(e, i, l) { %>
@@ -33,7 +34,7 @@
             });
         }) %>
         <%= Filter.filters(filters) %>
-        <div class="container-fluid span12">
+        <div class="container-fluid">
             <% if(show_label) { %>
             <div class="row-fluid grid_header">
                 <%- label %>
@@ -54,7 +55,7 @@
     <script type="text/template" id="report_template">
         <% if(show_label) { %>
         <div>
-            <div class="dasbhoardReportHeader"><strong><%- report.name %></strong></div>
+            <div class="dashboardReportHeader"><%- report.name %></div>
         </div>
         <% } %>
         <%= Filter.filters(report.metadata.filters) %>
@@ -185,9 +186,12 @@
 </script>
 
 <script type="text/template" id="dashboard_template">
-    <%= Filter.filters(filters) %>
-    <div>
-        <%= dashboardComponent(base) %>
+    <div class="container"><%= Filter.filters(filters) %></div>
+    <div class="container dashboard_base well" style="padding-top:10px">
+
+        <div class="row-fluid">
+            <div class="span12"><%= dashboardComponent(base) %></div>
+        </div>
     </div>
 </script>
 

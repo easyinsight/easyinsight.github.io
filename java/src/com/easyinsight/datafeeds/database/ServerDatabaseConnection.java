@@ -5,7 +5,6 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
@@ -270,5 +269,32 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
 
     public boolean rebuildFieldWindow() {
         return true;
+    }
+
+    public List<SchemaTable> exploreSchema() throws SQLException {
+        Connection conn = createConnection();
+        try {
+            DatabaseMetaData databaseMetaData = conn.getMetaData();
+            ResultSet tableRS = databaseMetaData.getTables(null, null, null, null);
+            List<SchemaTable> schemaTables = new ArrayList<SchemaTable>();
+            while (tableRS.next()) {
+                String tableName = tableRS.getString("TABLE_NAME");
+                SchemaTable schemaTable = new SchemaTable();
+                schemaTable.setName(tableName);
+                schemaTables.add(schemaTable);
+                List<SchemaColumn> schemaColumns = new ArrayList<SchemaColumn>();
+                ResultSet columnRS = databaseMetaData.getColumns(null, null, tableName, null);
+                while (columnRS.next()) {
+                    String columnName = columnRS.getString("COLUMN_NAME");
+                    SchemaColumn schemaColumn = new SchemaColumn();
+                    schemaColumn.setName(columnName);
+                    schemaColumns.add(schemaColumn);
+                }
+                schemaTable.setSchemaColumns(schemaColumns);
+            }
+            return schemaTables;
+        } finally {
+            conn.close();
+        }
     }
 }

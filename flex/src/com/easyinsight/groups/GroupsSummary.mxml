@@ -84,7 +84,7 @@
 
         private function deleteSelected():void {
             var activityList:ArrayCollection = new ArrayCollection();
-            for each (var group:Group in myGroups) {
+            for each (var group:GroupDescriptor in myGroups) {
                 if (group.selected) {
                     activityList.addItem(group.groupID);
                 }

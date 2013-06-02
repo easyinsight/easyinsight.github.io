@@ -6,31 +6,18 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.analysis.verticallist {
-import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.DataResults;
-import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.EmbeddedCrosstabDataResults;
-import com.easyinsight.analysis.EmbeddedDataResults;
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.IEmbeddedDataService;
-import com.easyinsight.analysis.IReportDataService;
-import com.easyinsight.analysis.ListDataResults;
-import com.easyinsight.analysis.ListDataResults;
+import com.easyinsight.analysis.RequestParams;
 import com.easyinsight.analysis.service.EmbeddedDataService;
-import com.easyinsight.analysis.service.ListDataService;
-import com.easyinsight.datasources.DataSourceInfo;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.framework.InsightRequestMetadata;
 
-import flash.events.EventDispatcher;
-
 import mx.collections.ArrayCollection;
-
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
-
 import mx.rpc.remoting.RemoteObject;
 
 public class EmbeddedCrosstabService extends EmbeddedDataService implements IEmbeddedDataService {
@@ -44,8 +31,7 @@ public class EmbeddedCrosstabService extends EmbeddedDataService implements IEmb
         dataRemoteSource.getEmbeddedCrosstabResults.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
     }
 
-    override public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection,
-            noCache:Boolean, hierarchyOverrides:ArrayCollection):void {
+    override public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.utcOffset = new Date().getTimezoneOffset();

@@ -28,6 +28,10 @@ body {
     vertical-align: middle;
 }
 
+.filters select {
+    width: auto;
+}
+
 .dashboard_grid {
     display: inline-block;
     vertical-align: top;
@@ -43,14 +47,40 @@ body {
 .grid_header {
     background-color: #CCCCCC;
     width: 100%;
-    padding: 10px 30px 10px 10px;
-    margin: 0px -20px 5px;
+    padding: 10px 0px 10px 40px;
+    margin-bottom: 10px;
+    margin-left: -40px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #999999;
+}
+
+.dashboardReportHeader {
+    background-color: #CCCCCC;
+    width: 100%;
+    padding: 4px 0px;
+    line-height: normal;
+    height: auto;
+    font-size: 14px;
+    margin-bottom: 10px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #999999;
 }
 
 .filters {
     text-align: left;
     width: 100%;
     vertical-align: top;
+    font-size: 11px;
+}
+
+.filters input {
+    font-size: 11px;
+}
+
+.filters button {
+    font-size: 11px;
 }
 
 .dashboard_text {
@@ -71,3 +101,20 @@ body {
     width: 80px;
     margin: 0px;
 }
+
+.nav-pills > li {
+    float: none;
+    width: auto;
+    display: inline-block;
+}
+
+/*.tabbable {*/
+    /*position: relative;*/
+/*}*/
+
+/*.nav-pills {*/
+    /*position: absolute;*/
+    /*top: 0;*/
+    /*width: 100%;*/
+    /*background-color: #5c5c5c;*/
+/*}*/

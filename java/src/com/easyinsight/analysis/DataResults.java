@@ -9,7 +9,7 @@ import java.util.*;
  * Date: Nov 30, 2009
  * Time: 9:15:12 AM
  */
-public abstract class DataResults {
+public abstract class DataResults implements Cloneable {
     
     private Set<Long> invalidAnalysisItemIDs;
     private FeedMetadata feedMetadata;
@@ -20,6 +20,10 @@ public abstract class DataResults {
     private List<IntentionSuggestion> suggestions;
     private String reportLog;
     private String uid;
+
+    public DataResults clone() throws CloneNotSupportedException {
+        return (DataResults) super.clone();
+    }
 
     public String getUid() {
         return uid;

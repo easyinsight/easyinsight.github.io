@@ -165,6 +165,14 @@ public class DataViewFactory extends VBox implements IRetrievable {
         dispatchEvent(new Event("controlBarWidthChanged"));
     }
 
+    private var showingAll:Boolean = false;
+
+    private function onShowAll(event:ReportPagingEvent):void {
+        showingAll = true;
+        resultsUID = event.uid;
+        forceRetrieve();
+    }
+
     override protected function createChildren():void {
         super.createChildren();
 
@@ -172,6 +180,8 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent, false, 0, true);
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent, false, 0, true);
         _dataService.addEventListener(DataServiceEvent.DATA_RETURNED, gotData);
+
+        addEventListener(ReportPagingEvent.SHOW_ALL, onShowAll);
 
         _controlBar = createReportControlBar();
         _controlBar["id"] = "_controlBar";
@@ -360,7 +370,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
                 _analysisDefinition = _controlBar.createAnalysisDefinition();
                 if (_controlBar.isDataValid()) {
                     _analysisDefinition.createDefaultLimits();
-                    _dataService.retrieveData(_analysisDefinition, false);
+                    _dataService.retrieveData(_analysisDefinition, false, createRequestParams());
                 } else {
                     showNotConfigured();
                 }
@@ -381,11 +391,20 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _analysisDefinition = _controlBar.createAnalysisDefinition();
             if (_controlBar.isDataValid()) {
                 _analysisDefinition.createDefaultLimits();
-                _dataService.retrieveData(_analysisDefinition, false);
+                _dataService.retrieveData(_analysisDefinition, false, createRequestParams());
             } else {
                 showNotConfigured();
             }
         }
+    }
+
+    private var resultsUID:String;
+
+    private function createRequestParams():RequestParams {
+        var requestParams:RequestParams = new RequestParams();
+        requestParams.showAll = showingAll;
+        requestParams.uid = resultsUID;
+        return requestParams;
     }
 
     public function isDataValid():Boolean {
@@ -456,7 +475,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     private function onProblem(event:ProblemDataEvent):void {
-        _dataService.retrieveData(_analysisDefinition, false);
+        _dataService.retrieveData(_analysisDefinition, false, createRequestParams());
     }
 
     private var reportModuleLoader:ReportModuleLoader;

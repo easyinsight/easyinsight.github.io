@@ -318,7 +318,7 @@
             <div class="span3">
                 <div class="well" style="background-color: #d5d5d5">
                     <p><strong>Have questions?</strong></p>
-                    <p>You can contact Easy Insight at 1-720-285-8652 or sales@easy-insight.com if you have any questions or concerns around your account billing.</p>
+                    <p>You can contact Easy Insight at 1-720-316-8174 or sales@easy-insight.com if you have any questions or concerns around your account billing.</p>
                 </div>
             </div>
         </div>
