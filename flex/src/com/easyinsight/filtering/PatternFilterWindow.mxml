@@ -18,6 +18,8 @@
         [Bindable]
         private var regex:Boolean;
         [Bindable]
+        private var autoWildCard:Boolean;
+        [Bindable]
         private var patternText:String;
 
         private var _fields:ArrayCollection;
@@ -33,6 +35,7 @@
                 caseSensitive = filterPatternDefinition.caseSensitive;
                 patternText = filterPatternDefinition.pattern;
                 regex = filterPatternDefinition.regex;
+                autoWildCard = filterPatternDefinition.autoWildCard;
             }
         }
 
@@ -50,6 +53,7 @@
                 filterPatternDefinition = _filterValueDefinition as FilterPatternDefinition;
             }
             filterPatternDefinition.pattern = patternInput.text;
+            filterPatternDefinition.autoWildCard = autoWildCardCheckbox.selected;
             filterPatternDefinition.caseSensitive = caseSensitiveCheckbox.selected;
             filterPatternDefinition.regex = regexCheckbox.selected;
             return filterPatternDefinition;
@@ -92,6 +96,9 @@
         </mx:FormItem>
         <mx:FormItem label="Regular Expression: ">
             <mx:CheckBox id="regexCheckbox" selected="{regex}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Auto Wild Card:">
+            <mx:CheckBox id="autoWildCardCheckbox" selected="{autoWildCard}"/>
         </mx:FormItem>
     </mx:Form>
 </mx:VBox>

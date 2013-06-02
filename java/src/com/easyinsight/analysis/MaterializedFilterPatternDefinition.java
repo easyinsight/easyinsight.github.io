@@ -14,9 +14,11 @@ import java.util.regex.PatternSyntaxException;
 public class MaterializedFilterPatternDefinition extends MaterializedFilterDefinition {
 
     private boolean caseSensitive;
+    private boolean autoWildCard;
     private Pattern pattern;
+    private String patternString;
 
-    public MaterializedFilterPatternDefinition(AnalysisItem key, String pattern, boolean caseSensitive, boolean regex) {
+    public MaterializedFilterPatternDefinition(AnalysisItem key, String pattern, boolean caseSensitive, boolean regex, boolean autoWildCard) {
         super(key);
         if (pattern == null) {
             pattern = "";
@@ -33,7 +35,12 @@ public class MaterializedFilterPatternDefinition extends MaterializedFilterDefin
             }
         }
         this.caseSensitive = caseSensitive;
-
+        if (caseSensitive) {
+            this.patternString = pattern;
+        } else {
+            this.patternString = pattern.toLowerCase();
+        }
+        this.autoWildCard = autoWildCard;
     }
 
     public boolean allows(Value value) {
@@ -43,6 +50,9 @@ public class MaterializedFilterPatternDefinition extends MaterializedFilterDefin
         String string = value.toString();
         if (!caseSensitive) {
             string = string.toLowerCase();
+        }
+        if (autoWildCard) {
+            return string.contains(patternString);
         }
         string = string.replace("\n", "");
         Matcher matcher = pattern.matcher(string);

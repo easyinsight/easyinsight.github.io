@@ -31,13 +31,16 @@ public class FilterPatternDefinition extends FilterDefinition {
     @Column(name="case_sensitive")
     private boolean caseSensitive;
 
+    @Column(name="auto_wild_card")
+    private boolean autoWildCard;
+
     @Override
     public int type() {
         return FilterDefinition.PATTERN;
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        return new MaterializedFilterPatternDefinition(getField(), pattern, caseSensitive, regex);
+        return new MaterializedFilterPatternDefinition(getField(), pattern, caseSensitive, regex, autoWildCard);
     }
 
     public String toQuerySQL(String tableName) {
@@ -49,8 +52,12 @@ public class FilterPatternDefinition extends FilterDefinition {
     }
 
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        String likePattern = pattern.replaceAll("\\*", "%");
-        preparedStatement.setString(start, likePattern);
+        if (autoWildCard) {
+            preparedStatement.setString(start, "%" + pattern + "%");
+        } else {
+            String likePattern = pattern.replaceAll("\\*", "%");
+            preparedStatement.setString(start, likePattern);
+        }
         return start + 1;
     }
 
@@ -80,6 +87,14 @@ public class FilterPatternDefinition extends FilterDefinition {
         setRegex(Boolean.parseBoolean(element.getAttribute("regularExpression").getValue()));
         setCaseSensitive(Boolean.parseBoolean(element.getAttribute("caseSensitive").getValue()));
         pattern = element.getValue();
+    }
+
+    public boolean isAutoWildCard() {
+        return autoWildCard;
+    }
+
+    public void setAutoWildCard(boolean autoWildCard) {
+        this.autoWildCard = autoWildCard;
     }
 
     public String getPattern() {

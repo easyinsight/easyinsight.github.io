@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF" height="450"
+                    xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.collections.HierarchicalData;
+
+        private var _statsList:ArrayCollection;
+
+        [Bindable]
+        private var hierarchicalData:HierarchicalData;
+
+        public function set statsList(value:ArrayCollection):void {
+            _statsList = value;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            hierarchicalData = new HierarchicalData(_statsList);
+            hierarchicalData.childrenField = "schemaColumns";
+        }
+        ]]></mx:Script>
+    <mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" height="100%">
+        <mx:AdvancedDataGrid dataProvider="{hierarchicalData}" height="100%">
+            <mx:columns>
+                <mx:AdvancedDataGridColumn dataField="name" width="400" headerText="Name"/>
+            </mx:columns>
+        </mx:AdvancedDataGrid>
+        <util:SaveButton label="Close" click="close()"/>
+    </mx:VBox>
+</util:EITitleWindow>
