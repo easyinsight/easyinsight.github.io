@@ -139,7 +139,7 @@
                 <label for="userName" class="promptLabel">
                     User Name or Email
                 </label>
-                <input type="email" name="userName" id="userName" style="width:100%;font-size:14px;height:28px" autocapitalize="off" autocorrect="off" autoFocus/>
+                <input type="text" name="userName" id="userName" style="width:100%;font-size:14px;height:28px" autocapitalize="off" autocorrect="off" autoFocus/>
 
                 <label for="password" class="promptLabel">
                     Password
