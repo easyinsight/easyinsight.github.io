@@ -8,6 +8,8 @@ import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.datafeeds.composite.FederationSource;
 import com.easyinsight.datafeeds.constantcontact.CCContactSource;
+import com.easyinsight.datafeeds.database.SchemaResponse;
+import com.easyinsight.datafeeds.database.ServerDatabaseConnection;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksClientSource;
 import com.easyinsight.datafeeds.harvest.HarvestProjectSource;
 import com.easyinsight.datafeeds.highrise.HighRiseCompanySource;
@@ -135,7 +137,6 @@ public class FeedService {
                 report.getAddedItems().remove(analysisItem);
             }
             AnalysisItem clone = analysisItem.clone();
-            // 888-363-8350
             dataSource.getFields().add(clone);
             new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
             conn.commit();
@@ -708,6 +709,41 @@ public class FeedService {
 
     }
 
+    public AnalysisBasedFeedDefinition createReportDataSource(long reportID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            SecurityUtil.authorizeFeedAccess(reportID);
+            AnalysisBasedFeedDefinition dataSource = new AnalysisBasedFeedDefinition();
+            dataSource.setReportID(reportID);
+            WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            dataSource.setFeedName(report.getName());
+            List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
+            Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+            for (AnalysisItem field : report.getAllAnalysisItems()) {
+                AnalysisItem clone = field.clone();
+                clones.add(clone);
+                clone.setConcrete(true);
+                replacementMap.put(field.getAnalysisItemID(), clone);
+            }
+            ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+            for (AnalysisItem clone : clones) {
+                clone.updateIDs(replacements);
+            }
+            dataSource.setFields(clones);
+            dataSource.setAccountVisible(true);
+            dataSource.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID()));
+            dataSource.setApiKey(RandomTextGenerator.generateText(20));
+            long feedID = feedStorage.addFeedDefinitionData(dataSource, conn);
+            DataStorage.liveDataSource(feedID, conn, dataSource.getFeedType().getType());
+            return dataSource;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public CompositeFeedDefinition createCompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> edges,
                                                        String feedName, EIConnection conn) throws Exception {
         CompositeFeedDefinition feedDef = new CompositeFeedDefinition();
@@ -859,6 +895,19 @@ public class FeedService {
             Database.closeConnection(conn);
         }
         return dataSources;
+    }
+
+    public SchemaResponse exploreSchema(ServerDatabaseConnection serverDatabaseConnection) {
+        SchemaResponse schemaResponse = new SchemaResponse();
+        try {
+            schemaResponse.setSchemaTables(serverDatabaseConnection.exploreSchema());
+        } catch (SQLException e) {
+            schemaResponse.setError(e.getMessage());
+        } catch (Exception e) {
+            LogClass.error(e);
+            schemaResponse.setError("An internal server error occurred on trying to retrieve the schema.");
+        }
+        return schemaResponse;
     }
 
     public FeedDefinition getFeedDefinition(long dataFeedID) {
