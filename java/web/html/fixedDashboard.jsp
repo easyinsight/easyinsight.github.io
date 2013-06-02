@@ -40,7 +40,7 @@
     <script type="text/javascript" src="/js/bootstrap.js"></script>
     <script type="text/javascript" src="/js/jquery.jqplot.min.js"></script>
     <script type="text/javascript" src="/js/plugins/jqplot.barRenderer.min.js"></script>
-    <script type="text/javascript" src="/js/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+    <script type="text/javascript" src="/js/plugins/jqplot.categoryAxisRenderer.js"></script>
     <script type="text/javascript" src="/js//plugins/jqplot.pointLabels.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/jquery.jqplot.css" />
     <script type="text/javascript">

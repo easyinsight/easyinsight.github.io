@@ -175,13 +175,14 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
-        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
-        includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
+
+        includes.add("/js/plugins/jqplot.categoryAxisRenderer.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/visualizations/chart.js");
         includes.add("/js/visualizations/util.js");
+//        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
         return includes;
     }
 

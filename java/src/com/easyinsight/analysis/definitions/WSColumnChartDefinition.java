@@ -172,7 +172,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
         includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
-        includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
+        includes.add("/js/plugins/jqplot.categoryAxisRenderer.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");

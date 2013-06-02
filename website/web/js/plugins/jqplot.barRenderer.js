@@ -29,7 +29,6 @@
  * 
  */
 (function($) {
-    
     // Class: $.jqplot.BarRenderer
     // A plugin renderer for jqPlot to draw a bar plot.
     // Draws series as a line.
@@ -232,7 +231,7 @@
                 pos = i;
             }
             // is the series rendered as a bar?
-            if (series.renderer.constructor == $.jqplot.BarRenderer) {
+            if (series.renderer.constructor == $.jqplot.BarRenderer || series.renderer.constructor == $.jqplot.GradientBarRenderer) {
                 // gridData may not be computed yet, use data length insted
                 nvals += series.data.length;
                 nseries += 1;
@@ -674,7 +673,7 @@
     
     function postInit(target, data, options) {
         for (var i=0; i<this.series.length; i++) {
-            if (this.series[i].renderer.constructor == $.jqplot.BarRenderer) {
+            if (this.series[i].renderer.constructor == $.jqplot.BarRenderer || this.series[i].renderer.constructor == $.jqplot.GradientBarRenderer) {
                 // don't allow mouseover and mousedown at same time.
                 if (this.series[i].highlightMouseOver) {
                     this.series[i].highlightMouseDown = false;
