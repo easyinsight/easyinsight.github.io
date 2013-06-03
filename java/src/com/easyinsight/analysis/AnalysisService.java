@@ -1240,7 +1240,7 @@ public class AnalysisService {
             additionalAnalysisItems.add(asTextDimension);
             asTextDimension.setKey(new NamedKey(dateDimension.toDisplay() + " for Drillthrough"));
             asTextDimension.setApplyBeforeAggregation(true);
-            asTextDimension.setDerivationCode("dateformat(datelevel([" + dateDimension.toDisplay() + "], \"" + dateDimension.getDateLevel()+"\"), \"yyyy-MM-dd\")");
+            asTextDimension.setDerivationCode("dateformatnoshift(datelevel([" + dateDimension.toDisplay() + "], \"" + dateDimension.getDateLevel()+"\"), \"yyyy-MM-dd\")");
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
             filterValueDefinition.setField(asTextDimension);
             filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
