@@ -112,6 +112,8 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
                 }
             }
             newObject[stackItem.qualifiedName()] = dimensionValue;
+            newObject[stackItem.qualifiedName() + "_ORIGINAL"] = stackVal;
+            newObject[xaxis.qualifiedName() + "_ORIGINAL"] = xValVal;
 
             newObject[dimensionValue] = measureValue;
             if (!uniques.contains(dimensionValue)) {
