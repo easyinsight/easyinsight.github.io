@@ -1128,7 +1128,7 @@ public class AnalysisService {
                     } else if (report.getReportType() == WSAnalysisDefinition.STACKED_BAR) {
                         WSStackedBarChartDefinition stackedColumnChartDefinition = (WSStackedBarChartDefinition) report;
                         {
-                            Object object = data.get(stackedColumnChartDefinition.getStackItem().qualifiedName() + "_ORIGINAL");
+                            Object object = altKey;
                             Value val;
                             if (object instanceof Value) {
                                 val = (Value) object;
