@@ -65,6 +65,10 @@ public class AnalysisService {
         }
     }*/
 
+    public void updateReportStylings() {
+
+    }
+
     public List<Revision> showHistory(String urlKey) {
         List<Revision> revisions = new ArrayList<Revision>();
         EIConnection conn = Database.instance().getConnection();
@@ -1059,6 +1063,9 @@ public class AnalysisService {
                 throw new RuntimeException();
             }
             List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+
+            List<AnalysisItem> additionalAnalysisItems = new ArrayList<AnalysisItem>();
+            Set<AnalysisItem> used = new HashSet<AnalysisItem>();
             if (drillThrough.getMarmotScript() != null && !"".equals(drillThrough.getMarmotScript())) {
 
                 filters = new ArrayList<FilterDefinition>();
@@ -1088,54 +1095,64 @@ public class AnalysisService {
                     } else if (report.getReportType() == WSAnalysisDefinition.STACKED_COLUMN) {
                         WSStackedColumnChartDefinition stackedColumnChartDefinition = (WSStackedColumnChartDefinition) report;
                         {
-                            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-                            filterValueDefinition.setField(stackedColumnChartDefinition.getStackItem());
-                            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                            filterValueDefinition.setSingleValue(true);
-                            filterValueDefinition.setEnabled(true);
-                            filterValueDefinition.setInclusive(true);
-                            filterValueDefinition.setToggleEnabled(true);
-
-                            filterValueDefinition.setFilteredValues(Arrays.asList((Object) altKey));
-                            filters.add(filterValueDefinition);
+                            Object object = altKey;
+                            Value val;
+                            if (object instanceof Value) {
+                                val = (Value) object;
+                            } else {
+                                val = new StringValue(object.toString());
+                            }
+                            FilterDefinition filter = constructDrillthroughFilter(drillThrough, stackedColumnChartDefinition.getStackItem(), data, val,
+                                    false, additionalAnalysisItems);
+                            if (filter != null) {
+                                used.add(stackedColumnChartDefinition.getStackItem());
+                                filters.add(filter);
+                            }
                         }
                         {
-                            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-                            filterValueDefinition.setField(stackedColumnChartDefinition.getXaxis());
-                            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                            filterValueDefinition.setSingleValue(true);
-                            filterValueDefinition.setEnabled(true);
-                            filterValueDefinition.setInclusive(true);
-                            filterValueDefinition.setToggleEnabled(true);
-
-                            filterValueDefinition.setFilteredValues(Arrays.asList(data.get(stackedColumnChartDefinition.getXaxis().qualifiedName())));
-                            filters.add(filterValueDefinition);
+                            Object object = data.get(stackedColumnChartDefinition.getXaxis().qualifiedName() + "_ORIGINAL");
+                            Value val;
+                            if (object instanceof Value) {
+                                val = (Value) object;
+                            } else {
+                                val = new StringValue(object.toString());
+                            }
+                            FilterDefinition filter = constructDrillthroughFilter(drillThrough, stackedColumnChartDefinition.getXaxis(), data, val,
+                                    false, additionalAnalysisItems);
+                            if (filter != null) {
+                                used.add(stackedColumnChartDefinition.getXaxis());
+                                filters.add(filter);
+                            }
                         }
                     } else if (report.getReportType() == WSAnalysisDefinition.STACKED_BAR) {
                         WSStackedBarChartDefinition stackedColumnChartDefinition = (WSStackedBarChartDefinition) report;
                         {
-                            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-                            filterValueDefinition.setField(stackedColumnChartDefinition.getStackItem());
-                            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                            filterValueDefinition.setSingleValue(true);
-                            filterValueDefinition.setEnabled(true);
-                            filterValueDefinition.setInclusive(true);
-                            filterValueDefinition.setToggleEnabled(true);
-
-                            filterValueDefinition.setFilteredValues(Arrays.asList((Object) altKey));
-                            filters.add(filterValueDefinition);
+                            Object object = data.get(stackedColumnChartDefinition.getStackItem().qualifiedName() + "_ORIGINAL");
+                            Value val;
+                            if (object instanceof Value) {
+                                val = (Value) object;
+                            } else {
+                                val = new StringValue(object.toString());
+                            }
+                            FilterDefinition filter = constructDrillthroughFilter(drillThrough, stackedColumnChartDefinition.getStackItem(), data, val,
+                                    false, additionalAnalysisItems);
+                            if (filter != null) {
+                                filters.add(filter);
+                            }
                         }
                         {
-                            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-                            filterValueDefinition.setField(stackedColumnChartDefinition.getYaxis());
-                            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                            filterValueDefinition.setSingleValue(true);
-                            filterValueDefinition.setEnabled(true);
-                            filterValueDefinition.setInclusive(true);
-                            filterValueDefinition.setToggleEnabled(true);
-
-                            filterValueDefinition.setFilteredValues(Arrays.asList(data.get(stackedColumnChartDefinition.getYaxis().qualifiedName())));
-                            filters.add(filterValueDefinition);
+                            Object object = data.get(stackedColumnChartDefinition.getYaxis().qualifiedName() + "_ORIGINAL");
+                            Value val;
+                            if (object instanceof Value) {
+                                val = (Value) object;
+                            } else {
+                                val = new StringValue(object.toString());
+                            }
+                            FilterDefinition filter = constructDrillthroughFilter(drillThrough, stackedColumnChartDefinition.getYaxis(), data, val,
+                                    false, additionalAnalysisItems);
+                            if (filter != null) {
+                                filters.add(filter);
+                            }
                         }
                     } else {
                         Object target = data.get(analysisItem.qualifiedName());
@@ -1146,78 +1163,9 @@ public class AnalysisService {
                                 multiValue = true;
                             }
                         }
-                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                            Value value = (Value) target;
-                            AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
-                            if (value instanceof DateValue) {
-                                DateValue dateValue = (DateValue) value;
-                                if (dateDimension.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
-                                    Calendar cal = Calendar.getInstance();
-                                    cal.setTime(dateValue.getDate());
-                                    FilterDateRangeDefinition range = new FilterDateRangeDefinition();
-                                    range.setStartDate(cal.getTime());
-                                    cal.add(Calendar.DAY_OF_YEAR, 1);
-                                    range.setEndDate(cal.getTime());
-                                    range.setField(analysisItem);
-                                    range.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                                    range.setEnabled(true);
-                                    filters.add(range);
-                                } else if (dateDimension.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL) {
-                                    Calendar cal = Calendar.getInstance();
-                                    cal.setTime(dateValue.getDate());
-                                    FilterDateRangeDefinition range = new FilterDateRangeDefinition();
-                                    range.setStartDate(cal.getTime());
-                                    cal.add(Calendar.WEEK_OF_YEAR, 1);
-                                    range.setEndDate(cal.getTime());
-                                    range.setField(analysisItem);
-                                    range.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                                    range.setEnabled(true);
-                                    filters.add(range);
-                                } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
-                                    Calendar cal = Calendar.getInstance();
-                                    cal.setTime(dateValue.getDate());
-                                    FilterDateRangeDefinition range = new FilterDateRangeDefinition();
-                                    range.setStartDate(cal.getTime());
-                                    cal.add(Calendar.MONTH, 1);
-                                    range.setEndDate(cal.getTime());
-                                    range.setField(analysisItem);
-                                    range.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                                    range.setEnabled(true);
-                                    filters.add(range);
-                                } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
-                                    Calendar cal = Calendar.getInstance();
-                                    cal.setTime(dateValue.getDate());
-                                    FilterDateRangeDefinition range = new FilterDateRangeDefinition();
-                                    range.setStartDate(cal.getTime());
-                                    cal.add(Calendar.MONTH, 1);
-                                    range.setEndDate(cal.getTime());
-                                    range.setField(analysisItem);
-                                    range.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                                    range.setEnabled(true);
-                                    filters.add(range);
-                                }
-                            }
-                        } else {
-                            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-                            filterValueDefinition.setField(analysisItem);
-                            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-
-                            filterValueDefinition.setEnabled(true);
-                            filterValueDefinition.setInclusive(true);
-                            filterValueDefinition.setToggleEnabled(true);
-                            if (multiValue) {
-                                filterValueDefinition.setSingleValue(false);
-                                Value value = (Value) target;
-                                List<Object> objs = new ArrayList<Object>();
-                                for (Value val : value.getOtherValues()) {
-                                    objs.add(val);
-                                }
-                                filterValueDefinition.setFilteredValues(objs);
-                            } else {
-                                filterValueDefinition.setSingleValue(true);
-                                filterValueDefinition.setFilteredValues(Arrays.asList(data.get(analysisItem.qualifiedName())));
-                            }
-                            filters.add(filterValueDefinition);
+                        FilterDefinition filter = constructDrillthroughFilter(drillThrough, analysisItem, data, (Value) target, multiValue, additionalAnalysisItems);
+                        if (filter != null) {
+                            filters.add(filter);
                         }
                     }
 
@@ -1227,6 +1175,12 @@ public class AnalysisService {
                             analysisItem));
                 }
                 if (drillThrough.isFilterRowGroupings()) {
+
+                    for (FilterDefinition filter : filters) {
+                        if (filter.getField() != null) {
+                            used.add(filter.getField());
+                        }
+                    }
                     List<FilterDefinition> fieldFilters = analysisItem.getFilters();
                     for (FilterDefinition filter : fieldFilters) {
                         FilterDefinition clone;
@@ -1240,16 +1194,18 @@ public class AnalysisService {
                         filters.add(clone);
                     }
                     for (AnalysisItem grouping : report.getAllAnalysisItems()) {
-                        if (grouping.hasType(AnalysisItemTypes.DIMENSION)) {
-                            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-                            filterValueDefinition.setField(grouping);
-                            filterValueDefinition.setSingleValue(true);
-                            filterValueDefinition.setEnabled(true);
-                            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                            filterValueDefinition.setToggleEnabled(true);
-                            filterValueDefinition.setInclusive(true);
-                            filterValueDefinition.setFilteredValues(Arrays.asList(data.get(grouping.qualifiedName())));
-                            filters.add(filterValueDefinition);
+                        if (!used.contains(grouping)) {
+                            if (grouping.hasType(AnalysisItemTypes.DIMENSION)) {
+                                FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+                                filterValueDefinition.setField(grouping);
+                                filterValueDefinition.setSingleValue(true);
+                                filterValueDefinition.setEnabled(true);
+                                filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                                filterValueDefinition.setToggleEnabled(true);
+                                filterValueDefinition.setInclusive(true);
+                                filterValueDefinition.setFilteredValues(Arrays.asList(data.get(grouping.qualifiedName())));
+                                filters.add(filterValueDefinition);
+                            }
                         }
                     }
                 }
@@ -1273,6 +1229,52 @@ public class AnalysisService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    private FilterDefinition constructDrillthroughFilter(DrillThrough drillThrough, AnalysisItem analysisItem, Map<String, Object> data, Value value, boolean multiValue, List<AnalysisItem> additionalAnalysisItems) {
+        FilterDefinition filterDefinition;
+        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+            AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
+            DerivedAnalysisDimension asTextDimension = new DerivedAnalysisDimension();
+            additionalAnalysisItems.add(asTextDimension);
+            asTextDimension.setKey(new NamedKey(dateDimension.toDisplay() + " for Drillthrough"));
+            asTextDimension.setApplyBeforeAggregation(true);
+            asTextDimension.setDerivationCode("dateformat([" + dateDimension.toDisplay() + "], \"yyyy-MM-dd\")");
+            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+            filterValueDefinition.setField(asTextDimension);
+            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+
+            filterValueDefinition.setEnabled(true);
+            filterValueDefinition.setInclusive(true);
+            filterValueDefinition.setToggleEnabled(true);
+
+            filterValueDefinition.setSingleValue(true);
+
+            filterValueDefinition.setFilteredValues(Arrays.asList((Object) value.toString()));
+            filterDefinition = filterValueDefinition;
+        } else {
+            FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+            filterValueDefinition.setField(analysisItem);
+            filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+
+            filterValueDefinition.setEnabled(true);
+            filterValueDefinition.setInclusive(true);
+            filterValueDefinition.setToggleEnabled(true);
+            if (multiValue) {
+                filterValueDefinition.setSingleValue(false);
+
+                List<Object> objs = new ArrayList<Object>();
+                for (Value val : value.getOtherValues()) {
+                    objs.add(val);
+                }
+                filterValueDefinition.setFilteredValues(objs);
+            } else {
+                filterValueDefinition.setSingleValue(true);
+                filterValueDefinition.setFilteredValues(Arrays.asList((Object) value));
+            }
+            filterDefinition = filterValueDefinition;
+        }
+        return filterDefinition;
     }
 
     public List<Date> testFormat(String format, String value1, String value2, String value3) {
