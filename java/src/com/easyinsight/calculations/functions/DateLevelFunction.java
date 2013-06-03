@@ -22,7 +22,9 @@ public class DateLevelFunction extends Function {
             int level = Integer.parseInt(minusQuotes(1));
             AnalysisDateDimension dateDimension = new AnalysisDateDimension();
             dateDimension.setDateLevel(level);
-            return dateDimension.transformValue(dateValue, new InsightRequestMetadata(), false, Calendar.getInstance());
+            Value result = dateDimension.transformValue(dateValue, new InsightRequestMetadata(), false, Calendar.getInstance());
+            System.out.println("transformed " + dateValue + " into " + result);
+            return result;
         }
         return new EmptyValue();
     }
