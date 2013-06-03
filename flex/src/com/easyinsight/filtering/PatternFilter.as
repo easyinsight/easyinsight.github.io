@@ -82,7 +82,7 @@ import mx.managers.PopUpManager;
 		override protected function createChildren():void {
 			super.createChildren();
             //if (!_filterEditable) {
-            if (_filterDefinition != null && !_filterDefinition.toggleEnabled) {
+            if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
                 var checkbox:CheckBox = new CheckBox();
                 checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
                 checkbox.toolTip = "Click to disable this filter.";

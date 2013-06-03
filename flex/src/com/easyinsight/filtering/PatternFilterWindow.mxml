@@ -66,6 +66,7 @@
                 caseSensitive = filterPatternDefinition.caseSensitive;
                 patternText = filterPatternDefinition.pattern;
                 regex = filterPatternDefinition.regex;
+                autoWildCard = filterPatternDefinition.autoWildCard;
             }
         }
 
