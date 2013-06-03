@@ -31,6 +31,7 @@ public class EIDateFormatFunction extends Function implements IFunction {
             throw new FunctionException("We couldn't parse the value of " + value.toString() + " as a date.");
         }
         Calendar cal = null;
+
         if (calculationMetadata.getInsightRequestMetadata() != null) {
             int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
             String string;

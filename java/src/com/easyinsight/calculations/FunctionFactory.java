@@ -261,6 +261,8 @@ public class FunctionFactory {
             return new DecimalDegrees();
         } else if (s.equals("assignfiltervalue")) {
             return new AssignFilterValue();
+        } else if (s.equals("datelevel")) {
+            return new DateLevelFunction();
         } else {
             return null;
         }

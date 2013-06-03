@@ -44,6 +44,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.hibernate.NonUniqueObjectException;
 import org.hibernate.Session;
 import org.apache.jcs.access.exception.CacheException;
 
@@ -1239,7 +1240,7 @@ public class AnalysisService {
             additionalAnalysisItems.add(asTextDimension);
             asTextDimension.setKey(new NamedKey(dateDimension.toDisplay() + " for Drillthrough"));
             asTextDimension.setApplyBeforeAggregation(true);
-            asTextDimension.setDerivationCode("dateformat([" + dateDimension.toDisplay() + "], \"yyyy-MM-dd\")");
+            asTextDimension.setDerivationCode("dateformat(datelevel([" + dateDimension.toDisplay() + "], \"" + dateDimension.getDateLevel()+"\"), \"yyyy-MM-dd\")");
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
             filterValueDefinition.setField(asTextDimension);
             filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
@@ -1703,6 +1704,25 @@ public class AnalysisService {
             session.flush();
             conn.commit();
             reportID = analysisDefinition.getAnalysisID();
+        } catch (NonUniqueObjectException noe) {
+            if (noe.getMessage().contains("Analysis")) {
+                String idString = noe.getMessage().substring(noe.getMessage().lastIndexOf("#") + 1, noe.getMessage().length() - 1);
+                long id = Long.parseLong(idString);
+                try {
+                    Feed feed = FeedRegistry.instance().getFeed(wsAnalysisDefinition.getDataFeedID());
+                    Set<AnalysisItem> items = wsAnalysisDefinition.getColumnItems(feed.getFields(), new AnalysisItemRetrievalStructure(null), new InsightRequestMetadata());
+                    for (AnalysisItem item : items) {
+                        if (item.getAnalysisItemID() == id) {
+                            LogClass.error("Error included item " + item.toDisplay() + " - " + item.getAnalysisItemID());
+                        }
+                    }
+                } catch (Throwable t) {
+                    LogClass.error(t);
+                }
+            }
+            LogClass.error(noe);
+            conn.rollback();
+            throw new RuntimeException(noe);
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
