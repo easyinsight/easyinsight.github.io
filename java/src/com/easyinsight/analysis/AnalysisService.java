@@ -1164,7 +1164,13 @@ public class AnalysisService {
                                 multiValue = true;
                             }
                         }
-                        FilterDefinition filter = constructDrillthroughFilter(drillThrough, analysisItem, data, (Value) target, multiValue, additionalAnalysisItems);
+                        Value val;
+                        if (target instanceof Value) {
+                            val = (Value) target;
+                        } else {
+                            val = new StringValue(target.toString());
+                        }
+                        FilterDefinition filter = constructDrillthroughFilter(drillThrough, analysisItem, data, val, multiValue, additionalAnalysisItems);
                         if (filter != null) {
                             filters.add(filter);
                         }
@@ -1197,7 +1203,7 @@ public class AnalysisService {
                     for (AnalysisItem grouping : report.getAllAnalysisItems()) {
                         if (!used.contains(grouping)) {
                             if (grouping.hasType(AnalysisItemTypes.DIMENSION)) {
-                                FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+                                /*FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
                                 filterValueDefinition.setField(grouping);
                                 filterValueDefinition.setSingleValue(true);
                                 filterValueDefinition.setEnabled(true);
@@ -1205,7 +1211,25 @@ public class AnalysisService {
                                 filterValueDefinition.setToggleEnabled(true);
                                 filterValueDefinition.setInclusive(true);
                                 filterValueDefinition.setFilteredValues(Arrays.asList(data.get(grouping.qualifiedName())));
-                                filters.add(filterValueDefinition);
+                                filters.add(filterValueDefinition);*/
+                                Object target = data.get(grouping.qualifiedName());
+                                boolean multiValue = false;
+                                if (target instanceof Value) {
+                                    Value value = (Value) target;
+                                    if (value.getOtherValues() != null) {
+                                        multiValue = true;
+                                    }
+                                }
+                                Value val;
+                                if (target instanceof Value) {
+                                    val = (Value) target;
+                                } else {
+                                    val = new StringValue(target.toString());
+                                }
+                                FilterDefinition filter = constructDrillthroughFilter(drillThrough, grouping, data, val, multiValue, additionalAnalysisItems);
+                                if (filter != null) {
+                                    filters.add(filter);
+                                }
                             }
                         }
                     }
