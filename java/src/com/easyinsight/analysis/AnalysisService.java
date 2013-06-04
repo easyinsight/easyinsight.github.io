@@ -1138,6 +1138,7 @@ public class AnalysisService {
                             FilterDefinition filter = constructDrillthroughFilter(drillThrough, stackedColumnChartDefinition.getStackItem(), data, val,
                                     false, additionalAnalysisItems);
                             if (filter != null) {
+                                used.add(stackedColumnChartDefinition.getStackItem());
                                 filters.add(filter);
                             }
                         }
@@ -1183,11 +1184,11 @@ public class AnalysisService {
                 }
                 if (drillThrough.isFilterRowGroupings()) {
 
-                    for (FilterDefinition filter : filters) {
+                    /*for (FilterDefinition filter : filters) {
                         if (filter.getField() != null) {
                             used.add(filter.getField());
                         }
-                    }
+                    }*/
                     List<FilterDefinition> fieldFilters = analysisItem.getFilters();
                     for (FilterDefinition filter : fieldFilters) {
                         FilterDefinition clone;
