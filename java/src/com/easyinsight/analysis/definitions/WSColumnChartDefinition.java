@@ -218,9 +218,9 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
     }
 
     @Override
-    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
 
-        JSONObject areaChart = super.toJSON(htmlReportMetadata);
+        JSONObject areaChart = super.toJSON(htmlReportMetadata, parentDefinitions);
         areaChart.put("type", "column");
         areaChart.put("key", getUrlKey());
         areaChart.put("url", "/app/columnChart");

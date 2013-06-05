@@ -11,6 +11,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.scorecard.Scorecard;
 import org.hibernate.Session;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -59,7 +60,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
 
     private int htmlWidth;
 
-    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata, List<FilterDefinition> parentFilters) throws JSONException {
         JSONObject jo = new JSONObject();
         if(getPreferredWidth() > 0)
             jo.put("preferredWidth", getPreferredWidth());
@@ -67,6 +68,19 @@ public abstract class DashboardElement implements Cloneable, Serializable {
             jo.put("preferredWidth", getHtmlWidth());
         if(getPreferredHeight() > 0)
             jo.put("preferredHeight", getPreferredHeight());
+
+        JSONArray filters = new JSONArray();
+        for(FilterDefinition f : getFilters()) {
+            boolean found = false;
+            for(FilterDefinition ff : parentFilters) {
+                if(f.sameFilter(ff)) {
+                    found = true;
+                }
+            }
+            if(!found)
+                filters.put(f.toJSON(filterHTMLMetadata));
+        }
+        jo.put("filters", filters);
         return jo;
     }
 
