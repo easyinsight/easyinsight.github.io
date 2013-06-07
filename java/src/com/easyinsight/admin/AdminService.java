@@ -2,7 +2,6 @@ package com.easyinsight.admin;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.audit.*;
-import com.easyinsight.billing.BillingScheduledTask;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.DashboardDescriptor;
@@ -18,14 +17,11 @@ import com.easyinsight.eventing.MessageUtils;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.lang.management.ThreadInfo;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.Date;
 
-import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
@@ -80,7 +76,48 @@ public class AdminService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            new BillingScheduledTask().expireTrials(conn);
+            PreparedStatement insert = conn.prepareStatement("INSERT INTO REVISED_ACTION_LOG (GENERAL_ACTION_TYPE, ACTION_TYPE, ACTION_DATE, " +
+                    "DASHBOARD_ID, REPORT_ID, DATA_SOURCE_ID, USER_ID) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            Session session = Database.instance().createSession(conn);
+            List<ActionLog> actionLogs = session.createQuery("from ActionLog").list();
+            for (ActionLog actionLog : actionLogs) {
+                try {
+                    if (actionLog instanceof ActionReportLog) {
+                        ActionReportLog actionReportLog = (ActionReportLog) actionLog;
+                        insert.setInt(1, REPORT);
+                        insert.setInt(2, actionLog.getActionType());
+                        insert.setTimestamp(3, new Timestamp(actionLog.getActionDate().getTime()));
+                        insert.setNull(4, Types.BIGINT);
+                        insert.setLong(5, actionReportLog.getReportID());
+                        insert.setNull(6, Types.BIGINT);
+                        insert.setLong(7, actionLog.getUserID());
+                        insert.execute();
+                    } else if (actionLog instanceof ActionDashboardLog) {
+                        ActionDashboardLog actionDashboardLog = (ActionDashboardLog) actionLog;
+                        insert.setInt(1, DASHBOARD);
+                        insert.setInt(2, actionLog.getActionType());
+                        insert.setTimestamp(3, new Timestamp(actionLog.getActionDate().getTime()));
+                        insert.setLong(4, actionDashboardLog.getDashboardID());
+                        insert.setNull(5, Types.BIGINT);
+                        insert.setNull(6, Types.BIGINT);
+                        insert.setLong(7, actionLog.getUserID());
+                        insert.execute();
+                    } else if (actionLog instanceof ActionDataSourceLog) {
+                        ActionDataSourceLog actionDataSourceLog = (ActionDataSourceLog) actionLog;
+                        insert.setInt(1, DATA_SOURCE);
+                        insert.setInt(2, actionLog.getActionType());
+                        insert.setTimestamp(3, new Timestamp(actionLog.getActionDate().getTime()));
+                        insert.setNull(4, Types.BIGINT);
+                        insert.setNull(5, Types.BIGINT);
+                        insert.setLong(6, actionDataSourceLog.getDataSourceID());
+                        insert.setLong(7, actionLog.getUserID());
+                        insert.execute();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            session.close();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -237,18 +274,38 @@ public class AdminService {
     }
 
     public void logAction(ActionLog actionLog) {
-        Session session = Database.instance().createSession();
+        EIConnection conn = Database.instance().getConnection();
         try {
-            actionLog.setUserID(SecurityUtil.getUserID());
-            actionLog.setActionDate(new Date());
-            session.getTransaction().begin();
-            session.save(actionLog);
-            session.getTransaction().commit();
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO REVISED_ACTION_LOG (GENERAL_ACTION_TYPE, ACTION_TYPE, ACTION_DATE, USER_ID, " +
+                    "DATA_SOURCE_ID, REPORT_ID, DASHBOARD_ID) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            insertStmt.setInt(2, actionLog.getActionType());
+            insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            insertStmt.setLong(4, SecurityUtil.getUserID());
+            if (actionLog instanceof ActionReportLog) {
+                ActionReportLog actionReportLog = (ActionReportLog) actionLog;
+                insertStmt.setInt(1, REPORT);
+                insertStmt.setNull(5, Types.BIGINT);
+                insertStmt.setLong(6, actionReportLog.getReportID());
+                insertStmt.setNull(7, Types.BIGINT);
+            } else if (actionLog instanceof ActionDashboardLog) {
+                ActionDashboardLog actionDashboardLog = (ActionDashboardLog) actionLog;
+                insertStmt.setInt(1, DASHBOARD);
+                insertStmt.setNull(5, Types.BIGINT);
+                insertStmt.setNull(6, Types.BIGINT);
+                insertStmt.setLong(7, actionDashboardLog.getDashboardID());
+            } else if (actionLog instanceof ActionDataSourceLog) {
+                ActionDataSourceLog actionDataSourceLog = (ActionDataSourceLog) actionLog;
+                insertStmt.setInt(1, DATA_SOURCE);
+                insertStmt.setLong(5, actionDataSourceLog.getDataSourceID());
+                insertStmt.setNull(6, Types.BIGINT);
+                insertStmt.setNull(7, Types.BIGINT);
+            }
+            insertStmt.execute();
+            insertStmt.close();
         } catch (Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
         } finally {
-            session.close();
+            Database.closeConnection(conn);
         }
     }
 
@@ -357,100 +414,115 @@ public class AdminService {
         }
     }*/
 
+    public static final int REPORT = 1;
+    public static final int DATA_SOURCE = 2;
+    public static final int DASHBOARD = 3;
+
+    private static class Argh {
+        int generalActionType;
+        int actionType;
+        Date actionDate;
+        long dataSourceID;
+        long reportID;
+        long dashboardID;
+
+        private Argh(int generalActionType, int actionType, Date actionDate, long dataSourceID, long report, long dashboardID) {
+            this.generalActionType = generalActionType;
+            this.actionType = actionType;
+            this.actionDate = actionDate;
+            this.dataSourceID = dataSourceID;
+            this.reportID = report;
+            this.dashboardID = dashboardID;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Argh argh = (Argh) o;
+
+            if (actionType != argh.actionType) return false;
+            if (dashboardID != argh.dashboardID) return false;
+            if (dataSourceID != argh.dataSourceID) return false;
+            if (generalActionType != argh.generalActionType) return false;
+            if (reportID != argh.reportID) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = generalActionType;
+            result = 31 * result + actionType;
+            result = 31 * result + (int) (dataSourceID ^ (dataSourceID >>> 32));
+            result = 31 * result + (int) (reportID ^ (reportID >>> 32));
+            result = 31 * result + (int) (dashboardID ^ (dashboardID >>> 32));
+            return result;
+        }
+    }
+
     public Collection<ActionLog> getRecentActions() {
         long start = System.currentTimeMillis();
+
         EIConnection conn = Database.instance().getConnection();
         try {
-            Collection<ActionLog> actions = new LinkedHashSet<ActionLog>();
-            PreparedStatement queryDSStmt = conn.prepareStatement("SELECT action_data_source_log.data_source_id, action_log.action_type, data_feed.feed_name, action_log.action_date from " +
-                    "data_feed, action_data_source_log, action_log where action_log.action_log_id = action_data_source_log.action_log_id and " +
-                    "action_data_source_log.data_source_id = data_feed.data_feed_id and action_log.user_id = ?");
-            queryDSStmt.setLong(1, SecurityUtil.getUserID());
-            ResultSet dsRS = queryDSStmt.executeQuery();
-            while (dsRS.next()) {
-                long dataSourceID = dsRS.getLong(1);
-                int actionType = dsRS.getInt(2);
-                String dataSourceName = dsRS.getString(3);
-                Date actionDate = new Date(dsRS.getTimestamp(4).getTime());
-                ActionLog actionLog = new ActionDataSourceLog(dataSourceID, dataSourceName, actionType, actionDate);
-                if (actions.contains(actionLog)) {
-                    actions.remove(actionLog);
-                }
-                actions.add(actionLog);
-            }
-            PreparedStatement queryReportStmt = conn.prepareStatement("SELECT action_report_log.report_id, action_log.action_type, analysis.data_feed_id," +
-                    "analysis.report_type, analysis.title, analysis.url_key, action_log.action_date from analysis, action_log, action_report_log where action_log.action_log_id = action_report_log.action_log_id and " +
-                    "action_report_log.report_id = analysis.analysis_id and action_log.user_id = ?");
-            queryReportStmt.setLong(1, SecurityUtil.getUserID());
-            ResultSet reportRS = queryReportStmt.executeQuery();
-            while (reportRS.next()) {
-                long reportID = reportRS.getLong(1);
-                int actionType = reportRS.getInt(2);
-                long dataSourceID = reportRS.getLong(3);
-                int reportType = reportRS.getInt(4);
-                String reportName = reportRS.getString(5);
-                String urlKey = reportRS.getString(6);
-                Date actionDate = new Date(reportRS.getTimestamp(7).getTime());
-                ActionReportLog actionReportLog = new ActionReportLog(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey, Roles.OWNER, false), actionType, actionDate);
-                if (actions.contains(actionReportLog)) {
-                    actions.remove(actionReportLog);
-                }
-                actions.add(actionReportLog);
-            }
-            PreparedStatement queryScorecardStmt = conn.prepareStatement("SELECT action_scorecard_log.scorecard_id, action_log.action_type, scorecard.data_source_id," +
-                    "scorecard.scorecard_name, scorecard.url_key, action_log.action_date from scorecard, action_log, action_scorecard_log where action_log.action_log_id = action_scorecard_log.action_log_id and " +
-                    "action_scorecard_log.scorecard_id = scorecard.scorecard_id and action_log.user_id = ?");
-            queryScorecardStmt.setLong(1, SecurityUtil.getUserID());
-            ResultSet scorecardRS = queryScorecardStmt.executeQuery();
-            while (scorecardRS.next()) {
-                long scorecardID = scorecardRS.getLong(1);
-                int actionType = scorecardRS.getInt(2);
-                long dataSourceID = scorecardRS.getLong(3);
-                String reportName = scorecardRS.getString(4);
-                String urlKey = scorecardRS.getString(5);
-                Date actionDate = new Date(scorecardRS.getTimestamp(6).getTime());
-                ActionScorecardLog actionScorecardLog = new ActionScorecardLog(new ScorecardDescriptor(reportName, scorecardID, urlKey, dataSourceID, false), actionType, actionDate);
-                if (actions.contains(actionScorecardLog)) {
-                    actions.remove(actionScorecardLog);
-                }
-                actions.add(actionScorecardLog);
-            }
-            PreparedStatement queryDashboardStmt = conn.prepareStatement("SELECT action_dashboard_log.dashboard_id, action_log.action_type, dashboard.data_source_id," +
-                    "dashboard.dashboard_name, dashboard.url_key, action_log.action_date from dashboard, action_log, action_dashboard_log where action_log.action_log_id = action_dashboard_log.action_log_id and " +
-                    "action_dashboard_log.dashboard_id = dashboard.dashboard_id and action_log.user_id = ?");
-            queryDashboardStmt.setLong(1, SecurityUtil.getUserID());
-            ResultSet dashboardRS = queryDashboardStmt.executeQuery();
-            while (dashboardRS.next()) {
-                long dashboardID = dashboardRS.getLong(1);
-                int actionType = dashboardRS.getInt(2);
-                long dataSourceID = dashboardRS.getLong(3);
-                String dashboardName = dashboardRS.getString(4);
-                String urlKey = dashboardRS.getString(5);
-                Date actionDate = new Date(dashboardRS.getTimestamp(6).getTime());
-                ActionLog log = new ActionDashboardLog(new DashboardDescriptor(dashboardName, dashboardID, urlKey, dataSourceID, Roles.OWNER, null, false), actionType, actionDate);
-                if (actions.contains(log)) {
-                    actions.remove(log);
-                }
-                actions.add(log);
-            }
-            List<ActionLog> actionList = new ArrayList<ActionLog>(actions);
-            Collections.sort(actionList, new Comparator<ActionLog>() {
 
-                public int compare(ActionLog actionLog, ActionLog actionLog1) {
-                    if (actionLog.getActionDate().before(actionLog1.getActionDate())) {
-                        return 1;
-                    } else if (actionLog.getActionDate().after(actionLog1.getActionDate())) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
-                }
-            });
-            if (actionList.size() > 10) {
-                actionList = actionList.subList(0, 10);
+            PreparedStatement queryActionStmt = conn.prepareStatement("SELECT GENERAL_ACTION_TYPE, ACTION_TYPE, ACTION_DATE, DATA_SOURCE_ID, REPORT_ID, DASHBOARD_ID FROM REVISED_ACTION_LOG " +
+                    "WHERE REVISED_ACTION_LOG.USER_ID = ? ORDER BY REVISED_ACTION_LOG.ACTION_DATE DESC LIMIT 30");
+            PreparedStatement dashboardStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, url_key, data_source_id FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+            PreparedStatement reportStmt = conn.prepareStatement("SELECT DATA_FEED_ID, REPORT_TYPE, TITLE, URL_KEY FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+            PreparedStatement dataSourceStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+            queryActionStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet rs = queryActionStmt.executeQuery();
+            Collection<Argh> arghs = new LinkedHashSet<Argh>();
+            while (rs.next()) {
+                int generalActionType = rs.getInt(1);
+                int actionType = rs.getInt(2);
+                Date actionDate = new Date(rs.getTimestamp(3).getTime());
+                long dataSourceID = rs.getLong(4);
+                long reportID = rs.getLong(5);
+                long dashboardID = rs.getLong(6);
+                arghs.add(new Argh(generalActionType, actionType, actionDate, dataSourceID, reportID, dashboardID));
             }
+            List<Argh> subsetArghs = new ArrayList<Argh>(arghs);
+            if (subsetArghs.size() > 10) {
+                subsetArghs = subsetArghs.subList(0, 10);
+            }
+            Collection<ActionLog> actions = new ArrayList<ActionLog>();
+            for (Argh argh : subsetArghs) {
+                if (argh.generalActionType == DASHBOARD) {
+                    dashboardStmt.setLong(1, argh.dashboardID);
+                    ResultSet dsRS = dashboardStmt.executeQuery();
+                    dsRS.next();
+                    String dashboardName = dsRS.getString(1);
+                    String urlKey = dsRS.getString(2);
+                    long dsID = dsRS.getLong(3);
+                    actions.add(new ActionDashboardLog(new DashboardDescriptor(dashboardName, argh.dashboardID, urlKey, dsID, Roles.OWNER, null, false), argh.actionType, argh.actionDate));
+                } else if (argh.generalActionType == DATA_SOURCE) {
+                    dataSourceStmt.setLong(1, argh.dataSourceID);
+                    ResultSet dsRS = dataSourceStmt.executeQuery();
+                    dsRS.next();
+                    String dataSourceName = dsRS.getString(1);
+                    actions.add(new ActionDataSourceLog(argh.dataSourceID, dataSourceName, argh.actionType, argh.actionDate));
+                } else if (argh.generalActionType == REPORT) {
+                    reportStmt.setLong(1, argh.reportID);
+                    ResultSet dsRS = reportStmt.executeQuery();
+                    dsRS.next();
+                    long dsID = dsRS.getLong(1);
+                    int reportType = dsRS.getInt(2);
+                    String reportName = dsRS.getString(3);
+                    String urlKey = dsRS.getString(4);
+                    actions.add(new ActionReportLog(new InsightDescriptor(argh.reportID, reportName, dsID, reportType, urlKey, Roles.OWNER, false), argh.actionType, argh.actionDate));
+                }
+            }
+            queryActionStmt.close();
+            dashboardStmt.close();
+            reportStmt.close();
+            dataSourceStmt.close();
+
             System.out.println((System.currentTimeMillis() - start) + " for actions");
-            return actionList;
+            return actions;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

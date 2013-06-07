@@ -505,12 +505,12 @@ public class UserUploadService {
                 }
             });
 
-            if (userID == 60) {
+            //if (userID == 60) {
                 System.out.println("Data Source Time: " + (dsTime - startTime) + ", Dashboard Time = " + (dashboardTime - dsTime)
-                        + ", Report Time = " + (dashboardTime - reportTime) + ", Scorecard Time = " + (scorecardTime - reportTime)
+                        + ", Report Time = " + (reportTime - dashboardTime) + ", Scorecard Time = " + (scorecardTime - reportTime)
                         + ", Folder Time = " + (folderTime - scorecardTime)
                         + ", Data Source Owner Time = " + (dsOwnerTime - folderTime) + ", Lookup Table Time = " + (lookupTime - dsOwnerTime));
-            }
+            //}
 
             int dataSourceCount = 0;
             int reportCount = 0;
@@ -882,6 +882,7 @@ public class UserUploadService {
     private void deleteUserUpload(long dataFeedID, EIConnection conn) throws SQLException {
         int role = SecurityUtil.getUserRoleToFeed(dataFeedID);
         if (role <= Roles.SHARER) {
+            LogClass.info("USER " + SecurityUtil.getUserID() + " DELETING DATA SOURCE " + dataFeedID);
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataFeedID, conn);
             feedDefinition.setVisible(false);
             PreparedStatement updateReportStmt = conn.prepareStatement("UPDATE ANALYSIS SET TEMPORARY_REPORT = ? WHERE DATA_FEED_ID = ?");

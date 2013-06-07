@@ -261,7 +261,11 @@ public class FunctionFactory {
             return new DecimalDegrees();
         } else if (s.equals("assignfiltervalue")) {
             return new AssignFilterValue();
-        } else {
+        } else if (s.equals("datelevel")) {
+            return new DateLevelFunction();
+        } else if (s.equals("dateformatnoshift")) {
+            return new EIDateFormatNoShiftFunction();
+        }else {
             return null;
         }
     }

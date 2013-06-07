@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 import java.sql.*;
@@ -435,6 +436,14 @@ public class DataStorage implements IDataStorage {
         Database.closeConnection(storageConn);
         storageConn = null;
     }
+
+    // product eligilbiyt, partner eligilbiyt, price bookk, list price, lp *qty
+    // solution rewards workbook, changes every month
+    // part # to partner ID to get competency from spreadsheet
+
+    // filter down to various
+    // if hierachy, search on PRM ID by category based on
+
 
     public void insertFromSelect(String tempTable) throws SQLException {
         StringBuilder columnBuilder = new StringBuilder();
@@ -1009,7 +1018,7 @@ public class DataStorage implements IDataStorage {
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && aggregateQuery) {
                 AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
                 int aggregation = analysisMeasure.getQueryAggregation();
-                if (aggregation == AggregationTypes.SUM) {
+                if (aggregation == AggregationTypes.SUM || aggregation == AggregationTypes.PERCENT_OF_TOTAL) {
                     columnName = "SUM(" + columnName + ")";
                 } else if (aggregation == AggregationTypes.AVERAGE) {
                     columnName = "AVG(" + columnName + ")";

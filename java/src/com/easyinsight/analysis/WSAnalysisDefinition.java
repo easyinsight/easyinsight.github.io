@@ -534,7 +534,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     }
 
     public void updateMetadata() {
-        
+
     }
 
     public abstract Set<AnalysisItem> getAllAnalysisItems();
@@ -719,7 +719,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public abstract void populateFromReportStructure(Map<String, AnalysisItem> structure);
 
 
-
     @Nullable
     protected AnalysisItem firstItem(String key, Map<String, AnalysisItem> structure) {
         String compositeKey = key + "-" + 0;
@@ -843,14 +842,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
         fontSize = (int) findNumberProperty(properties, "fontSize", 12);
         cacheMinutes = (int) findNumberProperty(properties, "cacheMinutes", 0);
         fixedWidth = (int) findNumberProperty(properties, "fixedWidth", 0);
-        backgroundAlpha =  findNumberProperty(properties, "backgroundAlpha", 1);
-        headerFontSize =  (int) findNumberProperty(properties, "headerFontSize", 24);
-        maxHeaderWidth =  (int) findNumberProperty(properties, "maxHeaderWidth", 600);
-        optimized =  findBooleanProperty(properties, "optimized", false);
-        fullJoins =  findBooleanProperty(properties, "fullJoins", false);
-        dataSourceFields =  findBooleanProperty(properties, "dataSourceFields", false);
-        headerImage =  findImage(properties, "headerImage", null);
-        lookupTableOptimization =  findBooleanProperty(properties, "lookupTableOptimization", false);
+        backgroundAlpha = findNumberProperty(properties, "backgroundAlpha", 1);
+        headerFontSize = (int) findNumberProperty(properties, "headerFontSize", 24);
+        maxHeaderWidth = (int) findNumberProperty(properties, "maxHeaderWidth", 600);
+        optimized = findBooleanProperty(properties, "optimized", false);
+        fullJoins = findBooleanProperty(properties, "fullJoins", false);
+        dataSourceFields = findBooleanProperty(properties, "dataSourceFields", false);
+        headerImage = findImage(properties, "headerImage", null);
+        lookupTableOptimization = findBooleanProperty(properties, "lookupTableOptimization", false);
         adHocExecution = findBooleanProperty(properties, "adHocExecution", false);
         cacheable = findBooleanProperty(properties, "cacheable", false);
         manualButRunFirst = findBooleanProperty(properties, "manualButRunFirst", false);
@@ -1005,7 +1004,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
-        return "$.get('/app/htmlExport?reportID="+getUrlKey()+"&embedded="+htmlReportMetadata.isEmbedded()+"&"+timezoneOffset+"&'+ strParams, function(data) { Utils.noData(data, function() { $('#"+targetDiv+" .reportArea').html(data); }, null, '" + targetDiv + "');});";
+        return "$.get('/app/htmlExport?reportID=" + getUrlKey() + "&embedded=" + htmlReportMetadata.isEmbedded() + "&" + timezoneOffset + "&'+ strParams, function(data) { Utils.noData(data, function() { $('#" + targetDiv + " .reportArea').html(data); }, null, '" + targetDiv + "');});";
     }
 
     public String rootHTML() {
@@ -1062,11 +1061,19 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return sb.toString();
     }
 
-    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentFilters) throws JSONException {
         JSONObject jo = new JSONObject();
         JSONArray filters = new JSONArray();
-        for(FilterDefinition f : getFilterDefinitions()) {
-            filters.put(f.toJSON(new FilterHTMLMetadata(this)));
+        for (FilterDefinition f : getFilterDefinitions()) {
+            boolean found = false;
+            for (FilterDefinition ff : parentFilters) {
+                if (f.sameFilter(ff)) {
+                    found = true;
+                }
+            }
+            if (!found)
+                filters.put(f.toJSON(new FilterHTMLMetadata(this)));
+
         }
         jo.put("filters", filters);
         return jo;

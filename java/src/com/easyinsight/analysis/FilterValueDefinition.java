@@ -489,7 +489,6 @@ public class FilterValueDefinition extends FilterDefinition {
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
         JSONObject jo = super.toJSON(filterHTMLMetadata);
 
-        StringBuilder sb = new StringBuilder();
         AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, 0, 0, filterHTMLMetadata.getReport());
         if (metadata.getReportFault() != null) {
             return null;
@@ -497,7 +496,6 @@ public class FilterValueDefinition extends FilterDefinition {
         AnalysisDimensionResultMetadata dimensionMetadata = (AnalysisDimensionResultMetadata) metadata;
         if (singleValue) {
             jo.put("type", "single");
-            String key = filterHTMLMetadata.getFilterKey();
 
 
             List<String> stringList = new ArrayList<String>();
@@ -549,5 +547,10 @@ public class FilterValueDefinition extends FilterDefinition {
             jo.put("values", arr);
         }
         return jo;
+    }
+
+    @Override
+    public boolean sameFilter(FilterDefinition targetDefinition) {
+        return super.sameFilter(targetDefinition) && ((FilterValueDefinition) targetDefinition).isSingleValue() == isSingleValue();
     }
 }

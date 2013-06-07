@@ -101,6 +101,8 @@ public class StackedBarChartDefinition extends YAxisDefinition{
             }
             newObject[yaxis.qualifiedName()] = xVal;
             newObject[dimensionValue] = object[measures.getItemAt(0).qualifiedName()];
+            newObject[stackItem.qualifiedName() + "_ORIGINAL"] = stackVal;
+            newObject[yaxis.qualifiedName() + "_ORIGINAL"] = xValVal;
             if (!uniques.contains(dimensionValue)) {
                 uniques.addItem(dimensionValue);
             }

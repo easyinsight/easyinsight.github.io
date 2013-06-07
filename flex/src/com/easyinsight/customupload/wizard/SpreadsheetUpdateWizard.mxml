@@ -3,7 +3,6 @@
                     implements="com.easyinsight.listing.IPerspective"
                     xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.kpi.KPITutorialEvent;
         import com.easyinsight.kpi.TutorialButtons;
         import com.easyinsight.kpi.TutorialPanel;
@@ -22,10 +21,10 @@
         private var fieldPanels:ArrayCollection;
 
         private function next(event:KPITutorialEvent):void {
-            if ((viewStack.getChildren().length) <= (panelIndex + 1)) {
-                createPanel(panelIndex - 1);
+            if (_fields.length > (panelIndex + 1)) {
+                //createPanel(panelIndex + 1);
+                panelIndex++;
             }
-            panelIndex++;
         }
 
         private function back(event:KPITutorialEvent):void {
@@ -61,9 +60,9 @@
                 controls.addEventListener(KPITutorialEvent.CANCEL, onCancel);
                 controls.tutorialPanel = panel;
                 tutorialPanel.addChild(controls);
-                //viewStack.addChild(tutorialPanel);
+                viewStack.addChild(tutorialPanel);
             }
-            viewStack.addChild(fieldPanels.getItemAt(0) as TutorialPanel);
+            //viewStack.addChild(fieldPanels.getItemAt(0) as TutorialPanel);
         }
 
         private function onFinish(event:KPITutorialEvent):void {

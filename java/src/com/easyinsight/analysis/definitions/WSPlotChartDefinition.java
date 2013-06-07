@@ -185,8 +185,8 @@ public class WSPlotChartDefinition extends WSChartDefinition {
     }
 
     @Override
-    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
-        JSONObject pie = super.toJSON(htmlReportMetadata);
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject pie = super.toJSON(htmlReportMetadata, parentDefinitions);
         pie.put("parameters", getJsonObject());
         pie.put("key", getUrlKey());
         pie.put("type", "plot");

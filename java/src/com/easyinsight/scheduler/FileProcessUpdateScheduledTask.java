@@ -16,6 +16,7 @@ import com.easyinsight.userupload.UserUploadService;
 import javax.persistence.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -71,6 +72,7 @@ public class FileProcessUpdateScheduledTask {
             if (newFields != null && newFields.size() > 0) {
                 feedDefinition.getFields().addAll(newFields);
             }
+            feedDefinition.setLastRefreshStart(new Date());
             new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn);
             metadata = DataStorage.writeConnection(feedDefinition, conn, accountID);
             UploadFormat uploadFormat = feedDefinition.getUploadFormat();

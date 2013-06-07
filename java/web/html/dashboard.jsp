@@ -22,6 +22,7 @@
         Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
         FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, false);
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
+        UIData uiData = Utils.createUIData();
 
 %>
 <head>
@@ -90,6 +91,7 @@
 </div>
 
 <div class="container-fluid">
+    <%= uiData.createHeader(dashboard.getName()) %>
     <jsp:include page="refreshingDataSource.jsp"/>
 
     <div id="base" />

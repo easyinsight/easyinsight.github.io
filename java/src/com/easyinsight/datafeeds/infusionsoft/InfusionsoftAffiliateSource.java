@@ -52,7 +52,7 @@ public class InfusionsoftAffiliateSource extends InfusionsoftTableSource {
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisitems = new ArrayList<AnalysisItem>();
         analysisitems.add(new AnalysisDimension(keys.get(AFFILIATE_ID), "Affiliate ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(CONTACT_ID), "Contact ID"));
+        analysisitems.add(new AnalysisDimension(keys.get(CONTACT_ID), "Affiliate Contact ID"));
         analysisitems.add(new AnalysisDimension(keys.get(PAYOUT_TYPE), "Payout Type"));
         analysisitems.add(new AnalysisDimension(keys.get(DEF_COMMISSION_TYPE), "Commission Type"));
         analysisitems.add(new AnalysisDimension(keys.get(STATUS), "Affiliate Status"));

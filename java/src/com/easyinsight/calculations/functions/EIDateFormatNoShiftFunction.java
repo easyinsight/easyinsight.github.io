@@ -3,7 +3,9 @@ package com.easyinsight.calculations.functions;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.IFunction;
-import com.easyinsight.core.*;
+import com.easyinsight.core.DateValue;
+import com.easyinsight.core.StringValue;
+import com.easyinsight.core.Value;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -15,7 +17,7 @@ import java.util.TimeZone;
  * Date: 12/7/11
  * Time: 11:10 AM
  */
-public class EIDateFormatFunction extends Function implements IFunction {
+public class EIDateFormatNoShiftFunction extends Function implements IFunction {
     public Value evaluate() {
         Value value = getParameter(0);
         if (value.type() == Value.EMPTY) {
@@ -30,28 +32,8 @@ public class EIDateFormatFunction extends Function implements IFunction {
         } else {
             throw new FunctionException("We couldn't parse the value of " + value.toString() + " as a date.");
         }
-        Calendar cal = null;
-
-        if (calculationMetadata.getInsightRequestMetadata() != null) {
-            int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
-            String string;
-            if (time > 0) {
-                string = "GMT-"+Math.abs(time);
-            } else if (time < 0) {
-                string = "GMT+"+Math.abs(time);
-            } else {
-                string = "GMT";
-            }
-            TimeZone timeZone = TimeZone.getTimeZone(string);
-
-            cal = Calendar.getInstance();
-            cal.setTimeZone(timeZone);
-        }
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(minusQuotes(getParameter(1)).toString());
-        if (cal != null) {
-            simpleDateFormat.setCalendar(cal);
-        }
         return new StringValue(simpleDateFormat.format(date));
     }
 

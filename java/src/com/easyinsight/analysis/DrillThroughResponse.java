@@ -12,6 +12,15 @@ import java.util.List;
 public class DrillThroughResponse {
     private EIDescriptor descriptor;
     private List<FilterDefinition> filters;
+    private List<AnalysisItem> additionalFields;
+
+    public List<AnalysisItem> getAdditionalFields() {
+        return additionalFields;
+    }
+
+    public void setAdditionalFields(List<AnalysisItem> additionalFields) {
+        this.additionalFields = additionalFields;
+    }
 
     public EIDescriptor getDescriptor() {
         return descriptor;
