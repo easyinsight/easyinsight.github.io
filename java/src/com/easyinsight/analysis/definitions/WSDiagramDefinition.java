@@ -2,6 +2,7 @@ package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.AnalysisTypes;
 import com.easyinsight.analysis.DiagramLink;
+import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.HTMLReportMetadata;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,8 +53,8 @@ public class WSDiagramDefinition extends WSKPIDefinition {
     }
 
     @Override
-    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
-        JSONObject diagram = super.toJSON(htmlReportMetadata);
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject diagram = super.toJSON(htmlReportMetadata, parentDefinitions);
         diagram.put("key", getUrlKey());
         diagram.put("type", "diagram");
         diagram.put("url", "/app/diagramChart");

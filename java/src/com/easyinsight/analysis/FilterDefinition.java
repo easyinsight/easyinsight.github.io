@@ -485,4 +485,8 @@ public class FilterDefinition implements Serializable, Cloneable {
         }
         return "";
     }
+
+    public boolean sameFilter(FilterDefinition targetDefinition) {
+        return getField().qualifiedName().equals(targetDefinition.getField().qualifiedName()) && type() == targetDefinition.type();
+    }
 }

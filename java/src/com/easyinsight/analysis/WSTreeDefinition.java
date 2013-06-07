@@ -239,8 +239,8 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
     }
 
     @Override
-    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
-        JSONObject list = super.toJSON(htmlReportMetadata);
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject list = super.toJSON(htmlReportMetadata, parentDefinitions);
         list.put("type", "tree");
         list.put("key", getUrlKey());
         list.put("url", "/app/htmlExport");

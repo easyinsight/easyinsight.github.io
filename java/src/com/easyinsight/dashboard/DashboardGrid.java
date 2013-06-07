@@ -259,25 +259,22 @@ public class DashboardGrid extends DashboardElement {
     }
 
     @Override
-    public JSONObject toJSON(FilterHTMLMetadata metadata) throws JSONException {
-        JSONObject grid = new JSONObject();
+    public JSONObject toJSON(FilterHTMLMetadata metadata, List<FilterDefinition> parentFilters) throws JSONException {
+        JSONObject grid = super.toJSON(metadata, parentFilters);
         grid.put("type", "grid");
-        JSONArray filters = new JSONArray();
-        for(FilterDefinition f : getFilters()) {
-            filters.put(f.toJSON(metadata));
-        }
-        grid.put("filters", filters);
         grid.put("id", getElementID());
 
         grid.put("show_label", showLabel);
         grid.put("label", getLabel());
-
+        List<FilterDefinition> curFilters = new ArrayList(parentFilters);
+        curFilters.addAll(this.getFilters());
         JSONArray jsonRows = new JSONArray();
         for(int i = 0;i < rows;i++) {
             JSONArray jsonColumns = new JSONArray();
             for(int j = 0;j < columns;j ++) {
                 DashboardGridItem item = findItem(i, j);
-                jsonColumns.put(item.getDashboardElement().toJSON(metadata));
+
+                jsonColumns.put(item.getDashboardElement().toJSON(metadata, curFilters));
             }
             jsonRows.put(jsonColumns);
         }

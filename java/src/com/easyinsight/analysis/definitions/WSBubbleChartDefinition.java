@@ -167,8 +167,8 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
     }
 
     @Override
-    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata) throws JSONException {
-        JSONObject areaChart = super.toJSON(htmlReportMetadata);
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject areaChart = super.toJSON(htmlReportMetadata, parentDefinitions);
         areaChart.put("type", "bubble");
         areaChart.put("key", getUrlKey());
         areaChart.put("url", "/app/bubbleChart");

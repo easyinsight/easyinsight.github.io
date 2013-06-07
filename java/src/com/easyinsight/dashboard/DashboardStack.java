@@ -346,15 +346,12 @@ public class DashboardStack extends DashboardElement {
         return parentConsolidatesFilters(parent.getParentElement());
     }
 
-    public JSONObject toJSON(FilterHTMLMetadata metadata) throws JSONException {
-        JSONObject stack = new JSONObject();
+    public JSONObject toJSON(FilterHTMLMetadata metadata, List<FilterDefinition> parentFilters) throws JSONException {
+        JSONObject stack = super.toJSON(metadata, parentFilters);
         stack.put("id", getElementID());
         stack.put("type", "stack");
-        JSONArray filters = new JSONArray();
-        for (FilterDefinition f : getFilters()) {
-            filters.put(f.toJSON(metadata));
-        }
-        stack.put("filters", filters);
+        List<FilterDefinition> curFilters = new ArrayList(parentFilters);
+        curFilters.addAll(getFilters());
         JSONArray stackItems = new JSONArray();
         stack.put("stack_items", stackItems);
         for (DashboardStackItem item : getGridItems()) {
@@ -367,7 +364,7 @@ public class DashboardStack extends DashboardElement {
             JSONObject stackItem = new JSONObject();
             stackItem.put("label", label);
 
-            stackItem.put("item", item.getDashboardElement().toJSON(metadata));
+            stackItem.put("item", item.getDashboardElement().toJSON(metadata, curFilters));
             stackItems.put(stackItem);
         }
 

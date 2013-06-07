@@ -2,6 +2,7 @@ package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.FilterHTMLMetadata;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -70,8 +71,8 @@ public class DashboardText extends DashboardElement {
     }
 
     @Override
-    public JSONObject toJSON(FilterHTMLMetadata metadata) throws JSONException {
-        JSONObject textObject = super.toJSON(metadata);
+    public JSONObject toJSON(FilterHTMLMetadata metadata, List<FilterDefinition> parentFilters) throws JSONException {
+        JSONObject textObject = super.toJSON(metadata, parentFilters);
         textObject.put("id", getElementID());
         textObject.put("type", "text");
         textObject.put("item", text);
