@@ -210,6 +210,13 @@ public class FeedType implements Serializable {
     public static final FeedType INFUSIONSOFT_CONTACTS = new FeedType(182);
     public static final FeedType INFUSIONSOFT_AFFILIATES = new FeedType(183);
     public static final FeedType INFUSIONSOFT_JOBS = new FeedType(184);
+    public static final FeedType INFUSIONSOFT_SUBSCRIPTIONS = new FeedType(185);
+    public static final FeedType INFUSIONSOFT_PRODUCTS = new FeedType(186);
+    public static final FeedType INFUSIONSOFT_PRODUCT_INTEREST = new FeedType(187);
+    public static final FeedType INFUSIONSOFT_CONTACT_ACTION = new FeedType(188);
+    public static final FeedType INFUSIONSOFT_CAMPAIGNS = new FeedType(189);
+    public static final FeedType INFUSIONSOFT_RECURRING_ORDERS = new FeedType(190);
+    public static final FeedType INFUSIONSOFT_ORDER_ITEM = new FeedType(191);
 
     public FeedType() {
     }
