@@ -114,7 +114,7 @@ public class AdminService {
                         insert.execute();
                     }
                 } catch (SQLException e) {
-                    LogClass.error(e);
+                    e.printStackTrace();
                 }
             }
             session.close();
