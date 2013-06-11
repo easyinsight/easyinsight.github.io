@@ -1,20 +1,20 @@
 package com.easyinsight.datafeeds.quickbase;
 
 import com.easyinsight.PasswordStorage;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.DerivedKey;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
+import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.ParsingException;
+import nu.xom.*;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.BasicHttpEntity;
@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.Date;
 
 /**
  * User: jamesboe
@@ -50,12 +51,22 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     private String applicationId;
     private boolean rebuildFields = true;
 
+    private boolean inlineUsers;
+
     public boolean isRebuildFields() {
         return rebuildFields;
     }
 
     public void setRebuildFields(boolean rebuildFields) {
         this.rebuildFields = rebuildFields;
+    }
+
+    public boolean isInlineUsers() {
+        return inlineUsers;
+    }
+
+    public void setInlineUsers(boolean inlineUsers) {
+        this.inlineUsers = inlineUsers;
     }
 
     @Override
@@ -143,6 +154,94 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         }
     }
 
+    private transient Map<String, String> userCache;
+
+    public Map<String, String> getOrCreateUserCache() {
+        if (isInlineUsers()) {
+            if (userCache == null) {
+                userCache = createUserCache();
+            }
+            return userCache;
+        } else {
+            return new HashMap<String, String>();
+        }
+    }
+
+    @Override
+    protected void beforeRefresh(Date lastRefreshTime) {
+        super.beforeRefresh(lastRefreshTime);
+        userCache = createUserCache();
+    }
+
+    private static final String REQUEST = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken></qdbapi>";
+
+
+
+    private Map<String, String> createUserCache() {
+        String fullPath = "https://" + host + "/db/" + applicationId;
+        HttpPost httpRequest = new HttpPost(fullPath);
+        httpRequest.setHeader("Accept", "application/xml");
+        httpRequest.setHeader("Content-Type", "application/xml");
+        httpRequest.setHeader("QUICKBASE-ACTION", "API_UserRoles");
+        BasicHttpEntity entity = new BasicHttpEntity();
+        Map<String, String> cache = new HashMap<String, String>();
+        try {
+            String requestBody;
+            requestBody = MessageFormat.format(REQUEST, sessionTicket, applicationToken, "");
+            byte[] contentBytes = requestBody.getBytes();
+            entity.setContent(new ByteArrayInputStream(contentBytes));
+            entity.setContentLength(contentBytes.length);
+            httpRequest.setEntity(entity);
+            HttpClient client = new DefaultHttpClient();
+            ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+            String string;
+            try {
+                string = client.execute(httpRequest, responseHandler);
+            } catch (HttpResponseException hre) {
+                // let's just ignore this for now
+                return new HashMap<String, String>();
+            }
+            Document doc = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+
+            Nodes errors = doc.query("/qdbapi/errcode/text()");
+            if (errors.size() > 0) {
+                Node error = errors.get(0);
+                if (!"0".equals(error.getValue())) {
+                    String errorDetail = doc.query("/qdbapi/errdetail/text()").get(0).getValue();
+                    throw new ReportException(new DataSourceConnectivityReportFault(errorDetail, this));
+                }
+            }
+
+            Nodes records = doc.query("/qdbapi/users/user");
+            for (int i = 0; i < records.size(); i++) {
+                Element record = (Element) records.get(i);
+                cache.put(getValue("./@id", record), getValue("./name/text()", record));
+            }
+            return cache;
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String getValue(String query, Element record) {
+        Nodes nodes = record.query(query);
+        if(nodes.size() > 0) {
+            return nodes.get(0).getValue();
+        } else {
+            return "";
+        }
+    }
+
+    @Override
+    protected void refreshDone() {
+        super.refreshDone();
+        userCache = null;
+    }
+
     @Override
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
@@ -150,7 +249,8 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO QUICKBASE_COMPOSITE_SOURCE (DATA_SOURCE_ID, APPLICATION_TOKEN," +
-                "SESSION_TICKET, HOST_NAME, qb_username, qb_password, support_index, preserve_credentials, application_id, rebuild_fields) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                "SESSION_TICKET, HOST_NAME, qb_username, qb_password, support_index, preserve_credentials, application_id, rebuild_fields, inline_fields) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, applicationToken);
         insertStmt.setString(3, sessionTicket);
@@ -166,6 +266,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         insertStmt.setBoolean(8, preserveCredentials);
         insertStmt.setString(9, applicationId);
         insertStmt.setBoolean(10, rebuildFields);
+        insertStmt.setBoolean(11, inlineUsers);
         insertStmt.execute();
     }
 
@@ -173,7 +274,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
         PreparedStatement queryStmt = conn.prepareStatement("SELECT APPLICATION_TOKEN, SESSION_TICKET, HOST_NAME, qb_username, " +
-                "qb_password, support_index, preserve_credentials, application_id, rebuild_fields FROM " +
+                "qb_password, support_index, preserve_credentials, application_id, rebuild_fields, inline_fields FROM " +
                 "QUICKBASE_COMPOSITE_SOURCE where data_source_id = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
@@ -192,6 +293,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         }
         applicationId = rs.getString(8);
         rebuildFields = rs.getBoolean(9);
+        inlineUsers = rs.getBoolean(10);
     }
 
     @Override

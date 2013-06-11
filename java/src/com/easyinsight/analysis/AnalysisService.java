@@ -66,8 +66,31 @@ public class AnalysisService {
         }
     }*/
 
-    public void updateReportStylings() {
+    public void updateReportStylings(List<ReportProperty> reportProperties) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
 
+            for (ReportProperty reportProperty : reportProperties) {
+
+            }
+            PreparedStatement reportStmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM USER_TO_ANALYSIS WHERE USER_ID = ?");
+            reportStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet rs = reportStmt.executeQuery();
+            while (rs.next()) {
+                long reportID = rs.getLong(1);
+                AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(reportID, conn);
+                List<ReportProperty> reportPropertyList = analysisDefinition.getProperties();
+                for (ReportProperty reportProperty : reportPropertyList) {
+
+                }
+            }
+
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public List<Revision> showHistory(String urlKey) {
@@ -332,7 +355,7 @@ public class AnalysisService {
                         }
                     } else {
                         if (connection.getSourceItem() != null) {
-                            if (connection.getSourceItem().toDisplay().equals(item.toDisplay())) {
+                            if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getSourceItem().toDisplay().equals(item.toDisplay())) {
                                 analysisItem = item;
                                 break;
                             }
@@ -382,7 +405,7 @@ public class AnalysisService {
                         }
                     } else {
                         if (connection.getTargetItem() != null) {
-                            if (connection.getTargetItem().toDisplay().equals(item.toDisplay())) {
+                            if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getTargetItem().toDisplay().equals(item.toDisplay())) {
                                 analysisItem = item;
                                 break;
                             }
@@ -2042,7 +2065,7 @@ public class AnalysisService {
             }
         } catch (Exception e) {
             LogClass.error(e);
-            throw new RuntimeException(e);
+            return new ArrayList<Intention>();
         }
     }
 }

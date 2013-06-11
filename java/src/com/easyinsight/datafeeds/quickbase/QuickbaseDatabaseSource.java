@@ -309,6 +309,16 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                     }
                 }
 
+
+                Map<String, String> userMap = quickbaseCompositeSource.getOrCreateUserCache();
+
+                Map<String, String> typeMap = new HashMap<String, String>();
+                for (String fieldID : map.keySet()) {
+                    Element fieldNode = (Element) doc.query("//field[@id='"+fieldID+"']").get(0);
+                    String fieldType = fieldNode.getAttribute("field_type").getValue();
+                    typeMap.put(fieldID, fieldType);
+                }
+
                 Nodes records = doc.query("/qdbapi/table/records/record");
                 for (int i = 0; i < records.size(); i++) {
                     Element record = (Element) records.get(i);
@@ -320,9 +330,15 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         Element childElement = childElements.get(j);
                         if (childElement.getLocalName().equals("f")) {
                             String fieldID = childElement.getAttribute("id").getValue();
+                            String fieldType = typeMap.get(fieldID);
                             Collection<AnalysisItem> items = map.get(fieldID);
                             for (AnalysisItem analysisItem : items) {    
                                 String value = childElement.getValue();
+                                if ("userid".equals(fieldType)) {
+                                    if (userMap.containsKey(value)) {
+                                        value = userMap.get(value);
+                                    }
+                                }
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
                                     row.addValue(analysisItem.getKey(), new Date(Long.parseLong(value)));
                                 } else {
