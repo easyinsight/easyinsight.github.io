@@ -1074,9 +1074,10 @@ public class UserUploadService {
         }
     }
 
-    public Collection<FieldUploadInfo> analyzeUpdate(long feedID, byte[] bytes) {
+    public AnalyzeUploadResponse analyzeUpdate(long feedID, byte[] bytes) {
         SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
         EIConnection conn = Database.instance().getConnection();
+        AnalyzeUploadResponse analyzeUploadResponse = new AnalyzeUploadResponse();
         try {
             conn.setAutoCommit(false);
             FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
@@ -1095,11 +1096,17 @@ public class UserUploadService {
                 }
             }
             conn.commit();
-            return fieldInfos;
+            analyzeUploadResponse.setFieldUploadInfos(fieldInfos);
+            return analyzeUploadResponse;
+        } catch (UploadException e) {
+            conn.rollback();
+            analyzeUploadResponse.setError(e.getMessage());
+            return analyzeUploadResponse;
         } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();
-            throw new RuntimeException(e);
+            analyzeUploadResponse.setError(e.getMessage());
+            return analyzeUploadResponse;
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);

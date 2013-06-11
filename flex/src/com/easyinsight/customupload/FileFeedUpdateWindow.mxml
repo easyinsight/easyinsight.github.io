@@ -7,8 +7,9 @@
         import com.easyinsight.util.ProgressAlert;
 
             import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
 
-            import mx.managers.PopUpManager;
+        import mx.managers.PopUpManager;
 
 
 
@@ -84,25 +85,31 @@
             private var op:int = 0;
 
             private function analyzedUpdate():void {
-                var fields:ArrayCollection = uploadService.analyzeUpdate.lastResult as ArrayCollection;
-                if (fields.length == 0) {
-                    if (op == 1) {
-                        ProgressAlert.alert(this, "Updating data...", null, uploadService.updateData);
-                        uploadService.updateData.send(_feedID, fileData, false);
-                    } else if (op == 2) {
-                        ProgressAlert.alert(this, "Updating data...", null, uploadService.updateData);
-                        uploadService.updateData.send(_feedID, fileData, true);
-                    }
-                } else {
-                    var window:SpreadsheetUpdateWizard = new SpreadsheetUpdateWizard();
-                    window.op = op;
-                    window.bytes = fileData;
-                    window.fields = fields;
-                    window.dataSourceID = _feedID;
-                    PopUpManager.addPopUp(window, this, true);
-                    PopUpUtil.centerPopUp(window);
-                    //dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SPREADSHEET_UPDATE, {dataSourceID: _feedID, op: op, bytes: fileData, fields: fields})));
+                var response:AnalyzeUploadResponse = uploadService.analyzeUpdate.lastResult as AnalyzeUploadResponse;
+                if (response.error != null) {
+                    Alert.show(response.error);
                     PopUpManager.removePopUp(this);
+                } else {
+                    var fields:ArrayCollection = response.fieldUploadInfos;
+                    if (fields.length == 0) {
+                        if (op == 1) {
+                            ProgressAlert.alert(this, "Updating data...", null, uploadService.updateData);
+                            uploadService.updateData.send(_feedID, fileData, false);
+                        } else if (op == 2) {
+                            ProgressAlert.alert(this, "Updating data...", null, uploadService.updateData);
+                            uploadService.updateData.send(_feedID, fileData, true);
+                        }
+                    } else {
+                        var window:SpreadsheetUpdateWizard = new SpreadsheetUpdateWizard();
+                        window.op = op;
+                        window.bytes = fileData;
+                        window.fields = fields;
+                        window.dataSourceID = _feedID;
+                        PopUpManager.addPopUp(window, this, true);
+                        PopUpUtil.centerPopUp(window);
+                        //dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SPREADSHEET_UPDATE, {dataSourceID: _feedID, op: op, bytes: fileData, fields: fields})));
+                        PopUpManager.removePopUp(this);
+                    }
                 }
             }
 		]]>
