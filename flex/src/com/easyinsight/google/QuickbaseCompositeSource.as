@@ -24,8 +24,11 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     public var preserveCredentials:Boolean;
 
     public var applicationToken:String;
+    public var applicationId:String;
     public var sessionTicket:String;
     public var host:String;
+
+    public var inlineUsers:Boolean = false;
 
     public var rebuildFields:Boolean = false;
 

@@ -10,12 +10,15 @@
         private var saveCredentials:Boolean;
         [Bindable]
         private var rebuildFields:Boolean;
+        [Bindable]
+        private var inline:Boolean;
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:QuickbaseCompositeSource = feedDefinition as QuickbaseCompositeSource;
             url = ds.host;
             saveCredentials = ds.preserveCredentials;
             rebuildFields = ds.rebuildFields;
+            inline = ds.inlineUsers;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
@@ -23,6 +26,7 @@
             ds.host = urlInput.text;
             ds.preserveCredentials = saveCredentialsCheckbox.selected;
             ds.rebuildFields = rebuildFieldsCheckbox.selected;
+            ds.inlineUsers = inlineCheckbox.selected;
         }
 
         public function validate():Boolean {
@@ -38,6 +42,9 @@
         </mx:FormItem>
         <mx:FormItem label="Rebuild Fields on Change:" direction="horizontal">
             <mx:CheckBox id="rebuildFieldsCheckbox" selected="{rebuildFields}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Inline User Names:" direction="horizontal">
+            <mx:CheckBox id="inlineCheckbox" selected="{inline}"/>
         </mx:FormItem>
 	</mx:Form>
 </mx:VBox>
