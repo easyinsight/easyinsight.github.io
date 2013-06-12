@@ -313,10 +313,17 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 Map<String, String> userMap = quickbaseCompositeSource.getOrCreateUserCache();
 
                 Map<String, String> typeMap = new HashMap<String, String>();
-                for (String fieldID : map.keySet()) {
-                    Element fieldNode = (Element) doc.query("//field[@id='"+fieldID+"']").get(0);
-                    String fieldType = fieldNode.getAttribute("field_type").getValue();
-                    typeMap.put(fieldID, fieldType);
+                try {
+                    for (String fieldID : map.keySet()) {
+                        Nodes nodes = doc.query("//field[@id='"+fieldID+"']");
+                        if (nodes.size() > 0) {
+                            Element fieldNode = (Element) nodes.get(0);
+                            String fieldType = fieldNode.getAttribute("field_type").getValue();
+                            typeMap.put(fieldID, fieldType);
+                        }
+                    }
+                } catch (Exception e) {
+                    LogClass.error(e);
                 }
 
                 Nodes records = doc.query("/qdbapi/table/records/record");
