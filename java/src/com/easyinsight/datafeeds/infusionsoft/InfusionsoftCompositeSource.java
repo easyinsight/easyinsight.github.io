@@ -70,6 +70,13 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.INFUSIONSOFT_COMPANIES);
         types.add(FeedType.INFUSIONSOFT_CONTACTS);
         types.add(FeedType.INFUSIONSOFT_JOBS);
+        types.add(FeedType.INFUSIONSOFT_SUBSCRIPTIONS);
+        types.add(FeedType.INFUSIONSOFT_PRODUCTS);
+        types.add(FeedType.INFUSIONSOFT_PRODUCT_INTEREST);
+        types.add(FeedType.INFUSIONSOFT_CONTACT_ACTION);
+        types.add(FeedType.INFUSIONSOFT_RECURRING_ORDERS);
+        types.add(FeedType.INFUSIONSOFT_CAMPAIGNS);
+        types.add(FeedType.INFUSIONSOFT_ORDER_ITEM);
         return types;
     }
 

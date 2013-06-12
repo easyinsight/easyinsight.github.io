@@ -63,7 +63,7 @@ public class FilterPatternDefinition extends FilterDefinition {
 
     @Override
     public boolean validForQuery() {
-        return super.validForQuery() && pattern != null && !regex;
+        return super.validForQuery() && pattern != null && !regex && !"".equals(pattern.trim());
     }
 
     @Override

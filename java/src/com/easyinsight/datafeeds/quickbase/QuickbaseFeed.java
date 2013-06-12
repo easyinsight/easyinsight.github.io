@@ -57,11 +57,7 @@ public class QuickbaseFeed extends Feed {
             DataSet dataSet = new DataSet();
             boolean indexed = true;
             for (AnalysisItem analysisItem : analysisItems) {
-                if ("Wtd Procedures".equals(analysisItem.toDisplay()) || "Wtd Procedures".equals(analysisItem.getKey().toBaseKey().toKeyString())) {
-                    continue;
-                }
                 if (!analysisItem.getKey().indexed()) {
-                    System.out.println(analysisItem.toDisplay() + " was not indexed");
                     indexed = false;
                 }
             }
@@ -127,6 +123,9 @@ public class QuickbaseFeed extends Feed {
         StringBuilder columnBuilder = new StringBuilder();
         Map<String, Collection<AnalysisItem>> map = new HashMap<String, Collection<AnalysisItem>>();
         for (AnalysisItem analysisItem : analysisItems) {
+            if (analysisItem.isDerived()) {
+                continue;
+            }
             String[] tokens = analysisItem.getKey().toBaseKey().toKeyString().split("\\.");
             if (tokens.length > 1) {
                 String fieldID = tokens[1];
@@ -200,7 +199,6 @@ public class QuickbaseFeed extends Feed {
                     requestBody = MessageFormat.format(REQUEST_Q2, sessionTicket, applicationToken, query, columnBuilder.toString(), String.valueOf(masterCount));
                 }
             }
-            System.out.println(requestBody);
             byte[] contentBytes = requestBody.getBytes();
             entity.setContent(new ByteArrayInputStream(contentBytes));
             entity.setContentLength(contentBytes.length);
@@ -220,6 +218,13 @@ public class QuickbaseFeed extends Feed {
                 }
             }
 
+            Map<String, String> userMap = quickbaseCompositeSource.getOrCreateUserCache();
+            Map<String, String> typeMap = new HashMap<String, String>();
+            for (String fieldID : map.keySet()) {
+                Element fieldNode = (Element) doc.query("//field[@id='"+fieldID+"']").get(0);
+                String fieldType = fieldNode.getAttribute("field_type").getValue();
+                typeMap.put(fieldID, fieldType);
+            }
             Nodes records = doc.query("/qdbapi/table/records/record");
             for (int i = 0; i < records.size(); i++) {
                 Element record = (Element) records.get(i);
@@ -231,9 +236,14 @@ public class QuickbaseFeed extends Feed {
                     Element childElement = childElements.get(j);
                     if (childElement.getLocalName().equals("f")) {
                         String fieldID = childElement.getAttribute("id").getValue();
+                        String fieldType = typeMap.get(fieldID);
+
                         Collection<AnalysisItem> items = map.get(fieldID);
                         for (AnalysisItem analysisItem : items) {
                             String value = childElement.getValue();
+                            if ("userid".equals(fieldType) && userMap.containsKey(value)) {
+                                value = userMap.get(value);
+                            }
                             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
                                 row.addValue(analysisItem.createAggregateKey(), new Date(Long.parseLong(value)));
                             } else {

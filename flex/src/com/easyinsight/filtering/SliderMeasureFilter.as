@@ -15,7 +15,10 @@ import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.HSlider;
 import mx.controls.Label;
+import mx.controls.LinkButton;
 import mx.controls.Text;
+import mx.controls.TextInput;
+import mx.core.UIComponent;
 import mx.events.SliderEvent;
 import mx.formatters.Formatter;
 import mx.managers.PopUpManager;
@@ -118,6 +121,12 @@ public class SliderMeasureFilter extends HBox implements IFilter
     }
 
     private function onFilterEdit(event:FilterEditEvent):void {
+        if (initLabel != null && initLabel is LinkButton) {
+            LinkButton(initLabel).label = FilterDefinition.getLabel(event.filterDefinition, analysisItem);
+        }
+        if (altInitLabel != null) {
+            altInitLabel.label = FilterDefinition.getLabel(event.filterDefinition, analysisItem);
+        }
         var measureFilter:FilterRangeDefinition = event.filterDefinition as FilterRangeDefinition;
         if (measureFilter.startValueDefined) {
             var lowString:String;
@@ -166,19 +175,49 @@ public class SliderMeasureFilter extends HBox implements IFilter
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 
+    private var initLabel:UIComponent;
+    private var altInitLabel:LinkButton;
+
+    private var leftInput:TextInput;
+    private var rightInput:TextInput;
+
+    private function onInputChange(event:Event):void {
+        if (leftInput != null) {
+            _filterDefinition.startValue = Number(leftInput.text);
+        }
+        if (rightInput != null) {
+            _filterDefinition.endValue = Number(rightInput.text);
+        }
+        dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
+    }
 
     override protected function createChildren():void {
         super.createChildren();
         if (lowInput == null) {
 
 
-            var checkbox:CheckBox = new CheckBox();
-            checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
-            checkbox.toolTip = "Click to disable this filter.";
-            checkbox.addEventListener(Event.CHANGE, onChange);
-            addChild(checkbox);
+            if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
+                var checkbox:CheckBox = new CheckBox();
+                checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
+                checkbox.toolTip = "Click to disable this filter.";
+                checkbox.addEventListener(Event.CHANGE, onChange);
+                addChild(checkbox);
+            }
+
+
+
 
             if (_filterEditable) {
+                initLabel = new LinkButton();
+                initLabel.addEventListener(MouseEvent.CLICK, edit);
+                initLabel.styleName = "filterLabel";
+                LinkButton(initLabel).label = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+
+                altInitLabel = new LinkButton();
+                altInitLabel.addEventListener(MouseEvent.CLICK, edit);
+                altInitLabel.styleName = "filterLabel";
+                LinkButton(altInitLabel).label = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+                //LinkButton(altInitLabel).label = "XYZ";
                 var haveDataState:State = new State();
                 haveDataState.name = "Configured";
                 var defaultBox:HBox = new HBox();
@@ -191,7 +230,7 @@ public class SliderMeasureFilter extends HBox implements IFilter
 
                 lowInput = new Label();
                 BindingUtils.bindProperty(lowInput, "text", this, "lowValueString");
-                box.addChild(lowInput);
+
 
                 var between:Text = new Text();
 
@@ -201,19 +240,16 @@ public class SliderMeasureFilter extends HBox implements IFilter
                 BindingUtils.bindProperty(lowOperator, "text", this, "lowOperatorString");
 
                 between.text = " " + analysisItem.display + " ";
-                box.addChild(lowOperator);
-                box.addChild(between);
-                box.addChild(highOperator);
+
 
                 highInput = new Label();
                 BindingUtils.bindProperty(highInput, "text", this, "highValueString");
+                box.addChild(lowInput);
+                box.addChild(lowOperator);
+                box.addChild(altInitLabel);
+                box.addChild(highOperator);
                 box.addChild(highInput);
 
-                var editButton:Button = new Button();
-                editButton.addEventListener(MouseEvent.CLICK, edit);
-                editButton.setStyle("icon", ImageConstants.EDIT_ICON);
-                editButton.toolTip = "Edit";
-                box.addChild(editButton);
                 var deleteButton:Button = new Button();
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
                 deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
@@ -224,15 +260,10 @@ public class SliderMeasureFilter extends HBox implements IFilter
                 this.states = [ haveDataState ];
 
 
-                var editLabel:Label = new Label();
-                editLabel.setStyle("fontSize", 10);
-                editLabel.text = "Click Edit to Configure";
-                defaultBox.addChild(editLabel);
-                var editDefault:Button = new Button();
-                editDefault.addEventListener(MouseEvent.CLICK, edit);
-                editDefault.setStyle("icon", ImageConstants.EDIT_ICON);
-                editDefault.toolTip = "Edit";
-                defaultBox.addChild(editDefault);
+
+
+                defaultBox.addChild(initLabel);
+
                 var deleteDefault:Button = new Button();
                 deleteDefault.addEventListener(MouseEvent.CLICK, deleteSelf);
                 deleteDefault.setStyle("icon", ImageConstants.DELETE_ICON);
@@ -241,30 +272,45 @@ public class SliderMeasureFilter extends HBox implements IFilter
 
                 addChild(defaultBox);
             } else {
-                setStyle("verticalAlign", "middle");
-                var initLabel:Label = new Label();
+                initLabel = new Label();
+
                 initLabel.styleName = "filterLabel";
-                initLabel.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+                /*if (_filterDefinition.startValueDefined && !_filterDefinition.endValueDefined) {
+                    // E@sy mone$1
+                    Label(initLabel).text = FilterDefinition.getLabelWithEnd(_filterDefinition, analysisItem, " " + OPERATOR_STRINGS[_filterDefinition.lowerOperator]);
+                    // Bra1n is marching
+                } else if (!_filterDefinition.startValueDefined && _filterDefinition.endValueDefined) {
+                    Label(initLabel).text = FilterDefinition.getLabelWithEnd(_filterDefinition, analysisItem, " " + OPERATOR_STRINGS[_filterDefinition.upperOperator]);
+                } else {*/
+                    Label(initLabel).text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+                //}
                 addChild(initLabel);
+                setStyle("verticalAlign", "middle");
                 var f:Formatter = _filterDefinition.field.getFormatter();
                 if (_filterDefinition.startValueDefined) {
-                    var leftLabel:Label = new Label();
+                    var leftLabel:TextInput = new TextInput();
+                    leftInput = leftLabel;
+                    leftInput.addEventListener(Event.CHANGE, onInputChange);
                     leftLabel.text = f.format(_filterDefinition.startValue);
                     addChild(leftLabel);
                 }
-                var slider:HSlider;
-                if (_filterDefinition.startValueDefined && _filterDefinition.endValueDefined) {
-                    slider = createDoubleSlider();
-                } else if (_filterDefinition.startValueDefined) {
-                    slider = createMinSlider();
-                } else if (_filterDefinition.endValueDefined) {
-                    slider = createMaxSlider();
-                }
-                if (slider != null) {
-                    addChild(slider);
+                if (_filterDefinition.showSlider) {
+                    var slider:HSlider;
+                    if (_filterDefinition.startValueDefined && _filterDefinition.endValueDefined) {
+                        slider = createDoubleSlider();
+                    } else if (_filterDefinition.startValueDefined) {
+                        slider = createMinSlider();
+                    } else if (_filterDefinition.endValueDefined) {
+                        slider = createMaxSlider();
+                    }
+                    if (slider != null) {
+                        addChild(slider);
+                    }
                 }
                 if (_filterDefinition.endValueDefined) {
-                    var rightLabel:Label = new Label();
+                    var rightLabel:TextInput = new TextInput();
+                    rightInput = rightLabel;
+                    rightInput.addEventListener(Event.CHANGE, onInputChange);
                     rightLabel.text = f.format(_filterDefinition.endValue);
                     addChild(rightLabel);    
                 }

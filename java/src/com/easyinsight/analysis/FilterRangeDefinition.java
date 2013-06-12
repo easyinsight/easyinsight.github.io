@@ -45,6 +45,9 @@ public class FilterRangeDefinition extends FilterDefinition {
     @Column(name="upper_operator")
     private int upperOperator;
 
+    @Column(name="show_slider")
+    private boolean showSlider;
+
     public FilterRangeDefinition() {
         setApplyBeforeAggregation(false);
     }
@@ -99,6 +102,14 @@ public class FilterRangeDefinition extends FilterDefinition {
         if (Double.isNaN(endValue)) endValue = 0;
         if (Double.isNaN(currentStartValue)) currentStartValue = 0;
         if (Double.isNaN(currentEndValue)) currentEndValue = 0;
+    }
+
+    public boolean isShowSlider() {
+        return showSlider;
+    }
+
+    public void setShowSlider(boolean showSlider) {
+        this.showSlider = showSlider;
     }
 
     public boolean isCurrentStartValueDefined() {

@@ -75,6 +75,23 @@ import flash.events.EventDispatcher;
         return "";
     }
 
+    public static function getLabelWithEnd(filterDefinition:FilterDefinition, field:AnalysisItem, end:String):String {
+        if (filterDefinition == null) {
+            if (field == null) {
+                return "";
+            } else {
+                return field.display + end;
+            }
+        }
+        if (filterDefinition.filterName != null && filterDefinition.filterName != "") {
+            return filterDefinition.filterName + end;
+        }
+        if (filterDefinition.field != null) {
+            return filterDefinition.field.display + end;
+        }
+        return "";
+    }
+
 		public function getType():int {
 			return 0;
 		}

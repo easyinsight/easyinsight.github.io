@@ -18,6 +18,8 @@ import com.easyinsight.storage.StringWhere;
 import nu.xom.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -170,13 +172,15 @@ public class UpdateRowsServlet extends APIServlet {
                     }
                     wheres.add(where);
                 }
-
             }
-
-            System.out.println("Updating with a data set of size = " + dataSet.getRows().size());
             dataStorage = DataStorage.writeConnection(dataSource, conn, SecurityUtil.getAccountID());
             dataStorage.updateData(dataSet, wheres);
             dataStorage.commit();
+            PreparedStatement updateSourceStmt = conn.prepareStatement("UPDATE DATA_FEED SET LAST_REFRESH_START = ? WHERE DATA_FEED_ID = ?");
+            updateSourceStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+            updateSourceStmt.setLong(2, dataSource.getDataFeedID());
+            updateSourceStmt.executeUpdate();
+            updateSourceStmt.close();
             return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
         } finally {
             if (dataStorage != null) {

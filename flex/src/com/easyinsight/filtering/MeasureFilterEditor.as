@@ -6,11 +6,13 @@ import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.containers.VBox;
+import mx.controls.CheckBox;
 import mx.controls.ComboBox;
 import mx.controls.Text;
 	import mx.controls.TextInput;
 
-	public class MeasureFilterEditor extends HBox implements IFilterDetailEditor
+	public class MeasureFilterEditor extends VBox implements IFilterDetailEditor
 	{
 		private var lowInput:TextInput;
 		private var highInput:TextInput;
@@ -37,13 +39,16 @@ import mx.controls.Text;
         private var lowOperator:ComboBox;
         private var highOperator:ComboBox;
 
+        private var showSliderCheckbox:CheckBox;
+
 		override protected function createChildren():void {
 			super.createChildren();
 			var analysisItem:AnalysisItem = _filterDefinition.field;
             var measure:AnalysisMeasure = analysisItem as AnalysisMeasure;
-            
+
+            var hbox:HBox = new HBox();
 			lowInput = new TextInput();
-			addChild(lowInput);
+			hbox.addChild(lowInput);
 
             if (measure.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
                 lowDropdown = new ComboBox();
@@ -63,20 +68,20 @@ import mx.controls.Text;
                 highOperator.selectedIndex = 1;
             }
 
-            addChild(lowOperator);
+            hbox.addChild(lowOperator);
 			var between:Text = new Text();
 			between.text = analysisItem.display;
-			addChild(between);
+            hbox.addChild(between);
 
-            addChild(highOperator);
+            hbox.addChild(highOperator);
 			
 			highInput = new TextInput();
-			addChild(highInput);
+            hbox.addChild(highInput);
 
             if (measure.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
                 highDropdown = new ComboBox();
                 highDropdown.dataProvider = new ArrayCollection([ "Days", "Hours"]);
-                addChild(highDropdown);
+                hbox.addChild(highDropdown);
             }
 			
 			if (_filterDefinition.startValueDefined) {
@@ -109,6 +114,13 @@ import mx.controls.Text;
 			} else {
 				highInput.text = "";
 			}
+            addChild(hbox);
+            var labelBox:HBox = new HBox();
+            showSliderCheckbox = new CheckBox();
+            showSliderCheckbox.label = "Show Slider";
+            showSliderCheckbox.selected = _filterDefinition.showSlider;
+            labelBox.addChild(showSliderCheckbox);
+            addChild(labelBox);
 		}
 		
 		public function makeUpdates():FilterDefinition {
@@ -152,6 +164,7 @@ import mx.controls.Text;
             _filterDefinition.upperOperator = highOperator.selectedItem.data;
             _filterDefinition.lowerOperator = lowOperator.selectedItem.data;
 
+            _filterDefinition.showSlider = showSliderCheckbox.selected;
 			return _filterDefinition;
 		}
 

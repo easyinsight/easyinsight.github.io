@@ -13,6 +13,8 @@ import com.easyinsight.storage.DataStorage;
 import nu.xom.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -108,6 +110,11 @@ public class AddRowsServlet extends APIServlet {
             dataStorage = DataStorage.writeConnection(dataSource, conn, SecurityUtil.getAccountID());
             dataStorage.insertData(dataSet);
             dataStorage.commit();
+            PreparedStatement updateSourceStmt = conn.prepareStatement("UPDATE DATA_FEED SET LAST_REFRESH_START = ? WHERE DATA_FEED_ID = ?");
+            updateSourceStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+            updateSourceStmt.setLong(2, dataSource.getDataFeedID());
+            updateSourceStmt.executeUpdate();
+            updateSourceStmt.close();
             return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
         } finally {
             if (dataStorage != null) {
