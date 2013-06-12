@@ -275,15 +275,15 @@ public class SliderMeasureFilter extends HBox implements IFilter
                 initLabel = new Label();
 
                 initLabel.styleName = "filterLabel";
-                if (_filterDefinition.startValueDefined && !_filterDefinition.endValueDefined) {
+                /*if (_filterDefinition.startValueDefined && !_filterDefinition.endValueDefined) {
                     // E@sy mone$1
                     Label(initLabel).text = FilterDefinition.getLabelWithEnd(_filterDefinition, analysisItem, " " + OPERATOR_STRINGS[_filterDefinition.lowerOperator]);
                     // Bra1n is marching
                 } else if (!_filterDefinition.startValueDefined && _filterDefinition.endValueDefined) {
                     Label(initLabel).text = FilterDefinition.getLabelWithEnd(_filterDefinition, analysisItem, " " + OPERATOR_STRINGS[_filterDefinition.upperOperator]);
-                } else {
+                } else {*/
                     Label(initLabel).text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
-                }
+                //}
                 addChild(initLabel);
                 setStyle("verticalAlign", "middle");
                 var f:Formatter = _filterDefinition.field.getFormatter();
