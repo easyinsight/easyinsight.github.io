@@ -174,7 +174,11 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
             for (ListEntry listEntry : feed.getEntries()) {
                 IRow row = dataSet.createRow();
                 boolean atLeastOneValue = false;
+                boolean countKeyExists = false;
                 for (String tag : listEntry.getCustomElements().getTags()) {
+                    if ("count".equals(tag.toLowerCase())) {
+                        countKeyExists = true;
+                    }
                     Value value;
                     String string = listEntry.getCustomElements().getValue(tag);
                     if (string == null) {
@@ -191,6 +195,14 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
                         keys.put(tag, key);
                     }
                     row.addValue(new NamedKey(tag), value);
+                }
+                if (!countKeyExists) {
+                    NamedKey countKey = (NamedKey) keys.get("Count");
+                    if (countKey == null) {
+                        countKey = new NamedKey("Count");
+                        keys.put("Count", countKey);
+                    }
+                    row.addValue(countKey, 1);
                 }
                 if (!atLeastOneValue) {
                     dataSet.removeRow(row);
