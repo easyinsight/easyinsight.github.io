@@ -66,9 +66,11 @@ public class GoogleSpreadsheetFeed extends Feed {
                     if (analysisItem.isDerived()) {
                         continue;
                     }
+                    boolean matched = false;
                     Key key = analysisItem.getKey();
                     for (String tag : listEntry.getCustomElements().getTags()) {
                         if (key.toKeyString().equals(tag)) {
+                            matched = true;
                             Value value;
                             String string = listEntry.getCustomElements().getValue(tag);
                             if (string == null) {
@@ -86,6 +88,9 @@ public class GoogleSpreadsheetFeed extends Feed {
                             }
                             row.addValue(analysisItem.createAggregateKey(), value);
                         }
+                    }
+                    if (!matched && "Count".equals(key.toKeyString())) {
+                        row.addValue(analysisItem.createAggregateKey(), 1);
                     }
                 }
             }

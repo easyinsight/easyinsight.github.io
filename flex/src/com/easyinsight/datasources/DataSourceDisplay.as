@@ -155,6 +155,7 @@ public class DataSourceDisplay extends HBox {
             } else {
                 labelText = "This data source is displaying live data as of " + dateString + " from " + dataSource.originName + ".";
             }
+            stackIndex = 1;
         } else if (_dataSource.type == DataSourceInfo.COMPOSITE) {
             labelText = "This data source combines other data sources.";
             for each (var childSource:DataSourceInfo in _dataSource.childSources) {

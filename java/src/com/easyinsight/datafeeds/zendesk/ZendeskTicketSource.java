@@ -65,6 +65,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         return FeedType.ZENDESK_TICKET;
     }
 
+    private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZ");
+
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
@@ -137,12 +139,12 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
             HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
             ZendeskUserCache zendeskUserCache = zendeskCompositeSource.getOrCreateUserCache(httpClient);
-            if (lastRefreshDate == null) {
+            //if (lastRefreshDate == null) {
                 return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache, IDataStorage);
-            } else {
+            /*} else {
                 getUpdatedTickets(keys, zendeskCompositeSource, lastRefreshDate, IDataStorage, zendeskUserCache);
                 return null;
-            }
+            }*/
         } catch (ReportException re) {
             LogClass.error(re);
             throw re;
@@ -163,16 +165,21 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
 
     @Override
     protected boolean clearsData(FeedDefinition parentSource) {
-        return false;
+        return true;
     }
 
-    private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, IDataStorage IDataStorage,
+    /*private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, IDataStorage IDataStorage,
                                    ZendeskUserCache zendeskUserCache) throws Exception {
 
         HttpClient httpClient = new HttpClient();
         Builder builder = new Builder();
 
         DateFormat updateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(lastUpdateDate);
+        cal.add(Calendar.DAY_OF_YEAR, -7);
+        lastUpdateDate = cal.getTime();
 
         String updateDate = updateFormat.format(lastUpdateDate);
         Key noteKey = zendeskCompositeSource.getField(TICKET_ID).toBaseKey();
@@ -206,65 +213,107 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             page++;
             recordCount += 15;
         } while (recordCount < count);
-    }
+    }*/
 
     private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, ZendeskUserCache userCache, IDataStorage dataStorage) throws Exception {
         DataSet dataSet = new DataSet();
-        HttpClient httpClient = new HttpClient();
-        Builder builder = new Builder();
+        DateFormat updateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.YEAR, -1);
+        long time = cal.getTimeInMillis();
+        time = 0;
+        Map<String, IRow> ticketMap = new HashMap<String, IRow>();
+        String updateDate = updateFormat.format(cal.getTime());
+        String nextPage = zendeskCompositeSource.getUrl() + "/api/v2/exports/tickets.json?start_time=" + time;
 
-        int page = 1;
-        int count = 0;
-        int recordCount = 0;
-        do {
-            String path = "/search.xml?query=type:ticket";
-            if (page > 1) {
-                path += "&page=" + page;
-            }
-            Document doc = runRestRequest(zendeskCompositeSource, httpClient, path, builder);
-            if (page == 1) {
-                Nodes countNodes = doc.query("/records/@count");
-                if (countNodes.size() == 1) {
-                    count = Integer.parseInt(countNodes.get(0).getValue());
-                } else {
-                    count = 0;
-                }
-            }
-            Nodes ticketNodes = doc.query("/records/record");
-            for (int i = 0; i < ticketNodes.size(); i++) {
+        while (nextPage != null) {
+            int count = 0;
+            Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
+            List results = (List) ticketObjects.get("results");
+            for (Object obj : results) {
+                count++;
+                Map map = (Map) obj;
                 IRow row = dataSet.createRow();
-                Node ticketNode = ticketNodes.get(i);
-                parseTicket(keys, userCache, row, ticketNode);
+                String id = parseTicket(keys, userCache, row, map);
+                ticketMap.put(id, row);
             }
-            page++;
-            dataStorage.insertData(dataSet);
-            dataSet = new DataSet();
-            recordCount += 15;
-        } while (recordCount < count);
+            if (ticketObjects.get("next_page") != null && !ticketObjects.get("next_page").toString().equals(nextPage) && count == 1000) {
+                nextPage = ticketObjects.get("next_page").toString();
+                Thread.sleep(60000);
+            } else {
+                nextPage = null;
+            }
+        }
+
+
+        nextPage = zendeskCompositeSource.getUrl() + "/api/v2/search.json?query=" + "type:ticket%20updated>"+updateDate;
+        while (nextPage != null) {
+            Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
+            List results = (List) ticketObjects.get("results");
+            for (Object obj : results) {
+                Map map = (Map) obj;
+                String ticketID = map.get("id").toString();
+                IRow row = ticketMap.get(ticketID);
+                row.addValue(DESCRIPTION, map.get("description").toString());
+                map.get("tags");
+                if (map.get("custom_fields") != null) {
+                    List customFields = (List) map.get("custom_fields");
+                    for (Object customFieldObj : customFields) {
+                        Map customFieldMap = (Map) customFieldObj;
+                        String fieldID = customFieldMap.get("id").toString();
+                        if (customFieldMap.get("value") != null) {
+                            String value = customFieldMap.get("value").toString();
+                            Key key = keys.get("zd" + fieldID);
+                            row.addValue(key, value);
+                        }
+                    }
+                }
+
+                // parse custom fields and anything else that's missing
+            }
+            if (ticketObjects.get("next_page") != null) {
+                nextPage = ticketObjects.get("next_page").toString();
+            } else {
+                nextPage = null;
+            }
+        }
+        Set<String> ids = new HashSet<String>();
+        for(Map.Entry<String, IRow> entry : ticketMap.entrySet()) {
+            if(!"Deleted".equals(entry.getValue().getValue(keys.get(STATUS)).toString()))
+                ids.add(entry.getKey());
+        }
+        zendeskCompositeSource.populateTicketIdList(ids);
+        dataStorage.insertData(dataSet);
         return null;
     }
 
-    private String parseTicket(Map<String, Key> keys, ZendeskUserCache userCache, IRow row, Node ticketNode) throws ParseException, InterruptedException {
+    private String parseTicket(Map<String, Key> keys, ZendeskUserCache userCache, IRow row, Map ticketNode) throws ParseException, InterruptedException {
         try {
-            row.addValue(keys.get(ASSIGNED_AT), queryDate(ticketNode, "assigned-at/text()"));
-            row.addValue(keys.get(ASSIGNEE), queryUser(ticketNode, "assignee-id/text()", userCache));
-            row.addValue(keys.get(BASE_SCORE), queryField(ticketNode, "base-score/text()"));
-            row.addValue(keys.get(SCORE), queryField(ticketNode, "score/text()"));
+            row.addValue(keys.get(ASSIGNED_AT), queryDate(ticketNode, "assigned_at"));
+            row.addValue(keys.get(INITIALLY_ASSIGNED_AT), queryDate(ticketNode, "initially_assigned_at"));
+            row.addValue(keys.get(ASSIGNEE), queryField(ticketNode, "assignee_name"));
+            row.addValue(keys.get(BASE_SCORE), queryField(ticketNode, "base_score"));
+            row.addValue(keys.get(SCORE), queryField(ticketNode, "score"));
             row.addValue(keys.get(COUNT), 1);
-            row.addValue(keys.get(CREATED_AT), queryDate(ticketNode, "created-at/text()"));
-            row.addValue(keys.get(DESCRIPTION), queryField(ticketNode, "description/text()"));
-            row.addValue(keys.get(DUE_DATE), queryDate(ticketNode, "due-date/text()"));
-            //row.addValue(keys.get(RESOLUTION_TIME), queryDate(ticketNode, "resolution-time/text()"));
-            row.addValue(keys.get(SOLVED_AT), queryDate(ticketNode, "solved-at/text()"));
-            row.addValue(keys.get(UPDATED_AT), queryDate(ticketNode, "updated-at/text()"));
-            row.addValue(keys.get(GROUP_ID), queryField(ticketNode, "group-id/text()"));
-            row.addValue(keys.get(SUBJECT), queryField(ticketNode, "subject/text()"));
-            row.addValue(keys.get(ORGANIZATION_ID), queryField(ticketNode, "organization-id/text()"));
-            String id = queryField(ticketNode, "nice-id/text()");
+            row.addValue(keys.get(CREATED_AT), queryDate(ticketNode, "created_at"));
+            row.addValue(keys.get(DESCRIPTION), queryField(ticketNode, "description"));
+            row.addValue(keys.get(DUE_DATE), queryDate(ticketNode, "due_date"));
+            row.addValue(keys.get(STATUS), queryField(ticketNode, "status"));
+            row.addValue(keys.get(TICKET_TYPE), queryField(ticketNode, "ticket_type"));
+            row.addValue(keys.get(PRIORITY), queryField(ticketNode, "priority"));
+            //row.addValue(keys.get(RESOLUTION_TIME), queryDate(ticketNode, "resolution_time"));
+            row.addValue(keys.get(SOLVED_AT), queryDate(ticketNode, "solved_at"));
+            row.addValue(keys.get(UPDATED_AT), queryDate(ticketNode, "updated_at"));
+            row.addValue(keys.get(GROUP_ID), queryField(ticketNode, "group_id"));
+            row.addValue(keys.get(SUBJECT), queryField(ticketNode, "subject"));
+            row.addValue(keys.get(ORGANIZATION_ID), queryField(ticketNode, "organization_id"));
+            String id = queryField(ticketNode, "id");
             row.addValue(keys.get(TICKET_ID), id);
-            row.addValue(keys.get(REQUESTER), queryUser(ticketNode, "requester-id/text()", userCache));
-            row.addValue(keys.get(SUBMITTER), queryUser(ticketNode, "submitter-id/text()", userCache));
-            String tags = queryField(ticketNode, "current-tags/text()");
+            row.addValue(keys.get(REQUESTER), queryField(ticketNode, "req_name"));
+            row.addValue(keys.get(SUBMITTER), queryField(ticketNode, "submitter_name"));
+            row.addValue(keys.get(VIA), queryField(ticketNode, "via"));
+            String tags = queryField(ticketNode, "current_tags");
             if (tags != null) {
                 String[] tagElements = tags.split(" ");
                 StringBuilder stringBuilder = new StringBuilder();
@@ -275,70 +324,9 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 row.addValue(keys.get(TAGS), stringBuilder.toString());
             }
 
-            Nodes customFieldEntries = ticketNode.query("ticket-field-entries/ticket-field-entry");
-            for (int i = 0; i < customFieldEntries.size(); i++) {
-                Node customFieldEntry = customFieldEntries.get(i);
-                String fieldID = queryField(customFieldEntry, "ticket-field-id/text()");
-                String value = queryField(customFieldEntry, "value/text()");
-                Key key = keys.get("zd" + fieldID);
-                row.addValue(key, value);
-            }
 
-            try {
-                int statusID = Integer.parseInt(queryField(ticketNode, "status-id/text()"));
 
-                if (statusID == 0) {
-                    row.addValue(keys.get(STATUS), "New");
-                } else if (statusID == 1) {
-                    row.addValue(keys.get(STATUS), "Open");
-                } else if (statusID == 2) {
-                    row.addValue(keys.get(STATUS), "Pending");
-                } else if (statusID == 3) {
-                    row.addValue(keys.get(STATUS), "Solved");
-                } else if (statusID == 4) {
-                    row.addValue(keys.get(STATUS), "Closed");
-                }
-            } catch (NumberFormatException e) {
-                // ignore
-            }
-
-            try {
-                int ticketTypeID = Integer.parseInt(queryField(ticketNode, "ticket-type-id/text()"));
-
-                if (ticketTypeID == 0) {
-                    row.addValue(keys.get(TICKET_TYPE), "( No Type Set )");
-                } else if (ticketTypeID == 1) {
-                    row.addValue(keys.get(TICKET_TYPE), "Question");
-                } else if (ticketTypeID == 2) {
-                    row.addValue(keys.get(TICKET_TYPE), "Incident");
-                } else if (ticketTypeID == 3) {
-                    row.addValue(keys.get(TICKET_TYPE), "Problem");
-                } else if (ticketTypeID == 4) {
-                    row.addValue(keys.get(TICKET_TYPE), "Task");
-                }
-            } catch (NumberFormatException e) {
-                // ignore
-            }
-
-            try {
-                int priorityID = Integer.parseInt(queryField(ticketNode, "priority-id/text()"));
-
-                if (priorityID == 0) {
-                    row.addValue(keys.get(PRIORITY), "( No Priority Set )");
-                } else if (priorityID == 1) {
-                    row.addValue(keys.get(PRIORITY), "Low");
-                } else if (priorityID == 2) {
-                    row.addValue(keys.get(PRIORITY), "Normal");
-                } else if (priorityID == 3) {
-                    row.addValue(keys.get(PRIORITY), "High");
-                } else if (priorityID == 4) {
-                    row.addValue(keys.get(PRIORITY), "Urgent");
-                }
-            } catch (NumberFormatException e) {
-                // ignore
-            }
-
-            try {
+            /*try {
                 int viaID = Integer.parseInt(queryField(ticketNode, "via-id/text()"));
 
                 if (viaID == 0) {
@@ -370,7 +358,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 }
             } catch (NumberFormatException e) {
                 // ignore
-            }
+            }*/
 
             return id;
         } catch (ReportException re) {
@@ -386,7 +374,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         return TICKET_ID;
     }
 
-    protected Value queryUser(Node node, String target, ZendeskUserCache zendeskUserCache) throws InterruptedException {
+    protected Value queryUser(Map node, String target, ZendeskUserCache zendeskUserCache) throws InterruptedException {
         String value = queryField(node, target);
         if (value != null && !"".equals(value)) {
             try {
@@ -398,21 +386,17 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         return new EmptyValue();
     }
 
-    protected Value queryDate(Node node, String target) throws ParseException {
+    protected Value queryDate(Map node, String target) throws ParseException {
         String value = queryField(node, target);
         if (value != null && !"".equals(value)) {
             try {
                 System.out.println(value);
-                return new DateValue(javax.xml.bind.DatatypeConverter.parseDateTime(value).getTime());
+                return new DateValue(df.parse(value));
             } catch (Exception e) {
                 LogClass.error(e);
                 return new EmptyValue();
             }
         }
         return new EmptyValue();
-    }
-
-    private DataSet getTicketsChangedSince() {
-        return null;
     }
 }

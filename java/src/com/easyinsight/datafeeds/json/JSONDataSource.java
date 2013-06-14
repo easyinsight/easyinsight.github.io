@@ -291,7 +291,8 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                     pages = pageInt;
                 }
             } catch (Exception e) {
-
+                responseLine = "We encountered an internal server error in trying to process the specified parameters. We've logged the error for our engineers to investigate.";
+                LogClass.error(e);
             }
         }
         JSONSetup jsonSetup = new JSONSetup();

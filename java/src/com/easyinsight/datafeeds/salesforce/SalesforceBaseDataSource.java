@@ -12,13 +12,6 @@ import com.easyinsight.datafeeds.constantcontact.ConstantContactCompositeSource;
 import com.easyinsight.users.Account;
 import com.easyinsight.analysis.*;
 
-import net.smartam.leeloo.client.OAuthClient;
-import net.smartam.leeloo.client.URLConnectionClient;
-import net.smartam.leeloo.client.request.OAuthClientRequest;
-import net.smartam.leeloo.client.response.OAuthJSONAccessTokenResponse;
-import net.smartam.leeloo.common.exception.OAuthProblemException;
-import net.smartam.leeloo.common.exception.OAuthSystemException;
-import net.smartam.leeloo.common.message.types.GrantType;
 import nu.xom.*;
 import oauth.signpost.OAuthConsumer;
 
@@ -27,6 +20,13 @@ import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.signature.HmacSha1MessageSigner;
+import org.apache.amber.oauth2.client.OAuthClient;
+import org.apache.amber.oauth2.client.URLConnectionClient;
+import org.apache.amber.oauth2.client.request.OAuthClientRequest;
+import org.apache.amber.oauth2.client.response.OAuthJSONAccessTokenResponse;
+import org.apache.amber.oauth2.common.exception.OAuthProblemException;
+import org.apache.amber.oauth2.common.exception.OAuthSystemException;
+import org.apache.amber.oauth2.common.message.types.GrantType;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
