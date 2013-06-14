@@ -12,6 +12,7 @@ import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.kpi.KPI;
 
 import com.easyinsight.kpi.KPIUtil;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.users.Account;
 
 import com.xerox.amazonws.sqs2.MessageQueue;
@@ -153,13 +154,15 @@ public class CloudWatchDataSource extends CompositeServerDataSource {
         try {
             EC2Util.getInstances(cwUserName, cwPassword);
         } catch (RuntimeException re) {
-            if (re.getMessage().indexOf("401") != -1) {
+            LogClass.error(re);
+            if (re.getMessage() != null && re.getMessage().indexOf("401") != -1) {
                 return "Your credentials were invalid.";
             } else {
-                return re.getMessage();
+                return "Your credentials were invalid.";
             }
         } catch (Exception e) {
-            return e.getMessage();
+            LogClass.error(e);
+            return "Your credentials were invalid.";
         }
         return null;
     }
