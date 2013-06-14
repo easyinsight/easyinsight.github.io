@@ -5,6 +5,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.DataSourceCloneResult;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.kpi.KPI;
@@ -33,6 +34,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     private String url;
     private String zdUserName;
     private String zdPassword;
+    private boolean loadComments;
 
     public ZendeskCompositeSource() {
         setFeedName("Zendesk");
@@ -87,6 +89,18 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         return types;
     }
 
+    protected void sortSources(List<IServerDataSourceDefinition> children) {
+        Collections.sort(children, new Comparator<IServerDataSourceDefinition>() {
+
+            public int compare(IServerDataSourceDefinition feedDefinition, IServerDataSourceDefinition feedDefinition1) {
+                if (feedDefinition.getFeedType().getType() == FeedType.ZENDESK_TICKET.getType()) {
+                    return -1;
+                }
+                return 0;
+            }
+        });
+    }
+
     @Override
     protected Collection<ChildConnection> getChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.ZENDESK_USER, FeedType.ZENDESK_ORGANIZATION, ZendeskUserSource.ORGANIZATION_ID, ZendeskOrganizationSource.ID),
@@ -104,8 +118,8 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ZENDESK (URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, DATA_SOURCE_ID) " +
-                "VALUES (?, ?, ?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ZENDESK (URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, DATA_SOURCE_ID, LOAD_COMMENTS) " +
+                "VALUES (?, ?, ?, ?, ?)");
         insertStmt.setString(1, url);
         insertStmt.setString(2, zdUserName);
         if (zdPassword != null) {
@@ -114,6 +128,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
             insertStmt.setString(3, null);
         }
         insertStmt.setLong(4, getDataFeedID());
+        insertStmt.setBoolean(5, isLoadComments());
         insertStmt.execute();
         insertStmt.close();
     }
@@ -121,13 +136,14 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, ZENDESK_USERNAME, ZENDESK_PASSWORD FROM ZENDESK WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, LOAD_COMMENTS FROM ZENDESK WHERE DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             url = rs.getString(1);
             zdUserName = rs.getString(2);
             zdPassword = rs.getString(3);
+            loadComments = rs.getBoolean(4);
             if (zdPassword != null) {
                 zdPassword = PasswordStorage.decryptString(zdPassword);
             }
@@ -137,6 +153,16 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     @Override
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
+    }
+
+    private transient Set<String> ticketIdList;
+
+    public Set<String> ticketIdList() {
+        return ticketIdList;
+    }
+
+    public void populateTicketIdList(Set<String> ticketIdList) {
+        this.ticketIdList = ticketIdList;
     }
 
     private transient ZendeskUserCache zendeskUserCache;
@@ -181,5 +207,13 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
 
     public void setZdPassword(String zdPassword) {
         this.zdPassword = zdPassword;
+    }
+
+    public boolean isLoadComments() {
+        return loadComments;
+    }
+
+    public void setLoadComments(boolean loadComments) {
+        this.loadComments = loadComments;
     }
 }
