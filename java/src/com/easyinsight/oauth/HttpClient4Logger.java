@@ -107,6 +107,7 @@ public class HttpClient4Logger implements HttpClient {
             if (contentTypeHeader != null) {
                 contentType = contentTypeHeader.toString();
             }
+            System.out.println(location.toString());
             System.out.println(contentType);
             System.out.println(responseBody);
             return OAuthClientResponseFactory
