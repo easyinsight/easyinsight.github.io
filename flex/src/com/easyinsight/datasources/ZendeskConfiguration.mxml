@@ -7,36 +7,19 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
 
-        import mx.controls.Alert;
-
-        import mx.controls.Button;
-
         [Bindable]
         private var url:String;
         [Bindable]
-        private var usernameInputText:String;
-        [Bindable]
         private var includeComments:Boolean;
-
-        public function get dataSourceDefinition():FeedDefinitionData {
-            return new ZendeskDataSource();
-        }
-
-        public function setupButton(button:Button):Function {
-            return null;
-        }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:ZendeskDataSource = feedDefinition as ZendeskDataSource;
-            usernameInputText = ds.zdUserName;
             url = ds.url;
             includeComments = ds.loadComments;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:ZendeskDataSource = feedDefinition as ZendeskDataSource;
-            ds.zdUserName = userNameInput.text;
-            ds.zdPassword = passwordInput.text;
             ds.url = urlInput.text;
             ds.loadComments = includeComments;
         }
@@ -61,12 +44,4 @@
     </mx:Form>
     <mx:TextArea width="700" text="Your Zendesk URL is the browser URL you normally use to connect to Zendesk. For example, if you access Zendesk as yourcompanyname.zendesk.com, put yourcompanyname in as the Zendesk URL."
             editable="false" selectable="false" focusEnabled="false" fontSize="12"/>
-    <mx:HBox>
-        <mx:Label text="Zendesk Email:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
-        <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}" width="350"/>
-    </mx:HBox>
-    <mx:HBox>
-        <mx:Label text="Zendesk Password:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
-        <mx:TextInput id="passwordInput" displayAsPassword="true" width="350"/>
-    </mx:HBox>
 </mx:VBox>

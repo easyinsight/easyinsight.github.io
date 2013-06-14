@@ -1062,6 +1062,15 @@ public class UserUploadService {
                     credentialsResponse.setEstimatedDuration(avgTime);
                 }
             } else {
+                if (feedDefinition instanceof ServerDataSourceDefinition) {
+                    ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) feedDefinition;
+                    EIConnection conn = Database.instance().getConnection();
+                    try {
+                        serverDataSourceDefinition.migrations(conn, null);
+                    } finally {
+                        Database.closeConnection(conn);
+                    }
+                }
                 feedDefinition.setVisible(true);
                 feedStorage.updateDataFeedConfiguration(feedDefinition);
                 credentialsResponse = new CredentialsResponse(true, feedID);

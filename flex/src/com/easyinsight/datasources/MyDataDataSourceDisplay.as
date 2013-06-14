@@ -149,16 +149,16 @@ public class MyDataDataSourceDisplay extends VBox {
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         if (dataSourceChanged) {
-            if (DataSourceBehavior.pullDataSource(dataSource.dataSourceBehavior)) {
+            //if (DataSourceBehavior.pullDataSource(dataSource.dataSourceBehavior)) {
                 if (dataSource.lastDataTime != null) {
                     updateString(dataSource.lastDataTime);
                 }
                 //form.visible = true;
                 button.visible = true;
-            } else {
+            /*} else {
                 //form.visible = false;
                 button.visible = false;
-            }
+            }*/
             dataSourceChanged = false;
         }
     }
