@@ -392,7 +392,6 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         String value = queryField(node, target);
         if (value != null && !"".equals(value)) {
             try {
-                System.out.println(value);
                 return new DateValue(df.parse(value));
             } catch (Exception e) {
                 LogClass.error(e);

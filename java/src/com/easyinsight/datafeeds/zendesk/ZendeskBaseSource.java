@@ -69,7 +69,6 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
                 } else if (restMethod.getStatusCode() >= 500) {
                     throw new RuntimeException("Zendesk server error--please try again later.");
                 }
-                System.out.println(restMethod.getResponseBodyAsString());
                 results = (Map) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
                 restMethod.releaseConnection();
                 successful = true;
