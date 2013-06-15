@@ -1,11 +1,13 @@
 package com.easyinsight.datafeeds.composite;
 
+import java.io.Serializable;
+
 /**
  * User: jamesboe
  * Date: 4/1/11
  * Time: 10:45 AM
  */
-public class FieldMapping {
+public class FieldMapping implements Serializable {
     private String federatedKey;
     private String sourceKey;
 

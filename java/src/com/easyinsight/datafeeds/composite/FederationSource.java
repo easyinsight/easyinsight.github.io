@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.composite;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +9,7 @@ import java.util.List;
  * Date: 3/5/11
  * Time: 6:30 PM
  */
-public class FederationSource {
+public class FederationSource implements Serializable {
     private long dataSourceID;
     private String value;
     private String name;

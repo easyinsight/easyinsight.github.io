@@ -231,12 +231,14 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             int count = 0;
             Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
             List results = (List) ticketObjects.get("results");
-            for (Object obj : results) {
-                count++;
-                Map map = (Map) obj;
-                IRow row = dataSet.createRow();
-                String id = parseTicket(keys, userCache, row, map);
-                ticketMap.put(id, row);
+            if (results != null) {
+                for (Object obj : results) {
+                    count++;
+                    Map map = (Map) obj;
+                    IRow row = dataSet.createRow();
+                    String id = parseTicket(keys, userCache, row, map);
+                    ticketMap.put(id, row);
+                }
             }
             if (ticketObjects.get("next_page") != null && !ticketObjects.get("next_page").toString().equals(nextPage) && count == 1000) {
                 nextPage = ticketObjects.get("next_page").toString();
@@ -390,7 +392,6 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         String value = queryField(node, target);
         if (value != null && !"".equals(value)) {
             try {
-                System.out.println(value);
                 return new DateValue(df.parse(value));
             } catch (Exception e) {
                 LogClass.error(e);

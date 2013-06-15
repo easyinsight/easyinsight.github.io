@@ -69,7 +69,6 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
                 } else if (restMethod.getStatusCode() >= 500) {
                     throw new RuntimeException("Zendesk server error--please try again later.");
                 }
-                System.out.println(restMethod.getResponseBodyAsString());
                 results = (Map) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
                 restMethod.releaseConnection();
                 successful = true;
@@ -158,7 +157,14 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
     }
 
     public Object runJSONRestRequest(ZendeskCompositeSource zendeskCompositeSource, HttpClient client, String path, Builder builder) throws InterruptedException {
-        HttpMethod restMethod = new GetMethod(zendeskCompositeSource.getUrl() + path);
+
+        HttpMethod restMethod;
+        if(path.startsWith("https://"))
+            restMethod = new GetMethod(path);
+        else
+            restMethod = new GetMethod(zendeskCompositeSource.getUrl() + path);
+
+
         /*if (path.startsWith("/search"))
         {
             // add  Authorization header with base64 encoded "<username>:<password>"
