@@ -117,7 +117,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
             List results = (List) ticketObjects.get("results");
             for (Object obj : results) {
                 Map map = (Map) obj;
-                System.out.println("blah");
+                //System.out.println("blah");
             }
             if (ticketObjects.get("next_page") != null) {
                 nextPage = ticketObjects.get("next_page").toString();
@@ -165,7 +165,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
             String path = "/api/v2/tickets/" + ticketId + "/audits.json";
             do {
                 JSONObject jo = (JSONObject) runJSONRestRequest(zendeskCompositeSource, httpClient, path, builder);
-                System.out.println(jo.toString());
+                //System.out.println(jo.toString());
                 JSONArray audits = (JSONArray) jo.get("audits");
                 for (Object o : audits) {
                     JSONObject audit = (JSONObject) o;
@@ -218,9 +218,9 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
             row.addValue(keys.get(COMMENT_TICKET_ID), ticketID);
             row.addValue(keys.get(AUTHOR), author);
             String a = (String) audit.get("created_at");
-            System.out.println(a);
+            //System.out.println(a);
             row.addValue(keys.get(COMMENT_CREATED_AT), df.parse(a));
-            System.out.println(audit.get("created_at"));
+            //System.out.println(audit.get("created_at"));
             row.addValue(keys.get(COMMENT_BODY), event.get("html_body").toString());
             row.addValue(keys.get(COUNT), 1);
             return ticketID;
