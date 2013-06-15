@@ -149,7 +149,14 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
     }
 
     public Object runJSONRestRequest(ZendeskCompositeSource zendeskCompositeSource, HttpClient client, String path, Builder builder) throws InterruptedException {
-        HttpMethod restMethod = new GetMethod(zendeskCompositeSource.getUrl() + path);
+
+        HttpMethod restMethod;
+        if(path.startsWith("https://"))
+            restMethod = new GetMethod(path);
+        else
+            restMethod = new GetMethod(zendeskCompositeSource.getUrl() + path);
+
+
         /*if (path.startsWith("/search"))
         {
             // add  Authorization header with base64 encoded "<username>:<password>"
