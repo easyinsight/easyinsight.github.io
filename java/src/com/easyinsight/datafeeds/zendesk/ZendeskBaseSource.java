@@ -125,9 +125,18 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
                     throw new ReportException(new DataSourceConnectivityReportFault("No Zendesk system was found at " +
                             zendeskCompositeSource.getUrl() + ". If your Zendesk account is using domain mapping, please use the actual Zendesk URL instead of the mapped domain.",
                             zendeskCompositeSource));
+                } else if (restMethod.getStatusCode() == 503) {
+                    Thread.sleep(20000);
+                    System.out.println("throttling, waiting 20 seconds...");
+                    retryCount++;
+                } else {
+                    successful = true;
                 }
-                successful = true;
+            } catch (ReportException re) {
+                throw re;
             } catch (Exception e) {
+                if(restMethod == null || restMethod.getStatusLine() == null)
+                    throw new RuntimeException(e);
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                     throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Zendesk instance at " +
@@ -201,8 +210,13 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
                     throw new ReportException(new DataSourceConnectivityReportFault("No Zendesk system was found at " +
                             zendeskCompositeSource.getUrl() + ". If your Zendesk account is using domain mapping, please use the actual Zendesk URL instead of the mapped domain.",
                             zendeskCompositeSource));
+                } else if (restMethod.getStatusCode() == 503) {
+                    Thread.sleep(20000);
+                    System.out.println("throttling, waiting 20 seconds...");
+                    retryCount++;
+                } else {
+                    successful = true;
                 }
-                successful = true;
             } catch (ReportException re) {
                 throw re;
             } catch (Exception e) {
