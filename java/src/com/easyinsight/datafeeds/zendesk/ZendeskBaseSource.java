@@ -204,6 +204,8 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
                 }
                 successful = true;
             } catch (Exception e) {
+                if(restMethod == null || restMethod.getStatusLine() == null)
+                    throw new RuntimeException(e);
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                     throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Zendesk instance at " +
