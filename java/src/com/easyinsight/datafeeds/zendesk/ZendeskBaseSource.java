@@ -203,6 +203,8 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
                             zendeskCompositeSource));
                 }
                 successful = true;
+            } catch (ReportException re) {
+                throw re;
             } catch (Exception e) {
                 if(restMethod == null || restMethod.getStatusLine() == null)
                     throw new RuntimeException(e);
