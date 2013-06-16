@@ -96,7 +96,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
 
     @Override
     protected boolean clearsData(FeedDefinition parentSource) {
-        return false;
+        return true;
     }
 
     private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, IDataStorage IDataStorage,
