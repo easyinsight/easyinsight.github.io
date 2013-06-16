@@ -257,8 +257,9 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 Map map = (Map) obj;
                 String ticketID = map.get("id").toString();
                 IRow row = ticketMap.get(ticketID);
-                row.addValue(DESCRIPTION, map.get("description").toString());
-                map.get("tags");
+                if (map.get("description") != null) {
+                    row.addValue(DESCRIPTION, map.get("description").toString());
+                }
                 if (map.get("custom_fields") != null) {
                     List customFields = (List) map.get("custom_fields");
                     for (Object customFieldObj : customFields) {

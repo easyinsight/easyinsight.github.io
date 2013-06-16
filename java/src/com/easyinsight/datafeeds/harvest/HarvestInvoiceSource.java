@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.harvest;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -51,23 +52,24 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
     public static final String TAX_2 = "Invoice Tax 2 %";
     public static final String TAX_AMOUNT = "Invoice Tax Amount";
     public static final String TAX_2_AMOUNT = "Invoice Tax 2 Amount";
+    public static final String RETAINER_ID = "Invoice Retainer ID";
 
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(ID, AMOUNT, DUE_AMOUNT, DUE_AT, DUE_AT_HUMAN_FORMAT, PERIOD_START, PERIOD_END,
                 CLIENT_ID, CURRENCY, ISSUED_AT, NOTES, NUMBER, PURCHASE_ORDER, CLIENT_KEY, STATE, TAX, TAX_2,
-                TAX_AMOUNT, TAX_2_AMOUNT);
+                TAX_AMOUNT, TAX_2_AMOUNT, RETAINER_ID);
     }
 
     @Override
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         AnalysisItem idDimension = new AnalysisDimension(keys.get(ID), true);
-        idDimension.setHidden(true);
+
         analysisItems.add(idDimension);
         AnalysisItem clientId = new AnalysisDimension(keys.get(CLIENT_ID), true);
-        clientId.setHidden(true);
+
         analysisItems.add(clientId);
         analysisItems.add(new AnalysisMeasure(keys.get(AMOUNT), AMOUNT, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
         analysisItems.add(new AnalysisMeasure(keys.get(DUE_AMOUNT), DUE_AMOUNT, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
@@ -86,6 +88,11 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
         analysisItems.add(new AnalysisMeasure(keys.get(TAX_2), AggregationTypes.AVERAGE));
         analysisItems.add(new AnalysisMeasure(keys.get(TAX_AMOUNT), TAX_AMOUNT, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
         analysisItems.add(new AnalysisMeasure(keys.get(TAX_2_AMOUNT), TAX_2_AMOUNT, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
+        Key retainerKey = keys.get(RETAINER_ID);
+        if (retainerKey == null) {
+            retainerKey = new NamedKey(RETAINER_ID);
+        }
+        analysisItems.add(new AnalysisDimension(retainerKey));
         return analysisItems;
     }
 
@@ -99,7 +106,7 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
         HarvestCompositeSource source = (HarvestCompositeSource) parentDefinition;
         HttpClient client = getHttpClient(source.getUsername(), source.getPassword());
         Builder builder = new Builder();
-        Nodes invoiceNodes = null;
+        Nodes invoiceNodes;
         try {
             int page = 1;
             DataSet ds = new DataSet();
@@ -135,6 +142,7 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
                     String tax2 = queryField(curInvoice, "tax2/text()");
                     String taxAmount = queryField(curInvoice,  "tax-amount/text()");
                     String tax2Amount = queryField(curInvoice, "tax-amount2/text()");
+                    String retainerID = queryField(curInvoice, "retainer-id/text()");
                     row.addValue(keys.get(ID), id);
                     if(amount != null && amount.length() > 0)
                         row.addValue(keys.get(AMOUNT), Double.parseDouble(amount));
@@ -152,6 +160,7 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
                     row.addValue(keys.get(NUMBER), number);
                     row.addValue(keys.get(PURCHASE_ORDER), purchaseOrder);
                     row.addValue(keys.get(CLIENT_KEY), clientKey);
+                    row.addValue(keys.get(RETAINER_ID), retainerID);
                     row.addValue(keys.get(STATE), state);
                     if(tax != null && tax.length() > 0)
                         row.addValue(keys.get(TAX), Double.parseDouble(tax));
