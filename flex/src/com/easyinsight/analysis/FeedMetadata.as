@@ -25,6 +25,7 @@ import mx.collections.ArrayCollection;
     public var suggestions:ArrayCollection;
     public var dataSourceType:int;
     public var allowRefactor:Boolean;
+    public var defaultMaxRecords:int;
 		
 		public function FeedMetadata()
 			{

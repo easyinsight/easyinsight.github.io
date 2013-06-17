@@ -221,6 +221,12 @@ public class DataService {
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
             feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
+            PreparedStatement ps = conn.prepareStatement("SELECT DEFAULT_MAX_RECORDS FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            ps.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            int defaultMaxRecords = rs.getInt(1);
+            feedMetadata.setDefaultMaxRecords(defaultMaxRecords);
             List<LookupTable> lookupTables = new ArrayList<LookupTable>();
             for (AnalysisItem field : feedItems) {
                 if (field.getLookupTableID() != null && field.getLookupTableID() > 0) {
@@ -1427,7 +1433,7 @@ public class DataService {
                 String ip = FlexContext.getHttpRequest().getRemoteAddr();
                 System.out.println(ip);
             }
-
+            long startTime = System.currentTimeMillis();
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
@@ -1452,6 +1458,10 @@ public class DataService {
                 results.getAdditionalProperties().put("cappedResults", results.getUid());
             }
             results.setSuggestions(suggestions);
+            long elapsed = System.currentTimeMillis() - startTime;
+            long processingTime = elapsed - insightRequestMetadata.getDatabaseTime();
+            results.setProcessingTime(processingTime);
+            results.setDatabaseTime(insightRequestMetadata.getDatabaseTime());
             return results;
         } catch (ReportException dae) {
             ListDataResults embeddedDataResults = new ListDataResults();
@@ -1584,7 +1594,7 @@ public class DataService {
             // acs stuff
 
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
-            allFields.addAll(analysisDefinition.allAddedItems());
+            allFields.addAll(analysisDefinition.allAddedItems(insightRequestMetadata));
 
             KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields);
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();

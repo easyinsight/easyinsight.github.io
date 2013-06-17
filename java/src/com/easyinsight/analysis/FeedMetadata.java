@@ -31,6 +31,15 @@ public class FeedMetadata implements Serializable {
     private List<LookupTable> lookupTables;
     private List<IntentionSuggestion> suggestions;
     private boolean allowRefactor;
+    private int defaultMaxRecords;
+
+    public int getDefaultMaxRecords() {
+        return defaultMaxRecords;
+    }
+
+    public void setDefaultMaxRecords(int defaultMaxRecords) {
+        this.defaultMaxRecords = defaultMaxRecords;
+    }
 
     public boolean isAllowRefactor() {
         return allowRefactor;

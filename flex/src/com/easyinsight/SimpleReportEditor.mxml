@@ -55,14 +55,17 @@
         import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.ImprovedSaveWindow;
+        import com.easyinsight.analysis.JoinOverrideEvent;
         import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.ReportEditorFieldEvent;
         import com.easyinsight.analysis.ReportEditorHelp;
+        import com.easyinsight.analysis.ReportJoinWindow;
         import com.easyinsight.analysis.ReportPreferencesEvent;
         import com.easyinsight.analysis.ReportPropertiesEvent;
         import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.analysis.SavedAnalysisEvent;
         import com.easyinsight.analysis.list.ListController;
+        import com.easyinsight.analysis.list.ListDefinition;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.dashboard.DashboardDescriptor;
@@ -85,6 +88,8 @@
         import com.easyinsight.report.ReportExportWindow;
         import com.easyinsight.report.ReportNavigationEvent;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.suggestion.IntentionListWindow;
+        import com.easyinsight.suggestion.IntentionSuggestion;
         import com.easyinsight.suggestion.IntentionTriggerEvent;
         import com.easyinsight.util.ActionDataSourceLog;
         import com.easyinsight.util.ActionReportLog;
@@ -213,9 +218,24 @@
             if (event.dataSource != null) {
                 this.dataSourceInfo = event.dataSource;
             }
-            if (event.suggestions != null) {
-                this.suggestions = event.suggestions;
+            assignSuggestions(event.suggestions);
+        }
+
+        private function assignSuggestions(suggests:ArrayCollection):void {
+            var suggestions:ArrayCollection = new ArrayCollection();
+            var quickActions:ArrayCollection = new ArrayCollection();
+            if (suggests != null) {
+
+                for each (var intentionSuggestion:IntentionSuggestion in suggests) {
+                    if (intentionSuggestion.priority == IntentionSuggestion.PROBLEM || intentionSuggestion.priority == IntentionSuggestion.WARNING) {
+                        suggestions.addItem(intentionSuggestion);
+                    } else {
+                        quickActions.addItem(intentionSuggestion);
+                    }
+                }
             }
+            this.suggestions = suggestions;
+            this.quickActions = quickActions;
             if (suggestions != null && suggestions.length > 0) {
                 currentState = "showSuggestions";
             } else {
@@ -224,16 +244,27 @@
         }
 
         private function gotIntentions():void {
-            this.suggestions = analysisService.generatePossibleIntentions.lastResult as ArrayCollection;
-            if (suggestions != null && suggestions.length > 0) {
-                currentState = "showSuggestions";
-            } else {
-                currentState = "";
-            }
+            assignSuggestions(analysisService.generatePossibleIntentions.lastResult as ArrayCollection);
         }
 
         [Bindable]
         private var suggestions:ArrayCollection;
+
+        private function additionalInitialConfig(analysisDefinition:AnalysisDefinition):void {
+            if (analysisDefinition is ListDefinition) {
+                analysisDefinition.generalSizeLimit = feedMetadata.defaultMaxRecords;
+            }
+
+        }
+
+        [Bindable]
+        private var quickActions:ArrayCollection;
+
+        private function populateFromMetadata(analysisDefinition:AnalysisDefinition):void {
+            if (analysisDefinition is ListDefinition) {
+                analysisDefinition.generalSizeLimit = feedMetadata.defaultMaxRecords;
+            }
+        }
 
         private function loadController(controller:IReportController, shareDataSourceSettings:Boolean = false):void {
             var dataViewFactory:DataViewFactory = controller.createDataView();
@@ -249,6 +280,7 @@
             if (analysisDefinition == null) {
                 this.analysisDefinition = dataViewFactory.createNewDefinition();
                 analysisDefinition.initialConfig();
+                additionalInitialConfig(analysisDefinition);
                 analysisDefinition.visibleAtFeedLevel = shareDataSourceSettings;
                 analysisDefinition.dataFeedID = dataSourceID;
             } else {
@@ -320,7 +352,26 @@
                 window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
                 PopUpManager.addPopUp(window, this);
                 PopUpUtil.centerPopUp(window);
+            } else if (event.joins) {
+                var joinWindow:ReportJoinWindow = new ReportJoinWindow();
+                joinWindow.addonReports = _analysisDefinition.addonReports;
+                var items:ArrayCollection = new ArrayCollection();
+                for each (var wrapper:AnalysisItemWrapper in wrappers) {
+                    items.addItem(wrapper.analysisItem);
+                }
+                joinWindow.fields = items;
+                joinWindow.dataSourceID = dataService.dataFeedID;
+                joinWindow.startJoins = _analysisDefinition.joinOverrides;
+                joinWindow.addEventListener(JoinOverrideEvent.JOIN_OVERRIDE_SET, onJoinOverride, false, 0, true);
+                PopUpManager.addPopUp(joinWindow, this, true);
+                PopUpUtil.centerPopUp(joinWindow);
+                PopUpManager.removePopUp(this);
             }
+        }
+
+        private function onJoinOverride(event:JoinOverrideEvent):void {
+            _analysisDefinition.joinOverrides = event.joins;
+            dataView.refresh();
         }
 
         private function onNewItem(event:AnalysisItemEditEvent):void {
@@ -433,7 +484,7 @@
                 this.exchangeSave = feedMetadata.exchangeSave;
                 this.admin = feedMetadata.dataSourceAdmin;
                 var cFactory:ClassFactory = new ClassFactory(AvailableFieldRenderer);
-                cFactory.properties = { dataSourceID: dataSourceID, calcRefactor: feedMetadata.allowRefactor };
+                cFactory.properties = { dataSourceID:dataSourceID, calcRefactor:feedMetadata.allowRefactor };
                 rendererFactory = cFactory;
                 dataSourceName = this.feedMetadata.dataSourceName;
                 joinsCustomizable = this.feedMetadata.customJoinsAllowed;
@@ -480,12 +531,7 @@
                     for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {
                         transformContainer.addFilterDefinition(filter);
                     }
-                    this.suggestions = feedMetadata.suggestions;
-                    if (suggestions != null && suggestions.length > 0) {
-                        currentState = "showSuggestions";
-                    } else {
-                        currentState = "";
-                    }
+                    assignSuggestions(feedMetadata.suggestions);
 
                 } else {
                     //this.title = analysisDefinition.name;
@@ -794,7 +840,6 @@
         }
 
         public function cleanup():void {
-            cleanupBindings();
             removeEventListener(CommandEvent.COMMAND, onCommand);
             removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             if (dataService != null) {
@@ -921,16 +966,16 @@
                     if (event.descriptor is InsightDescriptor) {
                         dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
                     } else if (event.descriptor is DashboardDescriptor) {
-                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(event.descriptor).id,
-                            initialFilters: event.filters})));
+                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
+                            initialFilters:event.filters})));
                     }
                 });
             } else {
                 if (event.descriptor is InsightDescriptor) {
                     dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
                 } else if (event.descriptor is DashboardDescriptor) {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(event.descriptor).id,
-                        initialFilters: event.filters})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
+                        initialFilters:event.filters})));
                 }
             }
         }
@@ -957,10 +1002,10 @@
         private function newDashboard():void {
             if (analysisChanged) {
                 createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID})));
             }
         }
 
@@ -1123,10 +1168,10 @@
         private function goAdmin():void {
             if (analysisChanged) {
                 createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID})));
             }
         }
 
@@ -1176,6 +1221,26 @@
             searchText = searchBox.text;
             fieldGrid.dataProvider.refresh();
         }
+
+        private function showQuickActions():void {
+            var items:ArrayCollection = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in wrappers) {
+                items.addItem(wrapper.analysisItem);
+            }
+            var window:IntentionListWindow = new IntentionListWindow();
+            window.addEventListener(IntentionTriggerEvent.INTENTION_TRIGGER, onIntentionEvent);
+            window.simpleReportEditor = this;
+            window.report = analysisDefinition;
+            window.fields = items;
+            window.allFields = availableFields;
+            window.dataSourceDisplay = dataSourceInfo;
+            window.wrappers = wrappers;
+            window.transformContainer = transformContainer;
+            window.dataView = dataView;
+            window.suggestions = quickActions;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
         ]]>
     </mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
@@ -1221,6 +1286,10 @@
                                          configureDataSourceAction="goAdmin()" toolTip="Actions"
                                          icon="@Embed(source='../../../assets/businessman_edit.png')"
                 />
+        <mx:Button icon="@Embed(source='../../../assets/table_edit.png')"
+                   click="showQuickActions()" id="quickActionButton"
+                   toolTip="Quick Actions" label="Quick Actions" labelPlacement="right"
+                   styleName="grayButton"/>
     </mx:HBox>
     <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275"
              paddingBottom="10" paddingTop="33">

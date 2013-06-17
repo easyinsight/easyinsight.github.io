@@ -14,7 +14,7 @@ import mx.collections.ArrayCollection;
 public class ReportAnalyzeSource extends PerspectiveInfo {
 
     public function ReportAnalyzeSource(insightDescriptor:InsightDescriptor, filters:ArrayCollection = null, exchangeItem:ExchangeItem = null, reportList:ArrayCollection = null,
-            reportIndex:int = 0, crumbs:Array = null, originalExchangeItem:EIDescriptor = null) {
+            reportIndex:int = 0, crumbs:Array = null, originalExchangeItem:EIDescriptor = null, additionalItems:ArrayCollection = null) {
         super(PerspectiveInfo.REPORT_VIEW);
         var properties:Object = new Object();
         properties.reportID = insightDescriptor.id;
@@ -26,6 +26,7 @@ public class ReportAnalyzeSource extends PerspectiveInfo {
         properties.reportIndex = reportIndex;
         properties.breadCrumbs = crumbs;
         properties.originalExchangeItem = originalExchangeItem;
+        properties.additionalItems = additionalItems;
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(insightDescriptor.reportType);
         var controller:IEmbeddedReportController = new controllerClass();
         properties.viewFactory = controller.createEmbeddedView();

@@ -17,17 +17,19 @@ public class IntentionTriggerEvent extends Event {
     public var admin:Boolean;
     public var newField:AnalysisItem;
     public var newHierarchy:Boolean;
+    public var joins:Boolean;
 
     public function IntentionTriggerEvent(type:String, admin:Boolean = false, newField:AnalysisItem = null,
-            newHierarchy:Boolean = false) {
+            newHierarchy:Boolean = false, joins:Boolean = false) {
         super(type);
         this.admin = admin;
         this.newField = newField;
         this.newHierarchy = newHierarchy;
+        this.joins = joins;
     }
 
     override public function clone():Event {
-        return new IntentionTriggerEvent(type, admin, newField, newHierarchy);
+        return new IntentionTriggerEvent(type, admin, newField, newHierarchy, joins);
     }
 }
 }

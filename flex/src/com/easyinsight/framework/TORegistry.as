@@ -90,6 +90,7 @@ import com.easyinsight.datasources.FreshbooksDataSource;
 import com.easyinsight.datasources.HarvestDataSource;
 import com.easyinsight.datasources.HighRiseDataSource;
 import com.easyinsight.datasources.HighriseAdditionalToken;
+import com.easyinsight.datasources.InfusionsoftCompositeSource;
 import com.easyinsight.datasources.InsightlyCompositeSource;
 import com.easyinsight.datasources.JSONDataSource;
 import com.easyinsight.datasources.LinkedInDataSource;
@@ -312,6 +313,7 @@ public class TORegistry {
         var oracle:OracleDatabaseConnection;
         var postgres:PostgresDatabaseConnection;
         var trello:TrelloCompositeSource;
+        var infusion:InfusionsoftCompositeSource;
     }
 }
 }

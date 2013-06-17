@@ -24,7 +24,6 @@
         import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
 
-        private var items:ArrayCollection = new ArrayCollection();
         private var lfItems:ArrayCollection = new ArrayCollection();
 
         public static const USER_SKIN:int = 1;
@@ -45,6 +44,8 @@
 
         [Bindable]
         private var skin:ApplicationSkinTO;
+
+
 
         private function onCreation():void {
             if (_skinMode == USER_SKIN) {
@@ -78,28 +79,13 @@
             lfItems.addItem(new ColorReportFormItem("Stack 2 Fill End", "dashboardStackColor2End", skin.dashboardStackColor2End, skin));
             lfItems.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", skin.multiColors, skin));
 
-            items.addItem(new ColorReportFormItem("Core Application Background Color", "coreAppBackgroundColor", skin.coreAppBackgroundColor, skin, "coreAppBackgroundColorEnabled"));
-            items.addItem(new ImageReportFormItem("Core Application Background Image", "coreAppBackgroundImage", skin.coreAppBackgroundImage, skin, "coreAppBackgroundImageEnabled"));
-            items.addItem(new ComboBoxReportFormItem("Core Application Background Styling", "coreAppBackgroundSize", skin.coreAppBackgroundSize, skin, ["100%", "Auto"], "coreAppBackgroundSizeEnabled"));
-            items.addItem(new ColorReportFormItem("Header Bar Background Color", "headerBarBackgroundColor", skin.headerBarBackgroundColor, skin, "headerBarBackgroundColorEnabled"));
-            items.addItem(new ColorReportFormItem("Header Bar Divider Color", "headerBarDividerColor", skin.headerBarDividerColor, skin, "headerBarDividerColorEnabled"));
-            items.addItem(new ImageReportFormItem("Header Logo", "headerBarLogo", skin.headerBarLogo, skin));
-            /*items.addItem(new ImageReportFormItem("Logo File", "headerBarLogo", skin.headerBarLogo, skin, "headerBarLogoEnabled"));*/
-
-            items.addItem(new ColorReportFormItem("Center Canvas Background Color", "centerCanvasBackgroundColor", skin.centerCanvasBackgroundColor, skin, "centerCanvasBackgroundColorEnabled"));
-            items.addItem(new NumericReportFormItem("Center Canvas Background Alpha", "centerCanvasBackgroundAlpha", skin.centerCanvasBackgroundAlpha, skin, 0, 1, "centerCanvasBackgroundAlphaEnabled"));
-
             reportBackgroundColor = skin.reportBackgroundColor;
             reportTextColor = skin.reportTextColor;
             headerLogo = skin.reportHeaderImage;
             customHeaderShown = skin.reportHeader;
             BindingUtils.bindProperty(this, "reportBackgroundColor", backgroundColorItem, "value");
             BindingUtils.bindProperty(this, "reportTextColor", textColorItem, "value");
-            var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
-            lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
-            for each (var item:ReportFormItem in items) {
-                reportForm.addChild(item);
-            }
+
             for each (var lItem:ReportFormItem in lfItems) {
                 lookAndFeelForm.addChild(lItem);
             }
@@ -125,13 +111,10 @@
 
         private function save():void {
             var valid:Boolean = true;
-            for each (var validateItem:ReportFormItem in items) {
+            for each (var validateItem:ReportFormItem in lfItems) {
                 valid = valid && validateItem.validate();
             }
             if (valid) {
-                for each (var item:ReportFormItem in items) {
-                    item.save();
-                }
                 for each (var lItem:ReportFormItem in lfItems) {
                     lItem.save();
                 }
@@ -195,17 +178,7 @@
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:TabNavigator resizeToContent="true" creationPolicy="all" selectedIndex="{_initialIndex}">
-            <mx:VBox label="Application Settings" width="600" horizontalAlign="center">
-                <mx:Form id="reportForm" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-
-                </mx:Form>
-            </mx:VBox>
-            <mx:VBox label="Look and Feel Settings" width="600" horizontalAlign="center">
-                <mx:Form id="lookAndFeelForm" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-
-                </mx:Form>
-            </mx:VBox>
-            <mx:VBox label="Report Header" paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
+            <mx:VBox label="Report Header" paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" creationComplete="onDone(event)">
                 <mx:CheckBox label="Do you want to define a custom header for reports and dashboards?" id="customHeader" selected="{customHeaderShown}"/>
                 <mx:HBox width="800" id="headerArea" paddingTop="5" paddingBottom="5" paddingLeft="10" verticalAlign="middle" enabled="{customHeader.selected}"
                          backgroundColor="{reportBackgroundColor}">
@@ -224,6 +197,11 @@
                     <mx:FormItem label="Text Color:">
                         <mx:ColorPicker selectedColor="{reportTextColor}" id="textColorItem"/>
                     </mx:FormItem>
+                </mx:Form>
+            </mx:VBox>
+            <mx:VBox label="Look and Feel Settings" width="600" horizontalAlign="center">
+                <mx:Form id="lookAndFeelForm" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+
                 </mx:Form>
             </mx:VBox>
         </mx:TabNavigator>

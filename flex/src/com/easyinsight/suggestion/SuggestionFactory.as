@@ -25,20 +25,20 @@ public class SuggestionFactory {
     }
 
     public function argh(type:int, analysisItems:ArrayCollection, dataSourceID:int):void {
-        var fields:ArrayCollection = new ArrayCollection();
+        /*var fields:ArrayCollection = new ArrayCollection();
         for each (var wrapper:AnalysisItemWrapper in analysisItems) {
             fields.addItem(wrapper.analysisItem);
-        }
+        }*/
         if (type == IntentionSuggestion.FILTERED_FIELD) {
             var generateFilteredFieldWindow:GenerateFilteredFieldWindow = new GenerateFilteredFieldWindow();
-            generateFilteredFieldWindow.analysisItems = fields;
+            generateFilteredFieldWindow.analysisItems = analysisItems;
             generateFilteredFieldWindow.dataSourceID = dataSourceID;
             generateFilteredFieldWindow.addEventListener(AnalysisItemCopyEvent.ITEM_COPY, reportEditor.onCopy, false, 0, true);
             PopUpManager.addPopUp(generateFilteredFieldWindow, Application(Application.application), true);
             PopUpUtil.centerPopUp(generateFilteredFieldWindow);
         } else if (type == IntentionSuggestion.DISTINCT_COUNT) {
             var distinctCountWindow:GenerateCountDistinctWindow = new GenerateCountDistinctWindow();
-            distinctCountWindow.analysisItems = fields;
+            distinctCountWindow.analysisItems = analysisItems;
             distinctCountWindow.dataSourceID = dataSourceID;
             distinctCountWindow.addEventListener(AnalysisItemCopyEvent.ITEM_COPY, reportEditor.onCopy, false, 0, true);
             PopUpManager.addPopUp(distinctCountWindow, Application(Application.application), true);

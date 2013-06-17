@@ -10,6 +10,10 @@ package com.easyinsight.suggestion {
 [RemoteClass(alias="com.easyinsight.intention.IntentionSuggestion")]
 public class IntentionSuggestion {
 
+    public static const PROBLEM:int = 1;
+    public static const WARNING:int = 2;
+    public static const OTHER:int = 3;
+
     public static const FILTERED_FIELD:int = 18;
     public static const DISTINCT_COUNT:int = 19;
 
@@ -17,6 +21,7 @@ public class IntentionSuggestion {
     public var description:String;
     public var type:int;
     public var scope:int;
+    public var priority:int;
     public var requiresServerCallback:Boolean;
 
     public function IntentionSuggestion() {
