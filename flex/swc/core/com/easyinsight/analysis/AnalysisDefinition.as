@@ -1,14 +1,10 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.filtering.FilterDefinition;
-
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.skin.ImageDescriptor;
 
-
-
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
 
 [Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.WSAnalysisDefinition")]
