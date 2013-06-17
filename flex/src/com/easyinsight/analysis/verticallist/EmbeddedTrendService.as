@@ -31,7 +31,7 @@ public class EmbeddedTrendService extends EmbeddedDataService implements IEmbedd
         dataRemoteSource.getEmbeddedTrendDataResults.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
     }
 
-    override public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams):void {
+    override public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams, additionalAnalysisItems:ArrayCollection):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.utcOffset = new Date().getTimezoneOffset();

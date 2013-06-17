@@ -60,7 +60,7 @@ public class EmbeddedCrosstabDataService extends EventDispatcher implements IEmb
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
-    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams):void {
+    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams, additionalAnalysisItems:ArrayCollection):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var insightRequestMetadata:InsightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.refreshAllSources = refreshAll;
