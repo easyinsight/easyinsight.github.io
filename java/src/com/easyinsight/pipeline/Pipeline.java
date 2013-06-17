@@ -34,7 +34,7 @@ public abstract class Pipeline {
         structure.setReport(report);
         structure.setInsightRequestMetadata(insightRequestMetadata);
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(dataSource.getFields());
-        allFields.addAll(report.allAddedItems());
+        allFields.addAll(report.allAddedItems(insightRequestMetadata));
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource, null);
         components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems(), insightRequestMetadata);
         if (report.hasCustomResultsBridge()) {
@@ -88,7 +88,7 @@ public abstract class Pipeline {
             }
         }
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(dataSource.getFields());
-        allFields.addAll(report.allAddedItems());
+        allFields.addAll(report.allAddedItems(insightRequestMetadata));
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource, reportItems);
         components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems(), insightRequestMetadata);
         if (report.hasCustomResultsBridge()) {
