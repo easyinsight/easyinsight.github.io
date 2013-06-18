@@ -1,8 +1,15 @@
 function drillThrough(params) {
-    $.getJSON('/app/drillThrough?' + params, function(data) {
-        var url = data["url"];
-        window.location.href = url;
-    });
+    $.ajax( {
+        dataType: "json",
+        url: '/app/drillThrough?' + params,
+        success: function(data) {
+            var url = data["url"];
+            window.location.href = url;
+        },
+        error: function(a, b, c) {
+            window.location.href = "/app/serverError.jsp"
+        }
+});
 }
 
 function drillThroughParameterized(params, val) {
