@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="center" width="100%" backgroundColor="#880000">
+    <mx:Script><![CDATA[
+        import com.easyinsight.SimpleReportEditor;
+
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var problemText:String;
+
+        public var intentionSuggestion:IntentionSuggestion;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            problemText = intentionSuggestion.description;
+        }
+
+        public var simpleReportEditor:SimpleReportEditor;
+
+        public var fields:ArrayCollection;
+
+        public var dataSourceID:int;
+
+        private function resolve():void {
+            new SuggestionFactory(simpleReportEditor).argh(intentionSuggestion.type, fields, dataSourceID);
+        }
+        ]]></mx:Script>
+    <mx:LinkButton label="{problemText}" click="resolve()" textDecoration="underline" color="#FFFFFF" fontSize="14" styleName="fallThroughFonts"/>
+</mx:HBox>

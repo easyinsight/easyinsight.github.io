@@ -38,10 +38,6 @@
         [Bindable]
         public var availableFields:ArrayCollection;
 
-        private function onCreation():void {
-            autoCompleteManager.openDropdownForTarget(fieldBox);
-        }
-
         [Bindable]
         public var advancedAvailable:Boolean = true;
 
@@ -52,13 +48,10 @@
         public var filterSource:int = REPORT_LEVEL;
 
         private function newFieldFilter():void {
-            var text:String = fieldBox.text;
-            for each (var f:AnalysisItemWrapper in availableFields) {
-                if (f.displayName == text) {
-                    dispatchEvent(new NewFilterEvent(NewFilterEvent.FIELD_FILTER, f.analysisItem));
-                    this.close();
-                    break;
-                }
+            var f:AnalysisItemWrapper = fieldBox.selectedItem as AnalysisItemWrapper;
+            if (f != null) {
+                dispatchEvent(new NewFilterEvent(NewFilterEvent.FIELD_FILTER, f.analysisItem));
+                this.close();
             }
         }
 
@@ -78,8 +71,11 @@
         }
 
         private function newFieldChoiceFilter():void {
-            dispatchEvent(new NewFilterEvent(NewFilterEvent.FIELD_CHOICE_FILTER, AnalysisItemWrapper(aFieldBox.selectedItem).analysisItem));
-            this.close();
+            var f:AnalysisItemWrapper = aFieldBox.selectedItem as AnalysisItemWrapper;
+            if (f != null) {
+                dispatchEvent(new NewFilterEvent(NewFilterEvent.FIELD_CHOICE_FILTER, f.analysisItem));
+                this.close();
+            }
         }
 
         [Bindable]
@@ -109,12 +105,7 @@
             }
 
         }
-
-        private function onClick(event:MouseEvent):void {
-            autoCompleteManager.openDropdownForTarget(fieldBox);
-        }
         ]]></mx:Script>
-    <util:AutoCompleteManager dataProvider="{availableFields}" minCharsForCompletion="0" target="{fieldBox}" labelField="displayName" id="autoCompleteManager"/>
     <mx:VBox>
         <mx:RadioButtonGroup id="typeGroup" change="updateStack()" selectedValue="fieldFilter"/>
         <mx:HBox id="optionsBox">
@@ -124,7 +115,7 @@
         <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}" id="viewStack">
             <mx:VBox>
                 <mx:Label text="Choose a field for the filter:"/>
-                <mx:TextInput id="fieldBox" click="onClick(event)"/>
+                <util:TextInputWithArrow id="fieldBox" width="300" dataProvider="{availableFields}"/>
                 <mx:HBox>
                     <util:SaveButton label="Create the Filter" click="newFieldFilter()"/>
                     <util:CancelButton label="Cancel" click="this.close()"/>
@@ -136,7 +127,7 @@
             </mx:HBox>
             <mx:VBox id="fieldChoiceFilterBox">
                 <mx:Label text="Choose a field for the filter:"/>
-                <mx:ComboBox dataProvider="{availableFields}" id="aFieldBox" labelField="displayName" rowCount="15"/>
+                <util:TextInputWithArrow id="aFieldBox" width="300" dataProvider="{availableFields}"/>
                 <mx:HBox>
                     <util:SaveButton label="Create a new Field Choice Filter" click="newFieldChoiceFilter()"/>
                     <util:CancelButton label="Cancel" click="this.close()"/>
