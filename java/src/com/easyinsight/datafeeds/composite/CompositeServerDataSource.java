@@ -401,7 +401,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
     public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report, DataSourceInfo dataSourceInfo) {
         List<IntentionSuggestion> suggestions = super.suggestIntentions(report, dataSourceInfo);
-        Date lastDataTime = dataSourceInfo.getLastDataTime();
+        /*Date lastDataTime = dataSourceInfo.getLastDataTime();
         if (lastDataTime != null) {
             long time = System.currentTimeMillis() - lastDataTime.getTime();
             long days = time / (1000 * 60 * 60 * 24);
@@ -410,17 +410,17 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                     "Your " + getFeedName() + " data source hasn't been refreshed with new data in " + days + " days.",
                     IntentionSuggestion.SCOPE_DATA_SOURCE, IntentionSuggestion.OLD_DATA, IntentionSuggestion.WARNING));
             }
-        }
+        }*/
         return suggestions;
     }
 
     public List<Intention> createIntentions(WSAnalysisDefinition report, List<AnalysisItem> fields, int type) throws SQLException {
         List<Intention> intentions = new ArrayList<Intention>();
-        if (type == IntentionSuggestion.OLD_DATA) {
+        /*if (type == IntentionSuggestion.OLD_DATA) {
             DataSourceIntention dataSourceIntention = new DataSourceIntention();
             dataSourceIntention.setRefreshData(true);
             intentions.add(dataSourceIntention);
-        }
+        }*/
         return intentions;
     }
 
