@@ -14,6 +14,7 @@ public class IntentionSuggestion {
     public static const WARNING:int = 2;
     public static const OTHER:int = 3;
 
+    public static const WARNING_JOIN_FAILURE:int = 17;
     public static const FILTERED_FIELD:int = 18;
     public static const DISTINCT_COUNT:int = 19;
 

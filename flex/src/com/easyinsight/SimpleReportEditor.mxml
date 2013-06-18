@@ -91,6 +91,7 @@
         import com.easyinsight.suggestion.IntentionListWindow;
         import com.easyinsight.suggestion.IntentionSuggestion;
         import com.easyinsight.suggestion.IntentionTriggerEvent;
+        import com.easyinsight.suggestion.MajorProblemBar;
         import com.easyinsight.util.ActionDataSourceLog;
         import com.easyinsight.util.ActionReportLog;
         import com.easyinsight.util.ErrorReportView;
@@ -221,6 +222,8 @@
             assignSuggestions(event.suggestions);
         }
 
+        private var majorProblemBar:MajorProblemBar;
+
         private function assignSuggestions(suggests:ArrayCollection):void {
             var suggestions:ArrayCollection = new ArrayCollection();
             var quickActions:ArrayCollection = new ArrayCollection();
@@ -234,13 +237,28 @@
                     }
                 }
             }
-            this.suggestions = suggestions;
+            if (suggestions.length == 1) {
+                if (majorProblemBar == null) {
+                    majorProblemBar = new MajorProblemBar();
+                    majorProblemBar.simpleReportEditor = this;
+                    majorProblemBar.intentionSuggestion = suggestions.getItemAt(0) as IntentionSuggestion;
+                    majorProblemBar.fields = wrappers;
+                    majorProblemBar.dataSourceID = dataService.dataFeedID;
+                    rightBox.addChildAt(majorProblemBar, 0);
+                }
+            } else if (suggestions.length == 0) {
+                if (majorProblemBar) {
+                    majorProblemBar.parent.removeChild(majorProblemBar);
+                    majorProblemBar = null;
+                }
+            }
+            //this.suggestions = suggestions;
             this.quickActions = quickActions;
-            if (suggestions != null && suggestions.length > 0) {
+            /*if (suggestions != null && suggestions.length > 0) {
                 currentState = "showSuggestions";
             } else {
                 currentState = "";
-            }
+            }*/
         }
 
         private function gotIntentions():void {
@@ -353,20 +371,24 @@
                 PopUpManager.addPopUp(window, this);
                 PopUpUtil.centerPopUp(window);
             } else if (event.joins) {
-                var joinWindow:ReportJoinWindow = new ReportJoinWindow();
-                joinWindow.addonReports = _analysisDefinition.addonReports;
-                var items:ArrayCollection = new ArrayCollection();
-                for each (var wrapper:AnalysisItemWrapper in wrappers) {
-                    items.addItem(wrapper.analysisItem);
-                }
-                joinWindow.fields = items;
-                joinWindow.dataSourceID = dataService.dataFeedID;
-                joinWindow.startJoins = _analysisDefinition.joinOverrides;
-                joinWindow.addEventListener(JoinOverrideEvent.JOIN_OVERRIDE_SET, onJoinOverride, false, 0, true);
-                PopUpManager.addPopUp(joinWindow, this, true);
-                PopUpUtil.centerPopUp(joinWindow);
-                PopUpManager.removePopUp(this);
+
             }
+        }
+
+        public function joinWindow():void {
+            var joinWindow:ReportJoinWindow = new ReportJoinWindow();
+            joinWindow.addonReports = _analysisDefinition.addonReports;
+            var items:ArrayCollection = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in wrappers) {
+                items.addItem(wrapper.analysisItem);
+            }
+            joinWindow.fields = items;
+            joinWindow.dataSourceID = dataService.dataFeedID;
+            joinWindow.startJoins = _analysisDefinition.joinOverrides;
+            joinWindow.addEventListener(JoinOverrideEvent.JOIN_OVERRIDE_SET, onJoinOverride, false, 0, true);
+            PopUpManager.addPopUp(joinWindow, this, true);
+            PopUpUtil.centerPopUp(joinWindow);
+            PopUpManager.removePopUp(this);
         }
 
         private function onJoinOverride(event:JoinOverrideEvent):void {

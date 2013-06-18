@@ -43,6 +43,8 @@ public class SuggestionFactory {
             distinctCountWindow.addEventListener(AnalysisItemCopyEvent.ITEM_COPY, reportEditor.onCopy, false, 0, true);
             PopUpManager.addPopUp(distinctCountWindow, Application(Application.application), true);
             PopUpUtil.centerPopUp(distinctCountWindow);
+        } else if (type == IntentionSuggestion.WARNING_JOIN_FAILURE) {
+            reportEditor.joinWindow();
         }
     }
 }
