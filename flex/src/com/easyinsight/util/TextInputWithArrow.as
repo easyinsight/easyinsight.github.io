@@ -81,8 +81,8 @@ public class TextInputWithArrow extends Canvas {
                 return f;
             }
         }
-        this.errorString = "You need to select a valid entry.";
-        dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER, textInput));
+        textInput.errorString = "You need to select a valid entry.";
+        textInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
         return null;
     }
 }
