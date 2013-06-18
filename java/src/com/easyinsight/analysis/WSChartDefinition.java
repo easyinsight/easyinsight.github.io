@@ -225,7 +225,7 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         xAxis.put("label", "'"+analysisItem.toDisplay()+"'");
 
         JSONObject xAxisTicketOptions = new JSONObject();
-        xAxisTicketOptions.put("angle", -15);
+        xAxisTicketOptions.put("angle", 0);
         xAxis.put("tickOptions", xAxisTicketOptions);
         return xAxis;
     }
