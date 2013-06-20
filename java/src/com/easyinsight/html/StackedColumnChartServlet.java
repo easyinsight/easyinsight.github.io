@@ -24,6 +24,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
         JSONArray createArray(Double measure, Integer index);
 
         public Integer getIndex(JSONArray jsonArray) throws JSONException;
+
         public Double getMeasure(JSONArray jsonArray) throws JSONException;
     }
 
@@ -98,7 +99,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
         }
 
         int i = 1;
-        Map<String, List<JSONArray>> seriesMap = new HashMap<String, List<JSONArray>>();
+        Map<String, List<JSONArray>> seriesMap = new LinkedHashMap<String, List<JSONArray>>();
         Map<String, Integer> indexMap = new HashMap<String, Integer>();
 
         JSONArray axisNames = new JSONArray();
@@ -180,33 +181,63 @@ public class StackedColumnChartServlet extends HtmlServlet {
             });
         }
 
-        if(seriesMap.entrySet().size() > 0) {
+        List<Integer> zeroIndicies = new ArrayList<Integer>();
+        if (seriesMap.entrySet().size() > 0) {
             Map.Entry<String, List<JSONArray>> first = null;
-            for(Map.Entry<String, List<JSONArray>> entry : seriesMap.entrySet()) {
+            for (Map.Entry<String, List<JSONArray>> entry : seriesMap.entrySet()) {
                 first = entry;
                 break;
             }
-            for(JSONArray jsonArray : first.getValue()) {
+            for (int k = 0; k < first.getValue().size(); k++) {
+                JSONArray jsonArray = first.getValue().get(k);
                 Integer curIndex = populator.getIndex(jsonArray);
                 Double total = 0.0;
-                for(Map.Entry<String, List<JSONArray>> entry : seriesMap.entrySet()) {
+                for (Map.Entry<String, List<JSONArray>> entry : seriesMap.entrySet()) {
                     Double curVal = 0.0;
-                    for(JSONArray arr : entry.getValue()) {
-                        if(populator.getIndex(arr).equals(curIndex)) {
+                    for (JSONArray arr : entry.getValue()) {
+                        if (populator.getIndex(arr).equals(curIndex)) {
                             curVal = populator.getMeasure(arr);
                             break;
                         }
                     }
-                    System.out.println(curVal);
                     total = total + curVal;
                 }
-                System.out.println(curIndex + ": " + total);
+                System.out.println(total);
+                if (total == 0.0) {
+                    System.out.println(k);
+                    zeroIndicies.add(k);
+                }
             }
         }
+        // start from top removing them in reverse order should make it easier
+//
+        for (int k = zeroIndicies.size() - 1; k >= 0; k--) {
+            for (Map.Entry<String, List<JSONArray>> entry : seriesMap.entrySet()) {
+                System.out.println("removing " + zeroIndicies.get(k));
+                entry.getValue().remove(entry.getValue().get(zeroIndicies.get(k)));
+            }
+            axisNames.remove(k);
+        }
+
 
         JSONArray blahs = new JSONArray();
+        int k = 0;
+        zeroIndicies = new ArrayList<Integer>();
         for (Map.Entry<String, List<JSONArray>> entry : seriesMap.entrySet()) {
-            blahs.put(entry.getValue());
+            double total = 0;
+            for (JSONArray arr : entry.getValue()) {
+                total = total + populator.getMeasure(arr);
+            }
+            if(total != 0) {
+                blahs.put(entry.getValue());
+            } else {
+                zeroIndicies.add(k);
+            }
+            k++;
+        }
+
+        for(int j = zeroIndicies.size() - 1;j >= 0;j--) {
+            series.remove(zeroIndicies.get(j));
         }
 
         object.put("values", blahs);
@@ -216,7 +247,17 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
         System.out.println(blahs);
         response.setContentType("application/json");
-        response.getOutputStream().write(object.toString().getBytes());
-        response.getOutputStream().flush();
+        response.getOutputStream().
+
+                write(object.toString()
+
+                        .
+
+                                getBytes()
+
+                );
+        response.getOutputStream().
+
+                flush();
     }
 }

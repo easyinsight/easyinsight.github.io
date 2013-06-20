@@ -13,6 +13,7 @@ import com.easyinsight.oauth.HttpClient4Logger;
 import com.easyinsight.users.Account;
 import org.apache.amber.oauth2.client.OAuthClient;
 //import org.apache.amber.oauth2.client.URLConnectionClient;
+import org.apache.amber.oauth2.client.URLConnectionClient;
 import org.apache.amber.oauth2.client.request.OAuthClientRequest;
 import org.apache.amber.oauth2.client.response.OAuthJSONAccessTokenResponse;
 import org.apache.amber.oauth2.common.exception.OAuthProblemException;
@@ -62,7 +63,7 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
                     setGrantType(GrantType.REFRESH_TOKEN).setClientId(CLIENT_ID).
                     setClientSecret(CLIENT_SECRET).setRefreshToken(refreshToken).setRedirectURI("https://easy-insight.com/app/oauth");
             tokenRequestBuilder.setParameter("type", "refresh");
-            OAuthClient client = new OAuthClient(new HttpClient4Logger());
+            OAuthClient client = new OAuthClient(new URLConnectionClient());
             OAuthClientRequest request = tokenRequestBuilder.buildBodyMessage();
             OAuthJSONAccessTokenResponse response = client.accessToken(request);
             accessToken = response.getAccessToken();
@@ -166,7 +167,7 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
                         tokenRequestBuilder.setParameter("type", "web_server");
                         request = tokenRequestBuilder.buildBodyMessage();
                     }
-                    OAuthClient client = new OAuthClient(new HttpClient4Logger());
+                    OAuthClient client = new OAuthClient(new URLConnectionClient());
                     OAuthJSONAccessTokenResponse response = client.accessToken(request);
                     accessToken = response.getAccessToken();
                     refreshToken = response.getRefreshToken();

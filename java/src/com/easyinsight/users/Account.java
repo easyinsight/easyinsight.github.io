@@ -248,9 +248,20 @@ public class Account {
     @Column(name="vat")
     private String vat;
 
+    @Column(name="default_max_records")
+    private int maxRecords;
+
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public int getMaxRecords() {
+        return maxRecords;
+    }
+
+    public void setMaxRecords(int maxRecords) {
+        this.maxRecords = maxRecords;
+    }
 
     public int getEnterpriseAddonCost() {
         return enterpriseAddonCost;

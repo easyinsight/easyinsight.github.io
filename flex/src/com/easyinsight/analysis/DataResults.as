@@ -16,6 +16,9 @@ public class DataResults {
     public var suggestions:ArrayCollection;
     public var uid:String;
 
+    public var databaseTime:int;
+    public var processingTime:int;
+
     public function DataResults() {
     }
 }

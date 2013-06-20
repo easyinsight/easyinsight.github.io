@@ -13,6 +13,7 @@ import mx.collections.ArrayCollection;
         public var refreshAllSources:Boolean;
         public var noCache:Boolean;
         public var hierarchyOverrides:ArrayCollection;
+        public var additionalAnalysisItems:ArrayCollection;
 		
 		public function InsightRequestMetadata()
 		{

@@ -41,6 +41,8 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
     private var _reportRenderer:IReportRenderer;
     private var _dataService:IEmbeddedDataService = new EmbeddedDataService();
 
+    private var _additionalItems:ArrayCollection;
+
     private var pendingRequest:Boolean = false;
 
     public function EmbeddedViewFactory() {
@@ -48,6 +50,10 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         //setStyle("backgroundColor", 0xCCCCCC);
         this.percentHeight = 100;
         this.percentWidth = 100;
+    }
+
+    public function set additionalItems(value:ArrayCollection):void {
+        _additionalItems = value;
     }
 
     public function set adHocMode(value:Boolean):void {
@@ -328,7 +334,7 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
                         filters.addItem(filter);
                     }
                 }
-                _dataService.retrieveData(reportID, dataSourceID, filters, false, drillthroughFilters, _noCache, overrides, createRequestParams());
+                _dataService.retrieveData(reportID, dataSourceID, filters, false, drillthroughFilters, _noCache, overrides, createRequestParams(), _additionalItems);
             }
         }
     }
@@ -370,7 +376,7 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         for each (var hierarchyOverride:AnalysisItemOverride in overrideObj) {
             overrides.addItem(hierarchyOverride);
         }
-        _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, false, drillthroughFilters, _noCache, overrides, createRequestParams());
+        _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, false, drillthroughFilters, _noCache, overrides, createRequestParams(), _additionalItems);
     }
 
     private var _usePreferredHeight:Boolean = false;

@@ -9,11 +9,21 @@ package com.easyinsight.suggestion {
 [Bindable]
 [RemoteClass(alias="com.easyinsight.intention.NewHierarchyIntention")]
 public class NewHierarchyIntention extends Intention {
+
+    public static const  HIERARCHY:int = 1;
+    public static const  CUSTOMIZE_JOINS:int = 2;
+
+    public var variant:int;
+
     public function NewHierarchyIntention() {
     }
 
     override public function apply(suggestionMetadata:SuggestionMetadata):void {
-        dispatchEvent(new IntentionTriggerEvent(IntentionTriggerEvent.INTENTION_TRIGGER, false, null, true));
+        if (variant == HIERARCHY) {
+            dispatchEvent(new IntentionTriggerEvent(IntentionTriggerEvent.INTENTION_TRIGGER, false, null, true));
+        } else {
+            dispatchEvent(new IntentionTriggerEvent(IntentionTriggerEvent.INTENTION_TRIGGER, false, null, false, true));
+        }
     }
 }
 }

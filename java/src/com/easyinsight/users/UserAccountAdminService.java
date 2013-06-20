@@ -1158,6 +1158,7 @@ public class UserAccountAdminService {
             account.setPublicDataEnabled(accountSettings.isPublicData());
             account.setReportSharingEnabled(accountSettings.isReportSharing());
             account.setCurrencySymbol(accountSettings.getCurrencySymbol());
+            account.setMaxRecords(accountSettings.getMaxResults());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -1186,6 +1187,7 @@ public class UserAccountAdminService {
             accountSettings.setDateFormat(account.getDateFormat());
             accountSettings.setReportSharing(account.isReportSharingEnabled());
             accountSettings.setCurrencySymbol(account.getCurrencySymbol());
+            accountSettings.setMaxResults(account.getMaxRecords());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);

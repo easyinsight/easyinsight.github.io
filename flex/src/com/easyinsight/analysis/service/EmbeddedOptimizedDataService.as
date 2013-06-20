@@ -80,7 +80,7 @@ public class EmbeddedOptimizedDataService extends EventDispatcher implements IEm
         dataRemoteSource.getOptimizedResults.send(reportIDs, dataSourceID, filters, insightRequestMetadata);
     }
 
-    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams):void {
+    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams, additionalAnalysisItems:ArrayCollection):void {
     }
 }
 }

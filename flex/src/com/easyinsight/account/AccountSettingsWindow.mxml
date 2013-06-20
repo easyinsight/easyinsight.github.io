@@ -11,6 +11,9 @@
         [Bindable]
         private var apiEnabled:Boolean = false;
 
+        [Bindable]
+        private var defaultMaxResults:String;
+
         private var settings:AccountAPISettings;
 
         [Bindable]
@@ -37,6 +40,7 @@
             dateFormat = accountSettings.dateFormat;
             currencySymbol = accountSettings.currencySymbol;
             firstDayOfWeek = accountSettings.firstDayOfWeek;
+            defaultMaxResults = String(accountSettings.maxResults);
         }
 
         private function save():void {
@@ -48,6 +52,7 @@
             accountSettings.dateFormat = dateBox.selectedItem.data;
             accountSettings.currencySymbol = currencySymbolInput.text;
             accountSettings.firstDayOfWeek = dayBox.selectedItem.data;
+            accountSettings.maxResults = int(defaultMaxResultsInput.text);
             ProgressAlert.alert(this, "Saving settings...", null, userService.saveAccountSettings);
             User.getInstance().dateFormat = accountSettings.dateFormat;
             userService.saveAccountSettings.send(accountSettings);
@@ -106,10 +111,10 @@
                     </util:dataProvider>
                 </util:SmartComboBox>
             </mx:FormItem>
-            <mx:FormItem label="Currency Symbol">
+            <mx:FormItem label="Currency Symbol:">
                 <mx:TextInput id="currencySymbolInput" maxChars="1" text="{currencySymbol}"/>
             </mx:FormItem>
-            <mx:FormItem label="First Day of Week">
+            <mx:FormItem label="First Day of Week:">
                 <util:SmartComboBox id="dayBox" rowCount="6" selectedValue="{firstDayOfWeek}" selectedProperty="data">
                     <util:dataProvider>
                         <mx:Array>
@@ -123,6 +128,9 @@
                         </mx:Array>
                     </util:dataProvider>
                 </util:SmartComboBox>
+            </mx:FormItem>
+            <mx:FormItem label="Default Max Results:">
+                <mx:TextInput id="defaultMaxResultsInput" text="{defaultMaxResults}"/>
             </mx:FormItem>
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">

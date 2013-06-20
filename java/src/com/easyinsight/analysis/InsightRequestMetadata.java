@@ -25,6 +25,7 @@ public class InsightRequestMetadata implements Serializable {
     private boolean traverseAllJoins;
     private Collection<AnalysisItem> reportItems;
     private boolean lookupTableAggregate;
+    private List<AnalysisItem> additionalAnalysisItems = new ArrayList<AnalysisItem>();
     private transient Map<Long, AnalysisItem> uniqueIteMap = new HashMap<Long, AnalysisItem>();
     private transient Map<String, Long> fieldToUniqueMap = new HashMap<String, Long>();
     private transient Map<AnalysisItem, Set<String>> pipelineAssignmentMap = new HashMap<AnalysisItem, Set<String>>();
@@ -37,6 +38,24 @@ public class InsightRequestMetadata implements Serializable {
     private transient Set<AnalysisItem> postProcessJoins = new HashSet<AnalysisItem>();
     private List<AddonReport> addonReports;
     private String ip;
+
+    private long databaseTime = 0;
+
+    public void addDatabaseTime(long time) {
+        databaseTime += time;
+    }
+
+    public long getDatabaseTime() {
+        return databaseTime;
+    }
+
+    public List<AnalysisItem> getAdditionalAnalysisItems() {
+        return additionalAnalysisItems;
+    }
+
+    public void setAdditionalAnalysisItems(List<AnalysisItem> additionalAnalysisItems) {
+        this.additionalAnalysisItems = additionalAnalysisItems;
+    }
 
     public List<AddonReport> getAddonReports() {
         return addonReports;
