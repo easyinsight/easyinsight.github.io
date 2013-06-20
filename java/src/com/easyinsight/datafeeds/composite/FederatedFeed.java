@@ -31,7 +31,7 @@ public class FederatedFeed extends Feed {
             for (FederationSource source : sources) {
                 Feed feed = FeedRegistry.instance().getFeed(source.getDataSourceID(), conn);
 
-                Map<AnalysisItem, AnalysisItem> map = new HashMap<AnalysisItem, AnalysisItem>();
+                Map<AnalysisItem, List<AnalysisItem>> map = new HashMap<AnalysisItem, List<AnalysisItem>>();
                 Set<AnalysisItem> childAnalysisItems = new HashSet<AnalysisItem>();
                 for (AnalysisItem analysisItem : analysisItems) {
                     boolean matched = false;
@@ -41,7 +41,12 @@ public class FederatedFeed extends Feed {
                                 if (field.toOriginalDisplayName().equals(fieldMapping.getSourceKey())) {
                                     matched = true;
                                     childAnalysisItems.add(field);
-                                    map.put(field, analysisItem);
+                                    List<AnalysisItem> items = map.get(field);
+                                    if (items == null) {
+                                        items = new ArrayList<AnalysisItem>();
+                                        map.put(field, items);
+                                    }
+                                    items.add(analysisItem);
                                 }
                             }
                         }
@@ -50,7 +55,12 @@ public class FederatedFeed extends Feed {
                         for (AnalysisItem field : feed.getDataSource().getFields()) {
                             if (field.toOriginalDisplayName().equals(analysisItem.toOriginalDisplayName())) {
                                 childAnalysisItems.add(field);
-                                map.put(field, analysisItem);
+                                List<AnalysisItem> items = map.get(field);
+                                if (items == null) {
+                                    items = new ArrayList<AnalysisItem>();
+                                    map.put(field, items);
+                                }
+                                items.add(analysisItem);
                             }
                         }
                     }
@@ -89,9 +99,12 @@ public class FederatedFeed extends Feed {
 
                 for (IRow row : childSet.getRows()) {
                     IRow newRow = dataSet.createRow();
-                    for (Map.Entry<AnalysisItem, AnalysisItem> entry : map.entrySet()) {
+                    for (Map.Entry<AnalysisItem, List<AnalysisItem>> entry : map.entrySet()) {
                         Value value = row.getValue(entry.getKey());
-                        newRow.addValue(entry.getValue().createAggregateKey(), value);
+                        for (AnalysisItem valItem : entry.getValue()) {
+                            newRow.addValue(valItem.createAggregateKey(), value);
+                        }
+
                     }
                 }
             }
