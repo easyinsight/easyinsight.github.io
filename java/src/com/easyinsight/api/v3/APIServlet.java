@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ public abstract class APIServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Date start = new Date();
         String authHeader = req.getHeader("Authorization");
         if (authHeader == null) {
             resp.setContentType("text/xml");
@@ -110,6 +112,8 @@ public abstract class APIServlet extends HttpServlet {
                 resp.getOutputStream().flush();
             }
         }
+        Date end = new Date();
+        System.out.println("API Call: " + this.getClass().getCanonicalName() +" Duration: " + (end.getTime() - start.getTime()));
     }
 
     @Override
