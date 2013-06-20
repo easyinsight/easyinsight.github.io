@@ -128,11 +128,21 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
+        JSONObject object = getJsonObject();
+        String argh = object.toString();
+        argh = argh.replaceAll("\"", "");
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        String customHeight = htmlReportMetadata.createStyleProperties().toString();
+        argh = "$.getJSON('/app/bubbleChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ",false," + customHeight + "))";
+        System.out.println(argh);
+        return argh;
+    }
+
+    private JSONObject getJsonObject() {
         JSONObject params;
         JSONObject object = new JSONObject();
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
-
             JSONObject seriesDefaults = new JSONObject();
             seriesDefaults.put("renderer", "$.jqplot.BubbleRenderer");
             JSONObject axes = new JSONObject();
@@ -142,7 +152,6 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
             axes.put("yaxis", yAxis);
             jsonParams.put("axes", axes);
             JSONObject rendererOptions = new JSONObject();
-            //rendererOptions.put("fillToZero", "true");
             rendererOptions.put("bubbleGradients", "true");
             seriesDefaults.put("rendererOptions", rendererOptions);
             seriesDefaults.put("shadow", true);
@@ -154,12 +163,17 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        String argh = object.toString();
-        argh = argh.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties();
-        argh = "$.getJSON('/app/bubbleChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('"+ targetDiv + "', " + argh + ",false,"+customHeight+"))";
-        System.out.println(argh);
-        return argh;
+        return object;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject areaChart = super.toJSON(htmlReportMetadata, parentDefinitions);
+        areaChart.put("type", "bubble");
+        areaChart.put("key", getUrlKey());
+        areaChart.put("url", "/app/bubbleChart");
+        areaChart.put("parameters", getJsonObject());
+        areaChart.put("styles", htmlReportMetadata.createStyleProperties());
+        return areaChart;
     }
 }

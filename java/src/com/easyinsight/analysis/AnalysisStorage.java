@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.calculations.FunctionFactory;
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -99,6 +100,21 @@ public class AnalysisStorage {
                     savedReport.validate();
                     analysisDefinition = savedReport.createBlazeDefinition();
                 }
+                InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                if (analysisDefinition.getMarmotScript() != null) {
+                    StringTokenizer toker = new StringTokenizer(analysisDefinition.getMarmotScript(), "\r\n");
+                    while (toker.hasMoreTokens()) {
+                        String line = toker.nextToken();
+                        if (FunctionFactory.functionRunsOnReportLoad(line)) {
+                            try {
+                                new ReportCalculation(line).apply(analysisDefinition, new ArrayList<AnalysisItem>(), new HashMap<String, List<AnalysisItem>>(),
+                                    new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                            } catch (Exception e) {
+                                LogClass.error(e);
+                            }
+                        }
+                    }
+                }
                 session.getTransaction().commit();
             } catch (Exception e) {
                 session.getTransaction().rollback();
@@ -150,6 +166,21 @@ public class AnalysisStorage {
                     AnalysisDefinition savedReport = (AnalysisDefinition) results.get(0);
                     savedReport.validate();
                     analysisDefinition = savedReport.createBlazeDefinition();
+                }
+                InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                if (analysisDefinition.getMarmotScript() != null) {
+                    StringTokenizer toker = new StringTokenizer(analysisDefinition.getMarmotScript(), "\r\n");
+                    while (toker.hasMoreTokens()) {
+                        String line = toker.nextToken();
+                        if (FunctionFactory.functionRunsOnReportLoad(line)) {
+                            try {
+                                new ReportCalculation(line).apply(analysisDefinition, new ArrayList<AnalysisItem>(), new HashMap<String, List<AnalysisItem>>(),
+                                        new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                            } catch (Exception e) {
+                                LogClass.error(e);
+                            }
+                        }
+                    }
                 }
                 session.getTransaction().commit();
             } catch (Exception e) {
@@ -395,7 +426,7 @@ public class AnalysisStorage {
                 descriptors.addAll(getInsightDescriptorsForDataSource(userID, accountID, node.getDataFeedID(), conn));
             }
         }
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ACCOUNT_VISIBLE FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ACCOUNT_VISIBLE, FOLDER FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
                 "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? AND temporary_report = ? AND " +
                 "analysis.data_feed_id = ?");
         queryStmt.setLong(1, userID);
@@ -403,7 +434,7 @@ public class AnalysisStorage {
         queryStmt.setLong(3, dataSourceID);
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
-            descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), Roles.OWNER, rs.getBoolean(6)));
+            descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), new Date(), "", Roles.OWNER, rs.getBoolean(6), rs.getInt(7), ""));
         }
         queryStmt.close();
         PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ACCOUNT_VISIBLE FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +

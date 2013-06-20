@@ -23,42 +23,38 @@ import java.util.*;
  */
 public class InfusionsoftCampaignSource extends InfusionsoftTableSource {
 
-    public static final String STAGE_MOVE_ID = "Id";
-    public static final String OPPORTUNITY_ID = "OpportunityId";
-    public static final String MOVE_DATE = "MoveDate";
-    public static final String MOVE_TO_STAGE = "MoveToStage";
-    public static final String MOVE_FROM_STAGE = "MoveFromStage";
+    public static final String ID = "Id";
+    public static final String NAME = "Name";
+    public static final String STATUS = "Status";
 
     public InfusionsoftCampaignSource() {
-        setFeedName("Stage History");
+        setFeedName("Campaigns");
     }
 
     @Override
     public FeedType getFeedType() {
-        return FeedType.INFUSIONSOFT_STAGE;
+        return FeedType.INFUSIONSOFT_CAMPAIGNS;
     }
 
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(STAGE_MOVE_ID, OPPORTUNITY_ID, MOVE_DATE, MOVE_TO_STAGE, MOVE_FROM_STAGE);
+        return Arrays.asList(ID, NAME, STATUS);
     }
 
     @Override
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisitems = new ArrayList<AnalysisItem>();
-        analysisitems.add(new AnalysisDimension(keys.get(STAGE_MOVE_ID), "Stage Move ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(OPPORTUNITY_ID), "Stage Order"));
-        analysisitems.add(new AnalysisDimension(keys.get(MOVE_TO_STAGE), "Move to Stage"));
-        analysisitems.add(new AnalysisDimension(keys.get(MOVE_FROM_STAGE), "Move from Stage"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(MOVE_DATE), "Move Date", AnalysisDateDimension.MINUTE_LEVEL));
+        analysisitems.add(new AnalysisDimension(keys.get(ID), "Campaign ID"));
+        analysisitems.add(new AnalysisDimension(keys.get(NAME), "Campaign Name"));
+        analysisitems.add(new AnalysisDimension(keys.get(STATUS), "Campaign Status"));
         return analysisitems;
     }
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            return query("StageMove", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            return query("Campaign", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

@@ -209,7 +209,7 @@ public class TreeData {
                 TreeRow summaryRow = new TreeRow();
 
                 for (AnalysisItem reportItem : treeDefinition.getItems()) {
-                    if (reportItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    if (reportItem.hasType(AnalysisItemTypes.MEASURE) && aggregateLevel != null) {
                         summaryRow.getValues().put(reportItem.qualifiedName(), aggregateLevel.getValue(reportItem));
                     }
                 }

@@ -162,7 +162,8 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
         includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
-        includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
+        includes.add("/js/plugins/jqplot.barRenderer.js");
+        includes.add("/js/plugins/jqplot.categoryAxisRenderer.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
@@ -175,6 +176,19 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
+        JSONObject fullObject = getJsonObject(htmlReportMetadata);
+        String argh = fullObject.toString();
+        argh = argh.replaceAll("\"", "");
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        String customHeight = htmlReportMetadata.createStyleProperties().toString();
+        String xyz = "$.getJSON('/app/stackedChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getStackedBarChart('" + targetDiv + "', " + argh + "," + customHeight + "))";
+        /*return "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {\n" +
+                "                var s1 = data[\"values\"];\n" +
+                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";*/
+        return xyz;
+    }
+
+    private JSONObject getJsonObject(HTMLReportMetadata htmlReportMetadata) {
         JSONObject params;
         JSONObject fullObject = new JSONObject();
         try {
@@ -205,15 +219,18 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        String argh = fullObject.toString();
-        argh = argh.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties();
-        String xyz = "$.getJSON('/app/stackedChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getStackedBarChart('" + targetDiv + "', " + argh + "," + customHeight + "))";
-        /*return "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {\n" +
-                "                var s1 = data[\"values\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";*/
-        return xyz;
+        return fullObject;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject pie = super.toJSON(htmlReportMetadata, parentDefinitions);
+        pie.put("parameters", getJsonObject(htmlReportMetadata));
+        pie.put("key", getUrlKey());
+        pie.put("type", "stacked_bar");
+        pie.put("styles", htmlReportMetadata.createStyleProperties());
+        pie.put("url", "/app/stackedChart");
+        return pie;
     }
 
     @Override

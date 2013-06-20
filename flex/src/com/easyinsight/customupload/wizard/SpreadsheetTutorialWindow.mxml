@@ -148,6 +148,7 @@
                     AnalysisDateDimension(item).customDateFormat = dateFormat.text;
                 }
                 AnalysisDateDimension(item).dateLevel = dateLevelBox.selectedItem.data;
+                AnalysisDateDimension(item).dateOnlyField = true;
             } else if (type == (AnalysisItemTypes.LIST | AnalysisItemTypes.DIMENSION)) {
                 item = new AnalysisList();
             } else if (type == (AnalysisItemTypes.ZIP_CODE | AnalysisItemTypes.DIMENSION)) {

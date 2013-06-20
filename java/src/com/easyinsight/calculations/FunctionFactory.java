@@ -26,6 +26,14 @@ public class FunctionFactory {
         aggregationMap.put("castvariance", AggregationTypes.VARIANCE);
     }
 
+    public static boolean functionRunsOnReportLoad(String function) {
+        if (function.contains("assignfiltervalue")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public IFunction createFunction(String s) {
         if (aggregationMap.containsKey(s)) {
             return new CastFunction(aggregationMap.get(s), s);
@@ -205,6 +213,8 @@ public class FunctionFactory {
             return new GreaterThanOrEqual();
         } else if (s.equals("next")) {
             return new NextRecord();
+        } else if (s.equals("nextfromnow")) {
+            return new NextFromNowRecord();
         } else if (s.equals("previous")) {
             return new PreviousRecord();
         } else if (s.equals("first")) {
@@ -249,7 +259,13 @@ public class FunctionFactory {
             return new Format();
         } else if (s.equals("decimaldegrees")) {
             return new DecimalDegrees();
-        } else {
+        } else if (s.equals("assignfiltervalue")) {
+            return new AssignFilterValue();
+        } else if (s.equals("datelevel")) {
+            return new DateLevelFunction();
+        } else if (s.equals("dateformatnoshift")) {
+            return new EIDateFormatNoShiftFunction();
+        }else {
             return null;
         }
     }

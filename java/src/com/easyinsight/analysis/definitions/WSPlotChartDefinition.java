@@ -142,6 +142,17 @@ public class WSPlotChartDefinition extends WSChartDefinition {
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
 
+        JSONObject object = getJsonObject();
+        String argh = object.toString();
+        argh = argh.replaceAll("\"", "");
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        String customHeight = htmlReportMetadata.createStyleProperties().toString();
+        argh = "$.getJSON('/app/bubbleChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ",false," + customHeight + "))";
+        System.out.println(argh);
+        return argh;
+    }
+
+    private JSONObject getJsonObject() {
         JSONObject params;
         JSONObject object = new JSONObject();
         try {
@@ -170,12 +181,17 @@ public class WSPlotChartDefinition extends WSChartDefinition {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        String argh = object.toString();
-        argh = argh.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties();
-        argh = "$.getJSON('/app/bubbleChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('"+ targetDiv + "', " + argh + ",false,"+customHeight+"))";
-        System.out.println(argh);
-        return argh;
+        return object;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject pie = super.toJSON(htmlReportMetadata, parentDefinitions);
+        pie.put("parameters", getJsonObject());
+        pie.put("key", getUrlKey());
+        pie.put("type", "plot");
+        pie.put("styles", htmlReportMetadata.createStyleProperties());
+        pie.put("url", "/app/bubbleChart");
+        return pie;
     }
 }

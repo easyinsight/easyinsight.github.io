@@ -3,6 +3,7 @@ package com.easyinsight.pipeline;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.InsightRequestMetadata;
+import com.easyinsight.database.EIConnection;
 
 import java.util.*;
 
@@ -19,6 +20,7 @@ public class PipelineData implements  Cloneable {
     private Map<String, String> dataSourceProperties;
     private Set<AnalysisItem> allRequestedItems;
     private Map<Long, AnalysisItem> uniqueItems;
+    private EIConnection conn;
 
     public PipelineData(WSAnalysisDefinition report, Collection<AnalysisItem> reportItems, InsightRequestMetadata insightRequestMetadata,
                         List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems,
@@ -30,6 +32,14 @@ public class PipelineData implements  Cloneable {
         this.dataSourceProperties = dataSourceProperties;
         this.allRequestedItems = allRequestedItems;
         this.uniqueItems = uniqueItems;
+    }
+
+    public EIConnection getConn() {
+        return conn;
+    }
+
+    public void setConn(EIConnection conn) {
+        this.conn = conn;
     }
 
     public PipelineData clone() throws CloneNotSupportedException {

@@ -2,9 +2,13 @@ package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.analysis.FilterHTMLMetadata;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.scorecard.Scorecard;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,6 +68,15 @@ public class DashboardText extends DashboardElement {
         insertStmt.setInt(4, fontSize);
         insertStmt.execute();
         return id;
+    }
+
+    @Override
+    public JSONObject toJSON(FilterHTMLMetadata metadata, List<FilterDefinition> parentFilters) throws JSONException {
+        JSONObject textObject = super.toJSON(metadata, parentFilters);
+        textObject.put("id", getElementID());
+        textObject.put("type", "text");
+        textObject.put("item", text);
+        return textObject;
     }
 
     @Override

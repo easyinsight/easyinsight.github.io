@@ -17,7 +17,7 @@ package com.easyinsight.filtering
         public var currentEndValueDefined:Boolean;
         public var lowerOperator:int;
         public var upperOperator:int;
-
+        public var showSlider:Boolean = true;
 
 		public function FilterRangeDefinition()
 		{

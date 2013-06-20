@@ -10,3 +10,132 @@ body {
 #problemHTML {
     display: none;
 }
+
+.rolling_filter_type {
+    width: 125px;
+}
+
+.rolling_filter_direction {
+    width: 70px;
+}
+
+.rolling_filter_value {
+    width: 70px;
+}
+
+.filter {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.filters select {
+    width: auto;
+}
+
+.dashboard_grid {
+    display: inline-block;
+    vertical-align: top;
+    max-width: 100%;
+
+}
+
+.dashboard_base {
+    background-color: #ffffff;
+    text-align: center;
+}
+
+.grid_header {
+    background-color: #CCCCCC;
+    width: 100%;
+    padding: 10px 0px 10px 40px;
+    margin-bottom: 10px;
+    margin-top: 5px;
+    margin-left: -40px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #999999;
+}
+
+.dashboardReportHeader {
+    background-color: #CCCCCC;
+    width: 100%;
+    padding: 4px 0px;
+    line-height: normal;
+    height: auto;
+    font-size: 14px;
+    margin-bottom: 10px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #999999;
+}
+
+.filters {
+    text-align: left;
+    width: 100%;
+    vertical-align: top;
+    font-size: 11px;
+}
+
+.filters input {
+    font-size: 11px;
+}
+
+.filters button {
+    font-size: 11px;
+}
+
+.dashboard_text {
+    text-align: left;
+}
+
+.dashboard_text_valign {
+    position: relative;
+}
+
+.inner_dashboard_text {
+    position: absolute;
+    top: 50%;
+    margin-top: -25%;
+}
+
+.date_filter_input {
+    width: 80px;
+    margin: 0px;
+}
+
+.nav-pills > li {
+    float: none;
+    width: auto;
+    display: inline-block;
+}
+
+.nav-pills > li a {
+    color: #FFFFFF;
+}
+
+.nav-pills > li.active a {
+    background-color: #FFFFFF;
+    color: #000000;
+}
+
+.tabbable {
+    position: relative;
+}
+
+.nav-pills {
+    width: 100%;
+    background-color: #5c5c5c;
+}
+
+.dashboard_header {
+    margin-bottom: 10px;
+}
+
+.dashboard_base > .row-fluid > .span12 > .tabbable > .nav-pills {
+    padding: 5px 20px 5px 20px;
+    margin: -5px -20px 15px -20px;
+    border-radius: 4px 4px 0px 0px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #5c5c5c;
+}

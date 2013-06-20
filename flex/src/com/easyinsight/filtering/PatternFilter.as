@@ -6,7 +6,10 @@ import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
+import flash.events.FocusEvent;
+import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
+import flash.ui.Keyboard;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
@@ -14,7 +17,10 @@ import mx.collections.ArrayCollection;
 	import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.Label;
-	import mx.managers.PopUpManager;
+import mx.controls.LinkButton;
+import mx.controls.TextInput;
+import mx.core.UIComponent;
+import mx.managers.PopUpManager;
 	import mx.rpc.remoting.RemoteObject;
 
 	public class PatternFilter extends HBox implements IFilter
@@ -24,7 +30,7 @@ import mx.controls.Label;
 		private var _feedID:int;		
 		private var deleteButton:Button;
 		private var editButton:Button;
-		private var labelText:Label;
+		private var labelText:UIComponent;
 		private var dataService:RemoteObject;		
 		private var _analysisItems:ArrayCollection;
 
@@ -57,6 +63,11 @@ import mx.controls.Label;
 		}
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
+            if (labelText != null && labelText is LinkButton) {
+                LinkButton(labelText).label = FilterDefinition.getLabel(event.filterDefinition, event.filterDefinition.field);
+            } else if (labelText != null && labelText is Label) {
+                Label(labelText).text = FilterDefinition.getLabel(event.filterDefinition, event.filterDefinition.field);
+            }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
 		}
 
@@ -65,26 +76,40 @@ import mx.controls.Label;
             _filterDefinition.enabled = checkbox.selected;
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
+
+
 		
 		override protected function createChildren():void {
 			super.createChildren();
             //if (!_filterEditable) {
+            if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
                 var checkbox:CheckBox = new CheckBox();
                 checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
                 checkbox.toolTip = "Click to disable this filter.";
                 checkbox.addEventListener(Event.CHANGE, onChange);
                 addChild(checkbox);
+            }
             //}
             if (_filterDefinition == null) {
                 _filterDefinition = new FilterPatternDefinition();
                 _filterDefinition.field = _analysisItem;
             }
 
-            labelText = new Label();
-            labelText.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+            if (_filterEditable) {
+                labelText = new LinkButton();
+                labelText.styleName = "filterLabel";
+                LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+            } else {
+                labelText = new Label();
+                labelText.styleName = "filterLabel";
+                Label(labelText).text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+            }
+
             addChild(labelText);
 
-            var valueLabel:Label = new Label();
+            valueLabel = new TextInput();
+            valueLabel.addEventListener(FocusEvent.FOCUS_OUT, onFocusOut);
+            valueLabel.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
             BindingUtils.bindProperty(valueLabel, "text", filterDefinition, "pattern");
             valueLabel.text = _filterDefinition.pattern;
             addChild(valueLabel);
@@ -110,6 +135,26 @@ import mx.controls.Label;
                 dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
             }
 		}
+
+        private var valueLabel:TextInput;
+
+        private function onKeyUp(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                var existing:String = _filterDefinition.pattern;
+                if (existing != valueLabel.text) {
+                    _filterDefinition.pattern = valueLabel.text;
+                    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
+                }
+            }
+        }
+
+        private function onFocusOut(event:FocusEvent):void {
+            var existing:String = _filterDefinition.pattern;
+            if (existing != valueLabel.text) {
+                _filterDefinition.pattern = valueLabel.text;
+                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
+            }
+        }
 		
 		private function deleteSelf(event:MouseEvent):void {
 			dispatchEvent(new FilterDeletionEvent(this));

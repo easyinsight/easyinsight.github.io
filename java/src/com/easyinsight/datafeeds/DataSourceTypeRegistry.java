@@ -307,6 +307,13 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.INFUSIONSOFT_COMPANIES, InfusionsoftCompanySource.class);
         registerType(FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftContactSource.class);
         registerType(FeedType.INFUSIONSOFT_JOBS, InfusionsoftJobSource.class);
+        registerType(FeedType.INFUSIONSOFT_SUBSCRIPTIONS, InfusionsoftSubscriptionSource.class);
+        registerType(FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftProductSource.class);
+        registerType(FeedType.INFUSIONSOFT_PRODUCT_INTEREST, InfusionsoftProductInterestSource.class);
+        registerType(FeedType.INFUSIONSOFT_CAMPAIGNS, InfusionsoftCampaignSource.class);
+        registerType(FeedType.INFUSIONSOFT_CONTACT_ACTION, InfusionsoftContactActionSource.class);
+        registerType(FeedType.INFUSIONSOFT_RECURRING_ORDERS, InfusionsoftRecurringOrderSource.class);
+        registerType(FeedType.INFUSIONSOFT_ORDER_ITEM, InfusionsoftOrderItemSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

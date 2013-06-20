@@ -8,6 +8,8 @@ import com.easyinsight.pipeline.IComponent;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.hibernate.Session;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.text.DateFormat;
@@ -299,5 +301,16 @@ public class FilterDateRangeDefinition extends FilterDefinition {
                 append("<input readonly=\"readonly\" type=\"text\" id=\""+endName+"\" value=\"").append(df.format(getEndDate())).append("\"/>");
         sb.append("</div>");
         return sb.toString();
+    }
+
+    @Override
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
+        DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+        JSONObject jo = super.toJSON(filterHTMLMetadata);
+
+        jo.put("type", "date_range");
+        jo.put("start_date", df.format(getStartDate()));
+        jo.put("end_date", df.format(getEndDate()));
+        return jo;
     }
 }

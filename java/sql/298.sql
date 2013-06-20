@@ -1,0 +1,1 @@
+alter table zendesk add load_comments tinyint(4) default 0;

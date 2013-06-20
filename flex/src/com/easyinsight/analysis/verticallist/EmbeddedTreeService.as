@@ -8,8 +8,8 @@
 package com.easyinsight.analysis.verticallist {
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.EmbeddedTreeDataResults;
-import com.easyinsight.analysis.EmbeddedTrendDataResults;
 import com.easyinsight.analysis.IEmbeddedDataService;
+import com.easyinsight.analysis.RequestParams;
 import com.easyinsight.analysis.service.EmbeddedDataService;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.GenericFaultHandler;
@@ -31,8 +31,7 @@ public class EmbeddedTreeService extends EmbeddedDataService implements IEmbedde
         dataRemoteSource.getEmbeddedTreeResults.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
     }
 
-    override public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection,
-            noCache:Boolean, hierarchyOverrides:ArrayCollection):void {
+    override public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.utcOffset = new Date().getTimezoneOffset();

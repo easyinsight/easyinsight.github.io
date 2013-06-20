@@ -47,7 +47,7 @@ public class UIData {
     public String createHeader(String name, @Nullable DashboardUIProperties properties) {
 
         StringBuilder sb = new StringBuilder();
-        sb.append("<div class=\"row-fluid\">\n" +
+        sb.append("<div class=\"row-fluid dashboard_header\">\n" +
                 "        <div class=\"span12\">\n");
         if (applicationSkin != null && applicationSkin.isReportHeader()) {
             sb.append("            <div style=\"").append(headerStyle).append("\">\n").append("                <div style=\"padding:10px;float:left\">\n").append("                    <div style=\"background-color: #FFFFFF;padding: 5px\">\n");

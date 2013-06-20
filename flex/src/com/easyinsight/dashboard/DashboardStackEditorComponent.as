@@ -140,6 +140,13 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         }
     }
 
+    public function toggleControls(show:Boolean):void {
+        var comps:ArrayCollection = stackComponents();
+        for each (var box:DashboardBox in comps) {
+            box.toggleControls(show);
+        }
+    }
+
     public function validate(results:Array):void {
         var valid:Boolean = false;
         var comps:ArrayCollection = stackComponents();

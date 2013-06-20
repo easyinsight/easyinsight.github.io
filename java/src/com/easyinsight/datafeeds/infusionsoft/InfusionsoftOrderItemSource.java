@@ -1,9 +1,6 @@
 package com.easyinsight.datafeeds.infusionsoft;
 
-import com.easyinsight.analysis.AnalysisDateDimension;
-import com.easyinsight.analysis.AnalysisDimension;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.ReportException;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -23,42 +20,48 @@ import java.util.*;
  */
 public class InfusionsoftOrderItemSource extends InfusionsoftTableSource {
 
-    public static final String STAGE_MOVE_ID = "Id";
-    public static final String OPPORTUNITY_ID = "OpportunityId";
-    public static final String MOVE_DATE = "MoveDate";
-    public static final String MOVE_TO_STAGE = "MoveToStage";
-    public static final String MOVE_FROM_STAGE = "MoveFromStage";
+    public static final String ORDER_ITEM_ID = "Id";
+    public static final String ORDER_ID = "OrderId";
+    public static final String PRODUCT_ID = "ProductId";
+    public static final String SUBSCRIPTION_PLAN_ID = "SubscriptionPlanId";
+    public static final String QUANTITY = "Qty";
+    public static final String CPU = "CPU";
+    public static final String PPU = "PPU";
+    public static final String ITEM_TYPE = "ItemType";
 
     public InfusionsoftOrderItemSource() {
-        setFeedName("Stage History");
+        setFeedName("Order Item");
     }
 
     @Override
     public FeedType getFeedType() {
-        return FeedType.INFUSIONSOFT_STAGE;
+        return FeedType.INFUSIONSOFT_ORDER_ITEM;
     }
 
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(STAGE_MOVE_ID, OPPORTUNITY_ID, MOVE_DATE, MOVE_TO_STAGE, MOVE_FROM_STAGE);
+        return Arrays.asList(ORDER_ITEM_ID, ORDER_ID, PRODUCT_ID, SUBSCRIPTION_PLAN_ID, QUANTITY, CPU, PPU, ITEM_TYPE);
     }
 
     @Override
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisitems = new ArrayList<AnalysisItem>();
-        analysisitems.add(new AnalysisDimension(keys.get(STAGE_MOVE_ID), "Stage Move ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(OPPORTUNITY_ID), "Stage Order"));
-        analysisitems.add(new AnalysisDimension(keys.get(MOVE_TO_STAGE), "Move to Stage"));
-        analysisitems.add(new AnalysisDimension(keys.get(MOVE_FROM_STAGE), "Move from Stage"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(MOVE_DATE), "Move Date", AnalysisDateDimension.MINUTE_LEVEL));
+        analysisitems.add(new AnalysisDimension(keys.get(ORDER_ITEM_ID), "Order Item ID"));
+        analysisitems.add(new AnalysisDimension(keys.get(ORDER_ID), "Order Item Order ID"));
+        analysisitems.add(new AnalysisDimension(keys.get(PRODUCT_ID), "Order Item Product ID"));
+        analysisitems.add(new AnalysisDimension(keys.get(SUBSCRIPTION_PLAN_ID), "Order Item Subscription Plan ID"));
+        analysisitems.add(new AnalysisDimension(keys.get(ITEM_TYPE), "Order Item Type"));
+        analysisitems.add(new AnalysisMeasure(keys.get(QUANTITY), "Order Item Quantity", AggregationTypes.SUM));
+        analysisitems.add(new AnalysisMeasure(keys.get(CPU), "CPU", AggregationTypes.SUM));
+        analysisitems.add(new AnalysisMeasure(keys.get(PPU), "PPU", AggregationTypes.SUM));
         return analysisitems;
     }
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            return query("StageMove", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            return query("OrderItem", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

@@ -7,6 +7,9 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.scorecard.Scorecard;
 import org.hibernate.Session;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -181,7 +184,7 @@ public class DashboardStack extends DashboardElement {
             List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
             Session session = Database.instance().createSession(conn);
             try {
-                PreparedStatement filterStmt = conn.prepareStatement("SELECT FILTER_ID FROM dashboard_element_to_filter where dashboard_element_id = ?");
+                PreparedStatement filterStmt = conn.prepareStatement("SELECT FILTER_ID FROM dashboard_element_to_filter WHERE dashboard_element_id = ?");
                 filterStmt.setLong(1, elementID);
                 ResultSet filterRS = filterStmt.executeQuery();
                 while (filterRS.next()) {
@@ -343,6 +346,31 @@ public class DashboardStack extends DashboardElement {
         return parentConsolidatesFilters(parent.getParentElement());
     }
 
+    public JSONObject toJSON(FilterHTMLMetadata metadata, List<FilterDefinition> parentFilters) throws JSONException {
+        JSONObject stack = super.toJSON(metadata, parentFilters);
+        stack.put("id", getElementID());
+        stack.put("type", "stack");
+        List<FilterDefinition> curFilters = new ArrayList(parentFilters);
+        curFilters.addAll(getFilters());
+        JSONArray stackItems = new JSONArray();
+        stack.put("stack_items", stackItems);
+        for (DashboardStackItem item : getGridItems()) {
+            String label;
+            if (item.getDashboardElement() instanceof DashboardReport) {
+                label = ((DashboardReport) item.getDashboardElement()).getReport().getName();
+            } else {
+                label = item.getDashboardElement().getLabel();
+            }
+            JSONObject stackItem = new JSONObject();
+            stackItem.put("label", label);
+
+            stackItem.put("item", item.getDashboardElement().toJSON(metadata, curFilters));
+            stackItems.put(stackItem);
+        }
+
+        return stack;
+    }
+
     @Override
     public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
@@ -419,7 +447,7 @@ public class DashboardStack extends DashboardElement {
                     } else {
                         update += "else if (state" + stackID + " == 'ds" + item.getDashboardElement().getElementID() + "') {\n";
                     }
-                    update += item.getDashboardElement().refreshFunction()+"\n";
+                    update += item.getDashboardElement().refreshFunction() + "\n";
                     update += "}\n";
                 }
                 update += "}";
@@ -430,21 +458,21 @@ public class DashboardStack extends DashboardElement {
                 String initString;
                 String pieceString;
                 if (filterHTMLMetadata.getDrillthroughKey() == null) {
-                    initString = "/app/dashboardPiece?dashboardElementID="+gridItems.get(0).getDashboardElement().getElementID()+"&embedded="+filterHTMLMetadata.isEmbedded()+"&dashboardID="+filterHTMLMetadata.getDashboard().getId();
-                    pieceString = "/app/dashboardPiece?dashboardElementID=' + contentID.replace('#', '')+'&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"&embedded="+filterHTMLMetadata.isEmbedded();
+                    initString = "/app/dashboardPiece?dashboardElementID=" + gridItems.get(0).getDashboardElement().getElementID() + "&embedded=" + filterHTMLMetadata.isEmbedded() + "&dashboardID=" + filterHTMLMetadata.getDashboard().getId();
+                    pieceString = "/app/dashboardPiece?dashboardElementID=' + contentID.replace('#', '')+'&dashboardID=" + filterHTMLMetadata.getDashboard().getId() + "&embedded=" + filterHTMLMetadata.isEmbedded();
                 } else {
-                    initString = "/app/dashboardPiece?dashboardElementID="+gridItems.get(0).getDashboardElement().getElementID()+"&embedded="+filterHTMLMetadata.isEmbedded()+"&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"&drillThroughKey="+filterHTMLMetadata.getDrillthroughKey();
-                    pieceString = "/app/dashboardPiece?dashboardElementID=' + contentID.replace('#', '')+'&dashboardID="+filterHTMLMetadata.getDashboard().getId()+"&embedded="+filterHTMLMetadata.isEmbedded()+"&drillThroughKey="+filterHTMLMetadata.getDrillthroughKey();
+                    initString = "/app/dashboardPiece?dashboardElementID=" + gridItems.get(0).getDashboardElement().getElementID() + "&embedded=" + filterHTMLMetadata.isEmbedded() + "&dashboardID=" + filterHTMLMetadata.getDashboard().getId() + "&drillThroughKey=" + filterHTMLMetadata.getDrillthroughKey();
+                    pieceString = "/app/dashboardPiece?dashboardElementID=' + contentID.replace('#', '')+'&dashboardID=" + filterHTMLMetadata.getDashboard().getId() + "&embedded=" + filterHTMLMetadata.isEmbedded() + "&drillThroughKey=" + filterHTMLMetadata.getDrillthroughKey();
                 }
                 sb.append("    $(function() {\n" +
-                        "        $('#ds"+gridItems.get(0).getDashboardElement().getElementID()+"').load('"+initString+"', function() {\n" +
-                        "            $('#"+stackID+"').tab(); //initialize tabs\n" +
+                        "        $('#ds" + gridItems.get(0).getDashboardElement().getElementID() + "').load('" + initString + "', function() {\n" +
+                        "            $('#" + stackID + "').tab(); //initialize tabs\n" +
                         "        });    \n" +
-                        "        $('#"+stackID+"').bind('show', function(e) {    \n" +
+                        "        $('#" + stackID + "').bind('show', function(e) {    \n" +
                         "           var pattern=/#.+/gi //use regex to get anchor(==selector)\n" +
                         "           var contentID = e.target.toString().match(pattern)[0]; //get anchor         \n" +
-                        "            $(contentID).load('"+pieceString+"', function(){\n" +
-                        "                $('#"+stackID+"').tab(); //reinitialize tabs\n" +
+                        "            $(contentID).load('" + pieceString + "', function(){\n" +
+                        "                $('#" + stackID + "').tab(); //reinitialize tabs\n" +
                         "state" + stackID + " = contentID.replace('#', '');\n" +
                         "            });\n" +
                         "        });\n" +
@@ -459,9 +487,9 @@ public class DashboardStack extends DashboardElement {
                 sb.append(MessageFormat.format("var optionMenu = document.getElementById(\"{0}\");\n", selectID));
                 sb.append("var chosenOption = optionMenu.options[optionMenu.selectedIndex];\n");
                 if (filterHTMLMetadata.getDrillthroughKey() == null) {
-                    sb.append("$.get('/app/dashboardPiece?dashboardElementID='+chosenOption.value+'&embedded="+filterHTMLMetadata.isEmbedded()+"&dashboardID=" + filterHTMLMetadata.getDashboard().getId()+"', function(data){\n");
+                    sb.append("$.get('/app/dashboardPiece?dashboardElementID='+chosenOption.value+'&embedded=" + filterHTMLMetadata.isEmbedded() + "&dashboardID=" + filterHTMLMetadata.getDashboard().getId() + "', function(data){\n");
                 } else {
-                    sb.append("$.get('/app/dashboardPiece?dashboardElementID='+chosenOption.value+'&embedded="+filterHTMLMetadata.isEmbedded()+"&dashboardID=" + filterHTMLMetadata.getDashboard().getId()+"&drillThroughKey="+filterHTMLMetadata.getDrillthroughKey()+"', function(data){\n");
+                    sb.append("$.get('/app/dashboardPiece?dashboardElementID='+chosenOption.value+'&embedded=" + filterHTMLMetadata.isEmbedded() + "&dashboardID=" + filterHTMLMetadata.getDashboard().getId() + "&drillThroughKey=" + filterHTMLMetadata.getDrillthroughKey() + "', function(data){\n");
                 }
                 sb.append("$('#" + divID + "').html(data);\n");
                 sb.append("});\n");
@@ -476,12 +504,12 @@ public class DashboardStack extends DashboardElement {
                     } else {
                         sb.append("else if (chosenOption.value == '" + item.getDashboardElement().getElementID() + "') {\n");
                     }
-                    sb.append(item.getDashboardElement().refreshFunction()+"\n");
+                    sb.append(item.getDashboardElement().refreshFunction() + "\n");
                     sb.append("}\n");
                 }
                 sb.append("}\n");
                 sb.append("</script>\n");
-                String onChange = "updateStackDropdown"+getElementID()+"()";
+                String onChange = "updateStackDropdown" + getElementID() + "()";
                 sb.append(MessageFormat.format("<select id=\"{0}\" onChange=\"{1}\">", selectID, onChange));
                 for (int i = 0; i < gridItems.size(); i++) {
                     DashboardStackItem item = gridItems.get(i);

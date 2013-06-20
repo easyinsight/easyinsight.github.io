@@ -2,8 +2,6 @@
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" headerHeight="0"
         creationComplete="onCreation()">
     <mx:Script><![CDATA[
-        import com.easyinsight.account.Account;
-        import com.easyinsight.framework.User;
         import com.easyinsight.schedule.ReportDelivery;
         import com.easyinsight.schedule.ReportDeliveryScheduleWindow;
         import com.easyinsight.util.PopUpUtil;
@@ -15,20 +13,9 @@
         protected override function commitProperties():void {
             super.commitProperties();
             reportName = _report.name;
-            if (_report.reportType == AnalysisDefinition.LIST || _report.reportType == AnalysisDefinition.CROSSTAB ||
-                    _report.reportType == AnalysisDefinition.TREE) {
-                exportIndex = 0;
-            } else {
-                exportIndex = 1;
-            }
             reportDescription = _report.description;
             accountVisible = _report.accountVisible;
             showConnectionSave = _exchangeSave;
-            if (User.getInstance().getAccountType() > Account.PERSONAL) {
-                firstNextButton = "Next";
-            } else {
-                firstNextButton = "Save";
-            }
             connectionSave = _report.solutionVisible ? "yes" : "no";
             if (_report.analysisID == 0) {
                 reportShare = "yes";
@@ -39,9 +26,6 @@
 
         [Bindable]
         private var connectionSave:String;
-
-        [Bindable]
-        private var exportIndex:int;
 
         [Bindable]
         private var reportShare:String;
@@ -83,11 +67,7 @@
         private function saved():void {
             _report = analysisService.saveAnalysisDefinition.lastResult as AnalysisDefinition;
             dispatchEvent(new SavedAnalysisEvent(_report));
-            if (_closeAfterSave) {
-                PopUpManager.removePopUp(this);
-            } else {
-                stackIndex = 4;
-            }
+            PopUpManager.removePopUp(this);
         }
 
         private var _closeAfterSave:Boolean = false;
@@ -104,23 +84,18 @@
             } else {
                 reportName = reportNameInput.text;
                 reportDescription = reportDescriptionInput.text;
-                if (User.getInstance().getAccountType() > Account.PERSONAL) {
-                    stackIndex++;
-                } else {
-                    save();
-                }
+                save();
             }
         }
 
         [Bindable]
-        private var firstNextButton:String = "Next";
+        private var firstNextButton:String = "Save";
 
         private function save():void {
             _report.name = reportName;
             _report.description = reportDescription;
-            _report.solutionVisible = exchangeGroup.selectedValue == "yes";
             _report.accountVisible = sharingGroup.selectedValue == "yes";
-            stackIndex = 2;
+            stackIndex = 1;
             analysisService.saveAnalysisDefinition.send(_report);
         }
 
@@ -160,25 +135,9 @@
         [Bindable]
         private var errorText:String;
 
-        [Bindable]
-        [Embed(source="../../../../assets/mail.png")]
-        private var mailIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/table.png")]
-        private var excelIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/document_chart.png")]
-        private var pdfIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/plasma_tv.png")]
-        private var embedIcon:Class;
-
         private function onFault(event:FaultEvent):void {
             errorText = event.fault.faultString;
-            stackIndex = 3;
+            stackIndex = 2;
         }
 
         public function set report(value:AnalysisDefinition):void {
@@ -191,15 +150,7 @@
     <mx:RemoteObject id="exportService" destination="exportService">
         <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
     </mx:RemoteObject>
-    <!--
-     sharing
-     delivery
-    -->
-    <mx:Canvas width="600" height="400">
-        <mx:VBox width="100%" height="100%" verticalGap="0">
-            <mx:Box height="50%" width="100%" backgroundColor="#000000"/>
-            <mx:Box height="50%" width="100%" backgroundColor="#CCCCCC"/>
-        </mx:VBox>
+    <mx:Canvas width="600" height="400" backgroundColor="#FFFFFF" styleName="fallThroughFonts">
         <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
             <mx:ViewStack selectedIndex="{stackIndex}" width="550" height="350" backgroundColor="#FFFFFF">
                 <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
@@ -207,37 +158,21 @@
                     <mx:Label text="What do you want to name this report?" fontSize="14" fontWeight="bold"/>
                     <mx:TextInput text="{reportName}" id="reportNameInput" width="530" fontSize="14"/>
                     <mx:Spacer height="20"/>
-                    <mx:Spacer height="20"/>
-                    <mx:Label text="How do you want to describe this report?" fontSize="14" fontWeight="bold"/>
-                    <mx:TextArea width="530" height="75" id="reportDescriptionInput"
-                                         text="{reportDescription}" fontSize="14" borderStyle="inset" borderThickness="1"/>
-                    <mx:Spacer height="100%"/>
-                    <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:Button label="{firstNextButton}" click="nextFromName()" fontSize="14"/>
-                        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
-                    </mx:HBox>
-                </mx:VBox>
-                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
                     <mx:Label text="Do you want to share this report with other users in the account?" fontSize="14"
-                            fontWeight="bold"/>
+                              fontWeight="bold"/>
                     <mx:RadioButtonGroup id="sharingGroup" selectedValue="{reportShare}"/>
                     <mx:HBox width="100%" horizontalAlign="center">
                         <mx:RadioButton label="Yes" value="yes" groupName="sharingGroup" fontSize="14" tabIndex="0"/>
                         <mx:RadioButton label="No" value="no" groupName="sharingGroup" fontSize="14" tabIndex="1"/>
                     </mx:HBox>
                     <mx:Spacer height="20"/>
-                    <mx:TextArea text="Do you want to share the template of this report on the Exchange for other Easy Insight users?" fontSize="14"
-                            width="530" borderStyle="none" editable="false" selectable="false" fontWeight="bold" backgroundAlpha="0" visible="{showConnectionSave}"/>
-                    <mx:RadioButtonGroup id="exchangeGroup" selectedValue="{connectionSave}"/>
-                    <mx:HBox width="100%" horizontalAlign="center" visible="{showConnectionSave}">
-                        <mx:RadioButton label="Yes" value="yes" groupName="exchangeGroup" fontSize="14" tabIndex="2"/>
-                        <mx:RadioButton label="No" value="no" groupName="exchangeGroup" fontSize="14" tabIndex="3"/>
-                    </mx:HBox>
+                    <mx:Label text="How do you want to describe this report?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextArea width="530" height="75" id="reportDescriptionInput"
+                                         text="{reportDescription}" fontSize="14" borderStyle="inset" borderThickness="1"/>
                     <mx:Spacer height="100%"/>
                     <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:Button label="Back" click="stackIndex--" fontSize="14" tabIndex="4"/>
-                        <mx:Button label="Save" click="save()" fontSize="14" tabIndex="5"/>
-                        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14" tabIndex="6"/>
+                        <util:SaveButton label="{firstNextButton}" click="nextFromName()" fontSize="14"/>
+                        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
                     </mx:HBox>
                 </mx:VBox>
                 <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
@@ -245,104 +180,8 @@
                 </mx:Box>
                 <mx:VBox width="100%" height="100%" horizontalAlign="center" paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10">
                     <mx:Label text="We're sorry, but something went wrong in saving the report." fontSize="14"/>
-                    <mx:TextArea borderStyle="none" backgroundAlpha="0" text="{errorText}" width="400" height="200" editable="false"/>
+                    <mx:Text text="{errorText}" width="400"/>
                     <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
-                </mx:VBox>
-                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
-                    <!-- export settings -->
-                    <mx:TextArea text="Your report has been saved. Listed below are a few of the options you can use as next steps to get the most out of your reporting. You can always access these options and more under the Export tab."
-                            width="530" borderStyle="none" editable="false" selectable="false" fontWeight="bold" backgroundAlpha="0" fontSize="14" height="75"/>
-                    <mx:Spacer height="100%"/>
-                    <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:ViewStack height="140" width="150" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"
-                                selectedIndex="{exportIndex}">
-                            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                                 backgroundColor="#FFFFFF" height="140"
-                                 width="150" cornerRadius="8" buttonMode="true" id="excelBox"
-                                 mouseOver="excelBox.setStyle('backgroundColor', 0xDDDDDD)"
-                                 mouseOut="excelBox.setStyle('backgroundColor', 0xFFFFFF)"
-                                 click="excel()"
-                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                                <mx:Image source="{excelIcon}"/>
-                                <mx:Text text="Export to Excel" fontSize="14" selectable="false"/>
-                                <mx:TextArea
-                                        text="Export the report as an Excel spreadsheet"
-                                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                                        height="80"
-                                        width="130" textAlign="center"/>
-                            </mx:VBox>
-                            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                                 backgroundColor="#FFFFFF" height="140"
-                                 width="150" cornerRadius="8" buttonMode="true" id="pdfBox"
-                                 mouseOver="pdfBox.setStyle('backgroundColor', 0xDDDDDD)"
-                                 mouseOut="pdfBox.setStyle('backgroundColor', 0xFFFFFF)"
-                                 click="pdf()"
-                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                                <mx:Image source="{pdfIcon}"/>
-                                <mx:Text text="Export to PDF" fontSize="14" selectable="false"/>
-                                <mx:TextArea
-                                        text="Export the report as an PDF file"
-                                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                                        height="80"
-                                        width="130" textAlign="center"/>
-                            </mx:VBox>
-                        </mx:ViewStack>
-
-                        <mx:Spacer width="100%"/>
-                        <mx:ViewStack height="140" width="150" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-                            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                                 backgroundColor="#FFFFFF" height="140"
-                                 width="150" cornerRadius="8" buttonMode="true" id="embedBox"
-                                 mouseOver="embedBox.setStyle('backgroundColor', 0xDDDDDD)"
-                                 mouseOut="embedBox.setStyle('backgroundColor', 0xFFFFFF)"
-                                 click="embed()"
-                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                                <mx:Image source="{embedIcon}"/>
-                                <mx:Text text="Embed this Report" fontSize="14" selectable="false"/>
-                                <mx:TextArea
-                                        text="Generate HTML to embed the report into a web page"
-                                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                                        height="80"
-                                        width="130" textAlign="center"/>
-                            </mx:VBox>
-                            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                                 backgroundColor="#FFFFFF" height="140"
-                                 width="150" cornerRadius="8" buttonMode="true" id="basecampBox"
-                                 mouseOver="basecampBox.setStyle('backgroundColor', 0xDDDDDD)"
-                                 mouseOut="basecampBox.setStyle('backgroundColor', 0xFFFFFF)"
-                                 click="embed()"
-                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                                <mx:Image source="{embedIcon}"/>
-                                <mx:Text text="Embed in Basecamp" fontSize="14" selectable="false"/>
-                                <mx:TextArea
-                                        text="Generate HTML to embed the report into a Basecamp message"
-                                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                                        height="80"
-                                        width="130" textAlign="center"/>
-                            </mx:VBox>
-                        </mx:ViewStack>
-
-                        <mx:Spacer width="100%"/>
-                        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                                 backgroundColor="#FFFFFF" height="140"
-                                 width="150" cornerRadius="8" buttonMode="true" id="emailBox"
-                                 mouseOver="emailBox.setStyle('backgroundColor', 0xDDDDDD)"
-                                 mouseOut="emailBox.setStyle('backgroundColor', 0xFFFFFF)"
-                                 click="email()"
-                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                            <mx:Image source="{mailIcon}"/>
-                            <mx:Text text="Email Delivery" fontSize="14" selectable="false"/>
-                            <mx:TextArea
-                                    text="Set up scheduled email delivery of the report"
-                                    fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                                    height="80"
-                                    width="130" textAlign="center"/>
-                        </mx:VBox>
-                    </mx:HBox>
-                    <mx:Spacer height="100%"/>
-                    <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
-                    </mx:HBox>
                 </mx:VBox>
             </mx:ViewStack>
         </mx:Box>

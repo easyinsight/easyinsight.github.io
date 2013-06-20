@@ -50,8 +50,8 @@
             dateFields.addItemAt(noComp, 0);
             var noTrend:Object = {display: "[ No Trend Measure ] "};
             fields.addItemAt(noTrend, 0);
-            rowCount = Math.min(15, dateFields.length);
-            altRowCount = Math.min(15, fields.length);
+            rowCount = Math.min(10, dateFields.length);
+            altRowCount = Math.min(10, fields.length);
             this.dateFields = dateFields;
             this.fields = fields;
         }

@@ -33,7 +33,7 @@ public class InfusionsoftJobSource extends InfusionsoftTableSource {
     public static final String DATE_CREATED = "DateCreated";
 
     public InfusionsoftJobSource() {
-        setFeedName("Stage History");
+        setFeedName("Job");
     }
 
     @Override
@@ -54,8 +54,8 @@ public class InfusionsoftJobSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(JOB_TITLE), "Job Title"));
         analysisitems.add(new AnalysisDimension(keys.get(ORDER_TYPE), "Order Type"));
         analysisitems.add(new AnalysisDimension(keys.get(ORDER_STATUS), "Order Status"));
-        analysisitems.add(new AnalysisDimension(keys.get(CONTACT_ID), "Contact ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(PRODUCT_ID), "Product ID"));
+        analysisitems.add(new AnalysisDimension(keys.get(CONTACT_ID), "Job Contact ID"));
+        analysisitems.add(new AnalysisDimension(keys.get(PRODUCT_ID), "Job Product ID"));
         analysisitems.add(new AnalysisDimension(keys.get(JOB_STATUS), "Job Status"));
         analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Date Created", AnalysisDateDimension.DAY_LEVEL));
         return analysisitems;

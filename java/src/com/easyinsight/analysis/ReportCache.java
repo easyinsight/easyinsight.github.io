@@ -71,7 +71,7 @@ public class ReportCache {
 
     @Nullable
     public DataSet getAddonResults(long dataSourceID, CacheKey cacheKey, int cacheTime) {
-        Map<CacheKey, DataSet> map = (Map<CacheKey, DataSet>) reportCache.get(dataSourceID);
+        Map<CacheKey, DataSet> map = (Map<CacheKey, DataSet>) addonReportCache.get(dataSourceID);
         if (map != null) {
             DataSet results = map.get(cacheKey);
             if (results != null) {
@@ -89,7 +89,7 @@ public class ReportCache {
     }
 
     public void storeAddonReport(long dataSourceID, CacheKey cacheKey, DataSet results) throws CacheException {
-        Map<CacheKey, DataSet> map = (Map<CacheKey, DataSet>) reportCache.get(dataSourceID);
+        Map<CacheKey, DataSet> map = (Map<CacheKey, DataSet>) addonReportCache.get(dataSourceID);
         if (map == null) {
             map = new HashMap<CacheKey, DataSet>();
 

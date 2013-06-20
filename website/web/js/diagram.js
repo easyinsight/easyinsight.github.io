@@ -1,4 +1,4 @@
-window.drawDiagram = function (j, selector, reportID) {
+window.drawDiagram = function (j, selector, reportID, afterRefresh) {
     var diagram = j;
 
     function createNode(node, key) {
@@ -58,10 +58,10 @@ window.drawDiagram = function (j, selector, reportID) {
     }
 
     var Direction = {
-        LEFT:"LEFT",
-        RIGHT:"RIGHT",
-        TOP:"TOP",
-        BOTTOM:"BOTTOM"
+        LEFT: "LEFT",
+        RIGHT: "RIGHT",
+        TOP: "TOP",
+        BOTTOM: "BOTTOM"
     }
 
     var ORDER = [Direction.LEFT, Direction.TOP, Direction.RIGHT, Direction.BOTTOM]
@@ -71,7 +71,7 @@ window.drawDiagram = function (j, selector, reportID) {
     }
 
     function getXY(node) {
-        return {x:stripPx(node.style.left), y:stripPx(node.style.top) };
+        return {x: stripPx(node.style.left), y: stripPx(node.style.top) };
     }
 
     function pointPoint(x1, y1, x2, y2) {
@@ -83,18 +83,18 @@ window.drawDiagram = function (j, selector, reportID) {
     function bottomRightXY(node) {
         var xy = getXY(node);
         var n = $(node);
-        return {x:xy.x + n.outerWidth(), y:xy.y + n.outerHeight() };
+        return {x: xy.x + n.outerWidth(), y: xy.y + n.outerHeight() };
     }
 
     function centerXY(node) {
         var xy = getXY(node);
         var n = $(node)
-        return {x:xy.x + n.outerWidth() / 2, y:xy.y + n.outerHeight() / 2 };
+        return {x: xy.x + n.outerWidth() / 2, y: xy.y + n.outerHeight() / 2 };
     }
 
     function upperRightXY(node) {
         var xy = getXY(node);
-        return {x:xy.x + $(node).outerWidth(), y:xy.y };
+        return {x: xy.x + $(node).outerWidth(), y: xy.y };
     }
 
     function attachPointXY(node, direction) {
@@ -102,14 +102,14 @@ window.drawDiagram = function (j, selector, reportID) {
         var n = $(node);
         if (direction == Direction.LEFT) {
             var b = $("div", n).first();
-            return {x:xy.x - 1, y:xy.y + b.outerHeight() / 2 }
+            return {x: xy.x - 1, y: xy.y + b.outerHeight() / 2 }
         } else if (direction == Direction.RIGHT) {
             var b = $("div", n).first();
-            return {x:xy.x + n.outerWidth() + 1, y:xy.y + b.outerHeight() / 2 }
+            return {x: xy.x + n.outerWidth() + 1, y: xy.y + b.outerHeight() / 2 }
         } else if (direction == Direction.TOP) {
-            return {x:xy.x + n.outerWidth() / 2, y:xy.y - 1 }
+            return {x: xy.x + n.outerWidth() / 2, y: xy.y - 1 }
         } else {
-            return {x:xy.x + n.outerWidth() / 2, y:xy.y + n.outerHeight() + 1 }
+            return {x: xy.x + n.outerWidth() / 2, y: xy.y + n.outerHeight() + 1 }
         }
     }
 
@@ -170,19 +170,19 @@ window.drawDiagram = function (j, selector, reportID) {
         var point2, point3;
         if (direction == Direction.TOP || direction == Direction.BOTTOM) {
             var midPointY = (fromCoord.y + toCoord.y) / 2;
-            point2 = {x:fromCoord.x, y:midPointY };
-            point3 = {x:toCoord.x, y:midPointY };
+            point2 = {x: fromCoord.x, y: midPointY };
+            point3 = {x: toCoord.x, y: midPointY };
         } else {
             var midPointX = (fromCoord.x + toCoord.x) / 2;
-            point2 = {x:midPointX, y:fromCoord.y };
-            point3 = {x:midPointX, y:toCoord.y };
+            point2 = {x: midPointX, y: fromCoord.y };
+            point3 = {x: midPointX, y: toCoord.y };
         }
 
         return [point2, point3, toCoord];
     }
 
     (function () {
-        if(Object.keys(diagram).length == 0) {
+        if (Object.keys(diagram).length == 0) {
             $("#reportWell").hide();
             $("#reportWell")
         } else {
@@ -212,28 +212,34 @@ window.drawDiagram = function (j, selector, reportID) {
         var context = canvas.getContext("2d");
 
         for (i in diagram["links"]) {
+
             var link = diagram["links"][i];
-            var fromNode = mapping[link["from"]];
-            var toNode = mapping[link["to"]];
-            var direction = getDirection(fromNode, toNode);
+            if(typeof(link) != "function") {
+                var fromNode = mapping[link["from"]];
+                var toNode = mapping[link["to"]];
+                var direction = getDirection(fromNode, toNode);
 
-            var fromCoords = attachPointXY(fromNode, direction);
+                var fromCoords = attachPointXY(fromNode, direction);
 
-            var toCoords = attachPointXY(toNode, ORDER[(ORDER.indexOf(direction) + 2) % ORDER.length]);
-            var points = getMidPoints(fromCoords, toCoords, direction);
-            context.beginPath();
-            context.moveTo(fromCoords.x, fromCoords.y);
-            context.strokeStyle = "#1F1F45";
-            context.lineWidth = 3;
-            context.lineCap = "square"
+                var toCoords = attachPointXY(toNode, ORDER[(ORDER.indexOf(direction) + 2) % ORDER.length]);
+                var points = getMidPoints(fromCoords, toCoords, direction);
+                context.beginPath();
+                context.moveTo(fromCoords.x, fromCoords.y);
+                context.strokeStyle = "#1F1F45";
+                context.lineWidth = 3;
+                context.lineCap = "square"
 
 
-            var point;
-            for (point in points) {
-                context.lineTo(points[point].x, points[point].y);
+                var point;
+                for (point in points) {
+                    if (typeof(points[point]) != "function") {
+
+                        context.lineTo(points[point].x, points[point].y);
+                    }
+                }
+                context.stroke();
+                drawArrow(context, points[1], points[2]);
             }
-            context.stroke();
-            drawArrow(context, points[1], points[2]);
         }
         afterRefresh();
 

@@ -47,6 +47,8 @@ public class ConfigLoader {
     private String databaseRequestQueue;
     private String databaseResponseQueue;
 
+    private String memcachedUrl;
+
     public String getReportDeliveryQueue() {
         return reportDeliveryQueue;
     }
@@ -265,6 +267,7 @@ public class ConfigLoader {
             databaseRequestQueue = (String) properties.get("database.request.queue");
             databaseResponseQueue = (String) properties.get("database.response.queue");
             reportDeliveryQueue = (String) properties.get("report.delivery.queue");
+            memcachedUrl = (String) properties.get("memcached.url");
 
         } catch (IOException e) {
             LogClass.error(e);
@@ -286,5 +289,13 @@ public class ConfigLoader {
 
     public void setBillingEnabled(boolean billingEnabled) {
         this.billingEnabled = billingEnabled;
+    }
+
+    public String getMemcachedUrl() {
+        return memcachedUrl;
+    }
+
+    public void setMemcachedUrl(String memcachedUrl) {
+        this.memcachedUrl = memcachedUrl;
     }
 }

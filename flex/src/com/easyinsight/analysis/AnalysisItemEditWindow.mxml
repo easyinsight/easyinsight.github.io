@@ -206,6 +206,12 @@
                 _reportEditor = vertEditor;
                 vertEditor.analysisItem = _analysisItem;
                 tabNavigator.addChild(vertEditor);
+            } else if (_reportType == AnalysisDefinition.STACKED_COLUMN) {
+                var chartEditor:ChartExtensionWindow = new ChartExtensionWindow();
+                _reportEditor = chartEditor;
+                chartEditor.analysisItem = _analysisItem;
+                chartEditor.analysisItems = _analysisItems;
+                tabNavigator.addChild(chartEditor);
             }
             if (initialWindow == EXTENSION) {
                 lastTab = tabNavigator.getChildIndex(DisplayObject(_reportEditor));

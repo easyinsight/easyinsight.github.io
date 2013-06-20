@@ -505,12 +505,12 @@ public class UserUploadService {
                 }
             });
 
-            if (userID == 60) {
+            //if (userID == 60) {
                 System.out.println("Data Source Time: " + (dsTime - startTime) + ", Dashboard Time = " + (dashboardTime - dsTime)
-                        + ", Report Time = " + (dashboardTime - reportTime) + ", Scorecard Time = " + (scorecardTime - reportTime)
+                        + ", Report Time = " + (reportTime - dashboardTime) + ", Scorecard Time = " + (scorecardTime - reportTime)
                         + ", Folder Time = " + (folderTime - scorecardTime)
                         + ", Data Source Owner Time = " + (dsOwnerTime - folderTime) + ", Lookup Table Time = " + (lookupTime - dsOwnerTime));
-            }
+            //}
 
             int dataSourceCount = 0;
             int reportCount = 0;
@@ -882,6 +882,7 @@ public class UserUploadService {
     private void deleteUserUpload(long dataFeedID, EIConnection conn) throws SQLException {
         int role = SecurityUtil.getUserRoleToFeed(dataFeedID);
         if (role <= Roles.SHARER) {
+            LogClass.info("USER " + SecurityUtil.getUserID() + " DELETING DATA SOURCE " + dataFeedID);
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataFeedID, conn);
             feedDefinition.setVisible(false);
             PreparedStatement updateReportStmt = conn.prepareStatement("UPDATE ANALYSIS SET TEMPORARY_REPORT = ? WHERE DATA_FEED_ID = ?");
@@ -1061,6 +1062,15 @@ public class UserUploadService {
                     credentialsResponse.setEstimatedDuration(avgTime);
                 }
             } else {
+                if (feedDefinition instanceof ServerDataSourceDefinition) {
+                    ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) feedDefinition;
+                    EIConnection conn = Database.instance().getConnection();
+                    try {
+                        serverDataSourceDefinition.migrations(conn, null);
+                    } finally {
+                        Database.closeConnection(conn);
+                    }
+                }
                 feedDefinition.setVisible(true);
                 feedStorage.updateDataFeedConfiguration(feedDefinition);
                 credentialsResponse = new CredentialsResponse(true, feedID);
@@ -1073,9 +1083,10 @@ public class UserUploadService {
         }
     }
 
-    public Collection<FieldUploadInfo> analyzeUpdate(long feedID, byte[] bytes) {
+    public AnalyzeUploadResponse analyzeUpdate(long feedID, byte[] bytes) {
         SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
         EIConnection conn = Database.instance().getConnection();
+        AnalyzeUploadResponse analyzeUploadResponse = new AnalyzeUploadResponse();
         try {
             conn.setAutoCommit(false);
             FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
@@ -1094,11 +1105,17 @@ public class UserUploadService {
                 }
             }
             conn.commit();
-            return fieldInfos;
+            analyzeUploadResponse.setFieldUploadInfos(fieldInfos);
+            return analyzeUploadResponse;
+        } catch (UploadException e) {
+            conn.rollback();
+            analyzeUploadResponse.setError(e.getMessage());
+            return analyzeUploadResponse;
         } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();
-            throw new RuntimeException(e);
+            analyzeUploadResponse.setError(e.getMessage());
+            return analyzeUploadResponse;
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);

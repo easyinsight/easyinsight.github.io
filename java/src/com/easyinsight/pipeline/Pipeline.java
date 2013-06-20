@@ -136,7 +136,7 @@ public abstract class Pipeline {
     }
 
     public Pipeline setup(Set<AnalysisItem> analysisItems, List<AnalysisItem> allFields, InsightRequestMetadata insightRequestMetadata) {
-        pipelineData = new PipelineData(null, analysisItems, null, allFields, new HashMap<String, String>(), analysisItems, null);
+        pipelineData = new PipelineData(null, analysisItems, insightRequestMetadata, allFields, new HashMap<String, String>(), analysisItems, null);
         components = generatePipelineCommands(analysisItems, analysisItems, new ArrayList<FilterDefinition>(), null, allFields, insightRequestMetadata);
         return this;
     }
@@ -319,18 +319,23 @@ public abstract class Pipeline {
     private StringBuilder logger = new StringBuilder();
 
     public DataResults toList(DataSet dataSet, EIConnection conn, Map<AnalysisItem, AnalysisItem> aliases) {
-        for (IComponent component : components) {
-            //System.out.println(component.getClass() + " - " + dataSet.getRows());
-            /*if (pipelineData.getReport().isLogReport()) {
-                logger.append("<h1>" + component.getClass().getName() + "</h1>");
-                logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, conn, pipelineData.getInsightRequestMetadata()));
-            }*/
-            long startTime = System.currentTimeMillis();
-            dataSet = component.apply(dataSet, pipelineData);
-            long endTime = System.currentTimeMillis();
-            /*if (pipelineData.getReport().isLogReport()) {
-                System.out.println(dataSet.getRows().size() + " - " + pipelineData.getReportItems().size() + " - " + component.getClass().getName() + " - " + (endTime - startTime));
-            }*/
+        pipelineData.setConn(conn);
+        try {
+            for (IComponent component : components) {
+                //System.out.println(component.getClass() + " - " + dataSet.getRows());
+                /*if (pipelineData.getReport().isLogReport()) {
+                    logger.append("<h1>" + component.getClass().getName() + "</h1>");
+                    logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, conn, pipelineData.getInsightRequestMetadata()));
+                }*/
+                long startTime = System.currentTimeMillis();
+                dataSet = component.apply(dataSet, pipelineData);
+                long endTime = System.currentTimeMillis();
+                /*if (pipelineData.getReport().isLogReport()) {
+                    System.out.println(dataSet.getRows().size() + " - " + pipelineData.getReportItems().size() + " - " + component.getClass().getName() + " - " + (endTime - startTime));
+                }*/
+            }
+        } finally {
+            pipelineData.setConn(null);
         }
         resultSet = dataSet;
         DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()), aliases, pipelineData.getReport());

@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Key;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -9,7 +10,7 @@ import java.util.*;
  * Date: 3/1/11
  * Time: 10:58 AM
  */
-public class DataSetKeys implements Cloneable {
+public class DataSetKeys implements Cloneable, Serializable {
     private Map<Key, Short> keyMap = new HashMap<Key, Short>();
     private short max;
     private List<Key> keys = new ArrayList<Key>();

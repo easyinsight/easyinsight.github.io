@@ -8,6 +8,7 @@ public class FilterPatternDefinition extends FilterDefinition{
     private var _pattern:String;
     public var regex:Boolean;
     public var caseSensitive:Boolean;
+    public var autoWildCard:Boolean;
 
     public function FilterPatternDefinition() {
         super();

@@ -17,7 +17,6 @@ import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
 import flex.messaging.FlexContext;
-import net.smartam.leeloo.client.request.OAuthClientRequest;
 import oauth.signpost.OAuth;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
@@ -28,6 +27,7 @@ import oauth.signpost.commonshttp.CommonsHttpOAuthProvider;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.signature.HmacSha1MessageSigner;
 import oauth.signpost.signature.PlainTextMessageSigner;
+import org.apache.amber.oauth2.client.request.OAuthClientRequest;
 
 import javax.servlet.http.HttpSession;
 import java.net.URL;

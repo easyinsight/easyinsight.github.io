@@ -44,6 +44,6 @@ public class AccountSyncScheduledTask extends ScheduledTask {
                 }
             }
         }
-
+        s.close();
     }
 }

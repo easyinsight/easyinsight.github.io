@@ -2,20 +2,23 @@
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <%@ page import="com.easyinsight.core.EIDescriptor" %>
-<%@ page import="java.util.Comparator" %>
-<%@ page import="java.util.Collections" %>
 <%@ page import="com.easyinsight.core.InsightDescriptor" %>
-<%@ page import="java.util.List" %>
 <%@ page import="com.easyinsight.userupload.UserUploadService" %>
 <%@ page import="com.easyinsight.dashboard.DashboardDescriptor" %>
 <%@ page import="com.easyinsight.audit.ActionLog" %>
 <%@ page import="com.easyinsight.admin.AdminService" %>
-<%@ page import="java.util.Collection" %>
 <%@ page import="com.easyinsight.audit.ActionReportLog" %>
 <%@ page import="com.easyinsight.audit.ActionDashboardLog" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.ResultSet" %>
+<%@ page import="com.easyinsight.userupload.CustomFolder" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="java.util.*" %>
+<%@ page import="com.easyinsight.core.DataFolder" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -50,44 +53,6 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
 </jsp:include>
-<%--<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a data-target=".nav-collapse" data-toggle="collapse" class="btn btn-navbar">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <div class="nav-collapse">
-                <div class="btn-group pull-right">
-                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                        <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-                        <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <% if (phone) { %>
-                            <li><a href="/app/html">Data Sources</a></li>
-                            <li><a href="#"><%=StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a></li>
-                        <% } else { %>
-                            <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
-                        <% } %>
-                        &lt;%&ndash;<li><a href="#">Profile</a></li>&ndash;%&gt;
-                        <li class="divider"></li>
-                        <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                    </ul>
-                </div>
-                <% if (!phone) { %>
-                <div class="nav-collapse">
-                    <ul class="nav">
-                        <li><a href="/app/html">Data Sources</a></li>
-                        <li class="active"><a href="#"><%=StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a></li>
-                    </ul>
-                </div>
-                <% } %>
-            </div>
-        </div>
-    </div>
-</div>--%>
 <div class="container-fluid">
     <div class="row-fluid">
         <ul class="breadcrumb">
@@ -127,10 +92,42 @@
                 </thead>
             <%
 
+                Map<Long, CustomFolder> folderMap = new HashMap<Long, CustomFolder>();
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    PreparedStatement getFoldersStmt = conn.prepareStatement("SELECT REPORT_FOLDER_ID, FOLDER_NAME, DATA_SOURCE_ID FROM REPORT_FOLDER WHERE DATA_SOURCE_ID = ?");
+                    getFoldersStmt.setLong(1, dataSourceID);
+
+                    ResultSet folderRS = getFoldersStmt.executeQuery();
+                    while (folderRS.next()) {
+                        long id = folderRS.getLong(1);
+                        String name = folderRS.getString(2);
+                        CustomFolder customFolder = new CustomFolder();
+                        customFolder.setName(name);
+                        customFolder.setId(id);
+                        folderMap.put(id, customFolder);
+                    }
+                } finally {
+                    Database.closeConnection(conn);
+                }
 
 
                 List<EIDescriptor> descriptors = new UserUploadService().getFeedAnalysisTreeForDataSource(new DataSourceDescriptor(null, dataSourceID, 0, false, 0));
-                Collections.sort(descriptors, new Comparator<EIDescriptor>() {
+
+                List<EIDescriptor> forThisLevel = new ArrayList<EIDescriptor>();
+                boolean additionalViewsUsed = false;
+                for (EIDescriptor desc : descriptors) {
+                    int folder = desc.getFolder();
+                    if (folder == 1) {
+                        forThisLevel.add(desc);
+                    } else if (folder == 2) {
+                        additionalViewsUsed = true;
+                    } else {
+
+                    }
+                }
+
+                Collections.sort(forThisLevel, new Comparator<EIDescriptor>() {
 
                     public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
                         String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName().toLowerCase() : "";
@@ -138,7 +135,20 @@
                         return name1.compareTo(name2);
                     }
                 });
-                for (EIDescriptor descriptor : descriptors) {
+                List<DataFolder> folders = new ArrayList<DataFolder>();
+                if (additionalViewsUsed) {
+                    DataFolder dataFolder = new DataFolder();
+                    dataFolder.setName("Additional Views");
+                    dataFolder.setUrlKey("AdditionalViews");
+                    folders.add(dataFolder);
+                }
+                for (CustomFolder customFolder : folderMap.values()) {
+                    DataFolder dataFolder = new DataFolder();
+                    dataFolder.setName(customFolder.getName());
+                    dataFolder.setUrlKey(String.valueOf(customFolder.getId()));
+                    folders.add(dataFolder);
+                }
+                for (EIDescriptor descriptor : forThisLevel) {
                     if (descriptor instanceof InsightDescriptor) {
                         out.println("<tr><td><a href=\"../report/" + descriptor.getUrlKey() + "\">" + descriptor.getName() + "</td></tr>");
                     } else if (descriptor instanceof DashboardDescriptor) {
@@ -147,6 +157,24 @@
                 }
             %>
             </table>
+            <%
+                if (folders.size() > 0) {
+            %>
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Folder Name</th>
+                    </tr>
+                </thead>
+                <%
+                    for (DataFolder dataFolder : folders) {
+                        out.println("<tr><td><a href=\"../reportsFolder/" + dataSourceDescriptor.getUrlKey() + "/" + dataFolder.getUrlKey() + "\">" + dataFolder.getName() + "</td></tr>");
+                    }
+                %>
+            </table>
+            <%
+                }
+            %>
         </div>
     </div>
 </div>

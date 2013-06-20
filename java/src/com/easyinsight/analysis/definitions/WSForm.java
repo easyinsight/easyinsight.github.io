@@ -3,6 +3,8 @@ package com.easyinsight.analysis.definitions;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -113,6 +115,15 @@ public class WSForm extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("labelFontSize", labelFontSize));
         properties.add(new ReportNumericProperty("columnCount", columnCount));
         return properties;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject list = super.toJSON(htmlReportMetadata, parentDefinitions);
+        list.put("type", "form");
+        list.put("key", getUrlKey());
+        list.put("url", "/app/htmlExport");
+        return list;
     }
 
     public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata) {

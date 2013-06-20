@@ -2,7 +2,10 @@ package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.AnalysisTypes;
 import com.easyinsight.analysis.DiagramLink;
+import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.HTMLReportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -41,7 +44,7 @@ public class WSDiagramDefinition extends WSKPIDefinition {
 
     @Override
     public List<String> javaScriptIncludes() {
-        return Arrays.asList("/js/diagram.js","/js/color.js");    //To change body of overridden methods use File | Settings | File Templates.
+        return Arrays.asList("/js/diagram.js", "/js/color.js");    //To change body of overridden methods use File | Settings | File Templates.
     }
 
     @Override
@@ -50,9 +53,18 @@ public class WSDiagramDefinition extends WSKPIDefinition {
     }
 
     @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject diagram = super.toJSON(htmlReportMetadata, parentDefinitions);
+        diagram.put("key", getUrlKey());
+        diagram.put("type", "diagram");
+        diagram.put("url", "/app/diagramChart");
+        return diagram;
+    }
+
+    @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String format = "$.getJSON(''/app/diagramChart?reportID={0}&{1}&''+ strParams, function(data) '{' window.drawDiagram(data, $(\"#{2}\"), ''{3}'') '}');";
+        String format = "$.getJSON(''/app/diagramChart?reportID={0}&{1}&''+ strParams, function(data) '{' window.drawDiagram(data, $(\"#{2}\"), ''{3}'', afterRefresh) '}');";
         return MessageFormat.format(format, getUrlKey(), timezoneOffset, targetDiv, getUrlKey());
     }
 }

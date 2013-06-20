@@ -173,7 +173,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
         includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
-        includes.add("/js/plugins/jqplot.categoryAxisRenderer.min.js");
+        includes.add("/js/plugins/jqplot.categoryAxisRenderer.js");
         includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
         includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
@@ -185,6 +185,18 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
 
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
+        JSONObject fullObject = getJsonObject(htmlReportMetadata);
+
+
+        String argh = fullObject.toString();
+        argh = argh.replaceAll("\"", "");
+
+        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
+        String customHeight = htmlReportMetadata.createStyleProperties().toString();
+        return "$.getJSON('/app/columnChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getBarChartCallback('" + targetDiv + "', " + argh + ",false," + customHeight + "))";
+    }
+
+    private JSONObject getJsonObject(HTMLReportMetadata htmlReportMetadata) {
         String color;
         String color2;
         JSONArray colorObj = new JSONArray();
@@ -284,13 +296,17 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
+        return fullObject;
+    }
 
-
-        String argh = fullObject.toString();
-        argh = argh.replaceAll("\"", "");
-
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties();
-        return "$.getJSON('/app/columnChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getBarChartCallback('" + targetDiv + "', " + argh + ",false," + customHeight + "))";
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject areaChart = super.toJSON(htmlReportMetadata, parentDefinitions);
+        areaChart.put("type", "bar");
+        areaChart.put("key", getUrlKey());
+        areaChart.put("url", "/app/columnChart");
+        areaChart.put("parameters", getJsonObject(htmlReportMetadata));
+        areaChart.put("styles", htmlReportMetadata.createStyleProperties());
+        return areaChart;
     }
 }

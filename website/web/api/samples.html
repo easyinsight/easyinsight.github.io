@@ -19,10 +19,11 @@
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen" />
 </head>
-<body style="width:100%;text-align:center;margin:0px auto;">
+<body>
+<div id="whiteDiv"></div>
 <div id="topMenuDiv"></div>
 <div id="subMenuDiv"></div>
-<div id="blackIntroWithSubMenuDiv"></div>
+<div id="blackIntroWithSubMenuDiv" style="height: 200px"></div>
 <div style="width:1000px;margin:0 auto;">
     <div id="topBar">
         <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
@@ -41,12 +42,11 @@
         <a class="active" href="/api.html">Developers</a>
     </div>
     <ul class="menuList">
-        <li class="first"><a href="index.html">API Introduction</a></li>
+        <li class="first"><a href="/api.html">API Introduction</a></li>
         <li><a href="restapi.html">REST API</a></li>
-        <li><a href="soapapi.html">SOAP API</a></li>
         <li><a href="samples.html">Samples and Wrappers</a></li>
     </ul>
-    <div id="coreContent">
+    <div id="coreContent" style="height:200px">
         <div class="coreContentBlock">
             <h2 class="coreContentHeader">Samples and Wrappers</h2>
 

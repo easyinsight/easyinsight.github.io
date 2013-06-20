@@ -109,6 +109,11 @@
         <to>/html/reports.jsp?dataSourceID=$1</to>
     </rule>
 
+    <rule>
+        <from>/html/reportsFolder/([A-Za-z0-9]+)/([A-Za-z0-9]+)</from>
+        <to>/html/folderReports.jsp?dataSourceID=$1&amp;folderID=$2</to>
+    </rule>
+
     <!--<rule>
         <from>/html/</from>
         <to>/html/index.jsp</to>

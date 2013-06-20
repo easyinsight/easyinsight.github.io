@@ -11,6 +11,9 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.scorecard.Scorecard;
 import org.hibernate.Session;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.sql.PreparedStatement;
@@ -54,6 +57,40 @@ public abstract class DashboardElement implements Cloneable, Serializable {
 
     private int preferredWidth;
     private int preferredHeight;
+
+    private int htmlWidth;
+
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata, List<FilterDefinition> parentFilters) throws JSONException {
+        JSONObject jo = new JSONObject();
+        if(getPreferredWidth() > 0)
+            jo.put("preferredWidth", getPreferredWidth());
+        else if (getHtmlWidth() > 0)
+            jo.put("preferredWidth", getHtmlWidth());
+        if(getPreferredHeight() > 0)
+            jo.put("preferredHeight", getPreferredHeight());
+
+        JSONArray filters = new JSONArray();
+        for(FilterDefinition f : getFilters()) {
+            boolean found = false;
+            for(FilterDefinition ff : parentFilters) {
+                if(f.sameFilter(ff)) {
+                    found = true;
+                }
+            }
+            if(!found)
+                filters.put(f.toJSON(filterHTMLMetadata));
+        }
+        jo.put("filters", filters);
+        return jo;
+    }
+
+    public int getHtmlWidth() {
+        return htmlWidth;
+    }
+
+    public void setHtmlWidth(int htmlWidth) {
+        this.htmlWidth = htmlWidth;
+    }
 
     public long getElementServerID() {
         return elementServerID;
@@ -222,7 +259,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     public void loadElement(long elementID, EIConnection conn) throws SQLException {
         PreparedStatement loadStmt = conn.prepareStatement("SELECT LABEL, FILTER_BORDER_STYLE, FILTER_BORDER_COLOR, filter_background_color, filter_background_alpha," +
                 "padding_left, padding_right, padding_top, padding_bottom, header_image_id, user_image.image_name, header_background_color, header_background_alpha," +
-                "preferred_width, preferred_height, dashboard_element_id, force_scrolling_off from dashboard_element " +
+                "preferred_width, preferred_height, dashboard_element_id, force_scrolling_off, html_width from dashboard_element " +
                 "left join user_image on dashboard_element.header_image_id = user_image.user_image_id where " +
                 "dashboard_element_id = ?");
         loadStmt.setLong(1, elementID);
@@ -256,14 +293,16 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         setPreferredHeight(rs.getInt(i++));
         setElementID(rs.getLong(i++));
         setElementServerID(getElementID());
-        setForceScrollingOff(rs.getBoolean(i));
+        setForceScrollingOff(rs.getBoolean(i++));
+        setHtmlWidth(rs.getInt(i));
         loadStmt.close();
     }
 
     public long save(EIConnection conn) throws SQLException {
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_ELEMENT (ELEMENT_TYPE, LABEL, filter_border_style, filter_border_color," +
                 "filter_background_color, filter_background_alpha, padding_left, padding_right, padding_top, padding_bottom, header_image_id," +
-                "header_background_color, header_background_alpha, preferred_width, preferred_height, force_scrolling_off) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "header_background_color, header_background_alpha, preferred_width, preferred_height, force_scrolling_off, html_width) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertStmt.setInt(i++, getType());
@@ -285,7 +324,8 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         insertStmt.setDouble(i++, headerBackgroundAlpha);
         insertStmt.setInt(i++, preferredWidth);
         insertStmt.setInt(i++, preferredHeight);
-        insertStmt.setBoolean(i, forceScrollingOff);
+        insertStmt.setBoolean(i++, forceScrollingOff);
+        insertStmt.setInt(i, htmlWidth);
         insertStmt.execute();
         setElementID(Database.instance().getAutoGenKey(insertStmt));
         insertStmt.close();

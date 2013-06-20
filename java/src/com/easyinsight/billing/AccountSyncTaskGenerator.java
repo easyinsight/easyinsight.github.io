@@ -20,7 +20,7 @@ import javax.persistence.Table;
 public class AccountSyncTaskGenerator extends TaskGenerator {
     public AccountSyncTaskGenerator() {
            super();
-           setTaskInterval(/*24 * 60 * */ 60 * 1000);
+           setTaskInterval(24 * 60 * 60 * 1000);
        }
 
        protected ScheduledTask createTask() {

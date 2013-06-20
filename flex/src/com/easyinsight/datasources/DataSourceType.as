@@ -56,6 +56,7 @@ public class DataSourceType {
     public static const SERVER_ORACLE:int = 169;
     public static const SERVER_POSTGRES:int = 170;
     public static const TRELLO:int = 171;
+    public static const INFUSIONSOFT:int = 177;
 
 
 

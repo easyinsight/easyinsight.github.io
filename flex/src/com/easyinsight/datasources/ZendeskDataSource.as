@@ -9,6 +9,7 @@ public class ZendeskDataSource extends CompositeServerDataSource {
     public var url:String;
     public var zdUserName:String;
     public var zdPassword:String;
+    public var loadComments:Boolean;
 
     public function ZendeskDataSource() {
         super();
@@ -16,9 +17,15 @@ public class ZendeskDataSource extends CompositeServerDataSource {
     }
 
     override public function createAdminPages():ArrayCollection {
-        var pages:ArrayCollection = new ArrayCollection();
-        return pages;
-    }
+            var pages:ArrayCollection = new ArrayCollection();
+
+            var config:ZendeskConfiguration = new ZendeskConfiguration();
+            config.dataSourceDefinition = this;
+            config.label = "Zendesk Server Configuration";
+            pages.addItem(config);
+            return pages;
+        }
+
 
     override public function getFeedType():int {
         return DataSourceType.ZENDESK;
@@ -27,5 +34,7 @@ public class ZendeskDataSource extends CompositeServerDataSource {
     override public function configClass():Class {
         return ZendeskDataSourceCreation;
     }
+
+
 }
 }

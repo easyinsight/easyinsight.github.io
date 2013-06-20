@@ -5,6 +5,8 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Value;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -24,7 +26,10 @@ public class TypeTransformComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         //DataSet targetSet = new DataSet();
-        Calendar calendar = Calendar.getInstance();
+        Map<AnalysisItem, Calendar> map = new HashMap<AnalysisItem, Calendar>();
+        for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
+            map.put(analysisItem, Calendar.getInstance());
+        }
         for (IRow row : dataSet.getRows()) {
             //IRow targetRow = targetSet.createRow();
             for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
@@ -35,7 +40,7 @@ public class TypeTransformComponent implements IComponent {
                         shift = ((AnalysisDateDimension) analysisItem).isTimeshift();
                     }
                 }
-                Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift, calendar);
+                Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift, map.get(analysisItem));
                 if (transformedValue != value) {
                     row.addValue(analysisItem.createAggregateKey(), transformedValue);
                 }

@@ -58,6 +58,7 @@ public class StackedColumnChartControlBar extends ReportControlBar implements IR
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
         addDropAreaGrouping(xAxisGrouping);
+        xAxisGrouping.report = xAxisDefinition;
 
         var stackLabel:Label = new Label();
         stackLabel.text = "Stack Grouping:";

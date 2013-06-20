@@ -7,6 +7,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.security.SecurityUtil;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.*;
@@ -171,5 +172,14 @@ public class WSTrendDefinition extends WSKPIDefinition {
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         return super.toHTML(targetDiv, htmlReportMetadata);    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject list = super.toJSON(htmlReportMetadata, parentDefinitions);
+        list.put("type", "trend_definition");
+        list.put("key", getUrlKey());
+        list.put("url", "/app/htmlExport");
+        return list;
     }
 }
