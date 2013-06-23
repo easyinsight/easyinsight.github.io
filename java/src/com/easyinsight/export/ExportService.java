@@ -1602,6 +1602,10 @@ public class ExportService {
                 for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
                     sb.append("<td style=\"").append(cellStyle).append("</td>");
                 }
+                if (hasBenchmark) {
+                    sb.append("<td>").append("</td>");
+                    sb.append("<td>").append("</td>");
+                }
             }
             sb.append("</tr>");
         }
