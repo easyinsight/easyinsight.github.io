@@ -51,7 +51,7 @@ public class XSSFExcelUploadFormat extends UploadFormat {
         return key.trim();
     }
 
-    protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems) {
+    protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems, int maxRows) {
         try {
             GridData gridData = new GridData();
 

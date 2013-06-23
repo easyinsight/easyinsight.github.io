@@ -66,7 +66,6 @@ public class UpdateRowsPKServlet extends APIServlet {
 
             for (int i = 0; i < rowNodes.size(); i++) {
                 List<AnalysisItem> items = new ArrayList<AnalysisItem>();
-                System.out.println("Inspecting row...");
                 Element rowNode = (Element) rowNodes.get(i);
                 Long rowID = Long.parseLong(rowNode.getAttribute("rowID").getValue());
                 IRow row = dataSet.createRow();

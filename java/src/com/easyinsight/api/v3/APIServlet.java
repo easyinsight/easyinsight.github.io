@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ public abstract class APIServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Date start = new Date();
         String authHeader = req.getHeader("Authorization");
         if (authHeader == null) {
             resp.setContentType("text/xml");
@@ -56,7 +58,7 @@ public abstract class APIServlet extends HttpServlet {
         UserServiceResponse userResponse = null;
         if (p != -1) {
             String userID = userPass.substring(0, p);
-            String password = userPass.substring(p+1);
+            String password = userPass.substring(p + 1);
             try {
                 userResponse = SecurityUtil.authenticateKeys(userID, password);
             } catch (com.easyinsight.security.SecurityException se) {
@@ -110,13 +112,15 @@ public abstract class APIServlet extends HttpServlet {
                 resp.getOutputStream().flush();
             }
         }
+        Date end = new Date();
+        System.out.println("API Call: " + this.getClass().getCanonicalName() + " Duration: " + (end.getTime() - start.getTime()));
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+        Date start = new Date();
         String authHeader = req.getHeader("Authorization");
-        if(authHeader == null) {
+        if (authHeader == null) {
             resp.setContentType("text/xml");
             resp.setStatus(403);
             resp.getOutputStream().write("<response><code>403</code><message>Unauthorized.</message></response>".getBytes());
@@ -131,7 +135,7 @@ public abstract class APIServlet extends HttpServlet {
         String userID = "";
         if (p != -1) {
             userID = userPass.substring(0, p);
-            String password = userPass.substring(p+1);
+            String password = userPass.substring(p + 1);
             try {
                 userResponse = SecurityUtil.authenticateKeys(userID, password);
             } catch (com.easyinsight.security.SecurityException se) {
@@ -140,8 +144,8 @@ public abstract class APIServlet extends HttpServlet {
         }
 
         if (userResponse == null || !userResponse.isSuccessful()) {
-            String ipAddress  = req.getHeader("X-FORWARDED-FOR");
-            if(ipAddress == null) {
+            String ipAddress = req.getHeader("X-FORWARDED-FOR");
+            if (ipAddress == null) {
                 ipAddress = req.getRemoteAddr();
             }
             new UserService().logAuthentication(userID, userResponse == null ? null : userResponse.getUserID(), false, ipAddress, req.getHeader("User-Agent"));
@@ -188,6 +192,8 @@ public abstract class APIServlet extends HttpServlet {
                 resp.getOutputStream().flush();
             }
         }
+        Date end = new Date();
+        System.out.println("API Call: " + this.getClass().getCanonicalName() + " Duration: " + (end.getTime() - start.getTime()));
     }
 
     protected abstract ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception;
@@ -215,7 +221,7 @@ public abstract class APIServlet extends HttpServlet {
                 long userID = SecurityUtil.getUserID();
                 // create new data source
                 FeedDefinition feedDefinition;
-                if(refreshKey != null && refreshUrl != null) {
+                if (refreshKey != null && refreshUrl != null) {
                     DatabaseConnection dbConnection = new DatabaseConnection();
                     dbConnection.setRefreshKey(refreshKey);
                     dbConnection.setRefreshUrl(refreshUrl);
@@ -249,7 +255,7 @@ public abstract class APIServlet extends HttpServlet {
                 FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(entry.getKey());
 
                 boolean changed = false;
-                if(feedDefinition instanceof DatabaseConnection && refreshKey != null && refreshUrl != null) {
+                if (feedDefinition instanceof DatabaseConnection && refreshKey != null && refreshUrl != null) {
                     DatabaseConnection databaseConnection = (DatabaseConnection) feedDefinition;
                     if (!refreshKey.equals(databaseConnection.getRefreshKey()) || !refreshUrl.equals(databaseConnection.getRefreshUrl())) {
                         changed = true;
@@ -306,8 +312,8 @@ public abstract class APIServlet extends HttpServlet {
     protected Map<Long, Boolean> findDataSourceIDsByName(String dataSourceName, Connection conn) throws SQLException {
         Map<Long, Boolean> dataSourceIDs = new HashMap<Long, Boolean>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.UNCHECKED_API_ENABLED" +
-                    " FROM UPLOAD_POLICY_USERS, DATA_FEED, user WHERE " +
-                    "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.user_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND (DATA_FEED.FEED_NAME = ? OR " +
+                " FROM UPLOAD_POLICY_USERS, DATA_FEED, user WHERE " +
+                "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.user_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND (DATA_FEED.FEED_NAME = ? OR " +
                 "DATA_FEED.API_KEY = ?) AND DATA_FEED.VISIBLE = ?");
         queryStmt.setLong(1, SecurityUtil.getUserID());
         queryStmt.setString(2, dataSourceName);

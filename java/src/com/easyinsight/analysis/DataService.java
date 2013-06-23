@@ -1687,6 +1687,7 @@ public class DataService {
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
 
             for (AnalysisItem analysisItem : analysisItems) {
+
                 //if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
                     validQueryItems.add(analysisItem);
                 //}
@@ -1732,6 +1733,7 @@ public class DataService {
             insightRequestMetadata.setLookupTableAggregate(analysisDefinition.isLookupTableOptimization());
             insightRequestMetadata.setReportItems(analysisDefinition.getAllAnalysisItems());
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
+
             timeshift(validQueryItems, filters, feed);
             dataSet = retrieveDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
             pipeline = new StandardReportPipeline(insightRequestMetadata.getIntermediatePipelines());

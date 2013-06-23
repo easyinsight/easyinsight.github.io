@@ -48,7 +48,7 @@ public class FlatFileUploadFormat extends UploadFormat {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems) {
+    protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems, int maxRows) {
         GridData gridData = new GridData();
 
         String csvResults = new String(data);

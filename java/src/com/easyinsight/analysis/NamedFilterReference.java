@@ -74,6 +74,10 @@ public class NamedFilterReference extends FilterDefinition {
 
     @Override
     public void timeshift(Feed dataSource, Collection<FilterDefinition> filters) {
+        filter.timeshift(dataSource, filters);
+    }
+
+    public void populateNamedFilters(Collection<FilterDefinition> filters) {
         for (FilterDefinition filter : filters) {
             if (referenceName.equals(filter.getFilterName())) {
                 this.filter = filter;
@@ -83,6 +87,5 @@ public class NamedFilterReference extends FilterDefinition {
         if (this.filter == null) {
             throw new ReportException(new GenericReportFault("Could not find a filter named " + referenceName + " as referenced in a named filter reference you defined."));
         }
-        filter.timeshift(dataSource, filters);
     }
 }

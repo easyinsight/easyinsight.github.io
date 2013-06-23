@@ -17,6 +17,7 @@
             measure.concrete = false;
             measure.displayName = grouping.display + " Count";
             addField(measure);
+            PopUpManager.removePopUp(this);
         }
 
         ]]></mx:Script>

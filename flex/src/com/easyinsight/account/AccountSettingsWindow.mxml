@@ -129,7 +129,7 @@
                     </util:dataProvider>
                 </util:SmartComboBox>
             </mx:FormItem>
-            <mx:FormItem label="Default Max Results:">
+            <mx:FormItem label="Default Max Rows for List Reports:">
                 <mx:TextInput id="defaultMaxResultsInput" text="{defaultMaxResults}"/>
             </mx:FormItem>
         </mx:Form>

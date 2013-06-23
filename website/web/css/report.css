@@ -105,6 +105,11 @@ body {
     position: relative;
 }
 
+.export_table {
+    border-collapse: separate !important;
+    border-spacing: 1px !important;
+}
+
 .inner_dashboard_text {
     position: absolute;
     top: 50%;

@@ -78,7 +78,6 @@ public class BulkUpdateRowsServlet extends APIServlet {
 
                 DataSet dataSet = new DataSet();
                 for (int i = 0; i < rowNodes.size(); i++) {
-                    System.out.println("Inspecting row...");
                     Node rowNode = rowNodes.get(i);
                     IRow row = dataSet.createRow();
                     for (int j = 0; j < rowNode.getChildCount(); j++) {
