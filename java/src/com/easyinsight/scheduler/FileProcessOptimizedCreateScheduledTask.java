@@ -124,11 +124,11 @@ public class FileProcessOptimizedCreateScheduledTask {
             String[] headerColumns = null;
             boolean foundHeaders = false;
             boolean foundRecord = true;
-            r.readRecord();
+
             while (!foundHeaders && foundRecord) {
-                headerColumns = r.getValues();
                 foundRecord = r.readRecord();
-                if (r.getColumnCount() > 1 && r.getColumnCount() == headerColumns.length) {
+                headerColumns = r.getValues();
+                if (r.getColumnCount() >= 1 && r.getColumnCount() == headerColumns.length) {
                     foundHeaders = true;
                 }
             }
