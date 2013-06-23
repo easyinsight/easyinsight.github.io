@@ -141,7 +141,11 @@ public class FileProcessOptimizedCreateScheduledTask {
             while (r.readRecord()) {
                 IRow row = dataSet.createRow();
                 for(int j = 0;j < r.getColumnCount();j++) {
-                    AnalysisItem analysisItem = analysisItems.get(headerColumns[j]);
+                    String key = headerColumns[j];
+                    if (key.length() > 50) {
+                        key = key.substring(0, 50);
+                    }
+                    AnalysisItem analysisItem = analysisItems.get(key);
                     if (analysisItem == null) {
                         continue;
                     }
