@@ -77,7 +77,8 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
             dispatchEvent(new ReportWindowEvent(event.drillThroughResponse.descriptor.id, 0, 0, event.drillThroughResponse.filters, InsightDescriptor(event.drillThroughResponse.descriptor).dataFeedID,
                     InsightDescriptor(event.drillThroughResponse.descriptor).reportType));
         } else {
-            dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.drillThroughResponse.descriptor, event.drillThroughResponse.filters));
+            dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.drillThroughResponse.descriptor, event.drillThroughResponse.filters,
+                event.drillThroughResponse.additionalFields));
         }
     }
 

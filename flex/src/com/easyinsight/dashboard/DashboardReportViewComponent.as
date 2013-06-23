@@ -10,7 +10,9 @@ import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.filtering.TransformContainer;
 import com.easyinsight.filtering.TransformsUpdatedEvent;
 import com.easyinsight.report.EmbedReportContextMenuFactory;
+import com.easyinsight.report.EmbeddedReportExportWindow;
 import com.easyinsight.report.ReportSetupEvent;
+import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.SaveButton;
 
 import flash.events.Event;
@@ -21,6 +23,7 @@ import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.controls.Label;
+import mx.managers.PopUpManager;
 
 public class DashboardReportViewComponent extends VBox implements IDashboardViewComponent  {
 
@@ -145,6 +148,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         }
 
         viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onReportSetup);
+        viewFactory.addEventListener("export", onExport);
         viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, onData);
         viewFactory.addEventListener(SizeOverrideEvent.SIZE_OVERRIDE, sizeOverride);
         viewFactory.setup();
@@ -154,6 +158,15 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             viewFactory.contextMenu = PopupMenuFactory.reportFactory.createReportContextMenu(dashboardReport.report, viewFactory, this);
         }
 
+    }
+
+    private function onExport(event:Event):void {
+        viewFactory.updateExportMetadata();
+        var window:EmbeddedReportExportWindow = new EmbeddedReportExportWindow();
+        window.report = viewFactory.report;
+        window.coreView = viewFactory.getChildAt(0);
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUp(window);
     }
 
     private function sizeOverride(event:SizeOverrideEvent):void {

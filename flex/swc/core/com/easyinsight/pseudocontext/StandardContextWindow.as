@@ -57,29 +57,6 @@ public class StandardContextWindow {
         this.copyText = copyText;
         this.altKey = altKey;
         items = [];
-        /*if (analysisItem is AnalysisHierarchyItem) {
-            var hierarchy:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
-            if (includeDrills) {
-                var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
-                if (index < (hierarchy.hierarchyLevels.length - 1)) {
-                    var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown");
-                    drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, drill);
-                }
-                if (index > 0) {
-                    var rollupItem:ContextMenuItem = new ContextMenuItem("Rollup");
-                    rollupItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
-                    items.push(rollupItem);
-                }
-            }
-            for each (var level:HierarchyLevel in hierarchy.hierarchyLevels) {
-                var childItem:AnalysisItem = level.analysisItem;
-                if (data[childItem.qualifiedName()]) {
-                    for each (var hierarchyLink:Link in childItem.links) {
-                        composeLink(hierarchyLink);
-                    }
-                }
-            }
-        }*/
         if (analysisItem is AnalysisDateDimension) {
             var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
             if (date.dateLevel == AnalysisItemTypes.YEAR_LEVEL) {
@@ -107,6 +84,9 @@ public class StandardContextWindow {
         var copyItem:ContextMenuItem = new ContextMenuItem("Copy Value");
         copyItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copyValue);
         items.push(copyItem);
+        var exportItem:ContextMenuItem = new ContextMenuItem("Export Report");
+        exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, exportReport);
+        items.push(exportItem);
         if (analysisItem.links.length > 0) {
             for each (var link:Link in analysisItem.links) {
                 composeLink(link);
@@ -205,6 +185,10 @@ public class StandardContextWindow {
 
     private function onReport(event:Event):void {
         passthroughFunction.call(passthroughObject, event);
+    }
+
+    private function exportReport(event:ContextMenuEvent):void {
+        passthroughFunction.call(passthroughObject, new Event("export", true));
     }
 
     private function copyValue(event:ContextMenuEvent):void {
