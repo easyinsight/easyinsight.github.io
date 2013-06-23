@@ -316,7 +316,6 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
                                     row.addValue(keys.get(MILESTONE_COMPLETED_ON), milestoneCompletedOn);
                                     row.addValue(keys.get(MILESTONE_OWNER), milestoneOwner);
                                     if (dueOnDate != null) {
-                                        System.out.println("for " + queryField(todoItem, "content/text()") + " , date string = " + dueOnString + " which parsed into " + dueOnDate);
                                         row.addValue(keys.get(DUEON), new DateValue(dueOnDate));
                                     }
                                     row.addValue(keys.get(CREATORNAME), creatorName);

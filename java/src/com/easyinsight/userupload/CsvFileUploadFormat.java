@@ -83,21 +83,20 @@ public class CsvFileUploadFormat extends UploadFormat {
         try {
             boolean foundHeaders = false;
             boolean foundRecord = true;
-            r.readRecord();
+
             while (!foundHeaders && foundRecord) {
-                headerColumns = r.getValues();
-                gridData.headerColumns = headerColumns;
                 foundRecord = r.readRecord();
-                if (r.getColumnCount() > 1 && r.getColumnCount() == headerColumns.length) {
+                headerColumns = r.getValues();
+                if (r.getColumnCount() >= 1 && r.getColumnCount() == headerColumns.length) {
                     foundHeaders = true;
                 }
             }
             if (!foundHeaders) {
-                throw new UploadException("We were unable to find headers in the CSV--if you tried to upload a file containing only a header row, you'll need to add at least one more row of data to the file.");
+                throw new RuntimeException("We were unable to find headers in the file.");
             }
             int currentRows = 0;
-            do {
-                if (r.getColumnCount() != headerColumns.length) {
+            while (r.readRecord() && (maxRows == -1 || currentRows < maxRows)) {
+                if (r.getColumnCount() > headerColumns.length) {
                     continue;
                 }
                 Value[] convertedValues = new Value[r.getColumnCount()];
@@ -129,7 +128,7 @@ public class CsvFileUploadFormat extends UploadFormat {
                     }
                 }
                 currentRows++;
-            } while (r.readRecord() && (maxRows == -1 || currentRows < maxRows));
+            };
             gridData.rowCount = grid.size();
             Value[][] v = new Value[grid.size()][];
             for(int i = 0; i < grid.size();i++) {
@@ -192,11 +191,13 @@ public class CsvFileUploadFormat extends UploadFormat {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM FLAT_FILE_UPLOAD_FORMAT WHERE FEED_ID = ?");
         clearStmt.setLong(1, feedID);
         clearStmt.executeUpdate();
+        clearStmt.close();
         PreparedStatement insertFormatStmt = conn.prepareStatement("INSERT INTO FLAT_FILE_UPLOAD_FORMAT (FEED_ID, DELIMITER_PATTERN," +
                 "DELIMITER_ESCAPE) VALUES (?, ?, ?)");
         insertFormatStmt.setLong(1, feedID);
         insertFormatStmt.setString(2, ",");
         insertFormatStmt.setString(3, "\"");
         insertFormatStmt.execute();
+        insertFormatStmt.close();
     }
 }
