@@ -588,7 +588,7 @@ public class AnalysisService {
                 List<String> pair = new ArrayList<String>();
                 Value provider = row.getValue(providerPseudoField);
                 Value location = row.getValue(locationPseudoField);
-                if ("".equals(provider.toString().trim())) {
+                if (provider.type() == Value.EMPTY || location.type() == Value.EMPTY || "".equals(provider.toString().trim())) {
                     iter.remove();
                     continue;
                 }
@@ -596,7 +596,8 @@ public class AnalysisService {
                 pair.add(location.toString());
                 String relatedProvider = map.get(pair);
                 if (relatedProvider == null || "(Empty)".equals(relatedProvider)) {
-                    return "We couldn't find " + location.toString() + " - " + provider.toString() + ".";
+                    // ignore
+                    //return "We couldn't find " + location.toString() + " - " + provider.toString() + ".";
                 } else {
                     row.addValue(new NamedKey("beutk2zd6.6"), relatedProvider);
                     row.addValue(useSourceRelatedProviderField.getKey(), relatedProvider);
@@ -1421,6 +1422,7 @@ public class AnalysisService {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
         try {
+            //boolean testAccountVisible = FeedService.testAccountVisible(conn);
             return analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn).values();
         } catch (Exception e) {
             LogClass.error(e);
