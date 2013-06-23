@@ -14,8 +14,17 @@ public class AccountSettings {
     private int dateFormat;
     private String currencySymbol;
     private int firstDayOfWeek;
+    private int maxResults;
 
     public AccountSettings() {
+    }
+
+    public int getMaxResults() {
+        return maxResults;
+    }
+
+    public void setMaxResults(int maxResults) {
+        this.maxResults = maxResults;
     }
 
     public int getFirstDayOfWeek() {

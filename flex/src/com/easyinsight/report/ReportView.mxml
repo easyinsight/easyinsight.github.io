@@ -162,6 +162,19 @@
 
         private var commandProcessor:CommandProcessor;
 
+        private var _additionalItems:ArrayCollection;
+
+        [Bindable(event="additionalItemsChanged")]
+        public function get additionalItems():ArrayCollection {
+            return _additionalItems;
+        }
+
+        public function set additionalItems(value:ArrayCollection):void {
+            if (_additionalItems == value) return;
+            _additionalItems = value;
+            dispatchEvent(new Event("additionalItemsChanged"));
+        }
+
         private var _parameterFilters:ArrayCollection;
 
         [Bindable(event="parameterFiltersChanged")]
@@ -486,6 +499,7 @@
                 this.headerBackgroundColor = ApplicationSkin.instance().headerBackgroundColor;
                 this.headerTextColor = ApplicationSkin.instance().headerTextColor;
                 this.headerVisible = ApplicationSkin.instance().reportHeader;
+                logoVisible = User.getInstance().reportLogo != null;
 
                 loading = true;
 
@@ -510,7 +524,7 @@
                             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:crumb.eiDescriptor.id,
                                 initialFilters:crumb.filters,
                                 exchangeItem:exchangeItem, reportList:reportList, reportIndex:reportIndex,
-                                breadCrumbs:_breadCrumbs, originalExchangeItem:originalExchangeItem != null ? originalExchangeItem : desc, dashboardStackPositions: crumb.stackPositions})));
+                                breadCrumbs:_breadCrumbs, originalExchangeItem:originalExchangeItem != null ? originalExchangeItem : desc, dashboardStackPositions:crumb.stackPositions})));
                         }
                     });
                     breadCrumbBox.addChild(backButton);
@@ -615,6 +629,7 @@
                     filterDefinitions = new ArrayCollection();
                 }
             }
+            viewFactory.additionalItems = additionalItems;
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             generateState();
             viewFactory.refresh();
@@ -726,7 +741,7 @@
             ProgressAlert.alert(this, "Setting up...", null, analysisService.setupAddRow);
             analysisService.setupAddRow.send(report.dataFeedID, new Date().getTimezoneOffset());
         }
-        
+
         private function setupAddRow():void {
             var rowSet:ActualRowSet = analysisService.setupAddRow.lastResult as ActualRowSet;
             var window:ActualRowEditWindow = new ActualRowEditWindow();
@@ -744,6 +759,9 @@
 
         [Bindable]
         private var maxHeaderWidth:int = 600;
+
+        [Bindable]
+        private var logoVisible:Boolean = false;
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="setupAddRow" result="setupAddRow()"/>
@@ -769,7 +787,7 @@
     </mx:HBox>
     <mx:HBox width="100%" id="headerArea" paddingTop="5" paddingBottom="5" paddingLeft="10" verticalAlign="middle">
         <mx:Box backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" borderColor="#FFFFFF" borderThickness="1" cornerRadius="5"
-                borderStyle="solid" visible="{headerVisible}">
+                borderStyle="solid" visible="{logoVisible}">
             <mx:Image id="logoImage"/>
         </mx:Box>
         <mx:Spacer width="100%"/>

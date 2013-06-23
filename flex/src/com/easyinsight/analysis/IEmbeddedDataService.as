@@ -3,7 +3,7 @@ import mx.collections.ArrayCollection;
 
 [Event(name="returnData", type="com.easyinsight.analysis.DataServiceEvent")]
 public interface IEmbeddedDataService {
-    function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams):void;
+    function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection, noCache:Boolean, hierarchyOverrides:ArrayCollection, requestParams:RequestParams, additionalAnalysisItems:ArrayCollection):void;
     function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0,
                 useWeakReference:Boolean = false):void;
     function set preserveValues(value:Boolean):void;

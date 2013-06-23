@@ -121,7 +121,11 @@ public class OAuthServlet extends HttpServlet {
                     PreparedStatement idStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE API_KEY = ?");
                     idStmt.setString(1, dataSourceID);
                     ResultSet rs = idStmt.executeQuery();
-                    rs.next();
+
+                    if(!rs.next()) {
+                        resp.sendError(404);
+                        return;
+                    }
                     long id = rs.getLong(1);
                     FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(id, conn);
                     IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
@@ -152,6 +156,7 @@ public class OAuthServlet extends HttpServlet {
             }
         } catch (Exception e) {
             LogClass.error(e);
+            resp.sendError(500);
         }
     }
 

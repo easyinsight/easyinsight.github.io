@@ -30,7 +30,7 @@ public class GoogleSpreadsheetFeed extends Feed {
     private String tokenKey;
     private String tokenSecret;
 
-    private SpreadsheetService as;
+    private transient SpreadsheetService as;
 
     public GoogleSpreadsheetFeed(String worksheetURL, String tokenKey, String tokenSecret) {
         this.worksheetURL = worksheetURL;

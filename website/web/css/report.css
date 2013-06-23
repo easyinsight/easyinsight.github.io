@@ -25,7 +25,13 @@ body {
 
 .filter {
     display: inline-block;
-    vertical-align: middle;
+    margin: auto 10px;
+    height: 40px;
+    /*vertical-align: middle;*/
+}
+
+.filters > .filter {
+    float: left;
 }
 
 .filters select {
@@ -72,13 +78,20 @@ body {
 .filters {
     text-align: left;
     width: 100%;
-    vertical-align: top;
+    vertical-align: baseline;
     font-size: 11px;
+    min-height: 40px;
 }
 
 .filters input {
     font-size: 11px;
 }
+
+.filters .date_filter_input {
+    width: 80px;
+    margin: 0px;
+}
+
 
 .filters button {
     font-size: 11px;
@@ -92,15 +105,15 @@ body {
     position: relative;
 }
 
+.export_table {
+    border-collapse: separate !important;
+    border-spacing: 1px !important;
+}
+
 .inner_dashboard_text {
     position: absolute;
     top: 50%;
     margin-top: -25%;
-}
-
-.date_filter_input {
-    width: 80px;
-    margin: 0px;
 }
 
 .nav-pills > li {

@@ -187,11 +187,11 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     }
 
     @Override
-        protected JSONObject getLegend() throws JSONException {
-            JSONObject o = super.getLegend();
-            o.put("renderer", "$.jqplot.GradientTableLegendRenderer");
-            return o;
-        }
+    protected JSONObject getLegend() throws JSONException {
+        JSONObject o = super.getLegend();
+        o.put("renderer", "$.jqplot.GradientTableLegendRenderer");
+        return o;
+    }
 
     @Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
@@ -201,7 +201,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
         String customHeight = htmlReportMetadata.createStyleProperties().toString();
-        String xyz = "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getStackedColumnChart('"+ targetDiv + "', " + argh + ","+customHeight+"))";
+        String xyz = "$.getJSON('/app/stackedChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getStackedColumnChart('" + targetDiv + "', " + argh + "," + customHeight + "))";
         /*return "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {\n" +
                 "                var s1 = data[\"values\"];\n" +
                 "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";*/
@@ -244,52 +244,82 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     }
 
     protected JSONArray getSeriesColors() {
-        return transformColors(super.getSeriesColors());
+        List<MultiColor> multiColors1 = new ArrayList<MultiColor>();
+        for(MultiColor mc : multiColors) {
+            if(mc.isColor1StartEnabled())
+                multiColors1.add(mc);
+        }
+        if (multiColors1.size() > 0) {
+            JSONArray colors = new JSONArray();
+            try {
+
+                for (MultiColor mc : multiColors1) {
+                    if(mc.isColor1StartEnabled()) {
+                        JSONArray gradient = new JSONArray();
+                        JSONObject color1 = new JSONObject();
+                        color1.put("color", String.format("'#%06X'", (0xFFFFFF & mc.getColor1Start())));
+                        color1.put("point", 0);
+                        JSONObject color2 = new JSONObject();
+                        color2.put("color", String.format("'#%06X'", (0xFFFFFF & mc.getColor1Start())));
+                        color2.put("point", 1);
+                        gradient.put(color1);
+                        gradient.put(color2);
+                        colors.put(gradient);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+            return colors;
+
+        } else {
+            return transformColors(super.getSeriesColors());
+        }
     }
 
     protected JSONArray transformColors(JSONArray colors) {
-            JSONArray newColors = new JSONArray();
-            try {
+        JSONArray newColors = new JSONArray();
+        try {
 
-                for (int i = 0; i < colors.length(); i++) {
-                    JSONArray gradient = new JSONArray();
-                    String color2 = "'#FFFFFF'";
-                    Object color = colors.get(i);
-
-
-                    JSONObject colorStop = new JSONObject();
-                    colorStop.put("point", 0);
-                    colorStop.put("color", color);
-                    gradient.put(colorStop);
-
-                    colorStop = new JSONObject();
-                    colorStop.put("point", .15);
-                    colorStop.put("color", color2);
-                    gradient.put(colorStop);
-
-                    colorStop = new JSONObject();
-                    colorStop.put("point", .5);
-                    colorStop.put("color", color);
-                    gradient.put(colorStop);
-
-                    colorStop = new JSONObject();
-                    colorStop.put("point", .9);
-                    colorStop.put("color", color);
-                    gradient.put(colorStop);
-
-                    colorStop = new JSONObject();
-                    colorStop.put("point", 1);
-                    colorStop.put("color", color2);
-                    gradient.put(colorStop);
+            for (int i = 0; i < colors.length(); i++) {
+                JSONArray gradient = new JSONArray();
+                String color2 = "'#FFFFFF'";
+                Object color = colors.get(i);
 
 
-                    newColors.put(gradient);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+                JSONObject colorStop = new JSONObject();
+                colorStop.put("point", 0);
+                colorStop.put("color", color);
+                gradient.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", .15);
+                colorStop.put("color", color2);
+                gradient.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", .5);
+                colorStop.put("color", color);
+                gradient.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", .9);
+                colorStop.put("color", color);
+                gradient.put(colorStop);
+
+                colorStop = new JSONObject();
+                colorStop.put("point", 1);
+                colorStop.put("color", color2);
+                gradient.put(colorStop);
+
+
+                newColors.put(gradient);
             }
-            return newColors;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+        return newColors;
+    }
 
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {

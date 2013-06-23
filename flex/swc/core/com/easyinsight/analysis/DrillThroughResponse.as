@@ -16,6 +16,7 @@ public class DrillThroughResponse {
 
     public var descriptor:EIDescriptor;
     public var filters:ArrayCollection;
+    public var additionalFields:ArrayCollection;
 
     public function DrillThroughResponse() {
     }

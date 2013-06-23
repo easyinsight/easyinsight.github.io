@@ -8,6 +8,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.intention.NewHierarchyIntention;
 import com.easyinsight.pipeline.*;
 
 import java.sql.SQLException;
@@ -429,10 +430,13 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return addedItems;
     }
 
-    public List<AnalysisItem> allAddedItems() {
+    public List<AnalysisItem> allAddedItems(InsightRequestMetadata insightRequestMetadata) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         if (addedItems != null) {
             items.addAll(addedItems);
+        }
+        if (insightRequestMetadata != null && insightRequestMetadata.getAdditionalAnalysisItems() != null) {
+            items.addAll(insightRequestMetadata.getAdditionalAnalysisItems());
         }
         if (addonReports != null) {
             for (AddonReport addonReport : addonReports) {
@@ -609,6 +613,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
+                analysisItem.populateNamedFilters(getFilterDefinitions());
                 List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), structure);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID()) {
@@ -962,7 +967,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
     }
 
     public List<Intention> createIntentions(List<AnalysisItem> fields, int type) throws SQLException {
-        return new ArrayList<Intention>();
+        if (type == IntentionSuggestion.WARNING_JOIN_FAILURE) {
+            return Arrays.asList((Intention) new NewHierarchyIntention(NewHierarchyIntention.CUSTOMIZE_JOINS));
+        } else {
+            return new ArrayList<Intention>();
+        }
     }
 
     public List<EIDescriptor> allItems(List<AnalysisItem> dataSourceItems, AnalysisItemRetrievalStructure structure) {

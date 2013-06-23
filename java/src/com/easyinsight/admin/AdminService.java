@@ -494,26 +494,29 @@ public class AdminService {
                 if (argh.generalActionType == DASHBOARD) {
                     dashboardStmt.setLong(1, argh.dashboardID);
                     ResultSet dsRS = dashboardStmt.executeQuery();
-                    dsRS.next();
-                    String dashboardName = dsRS.getString(1);
-                    String urlKey = dsRS.getString(2);
-                    long dsID = dsRS.getLong(3);
-                    actions.add(new ActionDashboardLog(new DashboardDescriptor(dashboardName, argh.dashboardID, urlKey, dsID, Roles.OWNER, null, false), argh.actionType, argh.actionDate));
+                    if (dsRS.next()) {
+                        String dashboardName = dsRS.getString(1);
+                        String urlKey = dsRS.getString(2);
+                        long dsID = dsRS.getLong(3);
+                        actions.add(new ActionDashboardLog(new DashboardDescriptor(dashboardName, argh.dashboardID, urlKey, dsID, Roles.OWNER, null, false), argh.actionType, argh.actionDate));
+                    }
                 } else if (argh.generalActionType == DATA_SOURCE) {
                     dataSourceStmt.setLong(1, argh.dataSourceID);
                     ResultSet dsRS = dataSourceStmt.executeQuery();
-                    dsRS.next();
-                    String dataSourceName = dsRS.getString(1);
-                    actions.add(new ActionDataSourceLog(argh.dataSourceID, dataSourceName, argh.actionType, argh.actionDate));
+                    if (dsRS.next()) {
+                        String dataSourceName = dsRS.getString(1);
+                        actions.add(new ActionDataSourceLog(argh.dataSourceID, dataSourceName, argh.actionType, argh.actionDate));
+                    }
                 } else if (argh.generalActionType == REPORT) {
                     reportStmt.setLong(1, argh.reportID);
                     ResultSet dsRS = reportStmt.executeQuery();
-                    dsRS.next();
-                    long dsID = dsRS.getLong(1);
-                    int reportType = dsRS.getInt(2);
-                    String reportName = dsRS.getString(3);
-                    String urlKey = dsRS.getString(4);
-                    actions.add(new ActionReportLog(new InsightDescriptor(argh.reportID, reportName, dsID, reportType, urlKey, Roles.OWNER, false), argh.actionType, argh.actionDate));
+                    if (dsRS.next()) {
+                        long dsID = dsRS.getLong(1);
+                        int reportType = dsRS.getInt(2);
+                        String reportName = dsRS.getString(3);
+                        String urlKey = dsRS.getString(4);
+                        actions.add(new ActionReportLog(new InsightDescriptor(argh.reportID, reportName, dsID, reportType, urlKey, Roles.OWNER, false), argh.actionType, argh.actionDate));
+                    }
                 }
             }
             queryActionStmt.close();

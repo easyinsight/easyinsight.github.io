@@ -11,6 +11,7 @@ public class AccountSettings {
     public var dateFormat:int;
     public var currencySymbol:String;
     public var firstDayOfWeek:int;
+    public var maxResults:int;
     
     public function AccountSettings() {
     }

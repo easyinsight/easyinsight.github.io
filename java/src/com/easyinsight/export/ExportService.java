@@ -1219,7 +1219,7 @@ public class ExportService {
         StringBuilder sb = new StringBuilder();
         String cellStyle;
         String thStyle = "padding:2px";
-        sb.append("<table style=\"width:100%;font-size:"+verticalList.getFontSize()+"px;\">");
+        sb.append("<table style=\"width:100%;font-size:"+verticalList.getFontSize()+"px;\" class='export_table'>");
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<th></th>");
         for (SortInfo sortInfo : vListInfo.columns) {
@@ -1449,7 +1449,7 @@ public class ExportService {
         if (includeTitle && report.getName() != null) {
             sb.append("<div style=\""+headerLabelStyle+"\">").append("<h0>").append(report.getName()).append("</h0></div>");
         }
-        sb.append("<table style=\"width:100%;font-size:"+verticalList.getFontSize()+"px;\">");
+        sb.append("<table style=\"width:100%;font-size:"+verticalList.getFontSize()+"px;\" class='export_table'>");
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<th></th>");
         for (int i = 0; i < ytdStuff.getHeaders().size(); i++) {
@@ -1530,7 +1530,7 @@ public class ExportService {
         if (includeTitle && listDefinition.getName() != null) {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(listDefinition.getName()).append("</h0>").append("</div>");
         }
-        sb.append("<table style=\"width:100%;font-size:"+verticalList.getFontSize()+"px;\">");
+        sb.append("<table style=\"width:100%;font-size:"+verticalList.getFontSize()+"px;\" class='export_table'>");
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<th></th>");
         for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
@@ -1601,6 +1601,10 @@ public class ExportService {
             } else if (alwaysShow) {
                 for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
                     sb.append("<td style=\"").append(cellStyle).append("</td>");
+                }
+                if (hasBenchmark) {
+                    sb.append("<td>").append("</td>");
+                    sb.append("<td>").append("</td>");
                 }
             }
             sb.append("</tr>");

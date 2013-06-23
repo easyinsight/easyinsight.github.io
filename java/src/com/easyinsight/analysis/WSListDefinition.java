@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -334,7 +335,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
             reportPropertiesIntention.setSummaryRow(true);
             return Arrays.asList((Intention) reportPropertiesIntention);
         } else {
-            throw new RuntimeException("Unrecognized intention type");
+            return super.createIntentions(fields, type);
         }
     }
 }

@@ -20,6 +20,24 @@ public abstract class DataResults implements Cloneable {
     private List<IntentionSuggestion> suggestions;
     private String reportLog;
     private String uid;
+    private long databaseTime;
+    private long processingTime;
+
+    public long getDatabaseTime() {
+        return databaseTime;
+    }
+
+    public void setDatabaseTime(long databaseTime) {
+        this.databaseTime = databaseTime;
+    }
+
+    public long getProcessingTime() {
+        return processingTime;
+    }
+
+    public void setProcessingTime(long processingTime) {
+        this.processingTime = processingTime;
+    }
 
     public DataResults clone() throws CloneNotSupportedException {
         return (DataResults) super.clone();

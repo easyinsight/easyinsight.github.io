@@ -59,6 +59,7 @@
             controls.addItem(new DashboardControl("Text", DashboardTextElement));
             this.availableControls = controls;
             if (_dashboardID == 0) {
+                dashboardChanged = true;
                 setupNewDashboard();
             } else {
                 dashboardViewable = true;

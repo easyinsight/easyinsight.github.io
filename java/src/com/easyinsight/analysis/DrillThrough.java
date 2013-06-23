@@ -121,10 +121,10 @@ public class DrillThrough extends Link {
         element.addAttribute(new Attribute("miniWindow", String.valueOf(miniWindow)));
         element.addAttribute(new Attribute("defaultLink", String.valueOf(isDefaultLink())));
         element.addAttribute(new Attribute("codeGenerated", String.valueOf(isCodeGenerated())));
-        if (reportID != null) {
+        if (reportID != null && reportID > 0) {
             element.addAttribute(new Attribute("reportID", xmlMetadata.urlKeyForReportID(reportID)));
         }
-        if (dashboardID != null) {
+        if (dashboardID != null && dashboardID > 0) {
             element.addAttribute(new Attribute("dashbordID", xmlMetadata.urlKeyForDashboardID(dashboardID)));
         }
         return element;

@@ -73,16 +73,6 @@
             _report = value;
         }
 
-        private function gotSuggestions():void {
-            var suggestions:ArrayCollection = analysisService.generatePossibleIntentions.lastResult as ArrayCollection;
-
-            /*    suggestionList.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
-             this.suggestions = suggestions;
-             suggestionList.rowCount = suggestions.length + 1;
-             }*/
-
-        }
-
         private function onUpdateComplete(event:FlexEvent):void {
             suggestionList.removeEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
             PopUpUtil.centerPopUp(this);
@@ -93,6 +83,7 @@
                 analysisService.getIntentions.send(_report, _fields, event.suggestion.scope, event.suggestion.type);
             } else {
                 new SuggestionFactory(simpleReportEditor).argh(event.suggestion.type, _fields, _report.dataFeedID);
+                PopUpManager.removePopUp(this);
             }
         }
 

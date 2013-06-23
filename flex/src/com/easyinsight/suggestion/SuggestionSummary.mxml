@@ -163,5 +163,4 @@
     <mx:LinkButton visible="false" textDecoration="underline" maxWidth="240" fontSize="12" id="text1" click="suggest1()"/>
     <mx:LinkButton visible="false" textDecoration="underline" maxWidth="240" fontSize="12" id="text2" click="suggest2()"/>
     <mx:LinkButton visible="false" textDecoration="underline" maxWidth="240" fontSize="12" id="text3" click="suggest3()"/>
-    <mx:LinkButton label="More Suggestions" textDecoration="underline" fontSize="12" click="moreSuggestions()"/>
 </mx:VBox>
