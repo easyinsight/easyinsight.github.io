@@ -225,9 +225,9 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
     public List<Intention> createIntentions(List<AnalysisItem> fields, int type) throws SQLException {
         List<Intention> intentions = new ArrayList<Intention>();
         if (type == IntentionSuggestion.NEW_HIERARCHY) {
-            intentions.add(new NewHierarchyIntention());
+            intentions.add(new NewHierarchyIntention(NewHierarchyIntention.HIERARCHY));
         } else {
-            throw new RuntimeException("Unrecognized intention type");
+            return super.createIntentions(fields, type);
         }
         return intentions;
     }

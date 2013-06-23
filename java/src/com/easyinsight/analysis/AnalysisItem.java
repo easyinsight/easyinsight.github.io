@@ -1001,4 +1001,15 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
         return null;
     }
+
+    public void populateNamedFilters(Collection<FilterDefinition> filters) {
+        if (getFilters() != null) {
+            for (FilterDefinition filter : getFilters()) {
+                if (filter instanceof NamedFilterReference) {
+                    NamedFilterReference namedFilterReference = (NamedFilterReference) filter;
+                    namedFilterReference.populateNamedFilters(filters);
+                }
+            }
+        }
+    }
 }

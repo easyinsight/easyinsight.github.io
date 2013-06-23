@@ -613,6 +613,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
+                analysisItem.populateNamedFilters(getFilterDefinitions());
                 List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), structure);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID()) {
