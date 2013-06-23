@@ -124,7 +124,6 @@ public class FileProcessOptimizedCreateScheduledTask {
             String[] headerColumns = null;
             boolean foundHeaders = false;
             boolean foundRecord = true;
-            r.readRecord();
             while (!foundHeaders && foundRecord) {
                 headerColumns = r.getValues();
                 foundRecord = r.readRecord();
