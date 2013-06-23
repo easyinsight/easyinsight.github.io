@@ -37,12 +37,12 @@ public abstract class UploadFormat implements Serializable {
     }
 
     public PersistableDataSetForm createDataSet(byte[] data, List<AnalysisItem> fields, IUploadFormatMapper formatMapper) {
-        return createInternalDataSet(data, null, fields, formatMapper);
+        return createInternalDataSet(data, null, fields, formatMapper, -1);
     }
 
     private DataTypeGuesser createDataTypeGuesser(byte[] data) {
         DataTypeGuesser dataTypeGuesser = new DataTypeGuesser();
-        createInternalDataSet(data, dataTypeGuesser, null, new DefaultFormatMapper(null));
+        createInternalDataSet(data, dataTypeGuesser, null, new DefaultFormatMapper(null), 100);
         return dataTypeGuesser;
     }
 
@@ -57,7 +57,7 @@ public abstract class UploadFormat implements Serializable {
         return keyMap;
     }
 
-    private PersistableDataSetForm createInternalDataSet(byte[] data, IDataTypeGuesser dataTypeGuesser, List<AnalysisItem> analysisItems, IUploadFormatMapper formatMapper) {
+    private PersistableDataSetForm createInternalDataSet(byte[] data, IDataTypeGuesser dataTypeGuesser, List<AnalysisItem> analysisItems, IUploadFormatMapper formatMapper, int maxRows) {
         Map<String, Key> keyMap = createKeyMap(analysisItems);
         Map<String, AnalysisItem> analysisItemMap = null;
         if (analysisItems != null) {
@@ -71,7 +71,7 @@ public abstract class UploadFormat implements Serializable {
 
         try {
 
-            GridData gridData = createGridData(data, dataTypeGuesser, keyMap, analysisItemMap);
+            GridData gridData = createGridData(data, dataTypeGuesser, keyMap, analysisItemMap, maxRows);
 
             Map<Key, ColumnSegment> columnSegmentMap = new LinkedHashMap<Key, ColumnSegment>();
             for (int j = 0; j < gridData.headerColumns.length; j++) {
@@ -93,6 +93,8 @@ public abstract class UploadFormat implements Serializable {
             }
 
             return new PersistableDataSetForm(columnSegmentMap);
+        } catch (RuntimeException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -108,7 +110,7 @@ public abstract class UploadFormat implements Serializable {
         return key.trim();
     }
 
-    protected abstract GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems);
+    protected abstract GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems, int maxRows);
 
     public abstract void persist(Connection conn, long feedID) throws SQLException;
 }

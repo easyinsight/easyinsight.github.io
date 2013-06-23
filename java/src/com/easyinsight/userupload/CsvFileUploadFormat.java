@@ -61,7 +61,7 @@ public class CsvFileUploadFormat extends UploadFormat {
         return valid;
     }
 
-    protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems) {
+    protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems, int maxRows) {
 
         GridData gridData = new GridData();
         CharsetDetector charsetDetector = new CharsetDetector();
@@ -93,13 +93,13 @@ public class CsvFileUploadFormat extends UploadFormat {
                 }
             }
             if (!foundHeaders) {
-                throw new RuntimeException("We were unable to find headers in the file.");
+                throw new UploadException("We were unable to find headers in the CSV--if you tried to upload a file containing only a header row, you'll need to add at least one more row of data to the file.");
             }
+            int currentRows = 0;
             do {
                 if (r.getColumnCount() != headerColumns.length) {
                     continue;
                 }
-                String[] values = new String[r.getColumnCount()];
                 Value[] convertedValues = new Value[r.getColumnCount()];
                 ColumnSegment columnSegment = new ColumnSegment();
                 for(int j = 0;j < r.getColumnCount();j++) {
@@ -114,7 +114,7 @@ public class CsvFileUploadFormat extends UploadFormat {
 
                 if (dataTypeGuesser != null) {
                     for (int headerKeyCounter = 0; headerKeyCounter < headerColumns.length; headerKeyCounter++) {
-                        if (headerKeyCounter < values.length) {
+                        if (headerKeyCounter < r.getColumnCount()) {
                             Value value = convertedValues[headerKeyCounter];
                             if (value != null) {
                                 Key key;
@@ -128,7 +128,8 @@ public class CsvFileUploadFormat extends UploadFormat {
                         }
                     }
                 }
-            } while (r.readRecord());
+                currentRows++;
+            } while (r.readRecord() && (maxRows == -1 || currentRows < maxRows));
             gridData.rowCount = grid.size();
             Value[][] v = new Value[grid.size()][];
             for(int i = 0; i < grid.size();i++) {
