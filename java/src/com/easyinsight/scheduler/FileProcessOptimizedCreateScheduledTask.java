@@ -72,15 +72,18 @@ public class FileProcessOptimizedCreateScheduledTask {
             }*/
 
             boolean hasCount = false;
+            Key countKey = null;
             for (AnalysisItem field : fields) {
                 if ("count".equals(field.toDisplay().toLowerCase())) {
                     hasCount = true;
+                    countKey = field.getKey();
                 }
             }
 
             AnalysisMeasure countMeasure;
             if (!hasCount) {
-                countMeasure = new AnalysisMeasure("Count", AggregationTypes.SUM);
+                countKey = new NamedKey("Count");
+                countMeasure = new AnalysisMeasure(countKey, AggregationTypes.SUM);
                 countMeasure.setRowCountField(true);
                 fields.add(countMeasure);
             }
@@ -135,7 +138,6 @@ public class FileProcessOptimizedCreateScheduledTask {
             DataSet dataSet = new DataSet();
             long start = System.currentTimeMillis();
             int i = 0;
-            int k = 0;
             while (r.readRecord()) {
                 IRow row = dataSet.createRow();
                 for(int j = 0;j < r.getColumnCount();j++) {
@@ -147,10 +149,9 @@ public class FileProcessOptimizedCreateScheduledTask {
                     Value value = transformValue(string, analysisItem);
                     row.addValue(analysisItem.getKey(), value);
                 }
+                row.addValue(countKey, 1);
                 i++;
-                k++;
                 if (i == 1000) {
-                    System.out.println("inserting at " + k);
                     tableDef.insertData(dataSet);
                     dataSet = new DataSet();
                     i = 0;
@@ -163,7 +164,7 @@ public class FileProcessOptimizedCreateScheduledTask {
             feedID = result.getFeedID();
             tableDef.commit();
             conn.commit();
-
+            r.close();
         }
         catch(Exception e) {
             if(tableDef != null) {
