@@ -206,6 +206,9 @@ $(function () {
 
         $("#base").append(dashboard(dashboardJSON));
 
+        $(".nav-pills").css("background-color", dashboardJSON["styles"]["alternative_stack_start"])
+        $(".dashboard_base > .row-fluid > .span12 > .tabbable > .nav-pills").css("background-color", dashboardJSON["styles"]["main_stack_start"])
+
         var filterMap = _.reduce(dashboardJSON["filters"], function (m, i) {
             m["filter" + i.id] = {"filter": i, "parent": null };
             return m;
