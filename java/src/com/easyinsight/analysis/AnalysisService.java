@@ -1139,6 +1139,8 @@ public class AnalysisService {
                             Value val;
                             if (object instanceof Value) {
                                 val = (Value) object;
+                            } else if(object == null) {
+                                val = new EmptyValue();
                             } else {
                                 val = new StringValue(object.toString());
                             }
