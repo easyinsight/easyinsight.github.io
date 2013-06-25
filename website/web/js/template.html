@@ -60,7 +60,11 @@
         <% } %>
         <%= Filter.filters(report.metadata.filters) %>
         <div>
+
             <div class="dashboardReportDiv" id="<%= report.id %>">
+                <% if(report.metadata.adhoc_execution) { %>
+                    <button class="adhoc btn btn-inverse">Run the Report</button>
+                <% } %>
                 <div class="reportArea" id="<%= report.id %>ReportArea"<%
                 if(typeof(preferredHeight) != "undefined" || typeof(preferredWidth) != "undefined") { %> style="<% if(typeof(preferredHeight) != "undefined") { %>height:<%- preferredHeight %>px;<% } %><%
                 if(typeof(preferredWidth) != "undefined") { %>width:<%- preferredWidth %>px;<% } %>"<% } %>></div>

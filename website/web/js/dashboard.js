@@ -115,10 +115,12 @@ var renderReport = function (o, dashboardID, reload) {
     o.rendered = true;
 }
 
-var buildReportGraph = function (obj, filterStack, filterMap, stackMap) {
+var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMap) {
     if (obj.type == "report") {
         var fs3 = filterStack.concat(obj.report.metadata.filters);
+
         var w = {"type": "report", "filters": fs3, "report": obj, "rendered": false };
+        reportMap[obj.id] = w;
         var t = _.reduce(obj.report.metadata.filters, function (m, i) {
             m["filter" + i.id] = {"filter": i, "parent": w };
             return m;
@@ -131,7 +133,7 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap) {
         var fs1 = filterStack.concat(obj.filters);
         for (var i = 0; i < obj.grid.length; i++) {
             for (var j = 0; j < obj.grid[i].length; j++) {
-                children = _.flatten(children.concat(buildReportGraph(obj.grid[i][j], fs1, filterMap, stackMap)));
+                children = _.flatten(children.concat(buildReportGraph(obj.grid[i][j], fs1, filterMap, stackMap, reportMap)));
             }
         }
         var x = {"type": "grid", "children": children };
@@ -145,7 +147,7 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap) {
         var fs2 = filterStack.concat(obj.filters);
         var ch = [];
         for (var k = 0; k < obj.stack_items.length; k++) {
-            ch = _.flatten(ch.concat(buildReportGraph(obj.stack_items[k].item, fs2, filterMap, stackMap)))
+            ch = _.flatten(ch.concat(buildReportGraph(obj.stack_items[k].item, fs2, filterMap, stackMap, reportMap)))
         }
         var y = {"type": "stack", "children": ch };
         stackMap[obj.id] = y;
@@ -162,7 +164,8 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap) {
 
 var renderReports = function (obj, dashboardID, force) {
     if (obj.type == "report") {
-        renderReport(obj, dashboardID, force);
+        if(!obj.report.report.metadata.adhoc_execution)
+            renderReport(obj, dashboardID, force);
     } else if (obj.type != "text") {
         for (var i = 0; i < obj.children.length; i++) {
             renderReports(obj.children[i], dashboardID, force);
@@ -214,7 +217,9 @@ $(function () {
             return m;
         }, {});
         var stackMap = {};
-        var graph = buildReportGraph(dashboardJSON["base"], dashboardJSON["filters"], filterMap, stackMap);
+        var reportMap = {};
+        var graph = buildReportGraph(dashboardJSON["base"], dashboardJSON["filters"], filterMap, stackMap, reportMap);
+
 
         renderReports(graph, dashboardJSON["id"], false);
         $(".single_filter").change(function (e) {
@@ -347,6 +352,11 @@ $(function () {
                 renderReports(f.parent, dashboardJSON["id"], true);
             }
         });
+
+        $(".adhoc").click(function(e) {
+            var z = $(e.target);
+            renderReport(reportMap[$(z.parent()).attr("id")], dashboardJSON["id"], true);
+        })
 
         $('a[data-toggle="tab"]').on('shown', function (e) {
             renderReports(stackMap[$(e.target).parent().parent().attr("id")], dashboardJSON["id"], false);

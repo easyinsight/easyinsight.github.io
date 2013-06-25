@@ -1085,6 +1085,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
         }
         jo.put("filters", filters);
+        jo.put("adhoc_execution", adHocExecution);
         return jo;
     }
 }
