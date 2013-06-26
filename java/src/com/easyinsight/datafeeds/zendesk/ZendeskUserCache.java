@@ -1,10 +1,6 @@
 package com.easyinsight.datafeeds.zendesk;
 
 import com.easyinsight.datafeeds.FeedDefinition;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Node;
-import nu.xom.Nodes;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,17 +25,24 @@ public class ZendeskUserCache extends ZendeskBaseSource {
     }
 
     public void populate(HttpClient httpClient, String url, ZendeskCompositeSource zendeskCompositeSource) throws InterruptedException {
-        Builder builder = new Builder();
-        Document doc = runRestRequest(zendeskCompositeSource, httpClient, "/users.xml", builder);
-        Nodes userNodes = doc.query("/users/user");
-        for (int i = 0; i < userNodes.size(); i++) {
-            Node userNode = userNodes.get(i);
-            String name = queryField(userNode, "name/text()");
-            String id = queryField(userNode, "id/text()");
-            String organization = queryField(userNode, "organization-id/text()");
-            String role = queryField(userNode, "roles/text()");
-            String email = queryField(userNode, "email/text()");
-            users.put(id, new ZendeskUser(name, id, organization, role, email));
+        String nextPage = zendeskCompositeSource.getUrl() + "/api/v2/users.json";
+        while (nextPage != null) {
+            Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
+            List results = (List) ticketObjects.get("users");
+            for (Object obj : results) {
+                Map map = (Map) obj;
+                String name = queryField(map, "name");
+                String id = queryField(map, "id");
+                String organization = queryField(map, "organization_id");
+                String role = queryField(map, "role");
+                String email = queryField(map, "email");
+                users.put(id, new ZendeskUser(name, id, organization, role, email));
+            }
+            if (ticketObjects.get("next_page") != null) {
+                nextPage = ticketObjects.get("next_page").toString();
+            } else {
+                nextPage = null;
+            }
         }
     }
 
