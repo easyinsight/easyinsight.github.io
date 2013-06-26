@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.ReportQueryNodeKey;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.Row;
@@ -74,15 +75,25 @@ public class CompositeFeedCompositeConnection implements Serializable, IJoin {
     }
 
     public QueryNodeKey sourceQueryNodeKey() {
-        return new DataSourceQueryNodeKey(sourceFeedID);
+        if (sourceReportID != null && sourceReportID > 0) {
+            return new ReportQueryNodeKey(sourceReportID);
+        } else {
+            return new DataSourceQueryNodeKey(sourceFeedID);
+        }
     }
 
     public QueryNodeKey targetQueryNodeKey() {
-        return new DataSourceQueryNodeKey(targetFeedID);
+        if (targetReportID != null && targetReportID > 0) {
+            return new ReportQueryNodeKey(targetReportID);
+        } else {
+            return new DataSourceQueryNodeKey(targetFeedID);
+        }
     }
 
     private Long sourceFeedID;
     private Long targetFeedID;
+    private Long sourceReportID;
+    private Long targetReportID;
     
     private List<AnalysisItem> sourceItems = new ArrayList<AnalysisItem>();
     private List<AnalysisItem> targetItems = new ArrayList<AnalysisItem>();
@@ -92,8 +103,28 @@ public class CompositeFeedCompositeConnection implements Serializable, IJoin {
     public CompositeFeedCompositeConnection() {
     }
 
+    public Long getSourceReportID() {
+        return sourceReportID;
+    }
+
+    public void setSourceReportID(Long sourceReportID) {
+        this.sourceReportID = sourceReportID;
+    }
+
+    public Long getTargetReportID() {
+        return targetReportID;
+    }
+
+    public void setTargetReportID(Long targetReportID) {
+        this.targetReportID = targetReportID;
+    }
+
     public List<AnalysisItem> getSourceItems() {
         return sourceItems;
+    }
+
+    public int dateLevelForJoin() {
+        return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public List<Key> getTargetJoins() {
