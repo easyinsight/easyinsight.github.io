@@ -3,7 +3,6 @@ package com.easyinsight.dataset;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.core.*;
-import com.easyinsight.pipeline.AggregationComponent;
 import com.easyinsight.pipeline.PipelineData;
 import com.easyinsight.storage.IWhere;
 
@@ -143,19 +142,22 @@ public class DataSet implements Serializable, Cloneable {
         return rows.toString();
     }
 
-    private long toID(Key key) {
+    private UniqueKey toID(Key key) {
         if (key instanceof DerivedKey) {
             DerivedKey derivedKey = (DerivedKey) key;
             Key next = derivedKey.getParentKey();
             if (next instanceof NamedKey) {
-                return derivedKey.getFeedID();
+                return new UniqueKey(derivedKey.getFeedID(), UniqueKey.DERIVED);
             }
             return toID(next);
+        } else if (key instanceof ReportKey) {
+            ReportKey reportKey = (ReportKey) key;
+            return new UniqueKey(reportKey.getReportID(), UniqueKey.REPORT);
         }
-        return 0;
+        return null;
     }
 
-    public ListTransform listTransform(List<AnalysisItem> columns, Set<Integer> skipAggregations, Map<Long, AnalysisItem> uniqueItems, Map<String, Long> fieldToUniques, int tier) {
+    public ListTransform listTransform(List<AnalysisItem> columns, Set<Integer> skipAggregations, Map<UniqueKey, AnalysisItem> uniqueItems, Map<String, UniqueKey> fieldToUniques, int tier) {
         ListTransform listTransform = new ListTransform(skipAggregations);
         Collection<AnalysisDimension> ourDimensions = new ArrayList<AnalysisDimension>();
         Collection<AnalysisDimension> ungroupedDimensions = new ArrayList<AnalysisDimension>();
@@ -173,13 +175,13 @@ public class DataSet implements Serializable, Cloneable {
                 }
             } else if (column.hasType(AnalysisItemTypes.MEASURE)) {
                 if (uniqueItems != null) {
-                    long id = toID(column.getKey());
-                    if (id != 0) {
+                    UniqueKey id = toID(column.getKey());
+                    if (id != null) {
                         AnalysisItem dim = uniqueItems.get(id);
                         keyMapping.put(column, dim);
                     } else {
                         if (fieldToUniques != null) {
-                            Long idObj = fieldToUniques.get(column.toDisplay());
+                            UniqueKey idObj = fieldToUniques.get(column.toDisplay());
                             if (idObj != null) {
                                 AnalysisItem dim = uniqueItems.get(idObj);
                                 keyMapping.put(column, dim);

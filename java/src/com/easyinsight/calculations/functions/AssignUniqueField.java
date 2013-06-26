@@ -1,6 +1,7 @@
 package com.easyinsight.calculations.functions;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.UniqueKey;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.calculations.FunctionException;
@@ -25,8 +26,18 @@ import java.util.Set;
 public class AssignUniqueField extends Function {
     public Value evaluate() {
         WSAnalysisDefinition report = calculationMetadata.getReport();
-        String field = minusQuotes(0);
-        String source = minusQuotes(1);
+        String field;
+        try {
+            Value param = getParameter(0);
+            if (param.type() != Value.EMPTY) {
+                field = minusQuotes(param).toString();
+            } else {
+                field = minusBrackets(getParameterName(0));
+            }
+        } catch (Exception e) {
+            field = minusBrackets(getParameterName(0));
+        }
+        String source = minusQuotes(getParameter(1)).toString();
         AnalysisItem match = null;
         for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
             if (field.equals(analysisItem.toDisplay())) {
@@ -36,7 +47,7 @@ public class AssignUniqueField extends Function {
         if (match == null) {
             throw new FunctionException("Could not find field " + field + ".");
         }
-        Long id;
+        UniqueKey id;
         try {
             id = findID(report.getDataFeedID(), source,  calculationMetadata.getConnection());
         } catch (SQLException e) {
@@ -47,13 +58,13 @@ public class AssignUniqueField extends Function {
         }
         //long id = toID(match.getKey());
         if (report.getFieldToUniqueMap() == null) {
-            report.setFieldToUniqueMap(new HashMap<String, Long>());
+            report.setFieldToUniqueMap(new HashMap<String, UniqueKey>());
         }
         report.getFieldToUniqueMap().put(field, id);
         return null;
     }
 
-    private Long findID(long dataSourceID, String name, EIConnection conn) throws SQLException {
+    private UniqueKey findID(long dataSourceID, String name, EIConnection conn) throws SQLException {
         PreparedStatement getCompStmt = conn.prepareStatement("SELECT COMPOSITE_FEED_ID FROM COMPOSITE_FEED WHERE DATA_FEED_ID = ?");
         getCompStmt.setLong(1, dataSourceID);
         ResultSet compRS = getCompStmt.executeQuery();
@@ -73,12 +84,12 @@ public class AssignUniqueField extends Function {
                 ids.add(childID);
                 String childName = rs.getString(2);
                 if (childName.equals(name)) {
-                    return childID;
+                    return new UniqueKey(childID, UniqueKey.DERIVED);
                 }
             }
             stmt.close();
             for (Long id : ids) {
-                Long match = findID(id, name, conn);
+                UniqueKey match = findID(id, name, conn);
                 if (match != null) {
                     return match;
                 }
@@ -87,19 +98,12 @@ public class AssignUniqueField extends Function {
         return null;
     }
 
-    private long toID(Key key) {
-        if (key instanceof DerivedKey) {
-            DerivedKey derivedKey = (DerivedKey) key;
-            Key next = derivedKey.getParentKey();
-            if (next instanceof NamedKey) {
-                return derivedKey.getFeedID();
-            }
-            return toID(next);
-        }
-        return 0;
-    }
-
     public int getParameterCount() {
         return 2;
+    }
+
+    @Override
+    public boolean onDemand() {
+        return true;
     }
 }

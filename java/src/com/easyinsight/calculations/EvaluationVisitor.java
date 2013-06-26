@@ -63,6 +63,14 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
 
         if (node1.getResult().type() == Value.STRING && node2.getResult().type() == Value.STRING) {
             return Function.minusQuotes(node1.getResult()).equals(Function.minusQuotes(node2.getResult()));
+        } else if (node1.getResult().type() == Value.STRING && node2.getResult().type() == Value.EMPTY) {
+            return Function.minusQuotes(node1.getResult()).toString().equals("");
+        } else if (node1.getResult().type() == Value.EMPTY && node2.getResult().type() == Value.STRING) {
+            return "".equals(Function.minusQuotes(node2.getResult()).toString());
+        } else if (node1.getResult().type() == Value.NUMBER && node2.getResult().type() == Value.EMPTY) {
+            return node1.getResult().equals(new NumericValue(0));
+        } else if (node1.getResult().type() == Value.EMPTY && node2.getResult().type() == Value.NUMBER) {
+            return new NumericValue(0).equals(node2.getResult());
         } else return node1.getResult().equals(node2.getResult());
     }
 
