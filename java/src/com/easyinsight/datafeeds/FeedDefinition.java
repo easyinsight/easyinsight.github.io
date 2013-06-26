@@ -1,5 +1,7 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.core.ReportKey;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.security.SecurityUtil;
@@ -65,6 +67,15 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean concreteFieldsEditable;
     private DataSourceInfo dataSourceInfo;
     private boolean kpiSource;
+    private List<AddonReport> addonReports;
+
+    public List<AddonReport> getAddonReports() {
+        return addonReports;
+    }
+
+    public void setAddonReports(List<AddonReport> addonReports) {
+        this.addonReports = addonReports;
+    }
 
     public boolean isKpiSource() {
         return kpiSource;
@@ -402,12 +413,67 @@ public class FeedDefinition implements Cloneable, Serializable {
         return getFields();
     }
 
+    private void addAddonReports(List<AnalysisItem> clones, List<FeedNode> feedNodes, EIConnection conn) {
+        for (AddonReport addonReport : addonReports) {
+            long addonReportID = addonReport.getReportID();
+            Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+            List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
+            WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(addonReportID, conn);
+            Map<String, AnalysisItem> structure = report.createStructure();
+            for (AnalysisItem item : structure.values()) {
+                AnalysisItem clone;
+                if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    AnalysisDateDimension baseDate = (AnalysisDateDimension) item;
+                    AnalysisDateDimension date = new AnalysisDateDimension();
+                    date.setDateLevel(baseDate.getDateLevel());
+                    date.setOutputDateFormat(baseDate.getOutputDateFormat());
+                    date.setDateOnlyField(baseDate.isDateOnlyField() || baseDate.hasType(AnalysisItemTypes.DERIVED_DATE));
+                    clone = date;
+                } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
+                    AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
+                    AnalysisMeasure measure = new AnalysisMeasure();
+                    measure.setFormattingConfiguration(item.getFormattingConfiguration());
+                    measure.setAggregation(baseMeasure.getAggregation());
+                    measure.setPrecision(baseMeasure.getPrecision());
+                    measure.setMinPrecision(baseMeasure.getMinPrecision());
+                    clone = measure;
+                } else {
+                    clone = new AnalysisDimension();
+                }
+                clone.setOriginalDisplayName(item.toDisplay());
+                clone.setDisplayName(item.toDisplay());
+                ReportKey reportKey = new ReportKey();
+                reportKey.setParentKey(item.getKey());
+                reportKey.setReportID(addonReportID);
+                clone.setKey(reportKey);
+                replacementMap.put(item.getAnalysisItemID(), clone);
+                fields.add(clone);
+            }
+            ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+            for (AnalysisItem clone : fields) {
+                clone.updateIDs(replacements);
+                clones.add(clone);
+            }
+            FolderNode folderNode = new FolderNode();
+            folderNode.setAddonReportDescriptor(new InsightDescriptor(report.getAnalysisID(), report.getName(), report.getDataFeedID(), report.getReportType(), report.getUrlKey(), 0, false));
+            folderNode.setAddonReportID(addonReportID);
+            FeedFolder feedFolder = new FeedFolder();
+            feedFolder.setName(report.getName());
+            folderNode.setFolder(feedFolder);
+            for (AnalysisItem analysisItem : fields) {
+                folderNode.getChildren().add(analysisItem.toFeedNode());
+            }
+            feedNodes.add(folderNode);
+        }
+    }
+
     private void populateFeedFields(Feed feed, List<AnalysisItem> kpis) {
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>();
         allFields.addAll(fieldsForFeed());
         allFields.addAll(kpis);
+
         for (AnalysisItem field : allFields) {
             try {
                 AnalysisItem clone = field.clone();
@@ -451,6 +517,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         for (AnalysisItem clone : clones) {
             clone.updateIDs(replacements);
         }
+
         List<FeedNode> feedNodes = new ArrayList<FeedNode>();
         for (FeedFolder feedFolder : getFolders()) {
             try {
@@ -481,6 +548,14 @@ public class FeedDefinition implements Cloneable, Serializable {
         for (AnalysisItem analysisItem : replacementMap.values()) {
             if (!analysisItem.isHidden()) {
                 feedNodes.add(analysisItem.toFeedNode());
+            }
+        }
+        if (addonReports != null) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                addAddonReports(clones, feedNodes, conn);
+            } finally {
+                Database.closeConnection(conn);
             }
         }
         Collections.sort(feedNodes, new Comparator<FeedNode>() {
