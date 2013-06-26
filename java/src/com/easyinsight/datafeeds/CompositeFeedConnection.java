@@ -5,10 +5,12 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
+import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
+import org.hibernate.Session;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -186,6 +188,21 @@ public class CompositeFeedConnection implements Serializable, IJoin {
         this.targetJoinOnOriginal = targetJoinOnOriginal;
     }
 
+    public int dateLevelForJoin() {
+        if (sourceItems != null && targetItems != null) {
+            for (int i = 0; i < sourceItems.size(); i++) {
+                AnalysisItem sourceItem = sourceItems.get(i);
+                AnalysisItem targetItem = targetItems.get(i);
+                if (sourceItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && targetItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    int sourceLevel = ((AnalysisDateDimension) sourceItem).getDateLevel();
+                    int targetLevel = ((AnalysisDateDimension) targetItem).getDateLevel();
+                    return sourceLevel;
+                }
+            }
+        }
+        return 0;
+    }
+
     public List<AnalysisItem> getSourceItems() {
         return sourceItems;
     }
@@ -306,17 +323,35 @@ public class CompositeFeedConnection implements Serializable, IJoin {
                     "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, source_item_id, target_item_id, COMPOSITE_FEED_ID, " +
                     "left_join, right_join, left_join_on_original, right_join_on_original, marmot_script, source_report_id, target_report_id) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            if (sourceFeedID == null) {
+            if (sourceFeedID == null || sourceFeedID == 0) {
                 connInsertStmt.setNull(1, Types.BIGINT);
             } else {
                 connInsertStmt.setLong(1, sourceFeedID);
             }
-            if (targetFeedID == null) {
+            if (targetFeedID == null || targetFeedID == 0) {
                 connInsertStmt.setNull(2, Types.BIGINT);
             } else {
                 connInsertStmt.setLong(2, targetFeedID);
             }
+            if (sourceItem.getAnalysisItemID() == 0) {
+                Session session = Database.instance().createSession(conn);
+                try {
+                    sourceItem.reportSave(session);
+                    session.save(sourceItem);
+                } finally {
+                    session.close();
+                }
+            }
             connInsertStmt.setLong(3, sourceItem.getAnalysisItemID());
+            if (targetItem.getAnalysisItemID() == 0) {
+                Session session = Database.instance().createSession(conn);
+                try {
+                    targetItem.reportSave(session);
+                    session.save(targetItem);
+                } finally {
+                    session.close();
+                }
+            }
             connInsertStmt.setLong(4, targetItem.getAnalysisItemID());
             connInsertStmt.setLong(5, feedID);
             connInsertStmt.setBoolean(6, sourceOuterJoin);
@@ -324,12 +359,12 @@ public class CompositeFeedConnection implements Serializable, IJoin {
             connInsertStmt.setBoolean(8, sourceJoinOnOriginal);
             connInsertStmt.setBoolean(9, targetJoinOnOriginal);
             connInsertStmt.setString(10, marmotScript);
-            if (sourceReportID == null) {
+            if (sourceReportID == null || sourceReportID == 0) {
                 connInsertStmt.setNull(11, Types.BIGINT);
             } else {
                 connInsertStmt.setLong(11, sourceReportID);
             }
-            if (targetReportID == null) {
+            if (targetReportID == null || targetReportID == 0) {
                 connInsertStmt.setNull(12, Types.BIGINT);
             } else {
                 connInsertStmt.setLong(12, targetReportID);
@@ -457,7 +492,9 @@ public class CompositeFeedConnection implements Serializable, IJoin {
             System.out.println("Couldn't find " + getTargetJoin().toKeyString() + " on " + targetName);
         }
         String mergeString = "Merging data set on " + sourceName + " : " + myJoinDimension.toKeyString() + " to " + targetName + " : " + fromJoinDimension.toKeyString();
-
+        System.out.println(mergeString);
+        System.out.println("\t" + sourceSet.getRows().size());
+        System.out.println("\t" + dataSet.getRows().size());
         Map<Value, List<IRow>> index = new HashMap<Value, List<IRow>>();
 
         Collection<IRow> unjoinedRows = new ArrayList<IRow>();
@@ -530,8 +567,6 @@ public class CompositeFeedConnection implements Serializable, IJoin {
                 }
             }
         }
-
-
         for (List<IRow> rows : indexCopy.values()) {
             for (IRow row : rows) {
                 result.createRow().addValues(row);
