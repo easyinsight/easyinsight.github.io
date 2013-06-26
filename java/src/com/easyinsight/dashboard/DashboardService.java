@@ -1,6 +1,7 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -84,7 +85,8 @@ public class DashboardService {
     public List<DashboardDescriptor> getDashboards() {
         EIConnection conn = Database.instance().getConnection();
         try {
-            return dashboardStorage.getDashboards(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn).values();
+            boolean testAccountVisible = FeedService.testAccountVisible(conn);
+            return dashboardStorage.getDashboards(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn, testAccountVisible).values();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -352,6 +354,7 @@ public class DashboardService {
         EIConnection conn = Database.instance().getConnection();
         try {
             int role = SecurityUtil.authorizeDashboard(dashboardID);
+            long startTime = System.currentTimeMillis();
             String cacheKey = SecurityUtil.getUserID(false) + "-" + dashboardID;
             /*if (dashboardCache != null) {
                 Dashboard dashboard = (Dashboard) dashboardCache.get(cacheKey);
@@ -380,6 +383,7 @@ public class DashboardService {
             if (dashboardCache != null) {
                 dashboardCache.put(cacheKey, dashboard);
             }
+            BenchmarkManager.recordBenchmarkForDashboard("DashboardView", System.currentTimeMillis() - startTime, SecurityUtil.getUserID(false), dashboardID);
             return dashboard;
         } catch (Exception e) {
             LogClass.error("On retrieving dashboard " + dashboardID, e);
