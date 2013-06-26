@@ -23,6 +23,7 @@ import org.hibernate.Session;
  * Time: 11:55:05 PM
  */
 public class CompositeFeedDefinition extends FeedDefinition {
+    // if (([Todo Completed At] > 0 && [Todo Completed At] <= [Todo Due At]) || nowdate() <= [Todo Due At], "On Time", "Late")
     private List<CompositeFeedNode> compositeFeedNodes = new ArrayList<CompositeFeedNode>();
     private List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
 
@@ -126,25 +127,45 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
             queryStmt.close();
             PreparedStatement queryConnStmt = conn.prepareStatement("SELECT SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID," +
-                    "SOURCE_JOIN, TARGET_JOIN, SOURCE_ITEM_ID, TARGET_ITEM_ID, left_join, right_join, left_join_on_original, right_join_on_original, marmot_script " +
+                    "SOURCE_JOIN, TARGET_JOIN, SOURCE_ITEM_ID, TARGET_ITEM_ID, left_join, right_join, left_join_on_original, right_join_on_original, marmot_script, SOURCE_REPORT_ID, TARGET_REPORT_ID " +
                     " FROM COMPOSITE_CONNECTION WHERE COMPOSITE_FEED_ID = ?");
             PreparedStatement nameStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+            PreparedStatement reportNameStmt = conn.prepareStatement("SELECT TITLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
             queryConnStmt.setLong(1, compositeFeedID);
             List<CompositeFeedConnection> edges = new ArrayList<CompositeFeedConnection>();
             ResultSet connectionRS = queryConnStmt.executeQuery();
             while (connectionRS.next()) {
                 long sourceID = connectionRS.getLong(1);
                 long targetID = connectionRS.getLong(2);
+                long sourceReportID = connectionRS.getLong(12);
+                long targetReportID = connectionRS.getLong(13);
+                String sourceName;
+                String targetName;
+                if (sourceID > 0) {
+                    nameStmt.setLong(1, sourceID);
+                    ResultSet nameRS = nameStmt.executeQuery();
+                    nameRS.next();
 
-                nameStmt.setLong(1, sourceID);
-                ResultSet nameRS = nameStmt.executeQuery();
-                nameRS.next();
-                String sourceName = nameRS.getString(1);
+                    sourceName = nameRS.getString(1);
+                } else {
+                    reportNameStmt.setLong(1, sourceReportID);
+                    ResultSet nameRS = reportNameStmt.executeQuery();
+                    nameRS.next();
+                    sourceName = nameRS.getString(1);
+                }
 
-                nameStmt.setLong(1, targetID);
-                nameRS = nameStmt.executeQuery();
-                nameRS.next();
-                String targetName = nameRS.getString(1);
+                if (targetID > 0) {
+                    nameStmt.setLong(1, targetID);
+                    ResultSet nameRS = nameStmt.executeQuery();
+                    nameRS.next();
+
+                    targetName = nameRS.getString(1);
+                } else {
+                    reportNameStmt.setLong(1, targetReportID);
+                    ResultSet nameRS = reportNameStmt.executeQuery();
+                    nameRS.next();
+                    targetName = nameRS.getString(1);
+                }
 
                 long sourceKeyID = connectionRS.getLong(3);
                 if (connectionRS.wasNull()) {
@@ -155,8 +176,11 @@ public class CompositeFeedDefinition extends FeedDefinition {
                     boolean sourceJoinOnOriginal = connectionRS.getBoolean(9);
                     boolean targetJoinOnOriginal = connectionRS.getBoolean(10);
                     String marmotScript = connectionRS.getString(11);
-                    edges.add(new CompositeFeedConnection(sourceID, targetID, sourceItem, targetItem, sourceName, targetName,
-                            sourceJoin, targetJoin, sourceJoinOnOriginal, targetJoinOnOriginal, marmotScript));
+                    CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(sourceID, targetID, sourceItem, targetItem, sourceName, targetName,
+                            sourceJoin, targetJoin, sourceJoinOnOriginal, targetJoinOnOriginal, marmotScript);
+                    compositeFeedConnection.setSourceReportID(sourceReportID);
+                    compositeFeedConnection.setTargetReportID(targetReportID);
+                    edges.add(compositeFeedConnection);
                 } else {
                     Key sourceKey = getKey(conn, sourceKeyID);
                     Key targetKey = getKey(conn, connectionRS.getLong(4));
@@ -165,8 +189,11 @@ public class CompositeFeedDefinition extends FeedDefinition {
                     boolean sourceJoinOnOriginal = connectionRS.getBoolean(9);
                     boolean targetJoinOnOriginal = connectionRS.getBoolean(10);
                     String marmotScript = connectionRS.getString(11);
-                    edges.add(new CompositeFeedConnection(sourceID, targetID, sourceKey, targetKey, sourceName, targetName,
-                            sourceJoin, targetJoin, sourceJoinOnOriginal, targetJoinOnOriginal, marmotScript));
+                    CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(sourceID, targetID, sourceKey, targetKey, sourceName, targetName,
+                            sourceJoin, targetJoin, sourceJoinOnOriginal, targetJoinOnOriginal, marmotScript);
+                    compositeFeedConnection.setSourceReportID(sourceReportID);
+                    compositeFeedConnection.setTargetReportID(targetReportID);
+                    edges.add(compositeFeedConnection);
                 }
 
             }
@@ -259,7 +286,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
 
     public Feed createFeedObject(FeedDefinition parent) {
         try {
-            return new CompositeFeed(compositeFeedNodes, obtainChildConnections());
+            return new CompositeFeed(compositeFeedNodes, obtainChildConnections(), getAddonReports());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

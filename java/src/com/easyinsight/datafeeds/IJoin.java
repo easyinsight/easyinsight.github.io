@@ -22,6 +22,8 @@ public interface IJoin {
 
     List<AnalysisItem> getSourceItems();
 
+    int dateLevelForJoin();
+
     List<Key> getTargetJoins();
 
     List<AnalysisItem> getTargetItems();

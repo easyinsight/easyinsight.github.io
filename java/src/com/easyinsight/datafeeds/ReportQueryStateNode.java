@@ -44,7 +44,7 @@ class ReportQueryStateNode extends QueryStateNode {
         return analysisItem.getKey().hasReport(reportID) || map.get(analysisItem.toDisplay()) != null;
     }
 
-    public void addJoinItem(AnalysisItem analysisItem) {
+    public void addJoinItem(AnalysisItem analysisItem, int dateLevel) {
         for (AnalysisItem field : parentItems) {
             if (analysisItem.toDisplay().equals(field.toDisplay())) {
                 analysisItem = field;
@@ -54,7 +54,7 @@ class ReportQueryStateNode extends QueryStateNode {
         List<AnalysisItem> items = analysisItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(analysisItem), false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
         for (AnalysisItem item : items) {
             addItem(item);
-            joinItems.add(item);
+            joinItems.add(new JoinMetadata(item, dateLevel));
         }
     }
 
@@ -80,7 +80,7 @@ class ReportQueryStateNode extends QueryStateNode {
         if (!alreadyHaveItem) {
             for (AnalysisItem analysisItem : parentItems) {
                 if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toBaseKey().getKeyID() == key.toBaseKey().getKeyID()) {
-                    addJoinItem(analysisItem);
+                    addJoinItem(analysisItem, 0);
                 }
             }
         }

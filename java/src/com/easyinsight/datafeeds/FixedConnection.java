@@ -85,6 +85,10 @@ public class FixedConnection implements Serializable, IJoin {
         return sourceItems;
     }
 
+    public int dateLevelForJoin() {
+        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public List<Key> getTargetJoins() {
         return new ArrayList<Key>();
     }

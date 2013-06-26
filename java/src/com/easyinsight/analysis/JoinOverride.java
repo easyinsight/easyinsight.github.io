@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
+import com.easyinsight.datafeeds.CompositeFeedConnection;
 import com.easyinsight.datafeeds.FeedStorage;
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -11,6 +12,8 @@ import org.hibernate.Session;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -20,6 +23,10 @@ import java.sql.SQLException;
 @Entity
 @Table(name="join_override")
 public class JoinOverride implements Cloneable, Serializable {
+
+    public static final int NORMAL = 1;
+    public static final int COMPOSITE = 2;
+
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="join_override_id")
     private long joinOverrideID;
@@ -43,6 +50,19 @@ public class JoinOverride implements Cloneable, Serializable {
     private boolean targetJoinOriginal;
     @Column(name="data_source_id")
     private Long dataSourceID;
+    @Column(name="join_type")
+    private int joinType = JoinOverride.NORMAL;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "join_override_to_source_fields",
+            joinColumns = @JoinColumn(name = "join_override_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "analysis_item_id", nullable = false))
+    private List<AnalysisItem> sourceItems;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "join_override_to_target_fields",
+            joinColumns = @JoinColumn(name = "join_override_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "analysis_item_id", nullable = false))
+    private List<AnalysisItem> targetItems;
 
     @Column(name="marmot_script")
     private String marmotScript;
@@ -71,12 +91,36 @@ public class JoinOverride implements Cloneable, Serializable {
         return joinOverride.toXML();
     }
 
+    public int getJoinType() {
+        return joinType;
+    }
+
+    public void setJoinType(int joinType) {
+        this.joinType = joinType;
+    }
+
     public String getMarmotScript() {
         return marmotScript;
     }
 
     public void setMarmotScript(String marmotScript) {
         this.marmotScript = marmotScript;
+    }
+
+    public List<AnalysisItem> getSourceItems() {
+        return sourceItems;
+    }
+
+    public void setSourceItems(List<AnalysisItem> sourceItems) {
+        this.sourceItems = sourceItems;
+    }
+
+    public List<AnalysisItem> getTargetItems() {
+        return targetItems;
+    }
+
+    public void setTargetItems(List<AnalysisItem> targetItems) {
+        this.targetItems = targetItems;
     }
 
     public boolean isSourceJoinOriginal() {
@@ -129,8 +173,22 @@ public class JoinOverride implements Cloneable, Serializable {
         if (dataSourceID == 0) {
             dataSourceID = null;
         }
-        sourceItem.reportSave(session);
-        targetItem.reportSave(session);
+        if (sourceItem != null) {
+            sourceItem.reportSave(session);
+        }
+        if (targetItem != null) {
+            targetItem.reportSave(session);
+        }
+        if (sourceItems != null) {
+            for (AnalysisItem item : sourceItems) {
+                item.reportSave(session);
+            }
+        }
+        if (targetItems != null) {
+            for (AnalysisItem item : targetItems) {
+                item.reportSave(session);
+            }
+        }
     }
 
     public void afterLoad() {
@@ -141,6 +199,18 @@ public class JoinOverride implements Cloneable, Serializable {
         if (targetItem != null) {
             targetItem = (AnalysisItem) Database.deproxy(targetItem);
             targetItem.afterLoad();
+        }
+        if (sourceItems != null) {
+            for (AnalysisItem item : sourceItems) {
+                item.afterLoad();
+            }
+            sourceItems = new ArrayList<AnalysisItem>(sourceItems);
+        }
+        if (targetItems != null) {
+            for (AnalysisItem item : targetItems) {
+                item.afterLoad();
+            }
+            targetItems = new ArrayList<AnalysisItem>(targetItems);
         }
     }
 

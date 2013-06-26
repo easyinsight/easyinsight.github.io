@@ -24,7 +24,7 @@ class QueryStateNode {
     public Collection<FilterDefinition> filters = new ArrayList<FilterDefinition>();
     public Collection<AnalysisItem> allFeedItems;
     public List<AnalysisItem> parentItems = new ArrayList<AnalysisItem>();
-    public Collection<AnalysisItem> joinItems = new HashSet<AnalysisItem>();
+    public Collection<JoinMetadata> joinItems = new HashSet<JoinMetadata>();
     public String dataSourceName;
     public EIConnection conn;
     public DataSet originalDataSet;
@@ -66,7 +66,7 @@ class QueryStateNode {
         return analysisItem.getKey().hasDataSource(feedID) || map.get(analysisItem.toDisplay()) != null;
     }
 
-    public void addJoinItem(AnalysisItem analysisItem) {
+    public void addJoinItem(AnalysisItem analysisItem, int dateLevel) {
         for (AnalysisItem field : parentItems) {
             if (analysisItem.toDisplay().equals(field.toDisplay())) {
                 analysisItem = field;
@@ -76,7 +76,7 @@ class QueryStateNode {
         List<AnalysisItem> items = analysisItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(analysisItem), false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
         for (AnalysisItem item : items) {
             addItem(item);
-            joinItems.add(item);
+            joinItems.add(new JoinMetadata(item, dateLevel));
         }
     }
 
@@ -102,7 +102,7 @@ class QueryStateNode {
         if (!alreadyHaveItem) {
             for (AnalysisItem analysisItem : parentItems) {
                 if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toBaseKey().getKeyID() == key.toBaseKey().getKeyID()) {
-                    addJoinItem(analysisItem);
+                    addJoinItem(analysisItem, 0);
                 }
             }
         }
