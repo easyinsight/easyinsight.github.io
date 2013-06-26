@@ -1424,8 +1424,8 @@ public class AnalysisService {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
         try {
-            //boolean testAccountVisible = FeedService.testAccountVisible(conn);
-            return analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn).values();
+            boolean testAccountVisible = FeedService.testAccountVisible(conn);
+            return analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn, testAccountVisible).values();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

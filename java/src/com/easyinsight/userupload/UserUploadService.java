@@ -1,5 +1,6 @@
 package com.easyinsight.userupload;
 
+import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.EIDescriptor;
@@ -181,11 +182,13 @@ public class UserUploadService {
             List<EIDescriptor> objects = new ArrayList<EIDescriptor>();
             List<EIDescriptor> results = new ArrayList<EIDescriptor>();
 
+            boolean testAccountVisible = FeedService.testAccountVisible(conn);
+
             AnalysisStorage analysisStorage = new AnalysisStorage();
 
             objects.addAll(new DashboardStorage().getDashboardsForDataSource(userID, accountID, conn, dataSourceDescriptor.getId()).values());
             objects.addAll(analysisStorage.getInsightDescriptorsForDataSource(userID, accountID, dataSourceDescriptor.getId(), conn));
-            objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn).values());
+            objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn, testAccountVisible).values());
 
             Iterator<EIDescriptor> iter = objects.iterator();
             while (iter.hasNext()) {
@@ -318,14 +321,12 @@ public class UserUploadService {
         try {
             conn.setAutoCommit(false);
             long startTime = System.currentTimeMillis();
-            if (userID == 60) {
-
-            }
+            boolean testAccountVisible = FeedService.testAccountVisible(conn);
             List<EIDescriptor> objects = new ArrayList<EIDescriptor>();
             List<EIDescriptor> results = new ArrayList<EIDescriptor>();
             List<DataSourceDescriptor> dataSources;
             if (groupID == 0) {
-                dataSources = feedStorage.getDataSources(userID, accountID, conn);
+                dataSources = feedStorage.getDataSources(userID, accountID, conn, testAccountVisible);
             } else {
                 dataSources = feedStorage.getDataSourcesForGroup(userID, groupID, conn);
             }
@@ -348,11 +349,11 @@ public class UserUploadService {
             long scorecardTime = 0;
 
             if (groupID == 0) {
-                objects.addAll(new DashboardStorage().getDashboards(userID, accountID, conn).values());
+                objects.addAll(new DashboardStorage().getDashboards(userID, accountID, conn, testAccountVisible).values());
                 dashboardTime = System.currentTimeMillis();
-                objects.addAll(analysisStorage.getReports(userID, accountID, conn).values());
+                objects.addAll(analysisStorage.getReports(userID, accountID, conn, testAccountVisible).values());
                 reportTime = System.currentTimeMillis();
-                objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn).values());
+                objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn, testAccountVisible).values());
                 scorecardTime = System.currentTimeMillis();
             } else {
                 objects.addAll(analysisStorage.getReportsForGroup(groupID, conn).values());
@@ -505,13 +506,6 @@ public class UserUploadService {
                 }
             });
 
-            //if (userID == 60) {
-                System.out.println("Data Source Time: " + (dsTime - startTime) + ", Dashboard Time = " + (dashboardTime - dsTime)
-                        + ", Report Time = " + (reportTime - dashboardTime) + ", Scorecard Time = " + (scorecardTime - reportTime)
-                        + ", Folder Time = " + (folderTime - scorecardTime)
-                        + ", Data Source Owner Time = " + (dsOwnerTime - folderTime) + ", Lookup Table Time = " + (lookupTime - dsOwnerTime));
-            //}
-
             int dataSourceCount = 0;
             int reportCount = 0;
             int dashboardCount = 0;
@@ -520,6 +514,7 @@ public class UserUploadService {
             myDataTree.setDataSourceCount(dataSourceCount);
             myDataTree.setReportCount(reportCount);
             conn.commit();
+            BenchmarkManager.recordBenchmark("Home Tree", (System.currentTimeMillis() - startTime), SecurityUtil.getUserID());
             return myDataTree;
         } catch (Throwable e) {
             LogClass.error(e);

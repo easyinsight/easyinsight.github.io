@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Module xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml"
-           xmlns:util="com.easyinsight.util.*"
            width="100%" height="100%"
            xmlns:feed="com.easyinsight.administration.feed.*" xmlns:easyinsight="com.easyinsight.*"
            creationComplete="setupListeners()"
@@ -9,16 +8,17 @@
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
+        import com.easyinsight.analysis.AddonReportEvent;
+        import com.easyinsight.analysis.AddonReportWindow;
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.code.DataSourceMarmotScriptWindow;
         import com.easyinsight.code.MarmotScriptEvent;
-        import com.easyinsight.customupload.OAuthResponse;
         import com.easyinsight.datasources.DataSourceInfo;
+        import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
-        import com.easyinsight.rowedit.LoadFromExcelWindow;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
@@ -83,6 +83,7 @@
 
         private function gotFeedDefinition():void {
             this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
+            showAddonReports = feedDefinition.getFeedType() == DataSourceType.COMPOSITE;
             kpiSource = feedDefinition.kpiSource;
             var owner:UserStub = feedDefinition.uploadPolicy.owners.getItemAt(0) as UserStub;
             ownerID = owner.userID;
@@ -238,6 +239,21 @@
 
         public function gotFocus():void {
         }
+
+        private function addonReports():void {
+            var window:AddonReportWindow = new AddonReportWindow();
+            window.addEventListener(AddonReportEvent.NEW_ADDONS, onNewAddons, false, 0, true);
+            window.dataSource = feedDefinition;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onNewAddons(event:AddonReportEvent):void {
+
+        }
+
+        [Bindable]
+        private var showAddonReports:Boolean;
 		]]>
 	</mx:Script>
     <mx:RemoteObject id="shareService" destination="share">
@@ -260,7 +276,7 @@
                                        icon="@Embed(source='../../../../../assets/refresh.png')" labelPlacement="right" enabled="{refreshable}"/>-->
             <mx:Button icon="@Embed(source='../../../../../assets/code_edit.png')" click="editCode()" toolTip="Edit Code..."
                     label="Edit Code" labelPlacement="right" styleName="grayButton"/>
-            <mx:Label fontSize="14" color="#FFFFFF"/>
+            <mx:Button click="addonReports()" label="Addon Reports" labelPlacement="right" styleName="grayButton" visible="{showAddonReports}"/>
             <mx:Spacer width="100%"/>
             <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
         </mx:HBox>

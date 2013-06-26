@@ -75,6 +75,38 @@ public class FeedStorage {
         return descriptors;
     }
 
+    private void saveAddonReports(long dataSourceID, List<AddonReport> addonReports, EIConnection conn) throws Exception {
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM DATA_SOURCE_TO_ADDON_REPORT WHERE DATA_SOURCE_ID = ?");
+        clearStmt.setLong(1, dataSourceID);
+        clearStmt.executeUpdate();
+        clearStmt.close();
+        if (addonReports != null) {
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_TO_ADDON_REPORT (DATA_SOURCE_ID, REPORT_ID) VALUES (?, ?)");
+            for (AddonReport addonReport : addonReports) {
+                insertStmt.setLong(1, dataSourceID);
+                insertStmt.setLong(2, addonReport.getReportID());
+                insertStmt.execute();
+            }
+            insertStmt.close();
+        }
+    }
+
+    private List<AddonReport> getAddonReports(long dataSourceID, EIConnection conn) throws SQLException {
+        List<AddonReport> addonReports = new ArrayList<AddonReport>();
+        PreparedStatement ps = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE FROM ANALYSIS, DATA_SOURCE_TO_ADDON_REPORT WHERE " +
+                "ANALYSIS.ANALYSIS_ID = DATA_SOURCE_TO_ADDON_REPORT.REPORT_ID AND DATA_SOURCE_TO_ADDON_REPORT.DATA_SOURCE_ID = ?");
+        ps.setLong(1, dataSourceID);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            AddonReport addonReport = new AddonReport();
+            addonReport.setReportID(rs.getLong(1));
+            addonReport.setReportName(rs.getString(2));
+            addonReports.add(addonReport);
+        }
+        ps.close();
+        return addonReports;
+    }
+
     public long addFeedDefinitionData(FeedDefinition feedDefinition, Connection conn) throws Exception {
         PreparedStatement insertDataFeedStmt;
         insertDataFeedStmt = conn.prepareStatement("INSERT INTO DATA_FEED (FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, FEED_SIZE, " +
@@ -132,6 +164,7 @@ public class FeedStorage {
         feedDefinition.setDataFeedID(feedID);
         saveFields(feedID, conn, feedDefinition.getFields());
         saveFolders(feedID, conn, feedDefinition.getFolders(), feedDefinition.getFields());
+        saveAddonReports(feedID, feedDefinition.getAddonReports(), (EIConnection) conn);
         feedDefinition.exchangeTokens((EIConnection) conn, FlexContext.getHttpRequest(), null);
         feedDefinition.customStorage(conn);
 
@@ -735,6 +768,7 @@ public class FeedStorage {
         savePolicy(conn, feedDefinition.getDataFeedID(), feedDefinition.getUploadPolicy());
         saveFields(feedDefinition.getDataFeedID(), conn, feedDefinition.getFields());
         saveFolders(feedDefinition.getDataFeedID(), conn, feedDefinition.getFolders(), feedDefinition.getFields());
+        saveAddonReports(feedDefinition.getDataFeedID(), feedDefinition.getAddonReports(), (EIConnection) conn);
         clearProblems(feedDefinition.getDataFeedID(), conn);
         feedDefinition.exchangeTokens((EIConnection) conn, FlexContext.getHttpRequest(), null);
         feedDefinition.customStorage(conn);
@@ -826,9 +860,9 @@ public class FeedStorage {
             feedDefinition.setConcreteFieldsEditable(rs.getBoolean(i++));
             feedDefinition.setRefreshMarmotScript(rs.getString(i++));
             feedDefinition.setKpiSource(rs.getBoolean(i));
+            feedDefinition.setAddonReports(getAddonReports(identifier, (EIConnection) conn));
             long folderStartTime = System.currentTimeMillis();
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
-            System.out.println("folder time = " + (System.currentTimeMillis() - folderStartTime));
             feedDefinition.setDataSourceBehavior(feedDefinition.getDataSourceType());
             feedDefinition.customLoad(conn);
         } else {
@@ -929,7 +963,8 @@ public class FeedStorage {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            List<DataSourceDescriptor> dataSources = getDataSources(userID, accountID, conn);
+            boolean testAccountVisible = FeedService.testAccountVisible(conn);
+            List<DataSourceDescriptor> dataSources = getDataSources(userID, accountID, conn, testAccountVisible);
             conn.commit();
             return dataSources;
         } catch (SQLException se) {
@@ -981,7 +1016,7 @@ public class FeedStorage {
         return dataSources;
     }
 
-    public List<DataSourceDescriptor> getDataSources(long userID, long accountID, EIConnection conn) throws SQLException {
+    public List<DataSourceDescriptor> getDataSources(long userID, long accountID, EIConnection conn, boolean testAccountVisible) throws SQLException {
         RolePrioritySet<DataSourceDescriptor> descriptorList = new RolePrioritySet<DataSourceDescriptor>();
         PreparedStatement userStmt = conn.prepareStatement("SELECT USER.FIRST_NAME, USER.NAME FROM USER WHERE USER_ID = ?");
         userStmt.setLong(1, userID);
@@ -992,7 +1027,9 @@ public class FeedStorage {
         String name = firstName != null ? firstName + " " + lastName : lastName;
         userStmt.close();
         Set<Long> sources = getMyDataSources(userID, conn, descriptorList, name);
-        getAccountDataSources(conn, accountID, descriptorList, sources);
+        if (testAccountVisible) {
+            getAccountDataSources(conn, accountID, descriptorList, sources);
+        }
         getGroupDataSources(userID, conn, descriptorList);
         List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
         for (EIDescriptor dataSource : descriptorList.values()) {
