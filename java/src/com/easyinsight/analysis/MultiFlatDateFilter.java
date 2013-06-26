@@ -6,6 +6,8 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.Nodes;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.sql.PreparedStatement;
@@ -21,8 +23,8 @@ import java.util.Locale;
  * Time: 11:03 PM
  */
 @Entity
-@Table(name="multi_date_filter")
-@PrimaryKeyJoinColumn(name="filter_id")
+@Table(name = "multi_date_filter")
+@PrimaryKeyJoinColumn(name = "filter_id")
 public class MultiFlatDateFilter extends FilterDefinition {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -31,7 +33,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
             inverseJoinColumns = @JoinColumn(name = "date_level_wrapper_id", nullable = false))
     private Collection<DateLevelWrapper> levels = new ArrayList<DateLevelWrapper>();
 
-    @Column(name="end_date_property")
+    @Column(name = "end_date_property")
     private String endDateProperty;
 
     @Override
@@ -152,7 +154,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
             }
         }
         sb.append("</select>");
-        sb.append("<select id=\""+filterName+"end\">");
+        sb.append("<select id=\"" + filterName + "end\">");
         for (int i = Calendar.JANUARY; i <= Calendar.DECEMBER; i++) {
             calendar.set(Calendar.MONTH, i);
             String displayName = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
@@ -168,7 +170,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
         sb.append("</div>");
         sb.append("</div>");
         sb.append("<div class=\"modal-footer\">\n" +
-                "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiMonth('"+filterName+"','"+filterHTMLMetadata.getFilterKey()+"',"+filterHTMLMetadata.createOnChange()+")\">Save</button>\n" +
+                "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiMonth('" + filterName + "','" + filterHTMLMetadata.getFilterKey() + "'," + filterHTMLMetadata.createOnChange() + ")\">Save</button>\n" +
                 "        <button class=\"btn\" data-dismiss=\"modal\" type=\"button\">Cancel</button>\n" +
                 "    </div>");
         sb.append("</div>");
@@ -191,7 +193,25 @@ public class MultiFlatDateFilter extends FilterDefinition {
                 flatLabel = firstMonth + " to " + endMonth;
             }
         }*/
-        sb.append("<a href=\"#"+divID+"\" data-toggle=\"modal\">").append(label(false)).append("</a></div>");
+        sb.append("<a href=\"#" + divID + "\" data-toggle=\"modal\">").append(label(false)).append("</a></div>");
         return sb.toString();
+    }
+
+    @Override
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
+        JSONObject jo = super.toJSON(filterHTMLMetadata);    //To change body of overridden methods use File | Settings | File Templates.
+        jo.put("type", "multi_date");
+
+        int minLevel = Calendar.DECEMBER;
+        int maxLevel = Calendar.JANUARY;
+        for (DateLevelWrapper wrapper : getLevels()) {
+            minLevel = Math.min(minLevel, wrapper.getDateLevel());
+            maxLevel = Math.max(maxLevel, wrapper.getDateLevel());
+        }
+
+        jo.put("min", minLevel);
+        jo.put("max", maxLevel);
+
+        return jo;
     }
 }

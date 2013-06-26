@@ -31,7 +31,8 @@ body {
 }
 
 .filters > .filter {
-    float: left;
+    /*float: left;*/
+    vertical-align:middle;
 }
 
 .filters select {
@@ -80,7 +81,7 @@ body {
     width: 100%;
     vertical-align: baseline;
     font-size: 11px;
-    min-height: 40px;
+    /*min-height: 40px;*/
 }
 
 .filters input {
@@ -137,7 +138,6 @@ body {
 
 .nav-pills {
     width: 100%;
-    background-color: #5c5c5c;
 }
 
 .dashboard_header {
@@ -145,8 +145,8 @@ body {
 }
 
 .dashboard_base > .row-fluid > .span12 > .tabbable > .nav-pills {
-    padding: 5px 20px 5px 20px;
-    margin: -5px -20px 15px -20px;
+    padding: 5px 19px 5px 19px;
+    margin: -10px -20px 15px -20px;
     border-radius: 4px 4px 0px 0px;
     border-style: solid;
     border-width: 1px;

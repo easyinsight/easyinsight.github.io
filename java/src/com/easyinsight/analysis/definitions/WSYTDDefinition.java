@@ -1,6 +1,8 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -140,5 +142,14 @@ public class WSYTDDefinition extends WSAnalysisDefinition {
         properties.add(new ReportStringProperty("ytdLabel", ytdLabel));
         properties.add(new ReportNumericProperty("firstAggregation", firstAggregation));
         return properties;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject list = super.toJSON(htmlReportMetadata, parentDefinitions);
+        list.put("type", "ytd_definition");
+        list.put("key", getUrlKey());
+        list.put("url", "/app/htmlExport");
+        return list;
     }
 }

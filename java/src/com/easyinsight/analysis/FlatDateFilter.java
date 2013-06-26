@@ -1,5 +1,9 @@
 package com.easyinsight.analysis;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -80,11 +84,11 @@ public class FlatDateFilter extends FilterDefinition {
         sb.append("<select style=\"margin-left:5px;margin-top:5px;margin-right:5px\" id=\"").append(filterName).append("\" onchange=\"").append(onChange).append("\">");
         if (dateLevel == AnalysisDateDimension.MONTH_LEVEL) {
             List<String> months = Arrays.asList("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
-            for(int i = 0;i < 12;i++) {
+            for (int i = 0; i < 12; i++) {
                 sb.append("<option value=\"");
                 sb.append(i);
                 sb.append("\"");
-                if(i == this.getValue())
+                if (i == this.getValue())
                     sb.append(" selected=\"selected\"");
                 sb.append(">");
                 sb.append(months.get(i));
@@ -116,5 +120,33 @@ public class FlatDateFilter extends FilterDefinition {
         }
         sb.append("</select>");
         return sb.toString();
+    }
+
+    @Override
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
+        JSONObject jo = super.toJSON(filterHTMLMetadata);
+        jo.put("selected", String.valueOf(value));
+        if (dateLevel == AnalysisDateDimension.MONTH_LEVEL) {
+            jo.put("type", "flat_date_month");
+        } else {
+            jo.put("type", "flat_date_year");
+
+            AnalysisDateDimensionResultMetadata metadata = (AnalysisDateDimensionResultMetadata) new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(),
+                    getField(), 0, 0, 0, filterHTMLMetadata.getReport());
+            Date earliestDate = metadata.getEarliestDate();
+            Date latestDate = metadata.getLatestDate();
+            Calendar cal = Calendar.getInstance();
+
+            cal.setTime(earliestDate);
+            int startYear = cal.get(Calendar.YEAR);
+            cal.setTime(latestDate);
+            int endYear = cal.get(Calendar.YEAR);
+            List<String> stringList = new ArrayList<String>();
+            for (int i = startYear; i <= endYear; i++) {
+                stringList.add(String.valueOf(i));
+            }
+            jo.put("years", new JSONArray(stringList));
+        }
+        return jo;
     }
 }

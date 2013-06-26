@@ -193,7 +193,7 @@ public abstract class APIServlet extends HttpServlet {
             }
         }
         Date end = new Date();
-        System.out.println("API Call: " + this.getClass().getCanonicalName() + " Duration: " + (end.getTime() - start.getTime()));
+        System.out.println("API Call: " + this.getClass().getCanonicalName() + " Duration: " + (end.getTime() - start.getTime()) + " User: " + ((userResponse != null && userResponse.getUserName() != null) ? userResponse.getUserName() : "unknown" ));
     }
 
     protected abstract ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception;
