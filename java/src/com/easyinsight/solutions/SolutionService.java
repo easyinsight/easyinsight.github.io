@@ -114,7 +114,8 @@ public class SolutionService {
         EIConnection conn = Database.instance().getConnection();
         try {
             Set<Long> connectionIDs = new HashSet<Long>();
-            List<DataSourceDescriptor> dataSources = new FeedStorage().getDataSources(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn);
+            boolean testAccountVisible = FeedService.testAccountVisible(conn);
+            List<DataSourceDescriptor> dataSources = new FeedStorage().getDataSources(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn, testAccountVisible);
             if (dataSources.isEmpty()) {
                 return new ArrayList<Long>();
             }
@@ -312,7 +313,8 @@ public class SolutionService {
                 }
             }
             long existingID = 0;
-            List<DataSourceDescriptor> dataSources = new FeedStorage().getDataSources(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn);
+            boolean testAccountVisible = FeedService.testAccountVisible(conn);
+            List<DataSourceDescriptor> dataSources = new FeedStorage().getDataSources(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn, testAccountVisible);
             for (DataSourceDescriptor dataSource : dataSources) {
                 if (dataSource.getDataSourceType() == dataSourceType) {
                     existingID = dataSource.getId();
