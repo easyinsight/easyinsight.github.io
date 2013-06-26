@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
 //import com.easyinsight.cache.MemCachedManager;
+import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.FunctionFactory;
 import com.easyinsight.core.InsightDescriptor;
@@ -673,6 +674,7 @@ public class DataService {
         }
         EIConnection conn = Database.instance().getConnection();
         try {
+            long startTime = System.currentTimeMillis();
             SecurityUtil.authorizeInsight(reportID);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
 
@@ -714,6 +716,9 @@ public class DataService {
                 results.getAdditionalProperties().put("cappedResults", ((EmbeddedDataResults) results).getUid());
             }
             conn.commit();
+            long elapsed = System.currentTimeMillis() - startTime;
+            long processingTime = elapsed - insightRequestMetadata.getDatabaseTime();
+            reportViewBenchmark(analysisDefinition, processingTime, insightRequestMetadata.getDatabaseTime());
             return results;
         } catch (com.easyinsight.security.SecurityException se) {
             EmbeddedDataResults results = new EmbeddedDataResults();
@@ -1429,10 +1434,6 @@ public class DataService {
         }
         EIConnection conn = Database.instance().getConnection();
         try {
-            if (FlexContext.getHttpRequest() != null) {
-                String ip = FlexContext.getHttpRequest().getRemoteAddr();
-                System.out.println(ip);
-            }
             long startTime = System.currentTimeMillis();
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
@@ -1462,6 +1463,7 @@ public class DataService {
             long processingTime = elapsed - insightRequestMetadata.getDatabaseTime();
             results.setProcessingTime(processingTime);
             results.setDatabaseTime(insightRequestMetadata.getDatabaseTime());
+            reportEditorBenchmark(analysisDefinition, processingTime, insightRequestMetadata.getDatabaseTime());
             return results;
         } catch (ReportException dae) {
             ListDataResults embeddedDataResults = new ListDataResults();
@@ -1475,6 +1477,26 @@ public class DataService {
         } finally {
             Database.closeConnection(conn);
             UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+        }
+    }
+
+    private void reportEditorBenchmark(WSAnalysisDefinition analysisDefinition, long processingTime, long databaseTime) {
+        if (analysisDefinition.getAnalysisID() == 0) {
+            BenchmarkManager.recordBenchmarkForDataSource("ReportEditorProcessingTime", processingTime, SecurityUtil.getUserID(false), analysisDefinition.getDataFeedID());
+            BenchmarkManager.recordBenchmarkForDataSource("ReportEditorDatabaseTime", databaseTime, SecurityUtil.getUserID(false), analysisDefinition.getDataFeedID());
+        } else {
+            BenchmarkManager.recordBenchmarkForReport("ReportEditorProcessingTime", processingTime, SecurityUtil.getUserID(false), analysisDefinition.getAnalysisID());
+            BenchmarkManager.recordBenchmarkForReport("ReportEditorDatabaseTime", databaseTime, SecurityUtil.getUserID(false), analysisDefinition.getAnalysisID());
+        }
+    }
+
+    private void reportViewBenchmark(WSAnalysisDefinition analysisDefinition, long processingTime, long databaseTime) {
+        if (analysisDefinition.getAnalysisID() == 0) {
+            BenchmarkManager.recordBenchmarkForDataSource("ReportViewProcessingTime", processingTime, SecurityUtil.getUserID(false), analysisDefinition.getDataFeedID());
+            BenchmarkManager.recordBenchmarkForDataSource("ReportViewDatabaseTime", databaseTime, SecurityUtil.getUserID(false), analysisDefinition.getDataFeedID());
+        } else {
+            BenchmarkManager.recordBenchmarkForReport("ReportViewProcessingTime", processingTime, SecurityUtil.getUserID(false), analysisDefinition.getAnalysisID());
+            BenchmarkManager.recordBenchmarkForReport("ReportViewDatabaseTime", databaseTime, SecurityUtil.getUserID(false), analysisDefinition.getAnalysisID());
         }
     }
 
@@ -1509,8 +1531,16 @@ public class DataService {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
             ReportRetrieval reportRetrieval = new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn).toPipeline();
-            analysisDefinition.setRowsEditable(((reportRetrieval.getFeed().getFeedType().getType() == FeedType.DEFAULT.getType() || reportRetrieval.getFeed().getFeedType().getType() == FeedType.STATIC.getType()) && reportRetrieval.getFeed().getName().contains("Survey")) ||
-                "ACS2".equals(reportRetrieval.getFeed().getName()) || "Therapy Works".equals(reportRetrieval.getFeed().getName()));
+            // TODO: get this code out of EI entirely
+            boolean acsType = ((reportRetrieval.getFeed().getFeedType().getType() == FeedType.DEFAULT.getType() || reportRetrieval.getFeed().getFeedType().getType() == FeedType.STATIC.getType()) && reportRetrieval.getFeed().getName().contains("Survey")) ||
+                    "ACS2".equals(reportRetrieval.getFeed().getName()) || "Therapy Works".equals(reportRetrieval.getFeed().getName());
+            if (acsType) {
+                String personaName = SecurityUtil.getPersonaName();
+                if ("Therapist".equals(personaName) || "Director".equals(personaName) || "CEO".equals(personaName) || "MLDirector".equals(personaName)) {
+                    acsType = false;
+                }
+            }
+            analysisDefinition.setRowsEditable(acsType);
             return reportRetrieval;
         }
 
