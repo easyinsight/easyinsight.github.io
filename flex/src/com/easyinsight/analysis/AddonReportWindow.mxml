@@ -2,6 +2,7 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" paddingBottom="10" paddingLeft="10"
         paddingRight="10" paddingTop="10">
     <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -15,26 +16,45 @@
         private function save():void {
             var newAddons:ArrayCollection = new ArrayCollection();
             for each (var addon:AddonReport in addonReports) {
-                if (report.addonReports.getItemIndex(addon) == -1) {
-                    newAddons.addItem(addon);
+                if (report != null) {
+                    if (report.addonReports.getItemIndex(addon) == -1) {
+                        newAddons.addItem(addon);
+                    }
+                } else {
+                    if (dataSource.addonReports.getItemIndex(addon) == -1) {
+                        newAddons.addItem(addon);
+                    }
                 }
             }
-            report.addonReports = addonReports;
+            if (report != null) {
+                report.addonReports = addonReports;
+            } else {
+                dataSource.addonReports = addonReports;
+            }
             dispatchEvent(new AddonReportEvent(AddonReportEvent.NEW_ADDONS, null, newAddons, removedReports));
             PopUpManager.removePopUp(this);
         }
 
         override protected function commitProperties():void {
             super.commitProperties();
-            addonReports = new ArrayCollection(report.addonReports.toArray());
+            if (report != null) {
+                addonReports = new ArrayCollection(report.addonReports.toArray());
+            } else {
+                addonReports = new ArrayCollection(dataSource.addonReports.toArray());
+            }
         }
 
         public var report:AnalysisDefinition;
+        public var dataSource:FeedDefinitionData;
 
         private function addReport():void {
             var window:AddonReportChoiceWindow = new AddonReportChoiceWindow();
-            window.dataSourceID = report.dataFeedID;
-            window.reportFrom = report.analysisID;
+            if (report != null) {
+                window.dataSourceID = report.dataFeedID;
+                window.reportFrom = report.analysisID;
+            } else {
+                window.dataSourceID = dataSource.dataFeedID;
+            }
             window.addEventListener(AddonReportEvent.ADD_REPORT, onAdd);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
