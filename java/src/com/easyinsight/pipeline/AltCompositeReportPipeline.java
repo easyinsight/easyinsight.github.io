@@ -3,6 +3,7 @@ package com.easyinsight.pipeline;
 import com.easyinsight.analysis.*;
 import com.easyinsight.calculations.CalcGraph;
 import com.easyinsight.datafeeds.FeedService;
+import com.easyinsight.datafeeds.JoinMetadata;
 import com.easyinsight.etl.LookupTable;
 
 import java.util.*;
@@ -13,10 +14,10 @@ import java.util.*;
  * Time: 12:16 PM
  */
 public class AltCompositeReportPipeline extends Pipeline {
-    private Collection<AnalysisItem> joinItems;
+    private Collection<JoinMetadata> joinMetadatas;
 
-    public AltCompositeReportPipeline(Collection<AnalysisItem> joinItems) {
-        this.joinItems = joinItems;
+    public AltCompositeReportPipeline(Collection<JoinMetadata> joinItems) {
+        this.joinMetadatas = joinItems;
     }
 
     @Override
@@ -39,16 +40,22 @@ public class AltCompositeReportPipeline extends Pipeline {
         for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new RangeComponent((AnalysisRangeDimension) range));
         }
+        components.add(new TypeTransformComponent());
+        List<AnalysisItem> joinItems = new ArrayList<AnalysisItem>();
+        for (JoinMetadata joinMetadata : joinMetadatas) {
+            joinItems.add(joinMetadata.analysisItem);
+        }
         components.addAll(new CalcGraph().doFunGraphStuff(new HashSet<AnalysisItem>(joinItems), allItems, reportItems, Pipeline.BEFORE, new AnalysisItemRetrievalStructure(Pipeline.BEFORE)));
-        for (AnalysisItem item : joinItems) {
+        for (JoinMetadata joinMetadata : joinMetadatas) {
+            AnalysisItem item = joinMetadata.analysisItem;
             for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, joinItems)) {
                 AnalysisList analysisList = (AnalysisList) tag;
                 if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
             }
-            components.add(new DateTransformComponent(item));
+            if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                components.add(new DateTransformComponent(item));
+            }
         }
-        /*components.add(new NormalizationComponent());
-        components.add(new AggregationComponent());*/
         return components;
     }
 }
