@@ -274,6 +274,9 @@ public class AdminService {
     }
 
     public void logAction(ActionLog actionLog) {
+        if (actionLog instanceof ActionScorecardLog) {
+            return;
+        }
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO REVISED_ACTION_LOG (GENERAL_ACTION_TYPE, ACTION_TYPE, ACTION_DATE, USER_ID, " +
