@@ -326,7 +326,7 @@
             if (dsd.dataSourceType == DataSourceType.COMPOSITE) {
                 return false;
             }
-            for each (var ds:DataSourceDescriptor in dataSources) {
+            for each (var ds:DataSourceDescriptor in visibleDataSources) {
                 if (ds.id == dsd.id) {
                     return false;
                 }

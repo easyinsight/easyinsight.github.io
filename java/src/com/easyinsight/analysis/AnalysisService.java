@@ -316,14 +316,44 @@ public class AnalysisService {
                 false, compositeFeedDefinition.getDataSourceBehavior()));
         for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
             JoinOverride joinOverride = new JoinOverride();
-            FeedDefinition source = new FeedStorage().getFeedDefinitionData(connection.getSourceFeedID());
-            FeedDefinition target = new FeedStorage().getFeedDefinitionData(connection.getTargetFeedID());
+            String sourceName;
+            String targetName;
+            if (connection.getSourceFeedID() != null && connection.getSourceFeedID() > 0) {
+                PreparedStatement stmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                stmt.setLong(1, connection.getSourceFeedID());
+                ResultSet rs = stmt.executeQuery();
+                rs.next();
+                sourceName = rs.getString(1);
+                stmt.close();
+            } else {
+                PreparedStatement stmt = conn.prepareStatement("SELECT TITLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                stmt.setLong(1, connection.getSourceReportID());
+                ResultSet rs = stmt.executeQuery();
+                rs.next();
+                sourceName = rs.getString(1);
+                stmt.close();
+            }
+            if (connection.getTargetFeedID() != null && connection.getTargetFeedID() > 0) {
+                PreparedStatement stmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                stmt.setLong(1, connection.getTargetFeedID());
+                ResultSet rs = stmt.executeQuery();
+                rs.next();
+                targetName = rs.getString(1);
+                stmt.close();
+            } else {
+                PreparedStatement stmt = conn.prepareStatement("SELECT TITLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                stmt.setLong(1, connection.getTargetReportID());
+                ResultSet rs = stmt.executeQuery();
+                rs.next();
+                targetName = rs.getString(1);
+                stmt.close();
+            }
             joinOverride.setDataSourceID(compositeFeedDefinition.getDataFeedID());
             joinOverride.setSourceItem(findSourceItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
             joinOverride.setTargetItem(findTargetItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
             if (joinOverride.getSourceItem() != null && joinOverride.getTargetItem() != null) {
-                joinOverride.setSourceName(source.getFeedName());
-                joinOverride.setTargetName(target.getFeedName());
+                joinOverride.setSourceName(sourceName);
+                joinOverride.setTargetName(targetName);
                 joinOverrides.add(joinOverride);
             }
         }
@@ -345,19 +375,40 @@ public class AnalysisService {
         AnalysisItem analysisItem = null;
         for (AnalysisItem item : items) {
             Key key = item.getKey();
-            if (key instanceof DerivedKey) {
-                DerivedKey derivedKey = (DerivedKey) key;
-                if (derivedKey.getFeedID() == connection.getSourceFeedID()) {
-                    if (connection.getSourceJoin() != null) {
-                        if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getSourceJoin().toKeyString())) {
-                            analysisItem = item;
-                            break;
-                        }
-                    } else {
-                        if (connection.getSourceItem() != null) {
-                            if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getSourceItem().toDisplay().equals(item.toDisplay())) {
+            if (connection.getSourceFeedID() != null && connection.getSourceFeedID() > 0) {
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    if (derivedKey.getFeedID() == connection.getSourceFeedID()) {
+                        if (connection.getSourceJoin() != null) {
+                            if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getSourceJoin().toKeyString())) {
                                 analysisItem = item;
                                 break;
+                            }
+                        } else {
+                            if (connection.getSourceItem() != null) {
+                                if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getSourceItem().toDisplay().equals(item.toDisplay())) {
+                                    analysisItem = item;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if (connection.getSourceReportID() != null && connection.getSourceReportID() > 0) {
+                if (key instanceof ReportKey) {
+                    ReportKey reportKey = (ReportKey) key;
+                    if (reportKey.getReportID() == connection.getSourceReportID()) {
+                        if (connection.getSourceJoin() != null) {
+                            if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getSourceJoin().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
+                        } else {
+                            if (connection.getSourceItem() != null) {
+                                if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getSourceItem().toDisplay().equals(item.toDisplay())) {
+                                    analysisItem = item;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -368,12 +419,24 @@ public class AnalysisService {
         if (analysisItem == null && connection.getSourceItem() != null) {
             for (AnalysisItem item : items) {
                 Key key = item.getKey();
-                if (key instanceof DerivedKey) {
-                    DerivedKey derivedKey = (DerivedKey) key;
-                    if (derivedKey.getFeedID() == connection.getSourceFeedID()) {
-                        if (connection.getSourceItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
-                            analysisItem = item;
-                            break;
+                if (connection.getSourceFeedID() != null && connection.getSourceFeedID() > 0) {
+                    if (key instanceof DerivedKey) {
+                        DerivedKey derivedKey = (DerivedKey) key;
+                        if (derivedKey.getFeedID() == connection.getSourceFeedID()) {
+                            if (connection.getSourceItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
+                        }
+                    }
+                } else if (connection.getSourceReportID() != null && connection.getSourceReportID() > 0) {
+                    if (key instanceof ReportKey) {
+                        ReportKey derivedKey = (ReportKey) key;
+                        if (derivedKey.getReportID() == connection.getSourceReportID()) {
+                            if (connection.getSourceItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
                         }
                     }
                 }
@@ -395,19 +458,40 @@ public class AnalysisService {
         AnalysisItem analysisItem = null;
         for (AnalysisItem item : items) {
             Key key = item.getKey();
-            if (key instanceof DerivedKey) {
-                DerivedKey derivedKey = (DerivedKey) key;
-                if (derivedKey.getFeedID() == connection.getTargetFeedID()) {
-                    if (connection.getTargetJoin() != null) {
-                        if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getTargetJoin().toKeyString())) {
-                            analysisItem = item;
-                            break;
-                        }
-                    } else {
-                        if (connection.getTargetItem() != null) {
-                            if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getTargetItem().toDisplay().equals(item.toDisplay())) {
+            if (connection.getTargetFeedID() != null && connection.getTargetFeedID() > 0) {
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    if (derivedKey.getFeedID() == connection.getTargetFeedID()) {
+                        if (connection.getTargetJoin() != null) {
+                            if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getTargetJoin().toKeyString())) {
                                 analysisItem = item;
                                 break;
+                            }
+                        } else {
+                            if (connection.getTargetItem() != null) {
+                                if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getTargetItem().toDisplay().equals(item.toDisplay())) {
+                                    analysisItem = item;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if (connection.getTargetReportID() != null && connection.getTargetReportID() > 0) {
+                if (key instanceof ReportKey) {
+                    ReportKey reportKey = (ReportKey) key;
+                    if (reportKey.getReportID() == connection.getTargetReportID()) {
+                        if (connection.getTargetJoin() != null) {
+                            if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getTargetJoin().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
+                        } else {
+                            if (connection.getTargetItem() != null) {
+                                if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getTargetItem().toDisplay().equals(item.toDisplay())) {
+                                    analysisItem = item;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -418,12 +502,24 @@ public class AnalysisService {
         if (analysisItem == null && connection.getTargetItem() != null) {
             for (AnalysisItem item : items) {
                 Key key = item.getKey();
-                if (key instanceof DerivedKey) {
-                    DerivedKey derivedKey = (DerivedKey) key;
-                    if (derivedKey.getFeedID() == connection.getTargetFeedID()) {
-                        if (connection.getTargetItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
-                            analysisItem = item;
-                            break;
+                if (connection.getTargetFeedID() != null && connection.getTargetFeedID() > 0) {
+                    if (key instanceof DerivedKey) {
+                        DerivedKey derivedKey = (DerivedKey) key;
+                        if (derivedKey.getFeedID() == connection.getTargetFeedID()) {
+                            if (connection.getTargetItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
+                        }
+                    }
+                } else if (connection.getTargetReportID() != null && connection.getTargetReportID() > 0) {
+                    if (key instanceof ReportKey) {
+                        ReportKey derivedKey = (ReportKey) key;
+                        if (derivedKey.getReportID() == connection.getTargetReportID()) {
+                            if (connection.getTargetItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
                         }
                     }
                 }
