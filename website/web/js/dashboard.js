@@ -6,6 +6,7 @@ var reportTemplate;
 var gaugeTemplate;
 
 var dashboard;
+var short_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 var dashboardComponent = function (obj) {
     if (obj.type == "stack")
@@ -44,19 +45,23 @@ var toFilterString = function (f) {
             return z;
     } else if (f.type == "date_range") {
         return ["filter" + f.id + "start=" + f.start_date, "filter" + f.id + "end=" + f.end_date ]
-    }
-    else
+    } else if(f.type == "flat_date_month" || f.type == "flat_date_year") {
+        return "filter" + f.id + "=" + f.selected;
+    } else if(f.type == "multi_date") {
+        return ["filter" + f.id + "start=" + f.min,"filter" + f.id + "end=" + f.max];
+    } else
         return ["filter" + f["id"] + "direction=0", "filter" + f["id"] + "value=1", "filter" + f["id"] + "interval=2"];
 }
 
 var renderReport = function (o, dashboardID, reload) {
     var obj = o.report.report;
+    var id = o.report.id;
     var filterStrings = [];
     var i;
     if (!reload && o.rendered) {
         return;
     }
-    if ($("#" + obj.id + " :visible").size() == 0) {
+    if ($("#" + id + " :visible").size() == 0) {
         o.rendered = false;
         return;
     }
@@ -66,50 +71,50 @@ var renderReport = function (o, dashboardID, reload) {
     if (obj.metadata.type == "pie") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getPieChartCallback(obj.id, w, {}))
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getPieChartCallback(id, w, {}))
     }
     else if (obj.metadata.type == "diagram") {
         $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), function (data) {
-            window.drawDiagram(data, $("#" + obj.id + " .reportArea"), obj.id, afterRefresh($("#" + obj.id + " .noData")));
+            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, afterRefresh($("#" + id + " .noData")));
         })
     }
     else if (obj.metadata.type == "list") {
         $.ajax({
             dataType: "text",
             url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"),
-            success: List.getCallback(obj.id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns)
+            success: List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns)
         });
     } else if (obj.metadata.type == "bar") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getBarChartCallback(obj.id, w, true, obj.metadata.styles));
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getBarChartCallback(id, w, true, obj.metadata.styles));
     } else if (obj.metadata.type == "column") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getColumnChartCallback(obj.id, w, obj.metadata.styles));
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getColumnChartCallback(id, w, obj.metadata.styles));
     }
     else if (obj.metadata.type == "area" || obj.metadata.type == "bubble" || obj.metadata.type == "plot" || obj.metadata.type == "line") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getCallback(obj.id, w, true, obj.metadata.styles));
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getCallback(id, w, true, obj.metadata.styles));
     } else if (obj.metadata.type == "stacked_bar") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getStackedBarChart(obj.id, w, obj.metadata.styles));
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getStackedBarChart(id, w, obj.metadata.styles));
     } else if (obj.metadata.type == "stacked_column") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getStackedColumnChart(obj.id, w, obj.metadata.styles));
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getStackedColumnChart(id, w, obj.metadata.styles));
     } else if (obj.metadata.type == "gauge") {
-        $("#" + obj.id + " .reportArea").html(gaugeTemplate({id: obj.id, benchmark: null }))
+        $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: null }))
         var v = JSON.stringify(obj.metadata.properties).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Gauge.getCallback(obj.id + "ReportArea", obj.id, w, obj.metadata.max))
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Gauge.getCallback(id + "ReportArea", id, w, obj.metadata.max))
     } else {
         $.get(obj.metadata.url + '?reportID=' + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), function (data) {
             Utils.noData(data, function () {
-                $('#' + obj.id + " .reportArea").html(data);
-            }, null, obj.id);
+                $('#' + id + " .reportArea").html(data);
+            }, null, id);
         });
     }
     o.rendered = true;
@@ -119,10 +124,10 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
     if (obj.type == "report") {
         var fs3 = filterStack.concat(obj.report.metadata.filters);
 
-        var w = {"type": "report", "filters": fs3, "report": obj, "rendered": false };
+        var w = {"type": "report", "filters": fs3, "report": obj, "rendered": false, "id": obj.id };
         reportMap[obj.id] = w;
         var t = _.reduce(obj.report.metadata.filters, function (m, i) {
-            m["filter" + i.id] = {"filter": i, "parent": w };
+            m[w.id + "filter" + i.id] = {"filter": i, "parent": w };
             return m;
         }, {});
         $.extend(filterMap, t);
@@ -138,7 +143,7 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
         }
         var x = {"type": "grid", "children": children };
         var u = _.reduce(obj.filters, function (m, i) {
-            m["filter" + i.id] = {"filter": i, "parent": x };
+            m[x.id + "filter" + i.id] = {"filter": i, "parent": x };
             return m;
         }, {});
         $.extend(filterMap, u)
@@ -149,10 +154,10 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
         for (var k = 0; k < obj.stack_items.length; k++) {
             ch = _.flatten(ch.concat(buildReportGraph(obj.stack_items[k].item, fs2, filterMap, stackMap, reportMap)))
         }
-        var y = {"type": "stack", "children": ch };
+        var y = {"type": "stack", "children": ch, "id": obj.id };
         stackMap[obj.id] = y;
         var v = _.reduce(obj.filters, function (m, i) {
-            m["filter" + i.id] = {"filter": i, "parent": y };
+            m[y.id + "filter" + i.id] = {"filter": i, "parent": y };
             return m;
         }, {});
         $.extend(filterMap, v)
@@ -164,7 +169,7 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
 
 var renderReports = function (obj, dashboardID, force) {
     if (obj.type == "report") {
-        if(!obj.report.report.metadata.adhoc_execution)
+        if (!obj.report.report.metadata.adhoc_execution)
             renderReport(obj, dashboardID, force);
     } else if (obj.type != "text") {
         for (var i = 0; i < obj.children.length; i++) {
@@ -178,26 +183,33 @@ $(function () {
     Date.format = 'yyyy/mm/dd';
     $.get("/js/template.html", function (data) {
         var s = $(data);
-
-
         Filter = {
-            create: function (obj) {
+            create: function (obj, parent_id) {
                 if (!obj) return;
                 if (obj.type == "single")
-                    return Filter.single(obj);
+                    return Filter.single({data: obj, parent_id: parent_id});
                 else if (obj.type == "multiple")
-                    return Filter.multiple(obj);
+                    return Filter.multiple({data: obj, parent_id: parent_id});
                 else if (obj.type == "rolling")
-                    return Filter.rolling(obj);
+                    return Filter.rolling({data: obj, parent_id: parent_id});
                 else if (obj.type == "date_range")
-                    return Filter.date_range(obj);
+                    return Filter.date_range({data: obj, parent_id: parent_id});
+                else if (obj.type == "flat_date_month")
+                    return Filter.flat_date_month({data: obj, parent_id: parent_id});
+                else if (obj.type == "flat_date_year")
+                    return Filter.flat_date_year({data: obj, parent_id: parent_id});
+                else if (obj.type == "multi_date")
+                    return Filter.multi_flat_date_month({data: obj, parent_id: parent_id});
             },
-            single: _.template($("#single_value_filter_template", s).html(), null, {variable: "data"}),
-            multiple: _.template($("#multi_value_filter_template", s).html(), null, {variable: "data"}),
-            rolling: _.template($("#rolling_date_filter_template", s).html(), null, {variable: "data"}),
-            date_range: _.template($("#absolute_date_filter_template", s).html(), null, {variable: "data"}),
+            multi_flat_date_month: _.template($("#multi_flat_date_filter", s).html()),
+            flat_date_year: _.template($("#flat_date_year_filter", s).html()),
+            flat_date_month: _.template($("#flat_date_month_filter", s).html()),
+            single: _.template($("#single_value_filter_template", s).html()),
+            multiple: _.template($("#multi_value_filter_template", s).html()),
+            rolling: _.template($("#rolling_date_filter_template", s).html()),
+            date_range: _.template($("#absolute_date_filter_template", s).html()),
             base_filter: _.template($("#filter_base", s).html()),
-            filters: _.template($("#filters_template", s).html(), null, {variable: "filter_values"})
+            filters: _.template($("#filters_template", s).html())
 
         };
         dashboard = _.template($("#dashboard_template", s).html());
@@ -231,6 +243,16 @@ $(function () {
                 renderReports(f.parent, dashboardJSON["id"], true);
             }
         });
+
+        $(".month_select, .year_select").change(function (e) {
+            var f = filterMap[$(e.target).attr("id")];
+            f.filter.selected = $(e.target).val();
+            if (f.parent == null) {
+                renderReports(graph, dashboardJSON["id"], true);
+            } else {
+                renderReports(f.parent, dashboardJSON["id"], true);
+            }
+        })
 
         $(".cb_all_choice").click(function (e) {
             if ($(e.target || e.srcElement).is(":checked")) {
@@ -269,6 +291,21 @@ $(function () {
                 renderReports(f.parent, dashboardJSON["id"], true);
             }
         });
+
+        $(".multi_flat_month_save").click(function(e) {
+            var a = $(e.target).parent().parent();
+            var f = filterMap[a.attr("id").split("_")[0]];
+            var min = $(".multi_flat_month_start", a).val();
+            var max = $(".multi_flat_month_end", a).val();
+            f.filter.min = parseInt(min);
+            f.filter.max = parseInt(max);
+            $("#" + a.attr("id").split("_")[0]).html(short_months[f.filter.min] + " to " + short_months[f.filter.max]);
+            if (f.parent == null) {
+                renderReports(graph, dashboardJSON["id"], true);
+            } else {
+                renderReports(f.parent, dashboardJSON["id"], true);
+            }
+        })
 
         $(".rolling_filter_type").change(function (e) {
             var t = $(".custom", $(e.target || e.srcElement).parent());
@@ -353,7 +390,7 @@ $(function () {
             }
         });
 
-        $(".adhoc").click(function(e) {
+        $(".adhoc").click(function (e) {
             var z = $(e.target);
             renderReport(reportMap[$(z.parent()).attr("id")], dashboardJSON["id"], true);
         })
@@ -361,6 +398,16 @@ $(function () {
         $('a[data-toggle="tab"]').on('shown', function (e) {
             renderReports(stackMap[$(e.target).parent().parent().attr("id")], dashboardJSON["id"], false);
         });
+        var showFilters = true;
+        $('.toggle-filters').click(function(e) {
+            if(showFilters) {
+                $(".filters").hide();
+            } else {
+                $(".filters").show();
+            }
+            showFilters = !showFilters;
+        })
+        console.log(filterMap)
     })
 })
 

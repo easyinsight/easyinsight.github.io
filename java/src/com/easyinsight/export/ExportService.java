@@ -77,19 +77,19 @@ public class ExportService {
         switch (o.getOutcome()) {
             case KPIOutcome.EXCEEDING_GOAL:
             case KPIOutcome.POSITIVE:
-                if(o.getDirection() == KPIOutcome.UP_DIRECTION) {
+                if (o.getDirection() == KPIOutcome.UP_DIRECTION) {
                     return "arrow2_up_green.png";
                 } else {
                     return "arrow2_down_green.png";
                 }
             case KPIOutcome.NEGATIVE:
-                if(o.getDirection() == KPIOutcome.UP_DIRECTION) {
+                if (o.getDirection() == KPIOutcome.UP_DIRECTION) {
                     return "arrow2_up_red.png";
                 } else {
                     return "arrow2_down_red.png";
                 }
             case KPIOutcome.NEUTRAL:
-                if(o.getDirection() == KPIOutcome.UP_DIRECTION) {
+                if (o.getDirection() == KPIOutcome.UP_DIRECTION) {
                     return "arrow2_up_blue.png";
                 } else if (o.getDirection() == KPIOutcome.DOWN_DIRECTION) {
                     return "arrow2_down_blue.png";
@@ -103,7 +103,7 @@ public class ExportService {
     }
 
     public static String getFontColor(TrendOutcome o) {
-        switch(o.getOutcome()) {
+        switch (o.getOutcome()) {
             case KPIOutcome.EXCEEDING_GOAL:
             case KPIOutcome.POSITIVE:
                 return "#00ff00";
@@ -251,7 +251,7 @@ public class ExportService {
 
     public void addOrUpdateSchedule(ScheduledActivity scheduledActivity, int utcOffset, EIConnection conn) throws SQLException {
         scheduledActivity.save(conn, utcOffset);
-        scheduledActivity.setup(conn);        
+        scheduledActivity.setup(conn);
     }
 
     public List<DataSourceDescriptor> getRefreshableDataSources(ScheduledActivity scheduledActivity) {
@@ -266,8 +266,8 @@ public class ExportService {
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, scheduled_account_activity.scheduled_account_activity_id FROM " +
                     "DATA_FEED, SCHEDULED_DATA_SOURCE_REFRESH, scheduled_account_activity WHERE " +
-                    "DATA_FEED.data_feed_id = SCHEDULED_DATA_SOURCE_REFRESH.data_source_id and " +
-                    "scheduled_data_source_refresh.scheduled_account_activity_id = scheduled_account_activity.scheduled_account_activity_id and " +
+                    "DATA_FEED.data_feed_id = SCHEDULED_DATA_SOURCE_REFRESH.data_source_id AND " +
+                    "scheduled_data_source_refresh.scheduled_account_activity_id = scheduled_account_activity.scheduled_account_activity_id AND " +
                     "scheduled_account_activity.account_id = ?");
             queryStmt.setLong(1, SecurityUtil.getAccountID());
             ResultSet rs = queryStmt.executeQuery();
@@ -360,7 +360,6 @@ public class ExportService {
     }
 
 
-
     public void deleteSchedules(List<Integer> activities) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -434,7 +433,7 @@ public class ExportService {
     }
 
     public void exportToPDF(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata,
-                              byte[] bytes, int width, int height) {
+                            byte[] bytes, int width, int height) {
         if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
@@ -459,7 +458,7 @@ public class ExportService {
     }
 
     public ReportFault emailReport(WSAnalysisDefinition analysisDefinition, int format, InsightRequestMetadata insightRequestMetadata, String email, String subject, String body,
-                            byte[] pdfBytes, int width, int height) {
+                                   byte[] pdfBytes, int width, int height) {
         boolean includeTitle = true;
         if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
@@ -469,8 +468,8 @@ public class ExportService {
             analysisDefinition.updateMetadata();
             if (format == ReportDelivery.EXCEL) {
                 byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata, true, false);
-                    new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
-                            "application/excel");
+                new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
+                        "application/excel");
             } else if (format == ReportDelivery.EXCEL_2007) {
                 byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata, true, true);
                 new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
@@ -540,8 +539,8 @@ public class ExportService {
         CrosstabValue[][] values = crosstab.toTable(crosstabDefinition, insightRequestMetadata, conn);
         StringBuilder sb = new StringBuilder();
         AnalysisMeasure measure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
-        String headerCell = "background: #"+Integer.toHexString(crosstabDefinition.getHeaderBackgroundColor()) + ";color: #"+Integer.toHexString(crosstabDefinition.getHeaderTextColor())+ ";" + tdStyle + "left";
-        String summaryCell = "background: #"+Integer.toHexString(crosstabDefinition.getSummaryBackgroundColor()) + ";color: #"+Integer.toHexString(crosstabDefinition.getSummaryTextColor())+ ";" + tdStyle + "right";
+        String headerCell = "background: #" + Integer.toHexString(crosstabDefinition.getHeaderBackgroundColor()) + ";color: #" + Integer.toHexString(crosstabDefinition.getHeaderTextColor()) + ";" + tdStyle + "left";
+        String summaryCell = "background: #" + Integer.toHexString(crosstabDefinition.getSummaryBackgroundColor()) + ";color: #" + Integer.toHexString(crosstabDefinition.getSummaryTextColor()) + ";" + tdStyle + "right";
         String dataCell = tdStyle + "right";
         if (includeTitle && analysisDefinition.getName() != null) {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(analysisDefinition.getName()).append("</h0>").append("</div>");
@@ -558,23 +557,23 @@ public class ExportService {
                 CrosstabValue crosstabValue = values[j][i];
                 if (crosstabValue == null) {
                     if (i == 0 || j < 2) {
-                        sb.append("<td style=\""+headerCell+"\"></td>");
+                        sb.append("<td style=\"" + headerCell + "\"></td>");
                     } else if (i == crosstab.getColumnSections().size() + crosstabDefinition.getRows().size() &&
                             j == crosstab.getRowSections().size() + crosstabDefinition.getColumns().size() + 1) {
-                        sb.append("<td style=\""+summaryCell+"\"></td>");
+                        sb.append("<td style=\"" + summaryCell + "\"></td>");
                     } else {
                         sb.append("<td style=\"" + headerCell + "\"></td>");
                     }
                 } else {
                     if (crosstabValue.getHeader() == null) {
                         if (crosstabValue.isSummaryValue()) {
-                            sb.append("<td style=\""+summaryCell+"\">");
+                            sb.append("<td style=\"" + summaryCell + "\">");
                         } else {
-                            sb.append("<td style=\""+dataCell+"\">");
+                            sb.append("<td style=\"" + dataCell + "\">");
                         }
                         sb.append(createValue(exportMetadata.dateFormat, measure, crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, false));
                     } else {
-                        sb.append("<td style=\""+headerCell+"\">");
+                        sb.append("<td style=\"" + headerCell + "\">");
                         sb.append(crosstabValue.getValue());
                     }
                     sb.append("</td>");
@@ -685,7 +684,7 @@ public class ExportService {
     }
 
     private void kpiReportToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, Document document,
-                                      ExportMetadata exportMetadata) throws SQLException, DocumentException {
+                                     ExportMetadata exportMetadata) throws SQLException, DocumentException {
         WSKPIDefinition kpiDefinition = (WSKPIDefinition) analysisDefinition;
 
 
@@ -701,8 +700,8 @@ public class ExportService {
                 AnalysisItem grouping = kpiDefinition.getGroupings().get(i);
                 PdfPCell cell = new PdfPCell(new Phrase(grouping.toDisplay()));
                 cell.setMinimumHeight(20f);
-                    cell.setBackgroundColor(new BaseColor(180, 180, 180));
-                    table.addCell(cell);
+                cell.setBackgroundColor(new BaseColor(180, 180, 180));
+                table.addCell(cell);
             }
         }
         PdfPCell labelCell = new PdfPCell(new Phrase("Name"));
@@ -749,7 +748,7 @@ public class ExportService {
     }
 
     private void crosstabToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, Document document,
-                                      ExportMetadata exportMetadata) throws DocumentException {
+                                    ExportMetadata exportMetadata) throws DocumentException {
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
         DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
         Crosstab crosstab = new Crosstab();
@@ -798,7 +797,7 @@ public class ExportService {
 
         PdfWriter.getInstance(document, baos);
         document.open();
-        
+
         Iterator<Page> pageIter = pages.iterator();
         while (pageIter.hasNext()) {
             Page page = pageIter.next();
@@ -813,7 +812,7 @@ public class ExportService {
         }
 
         // ratio = 1.5
-        
+
 
         document.close();
         return baos.toByteArray();
@@ -871,7 +870,7 @@ public class ExportService {
                 } else if (absoluteValue < (60000 * 60)) {
                     int minutes = (int) (absoluteValue / 60000);
                     int seconds = (int) (absoluteValue / 1000) % 60;
-                    valueString = minutes + "m: " +seconds + "s";
+                    valueString = minutes + "m: " + seconds + "s";
                 } else if (absoluteValue < (60000 * 60 * 24)) {
                     int hours = (int) (absoluteValue / (60000 * 60));
                     int minutes = (int) (absoluteValue % 24);
@@ -893,7 +892,7 @@ public class ExportService {
                 } else if (doubleValue < (60000 * 60)) {
                     int minutes = (int) (doubleValue / 60000);
                     int seconds = (int) (doubleValue / 1000) % 60;
-                    valueString = minutes + "m: " +seconds + "s";
+                    valueString = minutes + "m: " + seconds + "s";
                 } else if (doubleValue < (60000 * 60 * 24)) {
                     int hours = (int) (doubleValue / (60000 * 60));
                     int minutes = (int) (doubleValue % 24);
@@ -1180,7 +1179,7 @@ public class ExportService {
                         columnValue = value.toString();
                     }
                     //if (firstRow) {
-                        columnSet.add(new SortInfo(i, sortValue, columnValue));
+                    columnSet.add(new SortInfo(i, sortValue, columnValue));
                     //}
                     if (value != null && value.type() == Value.EMPTY) {
                         continue;
@@ -1219,7 +1218,7 @@ public class ExportService {
         StringBuilder sb = new StringBuilder();
         String cellStyle;
         String thStyle = "padding:2px";
-        sb.append("<table style=\"width:100%;font-size:"+verticalList.getFontSize()+"px;\" class='export_table'>");
+        sb.append("<table style=\"width:100%;font-size:" + verticalList.getFontSize() + "px;\" class='export_table'>");
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<th></th>");
         for (SortInfo sortInfo : vListInfo.columns) {
@@ -1251,7 +1250,7 @@ public class ExportService {
             }
             sb.append("<tr style=\"" + ytdTRStyle + "\">");
             //AnalysisMeasure baseMeasure = (AnalysisMeasure) map.get("baseMeasure");
-            sb.append("<td style=\"white-space: nowrap;"+cellStyle+"\">");
+            sb.append("<td style=\"white-space: nowrap;" + cellStyle + "\">");
             sb.append(baseMeasure.toDisplay());
             sb.append("</td>");
             for (SortInfo sortInfo : vListInfo.columns) {
@@ -1313,7 +1312,7 @@ public class ExportService {
                     columnValue = value.toString();
                 }
                 //if (firstRow) {
-                    columnSet.add(new SortInfo(0, sortValue, columnValue));
+                columnSet.add(new SortInfo(0, sortValue, columnValue));
                 //}
                 if (value != null && value.type() == Value.EMPTY) {
                     continue;
@@ -1379,25 +1378,25 @@ public class ExportService {
         }
         List<TrendOutcome> outcomes = trendDataResults.getTrendOutcomes();
         StringBuilder sb = new StringBuilder();
-        
+
         if (includeTitle && listDefinition.getName() != null) {
-            sb.append("<div style=\""+headerLabelStyle+"\">").append("<h0>").append(listDefinition.getName()).append("</h0></div>");
+            sb.append("<div style=\"" + headerLabelStyle + "\">").append("<h0>").append(listDefinition.getName()).append("</h0></div>");
         }
-        sb.append("<table style=\""+tableStyle+"\">");
-        sb.append("<tr style=\""+headerTRStyle+"\">");
+        sb.append("<table style=\"" + tableStyle + "\">");
+        sb.append("<tr style=\"" + headerTRStyle + "\">");
         int i;
         if (kpiReport.getGroupings() != null) {
             for (i = 0; i < kpiReport.getGroupings().size(); i++) {
                 AnalysisItem grouping = kpiReport.getGroupings().get(i);
-                sb.append("<th style=\""+thStyle+"\">");
+                sb.append("<th style=\"" + thStyle + "\">");
                 sb.append(grouping.toDisplay());
                 sb.append("</th>");
             }
         }
-        sb.append("<th style=\""+thStyle+"\">Name</th>");
-        sb.append("<th style=\"width:120px;"+thStyle+"\">Latest Value</th>");
-        sb.append("<th style=\"width:120px;"+thStyle+"\">Previous Value</th>");
-        sb.append("<th style=\"width:120px;"+thStyle+"\">Percent Change</th>");
+        sb.append("<th style=\"" + thStyle + "\">Name</th>");
+        sb.append("<th style=\"width:120px;" + thStyle + "\">Latest Value</th>");
+        sb.append("<th style=\"width:120px;" + thStyle + "\">Previous Value</th>");
+        sb.append("<th style=\"width:120px;" + thStyle + "\">Percent Change</th>");
         AnalysisMeasure percentMeasure = new AnalysisMeasure();
         percentMeasure.getFormattingConfiguration().setFormattingType(FormattingConfiguration.PERCENTAGE);
         percentMeasure.setMinPrecision(1);
@@ -1408,17 +1407,17 @@ public class ExportService {
                 for (i = 0; i < kpiReport.getGroupings().size(); i++) {
                     AnalysisItem grouping = kpiReport.getGroupings().get(i);
                     Value value = trendOutcome.getDimensions().get(grouping.qualifiedName());
-                    sb.append("<td style=\"" +tdStyle + "left\">");
+                    sb.append("<td style=\"" + tdStyle + "left\">");
                     sb.append(value);
                     sb.append("</td>");
                 }
             }
-            sb.append("<td style=\""+tdStyle+"left\">").append(trendOutcome.getMeasure().toDisplay()).append("</td>");
+            sb.append("<td style=\"" + tdStyle + "left\">").append(trendOutcome.getMeasure().toDisplay()).append("</td>");
             String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, false);
-            sb.append("<td style=\""+tdStyle+"right\">").append(nowValue).append("</td>");
+            sb.append("<td style=\"" + tdStyle + "right\">").append(nowValue).append("</td>");
             String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, false);
-            sb.append("<td style=\""+tdStyle+"right\">").append(previousValue).append("</td>");
-            sb.append("<td style=\""+tdStyle+"right\">");
+            sb.append("<td style=\"" + tdStyle + "right\">").append(previousValue).append("</td>");
+            sb.append("<td style=\"" + tdStyle + "right\">");
             if (trendOutcome.getHistorical().toDouble() != 0) {
                 double percentChange = (trendOutcome.getNow().toDouble() - trendOutcome.getHistorical().toDouble()) / trendOutcome.getHistorical().toDouble() * 100;
                 sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, false));
@@ -1447,9 +1446,9 @@ public class ExportService {
         String thStyle = "padding:2px";
         StringBuilder sb = new StringBuilder();
         if (includeTitle && report.getName() != null) {
-            sb.append("<div style=\""+headerLabelStyle+"\">").append("<h0>").append(report.getName()).append("</h0></div>");
+            sb.append("<div style=\"" + headerLabelStyle + "\">").append("<h0>").append(report.getName()).append("</h0></div>");
         }
-        sb.append("<table style=\"width:100%;font-size:"+verticalList.getFontSize()+"px;\" class='export_table'>");
+        sb.append("<table style=\"width:100%;font-size:" + verticalList.getFontSize() + "px;\" class='export_table'>");
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<th></th>");
         for (int i = 0; i < ytdStuff.getHeaders().size(); i++) {
@@ -1530,7 +1529,7 @@ public class ExportService {
         if (includeTitle && listDefinition.getName() != null) {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(listDefinition.getName()).append("</h0>").append("</div>");
         }
-        sb.append("<table style=\"width:100%;font-size:"+verticalList.getFontSize()+"px;\" class='export_table'>");
+        sb.append("<table style=\"width:100%;font-size:" + verticalList.getFontSize() + "px;\" class='export_table'>");
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<th></th>");
         for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
@@ -1549,65 +1548,66 @@ public class ExportService {
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (YTDValue ytdValue : ytdStuff.getValues()) {
-
-            String ytdTRStyle = "";
-            AnalysisMeasure baseMeasure = ytdValue.getAnalysisMeasure();
-            boolean alwaysShow = false;
-            if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
-                YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) baseMeasure.getReportFieldExtension();
-                if (ytdReportFieldExtension.isLineAbove()) {
-                    ytdTRStyle += "border-top: solid 1px black;";
-                }
-                if (ytdReportFieldExtension.isAlwaysShow()) {
-                    alwaysShow = true;
-                    cellStyle = "padding:2px;text-align:left;font-weight:bold";
+            if (ytdValue != null) {
+                String ytdTRStyle = "";
+                AnalysisMeasure baseMeasure = ytdValue.getAnalysisMeasure();
+                boolean alwaysShow = false;
+                if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
+                    YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) baseMeasure.getReportFieldExtension();
+                    if (ytdReportFieldExtension.isLineAbove()) {
+                        ytdTRStyle += "border-top: solid 1px black;";
+                    }
+                    if (ytdReportFieldExtension.isAlwaysShow()) {
+                        alwaysShow = true;
+                        cellStyle = "padding:2px;text-align:left;font-weight:bold";
+                    } else {
+                        cellStyle = "padding:2px;text-align:right";
+                    }
                 } else {
                     cellStyle = "padding:2px;text-align:right";
                 }
-            } else {
-                cellStyle = "padding:2px;text-align:right";
-            }
-            if (baseMeasure.isUnderline()) {
-                ytdTRStyle += "border-bottom:solid 1px black";
-            }
-
-            sb.append("<tr style=\"" + ytdTRStyle + "\">");
-            sb.append("<td style=\"white-space: nowrap; ").append(cellStyle).append("\">").append(baseMeasure.toDisplay()).append("</td>");
-            if (ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
-                Map<Value, TimeIntervalValue> map = new HashMap<Value, TimeIntervalValue>();
-                for (int i = 0; i < ytdValue.getTimeIntervalValues().size(); i++) {
-                    TimeIntervalValue timeIntervalValue = ytdValue.getTimeIntervalValues().get(i);
-                    map.put(timeIntervalValue.getDateValue(), timeIntervalValue);
+                if (baseMeasure.isUnderline()) {
+                    ytdTRStyle += "border-bottom:solid 1px black";
                 }
-                for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
-                    TimeIntervalValue timeIntervalValue = map.get(ytdStuff.getIntervals().get(i));
-                    if (timeIntervalValue != null) {
-                        Value value = timeIntervalValue.getValue();
-                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+
+                sb.append("<tr style=\"" + ytdTRStyle + "\">");
+                sb.append("<td style=\"white-space: nowrap; ").append(cellStyle).append("\">").append(baseMeasure.toDisplay()).append("</td>");
+                if (ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
+                    Map<Value, TimeIntervalValue> map = new HashMap<Value, TimeIntervalValue>();
+                    for (int i = 0; i < ytdValue.getTimeIntervalValues().size(); i++) {
+                        TimeIntervalValue timeIntervalValue = ytdValue.getTimeIntervalValues().get(i);
+                        map.put(timeIntervalValue.getDateValue(), timeIntervalValue);
+                    }
+                    for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
+                        TimeIntervalValue timeIntervalValue = map.get(ytdStuff.getIntervals().get(i));
+                        if (timeIntervalValue != null) {
+                            Value value = timeIntervalValue.getValue();
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                        } else {
+                            sb.append("<td style=\"").append(cellStyle).append("</td>");
+                        }
+                    }
+                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+
+                    if (ytdValue.getBenchmarkMeasure() != null) {
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
                     } else {
                         sb.append("<td style=\"").append(cellStyle).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("</td>");
+                    }
+                } else if (alwaysShow) {
+                    for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
+                        sb.append("<td style=\"").append(cellStyle).append("</td>");
+                    }
+                    if (hasBenchmark) {
+                        sb.append("<td>").append("</td>");
+                        sb.append("<td>").append("</td>");
                     }
                 }
-                sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-                sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-
-                if (ytdValue.getBenchmarkMeasure() != null) {
-                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-                } else {
-                    sb.append("<td style=\"").append(cellStyle).append("</td>");
-                    sb.append("<td style=\"").append(cellStyle).append("</td>");
-                }
-            } else if (alwaysShow) {
-                for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
-                    sb.append("<td style=\"").append(cellStyle).append("</td>");
-                }
-                if (hasBenchmark) {
-                    sb.append("<td>").append("</td>");
-                    sb.append("<td>").append("</td>");
-                }
+                sb.append("</tr>");
             }
-            sb.append("</tr>");
         }
         sb.append("</table>");
         return sb.toString();
@@ -1649,7 +1649,7 @@ public class ExportService {
     }
 
     private Workbook createWorkbookFromList(WSAnalysisDefinition listDefinition, ExportMetadata exportMetadata,
-                                                EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean generateWithNoData, boolean format2007) throws SQLException {
+                                            EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean generateWithNoData, boolean format2007) throws SQLException {
         Workbook workbook;
         if (format2007) {
             workbook = new XSSFWorkbook();
@@ -1693,7 +1693,7 @@ public class ExportService {
     }
 
     private boolean listTrends(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
-                                  InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+                               InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSKPIDefinition crosstabDefinition = (WSKPIDefinition) report;
         TrendDataResults trendDataResults = DataService.getTrendDataResults(crosstabDefinition, insightRequestMetadata, conn);
         List<TrendOutcome> outcomes = trendDataResults.getTrendOutcomes();
@@ -1749,7 +1749,7 @@ public class ExportService {
     }
 
     private boolean listCrosstab(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
-                                  InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
+                                 InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) report;
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         Crosstab crosstab = new Crosstab();
@@ -1830,7 +1830,7 @@ public class ExportService {
             }
         }
     }
-    
+
     private static Value createPercentValue(Value value) {
         if (value.toDouble() == null) {
             return new EmptyValue();
@@ -1840,7 +1840,7 @@ public class ExportService {
     }
 
     private boolean listCompareYears(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
-                         InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+                                     InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSCompareYearsDefinition verticalList = (WSCompareYearsDefinition) report;
         ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
         YearStuff ytdStuff = YTDUtil.getYearStuff(verticalList, dataSet.getDataSet(), dataSet.getPipelineData(), dataSet.getReportItems());
@@ -1881,7 +1881,7 @@ public class ExportService {
     }
 
     private boolean listYTD(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
-                                  InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+                            InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSYTDDefinition verticalList = (WSYTDDefinition) report;
         ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
         YTDStuff ytdStuff = YTDUtil.getYTDStuff(verticalList, dataSet.getDataSet(), insightRequestMetadata, conn, dataSet.getPipelineData(), dataSet.getReportItems());
@@ -1978,7 +1978,7 @@ public class ExportService {
     }
 
     private boolean listVerticalList(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
-                                  InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
+                                     InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         WSVerticalListDefinition verticalList = (WSVerticalListDefinition) report;
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         VListInfo vListInfo = getVListInfo(verticalList, dataSet);
@@ -1999,14 +1999,14 @@ public class ExportService {
                 SortInfo sortInfo = vListInfo.columns.get(i);
                 Value value = (Value) map.get(sortInfo.label);
                 Style style = getStyle(styleMap, baseMeasure, workbook, exportMetadata, value);
-                style.format(row, i+ 1, value, baseMeasure, exportMetadata.cal);
+                style.format(row, i + 1, value, baseMeasure, exportMetadata.cal);
             }
         }
         return dataSet.getRows().size() > 0;
     }
 
     private boolean listExcel(WSAnalysisDefinition listDefinition, Workbook workbook, Sheet sheet,
-                           InsightRequestMetadata insightRequestMetadata, EIConnection conn, ExportMetadata exportMetadata) {
+                              InsightRequestMetadata insightRequestMetadata, EIConnection conn, ExportMetadata exportMetadata) {
         ListDataResults listDataResults = (ListDataResults) DataService.list(listDefinition, insightRequestMetadata, conn);
         if (listDefinition.getReportType() == WSAnalysisDefinition.LIST) {
             WSListDefinition list = (WSListDefinition) listDefinition;
@@ -2148,7 +2148,7 @@ public class ExportService {
                     } else if (unsigned < (60000 * 60)) {
                         int minutes = (int) (unsigned / 60000);
                         int seconds = (int) (unsigned / 1000) % 60;
-                        result = minutes + "m: " +seconds + "s";
+                        result = minutes + "m: " + seconds + "s";
                     } else if (unsigned < (60000 * 60 * 24)) {
                         int hours = (int) (unsigned / (60000 * 60));
                         int minutes = (int) (unsigned % 24);
@@ -2399,7 +2399,6 @@ public class ExportService {
     }
 
 
-
     private Style getStyle(Map<AnalysisItem, Style> styleMap, AnalysisItem analysisItem, Workbook wb, ExportMetadata exportMetadata, Value value) {
         Style style = styleMap.get(analysisItem);
         if (style == null) {
@@ -2430,9 +2429,9 @@ public class ExportService {
         int time = insightRequestMetadata.getUtcOffset() / 60;
         String string;
         if (time > 0) {
-            string = "GMT-"+Math.abs(time);
+            string = "GMT-" + Math.abs(time);
         } else if (time < 0) {
-            string = "GMT+"+Math.abs(time);
+            string = "GMT+" + Math.abs(time);
         } else {
             string = "GMT";
         }
@@ -2516,7 +2515,6 @@ public class ExportService {
                 return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
             }
         });
-        
 
 
         if (includeTitle && report.getName() != null) {
@@ -2602,10 +2600,10 @@ public class ExportService {
                         }
                         sb.append("<td style=\"").append(styleString.toString()).append("\">");
                         //sb.append("<td>");
-                        if(!exportProperties.isEmailed()) {
+                        if (!exportProperties.isEmailed()) {
                             sb.append("<span class='sortData'>");
                             Value v = value;
-                            if(value.getSortValue() != null) {
+                            if (value.getSortValue() != null) {
                                 v = value.getSortValue();
                             }
                             sb.append(StringEscapeUtils.escapeHtml(v.toHTMLString()));
@@ -2727,7 +2725,7 @@ public class ExportService {
             List<AnalysisItem> items = new ArrayList<AnalysisItem>(fields);
             items.remove(null);
             Collections.sort(items, new Comparator<AnalysisItem>() {
-    
+
                 public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
                     return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
                 }
@@ -2749,8 +2747,8 @@ public class ExportService {
                 sb.append("<tr style=\">").append(summaryTRStyle).append("\">");
                 for (AnalysisItem analysisItem : items) {
                     //for (int i = 0; i < fields.length; i++) {
-                        //AnalysisItem headerItem = listDataResults.getHeaders()[i];
-                        //if (headerItem == analysisItem) {
+                    //AnalysisItem headerItem = listDataResults.getHeaders()[i];
+                    //if (headerItem == analysisItem) {
                     StringBuilder styleString = new StringBuilder(tdStyle);
                     String align = "left";
                     styleString.append(align);
@@ -2763,9 +2761,9 @@ public class ExportService {
                         }
                     }
                     sb.append("<td style=\"").append(styleString.toString()).append("\">");
-    
+
                     sb.append(ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
-    
+
                     sb.append("</td>");
                 }
                 sb.append("</tr>");
@@ -2829,22 +2827,22 @@ public class ExportService {
                 HSSFRow kpiRow = sheet.createRow(i++);
                 HSSFCell kpiNameCell = kpiRow.createCell(0);
                 kpiNameCell.setCellValue(new HSSFRichTextString(kpi.getName()));
-                
+
                 Style style = getStyle(styleMap, kpi.getAnalysisMeasure(), workbook, exportMetadata, new NumericValue(kpi.getKpiOutcome().getOutcomeValue()));
                 style.format(kpiRow, 1, new NumericValue(kpi.getKpiOutcome().getOutcomeValue()), kpi.getAnalysisMeasure(), exportMetadata.cal);
-                
+
                 HSSFCell timeCell = kpiRow.createCell(2);
                 timeCell.setCellValue(kpi.getDayWindow());
                 Value percentValue = new NumericValue(kpi.getKpiOutcome().getPercentChange());
                 Style percentStyle = getStyle(styleMap, percentMeasure, workbook, exportMetadata, percentValue);
-                percentStyle.format(kpiRow, 3, percentValue,  percentMeasure, exportMetadata.cal);
+                percentStyle.format(kpiRow, 3, percentValue, percentMeasure, exportMetadata.cal);
             }
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             workbook.write(baos);
             byte[] bytes = baos.toByteArray();
             baos.close();
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCEL_EXPORT (USER_ID, EXCEL_FILE, REPORT_NAME, ANONYMOUS_ID) VALUES (?, ?, ?, ?)",
-                        Statement.RETURN_GENERATED_KEYS);
+                    Statement.RETURN_GENERATED_KEYS);
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             BufferedInputStream bis = new BufferedInputStream(bais, 1024);
             long userID = SecurityUtil.getUserID(false);
@@ -2887,12 +2885,12 @@ public class ExportService {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(scorecard.getName()).append("</h0>").append("</div>");
         }
         sb.append("<table style=\"").append(tableStyle).append("\">");
-        sb.append("<tr style=\""+headerTRStyle+"\">");
-        sb.append("<th style=\""+thStyle+"\"></th>");
-        sb.append("<th style=\""+thStyle+"\">KPI Name</th>");
-        sb.append("<th style=\""+thStyle+"\">Latest Value</th>");
-        sb.append("<th style=\""+thStyle+"\">Time</th>");
-        sb.append("<th style=\""+thStyle+"\">% Change</th>");
+        sb.append("<tr style=\"" + headerTRStyle + "\">");
+        sb.append("<th style=\"" + thStyle + "\"></th>");
+        sb.append("<th style=\"" + thStyle + "\">KPI Name</th>");
+        sb.append("<th style=\"" + thStyle + "\">Latest Value</th>");
+        sb.append("<th style=\"" + thStyle + "\">Time</th>");
+        sb.append("<th style=\"" + thStyle + "\">% Change</th>");
         NumberFormat nf = NumberFormat.getNumberInstance();
         nf.setMaximumFractionDigits(2);
         sb.append("</tr>");
