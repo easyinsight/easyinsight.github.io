@@ -19,6 +19,7 @@
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -101,8 +102,13 @@
         }
 
         private function revert():void {
-            startJoins = null;
-            customConnectionMap = new Object();
+            //startJoins = null;
+            for each (var join:JoinOverride in startJoins) {
+                if (join.dataSourceID == selectedDataSource.id) {
+                    startJoins.removeItemAt(startJoins.getItemIndex(join));
+                }
+            }
+            customConnectionMap[String(selectedDataSource.id)] = new ArrayCollection();
             ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
             analysisService.determineOverrides.send(dataSourceID, fields);
         }
@@ -190,6 +196,8 @@
 
         public var addonReports:ArrayCollection;
 
+        private var addedAddons:Boolean = false;
+
         private function populateJoins(dataSource:DataSourceDescriptor):void {
             if (connections != null) {
                 var saveJoins:ArrayCollection = new ArrayCollection();
@@ -206,19 +214,22 @@
                 customConnectionMap[String(selectedDataSource.id)] = saveJoins;
             }
             var sources:ArrayCollection = dataSourceMap[String(dataSource.id)] as ArrayCollection;
-            for each (var addonReport:AddonReport in addonReports) {
-                var insightDescriptor:InsightDescriptor = new InsightDescriptor();
-                insightDescriptor.id = addonReport.reportID;
-                insightDescriptor.name = addonReport.reportName;
-                sources.addItem(insightDescriptor);
-            }
-            if (dsAddonReports != null) {
-                for each (var dsAddonReport:AddonReport in dsAddonReports) {
-                    var dsInsightDescriptor:InsightDescriptor = new InsightDescriptor();
-                    dsInsightDescriptor.id = dsAddonReport.reportID;
-                    dsInsightDescriptor.name = dsAddonReport.reportName;
-                    sources.addItem(dsInsightDescriptor);
+            if (dataSource.id == dataSourceID && !addedAddons) {
+                for each (var addonReport:AddonReport in addonReports) {
+                    var insightDescriptor:InsightDescriptor = new InsightDescriptor();
+                    insightDescriptor.id = addonReport.reportID;
+                    insightDescriptor.name = addonReport.reportName;
+                    sources.addItem(insightDescriptor);
                 }
+                if (dsAddonReports != null) {
+                    for each (var dsAddonReport:AddonReport in dsAddonReports) {
+                        var dsInsightDescriptor:InsightDescriptor = new InsightDescriptor();
+                        dsInsightDescriptor.id = dsAddonReport.reportID;
+                        dsInsightDescriptor.name = dsAddonReport.reportName;
+                        sources.addItem(dsInsightDescriptor);
+                    }
+                }
+                addedAddons = true;
             }
             dataSources = sources;
             connections = new ArrayCollection();
@@ -233,24 +244,39 @@
                 }
             } else {
                 var customJoins:ArrayCollection = customConnectionMap[String(dataSource.id)] as ArrayCollection;
-                for each (var customJoin:JoinOverride in customJoins) {
-                    if (customJoin.joinType == JoinOverride.NORMAL) {
-                        var customConnection:CompositeFeedConnection = customJoin.toConnection();
-                        for each (var desc:EIDescriptor in dataSources) {
-                            if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.sourceFeedID) {
-                                customConnection.sourceFeedName = desc.name;
-                            } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.sourceReportID) {
-                                customConnection.sourceFeedName = desc.name;
-                            }
-                            if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.targetFeedID) {
-                                customConnection.targetFeedName = desc.name;
-                            } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.targetReportID) {
-                                customConnection.targetFeedName = desc.name;
+                if (customJoins == null || customJoins.length == 0) {
+                    var joins:ArrayCollection = joinMap[String(dataSource.id)];
+                    if (joins == null) {
+                        Alert.show("null joins");
+                    } else {
+                        for each (var join:JoinOverride in joins) {
+                            if (join.joinType == JoinOverride.NORMAL) {
+                                connections.addItem(join.toConnection());
+                            } else {
+                                connections.addItem(join.toCompositeConnection());
                             }
                         }
-                        connections.addItem(customConnection);
-                    } else {
-                        connections.addItem(customJoin.toCompositeConnection());
+                    }
+                } else {
+                    for each (var customJoin:JoinOverride in customJoins) {
+                        if (customJoin.joinType == JoinOverride.NORMAL) {
+                            var customConnection:CompositeFeedConnection = customJoin.toConnection();
+                            for each (var desc:EIDescriptor in dataSources) {
+                                if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.sourceFeedID) {
+                                    customConnection.sourceFeedName = desc.name;
+                                } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.sourceReportID) {
+                                    customConnection.sourceFeedName = desc.name;
+                                }
+                                if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.targetFeedID) {
+                                    customConnection.targetFeedName = desc.name;
+                                } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.targetReportID) {
+                                    customConnection.targetFeedName = desc.name;
+                                }
+                            }
+                            connections.addItem(customConnection);
+                        } else {
+                            connections.addItem(customJoin.toCompositeConnection());
+                        }
                     }
                 }
             }

@@ -89,7 +89,9 @@ public class CompositeFeed extends Feed {
             compositeFeedNodes.add(reportNode);
         }
 
-        List<IJoin> connections;
+        List<IJoin> connections = null;
+
+        boolean joinsOverridden = false;
 
         if (insightRequestMetadata.getJoinOverrides() != null && insightRequestMetadata.getJoinOverrides().size() > 0) {
             connections = new ArrayList<IJoin>();
@@ -158,7 +160,11 @@ public class CompositeFeed extends Feed {
                     }
                 }
             }
-        } else {
+            if (connections.size() > 0) {
+                joinsOverridden = true;
+            }
+        }
+        if (!joinsOverridden) {
             connections = new ArrayList<IJoin>();
             for (CompositeFeedConnection connection : this.connections) {
                 if (connection.getMarmotScript() != null && !"".equals(connection.getMarmotScript())) {
