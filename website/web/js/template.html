@@ -2,19 +2,19 @@
     <script type="text/template" id="stack">
 
         <% if(stack_items.length == 1) { %>
+            <%= Filter.filters({filter_values: filters}) %>
             <%= dashboardComponent(stack_items[0].item) %>
         <% } else { %>
         <div class="tabbable">
             <ul class="nav nav-pills" id="<%- id %>" style="text-align:center;">
                 <% _.each(stack_items, function(e, i, l) { %>
-                <li
-                <%- i == 0 ? ' class=active' : '' %>>
+                <li<%- i == 0 ? ' class=active' : '' %>>
                 <a class="argh" data-toggle="tab" href="#stack_<%- id %>_<%- e.item.id %>"><%- (typeof(e.label) ==
                     "undefined" || e.label == "") ? ("Stack Item " + i) : e.label %></a>
                 </li>
                 <% }) %>
             </ul>
-            <%= Filter.filters(filters) %>
+            <%= Filter.filters({filter_values: filters, parent_id: id}) %>
             <div class="tab-content">
 
                 <% _.each(stack_items, function(e, i, l) { %>
@@ -33,7 +33,7 @@
                 return typeof(f.preferredWidth) == "undefined";
             });
         }) %>
-        <%= Filter.filters(filters) %>
+        <%= Filter.filters({ filter_values: filters }) %>
         <div class="container-fluid">
             <% if(show_label) { %>
             <div class="row-fluid grid_header">
@@ -58,14 +58,14 @@
             <div class="dashboardReportHeader"><%- report.name %></div>
         </div>
         <% } %>
-        <%= Filter.filters(report.metadata.filters) %>
+        <%= Filter.filters({ filter_values: report.metadata.filters, parent_id: id }) %>
         <div>
 
-            <div class="dashboardReportDiv" id="<%= report.id %>">
+            <div class="dashboardReportDiv" id="<%= id %>">
                 <% if(report.metadata.adhoc_execution) { %>
                     <button class="adhoc btn btn-inverse">Run the Report</button>
                 <% } %>
-                <div class="reportArea" id="<%= report.id %>ReportArea"<%
+                <div class="reportArea" id="<%= id %>ReportArea"<%
                 if(typeof(preferredHeight) != "undefined" || typeof(preferredWidth) != "undefined") { %> style="<% if(typeof(preferredHeight) != "undefined") { %>height:<%- preferredHeight %>px;<% } %><%
                 if(typeof(preferredWidth) != "undefined") { %>width:<%- preferredWidth %>px;<% } %>"<% } %>></div>
                 <div class="noData">
@@ -91,8 +91,8 @@
 
 <script type="text/template" id="single_value_filter_template">
     <div class="filter">
-        <%= Filter.base_filter(data) %>
-        <select id="filter<%= data.id %>" class="single_filter">
+        <%= Filter.base_filter({data: data, parent_id: parent_id}) %>
+        <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="single_filter">
             <% _.each(data.values, function(e, i , l) { %>
             <option
             <%= data.selected == e ? ' selected="selected"' : ''%>><%- e == "" ? "[ No Value ]" : e %></option>
@@ -103,14 +103,14 @@
 
 <script type="text/template" id="multi_value_filter_template">
     <div class="filter">
-        <%= Filter.base_filter(data) %> <a href="#filter<%= data.id %>_modal" data-toggle="modal">
-        <button id="filter<%= data.id %>" class="btn multi_filter"><% if(data.selected.length == 1) { %><%-
+        <%= Filter.base_filter({data: data, parent_id: parent_id}) %> <a href="#<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" data-toggle="modal">
+        <button id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="btn multi_filter"><% if(data.selected.length == 1) { %><%-
             data.selected[0] %><% } else { %><%- data.selected.length %> Items<% } %>
         </button>
     </a>
     </div>
 
-    <div id="filter<%= data.id %>_modal" class="modal hide">
+    <div id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" class="modal hide">
         <div class="modal-body">
             <div class="control-group">
                 <label class="control-label">Available Values</label>
@@ -137,8 +137,8 @@
 </script>
 
 <script type="text/template" id="rolling_date_filter_template">
-    <div class="filter"><%= Filter.base_filter(data) %>
-        <select id="filter<%= data.id %>_type" class="rolling_filter_type">
+    <div class="filter"><%= Filter.base_filter({data: data, parent_id: parent_id}) %>
+        <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_type" class="rolling_filter_type">
             <option value="19"<% if(data.interval_type == "19") { %> selected="selected"<%}%>>All</option>
             <option value="1"<% if(data.interval_type == "1") { %> selected="selected"<%}%>>Last Day</option>
             <option value="2"<% if(data.interval_type == "2") { %> selected="selected"<%}%>>Last 7 Days</option>
@@ -156,14 +156,14 @@
             <option value="18"<% if(data.interval_type == "18") { %> selected="selected"<%}%>>Custom</option>
         </select>
         <span class="custom<% if(data.interval_type != "18") { %> hide<% } %>">
-            <select id="filter<%=data.id%>_custom_direction" class="rolling_filter_direction">
+            <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>_custom_direction" class="rolling_filter_direction">
                 <option value="0"<% if(data.direction == "0") {%> selected="selected"<% } %>>Last</option>
                 <option value="1"<% if(data.direction == "1") {%> selected="selected"<% } %>>Next</option>
                 <option value="2"<% if(data.direction == "2") {%> selected="selected"<% } %>>Before</option>
                 <option value="3"<% if(data.direction == "3") {%> selected="selected"<% } %>>After</option>
             </select>
-            <input id="filter<%=data.id%>_custom_value" type="text" class="rolling_filter_value" value="<%- data.value %>" />
-            <select id="filter<%=data.id%>_custom_interval" style="margin-left:10px;width:80px" class="rolling_filter_interval">
+            <input id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>_custom_value" type="text" class="rolling_filter_value" value="<%- data.value %>" />
+            <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>_custom_interval" style="margin-left:10px;width:80px" class="rolling_filter_interval">
                 <option value="2"<% if(data.interval == "2") { %> selected="selected"<% } %>>Days</option>
                 <option value="3"<% if(data.interval == "3") { %> selected="selected"<% } %>>Weeks</option>
                 <option value="4"<% if(data.interval == "4") { %> selected="selected"<% } %>>Months</option>
@@ -174,23 +174,103 @@
 </script>
 
 
+<script type="text/template" id="flat_date_month_filter">
+    <div class="filter">
+        <%= Filter.base_filter({data: data, parent_id: parent_id}) %>
+        <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>" class="month_select">
+            <option value="0"<% if(data.selected == 0) { %> selected="selected"<% }%>>January</option>
+            <option value="1"<% if(data.selected == 1) { %> selected="selected"<% }%>>February</option>
+            <option value="2"<% if(data.selected == 2) { %> selected="selected"<% }%>>March</option>
+            <option value="3"<% if(data.selected == 3) { %> selected="selected"<% }%>>April</option>
+            <option value="4"<% if(data.selected == 4) { %> selected="selected"<% }%>>May</option>
+            <option value="5"<% if(data.selected == 5) { %> selected="selected"<% }%>>June</option>
+            <option value="6"<% if(data.selected == 6) { %> selected="selected"<% }%>>July</option>
+            <option value="7"<% if(data.selected == 7) { %> selected="selected"<% }%>>August</option>
+            <option value="8"<% if(data.selected == 8) { %> selected="selected"<% }%>>September</option>
+            <option value="9"<% if(data.selected == 9) { %> selected="selected"<% }%>>October</option>
+            <option value="10"<% if(data.selected == 10) { %> selected="selected"<% }%>>November</option>
+            <option value="11"<% if(data.selected == 11) { %> selected="selected"<% }%>>December</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/template" id="flat_date_year_filter">
+    <div class="filter">
+        <%= Filter.base_filter({data: data, parent_id: parent_id}) %>
+        <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>" class="year_select">
+            <% _.each(data.years, function(e, i , l) { %>
+                <option<%= data.selected == e ? ' selected="selected"' : ''%>><%- e %></option>
+            <% }) %>
+        </select>
+    </div>
+</script>
+
+<script type="text/template" id="multi_flat_date_filter">
+    <div class="filter">
+        <%= Filter.base_filter({"data": data, "parent_id": typeof(parent_id) == "undefined" ? '' : parent_id}) %>
+        <a href="#<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" data-toggle="modal">
+            <button id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="btn multi_flat_month"><%- short_months[data.min] %> to <%- short_months[data.max] %>
+            </button>
+        </a>
+    </div>
+
+    <div id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" class="modal hide">
+        <div class="modal-body">
+            <div class="control-group">
+                <select class="multi_flat_month_start">
+                    <option value="0"<% if(data.min == 0) { %> selected="selected"<% } %>>January</option>
+                    <option value="1"<% if(data.min == 1) { %> selected="selected"<% } %>>February</option>
+                    <option value="2"<% if(data.min == 2) { %> selected="selected"<% } %>>March</option>
+                    <option value="3"<% if(data.min == 3) { %> selected="selected"<% } %>>April</option>
+                    <option value="4"<% if(data.min == 4) { %> selected="selected"<% } %>>May</option>
+                    <option value="5"<% if(data.min == 5) { %> selected="selected"<% } %>>June</option>
+                    <option value="6"<% if(data.min == 6) { %> selected="selected"<% } %>>July</option>
+                    <option value="7"<% if(data.min == 7) { %> selected="selected"<% } %>>August</option>
+                    <option value="8"<% if(data.min == 8) { %> selected="selected"<% } %>>September</option>
+                    <option value="9"<% if(data.min == 9) { %> selected="selected"<% } %>>October</option>
+                    <option value="10"<% if(data.min == 10) { %> selected="selected"<% } %>>November</option>
+                    <option value="11"<% if(data.min == 11) { %> selected="selected"<% } %>>December</option>
+                </select>
+                <select class="multi_flat_month_end">
+                    <option value="0"<% if(data.max == 0) { %> selected="selected"<% } %>>January</option>
+                    <option value="1"<% if(data.max == 1) { %> selected="selected"<% } %>>February</option>
+                    <option value="2"<% if(data.max == 2) { %> selected="selected"<% } %>>March</option>
+                    <option value="3"<% if(data.max == 3) { %> selected="selected"<% } %>>April</option>
+                    <option value="4"<% if(data.max == 4) { %> selected="selected"<% } %>>May</option>
+                    <option value="5"<% if(data.max == 5) { %> selected="selected"<% } %>>June</option>
+                    <option value="6"<% if(data.max == 6) { %> selected="selected"<% } %>>July</option>
+                    <option value="7"<% if(data.max == 7) { %> selected="selected"<% } %>>August</option>
+                    <option value="8"<% if(data.max == 8) { %> selected="selected"<% } %>>September</option>
+                    <option value="9"<% if(data.max == 9) { %> selected="selected"<% } %>>October</option>
+                    <option value="10"<% if(data.max == 10) { %> selected="selected"<% } %>>November</option>
+                    <option value="11"<% if(data.max == 11) { %> selected="selected"<% } %>>December</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn multi_flat_month_save" data-dismiss="modal">Save</button>
+            <button class="btn" data-dismiss="modal">Cancel</button>
+        </div>
+    </div>
+</script>
+
 <script type="text/template" id="absolute_date_filter_template">
     <div class="filter">
-        <%= Filter.base_filter(data) %> <input id="filter<%=data.id%>_date_start" type="text" class="start_date_filter date_filter_input" readonly="readonly" value="<%- data.start_date %>" />
-        <input id="filter<%=data.id%>_date_end" type="text" class="end_date_filter date_filter_input" readonly="readonly" value="<%- data.end_date %>" />
+        <%= Filter.base_filter({data: data, parent_id: parent_id}) %> <input id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>_date_start" type="text" class="start_date_filter date_filter_input" readonly="readonly" value="<%- data.start_date %>" />
+        <input id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>_date_end" type="text" class="end_date_filter date_filter_input" readonly="readonly" value="<%- data.end_date %>" />
     </div>
 </script>
 
 <script type="text/template" id="filters_template">
     <div class="filters">
             <% _.each(_.select(filter_values, function(e, i, l) { return e.visible }), function(e, i, l) { %>
-            <%= Filter.create(e) %>
+            <%= Filter.create(e, typeof(parent_id) == "undefined" ? '' : parent_id) %>
             <% }) %>
         </div>
 </script>
 
 <script type="text/template" id="dashboard_template">
-    <div class="container"><%= Filter.filters(filters) %></div>
+    <div class="container"><%= Filter.filters({ filter_values: filters}) %></div>
     <div class="container dashboard_base well" style="padding-top:10px">
 
         <div class="row-fluid">
@@ -210,10 +290,10 @@
 
 <script type="text/template" id="filter_base">
 
-    <% if(!checkbox) { %>
-    <input id="filter<%=id%>_enabled" class="filter_enabled" type="checkbox" <% if(enabled) { %>checked="checked" <%}%>/>
+    <% if(!data.checkbox) { %>
+    <input id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>_enabled" class="filter_enabled" type="checkbox" <% if(data.enabled) { %>checked="checked" <%}%>/>
     <% } %>
-    <%- label %>
+    <%- data.label %>
 </script>
 </div>
 
