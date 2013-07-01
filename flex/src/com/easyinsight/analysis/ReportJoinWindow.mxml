@@ -19,6 +19,7 @@
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -66,6 +67,7 @@
                     }
                     var joins:ArrayCollection = customConnectionMap[String(joinOverride.dataSourceID)] as ArrayCollection;
                     if (joins == null) {
+                        //Alert.show("redefining joins for " + joinOverride.dataSourceID);
                         joins = new ArrayCollection();
                         customConnectionMap[String(joinOverride.dataSourceID)] = joins;
                     }
@@ -75,7 +77,9 @@
 
             joinMap = results.joinOverrideMap;
             dataSourceMap = results.dataSourceMap;
-            selectedDataSource = configurableDataSources.getItemAt(0) as DataSourceDescriptor;
+            if (selectedDataSource == null) {
+                selectedDataSource = configurableDataSources.getItemAt(0) as DataSourceDescriptor;
+            }
             populateJoins(selectedDataSource);
         }
 
@@ -101,8 +105,17 @@
         }
 
         private function revert():void {
-            startJoins = null;
-            customConnectionMap = new Object();
+            //startJoins = null;
+            var startSize:int = startJoins.length;
+            connections = null;
+            for (var i:int = 0; i < startJoins.length; i++) {
+                var join:JoinOverride = startJoins.getItemAt(i) as JoinOverride;
+                if (join.dataSourceID == selectedDataSource.id) {
+                    startJoins.removeItemAt(i--);
+                }
+            }
+
+            customConnectionMap[String(selectedDataSource.id)] = null;
             ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
             analysisService.determineOverrides.send(dataSourceID, fields);
         }
@@ -190,6 +203,8 @@
 
         public var addonReports:ArrayCollection;
 
+        private var addedAddons:Boolean = false;
+
         private function populateJoins(dataSource:DataSourceDescriptor):void {
             if (connections != null) {
                 var saveJoins:ArrayCollection = new ArrayCollection();
@@ -206,23 +221,28 @@
                 customConnectionMap[String(selectedDataSource.id)] = saveJoins;
             }
             var sources:ArrayCollection = dataSourceMap[String(dataSource.id)] as ArrayCollection;
-            for each (var addonReport:AddonReport in addonReports) {
-                var insightDescriptor:InsightDescriptor = new InsightDescriptor();
-                insightDescriptor.id = addonReport.reportID;
-                insightDescriptor.name = addonReport.reportName;
-                sources.addItem(insightDescriptor);
-            }
-            if (dsAddonReports != null) {
-                for each (var dsAddonReport:AddonReport in dsAddonReports) {
-                    var dsInsightDescriptor:InsightDescriptor = new InsightDescriptor();
-                    dsInsightDescriptor.id = dsAddonReport.reportID;
-                    dsInsightDescriptor.name = dsAddonReport.reportName;
-                    sources.addItem(dsInsightDescriptor);
+            if (dataSource.id == dataSourceID && !addedAddons) {
+                for each (var addonReport:AddonReport in addonReports) {
+                    var insightDescriptor:InsightDescriptor = new InsightDescriptor();
+                    insightDescriptor.id = addonReport.reportID;
+                    insightDescriptor.name = addonReport.reportName;
+                    sources.addItem(insightDescriptor);
                 }
+                if (dsAddonReports != null) {
+                    for each (var dsAddonReport:AddonReport in dsAddonReports) {
+                        var dsInsightDescriptor:InsightDescriptor = new InsightDescriptor();
+                        dsInsightDescriptor.id = dsAddonReport.reportID;
+                        dsInsightDescriptor.name = dsAddonReport.reportName;
+                        sources.addItem(dsInsightDescriptor);
+                    }
+                }
+                addedAddons = true;
             }
             dataSources = sources;
             connections = new ArrayCollection();
-            if (startJoins == null || startJoins.length == 0) {
+            var customJoins:ArrayCollection = customConnectionMap[String(dataSource.id)] as ArrayCollection;
+            if (customJoins == null) {
+                //Alert.show("custom joins = null");
                 var joins:ArrayCollection = joinMap[String(dataSource.id)];
                 for each (var join:JoinOverride in joins) {
                     if (join.joinType == JoinOverride.NORMAL) {
@@ -232,7 +252,6 @@
                     }
                 }
             } else {
-                var customJoins:ArrayCollection = customConnectionMap[String(dataSource.id)] as ArrayCollection;
                 for each (var customJoin:JoinOverride in customJoins) {
                     if (customJoin.joinType == JoinOverride.NORMAL) {
                         var customConnection:CompositeFeedConnection = customJoin.toConnection();
@@ -260,6 +279,38 @@
         private var controlsFactory:IFactory;
 
         private function onDataSourceChange():void {
+            var saveJoins:ArrayCollection = new ArrayCollection();
+            for each (var connection:CompositeFeedConnection in connections) {
+                if (connection is CompositeFeedCompositeConnection) {
+                    var compConnection:CompositeFeedCompositeConnection = connection as CompositeFeedCompositeConnection;
+                    var compJoin:JoinOverride = new JoinOverride();
+                    compJoin.joinType = JoinOverride.COMPOSITE;
+                    var sourceItems:ArrayCollection = new ArrayCollection();
+                    var targetItems:ArrayCollection = new ArrayCollection();
+                    for each (var pair:CompositeConnectionPair in compConnection.pairs) {
+                        sourceItems.addItem(pair.sourceField);
+                        targetItems.addItem(pair.targetField);
+                    }
+                    compJoin.sourceItems = sourceItems;
+                    compJoin.targetItems = targetItems;
+                    compJoin.dataSourceID = selectedDataSource.id;
+                    saveJoins.addItem(compJoin);
+                } else {
+                    var saveJoin:JoinOverride = new JoinOverride();
+                    saveJoin.sourceItem = connection.sourceItem;
+                    saveJoin.targetItem = connection.targetItem;
+                    saveJoin.sourceName = connection.sourceFeedName;
+                    saveJoin.targetName = connection.targetFeedName;
+                    saveJoin.dataSourceID = selectedDataSource.id;
+                    saveJoin.sourceOuterJoin = connection.sourceOuterJoin;
+                    saveJoin.targetOuterJoin = connection.targetOuterJoin;
+                    saveJoin.sourceJoinOriginal = connection.sourceJoinOnOriginal;
+                    saveJoin.targetJoinOriginal = connection.targetJoinOnOriginal;
+                    saveJoin.marmotScript = connection.marmotScript;
+                    saveJoins.addItem(saveJoin);
+                }
+            }
+            customConnectionMap[String(selectedDataSource.id)] = saveJoins;
             var dataSource:DataSourceDescriptor = dataSourceBox.selectedItem as DataSourceDescriptor;
             populateJoins(dataSource);
             selectedDataSource = dataSource;
