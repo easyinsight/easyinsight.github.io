@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var dataSources:ArrayCollection;
+
+        [Bindable]
+        private var dateFields:ArrayCollection;
+
+        private function onDataSourceChoice():void {
+
+        }
+
+        private function save():void {
+
+        }
+        ]]></mx:Script>
+    <mx:ComboBox id="dataSourceBox" dataProvider="{dataSources}" labelField="name" change="onDataSourceChoice()"/>
+    <mx:ComboBox id="dateFieldBox" dataProvider="{dateFields}" labelField="display"/>
+    <mx:HBox>
+        <util:SaveButton label="Save"/>
+        <util:SaveButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>
