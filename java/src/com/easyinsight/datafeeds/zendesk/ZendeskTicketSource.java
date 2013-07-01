@@ -10,6 +10,8 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -104,26 +106,29 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
 
         try {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
-            Document fields = runRestRequest(zendeskCompositeSource, getHttpClient(zendeskCompositeSource.getZdUserName(),
-                    zendeskCompositeSource.getZdPassword()), "/ticket_fields.xml", new Builder());
-            Nodes recordNodes = fields.query("/records/record");
-            for (int i = 0; i < recordNodes.size(); i++) {
-                Node recordNode = recordNodes.get(i);
-                String title = queryField(recordNode, "title/text()");
-                String id = queryField(recordNode, "id/text()");
-                Key customKey = keys.get("zd" + id);
-                if (customKey == null) {
-                    customKey = new NamedKey("zd" + id);
+            String nextPage = zendeskCompositeSource.getUrl() + "/api/v2/ticket_fields.json";
+            do {
+                Map m = queryList(nextPage, zendeskCompositeSource, getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword()));
+                JSONArray recordNodes = (JSONArray) m.get("ticket_fields");
+                for (int i = 0; i < recordNodes.size(); i++) {
+                    JSONObject recordNode = (JSONObject) recordNodes.get(i);
+                    String title = String.valueOf(recordNode.get("title"));
+                    String id = String.valueOf(recordNode.get("id"));
+                    Key customKey = keys.get("zd" + id);
+                    if (customKey == null) {
+                        customKey = new NamedKey("zd" + id);
+                    }
+                    String type = String.valueOf(recordNode.get("type"));
+                    if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type) || "FieldTagger".equals(type)) {
+                        items.add(new AnalysisDimension(customKey, title));
+                    } else if ("MultiLineField".equals(type) || "FieldTextarea".equals(type)) {
+                        items.add(new AnalysisText(customKey, title));
+                    } else if ("NumericField".equals(type) || "FieldDecimal".equals(type) || "FieldInteger".equals(type) || "FieldNumeric".equals(type)) {
+                        items.add(new AnalysisMeasure(customKey, title, AggregationTypes.SUM));
+                    }
                 }
-                String type = queryField(recordNode, "type/text()");
-                if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type) || "FieldTagger".equals(type)) {
-                    items.add(new AnalysisDimension(customKey, title));
-                } else if ("MultiLineField".equals(type) || "FieldTextarea".equals(type)) {
-                    items.add(new AnalysisText(customKey, title));
-                } else if ("NumericField".equals(type) || "FieldDecimal".equals(type) || "FieldInteger".equals(type) || "FieldNumeric".equals(type)) {
-                    items.add(new AnalysisMeasure(customKey, title, AggregationTypes.SUM));
-                }
-            }
+                nextPage = (String) m.get("next_page");
+            } while (nextPage != null);
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
@@ -140,7 +145,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
             ZendeskUserCache zendeskUserCache = zendeskCompositeSource.getOrCreateUserCache(httpClient);
             //if (lastRefreshDate == null) {
-                return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache, IDataStorage);
+            return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache, IDataStorage);
             /*} else {
                 getUpdatedTickets(keys, zendeskCompositeSource, lastRefreshDate, IDataStorage, zendeskUserCache);
                 return null;
@@ -249,7 +254,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         }
 
 
-        nextPage = zendeskCompositeSource.getUrl() + "/api/v2/search.json?query=" + "type:ticket%20updated>"+updateDate;
+        nextPage = zendeskCompositeSource.getUrl() + "/api/v2/search.json?query=" + "type:ticket%20updated>" + updateDate;
         while (nextPage != null) {
             Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
             List results = (List) ticketObjects.get("results");
@@ -282,8 +287,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             }
         }
         Set<String> ids = new HashSet<String>();
-        for(Map.Entry<String, IRow> entry : ticketMap.entrySet()) {
-            if(!"Deleted".equals(entry.getValue().getValue(keys.get(STATUS)).toString()))
+        for (Map.Entry<String, IRow> entry : ticketMap.entrySet()) {
+            if (!"Deleted".equals(entry.getValue().getValue(keys.get(STATUS)).toString()))
                 ids.add(entry.getKey());
         }
         zendeskCompositeSource.populateTicketIdList(ids);
