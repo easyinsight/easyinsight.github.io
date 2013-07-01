@@ -268,6 +268,7 @@ public class AnalysisService {
                 reportJoins.setJoinOverrideMap(map);
                 reportJoins.setDataSourceMap(dataSourceMap);
                 reportJoins.setConfigurableDataSources(configurableDataSources);
+                reportJoins.setDataSourceAddonReports(dataSource.getAddonReports());
             } else if (dataSource instanceof FederatedDataSource) {
                 FederatedDataSource federatedDataSource = (FederatedDataSource) dataSource;
                 Map<String, List<JoinOverride>> map = new HashMap<String, List<JoinOverride>>();
