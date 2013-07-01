@@ -67,6 +67,7 @@
                     }
                     var joins:ArrayCollection = customConnectionMap[String(joinOverride.dataSourceID)] as ArrayCollection;
                     if (joins == null) {
+                        //Alert.show("redefining joins for " + joinOverride.dataSourceID);
                         joins = new ArrayCollection();
                         customConnectionMap[String(joinOverride.dataSourceID)] = joins;
                     }
@@ -76,7 +77,9 @@
 
             joinMap = results.joinOverrideMap;
             dataSourceMap = results.dataSourceMap;
-            selectedDataSource = configurableDataSources.getItemAt(0) as DataSourceDescriptor;
+            if (selectedDataSource == null) {
+                selectedDataSource = configurableDataSources.getItemAt(0) as DataSourceDescriptor;
+            }
             populateJoins(selectedDataSource);
         }
 
@@ -103,12 +106,16 @@
 
         private function revert():void {
             //startJoins = null;
-            for each (var join:JoinOverride in startJoins) {
+            var startSize:int = startJoins.length;
+            connections = null;
+            for (var i:int = 0; i < startJoins.length; i++) {
+                var join:JoinOverride = startJoins.getItemAt(i) as JoinOverride;
                 if (join.dataSourceID == selectedDataSource.id) {
-                    startJoins.removeItemAt(startJoins.getItemIndex(join));
+                    startJoins.removeItemAt(i--);
                 }
             }
-            customConnectionMap[String(selectedDataSource.id)] = new ArrayCollection();
+
+            customConnectionMap[String(selectedDataSource.id)] = null;
             ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
             analysisService.determineOverrides.send(dataSourceID, fields);
         }
@@ -233,7 +240,9 @@
             }
             dataSources = sources;
             connections = new ArrayCollection();
-            if (startJoins == null || startJoins.length == 0) {
+            var customJoins:ArrayCollection = customConnectionMap[String(dataSource.id)] as ArrayCollection;
+            if (customJoins == null) {
+                //Alert.show("custom joins = null");
                 var joins:ArrayCollection = joinMap[String(dataSource.id)];
                 for each (var join:JoinOverride in joins) {
                     if (join.joinType == JoinOverride.NORMAL) {
@@ -243,40 +252,24 @@
                     }
                 }
             } else {
-                var customJoins:ArrayCollection = customConnectionMap[String(dataSource.id)] as ArrayCollection;
-                if (customJoins == null || customJoins.length == 0) {
-                    var joins:ArrayCollection = joinMap[String(dataSource.id)];
-                    if (joins == null) {
-                        Alert.show("null joins");
+                for each (var customJoin:JoinOverride in customJoins) {
+                    if (customJoin.joinType == JoinOverride.NORMAL) {
+                        var customConnection:CompositeFeedConnection = customJoin.toConnection();
+                        for each (var desc:EIDescriptor in dataSources) {
+                            if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.sourceFeedID) {
+                                customConnection.sourceFeedName = desc.name;
+                            } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.sourceReportID) {
+                                customConnection.sourceFeedName = desc.name;
+                            }
+                            if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.targetFeedID) {
+                                customConnection.targetFeedName = desc.name;
+                            } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.targetReportID) {
+                                customConnection.targetFeedName = desc.name;
+                            }
+                        }
+                        connections.addItem(customConnection);
                     } else {
-                        for each (var join:JoinOverride in joins) {
-                            if (join.joinType == JoinOverride.NORMAL) {
-                                connections.addItem(join.toConnection());
-                            } else {
-                                connections.addItem(join.toCompositeConnection());
-                            }
-                        }
-                    }
-                } else {
-                    for each (var customJoin:JoinOverride in customJoins) {
-                        if (customJoin.joinType == JoinOverride.NORMAL) {
-                            var customConnection:CompositeFeedConnection = customJoin.toConnection();
-                            for each (var desc:EIDescriptor in dataSources) {
-                                if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.sourceFeedID) {
-                                    customConnection.sourceFeedName = desc.name;
-                                } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.sourceReportID) {
-                                    customConnection.sourceFeedName = desc.name;
-                                }
-                                if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.targetFeedID) {
-                                    customConnection.targetFeedName = desc.name;
-                                } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.targetReportID) {
-                                    customConnection.targetFeedName = desc.name;
-                                }
-                            }
-                            connections.addItem(customConnection);
-                        } else {
-                            connections.addItem(customJoin.toCompositeConnection());
-                        }
+                        connections.addItem(customJoin.toCompositeConnection());
                     }
                 }
             }
@@ -286,6 +279,38 @@
         private var controlsFactory:IFactory;
 
         private function onDataSourceChange():void {
+            var saveJoins:ArrayCollection = new ArrayCollection();
+            for each (var connection:CompositeFeedConnection in connections) {
+                if (connection is CompositeFeedCompositeConnection) {
+                    var compConnection:CompositeFeedCompositeConnection = connection as CompositeFeedCompositeConnection;
+                    var compJoin:JoinOverride = new JoinOverride();
+                    compJoin.joinType = JoinOverride.COMPOSITE;
+                    var sourceItems:ArrayCollection = new ArrayCollection();
+                    var targetItems:ArrayCollection = new ArrayCollection();
+                    for each (var pair:CompositeConnectionPair in compConnection.pairs) {
+                        sourceItems.addItem(pair.sourceField);
+                        targetItems.addItem(pair.targetField);
+                    }
+                    compJoin.sourceItems = sourceItems;
+                    compJoin.targetItems = targetItems;
+                    compJoin.dataSourceID = selectedDataSource.id;
+                    saveJoins.addItem(compJoin);
+                } else {
+                    var saveJoin:JoinOverride = new JoinOverride();
+                    saveJoin.sourceItem = connection.sourceItem;
+                    saveJoin.targetItem = connection.targetItem;
+                    saveJoin.sourceName = connection.sourceFeedName;
+                    saveJoin.targetName = connection.targetFeedName;
+                    saveJoin.dataSourceID = selectedDataSource.id;
+                    saveJoin.sourceOuterJoin = connection.sourceOuterJoin;
+                    saveJoin.targetOuterJoin = connection.targetOuterJoin;
+                    saveJoin.sourceJoinOriginal = connection.sourceJoinOnOriginal;
+                    saveJoin.targetJoinOriginal = connection.targetJoinOnOriginal;
+                    saveJoin.marmotScript = connection.marmotScript;
+                    saveJoins.addItem(saveJoin);
+                }
+            }
+            customConnectionMap[String(selectedDataSource.id)] = saveJoins;
             var dataSource:DataSourceDescriptor = dataSourceBox.selectedItem as DataSourceDescriptor;
             populateJoins(dataSource);
             selectedDataSource = dataSource;
