@@ -40,7 +40,6 @@ public class AltCompositeReportPipeline extends Pipeline {
         for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new RangeComponent((AnalysisRangeDimension) range));
         }
-        components.add(new TypeTransformComponent());
         List<AnalysisItem> joinItems = new ArrayList<AnalysisItem>();
         for (JoinMetadata joinMetadata : joinMetadatas) {
             joinItems.add(joinMetadata.analysisItem);

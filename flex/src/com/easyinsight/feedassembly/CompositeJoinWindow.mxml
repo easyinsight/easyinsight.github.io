@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" paddingBottom="10"
+        paddingLeft="10" paddingRight="10" paddingTop="10" backgroundColor="#FFFFFF">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        public var metadataFields:ArrayCollection;
+
+        public var dataSourceID:int;
+
+        public var currentDataSourceID:int;
+
+        public var fields:ArrayCollection;
+
+        private function addFieldPair():void {
+            var window:DSPickJoinWindow = new DSPickJoinWindow();
+            window.dataSources = dataSources;
+            if (dataSourceID == currentDataSourceID) {
+                window.metadataFields = fields;
+                window.mode = DSPickJoinWindow.USE_SPECIFIED_FIELDS;
+            } else {
+                window.dataSourceID = dataSourceID;
+                window.mode = DSPickJoinWindow.SINGLE_FEED;
+            }
+
+            window.addEventListener(JoinSelectionEvent.JOIN_SELECTION, joinsSelected, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function joinsSelected(event:JoinSelectionEvent):void {
+            var edges:ArrayCollection = event.addedJoins;
+            var connection:CompositeFeedConnection = edges.getItemAt(0) as CompositeFeedConnection;
+            var pair:CompositeConnectionPair = new CompositeConnectionPair();
+            pair.sourceField = connection.sourceItem;
+            pair.targetField = connection.targetItem;
+            pairs.addItem(pair);
+        }
+
+        private function deleteSelected():void {
+            var count:int = 0;
+            for each (var pair:CompositeConnectionPair in pairs) {
+                if (pair.selected) {
+                    pairs.removeItemAt(pairs.getItemIndex(pair));
+                    count++;
+                }
+            }
+            if (count == 0) {
+                Alert.show("You must select at least one join to delete.");
+            }
+        }
+
+        public var dataSources:ArrayCollection;
+
+        private function save():void {
+            if (pairs.length == 0) {
+                Alert.show("You must define at least one join within this composite join.");
+            } else {
+                if (connection == null) {
+                    connection = new CompositeFeedCompositeConnection();
+                }
+                connection.pairs = pairs;
+                dispatchEvent(new CompositeFeedCompositeConnectionEvent(CompositeFeedCompositeConnectionEvent.SAVE_CONNECTION, connection));
+                PopUpManager.removePopUp(this);
+            }
+        }
+
+        public var connection:CompositeFeedCompositeConnection;
+
+        [Bindable]
+        private var pairs:ArrayCollection = new ArrayCollection();
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (connection != null) {
+                pairs = connection.pairs;
+            }
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <util:SaveButton label="Add Field Pair..." click="addFieldPair()" fontSize="12"/>
+        <util:SaveButton label="Delete Selected" click="deleteSelected()" fontSize="12"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{pairs}">
+        <mx:columns>
+            <mx:DataGridColumn dataField="" headerText=""
+                               itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" sortable="false"/>
+            <util:EIDataGridColumn dataField="sourceFieldDisplay" headerText="Source Field" width="250"
+                                   itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"/>
+            <util:EIDataGridColumn dataField="targetFieldDisplay" headerText="Target Field" width="250"
+                                   itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EITitleWindow>

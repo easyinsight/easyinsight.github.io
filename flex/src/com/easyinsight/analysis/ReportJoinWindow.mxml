@@ -2,7 +2,11 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         creationComplete="onCreation()">
     <mx:Script><![CDATA[
+        import com.easyinsight.feedassembly.CompositeConnectionPair;
+        import com.easyinsight.feedassembly.CompositeFeedCompositeConnection;
+        import com.easyinsight.feedassembly.CompositeFeedCompositeConnectionEvent;
         import com.easyinsight.feedassembly.CompositeFeedConnection;
+        import com.easyinsight.feedassembly.CompositeJoinWindow;
         import com.easyinsight.feedassembly.ConnectionControls;
         import com.easyinsight.feedassembly.ConnectionDeleteEvent;
         import com.easyinsight.feedassembly.DSPickJoinWindow;
@@ -29,7 +33,7 @@
 
         private function onCreation():void {
             controlsFactory = new ClassFactory(ConnectionControls);
-            ClassFactory(controlsFactory).properties = { fields: fields };
+            ClassFactory(controlsFactory).properties = { fields:fields };
             addEventListener(ConnectionDeleteEvent.CONNECTION_DELETE, onConnectionDelete);
             addEventListener(ConnectionDeleteEvent.CONNECTION_TO_TOP, onMoveToTop);
             addEventListener(ConnectionDeleteEvent.CONNECTION_TO_BOTTOM, onMoveToBottom);
@@ -37,19 +41,23 @@
             analysisService.determineOverrides.send(dataSourceID, fields);
             /*if (startJoins == null || startJoins.length == 0) {
 
-            } else {
-                connections = new ArrayCollection();
-                for each (var startJoin:JoinOverride in startJoins) {
-                    connections.addItem(startJoin.toConnection());
-                }
-            }*/
+             } else {
+             connections = new ArrayCollection();
+             for each (var startJoin:JoinOverride in startJoins) {
+             connections.addItem(startJoin.toConnection());
+             }
+             }*/
         }
 
         [Bindable]
         private var configurableDataSources:ArrayCollection;
 
+        [Bindable]
+        private var dsAddonReports:ArrayCollection;
+
         private function gotOverrides():void {
             var results:ReportJoins = analysisService.determineOverrides.lastResult as ReportJoins;
+            dsAddonReports = results.dataSourceAddonReports;
             configurableDataSources = results.configurableDataSources;
             if (startJoins != null && startJoins.length > 0) {
                 for each (var joinOverride:JoinOverride in startJoins) {
@@ -105,18 +113,34 @@
             var joins:ArrayCollection = new ArrayCollection();
             var saveJoins:ArrayCollection = new ArrayCollection();
             for each (var connection:CompositeFeedConnection in connections) {
-                var saveJoin:JoinOverride = new JoinOverride();
-                saveJoin.sourceItem = connection.sourceItem;
-                saveJoin.targetItem = connection.targetItem;
-                saveJoin.sourceName = connection.sourceFeedName;
-                saveJoin.targetName = connection.targetFeedName;
-                saveJoin.dataSourceID = selectedDataSource.id;
-                saveJoin.sourceOuterJoin = connection.sourceOuterJoin;
-                saveJoin.targetOuterJoin = connection.targetOuterJoin;
-                saveJoin.sourceJoinOriginal = connection.sourceJoinOnOriginal;
-                saveJoin.targetJoinOriginal = connection.targetJoinOnOriginal;
-                saveJoin.marmotScript = connection.marmotScript;
-                saveJoins.addItem(saveJoin);
+                if (connection is CompositeFeedCompositeConnection) {
+                    var compConnection:CompositeFeedCompositeConnection = connection as CompositeFeedCompositeConnection;
+                    var compJoin:JoinOverride = new JoinOverride();
+                    compJoin.joinType = JoinOverride.COMPOSITE;
+                    var sourceItems:ArrayCollection = new ArrayCollection();
+                    var targetItems:ArrayCollection = new ArrayCollection();
+                    for each (var pair:CompositeConnectionPair in compConnection.pairs) {
+                        sourceItems.addItem(pair.sourceField);
+                        targetItems.addItem(pair.targetField);
+                    }
+                    compJoin.sourceItems = sourceItems;
+                    compJoin.targetItems = targetItems;
+                    compJoin.dataSourceID = selectedDataSource.id;
+                    saveJoins.addItem(compJoin);
+                } else {
+                    var saveJoin:JoinOverride = new JoinOverride();
+                    saveJoin.sourceItem = connection.sourceItem;
+                    saveJoin.targetItem = connection.targetItem;
+                    saveJoin.sourceName = connection.sourceFeedName;
+                    saveJoin.targetName = connection.targetFeedName;
+                    saveJoin.dataSourceID = selectedDataSource.id;
+                    saveJoin.sourceOuterJoin = connection.sourceOuterJoin;
+                    saveJoin.targetOuterJoin = connection.targetOuterJoin;
+                    saveJoin.sourceJoinOriginal = connection.sourceJoinOnOriginal;
+                    saveJoin.targetJoinOriginal = connection.targetJoinOnOriginal;
+                    saveJoin.marmotScript = connection.marmotScript;
+                    saveJoins.addItem(saveJoin);
+                }
             }
             customConnectionMap[String(selectedDataSource.id)] = saveJoins;
             for each (var coll:ArrayCollection in customConnectionMap) {
@@ -141,6 +165,21 @@
             window.addEventListener(JoinSelectionEvent.JOIN_SELECTION, joinsSelected, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+        }
+
+        private function addCompositeConnection():void {
+            var window:CompositeJoinWindow = new CompositeJoinWindow();
+            window.dataSourceID = selectedDataSource.id;
+            window.currentDataSourceID = DataSourceDescriptor(configurableDataSources.getItemAt(0)).id;
+            window.fields = fields;
+            window.dataSources = dataSources;
+            window.addEventListener(CompositeFeedCompositeConnectionEvent.SAVE_CONNECTION, compositeJoinAdded, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function compositeJoinAdded(event:CompositeFeedCompositeConnectionEvent):void {
+            connections.addItem(event.connection);
         }
 
         private var dataSourceMap:Object;
@@ -173,31 +212,46 @@
                 insightDescriptor.name = addonReport.reportName;
                 sources.addItem(insightDescriptor);
             }
+            if (dsAddonReports != null) {
+                for each (var dsAddonReport:AddonReport in dsAddonReports) {
+                    var dsInsightDescriptor:InsightDescriptor = new InsightDescriptor();
+                    dsInsightDescriptor.id = dsAddonReport.reportID;
+                    dsInsightDescriptor.name = dsAddonReport.reportName;
+                    sources.addItem(dsInsightDescriptor);
+                }
+            }
             dataSources = sources;
             connections = new ArrayCollection();
             if (startJoins == null || startJoins.length == 0) {
                 var joins:ArrayCollection = joinMap[String(dataSource.id)];
                 for each (var join:JoinOverride in joins) {
-                    connections.addItem(join.toConnection());
+                    if (join.joinType == JoinOverride.NORMAL) {
+                        connections.addItem(join.toConnection());
+                    } else {
+                        connections.addItem(join.toCompositeConnection());
+                    }
                 }
             } else {
-
                 var customJoins:ArrayCollection = customConnectionMap[String(dataSource.id)] as ArrayCollection;
                 for each (var customJoin:JoinOverride in customJoins) {
-                    var customConnection:CompositeFeedConnection = customJoin.toConnection();
-                    for each (var desc:EIDescriptor in dataSources) {
-                        if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.sourceFeedID) {
-                            customConnection.sourceFeedName = desc.name;
-                        } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.sourceReportID) {
-                            customConnection.sourceFeedName = desc.name;
+                    if (customJoin.joinType == JoinOverride.NORMAL) {
+                        var customConnection:CompositeFeedConnection = customJoin.toConnection();
+                        for each (var desc:EIDescriptor in dataSources) {
+                            if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.sourceFeedID) {
+                                customConnection.sourceFeedName = desc.name;
+                            } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.sourceReportID) {
+                                customConnection.sourceFeedName = desc.name;
+                            }
+                            if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.targetFeedID) {
+                                customConnection.targetFeedName = desc.name;
+                            } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.targetReportID) {
+                                customConnection.targetFeedName = desc.name;
+                            }
                         }
-                        if (desc.getType() == EIDescriptor.DATA_SOURCE && desc.id == customConnection.targetFeedID) {
-                            customConnection.targetFeedName = desc.name;
-                        } else if (desc.getType() == EIDescriptor.REPORT && desc.id == customConnection.targetReportID) {
-                            customConnection.targetFeedName = desc.name;
-                        }
+                        connections.addItem(customConnection);
+                    } else {
+                        connections.addItem(customJoin.toCompositeConnection());
                     }
-                    connections.addItem(customConnection);
                 }
             }
         }
@@ -285,25 +339,34 @@
         [Embed(source="../../../../assets/arrow2_up_blue.png")]
         public var scrollUpIcon:Class;
 
-
+        private function addDateJoin():void {
+            var window:DateJoinWindow = new DateJoinWindow();
+            window.dataSourceID = selectedDataSource.id;
+            window.currentDataSourceID = DataSourceDescriptor(configurableDataSources.getItemAt(0)).id;
+            window.fields = fields;
+            window.dataSources = dataSources;
+            window.addEventListener(CompositeFeedCompositeConnectionEvent.SAVE_CONNECTION, compositeJoinAdded, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="determineOverrides" result="gotOverrides()"/>
     </mx:RemoteObject>
     <mx:ComboBox dataProvider="{configurableDataSources}" labelField="name" id="dataSourceBox" change="onDataSourceChange()"/>
-    <mx:Button label="Add Join..." click="addConnection()" styleName="grayButton"/>
+
     <mx:HBox width="100%">
         <mx:TextInput id="keywordInput" change="onKeyword(event)"/>
         <mx:Button icon="{scrollDownIcon}" click="scrollGridDown()" toolTip="Next Occurrence"/>
         <mx:Button icon="{scrollUpIcon}" click="scrollGridUp()" toolTip="Previous Occurrence"/>
+        <mx:Button label="Add Direct Join..." click="addConnection()" styleName="grayButton"/>
+        <!--<mx:Button label="Add Composite Join..." click="addCompositeConnection()" styleName="grayButton"/>-->
+<!--        <mx:Button label="Add Date Join..." click="addDateJoin()" styleName="grayButton"/>-->
     </mx:HBox>
     <util:EIDataGrid dataProvider="{connections}" rowHeight="28" dragMoveEnabled="true" dragEnabled="true" dropEnabled="true" id="dataGrid"
             rowColorFunction="rowColor">
         <util:columns>
-            <util:EIDataGridColumn dataField="sourceFeedName" headerText="Source Data Source" sortable="false" width="175"/>
-            <util:EIDataGridColumn dataField="sourceDisplay" headerText="Source Field" sortable="false" width="225"/>
-            <util:EIDataGridColumn dataField="targetDisplay" headerText="Target Field" sortable="false" width="225"/>
-            <util:EIDataGridColumn dataField="targetFeedName" headerText="Target Data Source" sortable="false" width="175"/>
+            <util:EIDataGridColumn dataField="display" headerText="Connection" sortable="false" width="650"/>
             <util:EIDataGridColumn headerText="" dataField="name" width="200" sortable="false" itemRenderer="{controlsFactory}"/>
         </util:columns>
     </util:EIDataGrid>

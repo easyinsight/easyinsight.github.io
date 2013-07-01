@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        public var metadataFields:ArrayCollection;
+
+        public var dataSourceID:int;
+
+        public var currentDataSourceID:int;
+
+        public var fields:ArrayCollection;
+
+        public var dataSources:ArrayCollection;
+
+        private function save():void {
+
+        }
+
+        private function addField():void {
+            var window:DateFieldSelectionWindow = new DateFieldSelectionWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function deleteSelected():void {
+
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <util:SaveButton label="Add Field..." click="addField()"/>
+        <util:SaveButton label="Delete Selected" click="deleteSelected()"/>
+    </mx:HBox>
+    <mx:DataGrid>
+        <mx:columns>
+            <mx:DataGridColumn dataField="" headerText=""
+                               itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" sortable="false"/>
+            <util:EIDataGridColumn dataField="sourceFieldDisplay" headerText="Source Field" width="250"
+                                   itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>
