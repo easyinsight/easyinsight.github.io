@@ -11,6 +11,8 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -60,20 +62,20 @@ public class ZendeskGroupToUserJoinSource extends ZendeskBaseSource {
             DataSet dataSet = new DataSet();
             HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
             Builder builder = new Builder();
-            Document doc = runRestRequest(zendeskCompositeSource, httpClient, "/groups.xml", builder);
-            Nodes groupNodes = doc.query("/groups/group");
-            for (int i = 0; i < groupNodes.size(); i++) {
-                Node groupNode = groupNodes.get(i);
-                String groupID = queryField(groupNode, "id/text()");
-                Nodes userNodes = groupNode.query("users/user");
-                for (int j = 0; j < userNodes.size(); j++) {
-                    Node userNode = userNodes.get(j);
-                    String userID = queryField(userNode, "id/text()");
+            String nextPage = zendeskCompositeSource.getUrl() + "/api/v2/group_memberships.json";
+            do {
+                Map m = queryList(nextPage, zendeskCompositeSource, httpClient);
+
+                JSONArray groupNodes = (JSONArray) m.get("group_memberships");
+                for (int i = 0; i < groupNodes.size(); i++) {
+                    JSONObject groupNode = (JSONObject) groupNodes.get(i);
                     IRow row = dataSet.createRow();
-                    row.addValue(keys.get(GROUP_ID), groupID);
-                    row.addValue(keys.get(USER_ID), userID);
+                    row.addValue(keys.get(GROUP_ID), String.valueOf(groupNode.get("group_id")));
+                    row.addValue(keys.get(USER_ID), String.valueOf(groupNode.get("user_id")));
                 }
-            }
+
+                nextPage = (String) m.get("next_page");
+            } while(nextPage != null);
             return dataSet;
         } catch (Exception e) {
             LogClass.error(e);

@@ -11,6 +11,8 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -58,25 +60,21 @@ public class ZendeskOrganizationSource extends ZendeskBaseSource {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
             DataSet dataSet = new DataSet();
             HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
-            Builder builder = new Builder();
-            boolean moreData;
-            int page = 1;
+
+            String nextPage = zendeskCompositeSource.getUrl() +  "/api/v2/organizations.json";
             do {
-                String url = "/organizations.xml";
-                if (page > 1) {
-                    url += "?page=" + page;
-                }
-                Document doc = runRestRequest(zendeskCompositeSource, httpClient, url, builder);
-                Nodes organizationNodes = doc.query("/organizations/organization");
-                moreData = organizationNodes.size() == 30;
+
+                Map m = queryList(nextPage, zendeskCompositeSource, httpClient);
+
+                JSONArray organizationNodes = (JSONArray) m.get("organizations");
                 for (int i = 0; i < organizationNodes.size(); i++) {
-                    Node organizationNode = organizationNodes.get(i);
+                    JSONObject organizationNode = (JSONObject) organizationNodes.get(i);
                     IRow row = dataSet.createRow();
-                    row.addValue(keys.get(NAME), queryField(organizationNode, "name/text()"));
-                    row.addValue(keys.get(ID), queryField(organizationNode, "id/text()"));
+                    row.addValue(keys.get(NAME), (String) organizationNode.get("name"));
+                    row.addValue(keys.get(ID), String.valueOf(organizationNode.get("id")));
                 }
-                page++;
-            } while (moreData);
+                nextPage = (String) m.get("next_page");
+            } while (nextPage != null);
             return dataSet;
         } catch (ReportException re) {
             throw re;

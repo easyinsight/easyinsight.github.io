@@ -11,6 +11,8 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -59,15 +61,19 @@ public class ZendeskGroupSource extends ZendeskBaseSource {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
             DataSet dataSet = new DataSet();
             HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
-            Builder builder = new Builder();
-            Document doc = runRestRequest(zendeskCompositeSource, httpClient, "/groups.xml", builder);
-            Nodes groupNodes = doc.query("/groups/group");
-            for (int i = 0; i < groupNodes.size(); i++) {
-                Node groupNode = groupNodes.get(i);
-                IRow row = dataSet.createRow();
-                row.addValue(keys.get(NAME), queryField(groupNode, "name/text()"));
-                row.addValue(keys.get(ID), queryField(groupNode, "id/text()"));
-            }
+            String nextPage = zendeskCompositeSource.getUrl() + "/api/v2/groups.json";
+            do {
+                Map m = queryList(nextPage, zendeskCompositeSource, httpClient);
+
+                JSONArray groupNodes = (JSONArray) m.get("groups");
+                for (int i = 0; i < groupNodes.size(); i++) {
+                    JSONObject groupNode = (JSONObject) groupNodes.get(i);
+                    IRow row = dataSet.createRow();
+                    row.addValue(keys.get(NAME), (String) groupNode.get("name"));
+                    row.addValue(keys.get(ID), String.valueOf(groupNode.get("id")));
+                }
+                nextPage = (String) m.get("next_page");
+            } while (nextPage != null);
             return dataSet;
         } catch (ReportException re) {
             throw re;
