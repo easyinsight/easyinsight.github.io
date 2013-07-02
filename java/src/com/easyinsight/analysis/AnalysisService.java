@@ -310,11 +310,12 @@ public class AnalysisService {
     }
 
     private void populateMap(Map<String, List<JoinOverride>> map, Map<String, List<DataSourceDescriptor>> dataSourceMap, List<DataSourceDescriptor> configurableDataSources,
-                             CompositeFeedDefinition compositeFeedDefinition, List<AnalysisItem> items, EIConnection conn) throws SQLException {
+                             CompositeFeedDefinition compositeFeedDefinition, List<AnalysisItem> items, EIConnection conn) throws SQLException, CloneNotSupportedException {
         List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
 
         configurableDataSources.add(new DataSourceDescriptor(compositeFeedDefinition.getFeedName(), compositeFeedDefinition.getDataFeedID(), compositeFeedDefinition.getFeedType().getType(),
                 false, compositeFeedDefinition.getDataSourceBehavior()));
+        Feed feed = FeedRegistry.instance().getFeed(compositeFeedDefinition.getDataFeedID(), conn);
         for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
             JoinOverride joinOverride = new JoinOverride();
             String sourceName;
@@ -350,8 +351,8 @@ public class AnalysisService {
                 stmt.close();
             }
             joinOverride.setDataSourceID(compositeFeedDefinition.getDataFeedID());
-            joinOverride.setSourceItem(findSourceItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
-            joinOverride.setTargetItem(findTargetItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
+            joinOverride.setSourceItem(findSourceItem(connection, items == null ? feed.getFields() : items));
+            joinOverride.setTargetItem(findTargetItem(connection, items == null ? feed.getFields() : items));
             if (joinOverride.getSourceItem() != null && joinOverride.getTargetItem() != null) {
                 joinOverride.setSourceName(sourceName);
                 joinOverride.setTargetName(targetName);
@@ -372,7 +373,7 @@ public class AnalysisService {
         dataSourceMap.put(String.valueOf(compositeFeedDefinition.getDataFeedID()), dataSources);
     }
 
-    private AnalysisItem findSourceItem(CompositeFeedConnection connection, List<AnalysisItem> items) {
+    private AnalysisItem findSourceItem(CompositeFeedConnection connection, List<AnalysisItem> items) throws CloneNotSupportedException {
         AnalysisItem analysisItem = null;
         for (AnalysisItem item : items) {
             Key key = item.getKey();
@@ -443,6 +444,9 @@ public class AnalysisService {
                 }
             }
         }
+        if (analysisItem != null) {
+            analysisItem = analysisItem.clone();
+        }
         return analysisItem;
     }
 
@@ -455,7 +459,7 @@ public class AnalysisService {
         return null;
     }
 
-    private AnalysisItem findTargetItem(CompositeFeedConnection connection, List<AnalysisItem> items) {
+    private AnalysisItem findTargetItem(CompositeFeedConnection connection, List<AnalysisItem> items) throws CloneNotSupportedException {
         AnalysisItem analysisItem = null;
         for (AnalysisItem item : items) {
             Key key = item.getKey();
@@ -525,6 +529,9 @@ public class AnalysisService {
                     }
                 }
             }
+        }
+        if (analysisItem != null) {
+            analysisItem = analysisItem.clone();
         }
         return analysisItem;
     }
@@ -704,8 +711,6 @@ public class AnalysisService {
 
             }
 
-            System.out.println("filtered values = " + filteredValues);
-
             WSListDefinition existingReport = new WSListDefinition();
             existingReport.setDataFeedID(dataSource.getDataFeedID());
 
@@ -726,13 +731,11 @@ public class AnalysisService {
             for (IRow row : existing.getRows()) {
                 recordIDValues.add(row.getValue(recordID));
             }
-            System.out.println("retrieving record IDs of " + recordIDValues);
             filterValueDefinition.setFilteredValues(recordIDValues);
             DataStorage readStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID());
             ActualRowSet rowSet = readStorage.allData(recordIDFilters, useSource.getFields(), null, new InsightRequestMetadata());
             readStorage.closeConnection();
 
-            System.out.println("retrieved " + rowSet.getRows().size() + " rows matching this existing data");
 
             Map<ImportKey, ActualRow> existingMap = new HashMap<ImportKey, ActualRow>();
             for (ActualRow actualRow : rowSet.getRows()) {
@@ -760,15 +763,12 @@ public class AnalysisService {
                 ImportKey importKey = new ImportKey(providerID.toString(), dateValue.getDate());
                 ActualRow actualRow = existingMap.get(importKey);
                 if (actualRow == null) {
-                    System.out.println("no row found for " + provider.toString() + " - " + dateValue.toString());
                     endTargets.add(row);
                 } else {
                     // update actualRow with the value from row
-                    System.out.println("found existing row for " + provider.toString() + " - " + dateValue.toString());
                     for (AnalysisItem analysisItem : useSource.getFields()) {
                         Value value = row.getValue(analysisItem);
                         if (value.type() != Value.EMPTY) {
-                            System.out.println("\tmerging in value from " + analysisItem.qualifiedName());
                             actualRow.getValues().put(analysisItem.qualifiedName(), value);
                         }
                     }
@@ -778,13 +778,11 @@ public class AnalysisService {
 
             }
 
-            System.out.println("Determining calculations to apply...");
             List<IDataTransform> transforms = new ArrayList<IDataTransform>();
             if (useSource.getMarmotScript() != null && !"".equals(useSource.getMarmotScript())) {
                 StringTokenizer toker = new StringTokenizer(useSource.getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
-                    System.out.println("Adding " + line);
                     transforms.addAll(new ReportCalculation(line).apply(useSource));
                 }
             }
@@ -964,7 +962,7 @@ public class AnalysisService {
         }
     }
 
-    private void createOptionMap(FeedDefinition dataSource, FeedDefinition useSource, Map<String, Collection<JoinLabelOption>> optionMap) {
+    private void createOptionMap(FeedDefinition dataSource, FeedDefinition useSource, Map<String, Collection<JoinLabelOption>> optionMap) throws CloneNotSupportedException {
         DerivedAnalysisDimension calculation = new DerivedAnalysisDimension();
         NamedKey key = new NamedKey("TmpCalculation");
         calculation.setKey(key);

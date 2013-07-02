@@ -84,13 +84,17 @@
         }
 
         private function onMoveToTop(event:ConnectionDeleteEvent):void {
-            connections.removeItemAt(connections.getItemIndex(event.connection));
-            connections.addItemAt(event.connection, 0);
+            if (connections.length > 1) {
+                connections.removeItemAt(connections.getItemIndex(event.connection));
+                connections.addItemAt(event.connection, 0);
+            }
         }
 
         private function onMoveToBottom(event:ConnectionDeleteEvent):void {
-            connections.removeItemAt(connections.getItemIndex(event.connection));
-            connections.addItemAt(event.connection, connections.length - 1);
+            if (connections.length > 1) {
+                connections.removeItemAt(connections.getItemIndex(event.connection));
+                connections.addItemAt(event.connection, connections.length);
+            }
         }
 
         private function onConnectionDelete(event:ConnectionDeleteEvent):void {
