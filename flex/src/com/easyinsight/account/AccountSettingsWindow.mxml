@@ -34,9 +34,6 @@
         private function gotSettings():void {
             var accountSettings:AccountSettings = userService.getAccountSettings.lastResult as AccountSettings;
             apiEnabled = accountSettings.apiEnabled;
-            publicDataEnabled = accountSettings.publicData;
-            sharingEnabled = accountSettings.reportSharing;
-            groupID = accountSettings.groupID;
             dateFormat = accountSettings.dateFormat;
             currencySymbol = accountSettings.currencySymbol;
             firstDayOfWeek = accountSettings.firstDayOfWeek;
@@ -46,9 +43,6 @@
         private function save():void {
             var accountSettings:AccountSettings = new AccountSettings();
             accountSettings.apiEnabled = apiEnabledCheckbox.selected;
-            accountSettings.publicData = publicDataCheckbox.selected;
-            accountSettings.reportSharing = sharingCheckbox.selected;
-            accountSettings.groupID = groupBox.selectedItem.groupID;
             accountSettings.dateFormat = dateBox.selectedItem.data;
             accountSettings.currencySymbol = currencySymbolInput.text;
             accountSettings.firstDayOfWeek = dayBox.selectedItem.data;
@@ -87,16 +81,6 @@
         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
             <mx:FormItem label="API Enabled:">
                 <mx:CheckBox id="apiEnabledCheckbox" selected="{apiEnabled}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Default Group for Users:">
-                <util:SmartComboBox dataProvider="{availableGroups}" labelField="name" selectedValue="{groupID}" selectedProperty="groupID"
-                        id="groupBox"/>
-            </mx:FormItem>
-            <mx:FormItem label="Public Data Source and Report Sharing Enabled:">
-                <mx:CheckBox id="publicDataCheckbox" selected="{publicDataEnabled}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Report Sharing Outside of Account Enabled:">
-                <mx:CheckBox id="sharingCheckbox" selected="{sharingEnabled}"/>
             </mx:FormItem>
             <mx:FormItem label="Date Formatting:">
                 <util:SmartComboBox id="dateBox" rowCount="6" selectedValue="{dateFormat}" selectedProperty="data">
