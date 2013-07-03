@@ -279,13 +279,13 @@
                     xField = newXField;
                 }
 
-                var newXAxisTitle:String = newXAxisItem.display;
+                var newXAxisTitle:String = (barChartDef.xAxisLabel != null && barChartDef.xAxisLabel != "") ? barChartDef.xAxisLabel : newXAxisItem.display;
                 if (newXAxisTitle != xAxisTitle) {
                     xAxisTitle = newXAxisTitle;
                     xAxis.title = xAxisTitle;
                 }
 
-                var newYAxisTitle:String = newYAxisItem.display;
+                var newYAxisTitle:String = (barChartDef.yAxisLabel != null && barChartDef.yAxisLabel != "") ? barChartDef.yAxisLabel : newYAxisItem.display;
                 if (newYAxisTitle != yAxisTitle) {
                     yAxisTitle = newYAxisTitle;
                     yAxis.title = yAxisTitle;
