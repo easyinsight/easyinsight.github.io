@@ -39,8 +39,6 @@ body {
 }
 
 .reportNavBarInner {
-    height: 18px;
-    line-height: 18px;
     background-color: #5c5c5c;
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
