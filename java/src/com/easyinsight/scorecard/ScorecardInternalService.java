@@ -3,6 +3,7 @@ package com.easyinsight.scorecard;
 import com.easyinsight.core.RolePrioritySet;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
@@ -22,7 +23,8 @@ public class ScorecardInternalService {
     public RolePrioritySet<ScorecardDescriptor> getScorecardDescriptors(long userID, long accountID) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            return getScorecards(userID, accountID, conn);
+            boolean testAccountVisible = FeedService.testAccountVisible(conn);
+            return getScorecards(userID, accountID, conn, testAccountVisible);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -45,7 +47,7 @@ public class ScorecardInternalService {
         return descriptors;
     }
 
-    public RolePrioritySet<ScorecardDescriptor> getScorecards(long userID, long accountID, EIConnection conn) throws SQLException {
+    public RolePrioritySet<ScorecardDescriptor> getScorecards(long userID, long accountID, EIConnection conn, boolean testAccountVisible) throws SQLException {
         RolePrioritySet<ScorecardDescriptor> scorecards = new RolePrioritySet<ScorecardDescriptor>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, SCORECARD.creation_date, SCORECARD.data_source_id, scorecard.folder from " +
                 "scorecard where scorecard.user_id = ?");
@@ -82,39 +84,41 @@ public class ScorecardInternalService {
             scorecardDescriptor.setFolder(rs.getInt(5));
             scorecards.add(scorecardDescriptor);
         }
-        PreparedStatement accountStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD.SCORECARD_NAME, scorecard.creation_date, scorecard.data_source_id, scorecard.folder FROM " +
-                "SCORECARD, USER WHERE SCORECARD.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? and SCORECARD.ACCOUNT_VISIBLE = ?");
-        accountStmt.setLong(1, accountID);
-        accountStmt.setBoolean(2, true);
-        ResultSet accountRS = accountStmt.executeQuery();
-        while (accountRS.next()) {
-            long scorecardID = accountRS.getLong(1);
-            String scorecardName = accountRS.getString(2);
-            ScorecardDescriptor scorecardDescriptor = new ScorecardDescriptor();
-            scorecardDescriptor.setId(scorecardID);
-            scorecardDescriptor.setName(scorecardName);
-            scorecardDescriptor.setRole(Roles.SUBSCRIBER);
-            userStmt.setLong(1, scorecardID);
-            ResultSet userRS = userStmt.executeQuery();
-            String name;
-            if (userRS.next()) {
-                String lastName = userRS.getString(1);
-                String firstName = userRS.getString(2);
-                name = firstName == null ? lastName : firstName + " " + lastName;
-            } else {
-                name = "";
+        if (testAccountVisible) {
+            PreparedStatement accountStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD.SCORECARD_NAME, scorecard.creation_date, scorecard.data_source_id, scorecard.folder FROM " +
+                    "SCORECARD, USER WHERE SCORECARD.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? and SCORECARD.ACCOUNT_VISIBLE = ?");
+            accountStmt.setLong(1, accountID);
+            accountStmt.setBoolean(2, true);
+            ResultSet accountRS = accountStmt.executeQuery();
+            while (accountRS.next()) {
+                long scorecardID = accountRS.getLong(1);
+                String scorecardName = accountRS.getString(2);
+                ScorecardDescriptor scorecardDescriptor = new ScorecardDescriptor();
+                scorecardDescriptor.setId(scorecardID);
+                scorecardDescriptor.setName(scorecardName);
+                scorecardDescriptor.setRole(Roles.SUBSCRIBER);
+                userStmt.setLong(1, scorecardID);
+                ResultSet userRS = userStmt.executeQuery();
+                String name;
+                if (userRS.next()) {
+                    String lastName = userRS.getString(1);
+                    String firstName = userRS.getString(2);
+                    name = firstName == null ? lastName : firstName + " " + lastName;
+                } else {
+                    name = "";
+                }
+                scorecardDescriptor.setAuthor(name);
+                Timestamp creationTimestamp = accountRS.getTimestamp(3);
+                Date creationDate = null;
+                if (creationTimestamp != null) {
+                    creationDate = new Date(creationTimestamp.getTime());
+                }
+                scorecardDescriptor.setCreationDate(creationDate);
+                long dataSourceID = accountRS.getLong(4);
+                scorecardDescriptor.setDataSourceID(dataSourceID);
+                scorecardDescriptor.setFolder(accountRS.getInt(5));
+                scorecards.add(scorecardDescriptor);
             }
-            scorecardDescriptor.setAuthor(name);
-            Timestamp creationTimestamp = accountRS.getTimestamp(3);
-            Date creationDate = null;
-            if (creationTimestamp != null) {
-                creationDate = new Date(creationTimestamp.getTime());
-            }
-            scorecardDescriptor.setCreationDate(creationDate);
-            long dataSourceID = accountRS.getLong(4);
-            scorecardDescriptor.setDataSourceID(dataSourceID);
-            scorecardDescriptor.setFolder(accountRS.getInt(5));
-            scorecards.add(scorecardDescriptor);
         }
         PreparedStatement groupStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, scorecard.group_id, " +
                 "group_to_user_join.binding_type, COMMUNITY_GROUP.name, scorecard.creation_date, scorecard.data_source_id, scorecard.folder from " +

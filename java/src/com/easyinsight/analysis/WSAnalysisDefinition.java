@@ -792,13 +792,13 @@ public abstract class WSAnalysisDefinition implements Serializable {
     }
 
     @Transient
-    private transient Map<Long, AnalysisItem> uniqueIteMap = new HashMap<Long, AnalysisItem>();
+    private transient Map<UniqueKey, AnalysisItem> uniqueIteMap = new HashMap<UniqueKey, AnalysisItem>();
 
     @Transient
     private transient List<AnalysisItem> additionalGroupingItems = new ArrayList<AnalysisItem>();
 
     @Transient
-    private transient Map<String, Long> fieldToUniqueMap = new HashMap<String, Long>();
+    private transient Map<String, UniqueKey> fieldToUniqueMap = new HashMap<String, UniqueKey>();
 
     public List<AnalysisItem> getAdditionalGroupingItems() {
         return additionalGroupingItems;
@@ -808,19 +808,19 @@ public abstract class WSAnalysisDefinition implements Serializable {
         this.additionalGroupingItems = additionalGroupingItems;
     }
 
-    public Map<String, Long> getFieldToUniqueMap() {
+    public Map<String, UniqueKey> getFieldToUniqueMap() {
         return fieldToUniqueMap;
     }
 
-    public void setFieldToUniqueMap(Map<String, Long> fieldToUniqueMap) {
+    public void setFieldToUniqueMap(Map<String, UniqueKey> fieldToUniqueMap) {
         this.fieldToUniqueMap = fieldToUniqueMap;
     }
 
-    public Map<Long, AnalysisItem> getUniqueIteMap() {
+    public Map<UniqueKey, AnalysisItem> getUniqueIteMap() {
         return uniqueIteMap;
     }
 
-    public void setUniqueIteMap(Map<Long, AnalysisItem> uniqueIteMap) {
+    public void setUniqueIteMap(Map<UniqueKey, AnalysisItem> uniqueIteMap) {
         this.uniqueIteMap = uniqueIteMap;
     }
 

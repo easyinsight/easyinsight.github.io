@@ -15,6 +15,7 @@ public class ReportJoins {
     public var joinOverrideMap:Object;
     public var dataSourceMap:Object;
     public var configurableDataSources:ArrayCollection;
+    public var dataSourceAddonReports:ArrayCollection;
 
     public function ReportJoins() {
     }

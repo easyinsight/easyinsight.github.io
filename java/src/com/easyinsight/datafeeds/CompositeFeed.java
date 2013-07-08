@@ -30,6 +30,7 @@ public class CompositeFeed extends Feed {
 
     private List<CompositeFeedNode> compositeFeedNodes;
     private List<CompositeFeedConnection> connections;
+    private List<AddonReport> addonReports;
 
     // two distinct scenarios...
     // one is combining some # of data sources into a
@@ -37,9 +38,10 @@ public class CompositeFeed extends Feed {
     public CompositeFeed() {
     }
 
-    public CompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> connections) {
+    public CompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> connections, List<AddonReport> addonReports) {
         this.compositeFeedNodes = compositeFeedNodes;
         this.connections = connections;
+        this.addonReports = addonReports;
     }
 
     public List<Long> getDataSourceIDs() {
@@ -81,8 +83,15 @@ public class CompositeFeed extends Feed {
                 compositeFeedNodes.add(reportNode);
             }
         }
+        for (AddonReport addonReport : this.addonReports) {
+            CompositeFeedNode reportNode = new CompositeFeedNode();
+            reportNode.setReportID(addonReport.getReportID());
+            compositeFeedNodes.add(reportNode);
+        }
 
-        List<IJoin> connections;
+        List<IJoin> connections = null;
+
+        boolean joinsOverridden = false;
 
         if (insightRequestMetadata.getJoinOverrides() != null && insightRequestMetadata.getJoinOverrides().size() > 0) {
             connections = new ArrayList<IJoin>();
@@ -99,33 +108,51 @@ public class CompositeFeed extends Feed {
                             throw new ReportException(new GenericReportFault(e.getMessage()));
                         }
                     } else {
-                        if ("com.easyinsight.core.Key".equals(joinOverride.getSourceItem().getKey().getClass().getName()) ||
-                                "com.easyinsight.core.Key".equals(joinOverride.getTargetItem().getKey().getClass().getName())) {
+                        if ((joinOverride.getSourceItem() != null && "com.easyinsight.core.Key".equals(joinOverride.getSourceItem().getKey().getClass().getName())) ||
+                                (joinOverride.getTargetItem() != null && "com.easyinsight.core.Key".equals(joinOverride.getTargetItem().getKey().getClass().getName()))) {
                             System.out.println("Bypassing bad state join.");
                             continue;
                         }
-                        CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection();
-                        compositeFeedConnection.setSourceItem(joinOverride.getSourceItem());
-                        compositeFeedConnection.setTargetItem(joinOverride.getTargetItem());
-                        compositeFeedConnection.setSourceItems(Arrays.asList(joinOverride.getSourceItem()));
-                        compositeFeedConnection.setTargetItems(Arrays.asList(joinOverride.getTargetItem()));
-                        compositeFeedConnection.setSourceFeedName(joinOverride.getSourceName());
-                        compositeFeedConnection.setTargetFeedName(joinOverride.getTargetName());
-                        compositeFeedConnection.setSourceJoinOnOriginal(joinOverride.isSourceJoinOriginal());
-                        compositeFeedConnection.setTargetJoinOnOriginal(joinOverride.isTargetJoinOriginal());
-                        compositeFeedConnection.setSourceOuterJoin(joinOverride.isSourceOuterJoin());
-                        compositeFeedConnection.setTargetOuterJoin(joinOverride.isTargetOuterJoin());
-                        if (joinOverride.getSourceItem().getKey() instanceof DerivedKey) {
-                            compositeFeedConnection.setSourceFeedID(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID());
-                        } else {
-                            compositeFeedConnection.setSourceReportID(((ReportKey) joinOverride.getSourceItem().getKey()).getReportID());
+                        if (joinOverride.getJoinType() == JoinOverride.NORMAL) {
+                            CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection();
+                            compositeFeedConnection.setSourceItem(joinOverride.getSourceItem());
+                            compositeFeedConnection.setTargetItem(joinOverride.getTargetItem());
+                            compositeFeedConnection.setSourceItems(Arrays.asList(joinOverride.getSourceItem()));
+                            compositeFeedConnection.setTargetItems(Arrays.asList(joinOverride.getTargetItem()));
+                            compositeFeedConnection.setSourceFeedName(joinOverride.getSourceName());
+                            compositeFeedConnection.setTargetFeedName(joinOverride.getTargetName());
+                            compositeFeedConnection.setSourceJoinOnOriginal(joinOverride.isSourceJoinOriginal());
+                            compositeFeedConnection.setTargetJoinOnOriginal(joinOverride.isTargetJoinOriginal());
+                            compositeFeedConnection.setSourceOuterJoin(joinOverride.isSourceOuterJoin());
+                            compositeFeedConnection.setTargetOuterJoin(joinOverride.isTargetOuterJoin());
+                            if (joinOverride.getSourceItem().getKey() instanceof DerivedKey) {
+                                compositeFeedConnection.setSourceFeedID(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID());
+                            } else {
+                                compositeFeedConnection.setSourceReportID(((ReportKey) joinOverride.getSourceItem().getKey()).getReportID());
+                            }
+                            if (joinOverride.getTargetItem().getKey() instanceof DerivedKey) {
+                                compositeFeedConnection.setTargetFeedID(((DerivedKey) joinOverride.getTargetItem().getKey()).getFeedID());
+                            } else {
+                                compositeFeedConnection.setTargetReportID(((ReportKey) joinOverride.getTargetItem().getKey()).getReportID());
+                            }
+                            connections.add(compositeFeedConnection);
+                        } else if (joinOverride.getJoinType() == JoinOverride.COMPOSITE) {
+                            CompositeFeedCompositeConnection compositeFeedCompositeConnection = new CompositeFeedCompositeConnection();
+                            if (joinOverride.getSourceItems().get(0).getKey() instanceof DerivedKey) {
+                                compositeFeedCompositeConnection.setSourceFeedID(((DerivedKey) joinOverride.getSourceItems().get(0).getKey()).getFeedID());
+                            } else {
+                                compositeFeedCompositeConnection.setSourceReportID(((ReportKey) joinOverride.getSourceItems().get(0).getKey()).getReportID());
+                            }
+                            if (joinOverride.getTargetItems().get(0).getKey() instanceof DerivedKey) {
+                                compositeFeedCompositeConnection.setTargetFeedID(((DerivedKey) joinOverride.getTargetItems().get(0).getKey()).getFeedID());
+                            } else {
+                                compositeFeedCompositeConnection.setTargetReportID(((ReportKey) joinOverride.getTargetItems().get(0).getKey()).getReportID());
+                            }
+                            compositeFeedCompositeConnection.setSourceItems(joinOverride.getSourceItems());
+                            compositeFeedCompositeConnection.setTargetItems(joinOverride.getTargetItems());
+                            connections.add(compositeFeedCompositeConnection);
                         }
-                        if (joinOverride.getTargetItem().getKey() instanceof DerivedKey) {
-                            compositeFeedConnection.setTargetFeedID(((DerivedKey) joinOverride.getTargetItem().getKey()).getFeedID());
-                        } else {
-                            compositeFeedConnection.setTargetReportID(((ReportKey) joinOverride.getTargetItem().getKey()).getReportID());
-                        }
-                        connections.add(compositeFeedConnection);
+
                         /*connections.add(new CompositeFeedConnection(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID(),
                             ((DerivedKey) joinOverride.getTargetItem().getKey()).getFeedID(), joinOverride.getSourceItem(),
                             joinOverride.getTargetItem(), joinOverride.getSourceName(), joinOverride.getTargetName(), joinOverride.isSourceOuterJoin(),
@@ -133,7 +160,11 @@ public class CompositeFeed extends Feed {
                     }
                 }
             }
-        } else {
+            if (connections.size() > 0) {
+                joinsOverridden = true;
+            }
+        }
+        if (!joinsOverridden) {
             connections = new ArrayList<IJoin>();
             for (CompositeFeedConnection connection : this.connections) {
                 if (connection.getMarmotScript() != null && !"".equals(connection.getMarmotScript())) {
@@ -277,7 +308,6 @@ public class CompositeFeed extends Feed {
         }
 
         // determine which keys are matched to which fields as we proceed here
-
         try {
             Iterator<QueryStateNode> neededNodeIter = new HashMap<QueryNodeKey, QueryStateNode>(neededNodes).values().iterator();
             QueryStateNode firstNode = neededNodeIter.next();
@@ -292,7 +322,7 @@ public class CompositeFeed extends Feed {
                         }
                     }
                     if (!stillOkay) {
-                        throw new ReportException(new GenericReportFault("We weren't able to find a way to join data across the specified fields. Please adjust the report to try again."));    
+                        throw new ReportException(new GenericReportFault("We weren't able to find a way to join data across the specified fields. Please adjust the report to try again."));
                     }
                 }
                 for (Edge edge : neededEdges) {
@@ -319,7 +349,6 @@ public class CompositeFeed extends Feed {
                 map.put(queryStateNode, childSet);
             }
             if (oneRowData) {
-                System.out.println("No join found, merging into a single result row.");
                 IRow baseRow = dataSet.createRow();
                 for (DataSet childSet : map.values()) {
                     for (IRow row : childSet.getRows()) {
@@ -327,7 +356,6 @@ public class CompositeFeed extends Feed {
                     }
                 }
             } else {
-                System.out.println("No join found, appending rows.");
                 for (DataSet childSet : map.values()) {
                     for (IRow row : childSet.getRows()) {
                         dataSet.addRow(row);
@@ -336,8 +364,6 @@ public class CompositeFeed extends Feed {
             }
             return dataSet;
         }
-
-
 
         UndirectedGraph<QueryStateNode, Edge> reducedGraph = new SimpleGraph<QueryStateNode, Edge>(Edge.class);
 
@@ -364,26 +390,26 @@ public class CompositeFeed extends Feed {
                             queryStateNode.addKey(join);
                         }
                         for (AnalysisItem sourceItem : localEdge.connection.getSourceItems()) {
-                            queryStateNode.addJoinItem(sourceItem);
+                            queryStateNode.addJoinItem(sourceItem, localEdge.connection.dateLevelForJoin());
                         }
                         for (Key join : localEdge.connection.getTargetJoins()) {
                             targetNode.addKey(join);
                         }
                         for (AnalysisItem sourceItem : localEdge.connection.getTargetItems()) {
-                            targetNode.addJoinItem(sourceItem);
+                            targetNode.addJoinItem(sourceItem, localEdge.connection.dateLevelForJoin());
                         }
                     } else {
                         for (Key join : localEdge.connection.getTargetJoins()) {
                             queryStateNode.addKey(join);
                         }
                         for (AnalysisItem sourceItem : localEdge.connection.getTargetItems()) {
-                            queryStateNode.addJoinItem(sourceItem);
+                            queryStateNode.addJoinItem(sourceItem, localEdge.connection.dateLevelForJoin());
                         }
                         for (Key join : localEdge.connection.getSourceJoins()) {
                             targetNode.addKey(join);
                         }
                         for (AnalysisItem sourceItem : localEdge.connection.getSourceItems()) {
-                            targetNode.addJoinItem(sourceItem);
+                            targetNode.addJoinItem(sourceItem, localEdge.connection.dateLevelForJoin());
                         }
                     }
                 }
@@ -455,8 +481,6 @@ public class CompositeFeed extends Feed {
                         }
                     }
                     sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
-                    /*auditBuilder.append("<p>" + sourceNode.dataSourceName + " original data set</p>");
-                    auditBuilder.append(ExportService.dataSetToHTMLTable(sourceQueryData.neededItems, sourceQueryData.dataSet, conn, insightRequestMetadata));*/
                     if (insightRequestMetadata.isOptimized()) {
                         for (IJoin myConn : myConnections) {
                             FilterDefinition filter = filterMap.get(myConn);
@@ -467,14 +491,12 @@ public class CompositeFeed extends Feed {
                                 } else {
                                     joinTargetNode = queryNodeMap.get(myConn.sourceQueryNodeKey());
                                 }
-                                //System.out.println("defining filter between " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
                                 FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, joinTargetNode, (CompositeFeedConnection) myConn);
                                 filterMap.put(myConn, joinFilter);
                             }
                         }
                     }
                 }
-                //System.out.println("joining " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
 
                 QueryData targetQueryData = map.get(targetNode.queryNodeKey());
                 boolean swapped = false;
@@ -506,7 +528,6 @@ public class CompositeFeed extends Feed {
                         sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
                     }
                 }
-                System.out.println("joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName);
 
                 /*if (sourceQueryData.dataSet == targetQueryData.dataSet) {
                     dataSet = sourceQueryData.dataSet;
@@ -562,7 +583,6 @@ public class CompositeFeed extends Feed {
                                 } else {
                                     targetNode = queryNodeMap.get(myConn.sourceQueryNodeKey());
                                 }
-                                System.out.println("defining filter between " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
                                 FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, (CompositeFeedConnection) myConn);
                                 filterMap.put(myConn, joinFilter);
                             }
@@ -584,7 +604,6 @@ public class CompositeFeed extends Feed {
                     QueryData targetQueryData = map.get(targetNode.queryNodeKey());
                     boolean swapped = false;
                     if (!last.connection.sourceQueryNodeKey().equals(sourceNode.queryNodeKey())) {
-                        System.out.println("Swapping " + sourceNode.dataSourceName + " and " + targetNode.dataSourceName);
                         swapped = true;
                         QueryStateNode swap = sourceNode;
                         sourceNode = targetNode;
@@ -612,8 +631,6 @@ public class CompositeFeed extends Feed {
                             sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
                         }
                     }
-
-                    System.out.println("joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName + " with " + sourceQueryData.dataSet.getRows().size() + " and " + targetQueryData.dataSet.getRows().size());
                     if (sourceQueryData.dataSet == targetQueryData.dataSet) {
 
                     }
@@ -644,15 +661,6 @@ public class CompositeFeed extends Feed {
             DataSet targetSet = queryStateNode.produceDataSet(insightRequestMetadata);
             dataSet = postJoin.merge(dataSet, targetSet, null, queryStateNode.neededItems, null, queryStateNode.dataSourceName, conn, 0, queryStateNode.feedID, operations).getDataSet();
         }
-
-        /*for (AnalysisItem postItem : analysisItems) {
-            if (postItem instanceof JoinedAnalysisItem) {
-                JoinedAnalysisItem joinedAnalysisItem = (JoinedAnalysisItem) postItem;
-                AnalysisItem item = joinedAnalysisItem.getSourceItem();
-                List<CompositeFeedConnection> fieldConnections = joinedAnalysisItem.getConnections();
-                // for each field connection, build a graph, populate from that...
-            }
-        }*/
 
         dataSet.setAudits(auditStrings);
         Pipeline pipeline = insightRequestMetadata.findPipeline(getName());

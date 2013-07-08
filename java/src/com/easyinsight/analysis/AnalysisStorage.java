@@ -322,7 +322,7 @@ public class AnalysisStorage {
         }
     }
 
-    public RolePrioritySet<InsightDescriptor> getReports(long userID, long accountID, EIConnection conn) throws SQLException {
+    public RolePrioritySet<InsightDescriptor> getReports(long userID, long accountID, EIConnection conn, boolean testAccountVisible) throws SQLException {
         RolePrioritySet<InsightDescriptor> descriptors = new RolePrioritySet<InsightDescriptor>();
         PreparedStatement ownerStmt = conn.prepareStatement("SELECT user.first_name, user.name from user, user_to_analysis where " +
                 "user.user_id = user_to_analysis.user_id and user_to_analysis.analysis_id = ? and user_to_analysis.relationship_type = ?");
@@ -349,33 +349,35 @@ public class AnalysisStorage {
             descriptors.add(descriptor);
         }
         queryStmt.close();
-        PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, create_date, " +
-                "account_visible, analysis.folder, analysis.description FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
-                "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = user.user_id and user.account_id = ? and analysis.account_visible = ? and temporary_report = ?");
-        queryAccountStmt.setLong(1, accountID);
-        queryAccountStmt.setBoolean(2, true);
-        queryAccountStmt.setBoolean(3, false);
-        ResultSet accountRS = queryAccountStmt.executeQuery();
-        while (accountRS.next()) {
-            long reportID = accountRS.getLong(1);
-            if (reportIDs.contains(reportID)) {
-                continue;
+        if (testAccountVisible) {
+            PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, create_date, " +
+                    "account_visible, analysis.folder, analysis.description FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
+                    "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = user.user_id and user.account_id = ? and analysis.account_visible = ? and temporary_report = ?");
+            queryAccountStmt.setLong(1, accountID);
+            queryAccountStmt.setBoolean(2, true);
+            queryAccountStmt.setBoolean(3, false);
+            ResultSet accountRS = queryAccountStmt.executeQuery();
+            while (accountRS.next()) {
+                long reportID = accountRS.getLong(1);
+                if (reportIDs.contains(reportID)) {
+                    continue;
+                }
+                ownerStmt.setLong(1, accountRS.getLong(1));
+                ownerStmt.setInt(2, Roles.OWNER);
+                ResultSet ownerRS = ownerStmt.executeQuery();
+                String ownerName;
+                if (ownerRS.next()) {
+                    String ownerFirstName = ownerRS.getString(1);
+                    String ownerLastName = ownerRS.getString(2);
+                    ownerName = ownerFirstName != null ? ownerFirstName + " " + ownerLastName : ownerLastName;
+                } else {
+                    ownerName = "";
+                }
+                descriptors.add(new InsightDescriptor(reportID, accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5),
+                        new Date(accountRS.getTimestamp(6).getTime()), ownerName, Roles.SHARER, accountRS.getBoolean(7), accountRS.getInt(8), accountRS.getString(9)));
             }
-            ownerStmt.setLong(1, accountRS.getLong(1));
-            ownerStmt.setInt(2, Roles.OWNER);
-            ResultSet ownerRS = ownerStmt.executeQuery();
-            String ownerName;
-            if (ownerRS.next()) {
-                String ownerFirstName = ownerRS.getString(1);
-                String ownerLastName = ownerRS.getString(2);
-                ownerName = ownerFirstName != null ? ownerFirstName + " " + ownerLastName : ownerLastName;
-            } else {
-                ownerName = "";
-            }
-            descriptors.add(new InsightDescriptor(reportID, accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5),
-                    new Date(accountRS.getTimestamp(6).getTime()), ownerName, Roles.SHARER, accountRS.getBoolean(7), accountRS.getInt(8), accountRS.getString(9)));
+            queryAccountStmt.close();
         }
-        queryAccountStmt.close();
         PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, " +
                 "group_to_user_join.binding_type, create_date, account_visible, folder, analysis.description FROM ANALYSIS, group_to_user_join," +
                 "group_to_insight WHERE " +

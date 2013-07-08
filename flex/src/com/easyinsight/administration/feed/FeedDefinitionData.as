@@ -43,6 +43,7 @@ import mx.collections.ArrayCollection;
         public var refreshMarmotScript:String;
         public var dataSourceBehavior:int;
         public var kpiSource:Boolean;
+        public var addonReports:ArrayCollection;
 		
 		public function FeedDefinitionData()
 		{

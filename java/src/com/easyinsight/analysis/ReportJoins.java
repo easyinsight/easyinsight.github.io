@@ -19,6 +19,16 @@ public class ReportJoins {
 
     private List<DataSourceDescriptor> configurableDataSources = new ArrayList<DataSourceDescriptor>();
 
+    private List<AddonReport> dataSourceAddonReports = new ArrayList<AddonReport>();
+
+    public List<AddonReport> getDataSourceAddonReports() {
+        return dataSourceAddonReports;
+    }
+
+    public void setDataSourceAddonReports(List<AddonReport> dataSourceAddonReports) {
+        this.dataSourceAddonReports = dataSourceAddonReports;
+    }
+
     public List<DataSourceDescriptor> getConfigurableDataSources() {
         return configurableDataSources;
     }

@@ -8,6 +8,7 @@
         import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.analysis.ReportKey;
         import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ProgressAlert;
 
@@ -72,7 +73,17 @@
             } else {
                 if (_mode == MULTIPLE_FEEDS) {
                     ProgressAlert.alert(this, "Retrieving metadata...", null, feedService.getMultipleFeeds);
-                    feedService.getMultipleFeeds.send(sourceDataBox.selectedItem.id, targetDataBox.selectedItem.id);
+                    if (sourceDataBox.selectedItem is InsightDescriptor) {
+                        sourceIDType = EIDescriptor.REPORT;
+                    } else {
+                        sourceIDType = EIDescriptor.DATA_SOURCE;
+                    }
+                    if (targetDataBox.selectedItem is InsightDescriptor) {
+                        targetIDType = EIDescriptor.REPORT;
+                    } else {
+                        targetIDType = EIDescriptor.DATA_SOURCE;
+                    }
+                    feedService.getMultipleFeeds.send(sourceDataBox.selectedItem, targetDataBox.selectedItem);
                 } else {
                     sourceFeedName = sourceDataBox.selectedItem.name;
                     targetFeedName = targetDataBox.selectedItem.name;

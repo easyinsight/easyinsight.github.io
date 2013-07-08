@@ -35,18 +35,37 @@ public class FederatedFeed extends Feed {
                 Set<AnalysisItem> childAnalysisItems = new HashSet<AnalysisItem>();
                 for (AnalysisItem analysisItem : analysisItems) {
                     boolean matched = false;
-                    for (FieldMapping fieldMapping : source.getFieldMappings()) {
-                        if (fieldMapping.getFederatedKey().equals(analysisItem.toOriginalDisplayName())) {
-                            for (AnalysisItem field : feed.getDataSource().getFields()) {
-                                if (field.toOriginalDisplayName().equals(fieldMapping.getSourceKey())) {
-                                    matched = true;
-                                    childAnalysisItems.add(field);
-                                    List<AnalysisItem> items = map.get(field);
-                                    if (items == null) {
-                                        items = new ArrayList<AnalysisItem>();
-                                        map.put(field, items);
+                    if (analysisItem.getKey() instanceof DerivedKey) {
+                        DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
+                        Key parentKey = derivedKey.getParentKey();
+                        for (AnalysisItem field : feed.getDataSource().getFields()) {
+                            if (field.getKey().toKeyString().equals(parentKey.toKeyString())) {
+                                matched = true;
+                                childAnalysisItems.add(field);
+                                List<AnalysisItem> items = map.get(field);
+                                if (items == null) {
+                                    items = new ArrayList<AnalysisItem>();
+                                    map.put(field, items);
+                                }
+                                items.add(analysisItem);
+                                break;
+                            }
+                        }
+                    }
+                    if (!matched) {
+                        for (FieldMapping fieldMapping : source.getFieldMappings()) {
+                            if (fieldMapping.getFederatedKey().equals(analysisItem.toOriginalDisplayName())) {
+                                for (AnalysisItem field : feed.getDataSource().getFields()) {
+                                    if (field.toOriginalDisplayName().equals(fieldMapping.getSourceKey())) {
+                                        matched = true;
+                                        childAnalysisItems.add(field);
+                                        List<AnalysisItem> items = map.get(field);
+                                        if (items == null) {
+                                            items = new ArrayList<AnalysisItem>();
+                                            map.put(field, items);
+                                        }
+                                        items.add(analysisItem);
                                     }
-                                    items.add(analysisItem);
                                 }
                             }
                         }

@@ -64,6 +64,7 @@
             <div class="span6">
                 <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
                     <div class="btn-group">
+
                         <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
                             Refresh Data
                             <span class="caret"></span>
@@ -83,6 +84,7 @@
                         </ul>
                     </div>
                     <div class="btn-group">
+                        <button class="btn btn-inverse toggle-filters">Toggle Filters</button>
                     </div>
                 </div>
             </div>
@@ -93,8 +95,7 @@
 <div class="container-fluid">
     <%= uiData.createHeader(dashboard.getName()) %>
     <jsp:include page="refreshingDataSource.jsp"/>
-
-    <div id="base" />
+    <div id="base"/>
 </div>
 
 

@@ -11,12 +11,14 @@
         import com.adobe.flex.extras.controls.springgraph.Item;
         import com.easyinsight.administration.feed.FeedChangeEvent;
         import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.analysis.AddonReport;
         import com.easyinsight.analysis.ReportFault;
         import com.easyinsight.customupload.ProblemDataEvent;
         import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.solutions.AddFeedToSolutionWindow;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.FeedSelectionEvent;
+        import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.GraphLine;
         import com.easyinsight.util.GraphSelectionState;
         import com.easyinsight.util.PopUpUtil;
@@ -49,14 +51,17 @@
         private var definedNodes:ArrayCollection;
         private var definedEdges:ArrayCollection;
 
+        private var addonReports:ArrayCollection;
+
         public function set feeds(feedList:ArrayCollection):void {
             this.initialFeedIDs = feedList;
         }
 
-        public function addExistingDef(nodes:ArrayCollection, edges:ArrayCollection, dataSourceID:int):void {
+        public function addExistingDef(nodes:ArrayCollection, edges:ArrayCollection, dataSourceID:int, addonReports:ArrayCollection):void {
             definedNodes = nodes;
             definedEdges = edges;
             compositeFeedID = dataSourceID;
+            this.addonReports = addonReports;
         }
 
         private function initializeData():void {
@@ -83,10 +88,10 @@
         }
 
         private function onConnectionDelete(event:ConnectionDeleteEvent):void {
-            var firstItem:Item = graph.find(String(event.connection.sourceFeedID));
+            /*var firstItem:Item = graph.find(String(event.connection.sourceFeedID));
             var secondItem:Item = graph.find(String(event.connection.targetFeedID));
             graph.unlink(firstItem, secondItem);
-            var connLine:GraphLine = null;
+            var connLine:GraphLine = null;*/
             connections.removeItemAt(connections.getItemIndex(event.connection));
             dispatchEvent(new FeedChangeEvent());
         }
@@ -103,6 +108,7 @@
             }
             graph.remove(item);
             dataSources.removeItemAt(dataSources.getItemIndex(event.feedDescriptor));
+            visibleDataSources.removeItemAt(visibleDataSources.getItemIndex(event.feedDescriptor));
 
             dispatchEvent(new FeedChangeEvent());
         }
@@ -182,10 +188,16 @@
                     addDescriptorToGraph(descriptor, compositeFeedNode.x, compositeFeedNode.y);
                 }
                 for each (var compositeFeedConnection:CompositeFeedConnection in definedEdges) {
-                    var fromItem:Item = graph.find(String(compositeFeedConnection.sourceFeedID));
+                    /*var fromItem:Item = graph.find(String(compositeFeedConnection.sourceFeedID));
                     var toItem:Item = graph.find(String(compositeFeedConnection.targetFeedID));
-                    graph.link(fromItem, toItem, compositeFeedConnection);
+                    graph.link(fromItem, toItem, compositeFeedConnection);*/
                     connections.addItem(compositeFeedConnection);
+                }
+                for each (var addonReport:AddonReport in addonReports) {
+                    var insightDescriptor:InsightDescriptor = new InsightDescriptor();
+                    insightDescriptor.id = addonReport.reportID;
+                    insightDescriptor.name = addonReport.reportName;
+                    dataSources.addItem(insightDescriptor);
                 }
                 //s.dataProvider = graph;
             }
@@ -210,9 +222,6 @@
         private function joinsSelected(event:JoinSelectionEvent):void {
             var edges:ArrayCollection = event.addedJoins;
             for each (var compositeFeedConnection:CompositeFeedConnection in edges) {
-                var fromItem:Item = graph.find(String(compositeFeedConnection.sourceFeedID));
-                var toItem:Item = graph.find(String(compositeFeedConnection.targetFeedID));
-                graph.link(fromItem, toItem, compositeFeedConnection);
                 connections.addItem(compositeFeedConnection);
             }
             dispatchEvent(new FeedChangeEvent());
@@ -231,6 +240,7 @@
             item.data["feedName"] = descriptor.name;
             graph.add(item);
             dataSources.addItem(descriptor);
+            visibleDataSources.addItem(descriptor);
         }
 
         private var queuedExistings:ArrayCollection;
@@ -298,6 +308,9 @@
         private var dataSources:ArrayCollection = new ArrayCollection();
 
         [Bindable]
+        private var visibleDataSources:ArrayCollection = new ArrayCollection();
+
+        [Bindable]
         private var connections:ArrayCollection = new ArrayCollection();
 
         private function addDataSource():void {
@@ -313,7 +326,7 @@
             if (dsd.dataSourceType == DataSourceType.COMPOSITE) {
                 return false;
             }
-            for each (var ds:DataSourceDescriptor in dataSources) {
+            for each (var ds:DataSourceDescriptor in visibleDataSources) {
                 if (ds.id == dsd.id) {
                     return false;
                 }
@@ -346,7 +359,7 @@
                     <mx:Label text="Data Sources" fontSize="16"/>
                 </mx:HBox>
                 <mx:Button label="Add Data Source..." click="addDataSource()" styleName="grayButton"/>
-                <mx:DataGrid dataProvider="{dataSources}" width="100%" rowHeight="28">
+                <mx:DataGrid dataProvider="{visibleDataSources}" width="100%" rowHeight="28">
                     <mx:columns>
                         <util:EIDataGridColumn dataField="name" headerText="Data Source"/>
                         <util:EIDataGridColumn headerText="" dataField="name" width="50" sortable="false" itemRenderer="com.easyinsight.feedassembly.DataSourceControls"/>

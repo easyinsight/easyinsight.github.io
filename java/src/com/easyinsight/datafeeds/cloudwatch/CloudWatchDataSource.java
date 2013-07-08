@@ -69,7 +69,7 @@ public class CloudWatchDataSource extends CompositeServerDataSource {
     @Override
     public Feed createFeedObject(FeedDefinition parent) {
         try {
-            return new CloudWatchFeed(getCompositeFeedNodes(), obtainChildConnections());
+            return new CloudWatchFeed(getCompositeFeedNodes(), obtainChildConnections(), getAddonReports());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

@@ -21,7 +21,7 @@ import mx.collections.ArrayCollection;
         override public function createAdminPages():ArrayCollection {
             var pages:ArrayCollection = new ArrayCollection();
             var compositeWorkspace:CompositeWorkspace = new CompositeWorkspace();
-            compositeWorkspace.addExistingDef(compositeFeedNodes, connections, dataFeedID);
+            compositeWorkspace.addExistingDef(compositeFeedNodes, connections, dataFeedID, addonReports);
             compositeWorkspace.label = "Composite Details";
             pages.addItem(compositeWorkspace);
             return pages;

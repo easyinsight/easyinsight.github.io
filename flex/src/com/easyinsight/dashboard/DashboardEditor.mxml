@@ -492,11 +492,11 @@
 
         private function toggleEditorControls():void {
             if (controls.parent) {
-                toggleButton.label = "Hide Editor Controls";
+                toggleButton.label = "Show Editor Controls";
                 controls.parent.removeChild(controls);
                 DashboardBox(rootView).toggleControls(false);
             } else {
-                toggleButton.label = "Show Editor Controls";
+                toggleButton.label = "Hide Editor Controls";
                 coreHBox.addChildAt(controls, 0);
                 DashboardBox(rootView).toggleControls(true);
             }

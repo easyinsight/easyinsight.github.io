@@ -20,8 +20,8 @@ import java.util.*;
  */
 public class CloudWatchFeed extends CompositeFeed {
 
-    public CloudWatchFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> connections) {
-        super(compositeFeedNodes, connections);
+    public CloudWatchFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> connections, List<AddonReport> addonReports) {
+        super(compositeFeedNodes, connections, addonReports);
     }
 
     private String getUserName() {

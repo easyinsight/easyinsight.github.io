@@ -1,6 +1,5 @@
 package com.easyinsight.datafeeds;
 
-import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.DashboardStorage;
@@ -38,8 +37,6 @@ import com.easyinsight.notifications.NotificationBase;
 import com.easyinsight.notifications.DataSourceToGroupNotification;
 import com.easyinsight.users.User;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.Charset;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -325,13 +322,27 @@ public class FeedService {
         }
     }
 
+    public static boolean testAccountVisible(EIConnection conn) throws SQLException {
+        /*PreparedStatement accountStmt = conn.prepareStatement("SELECT TEST_ACCOUNT_VISIBLE FROM USER WHERE USER_ID = ?");
+        accountStmt.setLong(1, SecurityUtil.getUserID());
+        ResultSet rs = accountStmt.executeQuery();
+        boolean testAccountVisible = true;
+        if (rs.next()) {
+            testAccountVisible = rs.getBoolean(1);
+        }
+        accountStmt.close();
+        return testAccountVisible;*/
+        return true;
+    }
+
     public List<JoinSuggestion> suggestJoins(List<DataSourceDescriptor> scope) {
         List<JoinSuggestion> suggestions = new ArrayList<JoinSuggestion>();
         long userID = SecurityUtil.getUserID();
         long accountID = SecurityUtil.getAccountID();
         EIConnection conn = Database.instance().getConnection();
         try {
-            List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(userID, accountID, conn);
+            boolean testAccountVisible = testAccountVisible(conn);
+            List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(userID, accountID, conn, testAccountVisible);
             JoinSuggestion suggestion0 = analyze(FeedType.HIGHRISE_COMPOSITE, FeedType.COMPOSITE, "Highrise", "Existing Cube", dataSources, conn);
             if (suggestion0 != null) {
                 suggestions.add(suggestion0);
@@ -427,8 +438,9 @@ public class FeedService {
 
         EIConnection conn = Database.instance().getConnection();
         try {
-            List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn);
-            List<InsightDescriptor> reports = analysisStorage.getReports(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn).values();
+            boolean testAccountVisible = testAccountVisible(conn);
+            List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn, testAccountVisible);
+            List<InsightDescriptor> reports = analysisStorage.getReports(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn, testAccountVisible).values();
             return new HomeState(dataSources, reports);
         } catch (Exception e) {
             LogClass.error(e);
@@ -465,10 +477,11 @@ public class FeedService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            descriptorList.addAll(feedStorage.getDataSources(userID, accountID, conn));
-            descriptorList.addAll(analysisStorage.getReports(userID, accountID, conn).values());
-            descriptorList.addAll(new DashboardStorage().getDashboards(userID, accountID, conn).values());
-            descriptorList.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn).values());
+            boolean testAccountVisible = testAccountVisible(conn);
+            descriptorList.addAll(feedStorage.getDataSources(userID, accountID, conn, testAccountVisible));
+            descriptorList.addAll(analysisStorage.getReports(userID, accountID, conn, testAccountVisible).values());
+            descriptorList.addAll(new DashboardStorage().getDashboards(userID, accountID, conn, testAccountVisible).values());
+            descriptorList.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn, testAccountVisible).values());
             Map<String, Integer> countMap = new HashMap<String, Integer>();
             Set<String> dupeNames = new HashSet<String>();
             Set<String> allNames = new HashSet<String>();
@@ -629,17 +642,43 @@ public class FeedService {
         }
     }
 
-    public CompositeResponse getMultipleFeeds(long firstID, long secondID) {
+    public CompositeResponse getMultipleFeeds(EIDescriptor firstID, EIDescriptor secondID) {
         CompositeResponse compositeResponse = new CompositeResponse();
         try {
-            FeedDefinition first = getFeedDefinition(firstID);
-            compositeResponse.setFirstFields(first.getFields());
-            compositeResponse.setFirstID(firstID);
-            compositeResponse.setFirstName(first.getFeedName());
-            FeedDefinition second = getFeedDefinition(secondID);
-            compositeResponse.setSecondFields(second.getFields());
-            compositeResponse.setSecondID(secondID);
-            compositeResponse.setSecondName(second.getFeedName());
+            if (firstID.getType() == EIDescriptor.DATA_SOURCE) {
+                FeedDefinition first = getFeedDefinition(firstID.getId());
+                compositeResponse.setFirstFields(first.getFields());
+                compositeResponse.setFirstID(firstID.getId());
+                compositeResponse.setFirstName(first.getFeedName());
+            } else {
+                List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
+                List<FeedNode> children = new DataService().addonFields(firstID.getId()).getChildren();
+                for (FeedNode child : children) {
+                    AnalysisItemNode analysisItemNode = (AnalysisItemNode) child;
+                    fields.add(analysisItemNode.getAnalysisItem());
+                }
+                compositeResponse.setFirstFields(fields);
+                compositeResponse.setFirstID(firstID.getId());
+                compositeResponse.setFirstName(firstID.getName());
+            }
+
+            if (secondID.getType() == EIDescriptor.DATA_SOURCE) {
+                FeedDefinition second = getFeedDefinition(secondID.getId());
+                compositeResponse.setSecondFields(second.getFields());
+                compositeResponse.setSecondID(secondID.getId());
+                compositeResponse.setSecondName(second.getFeedName());
+            } else {
+                List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
+                List<FeedNode> children = new DataService().addonFields(secondID.getId()).getChildren();
+                for (FeedNode child : children) {
+                    AnalysisItemNode analysisItemNode = (AnalysisItemNode) child;
+                    fields.add(analysisItemNode.getAnalysisItem());
+                }
+                compositeResponse.setSecondFields(fields);
+                compositeResponse.setSecondID(secondID.getId());
+                compositeResponse.setSecondName(secondID.getName());
+            }
+
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

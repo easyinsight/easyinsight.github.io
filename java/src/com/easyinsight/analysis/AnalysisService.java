@@ -268,6 +268,7 @@ public class AnalysisService {
                 reportJoins.setJoinOverrideMap(map);
                 reportJoins.setDataSourceMap(dataSourceMap);
                 reportJoins.setConfigurableDataSources(configurableDataSources);
+                reportJoins.setDataSourceAddonReports(dataSource.getAddonReports());
             } else if (dataSource instanceof FederatedDataSource) {
                 FederatedDataSource federatedDataSource = (FederatedDataSource) dataSource;
                 Map<String, List<JoinOverride>> map = new HashMap<String, List<JoinOverride>>();
@@ -309,21 +310,52 @@ public class AnalysisService {
     }
 
     private void populateMap(Map<String, List<JoinOverride>> map, Map<String, List<DataSourceDescriptor>> dataSourceMap, List<DataSourceDescriptor> configurableDataSources,
-                             CompositeFeedDefinition compositeFeedDefinition, List<AnalysisItem> items, EIConnection conn) throws SQLException {
+                             CompositeFeedDefinition compositeFeedDefinition, List<AnalysisItem> items, EIConnection conn) throws SQLException, CloneNotSupportedException {
         List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
 
         configurableDataSources.add(new DataSourceDescriptor(compositeFeedDefinition.getFeedName(), compositeFeedDefinition.getDataFeedID(), compositeFeedDefinition.getFeedType().getType(),
                 false, compositeFeedDefinition.getDataSourceBehavior()));
+        Feed feed = FeedRegistry.instance().getFeed(compositeFeedDefinition.getDataFeedID(), conn);
         for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
             JoinOverride joinOverride = new JoinOverride();
-            FeedDefinition source = new FeedStorage().getFeedDefinitionData(connection.getSourceFeedID());
-            FeedDefinition target = new FeedStorage().getFeedDefinitionData(connection.getTargetFeedID());
+            String sourceName;
+            String targetName;
+            if (connection.getSourceFeedID() != null && connection.getSourceFeedID() > 0) {
+                PreparedStatement stmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                stmt.setLong(1, connection.getSourceFeedID());
+                ResultSet rs = stmt.executeQuery();
+                rs.next();
+                sourceName = rs.getString(1);
+                stmt.close();
+            } else {
+                PreparedStatement stmt = conn.prepareStatement("SELECT TITLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                stmt.setLong(1, connection.getSourceReportID());
+                ResultSet rs = stmt.executeQuery();
+                rs.next();
+                sourceName = rs.getString(1);
+                stmt.close();
+            }
+            if (connection.getTargetFeedID() != null && connection.getTargetFeedID() > 0) {
+                PreparedStatement stmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                stmt.setLong(1, connection.getTargetFeedID());
+                ResultSet rs = stmt.executeQuery();
+                rs.next();
+                targetName = rs.getString(1);
+                stmt.close();
+            } else {
+                PreparedStatement stmt = conn.prepareStatement("SELECT TITLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                stmt.setLong(1, connection.getTargetReportID());
+                ResultSet rs = stmt.executeQuery();
+                rs.next();
+                targetName = rs.getString(1);
+                stmt.close();
+            }
             joinOverride.setDataSourceID(compositeFeedDefinition.getDataFeedID());
-            joinOverride.setSourceItem(findSourceItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
-            joinOverride.setTargetItem(findTargetItem(connection, items == null ? compositeFeedDefinition.getFields() : items));
+            joinOverride.setSourceItem(findSourceItem(connection, items == null ? feed.getFields() : items));
+            joinOverride.setTargetItem(findTargetItem(connection, items == null ? feed.getFields() : items));
             if (joinOverride.getSourceItem() != null && joinOverride.getTargetItem() != null) {
-                joinOverride.setSourceName(source.getFeedName());
-                joinOverride.setTargetName(target.getFeedName());
+                joinOverride.setSourceName(sourceName);
+                joinOverride.setTargetName(targetName);
                 joinOverrides.add(joinOverride);
             }
         }
@@ -341,23 +373,44 @@ public class AnalysisService {
         dataSourceMap.put(String.valueOf(compositeFeedDefinition.getDataFeedID()), dataSources);
     }
 
-    private AnalysisItem findSourceItem(CompositeFeedConnection connection, List<AnalysisItem> items) {
+    private AnalysisItem findSourceItem(CompositeFeedConnection connection, List<AnalysisItem> items) throws CloneNotSupportedException {
         AnalysisItem analysisItem = null;
         for (AnalysisItem item : items) {
             Key key = item.getKey();
-            if (key instanceof DerivedKey) {
-                DerivedKey derivedKey = (DerivedKey) key;
-                if (derivedKey.getFeedID() == connection.getSourceFeedID()) {
-                    if (connection.getSourceJoin() != null) {
-                        if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getSourceJoin().toKeyString())) {
-                            analysisItem = item;
-                            break;
-                        }
-                    } else {
-                        if (connection.getSourceItem() != null) {
-                            if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getSourceItem().toDisplay().equals(item.toDisplay())) {
+            if (connection.getSourceFeedID() != null && connection.getSourceFeedID() > 0) {
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    if (derivedKey.getFeedID() == connection.getSourceFeedID()) {
+                        if (connection.getSourceJoin() != null) {
+                            if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getSourceJoin().toKeyString())) {
                                 analysisItem = item;
                                 break;
+                            }
+                        } else {
+                            if (connection.getSourceItem() != null) {
+                                if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getSourceItem().toDisplay().equals(item.toDisplay())) {
+                                    analysisItem = item;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if (connection.getSourceReportID() != null && connection.getSourceReportID() > 0) {
+                if (key instanceof ReportKey) {
+                    ReportKey reportKey = (ReportKey) key;
+                    if (reportKey.getReportID() == connection.getSourceReportID()) {
+                        if (connection.getSourceJoin() != null) {
+                            if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getSourceJoin().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
+                        } else {
+                            if (connection.getSourceItem() != null) {
+                                if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getSourceItem().toDisplay().equals(item.toDisplay())) {
+                                    analysisItem = item;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -368,16 +421,31 @@ public class AnalysisService {
         if (analysisItem == null && connection.getSourceItem() != null) {
             for (AnalysisItem item : items) {
                 Key key = item.getKey();
-                if (key instanceof DerivedKey) {
-                    DerivedKey derivedKey = (DerivedKey) key;
-                    if (derivedKey.getFeedID() == connection.getSourceFeedID()) {
-                        if (connection.getSourceItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
-                            analysisItem = item;
-                            break;
+                if (connection.getSourceFeedID() != null && connection.getSourceFeedID() > 0) {
+                    if (key instanceof DerivedKey) {
+                        DerivedKey derivedKey = (DerivedKey) key;
+                        if (derivedKey.getFeedID() == connection.getSourceFeedID()) {
+                            if (connection.getSourceItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
+                        }
+                    }
+                } else if (connection.getSourceReportID() != null && connection.getSourceReportID() > 0) {
+                    if (key instanceof ReportKey) {
+                        ReportKey derivedKey = (ReportKey) key;
+                        if (derivedKey.getReportID() == connection.getSourceReportID()) {
+                            if (connection.getSourceItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
                         }
                     }
                 }
             }
+        }
+        if (analysisItem != null) {
+            analysisItem = analysisItem.clone();
         }
         return analysisItem;
     }
@@ -391,23 +459,44 @@ public class AnalysisService {
         return null;
     }
 
-    private AnalysisItem findTargetItem(CompositeFeedConnection connection, List<AnalysisItem> items) {
+    private AnalysisItem findTargetItem(CompositeFeedConnection connection, List<AnalysisItem> items) throws CloneNotSupportedException {
         AnalysisItem analysisItem = null;
         for (AnalysisItem item : items) {
             Key key = item.getKey();
-            if (key instanceof DerivedKey) {
-                DerivedKey derivedKey = (DerivedKey) key;
-                if (derivedKey.getFeedID() == connection.getTargetFeedID()) {
-                    if (connection.getTargetJoin() != null) {
-                        if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getTargetJoin().toKeyString())) {
-                            analysisItem = item;
-                            break;
-                        }
-                    } else {
-                        if (connection.getTargetItem() != null) {
-                            if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getTargetItem().toDisplay().equals(item.toDisplay())) {
+            if (connection.getTargetFeedID() != null && connection.getTargetFeedID() > 0) {
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    if (derivedKey.getFeedID() == connection.getTargetFeedID()) {
+                        if (connection.getTargetJoin() != null) {
+                            if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getTargetJoin().toKeyString())) {
                                 analysisItem = item;
                                 break;
+                            }
+                        } else {
+                            if (connection.getTargetItem() != null) {
+                                if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getTargetItem().toDisplay().equals(item.toDisplay())) {
+                                    analysisItem = item;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if (connection.getTargetReportID() != null && connection.getTargetReportID() > 0) {
+                if (key instanceof ReportKey) {
+                    ReportKey reportKey = (ReportKey) key;
+                    if (reportKey.getReportID() == connection.getTargetReportID()) {
+                        if (connection.getTargetJoin() != null) {
+                            if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getTargetJoin().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
+                        } else {
+                            if (connection.getTargetItem() != null) {
+                                if (item.hasType(AnalysisItemTypes.DIMENSION) && connection.getTargetItem().toDisplay().equals(item.toDisplay())) {
+                                    analysisItem = item;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -418,16 +507,31 @@ public class AnalysisService {
         if (analysisItem == null && connection.getTargetItem() != null) {
             for (AnalysisItem item : items) {
                 Key key = item.getKey();
-                if (key instanceof DerivedKey) {
-                    DerivedKey derivedKey = (DerivedKey) key;
-                    if (derivedKey.getFeedID() == connection.getTargetFeedID()) {
-                        if (connection.getTargetItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
-                            analysisItem = item;
-                            break;
+                if (connection.getTargetFeedID() != null && connection.getTargetFeedID() > 0) {
+                    if (key instanceof DerivedKey) {
+                        DerivedKey derivedKey = (DerivedKey) key;
+                        if (derivedKey.getFeedID() == connection.getTargetFeedID()) {
+                            if (connection.getTargetItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
+                        }
+                    }
+                } else if (connection.getTargetReportID() != null && connection.getTargetReportID() > 0) {
+                    if (key instanceof ReportKey) {
+                        ReportKey derivedKey = (ReportKey) key;
+                        if (derivedKey.getReportID() == connection.getTargetReportID()) {
+                            if (connection.getTargetItem().getKey().toBaseKey().toKeyString().equals(item.getKey().toBaseKey().toKeyString())) {
+                                analysisItem = item;
+                                break;
+                            }
                         }
                     }
                 }
             }
+        }
+        if (analysisItem != null) {
+            analysisItem = analysisItem.clone();
         }
         return analysisItem;
     }
@@ -607,8 +711,6 @@ public class AnalysisService {
 
             }
 
-            System.out.println("filtered values = " + filteredValues);
-
             WSListDefinition existingReport = new WSListDefinition();
             existingReport.setDataFeedID(dataSource.getDataFeedID());
 
@@ -629,13 +731,11 @@ public class AnalysisService {
             for (IRow row : existing.getRows()) {
                 recordIDValues.add(row.getValue(recordID));
             }
-            System.out.println("retrieving record IDs of " + recordIDValues);
             filterValueDefinition.setFilteredValues(recordIDValues);
             DataStorage readStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID());
             ActualRowSet rowSet = readStorage.allData(recordIDFilters, useSource.getFields(), null, new InsightRequestMetadata());
             readStorage.closeConnection();
 
-            System.out.println("retrieved " + rowSet.getRows().size() + " rows matching this existing data");
 
             Map<ImportKey, ActualRow> existingMap = new HashMap<ImportKey, ActualRow>();
             for (ActualRow actualRow : rowSet.getRows()) {
@@ -663,15 +763,12 @@ public class AnalysisService {
                 ImportKey importKey = new ImportKey(providerID.toString(), dateValue.getDate());
                 ActualRow actualRow = existingMap.get(importKey);
                 if (actualRow == null) {
-                    System.out.println("no row found for " + provider.toString() + " - " + dateValue.toString());
                     endTargets.add(row);
                 } else {
                     // update actualRow with the value from row
-                    System.out.println("found existing row for " + provider.toString() + " - " + dateValue.toString());
                     for (AnalysisItem analysisItem : useSource.getFields()) {
                         Value value = row.getValue(analysisItem);
                         if (value.type() != Value.EMPTY) {
-                            System.out.println("\tmerging in value from " + analysisItem.qualifiedName());
                             actualRow.getValues().put(analysisItem.qualifiedName(), value);
                         }
                     }
@@ -681,13 +778,11 @@ public class AnalysisService {
 
             }
 
-            System.out.println("Determining calculations to apply...");
             List<IDataTransform> transforms = new ArrayList<IDataTransform>();
             if (useSource.getMarmotScript() != null && !"".equals(useSource.getMarmotScript())) {
                 StringTokenizer toker = new StringTokenizer(useSource.getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
-                    System.out.println("Adding " + line);
                     transforms.addAll(new ReportCalculation(line).apply(useSource));
                 }
             }
@@ -867,7 +962,7 @@ public class AnalysisService {
         }
     }
 
-    private void createOptionMap(FeedDefinition dataSource, FeedDefinition useSource, Map<String, Collection<JoinLabelOption>> optionMap) {
+    private void createOptionMap(FeedDefinition dataSource, FeedDefinition useSource, Map<String, Collection<JoinLabelOption>> optionMap) throws CloneNotSupportedException {
         DerivedAnalysisDimension calculation = new DerivedAnalysisDimension();
         NamedKey key = new NamedKey("TmpCalculation");
         calculation.setKey(key);
@@ -1424,8 +1519,8 @@ public class AnalysisService {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
         try {
-            //boolean testAccountVisible = FeedService.testAccountVisible(conn);
-            return analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn).values();
+            boolean testAccountVisible = FeedService.testAccountVisible(conn);
+            return analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn, testAccountVisible).values();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

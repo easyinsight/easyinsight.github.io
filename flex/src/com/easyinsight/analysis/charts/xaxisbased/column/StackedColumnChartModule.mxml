@@ -31,7 +31,6 @@
         import mx.charts.CategoryAxis;
         import mx.charts.ChartItem;
         import mx.charts.ColumnChart;
-        import mx.charts.Legend;
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.CartesianCanvasValue;
         import mx.charts.chartClasses.CartesianDataCanvas;
@@ -39,14 +38,13 @@
         import mx.charts.chartClasses.Series;
         import mx.charts.events.ChartItemEvent;
         import mx.charts.series.ColumnSeries;
-        import mx.charts.series.ColumnSet;
         import mx.charts.series.items.ColumnSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
+        import mx.controls.Alert;
         import mx.controls.Label;
         import mx.events.FlexEvent;
         import mx.formatters.Formatter;
-        import mx.graphics.IFill;
         import mx.graphics.SolidColor;
 
         [Bindable]
@@ -101,6 +99,7 @@
             if (xAxisItem.reportFieldExtension != null && xAxisItem.reportFieldExtension is ChartReportFieldExtension) {
                 var cfre:ChartReportFieldExtension = xAxisItem.reportFieldExtension as ChartReportFieldExtension;
                 if (cfre.goal != null) {
+
                     var value:Value = additionalProps["goal" + cfre.goal.qualifiedName()];
 
                     if (value != null) {
@@ -124,12 +123,10 @@
                         );
 
                         dataCanvas.moveTo(new CartesianCanvasValue(left[xAxisItem.qualifiedName()], -200), num);
-                        //dataCanvas.moveTo(left[xAxisItem.qualifiedName()], 300000);
-                        //dataCanvas.moveTo("James Boe", 500000);
                         dataCanvas.lineTo(new CartesianCanvasValue(right[xAxisItem.qualifiedName()], 200), num);
-                        /*var label:Label = new Label();
-                         label.text = "Goal";
-                         dataCanvas.addDataChild(label, new CartesianCanvasValue(mid[xAxisItem.qualifiedName()], -50), 300000);*/
+                        var label:Label = new Label();
+                        label.text = "Goal";
+                        dataCanvas.addDataChild(label, new CartesianCanvasValue(mid[xAxisItem.qualifiedName()], -50), 300000);
                     }
                 }
             }
@@ -330,9 +327,7 @@
 
 
                 var newXAxisItem:AnalysisItem = columnChartDef.xaxis;
-                if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
-                    xAxisItem = newXAxisItem;
-                }
+                xAxisItem = newXAxisItem;
 
 
 
@@ -343,7 +338,7 @@
 
                 xAxis.categoryField = newXAxisItem.qualifiedName();
 
-                var newXAxisTitle:String = newXAxisItem.display;
+                var newXAxisTitle:String = (columnChartDef.xAxisLabel != null && columnChartDef.xAxisLabel != "") ? columnChartDef.xAxisLabel : newXAxisItem.display;
                 if (newXAxisTitle != xAxisTitle) {
                     xAxisTitle = newXAxisTitle;
                     xAxis.title = xAxisTitle;
@@ -354,7 +349,7 @@
                     yField = newYField;
                 }
 
-                var newYAxisTitle:String = newYAxisItem.display;
+                var newYAxisTitle:String = (columnChartDef.yAxisLabel != null && columnChartDef.yAxisLabel != "") ? columnChartDef.yAxisLabel : newYAxisItem.display;
                 if (newYAxisTitle != yAxisTitle) {
                     yAxisTitle = newYAxisTitle;
                     yAxis.title = yAxisTitle;

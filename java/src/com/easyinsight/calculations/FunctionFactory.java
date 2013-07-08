@@ -219,6 +219,8 @@ public class FunctionFactory {
             return new PreviousRecord();
         } else if (s.equals("first")) {
             return new FirstRecord();
+        } else if (s.equals("nth")) {
+            return new NthRecord();
         } else if (s.equals("last")) {
             return new LastRecord();
         } else if (s.equals("days")) {

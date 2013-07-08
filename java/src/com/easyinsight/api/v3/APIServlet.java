@@ -3,6 +3,7 @@ package com.easyinsight.api.v3;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.api.*;
+import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -113,6 +114,7 @@ public abstract class APIServlet extends HttpServlet {
             }
         }
         Date end = new Date();
+        BenchmarkManager.recordBenchmark(this.getClass().getCanonicalName(), (end.getTime() - start.getTime()), userResponse.getUserID());
         System.out.println("API Call: " + this.getClass().getCanonicalName() + " Duration: " + (end.getTime() - start.getTime()));
     }
 

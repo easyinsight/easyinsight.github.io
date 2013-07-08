@@ -1,20 +1,24 @@
 package com.easyinsight.scheduler;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
-import com.easyinsight.analysis.AnalysisMeasure;
+import com.csvreader.CsvReader;
+import com.easyinsight.analysis.*;
+import com.easyinsight.core.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceInternalService;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
-import com.easyinsight.dataset.PersistableDataSetForm;
+import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.userupload.DefaultFormatMapper;
-import com.easyinsight.userupload.UploadFormat;
+import com.ibm.icu.text.CharsetDetector;
+import com.ibm.icu.text.CharsetMatch;
 
-import javax.persistence.Transient;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,11 +33,6 @@ public class FileProcessOptimizedUpdateScheduledTask {
     private long uploadID;
     private long userID;
     private long accountID;
-
-    @Transient
-    private boolean background;
-    @Transient
-    private String feedName;
 
     private List<AnalysisItem> newFields;
 
@@ -54,38 +53,123 @@ public class FileProcessOptimizedUpdateScheduledTask {
     }
 
     public void updateData(long feedID, boolean update, EIConnection conn, byte[] bytes) throws Exception {
-        DataStorage metadata = null;
+        DataStorage tableDef = null;
         try {
             FileBasedFeedDefinition feedDefinition = (FileBasedFeedDefinition) new FeedStorage().getFeedDefinitionData(feedID, conn);
-            AnalysisMeasure rowCount = null;
+            Key countKey = null;
             for (AnalysisItem field : feedDefinition.getFields()) {
                 if (field.hasType(AnalysisItemTypes.MEASURE)) {
                     AnalysisMeasure measure = (AnalysisMeasure) field;
                     if (measure.isRowCountField()) {
-                        rowCount = measure;
+                        countKey = measure.getKey();
                     }
                 }
             }
+
             if (newFields != null && newFields.size() > 0) {
                 feedDefinition.getFields().addAll(newFields);
             }
             feedDefinition.setLastRefreshStart(new Date());
             new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn);
-            metadata = DataStorage.writeConnection(feedDefinition, conn, accountID);
-            UploadFormat uploadFormat = feedDefinition.getUploadFormat();
-            PersistableDataSetForm form = uploadFormat.createDataSet(bytes, feedDefinition.getFields(), new DefaultFormatMapper(feedDefinition.getFields()));
+            tableDef = DataStorage.writeConnection(feedDefinition, conn, accountID);
             if (update) {
-                metadata.truncate();
-                metadata.insertData(form.toDataSet(rowCount));
-            } else {
-                metadata.insertData(form.toDataSet(rowCount));
+                tableDef.truncate();
             }
-            metadata.commit();
+
+            CharsetDetector charsetDetector = new CharsetDetector();
+            charsetDetector.setText(bytes);
+            CharsetMatch[] charsetMatches = charsetDetector.detectAll();
+            CsvReader r = null;
+            for (CharsetMatch charsetMatch : charsetMatches) {
+                try {
+                    String charsetName = charsetMatch.getName();
+                    ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+                    r = new CsvReader(stream, Charset.forName(charsetName));
+                    break;
+                } catch (UnsupportedCharsetException e) {
+                    // continue
+                }
+            }
+            Map<String, AnalysisItem> analysisItems = new HashMap<String, AnalysisItem>();
+            for (AnalysisItem field : feedDefinition.getFields()) {
+                analysisItems.put(field.getKey().toKeyString(), field);
+            }
+            String[] headerColumns = null;
+            boolean foundHeaders = false;
+            boolean foundRecord = true;
+
+            while (!foundHeaders && foundRecord) {
+                foundRecord = r.readRecord();
+                headerColumns = r.getValues();
+                if (r.getColumnCount() >= 1 && r.getColumnCount() == headerColumns.length) {
+                    foundHeaders = true;
+                }
+            }
+            if (!foundHeaders) {
+                throw new RuntimeException("We were unable to find headers in the file.");
+            }
+            DataSet dataSet = new DataSet();
+            long start = System.currentTimeMillis();
+            int i = 0;
+            while (r.readRecord()) {
+                IRow row = dataSet.createRow();
+                for(int j = 0;j < r.getColumnCount();j++) {
+                    String key = headerColumns[j];
+                    if (key.length() > 50) {
+                        key = key.substring(0, 50);
+                    }
+                    AnalysisItem analysisItem = analysisItems.get(key);
+                    if (analysisItem == null) {
+                        continue;
+                    }
+                    String string = r.get(j);
+                    Value value = transformValue(string, analysisItem);
+                    row.addValue(analysisItem.getKey(), value);
+                }
+                row.addValue(countKey, 1);
+                i++;
+                if (i == 1000) {
+                    tableDef.insertData(dataSet);
+                    dataSet = new DataSet();
+                    i = 0;
+                }
+            }
+            tableDef.insertData(dataSet);
+            System.out.println("Inserting into temp, elapsed time = " + (System.currentTimeMillis() - start));
+            /*tableDef = DataStorage.writeConnection(feedDefinition, conn);
+            tableDef.insertFromSelect(tempStorage.getTableName());*/
+            tableDef.commit();
+            conn.commit();
+            r.close();
         }
         catch(Exception se) {
-            if (metadata != null) metadata.rollback();
+            if (tableDef != null) tableDef.rollback();
             throw se;
         }
+    }
+
+    private Value transformValue(String string, AnalysisItem analysisItem) {
+        Value value;
+        if (string == null) {
+            value = new EmptyValue();
+        } else {
+            string = string.trim();
+            if (analysisItem == null) {
+                value = new EmptyValue();
+            } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                value = new NumericValue(NumericValue.produceDoubleValue(string));
+            } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                value = date.renameMeLater(new StringValue(string));
+                if (value instanceof DateValue) {
+                    DateValue dateValue = (DateValue) value;
+                    dateValue.setFormat(date.getCustomDateFormat());
+                }
+            } else {
+                value = new StringValue(string);
+            }
+        }
+        return value;
     }
 
 

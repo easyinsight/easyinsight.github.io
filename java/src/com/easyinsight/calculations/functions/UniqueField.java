@@ -1,18 +1,12 @@
 package com.easyinsight.calculations.functions;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.UniqueKey;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.calculations.FunctionException;
-import com.easyinsight.core.DerivedKey;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.NamedKey;
-import com.easyinsight.core.Value;
-import com.easyinsight.database.EIConnection;
+import com.easyinsight.core.*;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 
 /**
@@ -23,7 +17,18 @@ import java.util.HashMap;
 public class UniqueField extends Function {
     public Value evaluate() {
         WSAnalysisDefinition report = calculationMetadata.getReport();
-        String field = minusQuotes(0);
+        String field;
+        try {
+            Value param = getParameter(0);
+            if (param.type() != Value.EMPTY) {
+                field = minusQuotes(param).toString();
+            } else {
+                field = minusBrackets(getParameterName(0));
+            }
+        } catch (Exception e) {
+            field = minusBrackets(getParameterName(0));
+        }
+
         AnalysisItem match = null;
         for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
             if (field.equals(analysisItem.toDisplay())) {
@@ -39,27 +44,35 @@ public class UniqueField extends Function {
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
-        long id = toID(match.getKey());
+        UniqueKey id = toID(match.getKey());
         if (report.getUniqueIteMap() == null) {
-            report.setUniqueIteMap(new HashMap<Long, AnalysisItem>());
+            report.setUniqueIteMap(new HashMap<UniqueKey, AnalysisItem>());
         }
         report.getUniqueIteMap().put(id, clone);
         return null;
     }
 
-    private long toID(Key key) {
+    private UniqueKey toID(Key key) {
         if (key instanceof DerivedKey) {
             DerivedKey derivedKey = (DerivedKey) key;
             Key next = derivedKey.getParentKey();
             if (next instanceof NamedKey) {
-                return derivedKey.getFeedID();
+                return new UniqueKey(derivedKey.getFeedID(), UniqueKey.DERIVED);
             }
             return toID(next);
+        } else if (key instanceof ReportKey) {
+            ReportKey reportKey = (ReportKey) key;
+            return new UniqueKey(reportKey.getReportID(), UniqueKey.REPORT);
         }
-        return 0;
+        return null;
     }
 
     public int getParameterCount() {
         return 1;
+    }
+
+    @Override
+    public boolean onDemand() {
+        return true;
     }
 }

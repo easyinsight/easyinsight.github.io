@@ -28,6 +28,10 @@ import com.easyinsight.analysis.Key;
 			super();
 		}
 
+        public function get display():String {
+            return sourceFeedName + " " + sourceDisplay + " to " + targetFeedName + " " + targetDisplay;
+        }
+
         public function get sourceDisplay():String {
             if (sourceItem != null) {
                 return sourceItem.display;

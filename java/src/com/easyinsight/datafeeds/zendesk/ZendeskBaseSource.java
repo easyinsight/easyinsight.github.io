@@ -69,7 +69,8 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
                 } else if (restMethod.getStatusCode() >= 500) {
                     throw new RuntimeException("Zendesk server error--please try again later.");
                 }
-                results = (Map) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                results = (Map) o;
                 restMethod.releaseConnection();
                 successful = true;
             } catch (ReportException re) {
@@ -77,6 +78,11 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
             } catch (Exception e) {
                 LogClass.error(e);
                 retryCount++;
+                try {
+                    Thread.sleep(60000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
             }
         } while (!successful && retryCount < 10);
         if (!successful) {

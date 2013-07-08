@@ -11,6 +11,7 @@ import com.easyinsight.logging.LogClass;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Date;
 
 /**
@@ -81,13 +82,127 @@ public class BenchmarkManager {
         new InternalPublishService().addRow("Scheduled Task Benchmarks", row);
     }
 
-    public static void recordBenchmark(String category, long time) {
+    public static void recordBenchmark(String category, long time, long userID) {
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date) VALUES (?, ?, ?)");
+            PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id) VALUES (?, ?, ?, ?)");
             benchmarkStmt.setString(1, category);
             benchmarkStmt.setLong(2, time);
             benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
+            if (userID > 0) {
+                benchmarkStmt.setLong(4, userID);
+            } else {
+                benchmarkStmt.setNull(4, Types.BIGINT);
+            }
+            benchmarkStmt.execute();
+        } catch (SQLException e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static void recordBenchmarkForDataSource(String category, long time, long userID, long dataSourceID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, data_source_id) VALUES (?, ?, ?, ?, ?)");
+            benchmarkStmt.setString(1, category);
+            benchmarkStmt.setLong(2, time);
+            benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
+            if (userID > 0) {
+                benchmarkStmt.setLong(4, userID);
+            } else {
+                benchmarkStmt.setNull(4, Types.BIGINT);
+            }
+            benchmarkStmt.setLong(5, dataSourceID);
+            benchmarkStmt.execute();
+        } catch (SQLException e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static void recordBenchmarkForReport(String category, long time, long userID, long reportID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, report_id) VALUES (?, ?, ?, ?, ?)");
+            benchmarkStmt.setString(1, category);
+            benchmarkStmt.setLong(2, time);
+            benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
+            if (userID > 0) {
+                benchmarkStmt.setLong(4, userID);
+            } else {
+                benchmarkStmt.setNull(4, Types.BIGINT);
+            }
+            benchmarkStmt.setLong(5, reportID);
+            benchmarkStmt.execute();
+        } catch (SQLException e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static void recordBenchmarkForReport(String category, long time, long userID, long reportID, boolean html) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, report_id, html) " +
+                    "VALUES (?, ?, ?, ?, ?, ?)");
+            benchmarkStmt.setString(1, category);
+            benchmarkStmt.setLong(2, time);
+            benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
+            if (userID > 0) {
+                benchmarkStmt.setLong(4, userID);
+            } else {
+                benchmarkStmt.setNull(4, Types.BIGINT);
+            }
+            benchmarkStmt.setLong(5, reportID);
+            benchmarkStmt.setBoolean(6, html);
+            benchmarkStmt.execute();
+        } catch (SQLException e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static void recordBenchmarkForDashboard(String category, long time, long userID, long dashboardID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, dashboard_id) VALUES (?, ?, ?, ?, ?)");
+            benchmarkStmt.setString(1, category);
+            benchmarkStmt.setLong(2, time);
+            benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
+            if (userID > 0) {
+                benchmarkStmt.setLong(4, userID);
+            } else {
+                benchmarkStmt.setNull(4, Types.BIGINT);
+            }
+            benchmarkStmt.setLong(5, dashboardID);
+            benchmarkStmt.execute();
+        } catch (SQLException e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static void recordBenchmarkForDashboard(String category, long time, long userID, long dashboardID, boolean html) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, dashboard_id, html) " +
+                    "VALUES (?, ?, ?, ?, ?, ?)");
+            benchmarkStmt.setString(1, category);
+            benchmarkStmt.setLong(2, time);
+            benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
+            if (userID > 0) {
+                benchmarkStmt.setLong(4, userID);
+            } else {
+                benchmarkStmt.setNull(4, Types.BIGINT);
+            }
+            benchmarkStmt.setLong(5, dashboardID);
+            benchmarkStmt.setBoolean(6, html);
             benchmarkStmt.execute();
         } catch (SQLException e) {
             LogClass.error(e);

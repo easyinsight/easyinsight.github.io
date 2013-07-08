@@ -6,6 +6,7 @@ import com.easyinsight.analysis.definitions.WSYTDDefinition;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.ReportKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
@@ -200,20 +201,20 @@ public abstract class Pipeline {
             }
         }
 
-        Map<Long, AnalysisItem> uniqueFields = new HashMap<Long, AnalysisItem>();
+        Map<UniqueKey, AnalysisItem> uniqueFields = new HashMap<UniqueKey, AnalysisItem>();
 
         if (report.getUniqueIteMap() != null) {
-            Set<Long> ids = new HashSet<Long>();
+            Set<UniqueKey> ids = new HashSet<UniqueKey>();
             for (AnalysisItem analysisItem : allNeededAnalysisItems) {
                 Key key = analysisItem.getKey();
-                long dsID = toID(key);
-                if (dsID != 0) {
+                UniqueKey dsID = toID(key);
+                if (dsID != null) {
                     ids.add(dsID);
                 }
             }
 
 
-            for (Long id : ids) {
+            for (UniqueKey id : ids) {
                 AnalysisDimension analysisDimension = (AnalysisDimension) report.getUniqueIteMap().get(id);
                 if (analysisDimension != null) {
                     //analysisDimension.setGroup(false);
@@ -261,17 +262,20 @@ public abstract class Pipeline {
                 uniqueFields);
         return allNeededAnalysisItems;
     }
-    
-    private long toID(Key key) {
+
+    private UniqueKey toID(Key key) {
         if (key instanceof DerivedKey) {
             DerivedKey derivedKey = (DerivedKey) key;
             Key next = derivedKey.getParentKey();
             if (next instanceof NamedKey) {
-                return derivedKey.getFeedID();
+                return new UniqueKey(derivedKey.getFeedID(), UniqueKey.DERIVED);
             }
             return toID(next);
+        } else if (key instanceof ReportKey) {
+            ReportKey reportKey = (ReportKey) key;
+            return new UniqueKey(reportKey.getReportID(), UniqueKey.REPORT);
         }
-        return 0;
+        return null;
     }
 
     protected final Collection<AnalysisItem> items(int type, Collection<AnalysisItem> items) {
