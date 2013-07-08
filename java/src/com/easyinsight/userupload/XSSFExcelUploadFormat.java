@@ -136,10 +136,12 @@ public class XSSFExcelUploadFormat extends UploadFormat {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM EXCEL_UPLOAD_FORMAT WHERE FEED_ID = ?");
         clearStmt.setLong(1, feedID);
         clearStmt.executeUpdate();
+        clearStmt.close();
         PreparedStatement insertFormatStmt = conn.prepareStatement("INSERT INTO EXCEL_UPLOAD_FORMAT (FEED_ID, EXCEL_MODEL) VALUES (?, ?)");
         insertFormatStmt.setLong(1, feedID);
         insertFormatStmt.setInt(2, FileBasedFeedDefinition.XSSF_MODEL);
         insertFormatStmt.execute();
+        insertFormatStmt.close();
     }
 
     @NotNull
