@@ -49,7 +49,7 @@
             t = hibernateSession.beginTransaction();
 
             account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
-
+            System.out.println("Account " + account.getAccountID() + " starting submittal process...");
             // clear out any existing credit card or address information
 
             Customer btCustomer = new BrainTreeBlueBillingSystem().getCustomer(account);
@@ -76,6 +76,10 @@
                 } else {
                     t.rollback();
                     String errorCode = result.getErrors().getAllDeepValidationErrors().get(0).getCode().code;
+                    System.out.println("Account " + account.getAccountID() + " has the following errors: ");
+                    for(ValidationError v : result.getErrors().getAllDeepValidationErrors()) {
+                        System.out.println("Account " + account.getAccountID() + ": " + v.getMessage());
+                    }
                     int responseCode;
                     if ("200".equals(errorCode)) responseCode = BillingResponse.DECLINED;
                     else if ("204".equals(errorCode)) responseCode = BillingResponse.TRANSACTION_NOT_ALLOWED;

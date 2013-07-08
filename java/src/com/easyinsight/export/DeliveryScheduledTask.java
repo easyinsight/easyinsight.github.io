@@ -521,7 +521,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             LogClass.error(e);
                         }
                     }
-                    LogClass.error("Failed to generate Selenium report for " + deliveryInfo.getId() + ", ended up timing out.");
+                    LogClass.error("Failed to generate Selenium report for report ID " + deliveryInfo.getId() + ", ended up timing out.");
                 }
             } else {
                 System.out.println("Running dashboard " + deliveryInfo.getId() + " for Selenium delivery");

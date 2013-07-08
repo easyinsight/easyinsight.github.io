@@ -76,15 +76,19 @@
 
         try {
             account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+            System.out.println("Account " + account.getAccountID() + " starting billing process.");
             if (account.getPricingModel() == Account.NEW) {
+                System.out.println("Account " + account.getAccountID() + " is on new pricing model, starting new model billing...");
                 response.sendRedirect("newModelBilling.jsp");
                 return;
             }
             accountTypeChange = (AccountTypeChange) session.getAttribute("accountTypeChange");
             if (accountTypeChange != null) {
+                System.out.println("Account " + account.getAccountID() + " is changing the cost.");
                 cost = Account.createTotalCost(account.getPricingModel(), accountTypeChange.getAccountType(), accountTypeChange.getDesigners(),
                         accountTypeChange.getStorage(), 0, accountTypeChange.isYearly());
                 credit = Account.calculateCredit(account);
+                System.out.println("Account " + account.getAccountID() + " new cost: " + cost);
                 if (credit >= cost) {
                     session.removeAttribute("accountTypeChange");
                     // not supposed to get here...
@@ -93,6 +97,7 @@
                 }
             } else {
                 cost = account.createTotalCost();
+                System.out.println("Account " + account.getAccountID() + " cost: " + cost);
             }
         } finally {
             hibernateSession.close();
@@ -105,17 +110,18 @@
         if (accountTypeChange != null && (cost - credit) > 0) {
 
             // it's an upgrade
+            System.out.println("Account " + account.getAccountID() + " is upgrading their account.");
 
             chargeNow = true;
         }  else if (account.getAccountState() == Account.DELINQUENT || account.getAccountState() == Account.BILLING_FAILED || account.getAccountState() == Account.CLOSED) {
 
             // it's restoring service to a locked account
-
+            System.out.println("Account " + account.getAccountID() + " is restoring service to their locked account.");
             chargeNow = true;
         } else {
 
             // it's putting in new info or updating on a trial or active account
-
+            System.out.println("Account " + account.getAccountID() + " is putting in new info or updating a trial or active account.");
             chargeNow = false;
         }
 
@@ -125,10 +131,14 @@
         String time = df.format(d);
 
         CustomerRequest trParams = new CustomerRequest();
-        if(account.isBillingInformationGiven() != null && account.isBillingInformationGiven())
+        if(account.isBillingInformationGiven() != null && account.isBillingInformationGiven()) {
             trParams = trParams.customerId(String.valueOf(account.getAccountID()));
-        else
+            System.out.println("Account " + account.getAccountID() + " billing information is given - customer id is set.");
+        }
+        else {
             trParams = trParams.id(String.valueOf(account.getAccountID()));
+            System.out.println("Account " + account.getAccountID() + " billing information is NOT given - customer id is set to be created.");
+        }
         trParams = trParams.creditCard().options().makeDefault(true).done().done();
 
         String trData = new BrainTreeBlueBillingSystem().getRedirect(trParams, account.getPricingModel());
