@@ -985,6 +985,7 @@ public class UserUploadService {
                     final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                     final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
                     final String personaName = SecurityUtil.getPersonaName();
+                    //final boolean accountReports = SecurityUtil.isAccountReports();
                     new Thread(new Runnable() {
 
                         public void run() {
@@ -1122,13 +1123,24 @@ public class UserUploadService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            FileProcessUpdateScheduledTask task = new FileProcessUpdateScheduledTask();
-            task.setFeedID(feedID);
-            task.setNewFields(newFields);
-            task.setUpdate(update);
-            task.setUserID(SecurityUtil.getUserID());
-            task.setAccountID(SecurityUtil.getAccountID());
-            task.updateData(feedID, update, conn, bytes);
+            FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
+            if (dataSource.getUploadFormat() instanceof CsvFileUploadFormat) {
+                FileProcessOptimizedUpdateScheduledTask task = new FileProcessOptimizedUpdateScheduledTask();
+                task.setFeedID(feedID);
+                task.setNewFields(newFields);
+                task.setUpdate(update);
+                task.setUserID(SecurityUtil.getUserID());
+                task.setAccountID(SecurityUtil.getAccountID());
+                task.updateData(feedID, update, conn, bytes);
+            } else {
+                FileProcessUpdateScheduledTask task = new FileProcessUpdateScheduledTask();
+                task.setFeedID(feedID);
+                task.setNewFields(newFields);
+                task.setUpdate(update);
+                task.setUserID(SecurityUtil.getUserID());
+                task.setAccountID(SecurityUtil.getAccountID());
+                task.updateData(feedID, update, conn, bytes);
+            }
             conn.commit();
         } catch (Throwable e) {
             LogClass.error(e);
@@ -1293,6 +1305,7 @@ public class UserUploadService {
                 final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                 final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
                 final String personaName = SecurityUtil.getPersonaName();
+                //final boolean accountReports = SecurityUtil.isAccountReports();
                 new Thread(new Runnable() {
 
                     public void run() {
