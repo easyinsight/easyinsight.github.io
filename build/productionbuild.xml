@@ -366,16 +366,19 @@
             <include-sources dir="${teamcity.build.checkoutDir}/flex/swc/core" includes="*"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="https://www.easy-insight.com/framework_3.6.0.16995.swz"/>
+                <policy-file-url></policy-file-url>
                 <url rsl-url="https://www.easy-insight.com/framework_3.6.0.16995.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
                 <url rsl-url="https://www.easy-insight.com/datavisualization_3.6.0.16995.swz"/>
+                <policy-file-url></policy-file-url>
                 <url rsl-url="https://www.easy-insight.com/datavisualization_3.6.0.16995.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="https://www.easy-insight.com/rpc_3.6.0.16995.swz"/>
+                <policy-file-url></policy-file-url>
                 <url rsl-url="https://www.easy-insight.com/rpc_3.6.0.16995.swf"/>
             </runtime-shared-library-path>
         </compc>
@@ -396,16 +399,19 @@
                 <load-config filename="${teamcity.build.checkoutDir}/flex/@{buildFile}"/>
                 <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                     <url rsl-url="https://www.easy-insight.com/framework_3.6.0.16995.swz"/>
+                    <policy-file-url></policy-file-url>
                     <url rsl-url="https://www.easy-insight.com/framework_3.6.0.16995.swf"/>
                 </runtime-shared-library-path>
 
                 <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
                     <url rsl-url="https://www.easy-insight.com/datavisualization_3.6.0.16995.swz"/>
+                    <policy-file-url></policy-file-url>
                     <url rsl-url="https://www.easy-insight.com/datavisualization_3.6.0.16995.swf"/>
                 </runtime-shared-library-path>
 
                 <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                     <url rsl-url="https://www.easy-insight.com/rpc_3.6.0.16995.swz"/>
+                    <policy-file-url></policy-file-url>
                     <url rsl-url="https://www.easy-insight.com/rpc_3.6.0.16995.swf"/>
                 </runtime-shared-library-path>
                 <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
