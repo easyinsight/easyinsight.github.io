@@ -43,7 +43,7 @@ public class GoogleSpreadsheetUploadContext extends UploadContext {
     private Map<Key, Set<String>> sampleMap;
 
     @Override
-    public List<AnalysisItem> guessFields(EIConnection conn) throws Exception {
+    public List<AnalysisItem> guessFields(EIConnection conn, byte[] bytes) throws Exception {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT GOOGLE_DOCS_TOKEN.token_key, GOOGLE_DOCS_TOKEN.token_secret FROM " +
                 "GOOGLE_DOCS_TOKEN WHERE GOOGLE_DOCS_TOKEN.user_id = ?");
         queryStmt.setLong(1, SecurityUtil.getUserID());
@@ -72,7 +72,7 @@ public class GoogleSpreadsheetUploadContext extends UploadContext {
     }
 
     @Override
-    public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible) throws Exception {
+    public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible, byte[] bytes) throws Exception {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT GOOGLE_DOCS_TOKEN.token_key, GOOGLE_DOCS_TOKEN.token_secret FROM " +
                 "GOOGLE_DOCS_TOKEN WHERE GOOGLE_DOCS_TOKEN.user_id = ?");
         queryStmt.setLong(1, SecurityUtil.getUserID());

@@ -14,9 +14,9 @@ import java.util.List;
 */
 public abstract class UploadContext {
     public abstract String validateUpload(EIConnection conn) throws SQLException;
-    public abstract List<AnalysisItem> guessFields(EIConnection conn) throws Exception;
+    public abstract List<AnalysisItem> guessFields(EIConnection conn, byte[] bytes) throws Exception;
 
-    public abstract long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible) throws Exception;
+    public abstract long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible, byte[] bytes) throws Exception;
 
     public abstract List<String> getSampleValues(Key key);
 }

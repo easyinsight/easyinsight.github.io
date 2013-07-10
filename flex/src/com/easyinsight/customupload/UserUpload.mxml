@@ -5,12 +5,8 @@
     <![CDATA[
         import com.easyinsight.customupload.wizard.FlatFileUploadContext;
         import com.easyinsight.customupload.wizard.SpreadsheetWizard;
-        import com.easyinsight.framework.ModulePerspective;
-        import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.util.PopUpUtil;
-
-        //import com.easyinsight.customupload.wizard.SpreadsheetSetupSource;
-        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
@@ -35,7 +31,7 @@
             nextButton.enabled = false;
             finishingSection.visible = true;
             var context:FlatFileUploadContext = new FlatFileUploadContext();
-            context.bytes = fileData;
+            context.uploadKey = uploadKey;
             context.type = type;
             uploadService.analyzeUpload.send(context);
             
@@ -45,7 +41,8 @@
             var uploadResponse:UploadResponse = uploadService.analyzeUpload.lastResult as UploadResponse;
             if (uploadResponse.successful) {
                 var context:FlatFileUploadContext = new FlatFileUploadContext();
-                context.bytes = fileData;
+                context.uploadKey = uploadKey;
+                //context.bytes = fileData;
                 //dispatchEvent(new AnalyzeEvent(new SpreadsheetSetupSource(context, uploadResponse.infos)));
                 var window:SpreadsheetWizard = new SpreadsheetWizard();
                 window.uploadContext = context;
@@ -53,6 +50,7 @@
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
                 PopUpManager.removePopUp(this);
+                //
             } else {
                 Alert.show(uploadResponse.failureMessage);
             }
@@ -82,6 +80,8 @@
             file.addEventListener( Event.SELECT, doSelect );
             file.addEventListener( Event.COMPLETE, doComplete );
             file.addEventListener( IOErrorEvent.IO_ERROR, onIOError);
+            ProgressAlert.alert(this, "Setting up for upload...", null, uploadService.startUpload);
+            uploadService.startUpload.send();
         }
 
         private function onIOError(event:IOErrorEvent):void {
@@ -101,6 +101,13 @@
         {
             // Specify the endpoint for the upload operation
             // Create an object to hold additional data fields
+            var request:URLRequest = new URLRequest("https://staging.easy-insight.com/app/fileUpload");
+            var vars:URLVariables = new URLVariables();
+            vars.uploadKey = uploadKey;
+            request.data = vars;
+            progressBar.visible = true;
+            file.upload( request );
+
             /*var request:URLRequest = new URLRequest( "/app/UploadExample" );
             var vars:URLVariables = new URLVariables();
 
@@ -115,8 +122,14 @@
 
             // Start the file upload process
             file.upload( request );*/
-            progressBar.visible = true;
-            file.load();
+            /*progressBar.visible = true;
+            file.load();*/
+        }
+
+        private var uploadKey:String;
+
+        private function gotUploadKey():void {
+            uploadKey = uploadService.startUpload.lastResult as String;
         }
 
         private function cancel():void {
@@ -126,6 +139,7 @@
 	</mx:Script>
 	<mx:RemoteObject id="uploadService" destination="userUpload">
 		<mx:method name="analyzeUpload" result="created()"/>
+		<mx:method name="startUpload" result="gotUploadKey()"/>
 	</mx:RemoteObject>
 	<mx:HBox id="coreVBox" backgroundColor="#FFFFFF" paddingRight="10" paddingBottom="10" paddingLeft="10" paddingTop="10">
         <mx:VBox>
