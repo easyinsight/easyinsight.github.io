@@ -26,7 +26,8 @@
             }
             
             public function doComplete( event:Event ):void  {
-                fileData = file.data;
+
+                //fileData = file.data;
                 /*var xml:XML = new XML(event.data);
 				var uploadIDString:String = xml.uploadID.toString();
 				var uploadID:Number = parseInt(uploadIDString);
@@ -37,14 +38,14 @@
                 appendButton.enabled = true;   
             }
 
-            private var fileData:ByteArray;
-
             // Called when the window has completed startup
             public function doCreationComplete():void {
                 // Listen for when the user has selected a file
                 // Listen for when the file upload is complete
                 file.addEventListener( Event.SELECT, doSelect );
                 file.addEventListener( Event.COMPLETE, doComplete );
+                ProgressAlert.alert(this, "Setting up for upload...", null, uploadService.startUpload);
+                uploadService.startUpload.send();
             }
 
             // Called when the user selects a file from disk
@@ -58,20 +59,25 @@
             // Initiates file upload operation
             public function doSubmit( event:Event ):void {
                 progressBar.visible = true;
-                file.load();
+                var request:URLRequest = new URLRequest("https://staging.easy-insight.com/app/fileUpload");
+                var vars:URLVariables = new URLVariables();
+                vars.uploadKey = uploadKey;
+                request.data = vars;
+                progressBar.visible = true;
+                file.upload( request );
             }
 
 			
 			private function replace():void {
                 op = 2;
                 ProgressAlert.alert(this, "Analyzing...", null, uploadService.analyzeUpdate);
-                uploadService.analyzeUpdate.send(_feedID, fileData);
+                uploadService.analyzeUpdate.send(_feedID, uploadKey);
 			}
 			
 			private function append():void {
                 op = 1;
                 ProgressAlert.alert(this, "Analyzing...", null, uploadService.analyzeUpdate);
-                uploadService.analyzeUpdate.send(_feedID, fileData);
+                uploadService.analyzeUpdate.send(_feedID, uploadKey);
 			}
 			
 			private function cancel():void {
@@ -94,15 +100,15 @@
                     if (fields.length == 0) {
                         if (op == 1) {
                             ProgressAlert.alert(this, "Updating data...", null, uploadService.updateData);
-                            uploadService.updateData.send(_feedID, fileData, false);
+                            uploadService.updateData.send(_feedID, uploadKey, false);
                         } else if (op == 2) {
                             ProgressAlert.alert(this, "Updating data...", null, uploadService.updateData);
-                            uploadService.updateData.send(_feedID, fileData, true);
+                            uploadService.updateData.send(_feedID, uploadKey, true);
                         }
                     } else {
                         var window:SpreadsheetUpdateWizard = new SpreadsheetUpdateWizard();
                         window.op = op;
-                        window.bytes = fileData;
+                        window.uploadKey = uploadKey;
                         window.fields = fields;
                         window.dataSourceID = _feedID;
                         PopUpManager.addPopUp(window, this, true);
@@ -112,11 +118,18 @@
                     }
                 }
             }
+
+        private var uploadKey:String;
+
+        private function gotUploadKey():void {
+            uploadKey = uploadService.startUpload.lastResult as String;
+        }
 		]]>
 	</mx:Script>
 	<mx:RemoteObject id="uploadService" destination="userUpload">
 		<mx:method name="updateData" result="updatedData()"/>
 		<mx:method name="analyzeUpdate" result="analyzedUpdate()"/>
+        <mx:method name="startUpload" result="gotUploadKey()"/>
 	</mx:RemoteObject>
 	<mx:VBox id="coreVBox" backgroundColor="#FFFFFF" paddingBottom="10" paddingLeft="10" paddingTop="10" paddingRight="10">
 		<mx:Form id="coreForm">
