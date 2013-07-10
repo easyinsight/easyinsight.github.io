@@ -59,7 +59,7 @@
             // Initiates file upload operation
             public function doSubmit( event:Event ):void {
                 progressBar.visible = true;
-                var request:URLRequest = new URLRequest("http://localhost:8080/app/fileUpload");
+                var request:URLRequest = new URLRequest("https://staging.easy-insight.com/app/fileUpload");
                 var vars:URLVariables = new URLVariables();
                 vars.uploadKey = uploadKey;
                 request.data = vars;
