@@ -6,6 +6,8 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.dashboard {
+import com.easyinsight.filtering.TransformContainer;
+
 import mx.collections.ArrayCollection;
 import mx.core.UIComponent;
 
@@ -22,6 +24,7 @@ public class DashboardEditorMetadata {
     public var dashboardID:int;
     public var dashboard:Dashboard;
     public var dashboardStackPositions:DashboardStackPositions;
+    public var transformContainer:TransformContainer;
 
     public function DashboardEditorMetadata() {
     }

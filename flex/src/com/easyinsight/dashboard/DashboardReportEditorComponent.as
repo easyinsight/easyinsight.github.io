@@ -49,6 +49,7 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
 
     public function edit():void {
         var window:DashboardEditWindow = new DashboardEditWindow();
+        window.filterDefinitions = dashboardEditorMetadata.transformContainer.getFilterDefinitions();
         window.dashboardElement = report;
         window.addEventListener(Event.CHANGE, onChange, false, 0, true);
         PopUpManager.addPopUp(window, this, true);

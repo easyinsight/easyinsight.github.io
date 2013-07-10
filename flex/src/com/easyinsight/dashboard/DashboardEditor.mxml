@@ -332,6 +332,7 @@
             metadata.allFields = allFields;
             metadata.dataSourceID = dataSourceID;
             metadata.availableFields = availableDimensions;
+            metadata.transformContainer = transformContainer;
         }
 
         [Bindable]

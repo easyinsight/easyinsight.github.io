@@ -33,6 +33,7 @@ import com.easyinsight.analysis.ytd.CompareYearsDefinition;
 import com.easyinsight.analysis.ytd.YTDDefinition;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardElement;
+import com.easyinsight.dashboard.DashboardFilterFormItem;
 import com.easyinsight.dashboard.DashboardGrid;
 import com.easyinsight.dashboard.DashboardReport;
 import com.easyinsight.dashboard.DashboardScorecard;
@@ -63,7 +64,7 @@ public class StyleConfiguration {
         return items;
     }
 
-    public static function getDashboardElementItems(dashboardElement:DashboardElement):ArrayCollection {
+    public static function getDashboardElementItems(dashboardElement:DashboardElement, filterDefinitions:ArrayCollection):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
         items.addItem(new NumericReportFormItem("Preferred Width", "preferredWidth", dashboardElement.preferredWidth, dashboardElement, 0, 2000));
         items.addItem(new NumericReportFormItem("Preferred Height", "preferredHeight", dashboardElement.preferredHeight, dashboardElement, 0, 2000));
@@ -102,6 +103,7 @@ public class StyleConfiguration {
         }
         if (dashboardElement is DashboardReport) {
             items.addItem(new CheckBoxReportFormItem("Show Label", "showLabel", DashboardReport(dashboardElement).showLabel, dashboardElement));
+            items.addItem(new DashboardFilterFormItem("Filter Overrides", "dashboardFilterOverrides", dashboardElement.dashboardFilterOverrides, dashboardElement, filterDefinitions));
             items.addItem(new CheckBoxReportFormItem("Auto Calculate Height", "autoCalculateHeight", DashboardReport(dashboardElement).autoCalculateHeight, dashboardElement, null,
                     false, function(dashboardReport:DashboardReport):Boolean {
                         return dashboardReport.report.reportType == AnalysisDefinition.LIST || dashboardReport.report.reportType == AnalysisDefinition.FORM ||

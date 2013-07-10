@@ -26,6 +26,7 @@ public class DashboardElement {
     public var preferredHeight:int;
     public var forceScrollingOff:Boolean;
     public var htmlWidth:int;
+    public var dashboardFilterOverrides:ArrayCollection;
 
     public var dashboardLevel:int;
 

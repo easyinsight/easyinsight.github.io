@@ -307,14 +307,6 @@ public class DashboardStorage {
             clearDSStmt.close();
         }
 
-        long id = dashboard.getRootElement().save(conn);
-
-        PreparedStatement saveRootStmt = conn.prepareStatement("INSERT INTO dashboard_to_dashboard_element (dashboard_id, dashboard_element_id) values (?, ?)");
-        saveRootStmt.setLong(1, dashboard.getId());
-        saveRootStmt.setLong(2, id);
-        saveRootStmt.execute();
-        saveRootStmt.close();
-
         Session session = Database.instance().createSession(conn);
         try {
             for (FilterDefinition filterDefinition : dashboard.getFilters()) {
@@ -333,6 +325,14 @@ public class DashboardStorage {
             filterStmt.execute();
         }
         filterStmt.close();
+
+        long id = dashboard.getRootElement().save(conn);
+
+        PreparedStatement saveRootStmt = conn.prepareStatement("INSERT INTO dashboard_to_dashboard_element (dashboard_id, dashboard_element_id) values (?, ?)");
+        saveRootStmt.setLong(1, dashboard.getId());
+        saveRootStmt.setLong(2, id);
+        saveRootStmt.execute();
+        saveRootStmt.close();
 
         PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO USER_TO_DASHBOARD (USER_ID, DASHBOARD_ID) VALUES (?, ?)");
         for (FeedConsumer feedConsumer : dashboard.getAdministrators()) {

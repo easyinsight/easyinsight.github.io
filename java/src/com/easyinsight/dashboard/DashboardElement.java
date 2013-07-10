@@ -52,6 +52,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     private ImageDescriptor headerBackground;
     private int headerBackgroundColor;
     private double headerBackgroundAlpha;
+    private List<DashboardFilterOverride> dashboardFilterOverrides = new ArrayList<DashboardFilterOverride>();
 
     private DashboardElement parentElement;
 
@@ -59,6 +60,14 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     private int preferredHeight;
 
     private int htmlWidth;
+
+    public List<DashboardFilterOverride> getDashboardFilterOverrides() {
+        return dashboardFilterOverrides;
+    }
+
+    public void setDashboardFilterOverrides(List<DashboardFilterOverride> dashboardFilterOverrides) {
+        this.dashboardFilterOverrides = dashboardFilterOverrides;
+    }
 
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata, List<FilterDefinition> parentFilters) throws JSONException {
         JSONObject jo = new JSONObject();
@@ -295,6 +304,17 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         setElementServerID(getElementID());
         setForceScrollingOff(rs.getBoolean(i++));
         setHtmlWidth(rs.getInt(i));
+        PreparedStatement filterStmt = conn.prepareStatement("SELECT FILTER_ID, HIDE_FILTER FROM dashboard_element_filter_setting WHERE DASHBOARD_ELEMENT_ID = ?");
+        filterStmt.setLong(1, elementID);
+        ResultSet filterRS = filterStmt.executeQuery();
+        List<DashboardFilterOverride> overrides = new ArrayList<DashboardFilterOverride>();
+        while (filterRS.next()) {
+            long filterID = filterRS.getLong(1);
+            boolean hideFilter = filterRS.getBoolean(2);
+            overrides.add(new DashboardFilterOverride(filterID, hideFilter));
+        }
+        setDashboardFilterOverrides(overrides);
+        filterStmt.close();
         loadStmt.close();
     }
 
@@ -348,6 +368,26 @@ public abstract class DashboardElement implements Cloneable, Serializable {
             filterStmt.execute();
         }
         filterStmt.close();
+
+        if (getDashboardFilterOverrides() != null) {
+            PreparedStatement filterOverrideStmt = conn.prepareStatement("INSERT INTO dashboard_element_filter_setting (filter_id, hide_filter, dashboard_element_id) values (?, ?, ?)");
+            for (DashboardFilterOverride override : getDashboardFilterOverrides()) {
+                long filterID;
+                if (override.getFilterDefinition() != null) {
+                    filterID = override.getFilterDefinition().getFilterID();
+                } else {
+                    filterID = override.getFilterID();
+                }
+                if (filterID == 0) {
+                    continue;
+                }
+                filterOverrideStmt.setLong(1, filterID);
+                filterOverrideStmt.setBoolean(2, override.isHideFilter());
+                filterOverrideStmt.setLong(3, getElementID());
+                filterOverrideStmt.execute();
+            }
+        }
+
         return elementID;
     }
 
