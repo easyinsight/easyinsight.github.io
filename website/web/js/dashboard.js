@@ -407,7 +407,6 @@ $(function () {
             }
             showFilters = !showFilters;
         })
-        console.log(filterMap)
     })
 })
 
