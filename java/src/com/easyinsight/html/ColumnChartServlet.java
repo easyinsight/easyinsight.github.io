@@ -11,8 +11,7 @@ import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -41,11 +40,22 @@ public class ColumnChartServlet extends HtmlServlet {
 
         params.put("seriesDefaults", seriesDefaults);
         object.put("params", params);
+        Comparator c = null;
 
         if (report instanceof WSColumnChartDefinition) {
             WSColumnChartDefinition columnChartDefinition = (WSColumnChartDefinition) report;
             xAxisItem = columnChartDefinition.getXaxis();
             measures = columnChartDefinition.getMeasures();
+            String sortType = columnChartDefinition.getColumnSort();
+            if ("X-Axis Ascending".equals(sortType)) {
+                c = new RowComparator(xAxisItem, true);
+            } else if ("X-Axis Descending".equals(sortType)) {
+                c = new RowComparator(xAxisItem, false);
+            } else if ("Y-Axis Ascending".equals(sortType)) {
+                c = new RowComparator(measures.get(0), true);
+            } else if ("Y-Axis Descending".equals(sortType)) {
+                c = new RowComparator(measures.get(0), false);
+            }
             if ("auto".equals(columnChartDefinition.getLabelPosition())) {
                 seriesDefaults.put("pointLabels", pointLabels);
                 pointLabels.put("labels", new JSONArray());
@@ -56,6 +66,16 @@ public class ColumnChartServlet extends HtmlServlet {
             WSBarChartDefinition columnChartDefinition = (WSBarChartDefinition) report;
             xAxisItem = columnChartDefinition.getYaxis();
             measures = columnChartDefinition.getMeasures();
+            String sortType = columnChartDefinition.getColumnSort();
+            if ("X-Axis Ascending".equals(sortType)) {
+                c = new RowComparator(measures.get(0), true);
+            } else if ("X-Axis Descending".equals(sortType)) {
+                c = new RowComparator(measures.get(0), false);
+            } else if ("Y-Axis Ascending".equals(sortType)) {
+                c = new RowComparator(xAxisItem, true);
+            } else if ("Y-Axis Descending".equals(sortType)) {
+                c = new RowComparator(xAxisItem, false);
+            }
             if ("auto".equals(columnChartDefinition.getLabelPosition())) {
                 seriesDefaults.put("pointLabels", pointLabels);
                 pointLabels.put("labels", new JSONArray());
@@ -94,6 +114,8 @@ public class ColumnChartServlet extends HtmlServlet {
 
         List<String> ticks = new ArrayList<String>();
 
+        if (c != null)
+            Collections.sort(dataSet.getRows(), c);
 
         for (IRow row : dataSet.getRows()) {
 
