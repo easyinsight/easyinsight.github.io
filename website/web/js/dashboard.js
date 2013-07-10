@@ -28,8 +28,19 @@ var afterRefresh = function (selector) {
     }
 }
 
+var selectedIndex = function(id) {
+    var v = $("#" + id);
+    var s = $("#" + id + " > .active");
+    for(var i = 0;i < v.children().length;i++) {
+        if(v.children()[i] == s[0]) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 var toFilterString = function (f) {
-    if (!f.enabled)
+    if (!f.enabled || f.override)
         return "filter" + f["id"] + "enabled=false";
     else if (f.type == "single")
         return "filter" + f["id"] + "=" + encodeURIComponent(f["selected"]);
@@ -45,10 +56,10 @@ var toFilterString = function (f) {
             return z;
     } else if (f.type == "date_range") {
         return ["filter" + f.id + "start=" + f.start_date, "filter" + f.id + "end=" + f.end_date ]
-    } else if(f.type == "flat_date_month" || f.type == "flat_date_year") {
+    } else if (f.type == "flat_date_month" || f.type == "flat_date_year") {
         return "filter" + f.id + "=" + f.selected;
-    } else if(f.type == "multi_date") {
-        return ["filter" + f.id + "start=" + f.min,"filter" + f.id + "end=" + f.max];
+    } else if (f.type == "multi_date") {
+        return ["filter" + f.id + "start=" + f.min, "filter" + f.id + "end=" + f.max];
     } else
         return ["filter" + f["id"] + "direction=0", "filter" + f["id"] + "value=1", "filter" + f["id"] + "interval=2"];
 }
@@ -66,7 +77,7 @@ var renderReport = function (o, dashboardID, reload) {
         return;
     }
     for (i = 0; i < o.filters.length; i++) {
-        filterStrings = filterStrings.concat(toFilterString(o.filters[i]))
+        filterStrings = filterStrings.concat(toFilterString(o.filters[i]));
     }
     if (obj.metadata.type == "pie") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
@@ -167,6 +178,34 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
     }
 }
 
+var hideFilter = function(id, filterMap) {
+    $(".filter" + id).addClass("hideFilter");
+    for(var f in filterMap) {
+        if(filterMap[f].filter.id == id) {
+            filterMap[f].filter.override = true;
+        }
+    }
+}
+
+var hideFilters = function (obj, filterMap) {
+    if (typeof(obj.overrides) != "undefined") {
+        for (var i = 0; i < obj.overrides.length; i++)
+            hideFilter(obj.overrides[i], filterMap);
+    } else if (typeof(obj.report) != "undefined" && typeof(obj.report.overrides) != "undefined") {
+        for (var i = 0; i < obj.report.overrides.length; i++)
+            hideFilter(obj.report.overrides[i], filterMap);
+    }
+    if(obj.type == "stack") {
+        var ss = selectedIndex(obj.id);
+        console.log(ss);
+        hideFilters(obj.children[ss], filterMap);
+    } else if(obj.type != "report") {
+        for(var i = 0;i < obj.children.length;i++) {
+            hideFilters(obj.children[i], filterMap);
+        }
+    }
+}
+
 var renderReports = function (obj, dashboardID, force) {
     if (obj.type == "report") {
         if (!obj.report.report.metadata.adhoc_execution)
@@ -232,7 +271,7 @@ $(function () {
         var reportMap = {};
         var graph = buildReportGraph(dashboardJSON["base"], dashboardJSON["filters"], filterMap, stackMap, reportMap);
 
-
+        hideFilters(graph, filterMap);
         renderReports(graph, dashboardJSON["id"], false);
         $(".single_filter").change(function (e) {
             var f = filterMap[$(e.target || e.srcElement).attr("id")]
@@ -292,7 +331,7 @@ $(function () {
             }
         });
 
-        $(".multi_flat_month_save").click(function(e) {
+        $(".multi_flat_month_save").click(function (e) {
             var a = $(e.target).parent().parent();
             var f = filterMap[a.attr("id").split("_")[0]];
             var min = $(".multi_flat_month_start", a).val();
@@ -396,11 +435,22 @@ $(function () {
         })
 
         $('a[data-toggle="tab"]').on('shown', function (e) {
-            renderReports(stackMap[$(e.target).parent().parent().attr("id")], dashboardJSON["id"], false);
+            $(".filter").removeClass("hideFilter");
+            var q = $(e.target).parent().parent();
+            var s = stackMap[q.attr("id")];
+            var t = q.children();
+            var selected = -1;
+            for(var f in filterMap) {
+                filterMap[f].filter.override = false;
+            }
+
+            hideFilters(graph, filterMap);
+
+            renderReports(s, dashboardJSON["id"], false);
         });
         var showFilters = true;
-        $('.toggle-filters').click(function(e) {
-            if(showFilters) {
+        $('.toggle-filters').click(function (e) {
+            if (showFilters) {
                 $(".filters").hide();
             } else {
                 $(".filters").show();

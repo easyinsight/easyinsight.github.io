@@ -89,6 +89,15 @@ public abstract class DashboardElement implements Cloneable, Serializable {
             if(!found)
                 filters.put(f.toJSON(filterHTMLMetadata));
         }
+
+
+        JSONArray overrides = new JSONArray();
+        for(DashboardFilterOverride fo : getDashboardFilterOverrides()) {
+            if(fo.isHideFilter()) {
+                overrides.put(fo.getFilterID());
+            }
+        }
+        jo.put("overrides", overrides);
         jo.put("filters", filters);
         return jo;
     }
