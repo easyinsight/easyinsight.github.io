@@ -79,6 +79,7 @@
                     System.out.println("Account " + account.getAccountID() + " has the following errors: ");
                     for(ValidationError v : result.getErrors().getAllDeepValidationErrors()) {
                         System.out.println("Account " + account.getAccountID() + ": " + v.getMessage());
+                        System.out.println("Account " + account.getAccountID() + " error code: " + v.getCode().code);
                     }
                     int responseCode;
                     if ("200".equals(errorCode)) responseCode = BillingResponse.DECLINED;
