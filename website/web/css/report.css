@@ -156,3 +156,7 @@ body {
 .hideFilter {
     display: none;
 }
+
+a {
+    outline: 0;
+}
