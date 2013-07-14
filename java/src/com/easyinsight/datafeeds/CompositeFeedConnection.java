@@ -492,9 +492,6 @@ public class CompositeFeedConnection implements Serializable, IJoin {
             System.out.println("Couldn't find " + getTargetJoin().toKeyString() + " on " + targetName);
         }
         String mergeString = "Merging data set on " + sourceName + " : " + myJoinDimension.toKeyString() + " to " + targetName + " : " + fromJoinDimension.toKeyString();
-        System.out.println(mergeString);
-        System.out.println("\t" + sourceSet.getRows().size());
-        System.out.println("\t" + dataSet.getRows().size());
         Map<Value, List<IRow>> index = new HashMap<Value, List<IRow>>();
 
         Collection<IRow> unjoinedRows = new ArrayList<IRow>();
