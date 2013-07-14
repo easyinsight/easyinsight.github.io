@@ -1,12 +1,19 @@
 package com.easyinsight.datafeeds.database;
 
 import com.easyinsight.PasswordStorage;
-import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.analysis.*;
+import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
+import com.easyinsight.storage.IDataStorage;
 
 import java.sql.*;
+import java.sql.Date;
 import java.text.MessageFormat;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -53,6 +60,95 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
         this.dbUserName = dbUserName;
     }
 
+    @Override
+    public DataSet getDataSet(Map<String, Key> keys, java.util.Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, java.util.Date lastRefreshDate) throws ReportException {
+        Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+        for (AnalysisItem field : getFields()) {
+            map.put(field.getKey().toKeyString(), field);
+        }
+        try {
+            DataSet dataSet = new DataSet();
+            Connection connection = createConnection();
+            Statement statement = connection.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+            statement.setFetchSize(1000);
+            ResultSet rs = statement.executeQuery(getQuery());
+            int ct = 0;
+            while (rs.next()) {
+                IRow row = dataSet.createRow();
+                int columnCount = rs.getMetaData().getColumnCount();
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = rs.getMetaData().getColumnName(i);
+                    AnalysisItem analysisItem = map.get(columnName);
+                    if (analysisItem == null) {
+                        continue;
+                    }
+                    switch (rs.getMetaData().getColumnType(i)) {
+                        case Types.BIGINT:
+                        case Types.TINYINT:
+                        case Types.SMALLINT:
+                        case Types.INTEGER:
+                        case Types.NUMERIC:
+                        case Types.FLOAT:
+                        case Types.DOUBLE:
+                        case Types.DECIMAL:
+                        case Types.REAL:
+                            double number = rs.getDouble(i);
+                            if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                                row.addValue(analysisItem.getKey(), String.valueOf((int) number));
+                            } else {
+                                row.addValue(analysisItem.getKey(), number);
+                            }
+                            break;
+
+                        case Types.BOOLEAN:
+                        case Types.BIT:
+                        case Types.CHAR:
+                        case Types.NCHAR:
+                        case Types.NVARCHAR:
+                        case Types.VARCHAR:
+                        case Types.LONGVARCHAR:
+                            String string = rs.getString(i);
+                            row.addValue(analysisItem.getKey(), string);
+                            break;
+
+                        case Types.DATE:
+                            java.util.Date d = rs.getDate(i);
+                            if(!rs.wasNull()) {
+                                row.addValue(analysisItem.getKey(), d);
+                            }
+                            break;
+                        case Types.TIME:
+                            Time t = rs.getTime(i);
+                            if(!rs.wasNull()) {
+                                row.addValue(analysisItem.getKey(), new java.util.Date(t.getTime()));
+                            }
+                            break;
+                        case Types.TIMESTAMP:
+                            Timestamp timestamp = rs.getTimestamp(i);
+                            if (!rs.wasNull()) {
+                                java.sql.Date date = new java.sql.Date(timestamp.getTime());
+                                row.addValue(analysisItem.getKey(), date);
+                            }
+                            break;
+                        default:
+                            throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(i) + ") is not supported in Easy Insight. Type value: " + rs.getMetaData().getColumnType(i));
+                    }
+                }
+                ct++;
+                if (ct == 1000) {
+                    IDataStorage.insertData(dataSet);
+                    dataSet = new DataSet();
+                }
+            }
+            rs.close();
+            statement.close();
+            IDataStorage.insertData(dataSet);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
+
     public String getDbPassword() {
         return dbPassword;
     }
@@ -63,7 +159,7 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
 
     @Override
     protected Connection createConnection() throws SQLException {
-        String url = MessageFormat.format("jdbc:sqlserver://{0}:{1};databaseName={2};loginTimeout=15", host, String.valueOf(port), databaseName);
+        String url = MessageFormat.format("jdbc:sqlserver://{0}:{1};databaseName={2};loginTimeout=15;selectMode=cursor", host, String.valueOf(port), databaseName);
         return DriverManager.getConnection(url, dbUserName, dbPassword);
     }
 
