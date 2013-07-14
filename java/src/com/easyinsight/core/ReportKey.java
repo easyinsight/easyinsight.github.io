@@ -73,6 +73,11 @@ public class ReportKey extends Key {
     }
 
     @Override
+    public boolean matchesOrContains(Key key) {
+        return false;
+    }
+
+    @Override
     public String toSQL() {
         return toBaseKey().toSQL();
     }
