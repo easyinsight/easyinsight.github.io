@@ -235,10 +235,14 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                             }
                             break;
                         case Types.TIMESTAMP:
-                            Timestamp timestamp = rs.getTimestamp(i);
-                            if (!rs.wasNull()) {
-                                java.sql.Date date = new java.sql.Date(timestamp.getTime());
-                                row.addValue(analysisItem.getKey(), date);
+                            try {
+                                Timestamp timestamp = rs.getTimestamp(i);
+                                if (!rs.wasNull()) {
+                                    java.sql.Date date = new java.sql.Date(timestamp.getTime());
+                                    row.addValue(analysisItem.getKey(), date);
+                                }
+                            } catch (SQLException e) {
+                                // ignore
                             }
                             break;
                         default:
