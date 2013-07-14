@@ -71,7 +71,7 @@
                 fields.addItem(SpreadsheetTutorialWindow(panel.getChildAt(0)).analysisItem);
             }
             ProgressAlert.alert(this, "Adding new fields to the data source...", null, uploadService.updateData);
-            uploadService.updateData.send(_dataSourceID, _bytes, _op == 2, fields);
+            uploadService.updateData.send(_dataSourceID, _uploadKey, _op == 2, fields);
         }
 
         private function onChange(event:Event):void {
@@ -80,7 +80,7 @@
 
         private var _dataSourceID:int;
 
-        private var _bytes:ByteArray;
+        private var _uploadKey:String;
 
         private var _op:int;
 
@@ -89,8 +89,9 @@
             _dataSourceID = value;
         }
 
-        public function set bytes(value:ByteArray):void {
-            _bytes = value;
+
+        public function set uploadKey(value:String):void {
+            _uploadKey = value;
         }
 
         public function set op(value:int):void {

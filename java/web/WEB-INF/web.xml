@@ -213,6 +213,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>FileUpload</servlet-name>
+        <display-name>FileUpload</display-name>
+        <servlet-class>com.easyinsight.scheduler.FileUploadServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>HtmlImage</servlet-name>
         <display-name>HtmlImage</display-name>
         <servlet-class>com.easyinsight.export.HTMLImageServlet</servlet-class>
@@ -296,12 +302,12 @@
         <load-on-startup>4</load-on-startup>
     </servlet>
 
-    <servlet>
+    <!--<servlet>
         <servlet-name>DeleteDataSource</servlet-name>
         <display-name>DeleteDataSource</display-name>
         <servlet-class>com.easyinsight.api.v3.DeleteDataSourceServlet</servlet-class>
         <load-on-startup>4</load-on-startup>
-    </servlet>
+    </servlet>-->
 
     <servlet>
         <servlet-name>ReplaceRows</servlet-name>
@@ -479,6 +485,20 @@
     </servlet>
 
     <servlet>
+        <servlet-name>CompleteInstallation</servlet-name>
+        <display-name>CompleteInstallation</display-name>
+        <servlet-class>com.easyinsight.html.CompleteInstallationServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ConnectionInstalled</servlet-name>
+        <display-name>ConnectionInstalled</display-name>
+        <servlet-class>com.easyinsight.html.ConnectionInstalledServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>RefreshStatus</servlet-name>
         <display-name>RefreshStatus</display-name>
         <servlet-class>com.easyinsight.html.RefreshStatusServlet</servlet-class>
@@ -628,6 +648,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>FileUpload</servlet-name>
+        <url-pattern>/fileUpload</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>AddRows</servlet-name>
         <url-pattern>/xml/addRows</url-pattern>
     </servlet-mapping>
@@ -698,6 +723,16 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>ConnectionInstalled</servlet-name>
+        <url-pattern>/connectionInstalled</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>CompleteInstallation</servlet-name>
+        <url-pattern>/completeInstallation</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>RefreshStatus</servlet-name>
         <url-pattern>/refreshStatus</url-pattern>
     </servlet-mapping>
@@ -727,10 +762,10 @@
         <url-pattern>/json/RunReport</url-pattern>
     </servlet-mapping>
 
-    <servlet-mapping>
+    <!--<servlet-mapping>
         <servlet-name>DeleteDataSource</servlet-name>
         <url-pattern>/xml/DeleteDataSource</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>-->
 
     <servlet-mapping>
         <servlet-name>Me</servlet-name>

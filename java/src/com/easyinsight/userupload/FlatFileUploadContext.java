@@ -17,7 +17,7 @@ import java.util.*;
  * Time: 3:21:36 PM
  */
 public class FlatFileUploadContext extends UploadContext {
-    private byte[] bytes;
+    private String uploadKey;
     private int type;
 
     public int getType() {
@@ -28,12 +28,12 @@ public class FlatFileUploadContext extends UploadContext {
         this.type = type;
     }
 
-    public byte[] getBytes() {
-        return bytes;
+    public String getUploadKey() {
+        return uploadKey;
     }
 
-    public void setBytes(byte[] bytes) {
-        this.bytes = bytes;
+    public void setUploadKey(String uploadKey) {
+        this.uploadKey = uploadKey;
     }
 
     private transient UploadFormat uploadFormat;
@@ -66,14 +66,13 @@ public class FlatFileUploadContext extends UploadContext {
     private Map<Key, Set<String>> sampleMap;
 
     @Override
-    public List<AnalysisItem> guessFields(EIConnection conn) throws Exception {
+    public List<AnalysisItem> guessFields(EIConnection conn, byte[] bytes) throws Exception {
         UserUploadAnalysis userUploadAnalysis = uploadFormat.analyze(bytes);
         sampleMap = userUploadAnalysis.getSampleMap();
         return userUploadAnalysis.getFields();
     }
 
-    @Override
-    public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible) throws Exception {
+    public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible, byte[] bytes) throws Exception {
         UploadFormat uploadFormat = new UploadFormatTester().determineFormat(bytes);
         if (uploadFormat instanceof CsvFileUploadFormat) {
             FileProcessOptimizedCreateScheduledTask task = new FileProcessOptimizedCreateScheduledTask();

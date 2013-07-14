@@ -40,6 +40,7 @@ import java.util.*;
 import java.util.Date;
 import java.sql.*;
 
+import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.util.ServiceUtil;
 import com.xerox.amazonws.sqs2.Message;
 import com.xerox.amazonws.sqs2.MessageQueue;
@@ -650,7 +651,16 @@ public class UserUploadService {
             if (validation != null) {
                 uploadResponse = new UploadResponse(validation);
             } else {
-                List<AnalysisItem> fields = uploadContext.guessFields(conn);
+                byte[] bytes = null;
+                if (uploadContext instanceof FlatFileUploadContext) {
+                    FlatFileUploadContext flatFileUploadContext = (FlatFileUploadContext) uploadContext;
+                    PreparedStatement ps = conn.prepareStatement("SELECT BYTES FROM upload_bytes WHERE upload_key = ?");
+                    ps.setString(1, flatFileUploadContext.getUploadKey());
+                    ResultSet rs = ps.executeQuery();
+                    rs.next();
+                    bytes = rs.getBytes(1);
+                }
+                List<AnalysisItem> fields = uploadContext.guessFields(conn, bytes);
                 List<FieldUploadInfo> fieldInfos = new ArrayList<FieldUploadInfo>();
                 for (AnalysisItem field : fields) {
                     FieldUploadInfo fieldUploadInfo = new FieldUploadInfo();
@@ -679,7 +689,16 @@ public class UserUploadService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible);
+            byte[] bytes = null;
+            if (uploadContext instanceof FlatFileUploadContext) {
+                FlatFileUploadContext flatFileUploadContext = (FlatFileUploadContext) uploadContext;
+                PreparedStatement ps = conn.prepareStatement("SELECT BYTES FROM upload_bytes WHERE upload_key = ?");
+                ps.setString(1, flatFileUploadContext.getUploadKey());
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                bytes = rs.getBytes(1);
+            }
+            long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible, bytes);
             uploadResponse = new UploadResponse(dataSourceID);
             conn.commit();
             return uploadResponse;
@@ -1079,13 +1098,19 @@ public class UserUploadService {
         }
     }
 
-    public AnalyzeUploadResponse analyzeUpdate(long feedID, byte[] bytes) {
+    public AnalyzeUploadResponse analyzeUpdate(long feedID, String uploadKey) {
         SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
         EIConnection conn = Database.instance().getConnection();
         AnalyzeUploadResponse analyzeUploadResponse = new AnalyzeUploadResponse();
         try {
             conn.setAutoCommit(false);
             FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
+            PreparedStatement ps = conn.prepareStatement("SELECT BYTES FROM upload_bytes WHERE upload_key = ?");
+            ps.setString(1, uploadKey);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            byte[] bytes = rs.getBytes(1);
+            ps.close();
             UserUploadAnalysis analysis = dataSource.getUploadFormat().analyze(bytes);
             Map<String, AnalysisItem> fieldMap = new HashMap<String, AnalysisItem>();
             for (AnalysisItem field : dataSource.getFields()) {
@@ -1118,12 +1143,38 @@ public class UserUploadService {
         }
     }
 
-    public void updateData(long feedID, byte[] bytes, boolean update, List<AnalysisItem> newFields) {
+    public String startUpload() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            String key = RandomTextGenerator.generateText(80);
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO UPLOAD_BYTES (UPLOAD_TIME, UPLOAD_KEY, USER_ID) VALUES (?, ?, ?)");
+            stmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+            stmt.setString(2, key);
+            stmt.setLong(3, SecurityUtil.getUserID());
+            stmt.execute();
+            stmt.close();
+            return key;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void updateData(long feedID, String uploadKey, boolean update, List<AnalysisItem> newFields) {
         SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
+
+            PreparedStatement ps = conn.prepareStatement("SELECT BYTES FROM upload_bytes WHERE upload_key = ?");
+            ps.setString(1, uploadKey);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            byte[] bytes = rs.getBytes(1);
+
             if (dataSource.getUploadFormat() instanceof CsvFileUploadFormat) {
                 FileProcessOptimizedUpdateScheduledTask task = new FileProcessOptimizedUpdateScheduledTask();
                 task.setFeedID(feedID);
@@ -1152,8 +1203,8 @@ public class UserUploadService {
         }
     }
 
-    public void updateData(long feedID, byte[] bytes, boolean update) {
-        updateData(feedID, bytes, update, null);
+    public void updateData(long feedID, String uploadKey, boolean update) {
+        updateData(feedID, uploadKey, update, null);
     }
 
     public long uploadPNG(byte[] bytes) {

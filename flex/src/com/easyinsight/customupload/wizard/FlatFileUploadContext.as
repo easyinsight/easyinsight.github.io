@@ -5,7 +5,7 @@ import flash.utils.ByteArray;
 [RemoteClass(alias="com.easyinsight.userupload.FlatFileUploadContext")]
 public class FlatFileUploadContext extends UploadContext {
 
-    public var bytes:ByteArray;
+    public var uploadKey:String;
     public var type:int;
 
     public function FlatFileUploadContext() {

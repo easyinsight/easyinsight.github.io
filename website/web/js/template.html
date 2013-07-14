@@ -90,7 +90,7 @@
 
 
 <script type="text/template" id="single_value_filter_template">
-    <div class="filter">
+    <div class="filter filter<%= data.id %>">
         <%= Filter.base_filter({data: data, parent_id: parent_id}) %>
         <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="single_filter">
             <% _.each(data.values, function(e, i , l) { %>
@@ -102,7 +102,7 @@
 </script>
 
 <script type="text/template" id="multi_value_filter_template">
-    <div class="filter">
+    <div class="filter filter<%= data.id %>">
         <%= Filter.base_filter({data: data, parent_id: parent_id}) %> <a href="#<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" data-toggle="modal">
         <button id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="btn multi_filter"><% if(data.selected.length == 1) { %><%-
             data.selected[0] %><% } else { %><%- data.selected.length %> Items<% } %>
@@ -137,7 +137,7 @@
 </script>
 
 <script type="text/template" id="rolling_date_filter_template">
-    <div class="filter"><%= Filter.base_filter({data: data, parent_id: parent_id}) %>
+    <div class="filter filter<%= data.id %>"><%= Filter.base_filter({data: data, parent_id: parent_id}) %>
         <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_type" class="rolling_filter_type">
             <option value="19"<% if(data.interval_type == "19") { %> selected="selected"<%}%>>All</option>
             <option value="1"<% if(data.interval_type == "1") { %> selected="selected"<%}%>>Last Day</option>
@@ -175,7 +175,7 @@
 
 
 <script type="text/template" id="flat_date_month_filter">
-    <div class="filter">
+    <div class="filter filter<%= data.id %>">
         <%= Filter.base_filter({data: data, parent_id: parent_id}) %>
         <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>" class="month_select">
             <option value="0"<% if(data.selected == 0) { %> selected="selected"<% }%>>January</option>
@@ -195,7 +195,7 @@
 </script>
 
 <script type="text/template" id="flat_date_year_filter">
-    <div class="filter">
+    <div class="filter filter<%= data.id %>">
         <%= Filter.base_filter({data: data, parent_id: parent_id}) %>
         <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>" class="year_select">
             <% _.each(data.years, function(e, i , l) { %>
@@ -206,7 +206,7 @@
 </script>
 
 <script type="text/template" id="multi_flat_date_filter">
-    <div class="filter">
+    <div class="filter filter<%= data.id %>">
         <%= Filter.base_filter({"data": data, "parent_id": typeof(parent_id) == "undefined" ? '' : parent_id}) %>
         <a href="#<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" data-toggle="modal">
             <button id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="btn multi_flat_month"><%- short_months[data.min] %> to <%- short_months[data.max] %>
@@ -255,7 +255,7 @@
 </script>
 
 <script type="text/template" id="absolute_date_filter_template">
-    <div class="filter">
+    <div class="filter filter<%= data.id %>">
         <%= Filter.base_filter({data: data, parent_id: parent_id}) %> <input id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>_date_start" type="text" class="start_date_filter date_filter_input" readonly="readonly" value="<%- data.start_date %>" />
         <input id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>_date_end" type="text" class="end_date_filter date_filter_input" readonly="readonly" value="<%- data.end_date %>" />
     </div>

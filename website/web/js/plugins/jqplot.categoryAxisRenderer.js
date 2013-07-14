@@ -426,9 +426,9 @@
             }
         }  
     };
-    
+
     // called with scope of axis
-    $.jqplot.CategoryAxisRenderer.prototype.pack = function(pos, offsets) {
+    $.jqplot.CategoryAxisRenderer.prototype.pack = function (pos, offsets) {
         var ticks = this._ticks;
         var max = this.max;
         var min = this.min;
@@ -440,37 +440,37 @@
         for (var p in pos) {
             this._elem.css(p, pos[p]);
         }
-        
+
         this._offsets = offsets;
         // pixellength will be + for x axes and - for y axes becasue pixels always measured from top left.
         var pixellength = offmax - offmin;
         var unitlength = max - min;
-        
+
         if (!this.reverse) {
             // point to unit and unit to point conversions references to Plot DOM element top left corner.
-            
-            this.u2p = function(u){
+
+            this.u2p = function (u) {
                 return (u - min) * pixellength / unitlength + offmin;
             };
 
-            this.p2u = function(p){
+            this.p2u = function (p) {
                 return (p - offmin) * unitlength / pixellength + min;
             };
-                    
-            if (this.name == 'xaxis' || this.name == 'x2axis'){
-                this.series_u2p = function(u){
+
+            if (this.name == 'xaxis' || this.name == 'x2axis') {
+                this.series_u2p = function (u) {
                     return (u - min) * pixellength / unitlength;
                 };
-                this.series_p2u = function(p){
+                this.series_p2u = function (p) {
                     return p * unitlength / pixellength + min;
                 };
             }
-            
+
             else {
-                this.series_u2p = function(u){
+                this.series_u2p = function (u) {
                     return (u - max) * pixellength / unitlength;
                 };
-                this.series_p2u = function(p){
+                this.series_p2u = function (p) {
                     return p * unitlength / pixellength + max;
                 };
             }
@@ -478,127 +478,155 @@
 
         else {
             // point to unit and unit to point conversions references to Plot DOM element top left corner.
-            
-            this.u2p = function(u){
+
+            this.u2p = function (u) {
                 return offmin + (max - u) * pixellength / unitlength;
             };
 
-            this.p2u = function(p){
+            this.p2u = function (p) {
                 return min + (p - offmin) * unitlength / pixellength;
             };
-                    
-            if (this.name == 'xaxis' || this.name == 'x2axis'){
-                this.series_u2p = function(u){
+
+            if (this.name == 'xaxis' || this.name == 'x2axis') {
+                this.series_u2p = function (u) {
                     return (max - u) * pixellength / unitlength;
                 };
-                this.series_p2u = function(p){
+                this.series_p2u = function (p) {
                     return p * unitlength / pixellength + max;
                 };
             }
-            
+
             else {
-                this.series_u2p = function(u){
+                this.series_u2p = function (u) {
                     return (min - u) * pixellength / unitlength;
                 };
-                this.series_p2u = function(p){
+                this.series_p2u = function (p) {
                     return p * unitlength / pixellength + min;
                 };
             }
 
         }
-            
-        
+
+
         if (this.show) {
             if (this.name == 'xaxis' || this.name == 'x2axis') {
-                var maxHeight = 0;
-                for (i=0; i<ticks.length; i++) {
-                    var t = ticks[i];
-                    var dist = (this.u2p(.5) - this.u2p(0));
-                    var aa =  Math.floor(dist - 2);
-                    if(dist < t._textRenderer.height) {
-                        if(aa < 12) {
+                var createXAxis = function (ticks) {
+                    var maxHeight = 0;
+                    for (var i = 0; i < ticks.length; i++) {
+                        var t = ticks[i];
+                        var dist = (this.u2p(.5) - this.u2p(0));
+                        var aa = Math.floor(dist - 2);
+                        if (dist < t._textRenderer.height) {
+                            if (aa < 12) {
 
-                            var modifier = 20 + 8 * (12 - aa);
-                            aa = Math.max(5, aa);
-                            if(modifier < 90)
-                                aa = 10;
+                                var modifier = 20 + 8 * (12 - aa);
+                                aa = Math.max(5, aa);
+                                if (modifier < 90)
+                                    aa = 10;
 
-                            if(t.angle < 0) {
-                                t.angle = t.angle - modifier;
-                            } else {
-                                t.angle = t.angle + modifier;
+                                if (t.angle <= 0) {
+                                    t.angle = t.angle - modifier;
+                                } else {
+                                    t.angle = t.angle + modifier;
+                                }
+
+                                t.angle = Math.max(-90, Math.min(t.angle, 90));
+                                t._textRenderer.angle = (t.angle * Math.PI / 180.0);
                             }
-
-                            t.angle = Math.min(t.angle, 90);
-                            t._textRenderer.angle = (t.angle * Math.PI / 180.0);
+                            t._textRenderer.fontSize = aa + "px";
                         }
-                        t._textRenderer.fontSize = aa + "px";
-                    }
 
-                    if (t.show && t.showLabel) {
-                        var shim;
+                        if (t.show && t.showLabel) {
+                            var shim;
 
-                        if (t.constructor == $.jqplot.CanvasAxisTickRenderer && t.angle) {
-                            // will need to adjust auto positioning based on which axis this is.
-                            var temp = (this.name == 'xaxis') ? 1 : -1;
-                            var ee = t._elem.get(0)
-                            var c = ee.getContext("2d");
-                            t._textRenderer.setWidth(c);
-                            t._textRenderer.setHeight();
-                            var hh = t.getHeight(c, true);
-                            var ww = t.getWidth(c, true);
-                            ee.width = ww;
-                            ee.height = hh;
-                            ee.style.width = ww;
-                            ee.style.height = hh;
-                            if(hh > maxHeight)
-                                maxHeight = hh;
+                            if (t.constructor == $.jqplot.CanvasAxisTickRenderer && t.angle) {
+                                // will need to adjust auto positioning based on which axis this is.
+                                var temp = (this.name == 'xaxis') ? 1 : -1;
+                                var ee = t._elem.get(0)
+                                var c = ee.getContext("2d");
+                                t._textRenderer.setWidth(c);
+                                t._textRenderer.setHeight();
+                                var hh = t.getHeight(c, true);
+                                var ww = t.getWidth(c, true);
+                                ee.width = ww;
+                                ee.height = hh;
+                                ee.style.width = ww;
+                                ee.style.height = hh;
+                                if (hh > maxHeight)
+                                    maxHeight = hh;
 
-                            switch (t.labelPosition) {
-                                case 'auto':
-                                    // position at end
-                                    if (temp * t.angle < 0) {
+                                switch (t.labelPosition) {
+                                    case 'auto':
+                                        // position at end
+                                        if (temp * t.angle < 0) {
+                                            shim = -t.getWidth() + t._textRenderer.height * Math.sin(-t._textRenderer.angle) / 2;
+                                        }
+                                        // position at start
+                                        else {
+                                            shim = -t._textRenderer.height * Math.sin(t._textRenderer.angle) / 2;
+                                        }
+                                        break;
+                                    case 'end':
                                         shim = -t.getWidth() + t._textRenderer.height * Math.sin(-t._textRenderer.angle) / 2;
-                                    }
-                                    // position at start
-                                    else {
+                                        break;
+                                    case 'start':
                                         shim = -t._textRenderer.height * Math.sin(t._textRenderer.angle) / 2;
-                                    }
-                                    break;
-                                case 'end':
-                                    shim = -t.getWidth() + t._textRenderer.height * Math.sin(-t._textRenderer.angle) / 2;
-                                    break;
-                                case 'start':
-                                    shim = -t._textRenderer.height * Math.sin(t._textRenderer.angle) / 2;
-                                    break;
-                                case 'middle':
-                                    shim = -t.getWidth()/2 + t._textRenderer.height * Math.sin(-t._textRenderer.angle) / 2;
-                                    break;
-                                default:
-                                    shim = -t.getWidth()/2 + t._textRenderer.height * Math.sin(-t._textRenderer.angle) / 2;
-                                    break;
+                                        break;
+                                    case 'middle':
+                                        shim = -t.getWidth() / 2 + t._textRenderer.height * Math.sin(-t._textRenderer.angle) / 2;
+                                        break;
+                                    default:
+                                        shim = -t.getWidth() / 2 + t._textRenderer.height * Math.sin(-t._textRenderer.angle) / 2;
+                                        break;
+                                }
                             }
-                        }
-                        else {
-                            shim = -t.getWidth()/2;
-                        }
-                        var val = this.u2p(t.value) + shim + 'px';
-                        t.pack();
-                        t._elem.css('left', val);
+                            else {
+                                shim = -t.getWidth() / 2;
+                            }
+                            var val = this.u2p(t.value) + shim + 'px';
+                            t.pack();
+                            t._elem.css('left', val);
 
+                        }
+                    }
+                    return maxHeight;
+                }
+                var maxHeight = createXAxis.call(this, ticks);
+                var prev = null;
+                for(var i = 0;i < ticks.length;i++) {
+                    var t = ticks[i];
+                    if(typeof(t.angle) != "undefined" && t.angle == 0) {
+                        var curElem = t._elem;
+                        if(typeof(curElem) != "undefined") {
+                            if(prev != null) {
+                                var ff = $(prev._elem);
+                                var yy = $(curElem);
+                                if(ff.offset().left + ff.outerWidth() > yy.offset().left) {
+                                    t.angle = -15;
+                                    prev.angle = -15;
+                                    t.angle = Math.max(-90, Math.min(t.angle, 90));
+                                    t._textRenderer.angle = (t.angle * Math.PI / 180.0);
+                                    prev.angle = Math.max(-90, Math.min(prev.angle, 90));
+                                    prev._textRenderer.angle = (prev.angle * Math.PI / 180.0);
+                                }
+                            }
+                            prev = t;
+                        }
                     }
                 }
-                
-                var labeledge=['bottom', 0];
+
+                maxHeight = createXAxis.call(this, ticks);
+
+                var labeledge = ['bottom', 0];
                 if (lshow) {
                     var w = this._label._elem.outerWidth(true);
-                    this._label._elem.css('left', offmin + pixellength/2 - w/2 + 'px');
+                    this._label._elem.css('left', offmin + pixellength / 2 - w / 2 + 'px');
                     if (this.name == 'xaxis') {
                         this._label._elem.css('bottom', '0px');
                         var a = this._label._elem.outerHeight(true);
                         var b = this._label._elem.parent().height();
                         var c = this._label._elem.parent().parent().height();
-                        this._label._elem.parent().css("height", (a + hh) + "px");
+                        this._label._elem.parent().css("height", (a + maxHeight) + "px");
                         this._label._elem.parent().parent().css("height", (c + (this._label._elem.parent().height() - b)) + "px");
                         labeledge = ['bottom', this._label._elem.outerHeight(true)];
                     }
@@ -608,37 +636,39 @@
                     }
                     this._label.pack();
                 }
-                
+
                 // draw the group labels
-                var step = parseInt(this._ticks.length/this.groups, 10) + 1;
-                for (i=0; i<this._groupLabels.length; i++) {
+                var step = parseInt(this._ticks.length / this.groups, 10) + 1;
+                for (i = 0; i < this._groupLabels.length; i++) {
                     var mid = 0;
                     var count = 0;
-                    for (var j=i*step; j<(i+1)*step; j++) {
-                        if (j >= this._ticks.length-1) continue; // the last tick does not exist as there is no other group in order to have an empty one.
+                    for (var j = i * step; j < (i + 1) * step; j++) {
+                        if (j >= this._ticks.length - 1) continue; // the last tick does not exist as there is no other group in order to have an empty one.
                         if (this._ticks[j]._elem && this._ticks[j].label != " ") {
                             var t = this._ticks[j]._elem;
                             var p = t.position();
-                            mid += p.left + t.outerWidth(true)/2;
+                            mid += p.left + t.outerWidth(true) / 2;
                             count++;
                         }
                     }
-                    mid = mid/count;
-                    this._groupLabels[i].css({'left':(mid - this._groupLabels[i].outerWidth(true)/2)});
+                    mid = mid / count;
+                    this._groupLabels[i].css({'left': (mid - this._groupLabels[i].outerWidth(true) / 2)});
                     this._groupLabels[i].css(labeledge[0], labeledge[1]);
                 }
+
+
             }
             else {
-                for (i=0; i<ticks.length; i++) {
+                for (i = 0; i < ticks.length; i++) {
                     var t = ticks[i];
-                    if (t.show && t.showLabel) {                        
+                    if (t.show && t.showLabel) {
                         var shim;
                         if (t.constructor == $.jqplot.CanvasAxisTickRenderer && t.angle) {
                             // will need to adjust auto positioning based on which axis this is.
                             var temp = (this.name == 'yaxis') ? 1 : -1;
                             switch (t.labelPosition) {
                                 case 'auto':
-                                    // position at end
+                                // position at end
                                 case 'end':
                                     if (temp * t.angle < 0) {
                                         shim = -t._textRenderer.height * Math.cos(-t._textRenderer.angle) / 2;
@@ -662,27 +692,27 @@
                                     // else {
                                     //     shim = -t.getHeight()/2 - t._textRenderer.height * Math.sin(t._textRenderer.angle) / 2;
                                     // }
-                                    shim = -t.getHeight()/2;
+                                    shim = -t.getHeight() / 2;
                                     break;
                                 default:
-                                    shim = -t.getHeight()/2;
+                                    shim = -t.getHeight() / 2;
                                     break;
                             }
                         }
                         else {
-                            shim = -t.getHeight()/2;
+                            shim = -t.getHeight() / 2;
                         }
-                        
+
                         var val = this.u2p(t.value) + shim + 'px';
                         t._elem.css('top', val);
                         t.pack();
                     }
                 }
-                
-                var labeledge=['left', 0];
+
+                var labeledge = ['left', 0];
                 if (lshow) {
                     var h = this._label._elem.outerHeight(true);
-                    this._label._elem.css('top', offmax - pixellength/2 - h/2 + 'px');
+                    this._label._elem.css('top', offmax - pixellength / 2 - h / 2 + 'px');
                     if (this.name == 'yaxis') {
                         this._label._elem.css('left', '0px');
                         labeledge = ['left', this._label._elem.outerWidth(true)];
@@ -690,32 +720,32 @@
                     else {
                         this._label._elem.css('right', '0px');
                         labeledge = ['right', this._label._elem.outerWidth(true)];
-                    }   
+                    }
                     this._label.pack();
                 }
-                
+
                 // draw the group labels, position top here, do left after label position.
-                var step = parseInt(this._ticks.length/this.groups, 10) + 1; // step is one more than before as we don't want to have overlaps in loops
-                for (i=0; i<this._groupLabels.length; i++) {
+                var step = parseInt(this._ticks.length / this.groups, 10) + 1; // step is one more than before as we don't want to have overlaps in loops
+                for (i = 0; i < this._groupLabels.length; i++) {
                     var mid = 0;
                     var count = 0;
-                    for (var j=i*step; j<(i+1)*step; j++) { // j must never reach (i+1)*step as we don't want to have overlap between loops
-                        if (j >= this._ticks.length-1) continue; // the last tick does not exist as there is no other group in order to have an empty one.
+                    for (var j = i * step; j < (i + 1) * step; j++) { // j must never reach (i+1)*step as we don't want to have overlap between loops
+                        if (j >= this._ticks.length - 1) continue; // the last tick does not exist as there is no other group in order to have an empty one.
                         if (this._ticks[j]._elem && this._ticks[j].label != " ") {
                             var t = this._ticks[j]._elem;
                             var p = t.position();
-                            mid += p.top + t.outerHeight()/2;
+                            mid += p.top + t.outerHeight() / 2;
                             count++;
                         }
                     }
-                    mid = mid/count;
-                    this._groupLabels[i].css({'top':mid - this._groupLabels[i].outerHeight()/2});
+                    mid = mid / count;
+                    this._groupLabels[i].css({'top': mid - this._groupLabels[i].outerHeight() / 2});
                     this._groupLabels[i].css(labeledge[0], labeledge[1]);
-                    
+
                 }
             }
         }
-    };    
-    
-    
+    };
+
+
 })(jQuery);

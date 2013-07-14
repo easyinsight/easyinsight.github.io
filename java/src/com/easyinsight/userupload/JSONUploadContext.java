@@ -97,7 +97,7 @@ public class JSONUploadContext extends UploadContext {
     private Map<Key, Set<String>> sampleMap;
 
     @Override
-    public List<AnalysisItem> guessFields(EIConnection conn) throws Exception {
+    public List<AnalysisItem> guessFields(EIConnection conn, byte[] bytes) throws Exception {
         List<AnalysisItem> fieldList;
         try {
             HttpClient client = new HttpClient();
@@ -156,7 +156,7 @@ public class JSONUploadContext extends UploadContext {
     }
 
     @Override
-    public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible) throws Exception {
+    public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible, byte[] bytes) throws Exception {
         JSONDataSource jsonDataSource = new JSONDataSource();
         jsonDataSource.setFeedName(name);
         jsonDataSource.setHttpMethod(httpMethod);

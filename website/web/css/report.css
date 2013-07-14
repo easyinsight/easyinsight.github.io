@@ -152,3 +152,15 @@ body {
     border-width: 1px;
     border-color: #5c5c5c;
 }
+
+.hideFilter {
+    display: none;
+}
+
+a {
+    outline: 0;
+}
+
+a:focus {
+    outline: 0;
+}
