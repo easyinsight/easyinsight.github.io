@@ -101,11 +101,12 @@
         {
             // Specify the endpoint for the upload operation
             // Create an object to hold additional data fields
-            var request:URLRequest = new URLRequest("https://staging.easy-insight.com/app/fileUpload");
+            var request:URLRequest = new URLRequest("https://www.easy-insight.com/app/fileUpload");
             var vars:URLVariables = new URLVariables();
             vars.uploadKey = uploadKey;
             request.data = vars;
             progressBar.visible = true;
+            uploadButton.enabled = false;
             file.upload( request );
 
             /*var request:URLRequest = new URLRequest( "/app/UploadExample" );
