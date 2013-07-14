@@ -262,6 +262,9 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 Map map = (Map) obj;
                 String ticketID = map.get("id").toString();
                 IRow row = ticketMap.get(ticketID);
+                if (row == null) {
+                    continue;
+                }
                 if (map.get("description") != null) {
                     row.addValue(DESCRIPTION, map.get("description").toString());
                 }
