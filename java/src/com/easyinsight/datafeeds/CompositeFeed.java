@@ -152,11 +152,6 @@ public class CompositeFeed extends Feed {
                             compositeFeedCompositeConnection.setTargetItems(joinOverride.getTargetItems());
                             connections.add(compositeFeedCompositeConnection);
                         }
-
-                        /*connections.add(new CompositeFeedConnection(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID(),
-                            ((DerivedKey) joinOverride.getTargetItem().getKey()).getFeedID(), joinOverride.getSourceItem(),
-                            joinOverride.getTargetItem(), joinOverride.getSourceName(), joinOverride.getTargetName(), joinOverride.isSourceOuterJoin(),
-                            joinOverride.isTargetOuterJoin(), joinOverride.isSourceJoinOriginal(), joinOverride.isTargetJoinOriginal()));*/
                     }
                 }
             }
@@ -328,7 +323,6 @@ public class CompositeFeed extends Feed {
                 for (Edge edge : neededEdges) {
                     QueryStateNode precedingNode = graph.getEdgeSource(edge);
                     QueryStateNode followingNode = graph.getEdgeTarget(edge);
-                    System.out.println("identified edge from " + precedingNode.dataSourceName + " to " + followingNode.dataSourceName);
                     neededNodes.put(precedingNode.queryNodeKey(), precedingNode);
                     neededNodes.put(followingNode.queryNodeKey(), followingNode);
                 }
@@ -567,7 +561,6 @@ public class CompositeFeed extends Feed {
                         FilterDefinition filter = filterMap.get(myConn);
                         if (filter != null) {
                             if (insightRequestMetadata.isOptimized()) {
-                                System.out.println("adding filter for " + sourceNode.dataSourceName);
                                 sourceNode.addFilter(filter);
                             }
                         }

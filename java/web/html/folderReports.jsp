@@ -137,9 +137,9 @@
 
                 for (EIDescriptor descriptor : forThisLevel) {
                     if (descriptor instanceof InsightDescriptor) {
-                        out.println("<tr><td><a href=\"../report/" + descriptor.getUrlKey() + "\">" + descriptor.getName() + "</td></tr>");
+                        out.println("<tr><td><a href=\"../../report/" + descriptor.getUrlKey() + "\">" + descriptor.getName() + "</td></tr>");
                     } else if (descriptor instanceof DashboardDescriptor) {
-                        out.println("<tr><td><a href=\"../dashboard/" + descriptor.getUrlKey() + "\">" + descriptor.getName() + "</td></tr>");
+                        out.println("<tr><td><a href=\"../../dashboard/" + descriptor.getUrlKey() + "\">" + descriptor.getName() + "</td></tr>");
                     }
                 }
             %>
