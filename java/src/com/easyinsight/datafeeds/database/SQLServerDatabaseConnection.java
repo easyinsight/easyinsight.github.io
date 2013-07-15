@@ -142,6 +142,7 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
                 if (ct == 1000) {
                     IDataStorage.insertData(dataSet);
                     dataSet = new DataSet();
+                    ct = 0;
                 }
             }
             rs.close();
