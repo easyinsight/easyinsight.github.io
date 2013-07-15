@@ -253,6 +253,7 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                 if (ct == 1000) {
                     IDataStorage.insertData(dataSet);
                     dataSet = new DataSet();
+                    ct = 0;
                 }
             }
             IDataStorage.insertData(dataSet);
