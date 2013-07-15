@@ -70,9 +70,18 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
         JSONObject pointLabels = new JSONObject();
 
+        JSONObject axes = new JSONObject();
+        JSONObject yAxis = new JSONObject();
+        JSONObject xAxis = new JSONObject();
+        JSONObject params = new JSONObject();
+        axes.put("yaxis", yAxis);
+        axes.put("xaxis", xAxis);
+        params.put("axes", axes);
+
 
         JSONObject seriesDefaults = new JSONObject();
         JSONObject object = new JSONObject();
+        object.put("params", params);
         // need series, need ticks
         AnalysisItem xAxisItem;
         AnalysisItem measureItem;
@@ -84,6 +93,8 @@ public class StackedColumnChartServlet extends HtmlServlet {
             stackItem = columnChartDefinition.getStackItem();
             measureItem = columnChartDefinition.getMeasures().get(0);
             populator = new ColumnPopulator();
+            xAxis.put("label", xAxisItem.toDisplay());
+            yAxis.put("label", measureItem.toDisplay());
         } else if (report instanceof WSStackedBarChartDefinition) {
             WSStackedBarChartDefinition columnChartDefinition = (WSStackedBarChartDefinition) report;
             xAxisItem = columnChartDefinition.getYaxis();
@@ -94,6 +105,8 @@ public class StackedColumnChartServlet extends HtmlServlet {
                 seriesDefaults.put("pointLabels", pointLabels);
                 pointLabels.put("labels", new JSONArray());
             }
+            xAxis.put("label", measureItem.toDisplay());
+            yAxis.put("label", xAxisItem.toDisplay());
         } else {
             throw new RuntimeException();
         }
@@ -105,7 +118,6 @@ public class StackedColumnChartServlet extends HtmlServlet {
         JSONArray axisNames = new JSONArray();
         JSONArray series = new JSONArray();
 
-        JSONObject params = new JSONObject();
         JSONObject rendererOptions = new JSONObject();
 
 
@@ -228,7 +240,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
             for (JSONArray arr : entry.getValue()) {
                 total = total + populator.getMeasure(arr);
             }
-            if(total != 0) {
+            if (total != 0) {
                 blahs.put(entry.getValue());
             } else {
                 zeroIndicies.add(k);
@@ -236,7 +248,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
             k++;
         }
 
-        for(int j = zeroIndicies.size() - 1;j >= 0;j--) {
+        for (int j = zeroIndicies.size() - 1; j >= 0; j--) {
             series.remove(zeroIndicies.get(j));
         }
 

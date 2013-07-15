@@ -101,6 +101,19 @@
     </div>
 </script>
 
+<script type="text/template" id="field_filter_template">
+    <div class="filter filter<%= data.id %>">
+        <%= Filter.base_filter({data: data, parent_id: parent_id}) %>
+        <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="field_filter">
+            <% console.log(data.values) %>
+            <% _.each(data.values, function(e, i , l) { %>
+            <option value="<%= e.value %>"
+            <%= data.selected == e.value ? ' selected="selected"' : ''%>><%- e.label %></option>
+            <% }) %>
+        </select>
+    </div>
+</script>
+
 <script type="text/template" id="multi_value_filter_template">
     <div class="filter filter<%= data.id %>">
         <%= Filter.base_filter({data: data, parent_id: parent_id}) %> <a href="#<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" data-toggle="modal">

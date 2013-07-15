@@ -288,6 +288,9 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             rendererOptions.put("varyBarColor", "true");
             rendererOptions.put("barMargin", (45 / 2));
             seriesDefaults.put("rendererOptions", rendererOptions);
+            seriesDefaults.put("shadow", true);
+            seriesDefaults.put("shadowOffset", 1537573);
+            seriesDefaults.put("shadowDepth", 1);
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
