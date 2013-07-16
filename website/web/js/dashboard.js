@@ -60,6 +60,8 @@ var toFilterString = function (f) {
         return "filter" + f.id + "=" + f.selected;
     } else if (f.type == "multi_date") {
         return ["filter" + f.id + "start=" + f.min, "filter" + f.id + "end=" + f.max];
+    } else if(f.type == "field_filter") {
+        return "filter" + f["id"] + "=" + f.selected;
     } else
         return ["filter" + f["id"] + "direction=0", "filter" + f["id"] + "value=1", "filter" + f["id"] + "interval=2"];
 }
@@ -197,7 +199,6 @@ var hideFilters = function (obj, filterMap) {
     }
     if(obj.type == "stack") {
         var ss = selectedIndex(obj.id);
-        console.log(ss);
         hideFilters(obj.children[ss], filterMap);
     } else if(obj.type != "report") {
         for(var i = 0;i < obj.children.length;i++) {
@@ -238,7 +239,9 @@ $(function () {
                 else if (obj.type == "flat_date_year")
                     return Filter.flat_date_year({data: obj, parent_id: parent_id});
                 else if (obj.type == "multi_date")
-                    return Filter.multi_flat_date_month({data: obj, parent_id: parent_id});
+                    return Filter.multi_flat_date_month({data: obj, parent_id: parent_id})
+                else if(obj.type == "field_filter")
+                    return Filter.field_filter({data: obj, parent_id: parent_id});
             },
             multi_flat_date_month: _.template($("#multi_flat_date_filter", s).html()),
             flat_date_year: _.template($("#flat_date_year_filter", s).html()),
@@ -248,6 +251,7 @@ $(function () {
             rolling: _.template($("#rolling_date_filter_template", s).html()),
             date_range: _.template($("#absolute_date_filter_template", s).html()),
             base_filter: _.template($("#filter_base", s).html()),
+            field_filter: _.template($("#field_filter_template", s).html()),
             filters: _.template($("#filters_template", s).html())
 
         };
@@ -389,6 +393,16 @@ $(function () {
             var f = filterMap[$(e.target || e.srcElement).attr("id").split("_")[0]];
             f.filter.interval = $(e.target || e.srcElement).val();
             if (f.parent == null) {
+                renderReports(graph, dashboardJSON["id"], true);
+            } else {
+                renderReports(f.parent, dashboardJSON["id"], true);
+            }
+        });
+
+        $(".field_filter").change(function(e) {
+            var f = filterMap[$(e.target).attr("id").split("_")[0]];
+            f.filter.selected = $(e.target).val();
+            if(f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], true);
             } else {
                 renderReports(f.parent, dashboardJSON["id"], true);

@@ -27,6 +27,14 @@ public class LineChartServlet extends HtmlServlet {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
 
         JSONObject object = new JSONObject();
+
+        JSONObject params = new JSONObject();
+        JSONObject axes = new JSONObject();
+        JSONObject xAxis = new JSONObject();
+        JSONObject yyAxis = new JSONObject();
+        axes.put("xaxis", xAxis);
+        axes.put("yaxis", yyAxis);
+        params.put("axes", axes);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         // need series, need ticks
         WSTwoAxisDefinition twoAxisDefinition = (WSTwoAxisDefinition) report;
@@ -35,6 +43,8 @@ public class LineChartServlet extends HtmlServlet {
         if (twoAxisDefinition.isMultiMeasure()) {
             List<AnalysisItem> measures = twoAxisDefinition.getMeasures();
             AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
+            xAxis.put("label", date.toDisplay());
+            yyAxis.put("label", measures.get(0).toDisplay());
             for (AnalysisItem measure : measures) {
                 JSONArray measureArray = new JSONArray();
                 labelArray.put(measure.toDisplay());
@@ -58,6 +68,9 @@ public class LineChartServlet extends HtmlServlet {
             AnalysisItem measure = twoAxisDefinition.getMeasure();
             AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
             AnalysisItem yAxis = twoAxisDefinition.getYaxis();
+
+            xAxis.put("label", date.toDisplay());
+            yyAxis.put("label", measure.toDisplay());
 
             Map<String, Map<Date, Double>> series = new HashMap<String, Map<Date, Double>>();
 
@@ -114,6 +127,7 @@ public class LineChartServlet extends HtmlServlet {
 
         object.put("values", blahArray);
         object.put("labels", labelArray);
+        object.put("params", params);
 
         response.setContentType("application/json");
         String argh = object.toString();

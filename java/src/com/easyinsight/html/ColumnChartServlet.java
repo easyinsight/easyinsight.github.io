@@ -42,6 +42,13 @@ public class ColumnChartServlet extends HtmlServlet {
         object.put("params", params);
         Comparator c = null;
 
+        JSONObject axes = new JSONObject();
+        JSONObject yAxis = new JSONObject();
+        JSONObject xAxis = new JSONObject();
+        axes.put("yaxis", yAxis);
+        axes.put("xaxis", xAxis);
+
+
         if (report instanceof WSColumnChartDefinition) {
             WSColumnChartDefinition columnChartDefinition = (WSColumnChartDefinition) report;
             xAxisItem = columnChartDefinition.getXaxis();
@@ -56,6 +63,10 @@ public class ColumnChartServlet extends HtmlServlet {
             } else if ("Y-Axis Descending".equals(sortType)) {
                 c = new RowComparator(measures.get(0), false);
             }
+            xAxis.put("label", xAxisItem.toDisplay());
+            yAxis.put("label", measures.get(0).toDisplay());
+            params.put("axes", axes);
+
             if ("auto".equals(columnChartDefinition.getLabelPosition())) {
                 seriesDefaults.put("pointLabels", pointLabels);
                 pointLabels.put("labels", new JSONArray());
@@ -76,6 +87,9 @@ public class ColumnChartServlet extends HtmlServlet {
             } else if ("Y-Axis Descending".equals(sortType)) {
                 c = new RowComparator(xAxisItem, false);
             }
+            xAxis.put("label", measures.get(0).toDisplay());
+            yAxis.put("label", xAxisItem.toDisplay());
+            params.put("axes", axes);
             if ("auto".equals(columnChartDefinition.getLabelPosition())) {
                 seriesDefaults.put("pointLabels", pointLabels);
                 pointLabels.put("labels", new JSONArray());

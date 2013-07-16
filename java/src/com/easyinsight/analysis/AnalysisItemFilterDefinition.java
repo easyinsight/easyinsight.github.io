@@ -6,6 +6,9 @@ import com.easyinsight.database.Database;
 import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.sql.PreparedStatement;
@@ -184,5 +187,21 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
         }
         sb.append("</select>");
         return sb.toString();
+    }
+
+    @Override
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
+        JSONObject jo = super.toJSON(filterHTMLMetadata);
+        jo.put("type", "field_filter");
+        jo.put("selected", targetItem.getAnalysisItemID());
+        JSONArray available = new JSONArray();
+        for(AnalysisItem analysisItem : getAvailableItems()) {
+            JSONObject j = new JSONObject();
+            j.put("value", analysisItem.getAnalysisItemID());
+            j.put("label", analysisItem.toDisplay());
+            available.put(j);
+        }
+        jo.put("values", available);
+        return jo;
     }
 }
