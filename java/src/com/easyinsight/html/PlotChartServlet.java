@@ -30,6 +30,16 @@ public class PlotChartServlet extends HtmlServlet {
         // need series, need ticks
         WSPlotChartDefinition plotDefinition = (WSPlotChartDefinition) report;
 
+        JSONObject params = new JSONObject();
+        JSONObject axes = new JSONObject();
+        JSONObject xAxis = new JSONObject();
+        JSONObject yAxis = new JSONObject();
+        axes.put("xaxis", xAxis);
+        axes.put("yaxis", yAxis);
+        params.put("axes", axes);
+        object.put("params", params);
+        xAxis.put("label", plotDefinition.getXaxisMeasure().toDisplay());
+        yAxis.put("label", plotDefinition.getYaxisMeasure().toDisplay());
         List<JSONArray> arrays = new ArrayList<JSONArray>();
 
         for (IRow row : dataSet.getRows()) {
