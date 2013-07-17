@@ -31,6 +31,8 @@
         import com.easyinsight.analysis.MultiColor;
         import com.easyinsight.analysis.charts.ChartUtil;
 
+        import mx.controls.Alert;
+
         import mx.graphics.SolidColor;
 
         //import com.easyinsight.pseudocontext.PseudoContextWindow;
@@ -65,8 +67,16 @@
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             pieChartDef = analysisDefinition as PieChartDefinition;
-            graphData = dataSet;
+
             if (dataSet.length > 0) {
+                var endData:ArrayCollection = new ArrayCollection();
+                measureName = pieChartDef.measures.getItemAt(0).qualifiedName();
+                for each (var obj:Object in dataSet) {
+                    var num:Number = obj[measureName];
+                    if (num != 0) {
+                        endData.addItem(obj);
+                    }
+                }
                 canvas.setStyle("backgroundAlpha", pieChartDef.backgroundAlpha);
                 if (pieChartDef.showLegend) {
                     currentState = "";
@@ -96,14 +106,16 @@
                 pieSeries.setStyle("fills", colors);
                 this.defaultLink = ChartUtil.setup(pieChartDef.xaxis, pieChart, onChartClick);
                 this.measureFormatter = pieChartDef.measures.getItemAt(0).getFormatter();
-                measureName = pieChartDef.measures.getItemAt(0).qualifiedName();
+
                 dimension = pieChartDef.xaxis.qualifiedName();
                 this.dimensionItem = pieChartDef.xaxis;
+                graphData = endData;
             } else {
                 if (pieChartDef.measures != null && pieChartDef.measures.length > 0 && pieChartDef.xaxis != null) stackIndex = 2;
                 else stackIndex = 1;
                 pieChart.visible = false;
                 legend.visible = false;
+                graphData = dataSet;
             }
         }
 
