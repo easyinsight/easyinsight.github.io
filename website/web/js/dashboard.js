@@ -88,7 +88,7 @@ var renderReport = function (o, dashboardID, reload) {
     }
     else if (obj.metadata.type == "diagram") {
         $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), function (data) {
-            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, afterRefresh($("#" + id + " .noData")));
+            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, afterRefresh($("#" + id + " .loading")));
         })
     }
     else if (obj.metadata.type == "list") {

@@ -68,9 +68,18 @@
                 <div class="reportArea" id="<%= id %>ReportArea"<%
                 if(typeof(preferredHeight) != "undefined" || typeof(preferredWidth) != "undefined") { %> style="<% if(typeof(preferredHeight) != "undefined") { %>height:<%- preferredHeight %>px;<% } %><%
                 if(typeof(preferredWidth) != "undefined") { %>width:<%- preferredWidth %>px;<% } %>"<% } %>></div>
-                <div class="noData">
-                    Loading the report...
+                <div class="noData" style="display:none">
+                    There is no data available for the combination of filters you have selected.
                 </div>
+                <div class="loading">
+                    <div>
+                        Loading the report...
+                    </div>
+                    <div class="progress progress-striped active">
+                      <div class="bar" style="width: 100%;"></div>
+                    </div>
+                </div>
+
             </div>
         </div>
 </script>

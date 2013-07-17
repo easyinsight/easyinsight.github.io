@@ -197,6 +197,8 @@
         // Ughhh, have to make a copy of options b/c it may be modified later.
         var opts = $.extend({}, options);
         var shadow = (opts.shadow != undefined) ? opts.shadow : this.shadow;
+        console.log(opts);
+        console.log(this);
         var showLine = (opts.showLine != undefined) ? opts.showLine : this.showLine;
         var fill = (opts.fill != undefined) ? opts.fill : this.fill;
         var xaxis = this.xaxis;
@@ -331,8 +333,10 @@
                     // for stacked plots, they are predrawn by drawShadow
                     if (shadow && !this._stack) {
                         var sopts = $.extend(true, {}, opts);
+                        opts.offset = (opts.shadowOffset != undefined) ? opts.shadowOffset : this.shadowOffset;
                         // need to get rid of fillStyle on shadow.
                         delete sopts.fillStyle;
+                        console.log(this.renderer.shadowRenderer.draw);
                         this.renderer.shadowRenderer.draw(ctx, points, sopts);
                     }
 
