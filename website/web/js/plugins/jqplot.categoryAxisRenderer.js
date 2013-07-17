@@ -531,6 +531,8 @@
                                 }
 
                                 t.angle = Math.max(-90, Math.min(t.angle, 90));
+                                if(90 - Math.abs(t.angle) < 10)
+                                    t.angle = 90;
                                 t._textRenderer.angle = (t.angle * Math.PI / 180.0);
                             }
                             t._textRenderer.fontSize = aa + "px";

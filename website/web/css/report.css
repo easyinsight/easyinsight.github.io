@@ -164,3 +164,7 @@ a {
 a:focus {
     outline: 0;
 }
+
+.adhoc_instructions {
+    padding: 20px;
+}

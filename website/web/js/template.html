@@ -71,7 +71,7 @@
                 <div class="noData" style="display:none">
                     There is no data available for the combination of filters you have selected.
                 </div>
-                <div class="loading">
+                <div class="loading" <% if(report.metadata.adhoc_execution) { %>style="display:none"<% } %>>
                     <div>
                         Loading the report...
                     </div>
@@ -79,7 +79,11 @@
                       <div class="bar" style="width: 100%;"></div>
                     </div>
                 </div>
-
+                <% if(report.metadata.adhoc_execution) { %>
+                    <div class="adhoc_instructions">
+                        Adjust the filters to match your desired search and click the Run the Report button to actually retrieve data for this report.
+                    </div>
+                <% } %>
             </div>
         </div>
 </script>
@@ -114,7 +118,6 @@
     <div class="filter filter<%= data.id %>">
         <%= Filter.base_filter({data: data, parent_id: parent_id}) %>
         <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="field_filter">
-            <% console.log(data.values) %>
             <% _.each(data.values, function(e, i , l) { %>
             <option value="<%= e.value %>"
             <%= data.selected == e.value ? ' selected="selected"' : ''%>><%- e.label %></option>
