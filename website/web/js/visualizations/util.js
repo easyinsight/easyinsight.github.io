@@ -11,7 +11,11 @@ Utils = {
             $("#" + target + " .noData").show();
         }
         if(typeof(afterRefresh) != "undefined") {
-            afterRefresh();
+            if(afterRefresh.length > 0) {
+                afterRefresh($("#" + target + " .loading"))();
+            } else {
+                afterRefresh();
+            }
         }
     }
 };

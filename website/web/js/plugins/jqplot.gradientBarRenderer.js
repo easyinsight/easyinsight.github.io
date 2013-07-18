@@ -331,6 +331,7 @@
                     // for stacked plots, they are predrawn by drawShadow
                     if (shadow && !this._stack) {
                         var sopts = $.extend(true, {}, opts);
+                        opts.offset = (opts.shadowOffset != undefined) ? opts.shadowOffset : this.shadowOffset;
                         // need to get rid of fillStyle on shadow.
                         delete sopts.fillStyle;
                         this.renderer.shadowRenderer.draw(ctx, points, sopts);

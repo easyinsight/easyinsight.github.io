@@ -12,11 +12,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * User: jamesboe
@@ -42,6 +46,15 @@ public class FileUploadServlet extends HttpServlet {
                     System.out.println("got " + bytes.length + " bytes");
                 }
             }
+            ByteArrayOutputStream dest = new ByteArrayOutputStream();
+            ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(dest));
+            zos.putNextEntry(new ZipEntry("data.csv"));
+            zos.write(bytes);
+            zos.closeEntry();
+            zos.close();
+            int start = bytes.length;
+            bytes = dest.toByteArray();
+            System.out.println("compressed from " + start + " to " + bytes.length);
             EIConnection conn = Database.instance().getConnection();
             try {
                 PreparedStatement ps = conn.prepareStatement("SELECT UPLOAD_BYTES_ID, USER_ID FROM UPLOAD_BYTES WHERE UPLOAD_KEY = ?");

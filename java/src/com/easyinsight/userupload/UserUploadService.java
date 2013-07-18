@@ -39,12 +39,15 @@ import java.io.*;
 import java.util.*;
 import java.util.Date;
 import java.sql.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.util.ServiceUtil;
 import com.xerox.amazonws.sqs2.Message;
 import com.xerox.amazonws.sqs2.MessageQueue;
 import com.xerox.amazonws.sqs2.SQSUtils;
+import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
@@ -659,6 +662,13 @@ public class UserUploadService {
                     ResultSet rs = ps.executeQuery();
                     rs.next();
                     bytes = rs.getBytes(1);
+                    ps.close();
+                    ByteArrayOutputStream streamBuilder = new ByteArrayOutputStream();
+                    ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(bytes)));
+                    zis.getNextEntry();
+                    IOUtils.copy(zis, streamBuilder);
+                    bytes = streamBuilder.toByteArray();
+                    zis.close();
                 }
                 List<AnalysisItem> fields = uploadContext.guessFields(conn, bytes);
                 List<FieldUploadInfo> fieldInfos = new ArrayList<FieldUploadInfo>();
@@ -697,6 +707,13 @@ public class UserUploadService {
                 ResultSet rs = ps.executeQuery();
                 rs.next();
                 bytes = rs.getBytes(1);
+                ps.close();
+                ByteArrayOutputStream streamBuilder = new ByteArrayOutputStream();
+                ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(bytes)));
+                zis.getNextEntry();
+                IOUtils.copy(zis, streamBuilder);
+                bytes = streamBuilder.toByteArray();
+                zis.close();
             }
             long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible, bytes);
             uploadResponse = new UploadResponse(dataSourceID);
@@ -1111,6 +1128,12 @@ public class UserUploadService {
             rs.next();
             byte[] bytes = rs.getBytes(1);
             ps.close();
+            ByteArrayOutputStream streamBuilder = new ByteArrayOutputStream();
+            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(bytes)));
+            zis.getNextEntry();
+            IOUtils.copy(zis, streamBuilder);
+            bytes = streamBuilder.toByteArray();
+            zis.close();
             UserUploadAnalysis analysis = dataSource.getUploadFormat().analyze(bytes);
             Map<String, AnalysisItem> fieldMap = new HashMap<String, AnalysisItem>();
             for (AnalysisItem field : dataSource.getFields()) {
@@ -1174,6 +1197,13 @@ public class UserUploadService {
             ResultSet rs = ps.executeQuery();
             rs.next();
             byte[] bytes = rs.getBytes(1);
+            ps.close();
+            ByteArrayOutputStream streamBuilder = new ByteArrayOutputStream();
+            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(bytes)));
+            zis.getNextEntry();
+            IOUtils.copy(zis, streamBuilder);
+            bytes = streamBuilder.toByteArray();
+            zis.close();
 
             if (dataSource.getUploadFormat() instanceof CsvFileUploadFormat) {
                 FileProcessOptimizedUpdateScheduledTask task = new FileProcessOptimizedUpdateScheduledTask();

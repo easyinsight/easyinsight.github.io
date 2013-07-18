@@ -28,6 +28,13 @@ var afterRefresh = function (selector) {
     }
 }
 
+var beforeRefresh = function(selector) {
+    return function() {
+        $(".reportArea", selector.parent()).hide();
+        $(selector).show();
+    }
+}
+
 var selectedIndex = function(id) {
     var v = $("#" + id);
     var s = $("#" + id + " > .active");
@@ -66,12 +73,26 @@ var toFilterString = function (f) {
         return ["filter" + f["id"] + "direction=0", "filter" + f["id"] + "value=1", "filter" + f["id"] + "interval=2"];
 }
 
+var confirmRender = function(o, f) {
+    return function(data) {
+        var id = o.report.id;
+        if ($("#" + id + " :visible").size() == 0) {
+            o.rendered = false;
+            return;
+        } else {
+            f(data);
+            o.rendered = true;
+        }
+    }
+
+}
+
 var renderReport = function (o, dashboardID, reload) {
     var obj = o.report.report;
     var id = o.report.id;
     var filterStrings = [];
     var i;
-    if (!reload && o.rendered) {
+    if (!reload && o.rendered ) {
         return;
     }
     if ($("#" + id + " :visible").size() == 0) {
@@ -81,54 +102,55 @@ var renderReport = function (o, dashboardID, reload) {
     for (i = 0; i < o.filters.length; i++) {
         filterStrings = filterStrings.concat(toFilterString(o.filters[i]));
     }
+    beforeRefresh($("#" + id + " .loading"))();
     if (obj.metadata.type == "pie") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getPieChartCallback(id, w, {}))
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Chart.getPieChartCallback(id, w, {})))
     }
     else if (obj.metadata.type == "diagram") {
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), function (data) {
-            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, afterRefresh($("#" + id + " .noData")));
-        })
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, function (data) {
+            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, afterRefresh($("#" + id + " .loading")));
+        }))
     }
     else if (obj.metadata.type == "list") {
         $.ajax({
             dataType: "text",
             url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"),
-            success: List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns)
+            success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns))
         });
     } else if (obj.metadata.type == "bar") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getBarChartCallback(id, w, true, obj.metadata.styles));
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Chart.getBarChartCallback(id, w, true, obj.metadata.styles)));
     } else if (obj.metadata.type == "column") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getColumnChartCallback(id, w, obj.metadata.styles));
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Chart.getColumnChartCallback(id, w, obj.metadata.styles)));
     }
     else if (obj.metadata.type == "area" || obj.metadata.type == "bubble" || obj.metadata.type == "plot" || obj.metadata.type == "line") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getCallback(id, w, true, obj.metadata.styles));
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Chart.getCallback(id, w, true, obj.metadata.styles)));
     } else if (obj.metadata.type == "stacked_bar") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getStackedBarChart(id, w, obj.metadata.styles));
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Chart.getStackedBarChart(id, w, obj.metadata.styles)));
     } else if (obj.metadata.type == "stacked_column") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Chart.getStackedColumnChart(id, w, obj.metadata.styles));
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Chart.getStackedColumnChart(id, w, obj.metadata.styles)));
     } else if (obj.metadata.type == "gauge") {
         $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: null }))
         var v = JSON.stringify(obj.metadata.properties).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), Gauge.getCallback(id + "ReportArea", id, w, obj.metadata.max))
+        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Gauge.getCallback(id + "ReportArea", id, w, obj.metadata.max)))
     } else {
-        $.get(obj.metadata.url + '?reportID=' + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), function (data) {
+        $.get(obj.metadata.url + '?reportID=' + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, function (data) {
             Utils.noData(data, function () {
                 $('#' + id + " .reportArea").html(data);
             }, null, id);
-        });
+        }));
     }
     o.rendered = true;
 }
@@ -200,7 +222,7 @@ var hideFilters = function (obj, filterMap) {
     if(obj.type == "stack") {
         var ss = selectedIndex(obj.id);
         hideFilters(obj.children[ss], filterMap);
-    } else if(obj.type != "report") {
+    } else if(obj.type != "report" && obj.type != "text") {
         for(var i = 0;i < obj.children.length;i++) {
             hideFilters(obj.children[i], filterMap);
         }
@@ -445,6 +467,7 @@ $(function () {
 
         $(".adhoc").click(function (e) {
             var z = $(e.target);
+            $(".adhoc_instructions", z.parent()).hide();
             renderReport(reportMap[$(z.parent()).attr("id")], dashboardJSON["id"], true);
         })
 

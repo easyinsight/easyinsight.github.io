@@ -41,10 +41,19 @@ public class BubbleChartServlet extends HtmlServlet {
             yAxisMeasure = (AnalysisMeasure) plotDefinition.getYaxisMeasure();
             dimension = plotDefinition.getDimension();
         }
-
+        JSONObject params = new JSONObject();
+        JSONObject axes = new JSONObject();
+        JSONObject xAxis = new JSONObject();
+        JSONObject yAxis = new JSONObject();
+        axes.put("xaxis", xAxis);
+        axes.put("yaxis", yAxis);
+        params.put("axes", axes);
+        object.put("params", params);
+        xAxis.put("label", xAxisMeasure.toDisplay());
+        yAxis.put("label", yAxisMeasure.toDisplay());
 
         Link l = dimension.defaultLink();
-        if(l != null && l instanceof DrillThrough) {
+        if (l != null && l instanceof DrillThrough) {
             JSONObject drillthrough = new JSONObject();
             drillthrough.put("reportID", report.getUrlKey());
             drillthrough.put("id", l.getLinkID());
