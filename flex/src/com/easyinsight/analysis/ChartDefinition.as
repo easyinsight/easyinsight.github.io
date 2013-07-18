@@ -28,6 +28,8 @@ public class ChartDefinition extends AnalysisDefinition {
     public static const SORT_Y_ASCENDING:String = "Y-Axis Ascending";
     public static const SORT_Y_DESCENDING:String = "Y-Axis Descending";
     public static const SORT_UNSORTED:String = "Unsorted";
+    public static const STACK_SORT_ASCENDING:String = "Stack Ascending";
+    public static const STACK_SORT_DESCENDING:String = "Stack Descending";
 
     public var limitsMetadata:LimitsMetadata;
 

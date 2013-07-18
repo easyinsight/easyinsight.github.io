@@ -24,6 +24,15 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     private int labelFontSize;
     private String labelFontWeight;
     private List<MultiColor> multiColors = new ArrayList<MultiColor>();
+    private String stackSort;
+
+    public String getStackSort() {
+        return stackSort;
+    }
+
+    public void setStackSort(String stackSort) {
+        this.stackSort = stackSort;
+    }
 
     public List<MultiColor> getMultiColors() {
         return multiColors;
@@ -119,6 +128,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         chartColor = (int) findNumberProperty(properties, "chartColor", 0);
         useChartColor = findBooleanProperty(properties, "useChartColor", false);
         columnSort = findStringProperty(properties, "columnSort", "Unsorted");
+        stackSort = findStringProperty(properties, "stackSort", "Unsorted");
         labelFontWeight = findStringProperty(properties, "labelFontWeight", "none");
         labelFontSize = (int) findNumberProperty(properties, "labelFontSize", 12);
         labelPosition = findStringProperty(properties, "labelPosition", "none");
@@ -133,6 +143,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         properties.add(new ReportNumericProperty("chartColor", chartColor));
         properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
         properties.add(new ReportStringProperty("columnSort", columnSort));
+        properties.add(new ReportStringProperty("stackSort", stackSort));
         properties.add(new ReportNumericProperty("labelFontSize", labelFontSize));
         properties.add(new ReportStringProperty("labelFontWeight", labelFontWeight));
         properties.add(new ReportStringProperty("labelPosition", labelPosition));

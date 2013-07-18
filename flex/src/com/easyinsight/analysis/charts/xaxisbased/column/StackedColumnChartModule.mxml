@@ -41,6 +41,7 @@
         import mx.charts.series.items.ColumnSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
+        import mx.collections.SortField;
         import mx.controls.Alert;
         import mx.controls.Label;
         import mx.events.FlexEvent;
@@ -125,8 +126,8 @@
                         dataCanvas.moveTo(new CartesianCanvasValue(left[xAxisItem.qualifiedName()], -200), num);
                         dataCanvas.lineTo(new CartesianCanvasValue(right[xAxisItem.qualifiedName()], 200), num);
                         var label:Label = new Label();
-                        label.text = "Goal";
-                        dataCanvas.addDataChild(label, new CartesianCanvasValue(mid[xAxisItem.qualifiedName()], -50), 300000);
+                        label.text = "Team Goal";
+                        dataCanvas.addDataChild(label, new CartesianCanvasValue(mid[xAxisItem.qualifiedName()], -50), num);
                     }
                 }
             }
@@ -233,20 +234,6 @@
 
                 canvas.setStyle("backgroundAlpha", columnChartDef.backgroundAlpha);
                 stackIndex = 0;
-                if (columnChartDef.columnSort != ChartDefinition.SORT_UNSORTED) {
-                    var sort:Sort = new Sort();
-                    if (columnChartDef.columnSort == ChartDefinition.SORT_X_ASCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.xaxis, false, true);
-                    } else if (columnChartDef.columnSort == ChartDefinition.SORT_X_DESCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.xaxis, true, true);
-                    } else if (columnChartDef.columnSort == ChartDefinition.SORT_Y_ASCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measures.getItemAt(0) as AnalysisItem, false, true);
-                    } else if (columnChartDef.columnSort == ChartDefinition.SORT_Y_DESCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measures.getItemAt(0) as AnalysisItem, true, true);
-                    }
-                    dataSet.sort = sort;
-                    dataSet.refresh();
-                }
 
                 xField = columnChartDef.xaxis.qualifiedName();
                 createChart();
@@ -261,6 +248,14 @@
 
 
                 var dataObjs:ArrayCollection = columnChartDef.populateGroupings(dataSet, uniques);
+
+                if (columnChartDef.stackSort == ChartDefinition.STACK_SORT_ASCENDING || columnChartDef.stackSort == ChartDefinition.STACK_SORT_DESCENDING) {
+                    var stackSort:Sort = new Sort();
+                    stackSort.fields = [ new SortField(null, true, columnChartDef.stackSort != ChartDefinition.STACK_SORT_ASCENDING)];
+                    uniques.sort = stackSort;
+                    uniques.refresh();
+                }
+
                 var columnSet:EIColumnSet = new EIColumnSet();
                 measureFormatter = columnChartDef.measures.getItemAt(0).getFormatter();
                 dimensionFormatter = columnChartDef.xaxis.getFormatter();
@@ -281,6 +276,14 @@
                     }
                 } else {
                     colors = FillProvider.createLinearGradients(0);
+                }
+
+                if (columnChartDef.stackSort == ChartDefinition.SORT_X_ASCENDING) {
+
+                } else if (columnChartDef.stackSort == ChartDefinition.SORT_X_ASCENDING) {
+
+                } else {
+
                 }
 
                 for (var i:int = 0; i < uniques.length; i++) {
