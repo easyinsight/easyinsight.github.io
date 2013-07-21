@@ -10,6 +10,9 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.Roles;
+import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.userupload.UserUploadInternalService;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -31,6 +34,26 @@ public class FederatedDataSource extends FeedDefinition {
         return DataSourceInfo.COMPOSITE;
     }
 
+    @Override
+    public DataSourceCloneResult cloneDataSource(Connection conn) throws Exception {
+        DataSourceCloneResult dataSourceCloneResult = super.cloneDataSource(conn);
+        FederatedDataSource feedDefinition = (FederatedDataSource) dataSourceCloneResult.getFeedDefinition();
+        List<FederationSource> clonedFederationSources = new ArrayList<FederationSource>();
+        for (FederationSource federationSource : sources) {
+            long id = federationSource.getDataSourceID();
+            FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(id, conn);
+            DataSourceCloneResult result = DataSourceCopyUtils.cloneFeed(SecurityUtil.getUserID(), conn, childDefinition, false, SecurityUtil.getAccountID(), SecurityUtil.getUserName());
+            FeedDefinition clonedDefinition = result.getFeedDefinition();
+            DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
+            new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);
+            FederationSource clonee = new FederationSource();
+            clonee.setDataSourceID(id);
+            clonedFederationSources.add(clonee);
+        }
+        feedDefinition.setSources(clonedFederationSources);
+        return dataSourceCloneResult;
+    }
+
     public List<FederationSource> getSources() {
         return sources;
     }
@@ -41,6 +64,7 @@ public class FederatedDataSource extends FeedDefinition {
 
     public AnalysisItem getAnalysisItem() {
         return analysisItem;
+        // 650-
     }
 
     public void setAnalysisItem(AnalysisItem analysisItem) {
