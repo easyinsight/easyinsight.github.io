@@ -3,6 +3,8 @@
          height="100%" horizontalAlign="center" initialize="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.dashboard.DashboardDescriptor;
+        import com.easyinsight.datasources.CopyDataSourceWindow;
+
         /*import com.easyinsight.datasources.NewReportDataSourceWindow;*/
         import com.easyinsight.feedassembly.CompositeCreator;
         import com.easyinsight.framework.PerspectiveInfo;
@@ -67,6 +69,12 @@
             }
         }
 
+        private function nameSort(obj1:Object, obj2:Object):int {
+            var str1:String = obj1.name;
+            var str2:String = obj2.name;
+            return ObjectUtil.stringCompare(str1, str2, true);
+        }
+
         private function customSort(obj1:Object, obj2:Object):int {
             var date1:Date = null;
             var date2:Date = null;
@@ -97,21 +105,43 @@
                 topReports.topItems = topItems;
                 addChildAt(topReports, 0);
             }
+            /*var dTip:DataSourcesTip = new DataSourcesTip();
+            if (topBox == null) {
+                topBox = new HBox();
+                addChildAt(dTip, 0);
+            }*/
             if (User.getInstance().newsDate != null) {
                 if (User.getInstance().newsDismissDate == null || User.getInstance().newsDismissDate.getTime() < User.getInstance().newsDate.getTime()) {
                     if (getChildren().length > 0 && !(getChildAt(0) is NewsBar)) {
                         var newsBar:NewsBar = new NewsBar();
                         newsBar.addEventListener("dismissNews", onDismissed);
-                        addChildAt(newsBar, 0);
+                        if (topBox == null) {
+                            topBox = new HBox();
+                            addChildAt(topBox, 0);
+                        }
+                        topBox.addChildAt(newsBar, 0);
                     }
                 }
             }
+            /*var getHelp:GetHelp = new GetHelp();
+            if (topBox == null) {
+                topBox = new HBox();
+                addChildAt(topBox, 0);
+            }
+            topBox.addChild(getHelp);*/
+
             if (User.getInstance().accountOverSize) {
                 var mb:AccountMessageBar = new AccountMessageBar();
-                addChildAt(mb, 0);
+                if (topBox == null) {
+                    topBox = new HBox();
+                    addChildAt(topBox, 0);
+                }
+                topBox.addChild(mb);
             }
 
         }
+
+        private var topBox:HBox;
 
         private var formatter:DateFormatter;
 
@@ -173,6 +203,12 @@
 
         [Bindable]
         private var customizeVisible:Boolean;
+
+        private function blah():void {
+            var window:CopyDataSourceWindow = new CopyDataSourceWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
         ]]></mx:Script>
 
 
@@ -180,6 +216,7 @@
         <mx:Label text="Data Sources" fontSize="20" maxWidth="300"/>
         <mx:Spacer width="100%"/>
         <mx:LinkButton label="Join data sources" click="createCompositeFeed()" fontSize="12"/>
+        <mx:LinkButton label="Blah" click="blah()" fontSize="12"/>
         <!--<mx:LinkButton label="Data source from report" click="blah()" fontSize="12"/>-->
         <mx:LinkButton label="Customize top reports" click="blah1()" fontSize="12" visible="{customizeVisible}"/>
     </mx:HBox>
@@ -191,7 +228,7 @@
             verticalGridLines="true" id="dataSourceGrid" horizontalScrollPolicy="off" verticalScrollPolicy="off" selectable="false"
                 dataProvider="{dataProvider}" rowHeight="24">
             <mx:columns>
-                <mx:DataGridColumn dataField="name" itemRenderer="com.easyinsight.listing.MyDataNameRenderer" headerText="Data Source" width="400"/>
+                <mx:DataGridColumn dataField="name" itemRenderer="com.easyinsight.listing.MyDataNameRenderer" headerText="Data Source" width="400" sortCompareFunction="nameSort"/>
                 <mx:DataGridColumn dataField="lastDataTime" labelFunction="createDateLabelFunction" headerText="Last Data Time" width="140"
                         sortCompareFunction="customSort"/>
                 <mx:DataGridColumn dataField="author" headerText="Owner" width="140"/>

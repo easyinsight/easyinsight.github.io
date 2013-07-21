@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var dataSources:ArrayCollection;
+
+        private function next():void {
+            var dsToUse:DataSourceDescriptor = null;
+            for each (var ds:DataSourceDescriptor in dataSources) {
+                if (ds.selected) {
+                    dsToUse = ds;
+                }
+            }
+            ProgressAlert.alert(this, "Copying...", null, uploadService.copyDataSource);
+            uploadService.copyDataSource.send(dsToUse.id, "Copy Name", false, true);
+        }
+
+        private function copied():void {
+
+        }
+
+        private function onCreation():void {
+            feedService.searchForSubscribedFeeds.send();
+        }
+
+        private function gotDataSources():void {
+            dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="uploadService" destination="userUpload">
+        <mx:method name="copyDataSource" result="copied()"/>
+    </mx:RemoteObject>
+    <!--
+        pick the data source(s)?
+        copy from there
+        concept of account linkage?
+
+        so for rebate/mdf, you're going to copy 25 combined sources, and DRR
+
+        copy all sources "tagged" as X?
+
+        preserve link of source data source, source report, etc
+
+        on a subsequent copy, it's a copy over (update), vs. copy fresh?
+
+
+    -->
+    <mx:DataGrid id="sourceGrid" dataProvider="{dataSources}" rowHeight="28" height="400">
+        <mx:columns>
+            <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="50"/>
+            <mx:DataGridColumn dataField="name" width="400"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Next" click="next()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EITitleWindow>
