@@ -1311,7 +1311,7 @@
         <mx:Button icon="@Embed(source='../../../assets/table_edit.png')"
                    click="showQuickActions()" id="quickActionButton"
                    toolTip="Quick Actions" label="Quick Actions" labelPlacement="right"
-                   styleName="grayButton"/>
+                   styleName="grayButton" enabled="{!loadingReport}"/>
     </mx:HBox>
     <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275"
              paddingBottom="10" paddingTop="33">
