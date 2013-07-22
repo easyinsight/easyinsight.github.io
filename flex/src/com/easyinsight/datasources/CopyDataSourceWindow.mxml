@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()" backgroundColor="#FFFFFF">
     <mx:Script><![CDATA[
+        import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.ProgressAlert;
 
@@ -22,7 +23,8 @@
         }
 
         private function copied():void {
-
+            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
+            PopUpManager.removePopUp(this);
         }
 
         private function onCreation():void {
@@ -39,21 +41,6 @@
     <mx:RemoteObject id="uploadService" destination="userUpload">
         <mx:method name="copyDataSource" result="copied()"/>
     </mx:RemoteObject>
-    <!--
-        pick the data source(s)?
-        copy from there
-        concept of account linkage?
-
-        so for rebate/mdf, you're going to copy 25 combined sources, and DRR
-
-        copy all sources "tagged" as X?
-
-        preserve link of source data source, source report, etc
-
-        on a subsequent copy, it's a copy over (update), vs. copy fresh?
-
-
-    -->
     <mx:DataGrid id="sourceGrid" dataProvider="{dataSources}" rowHeight="28" height="400">
         <mx:columns>
             <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="50"/>
