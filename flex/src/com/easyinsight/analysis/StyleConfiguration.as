@@ -61,6 +61,8 @@ public class StyleConfiguration {
         items.addItem(new ColorReportFormItem("Stack 2 Fill End", "stackFill2End",  dashboard.stackFill2End, dashboard));
         items.addItem(new CheckBoxReportFormItem("Absolute Height", "absoluteSizing",  dashboard.absoluteSizing, dashboard));
         items.addItem(new CheckBoxReportFormItem("Stack Fill Headers", "fillStackHeaders",  dashboard.fillStackHeaders, dashboard));
+        items.addItem(new ImageReportFormItem("Header Image", "headerImage", dashboard.headerImage, dashboard));
+        items.addItem(new CheckBoxReportFormItem("Full-Size Header Image", "imageFullHeader", dashboard.imageFullHeader, dashboard));
         return items;
     }
 

@@ -48,7 +48,7 @@ public class AvailableFieldTextRenderer extends UITextField implements IListItem
     public function set data(value:Object):void {
         wrapper = value as AnalysisItemWrapper;
 
-        if (wrapper.analysisItem != null) {
+        if (wrapper != null && wrapper.analysisItem != null) {
             var items:Array = [];
             var addToReportItem:ContextMenuItem = new ContextMenuItem("Add to Report");
             addToReportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {

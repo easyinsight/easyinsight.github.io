@@ -51,23 +51,29 @@ public class UIData {
                 "        <div class=\"span12\">\n");
         if (applicationSkin != null && applicationSkin.isReportHeader()) {
             sb.append("            <div style=\"").append(headerStyle).append("\">\n").append("                <div style=\"padding:10px;float:left\">\n").append("                    <div style=\"background-color: #FFFFFF;padding: 5px\">\n");
-            if (headerImageDescriptor != null) {
+            if (properties.getHeader() != null) {
+                sb.append("                        <img src=\"/app/reportHeader?imageID=").append(properties.getHeader().getId()).append("\" alt=\"Logo\"/>\n");
+            } else if (headerImageDescriptor != null) {
                 sb.append("                        <img src=\"/app/reportHeader?imageID=").append(headerImageDescriptor.getId()).append("\" alt=\"Logo\"/>\n");
             }
             sb.append("                    </div>\n" +
                     "                </div>\n");
-            sb.append("<div style=\"").append(headerTextStyle).append("\">");
-            sb.append(StringEscapeUtils.escapeHtml(name));
-            sb.append("</div>\n");
+            if(!properties.isImageFullHeader()) {
+                sb.append("<div style=\"").append(headerTextStyle).append("\">");
+                sb.append(StringEscapeUtils.escapeHtml(name));
+                sb.append("</div>\n");
+            }
             sb.append("</div>\n");
         } else if (properties != null && properties.getHeader() != null) {
             sb.append("            <div style=\"").append(headerStyle).append("\">\n").append("                <div style=\"padding:10px;float:left\">\n").append("                    <div style=\"background-color: #FFFFFF;padding: 5px\">\n");
             sb.append("                        <img src=\"/app/reportHeader?imageID=").append(properties.getHeader().getId()).append("\" alt=\"Logo\"/>\n");
             sb.append("                    </div>\n" +
                     "                </div>\n");
-            sb.append("<div style=\"").append(headerTextStyle).append("\">");
-            sb.append(StringEscapeUtils.escapeHtml(name));
-            sb.append("</div>\n");
+            if(!properties.isImageFullHeader()) {
+                sb.append("<div style=\"").append(headerTextStyle).append("\">");
+                sb.append(StringEscapeUtils.escapeHtml(name));
+                sb.append("</div>\n");
+            }
             sb.append("</div>\n");
         } else {
             sb.append("<div style=\"").append(headerTextStyle).append("\">");
