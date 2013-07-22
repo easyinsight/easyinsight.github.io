@@ -47,7 +47,7 @@ public class FederatedDataSource extends FeedDefinition {
             DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
             new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);
             FederationSource clonee = new FederationSource();
-            clonee.setDataSourceID(id);
+            clonee.setDataSourceID(clonedDefinition.getDataFeedID());
             clonedFederationSources.add(clonee);
         }
         feedDefinition.setSources(clonedFederationSources);
