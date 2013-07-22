@@ -3,11 +3,16 @@ package com.easyinsight.datafeeds.composite;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.analysis.ReplacementMap;
+import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.Roles;
+import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.userupload.UserUploadInternalService;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -29,6 +34,26 @@ public class FederatedDataSource extends FeedDefinition {
         return DataSourceInfo.COMPOSITE;
     }
 
+    @Override
+    public DataSourceCloneResult cloneDataSource(Connection conn) throws Exception {
+        DataSourceCloneResult dataSourceCloneResult = super.cloneDataSource(conn);
+        FederatedDataSource feedDefinition = (FederatedDataSource) dataSourceCloneResult.getFeedDefinition();
+        List<FederationSource> clonedFederationSources = new ArrayList<FederationSource>();
+        for (FederationSource federationSource : sources) {
+            long id = federationSource.getDataSourceID();
+            FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(id, conn);
+            DataSourceCloneResult result = DataSourceCopyUtils.cloneFeed(SecurityUtil.getUserID(), conn, childDefinition, false, SecurityUtil.getAccountID(), SecurityUtil.getUserName());
+            FeedDefinition clonedDefinition = result.getFeedDefinition();
+            DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
+            new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);
+            FederationSource clonee = new FederationSource();
+            clonee.setDataSourceID(clonedDefinition.getDataFeedID());
+            clonedFederationSources.add(clonee);
+        }
+        feedDefinition.setSources(clonedFederationSources);
+        return dataSourceCloneResult;
+    }
+
     public List<FederationSource> getSources() {
         return sources;
     }
@@ -39,6 +64,7 @@ public class FederatedDataSource extends FeedDefinition {
 
     public AnalysisItem getAnalysisItem() {
         return analysisItem;
+        // 650-
     }
 
     public void setAnalysisItem(AnalysisItem analysisItem) {
@@ -62,6 +88,24 @@ public class FederatedDataSource extends FeedDefinition {
         FederationSource source1 = sources.get(0);
         FeedDefinition child = new FeedStorage().getFeedDefinitionData(source1.getDataSourceID(), conn);
         return child.customJoinsAllowed(conn);
+    }
+
+    @Override
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report, DataSourceInfo dataSourceInfo) {
+        FederationSource source1 = sources.get(0);
+        FeedDefinition child;
+        try {
+            child = new FeedStorage().getFeedDefinitionData(source1.getDataSourceID());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return child.suggestIntentions(report, dataSourceInfo);
+    }
+
+    @Override
+    public void beforeSave(EIConnection conn) throws Exception {
+        super.beforeSave(conn);
+        lookForNewFields( conn);
     }
 
     @Override
@@ -176,5 +220,36 @@ public class FederatedDataSource extends FeedDefinition {
             }
         }
         setFolders(clonedFolders);
+    }
+
+    public void lookForNewFields(EIConnection conn) throws SQLException {
+        Map<String, AnalysisItem> existingMap = new HashMap<String, AnalysisItem>();
+        for (AnalysisItem analysisItem : getFields()) {
+            existingMap.put(analysisItem.toDisplay(), analysisItem);
+        }
+        FederationSource source = sources.get(0);
+        FeedDefinition child = new FeedStorage().getFeedDefinitionData(source.getDataSourceID(), conn);
+        Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+        for (AnalysisItem analysisItem : child.getFields()) {
+            // is this analysis item new...
+            AnalysisItem existing = existingMap.get(analysisItem.toDisplay());
+            if (existing == null) {
+                System.out.println("Couldn't find field " + analysisItem.toDisplay());
+                try {
+                    AnalysisItem clonedItem = analysisItem.clone();
+                    clonedItem.setAnalysisItemID(0);
+                    Key clonedKey = clonedItem.getKey().clone();
+                    clonedItem.setKey(clonedKey);
+                    getFields().add(clonedItem);
+                    replacementMap.put(analysisItem.getAnalysisItemID(), clonedItem);
+                } catch (CloneNotSupportedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+        for (Map.Entry<Long, AnalysisItem> replEntry : replacementMap.entrySet()) {
+            replEntry.getValue().updateIDs(replacements);
+        }
     }
 }

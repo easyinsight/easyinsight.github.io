@@ -26,6 +26,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     private int labelInsideFontColor;
     private boolean useInsideLabelFontColor;
     private List<MultiColor> multiColors = new ArrayList<MultiColor>();
+    private String stackSort;
 
     @Override
     public List<IComponent> createComponents() {
@@ -37,6 +38,14 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
             }
         }
         return components;
+    }
+
+    public String getStackSort() {
+        return stackSort;
+    }
+
+    public void setStackSort(String stackSort) {
+        this.stackSort = stackSort;
     }
 
     public List<MultiColor> getMultiColors() {
@@ -139,6 +148,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         labelInsideFontColor = (int) findNumberProperty(properties, "labelInsideFontColor", 0);
         useInsideLabelFontColor = findBooleanProperty(properties, "useInsideLabelFontColor", false);
         multiColors = multiColorProperty(properties, "multiColors");
+        stackSort = findStringProperty(properties, "stackSort", "Unsorted");
     }
 
     @Override
@@ -147,6 +157,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         properties.add(new ReportNumericProperty("chartColor", chartColor));
         properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
         properties.add(new ReportStringProperty("columnSort", columnSort));
+        properties.add(new ReportStringProperty("stackSort", stackSort));
         properties.add(new ReportStringProperty("labelPosition", labelPosition));
         properties.add(new ReportNumericProperty("labelFontSize", labelFontSize));
         properties.add(new ReportStringProperty("labelFontWeight", labelFontWeight));

@@ -590,7 +590,7 @@ public class SolutionService {
         }
     }
 
-    private DashboardDescriptor installDashboard(long dashboardID, long dataSourceID, EIConnection conn, Session session, boolean temporaryDashboard,
+    public DashboardDescriptor installDashboard(long dashboardID, long dataSourceID, EIConnection conn, Session session, boolean temporaryDashboard,
                                                  boolean makeAccountVisible, Map<Long, AnalysisDefinition> alreadyInstalledMap, int toFolder) throws Exception {
         DashboardStorage dashboardStorage = new DashboardStorage();
         FeedStorage feedStorage = new FeedStorage();
@@ -738,7 +738,7 @@ public class SolutionService {
         }
     }
 
-    private InsightDescriptor installReport(long reportID, long dataSourceID, EIConnection conn, Session session, 
+    public InsightDescriptor installReport(long reportID, long dataSourceID, EIConnection conn, Session session,
                                             boolean keepTemporary, boolean makeAccountVisible, Map<Long, AnalysisDefinition> alreadyInstalledMap) throws Exception {
         AnalysisDefinition originalBaseReport = new AnalysisStorage().getPersistableReport(reportID, session);
         //FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);

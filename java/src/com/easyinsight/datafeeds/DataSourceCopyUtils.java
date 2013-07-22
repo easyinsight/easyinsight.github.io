@@ -1,5 +1,7 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
@@ -58,7 +60,26 @@ public class DataSourceCopyUtils {
         DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(clonedFeedDefinition.getFeedName(), clonedFeedDefinition.getDataFeedID(),
                 clonedFeedDefinition.getFeedType().getType(), false, clonedFeedDefinition.getDataSourceBehavior());
         infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), dataSourceDescriptor, clonedFeedDefinition.getFeedName(), requiresConfig));
-
+        PreparedStatement getReports = conn.prepareStatement("SELECT ANALYSIS_ID FROM ANALYSIS WHERE DATA_FEED_ID = ? AND TEMPORARY_REPORT = ?");
+        getReports.setLong(1, feedDefinition.getDataFeedID());
+        getReports.setBoolean(2, false);
+        ResultSet reportRS = getReports.executeQuery();
+        Map<Long, AnalysisDefinition> alreadyInstalledMap = new HashMap<Long, AnalysisDefinition>();
+        Session session = Database.instance().createSession(conn);
+        while (reportRS.next()) {
+            long reportID = reportRS.getLong(1);
+            new SolutionService().installReport(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, false, true, alreadyInstalledMap);
+        }
+        PreparedStatement getDashboards = conn.prepareStatement("SELECT DASHBOARD_ID, FOLDER FROM DASHBOARD WHERE DATA_SOURCE_ID = ? AND TEMPORARY_DASHBOARD = ?");
+        getDashboards.setLong(1, feedDefinition.getDataFeedID());
+        getDashboards.setBoolean(2, false);
+        ResultSet dashboardRS = getDashboards.executeQuery();
+        while (dashboardRS.next()) {
+            long reportID = dashboardRS.getLong(1);
+            int folder = dashboardRS.getInt(2);
+            new SolutionService().installDashboard(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, false, true, alreadyInstalledMap, folder);
+        }
+        session.close();
         return infos;
     }
 
@@ -110,17 +131,6 @@ public class DataSourceCopyUtils {
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID, accountID));
         clonedFeedDefinition.setOwnerName(userName);
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
-        if (feedDefinition.getFeedType().equals(FeedType.ANALYSIS_BASED)) {
-            // TODO: repair, we don't use atm
-            /*if (feedDefinition.getAnalysisDefinitionID() > 0) {
-                AnalysisDefinition clonedRootInsight = analysisStorage.cloneReport(feedDefinition.getAnalysisDefinitionID(), conn, result.getKeyReplacementMap(), clonedFeedDefinition.getFields());
-                if (clonedRootInsight != null) {
-                    clonedRootInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
-                    analysisStorage.saveAnalysis(clonedRootInsight, conn);
-                    clonedFeedDefinition.setAnalysisDefinitionID(clonedRootInsight.getAnalysisID());
-                }
-            }*/
-        }
         return result;
     }
 
