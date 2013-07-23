@@ -91,9 +91,12 @@ public class AnalysisBasedFeed extends Feed {
             for (FilterDefinition filter : filters) {
                 filterStrings.add(filter.toXML(xmlMetadata).toXML());
             }
+            List<String> sorted = new ArrayList<String>();
             for (AnalysisItem analysisItem : analysisItems) {
-                filterStrings.add(analysisItem.getKey().toKeyString());
+                sorted.add(analysisItem.getKey().toKeyString());
             }
+            Collections.sort(sorted);
+            filterStrings.addAll(sorted);
             cacheKey = new CacheKey(analysisDefinition.getAnalysisID(), filterStrings);
             DataSet embeddedResults = ReportCache.instance().getAddonResults(analysisDefinition.getDataFeedID(), cacheKey, analysisDefinition.getCacheMinutes());
             if (embeddedResults != null) {
