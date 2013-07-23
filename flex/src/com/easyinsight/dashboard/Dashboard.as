@@ -50,6 +50,7 @@ public class Dashboard {
     public var headerImage:ImageDescriptor;
     public var headerTextColor:int;
     public var headerBackgroundColor:int;
+    public var imageFullHeader:Boolean;
 
     public var defaultDrillthrough:Link;
 
