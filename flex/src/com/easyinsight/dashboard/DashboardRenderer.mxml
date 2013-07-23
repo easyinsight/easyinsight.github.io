@@ -8,6 +8,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.filtering.AnalysisItemFilterDefinition;
         import com.easyinsight.filtering.FilterDefinition;
+        import com.easyinsight.filtering.TransformsUpdatedEvent;
 
         import mx.collections.ArrayCollection;
         import mx.core.Container;
@@ -33,13 +34,15 @@
             _fixedID = value;
         }
 
-        private function transformsUpdated(event:Event):void {
+        private function transformsUpdated(event:TransformsUpdatedEvent):void {
             var filterMap:Object = new Object();
             if (transformContainer != null) {
-                filterMap["master"] = transformContainer.getFilterDefinitions();
+                filterMap["master"] = transformContainer.getVisibleFilterDefinitions();
             }
             rootView.updateAdditionalFilters(filterMap);
-            rootView.refresh();
+            if (event.rerender) {
+                rootView.refresh();
+            }
         }
 
         public function styleUpdated():void {
@@ -70,9 +73,14 @@
             }
         }
 
+        private function onBlah(event:DashboardFilterEvent):void {
+            transformContainer.hideFilters(event.filters);
+        }
+
         public function createDashboard(width:int = 0, height:int = 0):IDashboardViewComponent {
 
             addEventListener(DashboardReportLoadEvent.DASHBOARD_REPORT_LOAD, onReportLoad);
+            addEventListener(DashboardFilterEvent.BLAH, onBlah);
             /*var primary:VBox = new VBox();
              primary.percentHeight = 100;
              primary.percentWidth = 100;
@@ -167,6 +175,7 @@
             }
 
             var dashboardEditorMetadata:DashboardEditorMetadata = new DashboardEditorMetadata();
+            dashboardEditorMetadata.transformContainer = transformContainer;
             dashboardEditorMetadata.dashboardStackPositions = _dashboardStackPositions;
             dashboardEditorMetadata.dataSourceID = dataSourceID;
             dashboardEditorMetadata.dashboardID = dashboard.id;

@@ -6,7 +6,7 @@ import com.easyinsight.filtering.TransformsUpdatedEvent;
 import com.easyinsight.framework.LoginEvent;
 import com.easyinsight.framework.User;
 import com.easyinsight.report.TempReportExportWindow;
-import com.easyinsight.skin.BackgroundImage;
+
 import com.easyinsight.skin.DashboardHeaderBackgroundImage;
 import com.easyinsight.skin.ImageLoadEvent;
 import com.easyinsight.skin.ImageLoader;
@@ -24,12 +24,9 @@ import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.ComboBox;
-import mx.controls.LinkButton;
 import mx.controls.Spacer;
-import mx.controls.ToggleButtonBar;
 import mx.core.Container;
 import mx.core.UIComponent;
 import mx.effects.Effect;
@@ -84,6 +81,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         } else {
             return;
         }
+        dashboardEditorMetadata.transformContainer.hideFilters(new ArrayCollection());
         IDashboardViewComponent(newComp).initialRetrieve();
         viewStack.selectedIndex = targetIndex;
         updateAdditionalFilters(filterMap);
@@ -209,13 +207,19 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                 }
             }
         }
-        if (dashboardEditorMetadata.dashboardStackPositions != null) {
+        if (dashboardEditorMetadata != null && dashboardEditorMetadata.dashboardStackPositions != null && viewStack != null) {
             var index:int = dashboardEditorMetadata.dashboardStackPositions.getStackPosition(dashboardStack);
-            viewStack.selectedIndex = index;
-            if (dashboardHeaderButtons != null) {
-                selectedButton.selected = false;
-                DashboardButton(dashboardHeaderButtons.getItemAt(index)).selected = true;
-                selectedButton = DashboardButton(dashboardHeaderButtons.getItemAt(index));
+            if (index != -1) {
+                viewStack.selectedIndex = index;
+                if (dashboardHeaderButtons != null && index != -1 && dashboardHeaderButtons.length > index) {
+                    if (selectedButton != null) {
+                        selectedButton.selected = false;
+                    }
+                    if (dashboardHeaderButtons.getItemAt(index) is DashboardButton) {
+                        DashboardButton(dashboardHeaderButtons.getItemAt(index)).selected = true;
+                        selectedButton = DashboardButton(dashboardHeaderButtons.getItemAt(index));
+                    }
+                }
             }
         }
         addChild(viewStack);
