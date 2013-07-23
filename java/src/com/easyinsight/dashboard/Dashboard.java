@@ -66,6 +66,7 @@ public class Dashboard implements Cloneable, Serializable {
     private Link defaultDrillthrough;
 
     private ImageDescriptor headerImage;
+    private boolean imageFullHeader;
     private int headerTextColor;
     private int headerBackgroundColor;
 
@@ -501,7 +502,9 @@ public class Dashboard implements Cloneable, Serializable {
     }
 
     public DashboardUIProperties findHeaderImage() {
-        return getRootElement().findHeaderImage();
+        DashboardUIProperties p = new DashboardUIProperties(this.getHeaderBackgroundColor(), this.getHeaderImage());
+        p.setImageFullHeader(this.isImageFullHeader());
+        return p;
     }
 
     public DashboardElement findElement(long dashboardElementID) {
@@ -529,5 +532,13 @@ public class Dashboard implements Cloneable, Serializable {
 
         dashboard.put("styles", styles);
         return dashboard;
+    }
+
+    public boolean isImageFullHeader() {
+        return imageFullHeader;
+    }
+
+    public void setImageFullHeader(boolean imageFullHeader) {
+        this.imageFullHeader = imageFullHeader;
     }
 }

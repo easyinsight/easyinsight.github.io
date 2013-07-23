@@ -319,7 +319,7 @@ public class DashboardService {
             return dashboard;
         } catch (Exception e) {
             LogClass.error("On retrieving dashboard " + dashboardID, e);
-            throw new RuntimeException(e);
+                throw new RuntimeException(e);
         }
     }
 

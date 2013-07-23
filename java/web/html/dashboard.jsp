@@ -93,7 +93,7 @@
 </div>
 
 <div class="container-fluid">
-    <%= uiData.createHeader(dashboard.getName()) %>
+    <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>
     <jsp:include page="refreshingDataSource.jsp"/>
     <div id="base"/>
 </div>

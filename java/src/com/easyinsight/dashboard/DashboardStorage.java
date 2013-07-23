@@ -9,6 +9,7 @@ import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.email.UserStub;
+import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.security.Roles;
 import org.hibernate.Session;
 
@@ -216,8 +217,8 @@ public class DashboardStorage {
                     "ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE, UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, TEMPORARY_DASHBOARD," +
                     "PUBLIC_VISIBLE, border_color, border_thickness, background_color, padding," +
                     "recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing," +
-                    "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding, default_link) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding, default_link, image_full_header, header_image_id) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             insertStmt.setString(1, dashboard.getName());
             insertStmt.setString(2, dashboard.getUrlKey());
             insertStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -250,6 +251,12 @@ public class DashboardStorage {
             } else {
                 insertStmt.setLong(28, dashboard.getDefaultDrillthrough().getLinkID());
             }
+            insertStmt.setBoolean(29, dashboard.isImageFullHeader());
+            if(dashboard.getHeaderImage() == null) {
+                insertStmt.setNull(30, Types.BIGINT);
+            } else {
+                insertStmt.setLong(30, dashboard.getHeaderImage().getId());
+            }
             insertStmt.execute();
             dashboard.setId(Database.instance().getAutoGenKey(insertStmt));
             insertStmt.close();
@@ -259,7 +266,7 @@ public class DashboardStorage {
                     "PUBLIC_VISIBLE = ?, border_color = ?, border_thickness = ?, background_color = ?, padding = ?," +
                     "recommended_exchange = ?, ytd_date = ?, ytd_override = ?, marmotscript = ?, folder = ?, absolute_sizing = ?," +
                     "stack_fill1_start = ?, stack_fill1_end = ?, stack_fill2_start = ?, stack_fill2_end = ?, stack_fill_enabled = ?, report_horizontal_padding = ?," +
-                    "default_link = ? WHERE DASHBOARD_ID = ?");
+                    "default_link = ?, image_full_header = ?, header_image_id = ? WHERE DASHBOARD_ID = ?");
             updateStmt.setString(1, dashboard.getName());
             updateStmt.setString(2, dashboard.getUrlKey());
             updateStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -290,7 +297,13 @@ public class DashboardStorage {
             } else {
                 updateStmt.setLong(26, dashboard.getDefaultDrillthrough().getLinkID());
             }
-            updateStmt.setLong(27, dashboard.getId());
+            updateStmt.setBoolean(27, dashboard.isImageFullHeader());
+            if(dashboard.getHeaderImage() == null) {
+                updateStmt.setNull(28, Types.BIGINT);
+            } else {
+                updateStmt.setLong(28, dashboard.getHeaderImage().getId());
+            }
+            updateStmt.setLong(29, dashboard.getId());
             updateStmt.executeUpdate();
             updateStmt.close();
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ?");
@@ -349,7 +362,7 @@ public class DashboardStorage {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, URL_KEY, ACCOUNT_VISIBLE, DATA_SOURCE_ID, CREATION_DATE," +
                     "UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, temporary_dashboard, public_visible, border_color, border_thickness," +
                 "background_color, padding, recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing," +
-                "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding, default_link FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding, default_link, image_full_header, header_image_id FROM DASHBOARD WHERE DASHBOARD_ID = ?");
         queryStmt.setLong(1, dashboardID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -382,6 +395,7 @@ public class DashboardStorage {
             dashboard.setStackFill2End(rs.getInt(25));
             dashboard.setFillStackHeaders(rs.getBoolean(26));
             dashboard.setReportHorizontalPadding(rs.getInt(27));
+            dashboard.setImageFullHeader(rs.getBoolean(29));
             Long defaultLink = rs.getLong(28);
             if (!rs.wasNull()) {
                 Session session = Database.instance().createSession(conn);
@@ -389,6 +403,22 @@ public class DashboardStorage {
                     dashboard.setDefaultDrillthrough((Link) session.createQuery("from Link where linkID = ?").setLong(0, defaultLink).list().get(0));
                 } finally {
                     session.close();
+                }
+            }
+            Long imageHeader = rs.getLong(30);
+            if(!rs.wasNull()) {
+                PreparedStatement imageStatement = conn.prepareStatement("SELECT user_image_id, image_name from USER_IMAGE WHERE user_image_id = ?");
+                imageStatement.setLong(1, imageHeader);
+                try {
+                    ResultSet rs2 = imageStatement.executeQuery();
+                    if(rs2.next()) {
+                        ImageDescriptor id = new ImageDescriptor();
+                        id.setId(rs2.getLong(1));
+                        id.setName(rs2.getString(2));
+                        dashboard.setHeaderImage(id);
+                    }
+                } finally {
+                    imageStatement.close();
                 }
             }
             PreparedStatement findElementsStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, ELEMENT_TYPE FROM " +

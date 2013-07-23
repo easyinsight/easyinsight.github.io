@@ -418,6 +418,7 @@ public class FilterDefinition implements Serializable, Cloneable {
         filterElement.addAttribute(new Attribute("trendFilter", String.valueOf(trendFilter)));
         filterElement.addAttribute(new Attribute("minimumRole", String.valueOf(minimumRole)));
         filterElement.addAttribute(new Attribute("filterName", xmlMetadata.value(filterName)));
+        filterElement.addAttribute(new Attribute("notCondition", String.valueOf(notCondition)));
         if (getField() != null) {
             Element fieldElement = new Element("field");
             filterElement.appendChild(fieldElement);

@@ -1,9 +1,11 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
+        import com.easyinsight.dashboard.DashboardFilterOverride;
         import com.easyinsight.filtering.FilterDefinition;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         public var filterDefs:ArrayCollection;
@@ -13,22 +15,33 @@
 
         public var dashboardElement:DashboardElement;
 
-        override protected function commitProperties():void {
-            super.commitProperties();
+        override protected function createChildren():void {
+            super.createChildren();
             var map:Object = new Object();
             for each (var existingOverride:DashboardFilterOverride in dashboardElement.dashboardFilterOverrides) {
-                map[String(existingOverride.filterID)] = existingOverride.hideFilter;
+                if (existingOverride.filterDefinition != null && existingOverride.filterDefinition.field != null) {
+                    map[FilterDefinition.getLabel(existingOverride.filterDefinition, existingOverride.filterDefinition.field)] = existingOverride;
+                } else if (existingOverride.filterID != 0) {
+                    map[String(existingOverride.filterID)] = existingOverride;
+                }
             }
-            filterOverrides = new ArrayCollection();
+
+            var filterOverrides:ArrayCollection = new ArrayCollection();
             for each (var filter:FilterDefinition in filterDefs) {
                 var overrideState:DashboardFilterOverrideState = new DashboardFilterOverrideState();
                 overrideState.filter = filter;
                 filterOverrides.addItem(overrideState);
-                var existing:DashboardFilterOverride = map[filter] as DashboardFilterOverride;
+                var existing:DashboardFilterOverride = map[FilterDefinition.getLabel(filter, filter.field)] as DashboardFilterOverride;
                 if (existing != null && existing.hideFilter) {
                     overrideState.selected = true;
+                } else {
+                    var existingByID:DashboardFilterOverride = map[String(filter.filterID)] as DashboardFilterOverride;
+                    if (existingByID != null && existingByID.hideFilter) {
+                        overrideState.selected = true;
+                    }
                 }
             }
+            this.filterOverrides = filterOverrides;
         }
 
         private function save():void {
@@ -47,13 +60,14 @@
 
         private static function renderFilterLabel(object:Object, column:DataGridColumn):String {
             var filterOverride:DashboardFilterOverrideState = object as DashboardFilterOverrideState;
-            return FilterDefinition.getLabel(filterOverride.filter, filterOverride.filter.field);
+            return FilterDefinition.getLabelWithEnd(filterOverride.filter, filterOverride.filter.field, "");
         }
         ]]></mx:Script>
-    <mx:DataGrid dataProvider="{filterOverrides}">
+    <mx:Text width="450" text="In this window, you can choose to hide dashboard level filters for this report. If hidden, the dashboard level filter will disappear and not have any effect when this report is shown on the dashboard. The filter will reappear when the report is no longer shown on the dashboard."/>
+    <mx:DataGrid dataProvider="{filterOverrides}" rowHeight="28">
         <mx:columns>
-            <mx:DataGridColumn labelFunction="renderFilterLabel" headerText="Filter"/>
-            <mx:DataGridColumn headerText="" itemRenderer="com.easyinsight.dashboard.DashboardFilterOverrideCheckbox"/>
+            <mx:DataGridColumn labelFunction="renderFilterLabel" headerText="Filter" width="400"/>
+            <mx:DataGridColumn headerText="" itemRenderer="com.easyinsight.dashboard.DashboardFilterOverrideCheckbox" width="50"/>
         </mx:columns>
     </mx:DataGrid>
     <mx:HBox width="100%" horizontalAlign="center">

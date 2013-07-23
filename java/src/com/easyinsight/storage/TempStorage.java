@@ -103,7 +103,8 @@ public class TempStorage implements IDataStorage {
             sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType()));
             sqlBuilder.append(",");
         }
-        sqlBuilder.append("update_key_field varchar(255)");
+        sqlBuilder.append("update_key_field varchar(255),");
+        sqlBuilder.append("index(update_key_field),");
         if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
         sqlBuilder.append(" )");
         return sqlBuilder.toString();
@@ -174,7 +175,7 @@ public class TempStorage implements IDataStorage {
             storageConn.commit();
         } catch (Exception e) {
             storageConn.rollback();
-            if (e.getMessage().contains("Data truncated")) {
+            if (e.getMessage() != null && e.getMessage().contains("Data truncated")) {
                 PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
                 for (IRow row : dataSet.getRows()) {
                     int i = 1;

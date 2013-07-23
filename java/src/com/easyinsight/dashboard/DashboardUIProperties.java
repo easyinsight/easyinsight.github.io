@@ -10,6 +10,7 @@ import com.easyinsight.preferences.ImageDescriptor;
 public class DashboardUIProperties {
     private int color;
     private ImageDescriptor header;
+    private boolean imageFullHeader;
 
     public DashboardUIProperties(int color, ImageDescriptor header) {
         this.color = color;
@@ -22,5 +23,13 @@ public class DashboardUIProperties {
 
     public ImageDescriptor getHeader() {
         return header;
+    }
+
+    public boolean isImageFullHeader() {
+        return imageFullHeader;
+    }
+
+    public void setImageFullHeader(boolean imageFullHeader) {
+        this.imageFullHeader = imageFullHeader;
     }
 }
