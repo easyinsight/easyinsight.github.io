@@ -91,11 +91,20 @@ public class AnalysisBasedFeed extends Feed {
             for (FilterDefinition filter : filters) {
                 filterStrings.add(filter.toXML(xmlMetadata).toXML());
             }
+            for (AnalysisItem analysisItem : analysisItems) {
+                filterStrings.add(analysisItem.getKey().toKeyString());
+            }
             cacheKey = new CacheKey(analysisDefinition.getAnalysisID(), filterStrings);
             DataSet embeddedResults = ReportCache.instance().getAddonResults(analysisDefinition.getDataFeedID(), cacheKey, analysisDefinition.getCacheMinutes());
             if (embeddedResults != null) {
-                LogClass.debug("*** Returning from cache");
-                return embeddedResults;
+                try {
+                    System.out.println("returning from cache");
+                    return embeddedResults.clone();
+                } catch (CloneNotSupportedException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                System.out.println("not found in cache");
             }
         }
         DataSet dataSet = DataService.listDataSet(analysisDefinition, localInsightRequestMetadata, conn);
