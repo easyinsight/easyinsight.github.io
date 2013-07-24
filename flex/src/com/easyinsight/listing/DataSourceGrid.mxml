@@ -5,6 +5,7 @@
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.datasources.CopyDataSourceWindow;
+        import com.easyinsight.datasources.DataSourceType;
 
         /*import com.easyinsight.datasources.NewReportDataSourceWindow;*/
         import com.easyinsight.feedassembly.CompositeCreator;
@@ -148,7 +149,11 @@
 
         private function createDateLabelFunction(value:Object, column:DataGridColumn):String {
             var descriptor:DataSourceDescriptor = value as DataSourceDescriptor;
-            if (descriptor.lastDataTime == null) {
+            /*if (descriptor.dataSourceType == DataSourceType.COMPOSITE) {
+                return "( Composite )";
+            } else if (descriptor.dataSourceType == DataSourceType.FEDERATED) {
+                return "( Federated ) ";
+            } else*/ if (descriptor.lastDataTime == null) {
                 return "( No Data )";
             } else {
                 return formatter.format(descriptor.lastDataTime);
@@ -168,7 +173,7 @@
         }
 
         private function onDismissed(event:Event):void {
-            removeChild(DisplayObject(event.currentTarget));
+            topBox.removeChild(DisplayObject(event.currentTarget));
         }
 
         /*private function blah():void {
@@ -222,7 +227,7 @@
         <mx:Label text="Data Sources" fontSize="20" maxWidth="300"/>
         <mx:Spacer width="100%"/>
         <mx:LinkButton label="Join data sources" click="createCompositeFeed()" fontSize="12"/>
-<!--        <mx:LinkButton label="Copy data sources" click="blah()" fontSize="12"/>-->
+        <!--<mx:LinkButton label="Copy data sources" click="blah()" fontSize="12"/>-->
         <!--<mx:LinkButton label="Data source from report" click="blah()" fontSize="12"/>-->
         <mx:LinkButton label="Customize top reports" click="blah1()" fontSize="12" visible="{customizeVisible}"/>
     </mx:HBox>
