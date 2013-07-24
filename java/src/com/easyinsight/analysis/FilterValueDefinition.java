@@ -359,7 +359,7 @@ public class FilterValueDefinition extends FilterDefinition {
                 values.appendChild(valueElement);
             }
         } else if (filteredValues != null) {
-            Set<Value> valueSet = new HashSet<Value>();
+            Set<Value> valueSet = new LinkedHashSet<Value>();
             for (Object valueObject : filteredValues) {
                 Value value;
                 if (valueObject instanceof String) {

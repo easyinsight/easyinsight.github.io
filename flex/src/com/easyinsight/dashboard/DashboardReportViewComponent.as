@@ -173,11 +173,9 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         event.stopPropagation();
         if (event.height != -1) {
             this.percentHeight = NaN;
-            //Alert.show("setting size to " + event.height);
             var h:int = event.height + (this.transformContainer ? this.transformContainer.height : 0) + 25 + (dashboardReport.showLabel ? 30 : 0);
             this.height = h;
             alteredHeight = h;
-            //Alert.show("setting to " + h);
             dispatchEvent(new SizeOverrideEvent(-1, h));
         }
     }
@@ -339,6 +337,9 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     private var retrievedDataOnce:Boolean;
 
     public function initialRetrieve():void {
+        if (dashboardEditorMetadata != null && dashboardEditorMetadata.transformContainer != null) {
+            dashboardEditorMetadata.transformContainer.hideFilters(dashboardReport.dashboardFilterOverrides);
+        }
         if (!retrievedDataOnce) {
             if (setup) {
                 retrievedDataOnce = true;

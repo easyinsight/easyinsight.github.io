@@ -19,6 +19,8 @@ public class DashboardFilterOverrideCheckbox extends HBox {
     public function DashboardFilterOverrideCheckbox() {
         checkbox = new CheckBox();
         checkbox.addEventListener(Event.CHANGE, onChange);
+        setStyle("horizontalAlign", "center");
+        percentWidth = 100;
     }
 
     private function onChange(event:Event):void {

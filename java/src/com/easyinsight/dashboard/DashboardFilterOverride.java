@@ -2,12 +2,14 @@ package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.FilterDefinition;
 
+import java.io.Serializable;
+
 /**
  * User: jamesboe
  * Date: 7/1/13
  * Time: 11:08 AM
  */
-public class DashboardFilterOverride {
+public class DashboardFilterOverride implements Serializable {
     private long filterID;
     private FilterDefinition filterDefinition;
     private boolean hideFilter;

@@ -9,6 +9,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemWrapper;
 import com.easyinsight.dashboard.Dashboard;
+import com.easyinsight.dashboard.DashboardFilterOverride;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.display.DisplayObject;
@@ -34,6 +35,8 @@ import mx.events.DragEvent;
 import mx.events.FlexEvent;
 import mx.managers.DragManager;
 import mx.managers.PopUpManager;
+import mx.states.RemoveChild;
+import mx.states.State;
 
 [Event(name="updatedTransforms", type="com.easyinsight.filtering.TransformsUpdatedEvent")]
 [Event(name="analysisChanged", type="com.easyinsight.analysis.AnalysisChangedEvent")]
@@ -621,6 +624,7 @@ public class TransformContainer extends HBox
         filter.analysisItems = _analysisItems;
     }
 
+
     public function getFilterDefinitions():ArrayCollection {
         return filterDefinitions;
     }
@@ -677,6 +681,60 @@ public class TransformContainer extends HBox
             }
         }
         return changed;
+    }
+
+    private var stateCtr:int = 0;
+
+    private var filterOverrides:ArrayCollection;
+
+    public function hideFilters(filters:ArrayCollection):void {
+
+        var ops:Array = [];
+        for each (var o:DashboardFilterOverride in filters) {
+            if (o.hideFilter) {
+                for each (var child:DisplayObject in filterTile.getChildren()) {
+                    if (child is IFilter) {
+                        var filter:IFilter = child as IFilter;
+                        if (filter.filterDefinition.filterID == o.filterID) {
+                            var remove:RemoveChild = new RemoveChild(DisplayObject(filter));
+                            ops.push(remove);
+                        }
+                    }
+                }
+            }
+        }
+        var name:String = String(stateCtr++);
+        if (ops.length > 0) {
+            var overrideState:State = new State();
+            overrideState.name = name;
+            overrideState.overrides = ops;
+            states = [overrideState];
+            currentState = name;
+        } else {
+            currentState = "";
+        }
+        filterOverrides = filters;
+        dispatchEvent(new TransformsUpdatedEvent(getVisibleFilterDefinitions(), false));
+    }
+
+    public function getVisibleFilterDefinitions():ArrayCollection {
+        var filters:ArrayCollection = new ArrayCollection();
+        for each (var filterDef:FilterDefinition in filterDefinitions) {
+            var valid:Boolean = true;
+            if (filterOverrides != null) {
+                for each (var o:DashboardFilterOverride in filterOverrides) {
+                    if (filterDef.filterID == o.filterID) {
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+            if (valid) {
+                filters.addItem(filterDef);
+            }
+        }
+
+        return filters;
     }
 }
 }
