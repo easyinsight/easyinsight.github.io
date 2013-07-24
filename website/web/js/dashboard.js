@@ -220,7 +220,12 @@ var hideFilters = function (obj, filterMap) {
             hideFilter(obj.report.overrides[i], filterMap);
     }
     if(obj.type == "stack") {
-        var ss = selectedIndex(obj.id);
+        var ss;
+        if(obj.children.length == 1) {
+            ss = 0;
+        } else {
+            ss = selectedIndex(obj.id);
+        }
         hideFilters(obj.children[ss], filterMap);
     } else if(obj.type != "report" && obj.type != "text") {
         for(var i = 0;i < obj.children.length;i++) {

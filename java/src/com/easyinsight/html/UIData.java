@@ -50,7 +50,12 @@ public class UIData {
         sb.append("<div class=\"row-fluid dashboard_header\">\n" +
                 "        <div class=\"span12\">\n");
         if (applicationSkin != null && applicationSkin.isReportHeader()) {
-            sb.append("            <div style=\"").append(headerStyle).append("\">\n").append("                <div style=\"padding:10px;float:left\">\n").append("                    <div style=\"background-color: #FFFFFF;padding: 5px\">\n");
+            sb.append("            <div style=\"").append(headerStyle).append("\">\n");
+            if(properties.isImageFullHeader()) {
+                sb.append("<div style=\"width:100%;text-align:center\"><div>");
+            } else {
+                sb.append("                <div style=\"padding:10px;float:left\">\n").append("                    <div style=\"background-color: #FFFFFF;padding: 5px\">\n");
+            }
             if (properties.getHeader() != null) {
                 sb.append("                        <img src=\"/app/reportHeader?imageID=").append(properties.getHeader().getId()).append("\" alt=\"Logo\"/>\n");
             } else if (headerImageDescriptor != null) {

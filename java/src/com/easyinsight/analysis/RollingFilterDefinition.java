@@ -9,6 +9,7 @@ import com.easyinsight.datafeeds.Feed;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.antlr.runtime.RecognitionException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,8 +27,8 @@ import java.util.Map;
  * Time: 11:08:41 AM
  */
 @Entity
-@Table(name="rolling_range_filter")
-@PrimaryKeyJoinColumn(name="filter_id")
+@Table(name = "rolling_range_filter")
+@PrimaryKeyJoinColumn(name = "filter_id")
 public class RollingFilterDefinition extends FilterDefinition {
 
     public static final int LAST = 0;
@@ -35,16 +36,16 @@ public class RollingFilterDefinition extends FilterDefinition {
     public static final int BEFORE = 2;
     public static final int AFTER = 3;
 
-    @Column(name="interval_value")
+    @Column(name = "interval_value")
     private int interval;
 
-    @Column(name="before_or_after")
+    @Column(name = "before_or_after")
     private int customBeforeOrAfter;
 
-    @Column(name="interval_type")
+    @Column(name = "interval_type")
     private int customIntervalType;
 
-    @Column(name="interval_amount")
+    @Column(name = "interval_amount")
     private int customIntervalAmount;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -162,31 +163,33 @@ public class RollingFilterDefinition extends FilterDefinition {
                                            Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) {
         try {
             for (CustomRollingInterval interval : intervals) {
-                if (interval.isStartDefined()) {
-                    Value value = new ReportCalculation(interval.getStartScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
-                    if (value.type() == Value.DATE) {
-                        DateValue dateValue = (DateValue) value;
-                        startDate = dateValue.getDate();
-                    } else if (value.type() == Value.NUMBER) {
-                        startDate = new Date(value.toDouble().longValue());
+                if (interval.getIntervalNumber() == this.getInterval()) {
+                    if (interval.isStartDefined()) {
+                        Value value = new ReportCalculation(interval.getStartScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                        if (value.type() == Value.DATE) {
+                            DateValue dateValue = (DateValue) value;
+                            startDate = dateValue.getDate();
+                        } else if (value.type() == Value.NUMBER) {
+                            startDate = new Date(value.toDouble().longValue());
+                        } else {
+                            startDate = null;
+                        }
                     } else {
                         startDate = null;
                     }
-                } else {
-                    startDate = null;
-                }
-                if (interval.isEndDefined()) {
-                    Value value = new ReportCalculation(interval.getEndScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
-                    if (value.type() == Value.DATE) {
-                        DateValue dateValue = (DateValue) value;
-                        endDate = dateValue.getDate();
-                    } else if (value.type() == Value.NUMBER) {
-                        endDate = new Date(value.toDouble().longValue());
+                    if (interval.isEndDefined()) {
+                        Value value = new ReportCalculation(interval.getEndScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                        if (value.type() == Value.DATE) {
+                            DateValue dateValue = (DateValue) value;
+                            endDate = dateValue.getDate();
+                        } else if (value.type() == Value.NUMBER) {
+                            endDate = new Date(value.toDouble().longValue());
+                        } else {
+                            endDate = null;
+                        }
                     } else {
                         endDate = null;
                     }
-                } else {
-                    endDate = null;
                 }
             }
         } catch (RecognitionException e) {
@@ -275,68 +278,76 @@ public class RollingFilterDefinition extends FilterDefinition {
         jo.put("direction", customBeforeOrAfter);
         jo.put("value", customIntervalAmount);
         jo.put("interval", customIntervalType);
+        JSONArray customIntervalList = new JSONArray();
+        for (CustomRollingInterval interval : getIntervals()) {
+            JSONObject jj = new JSONObject();
+            jj.put("name", interval.getFilterLabel());
+            jj.put("interval", interval.getIntervalNumber());
+            customIntervalList.put(jj);
+        }
+        jo.put("custom_intervals", customIntervalList);
         return jo;
     }
 
     @Override
     public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
-        String filterName = "filter"+getFilterID();
+        String filterName = "filter" + getFilterID();
         String key = filterHTMLMetadata.getFilterKey();
         String function = filterHTMLMetadata.createOnChange();
-        String onChange = "changeRolling"+getFilterID()+"();updateRollingFilter('filter" + getFilterID() + "','" + key + "', " + function + ")";
-        String customOnChange = "updateRollingFilter(\\'filter" + getFilterID() + "\\', \\'"+key + "\\',\\'"+function+"\\')";
+        String onChange = "changeRolling" + getFilterID() + "();updateRollingFilter('filter" + getFilterID() + "','" + key + "', " + function + ")";
+        String customOnChange = "updateRollingFilter(\\'filter" + getFilterID() + "\\', \\'" + key + "\\',\\'" + function + "\\')";
         sb.append("<script type=\"text/javascript\">\n");
-        sb.append("function changeRolling"+getFilterID()+"() {");
+        sb.append("function changeRolling" + getFilterID() + "() {");
         sb.append("var menu = document.getElementById('" + filterName + "');");
         sb.append("if (menu.value == '" + MaterializedRollingFilterDefinition.CUSTOM + "') {");
-        String direction = "<select style=\"margin-left:10px;width:80px\" onchange=\""+customOnChange+"\" id=\"customDirection" + filterName + "\">" +
-                "<option value=\""+RollingFilterDefinition.LAST+"\">Last</option>" +
-                "<option value=\""+RollingFilterDefinition.NEXT+"\">Next</option>" +
-                "<option value=\""+RollingFilterDefinition.BEFORE+"\">Before</option>" +
-                "<option value=\""+RollingFilterDefinition.AFTER+"\">After</option>" +
+        String direction = "<select style=\"margin-left:10px;width:80px\" onchange=\"" + customOnChange + "\" id=\"customDirection" + filterName + "\">" +
+                "<option value=\"" + RollingFilterDefinition.LAST + "\">Last</option>" +
+                "<option value=\"" + RollingFilterDefinition.NEXT + "\">Next</option>" +
+                "<option value=\"" + RollingFilterDefinition.BEFORE + "\">Before</option>" +
+                "<option value=\"" + RollingFilterDefinition.AFTER + "\">After</option>" +
                 "</select>";
         direction = addSelected(direction, String.valueOf(getCustomBeforeOrAfter()));
-        String intervalAmount = "<select style=\"margin-left:10px;width:80px\" onchange=\""+customOnChange + "\" id=\"customInterval" + filterName + "\">" +
+        String intervalAmount = "<select style=\"margin-left:10px;width:80px\" onchange=\"" + customOnChange + "\" id=\"customInterval" + filterName + "\">" +
                 "<option value=\"2\">Days</option>" +
                 "<option value=\"3\">Weeks</option>" +
                 "<option value=\"4\">Months</option>" +
                 "<option value=\"5\">Years</option></select>";
         intervalAmount = addSelected(intervalAmount, String.valueOf(getCustomIntervalType()));
         String customOptionHTML = direction +
-                "<input style=\"margin-left:10px;width:50px;height:28px\" onchange=\""+customOnChange +"\" type=\"text\" id=\"customValue" + filterName + "\" value=\""+getCustomIntervalAmount()+"\"/>" +
+                "<input style=\"margin-left:10px;width:50px;height:28px\" onchange=\"" + customOnChange + "\" type=\"text\" id=\"customValue" + filterName + "\" value=\"" + getCustomIntervalAmount() + "\"/>" +
                 intervalAmount;
-        sb.append("$('#rolling"+getFilterID()+"')").append(".html('"+customOptionHTML+"');");
+        sb.append("$('#rolling" + getFilterID() + "')").append(".html('" + customOptionHTML + "');");
         sb.append("} else {");
-        sb.append("$('#rolling"+getFilterID()+"')").append(".html('');");
+        sb.append("$('#rolling" + getFilterID() + "')").append(".html('');");
         sb.append("}");
         sb.append("}");
         sb.append("</script>");
         sb.append("<div>");
         sb.append(label(true));
-        sb.append("<select class=\"filterSelect\" style=\"width:130px\" id=\""+filterName+"\" onchange=\""+onChange+"\">");
+        sb.append("<select class=\"filterSelect\" style=\"width:130px\" id=\"" + filterName + "\" onchange=\"" + onChange + "\">");
         StringBuilder optionBuilder = new StringBuilder();
         optionBuilder.append("<option value=\"19\">All</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.DAY+"\">Last Day</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.WEEK+"\">Last 7 Days</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.MONTH+"\">Last 30 Days</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.QUARTER+"\">Last 90 Days</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.YEAR+"\">Last 365 Days</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.DAY_TO_NOW+"\">Today</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.WEEK_TO_NOW+"\">Week to Date</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.MONTH_TO_NOW+"\">Month to Date</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.QUARTER_TO_NOW+"\">Quarter to Date</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.YEAR_TO_NOW+"\">Year to Date</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.LAST_FULL_DAY+"\">Last Full Day</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.LAST_FULL_WEEK+"\">Last Full Week</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.LAST_FULL_MONTH+"\">Last Full Month</option>");
-        optionBuilder.append("<option value=\""+MaterializedRollingFilterDefinition.CUSTOM+"\">Custom</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.DAY + "\">Last Day</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.WEEK + "\">Last 7 Days</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.MONTH + "\">Last 30 Days</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.QUARTER + "\">Last 90 Days</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.YEAR + "\">Last 365 Days</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.DAY_TO_NOW + "\">Today</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.WEEK_TO_NOW + "\">Week to Date</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.MONTH_TO_NOW + "\">Month to Date</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.QUARTER_TO_NOW + "\">Quarter to Date</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.YEAR_TO_NOW + "\">Year to Date</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.LAST_FULL_DAY + "\">Last Full Day</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.LAST_FULL_WEEK + "\">Last Full Week</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.LAST_FULL_MONTH + "\">Last Full Month</option>");
+        optionBuilder.append("<option value=\"" + MaterializedRollingFilterDefinition.CUSTOM + "\">Custom</option>");
         optionBuilder.append("</select>");
         sb.append(addSelected(optionBuilder.toString(), String.valueOf(getInterval())));
-        sb.append("<div style=\"float:right\" id=\"rolling"+getFilterID()+"\">");
+        sb.append("<div style=\"float:right\" id=\"rolling" + getFilterID() + "\">");
         sb.append("</div>");
         sb.append("<script type=\"text/javascript\">\n");
-        sb.append("$(document).ready(changeRolling"+getFilterID()+"());\n");
+        sb.append("$(document).ready(changeRolling" + getFilterID() + "());\n");
         sb.append("</script>");
         sb.append("</div>");
         return sb.toString();
