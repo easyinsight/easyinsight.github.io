@@ -179,6 +179,9 @@
             <option value="13"<% if(data.interval_type == "13") { %> selected="selected"<%}%>>Last Full Week</option>
             <option value="14"<% if(data.interval_type == "14") { %> selected="selected"<%}%>>Last Full Month</option>
             <option value="18"<% if(data.interval_type == "18") { %> selected="selected"<%}%>>Custom</option>
+            <% _.each(data.custom_intervals, function(e,i,l) { %>
+            <option value="<%= e.interval %>"<% if(data.interval_type == e.interval) { %> selected="selected"<% } %>><%- e.name %></option>
+            <% }) %>
         </select>
         <span class="custom<% if(data.interval_type != "18") { %> hide<% } %>">
             <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>_custom_direction" class="rolling_filter_direction">
