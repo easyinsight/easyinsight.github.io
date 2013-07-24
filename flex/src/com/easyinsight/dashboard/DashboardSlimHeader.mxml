@@ -132,9 +132,16 @@
         private var viewInHTMLable:Boolean = true;
 
         private function viewInHTML():void {
-            navigateToURL(new URLRequest("/app/html/dashboard/" + _dashboard.urlKey), "_blank");
+            if (_dashboard != null) {
+                navigateToURL(new URLRequest("/app/html/dashboard/" + _dashboard.urlKey), "_blank");
+            }
         }
 
+        private function toggleFilters():void {
+            if (_dashboardView != null) {
+                _dashboardView.toggleFilters();
+            }
+        }
 
         ]]></mx:Script>
     <mx:Button click="_dashboardView.close()" styleName="grayButton" labelPlacement="right"
@@ -146,7 +153,7 @@
     <mx:Button styleName="grayButton" click="_dashboardView.exportDashboard(exportButton)"
            labelPlacement="right"
            id="exportButton" toolTip="Export the dashboard..." label="Export" icon="{exportToExcelIcon}"/>
-    <mx:Button click="_dashboardView.toggleFilters()" styleName="grayButton" labelPlacement="right"
+    <mx:Button click="toggleFilters()" styleName="grayButton" labelPlacement="right"
                id="filterButton" label="Toggle Filters" icon="{filterIcon}"/>
     <mx:Button click="viewInHTML()" styleName="grayButton" labelPlacement="right" id="viewInHTMLButton" label="View in HTML" icon="{htmlIcon}" visible="{viewInHTMLable}"/>
     <mx:Button click="dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { dashboardID: _dashboard.id})))" styleName="grayButton" labelPlacement="right"
