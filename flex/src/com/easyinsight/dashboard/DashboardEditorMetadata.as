@@ -25,6 +25,7 @@ public class DashboardEditorMetadata {
     public var dashboard:Dashboard;
     public var dashboardStackPositions:DashboardStackPositions;
     public var transformContainer:TransformContainer;
+    public var editor:Boolean;
 
     public function DashboardEditorMetadata() {
     }

@@ -173,6 +173,7 @@
             dataSourceID = _dashboard.dataSourceID;
             dataSource = _dashboard.dataSourceInfo;
             metadata.dataSourceID = dataSourceID;
+            metadata.editor = true;
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.dashboardAdminID = String(_dashboard.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
