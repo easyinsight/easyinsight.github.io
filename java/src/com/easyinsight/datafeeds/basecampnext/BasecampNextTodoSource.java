@@ -150,10 +150,9 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                 String projectID = project.getId();
                 JSONArray todoListArray = runJSONRequest("projects/"+projectID+"/todolists.json", (BasecampNextCompositeSource) parentDefinition, lastRefreshDate, httpClient);
                 if (todoListArray == null) {
-                    System.out.println("No need to retrieve todos for " + projectID);
+
                     continue;
                 }
-                System.out.println("Retrieving todos for " + projectID);
                 for (int j = 0; j < todoListArray.length(); j++) {
 
                     JSONObject todoList = todoListArray.getJSONObject(j);
