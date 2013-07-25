@@ -258,30 +258,32 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         while (nextPage != null) {
             Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
             List results = (List) ticketObjects.get("results");
-            for (Object obj : results) {
-                Map map = (Map) obj;
-                String ticketID = map.get("id").toString();
-                IRow row = ticketMap.get(ticketID);
-                if (row == null) {
-                    continue;
-                }
-                if (map.get("description") != null) {
-                    row.addValue(DESCRIPTION, map.get("description").toString());
-                }
-                if (map.get("custom_fields") != null) {
-                    List customFields = (List) map.get("custom_fields");
-                    for (Object customFieldObj : customFields) {
-                        Map customFieldMap = (Map) customFieldObj;
-                        String fieldID = customFieldMap.get("id").toString();
-                        if (customFieldMap.get("value") != null) {
-                            String value = customFieldMap.get("value").toString();
-                            Key key = keys.get("zd" + fieldID);
-                            row.addValue(key, value);
+            if (results != null) {
+                for (Object obj : results) {
+                    Map map = (Map) obj;
+                    String ticketID = map.get("id").toString();
+                    IRow row = ticketMap.get(ticketID);
+                    if (row == null) {
+                        continue;
+                    }
+                    if (map.get("description") != null) {
+                        row.addValue(DESCRIPTION, map.get("description").toString());
+                    }
+                    if (map.get("custom_fields") != null) {
+                        List customFields = (List) map.get("custom_fields");
+                        for (Object customFieldObj : customFields) {
+                            Map customFieldMap = (Map) customFieldObj;
+                            String fieldID = customFieldMap.get("id").toString();
+                            if (customFieldMap.get("value") != null) {
+                                String value = customFieldMap.get("value").toString();
+                                Key key = keys.get("zd" + fieldID);
+                                row.addValue(key, value);
+                            }
                         }
                     }
-                }
 
-                // parse custom fields and anything else that's missing
+                    // parse custom fields and anything else that's missing
+                }
             }
             if (ticketObjects.get("next_page") != null) {
                 nextPage = ticketObjects.get("next_page").toString();

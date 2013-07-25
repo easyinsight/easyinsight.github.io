@@ -38,8 +38,17 @@ public class InsightRequestMetadata implements Serializable {
     private transient Set<AnalysisItem> postProcessJoins = new HashSet<AnalysisItem>();
     private List<AddonReport> addonReports;
     private String ip;
+    private transient boolean noLogging;
 
     private long databaseTime = 0;
+
+    public boolean isNoLogging() {
+        return noLogging;
+    }
+
+    public void setNoLogging(boolean noLogging) {
+        this.noLogging = noLogging;
+    }
 
     public void addDatabaseTime(long time) {
         databaseTime += time;
