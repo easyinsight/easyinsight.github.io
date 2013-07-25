@@ -289,6 +289,8 @@ public class StyleConfiguration {
         }
 
         if (report is StackedBarChartDefinition) {
+            items.addItem(new ComboBoxReportFormItem("Stack Sort", "stackSort", StackedBarChartDefinition(report).stackSort, report,
+                    [ChartDefinition.SORT_UNSORTED, ChartDefinition.STACK_SORT_ASCENDING, ChartDefinition.STACK_SORT_DESCENDING]));
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", StackedBarChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                         ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
@@ -306,6 +308,8 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", StackedColumnChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                         ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
+            items.addItem(new ComboBoxReportFormItem("Stack Sort", "stackSort", StackedColumnChartDefinition(report).stackSort, report,
+                    [ChartDefinition.SORT_UNSORTED, ChartDefinition.STACK_SORT_ASCENDING, ChartDefinition.STACK_SORT_DESCENDING]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", StackedColumnChartDefinition(report).labelPosition,
                     report, ["none", "inside"]));
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", StackedColumnChartDefinition(report).labelFontSize, report, 8, 48));
