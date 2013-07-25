@@ -337,7 +337,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     private var retrievedDataOnce:Boolean;
 
     public function initialRetrieve():void {
-        if (dashboardEditorMetadata != null && dashboardEditorMetadata.transformContainer != null) {
+        if (dashboardEditorMetadata != null && !dashboardEditorMetadata.editor && dashboardEditorMetadata.transformContainer != null) {
             dashboardEditorMetadata.transformContainer.hideFilters(dashboardReport.dashboardFilterOverrides);
         }
         if (!retrievedDataOnce) {

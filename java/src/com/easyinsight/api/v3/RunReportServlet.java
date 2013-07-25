@@ -38,6 +38,7 @@ public class RunReportServlet extends APIServlet {
         WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
         populateFiltersFromRequest(request, report);
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+        insightRequestMetadata.setNoLogging(true);
         ListDataResults results = (ListDataResults) new DataService().list(report, insightRequestMetadata);
         StringBuilder result = new StringBuilder();
 

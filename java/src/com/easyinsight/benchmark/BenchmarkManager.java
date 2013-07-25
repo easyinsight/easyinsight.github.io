@@ -6,6 +6,7 @@ import com.easyinsight.api.NumberPair;
 import com.easyinsight.api.Row;
 import com.easyinsight.api.StringPair;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 
 import java.sql.Connection;
@@ -102,8 +103,8 @@ public class BenchmarkManager {
         }
     }
 
-    public static void recordBenchmarkForDataSource(String category, long time, long userID, long dataSourceID) {
-        Connection conn = Database.instance().getConnection();
+    public static void recordBenchmarkForDataSource(String category, long time, long userID, long dataSourceID, EIConnection conn) {
+
         try {
             PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, data_source_id) VALUES (?, ?, ?, ?, ?)");
             benchmarkStmt.setString(1, category);
@@ -118,13 +119,10 @@ public class BenchmarkManager {
             benchmarkStmt.execute();
         } catch (SQLException e) {
             LogClass.error(e);
-        } finally {
-            Database.closeConnection(conn);
         }
     }
 
-    public static void recordBenchmarkForReport(String category, long time, long userID, long reportID) {
-        Connection conn = Database.instance().getConnection();
+    public static void recordBenchmarkForReport(String category, long time, long userID, long reportID, EIConnection conn) {
         try {
             PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, report_id) VALUES (?, ?, ?, ?, ?)");
             benchmarkStmt.setString(1, category);
@@ -139,8 +137,6 @@ public class BenchmarkManager {
             benchmarkStmt.execute();
         } catch (SQLException e) {
             LogClass.error(e);
-        } finally {
-            Database.closeConnection(conn);
         }
     }
 

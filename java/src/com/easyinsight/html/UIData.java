@@ -50,15 +50,20 @@ public class UIData {
         sb.append("<div class=\"row-fluid dashboard_header\">\n" +
                 "        <div class=\"span12\">\n");
         if (applicationSkin != null && applicationSkin.isReportHeader()) {
-            sb.append("            <div style=\"").append(headerStyle).append("\">\n").append("                <div style=\"padding:10px;float:left\">\n").append("                    <div style=\"background-color: #FFFFFF;padding: 5px\">\n");
-            if (properties.getHeader() != null) {
+            sb.append("            <div style=\"").append(headerStyle).append("\">\n");
+            if(properties != null && properties.isImageFullHeader()) {
+                sb.append("<div style=\"width:100%;text-align:center\"><div>");
+            } else {
+                sb.append("                <div style=\"padding:10px;float:left\">\n").append("                    <div style=\"background-color: #FFFFFF;padding: 5px\">\n");
+            }
+            if (properties != null && properties.getHeader() != null) {
                 sb.append("                        <img src=\"/app/reportHeader?imageID=").append(properties.getHeader().getId()).append("\" alt=\"Logo\"/>\n");
             } else if (headerImageDescriptor != null) {
                 sb.append("                        <img src=\"/app/reportHeader?imageID=").append(headerImageDescriptor.getId()).append("\" alt=\"Logo\"/>\n");
             }
             sb.append("                    </div>\n" +
                     "                </div>\n");
-            if(!properties.isImageFullHeader()) {
+            if(properties != null && !properties.isImageFullHeader()) {
                 sb.append("<div style=\"").append(headerTextStyle).append("\">");
                 sb.append(StringEscapeUtils.escapeHtml(name));
                 sb.append("</div>\n");

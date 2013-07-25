@@ -7,6 +7,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import nu.xom.*;
 import oauth.signpost.exception.OAuthCommunicationException;
@@ -227,67 +228,71 @@ public class CCContactSource extends ConstantContactBaseSource {
             for (Object obj : results) {
                 Map node = (Map) obj;
                 IRow row = dataSet.createRow();
-                row.addValue(CONTACT_EMAIL, ((Map) ((List) node.get("email_addresses")).get(0)).get("email_address").toString());
-                row.addValue(CONTACT_ID, node.get("id").toString());
-                row.addValue(CONTACT_NAME, node.get("first_name").toString() + " " + node.get("last_name"));
-                row.addValue(CONTACT_FIRST_NAME, node.get("first_name").toString());
-                row.addValue(CONTACT_LAST_NAME, node.get("last_name").toString());
-                row.addValue(CONTACT_COMPANY, node.get("company_name").toString());
-                row.addValue(CONTACT_JOB_TITLE, node.get("job_title").toString());
-                row.addValue(CONTACT_HOME_PHONE, node.get("home_phone").toString());
-                row.addValue(CONTACT_WORK_PHONE, node.get("work_phone").toString());
-                List addresses = (List) node.get("addresses");
-                if (addresses != null && addresses.size() > 0) {
-                    Map addressNode = (Map) addresses.get(0);
-                    row.addValue(CONTACT_CITY, addressNode.get("city").toString());
-                    row.addValue(CONTACT_STATE, addressNode.get("state_code").toString());
-                    row.addValue(CONTACT_COUNTRY, addressNode.get("country_code").toString());
-                    row.addValue(CONTACT_POSTAL, addressNode.get("postal_code").toString());
-                }
-                List customFields = (List) node.get("custom_fields");
-                if (customFields != null) {
-                    for (Object customFieldObj : customFields) {
-                        Map customFieldMap = (Map) customFieldObj;
-                        String name = customFieldMap.get("name").toString();
-                        String value = customFieldMap.get("value").toString();
-                        if (name.equals("CustomField1")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD1, value);
-                        } else if (name.equals("CustomField2")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD2, value);
-                        } else if (name.equals("CustomField2")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD2, value);
-                        } else if (name.equals("CustomField3")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD3, value);
-                        } else if (name.equals("CustomField4")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD4, value);
-                        } else if (name.equals("CustomField5")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD5, value);
-                        } else if (name.equals("CustomField6")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD6, value);
-                        } else if (name.equals("CustomField7")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD7, value);
-                        } else if (name.equals("CustomField8")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD8, value);
-                        } else if (name.equals("CustomField9")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD9, value);
-                        } else if (name.equals("CustomField10")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD10, value);
-                        } else if (name.equals("CustomField11")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD11, value);
-                        } else if (name.equals("CustomField12")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD12, value);
-                        } else if (name.equals("CustomField13")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD13, value);
-                        } else if (name.equals("CustomField14")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD14, value);
-                        } else if (name.equals("CustomField15")) {
-                            row.addValue(CONTACT_CUSTOM_FIELD15, value);
+                try {
+                    row.addValue(CONTACT_EMAIL, ((Map) ((List) node.get("email_addresses")).get(0)).get("email_address").toString());
+                    row.addValue(CONTACT_ID, node.get("id").toString());
+                    row.addValue(CONTACT_NAME, node.get("first_name").toString() + " " + node.get("last_name"));
+                    row.addValue(CONTACT_FIRST_NAME, node.get("first_name").toString());
+                    row.addValue(CONTACT_LAST_NAME, node.get("last_name").toString());
+                    row.addValue(CONTACT_COMPANY, node.get("company_name").toString());
+                    row.addValue(CONTACT_JOB_TITLE, node.get("job_title").toString());
+                    row.addValue(CONTACT_HOME_PHONE, node.get("home_phone").toString());
+                    row.addValue(CONTACT_WORK_PHONE, node.get("work_phone").toString());
+                    List addresses = (List) node.get("addresses");
+                    if (addresses != null && addresses.size() > 0) {
+                        Map addressNode = (Map) addresses.get(0);
+                        row.addValue(CONTACT_CITY, addressNode.get("city").toString());
+                        row.addValue(CONTACT_STATE, addressNode.get("state_code").toString());
+                        row.addValue(CONTACT_COUNTRY, addressNode.get("country_code").toString());
+                        row.addValue(CONTACT_POSTAL, addressNode.get("postal_code").toString());
+                    }
+                    List customFields = (List) node.get("custom_fields");
+                    if (customFields != null) {
+                        for (Object customFieldObj : customFields) {
+                            Map customFieldMap = (Map) customFieldObj;
+                            String name = customFieldMap.get("name").toString();
+                            String value = customFieldMap.get("value").toString();
+                            if (name.equals("CustomField1")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD1, value);
+                            } else if (name.equals("CustomField2")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD2, value);
+                            } else if (name.equals("CustomField2")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD2, value);
+                            } else if (name.equals("CustomField3")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD3, value);
+                            } else if (name.equals("CustomField4")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD4, value);
+                            } else if (name.equals("CustomField5")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD5, value);
+                            } else if (name.equals("CustomField6")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD6, value);
+                            } else if (name.equals("CustomField7")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD7, value);
+                            } else if (name.equals("CustomField8")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD8, value);
+                            } else if (name.equals("CustomField9")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD9, value);
+                            } else if (name.equals("CustomField10")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD10, value);
+                            } else if (name.equals("CustomField11")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD11, value);
+                            } else if (name.equals("CustomField12")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD12, value);
+                            } else if (name.equals("CustomField13")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD13, value);
+                            } else if (name.equals("CustomField14")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD14, value);
+                            } else if (name.equals("CustomField15")) {
+                                row.addValue(CONTACT_CUSTOM_FIELD15, value);
+                            }
                         }
                     }
+                    row.addValue(CONTACT_COUNT, 1);
+                    row.addValue(CONTACT_CREATED_ON, new DateValue(DATE_FORMAT.parse(node.get("created_date").toString())));
+                    row.addValue(CONTACT_UPDATED_ON, new DateValue(DATE_FORMAT.parse(node.get("created_date").toString())));
+                } catch (Exception e) {
+                    LogClass.error(e);
                 }
-                row.addValue(CONTACT_COUNT, 1);
-                row.addValue(CONTACT_CREATED_ON, new DateValue(DATE_FORMAT.parse(node.get("created_date").toString())));
-                row.addValue(CONTACT_UPDATED_ON, new DateValue(DATE_FORMAT.parse(node.get("created_date").toString())));
                 size++;
                 if (size == 250) {
                     IDataStorage.insertData(dataSet);
