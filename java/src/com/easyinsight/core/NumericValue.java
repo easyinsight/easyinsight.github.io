@@ -74,6 +74,7 @@ public class NumericValue extends Value implements Serializable {
 
     public static double produceDoubleValue(String valueObj) {
         Double value;
+        boolean negative = false;
         if (valueObj == null || "".equals(valueObj)) {
             value = 0.;
         } else {
@@ -85,12 +86,15 @@ public class NumericValue extends Value implements Serializable {
                 int i = 0;
                 boolean hitNumber = false;
                 boolean seemsValid = true;
+
                 for (char character : valueObj.toCharArray()) {
                     if (Character.isDigit(character) || character == '.') {
                         transferArray[i++] = character;
                         hitNumber = true;
                     } else {
-                        if (hitNumber && !(character == ',' || character == '%')) {
+                        if (character == '(' || character == ')') {
+                            negative = true;
+                        } else if (hitNumber && !(character == ',' || character == '%')) {
                             seemsValid = false;
                         }
                     }
@@ -105,6 +109,9 @@ public class NumericValue extends Value implements Serializable {
                     value = 0.;
                 }
             }
+        }
+        if (negative) {
+            value = -value;
         }
         return value;
     }
