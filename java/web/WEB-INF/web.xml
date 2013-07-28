@@ -247,6 +247,24 @@
     </servlet>
 
     <servlet>
+        <servlet-name>Lock</servlet-name>
+        <display-name>Lock</display-name>
+        <servlet-class>com.easyinsight.api.v3.LockServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>BenchmarkHistory</servlet-name>
+        <display-name>BenchmarkHistory</display-name>
+        <servlet-class>com.easyinsight.api.v3.BenchmarkServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Semaphore</servlet-name>
+        <display-name>Semaphore</display-name>
+        <servlet-class>com.easyinsight.api.v3.SemaphoreServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>ImportActivity</servlet-name>
         <display-name>ImportActivity</display-name>
         <servlet-class>com.easyinsight.export.ImportScheduledActivityServlet</servlet-class>
@@ -620,6 +638,21 @@
     <servlet-mapping>
         <servlet-name>ImportActivity</servlet-name>
         <url-pattern>/importActivity</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Lock</servlet-name>
+        <url-pattern>/lock</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BenchmarkHistory</servlet-name>
+        <url-pattern>/benchmarkHistory</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Semaphore</servlet-name>
+        <url-pattern>/semaphore</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
