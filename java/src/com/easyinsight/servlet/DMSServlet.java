@@ -48,7 +48,9 @@ public class DMSServlet extends HttpServlet {
             if (Database.instance() == null) {
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();
+                SystemSettings.initialize();
                 ServiceUtil.initialize();
+
                 CurrencyRetrieval.initialize();
                 if (ConfigLoader.instance().isDatabaseListener()) {
                     DatabaseListener.initialize();
@@ -101,12 +103,6 @@ public class DMSServlet extends HttpServlet {
                 // Do nothing for now, possibly intended behavior
             }
         }
-
-        Database.instance().shutdown();
-        DatabaseManager.instance().shutdown();
-        EventDispatcher.instance().setRunning(false);
-        EventDispatcher.instance().interrupt();
-        //MemCachedManager.instance().shutdown();
         if (DatabaseListener.instance() != null) {
             DatabaseListener.instance().stop();
         }
@@ -114,6 +110,16 @@ public class DMSServlet extends HttpServlet {
             scheduler.stop();
         }
         healthListener.stop();
+        EventDispatcher.instance().setRunning(false);
+        EventDispatcher.instance().interrupt();
+        SystemSettings.instance().stop();
+        Database.instance().shutdown();
+
+        DatabaseManager.instance().shutdown();
+
+        //MemCachedManager.instance().shutdown();
+
+
         super.destroy();
     }
 }
