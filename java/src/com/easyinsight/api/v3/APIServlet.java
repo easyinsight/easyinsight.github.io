@@ -77,8 +77,10 @@ public abstract class APIServlet extends HttpServlet {
             try {
                 SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
                         userResponse.getAccountType(), userResponse.isAccountAdmin(), userResponse.getFirstDayOfWeek(), userResponse.getPersonaName());
+                UserThreadMutex.mutex().acquire(userResponse.getUserID());
                 EIConnection conn = Database.instance().getConnection();
                 ResponseInfo responseInfo;
+
                 try {
                     conn.setAutoCommit(false);
                     responseInfo = processXML(null, conn, req);
@@ -100,6 +102,7 @@ public abstract class APIServlet extends HttpServlet {
                 } finally {
                     conn.setAutoCommit(true);
                     Database.closeConnection(conn);
+                    UserThreadMutex.mutex().release(userResponse.getUserID());
                     SecurityUtil.clearThreadLocal();
                 }
                 resp.setContentType("text/xml");
@@ -159,6 +162,7 @@ public abstract class APIServlet extends HttpServlet {
             try {
                 SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
                         userResponse.getAccountType(), userResponse.isAccountAdmin(), userResponse.getFirstDayOfWeek(), userResponse.getPersonaName());
+                UserThreadMutex.mutex().acquire(userResponse.getUserID());
                 EIConnection conn = Database.instance().getConnection();
                 ResponseInfo responseInfo;
                 try {
@@ -181,6 +185,7 @@ public abstract class APIServlet extends HttpServlet {
                 } finally {
                     conn.setAutoCommit(true);
                     Database.closeConnection(conn);
+                    UserThreadMutex.mutex().release(userResponse.getUserID());
                     SecurityUtil.clearThreadLocal();
                 }
                 resp.setContentType("text/xml");
