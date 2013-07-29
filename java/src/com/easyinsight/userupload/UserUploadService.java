@@ -1392,6 +1392,8 @@ public class UserUploadService {
             bufOS = null;
             fout = null;
 
+            System.out.println(SecurityUtil.getUserID() + " uploaded " + bytes.length + " bytes with key " + uploadKey + " for update of data source " + feedID + ".");
+
             UserUploadAnalysis analysis = dataSource.getUploadFormat().analyze(bytes);
             Map<String, AnalysisItem> fieldMap = new HashMap<String, AnalysisItem>();
             for (AnalysisItem field : dataSource.getFields()) {
@@ -1485,7 +1487,7 @@ public class UserUploadService {
             bufOS = null;
             fout = null;
 
-            System.out.println(Runtime.getRuntime().freeMemory() + " - " + Runtime.getRuntime().totalMemory());
+            System.out.println(SecurityUtil.getUserID() + " uploaded " + bytes.length + " bytes with key " + uploadKey + " for update of data source " + feedID + ".");
             if (dataSource.getUploadFormat() instanceof CsvFileUploadFormat) {
                 FileProcessOptimizedUpdateScheduledTask task = new FileProcessOptimizedUpdateScheduledTask();
                 task.setFeedID(feedID);
