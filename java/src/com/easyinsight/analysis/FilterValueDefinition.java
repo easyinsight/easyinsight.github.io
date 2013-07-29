@@ -535,8 +535,7 @@ public class FilterValueDefinition extends FilterDefinition {
                 stringList.remove("");
             }
             List<String> existingChoices = new ArrayList<String>();
-            if (!getFilteredValues().isEmpty()) {
-                Object obj = getFilteredValues().get(0);
+            for(Object obj : getFilteredValues()) {
                 if (obj != null) {
                     existingChoices.add(obj.toString());
                 }
