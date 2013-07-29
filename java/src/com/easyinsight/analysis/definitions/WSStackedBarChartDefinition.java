@@ -252,7 +252,37 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     }
 
     protected JSONArray getSeriesColors() {
-        return transformColors(super.getSeriesColors());
+        List<MultiColor> multiColors1 = new ArrayList<MultiColor>();
+        for(MultiColor mc : multiColors) {
+            if(mc.isColor1StartEnabled())
+                multiColors1.add(mc);
+        }
+        if (multiColors1.size() > 0) {
+            JSONArray colors = new JSONArray();
+            try {
+
+                for (MultiColor mc : multiColors1) {
+                    if(mc.isColor1StartEnabled()) {
+                        JSONArray gradient = new JSONArray();
+                        JSONObject color1 = new JSONObject();
+                        color1.put("color", String.format("'#%06X'", (0xFFFFFF & mc.getColor1Start())));
+                        color1.put("point", 0);
+                        JSONObject color2 = new JSONObject();
+                        color2.put("color", String.format("'#%06X'", (0xFFFFFF & mc.getColor1Start())));
+                        color2.put("point", 1);
+                        gradient.put(color1);
+                        gradient.put(color2);
+                        colors.put(gradient);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+            return colors;
+
+        } else {
+            return transformColors(super.getSeriesColors());
+        }
     }
 
 }
