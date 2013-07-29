@@ -4,6 +4,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 
+import java.sql.Timestamp;
 import java.util.concurrent.*;
 import java.util.*;
 import java.sql.Connection;
@@ -162,8 +163,9 @@ public class Scheduler {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement lockStmt = conn.prepareStatement("INSERT INTO DISTRIBUTED_LOCK (LOCK_NAME) VALUES (?)");
+            PreparedStatement lockStmt = conn.prepareStatement("INSERT INTO DISTRIBUTED_LOCK (LOCK_NAME, LOCK_TIME) VALUES (?, ?)");
             lockStmt.setString(1, lock);
+            lockStmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
             lockStmt.execute();
             locked = true;
             lockStmt.close();

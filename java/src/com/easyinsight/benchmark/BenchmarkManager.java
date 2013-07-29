@@ -96,6 +96,7 @@ public class BenchmarkManager {
                 benchmarkStmt.setNull(4, Types.BIGINT);
             }
             benchmarkStmt.execute();
+            benchmarkStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
@@ -117,6 +118,7 @@ public class BenchmarkManager {
             }
             benchmarkStmt.setLong(5, dataSourceID);
             benchmarkStmt.execute();
+            benchmarkStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
         }
@@ -135,6 +137,7 @@ public class BenchmarkManager {
             }
             benchmarkStmt.setLong(5, reportID);
             benchmarkStmt.execute();
+            benchmarkStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
         }
@@ -156,6 +159,7 @@ public class BenchmarkManager {
             benchmarkStmt.setLong(5, reportID);
             benchmarkStmt.setBoolean(6, html);
             benchmarkStmt.execute();
+            benchmarkStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
@@ -177,6 +181,7 @@ public class BenchmarkManager {
             }
             benchmarkStmt.setLong(5, dashboardID);
             benchmarkStmt.execute();
+            benchmarkStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
@@ -200,6 +205,7 @@ public class BenchmarkManager {
             benchmarkStmt.setLong(5, dashboardID);
             benchmarkStmt.setBoolean(6, html);
             benchmarkStmt.execute();
+            benchmarkStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {

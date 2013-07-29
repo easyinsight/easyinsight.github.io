@@ -1,5 +1,7 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.servlet.SystemSettings;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
@@ -20,20 +22,35 @@ public class UserThreadMutex {
     }
 
     public void acquire(long userID) throws InterruptedException {
-        /*Semaphore semaphore = mutexMap.get(userID);
+        Semaphore semaphore = mutexMap.get(userID);
         if (semaphore == null) {
-            semaphore = new Semaphore(1);
+            semaphore = new Semaphore(SystemSettings.instance().getSemaphoreLimit());
             mutexMap.put(userID, semaphore);
-            semaphore.acquire();
+            boolean success = semaphore.tryAcquire();
+            if (!success) {
+                System.out.println(userID + " could not retrieve a user thread semaphore, retrying and waiting.");
+                semaphore.acquire();
+            }
         } else {
             semaphore.acquire();
-        }*/
+        }
+    }
+
+    public static Map<Long, Semaphore> summarize() {
+        return new HashMap<Long, Semaphore>(mutex().mutexMap);
+    }
+
+    public static void release() {
+        Map<Long, Semaphore> copy = new HashMap<Long, Semaphore>(mutex().mutexMap);
+        for (Map.Entry<Long, Semaphore> entry : copy.entrySet()) {
+            entry.getValue().release();
+        }
     }
 
     public void release(long userID) {
-        /*Semaphore semaphore = mutexMap.get(userID);
+        Semaphore semaphore = mutexMap.get(userID);
         if (semaphore != null) {
             semaphore.release();
-        }*/
+        }
     }
 }
