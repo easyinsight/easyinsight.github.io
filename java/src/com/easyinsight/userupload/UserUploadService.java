@@ -1,5 +1,10 @@
 package com.easyinsight.userupload;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.core.DataSourceDescriptor;
@@ -29,6 +34,7 @@ import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
+import com.easyinsight.tag.Tag;
 import com.easyinsight.users.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
@@ -39,7 +45,6 @@ import java.io.*;
 import java.util.*;
 import java.util.Date;
 import java.sql.*;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import com.easyinsight.util.RandomTextGenerator;
@@ -47,7 +52,6 @@ import com.easyinsight.util.ServiceUtil;
 import com.xerox.amazonws.sqs2.Message;
 import com.xerox.amazonws.sqs2.MessageQueue;
 import com.xerox.amazonws.sqs2.SQSUtils;
-import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
@@ -63,6 +67,95 @@ public class UserUploadService {
     private static Map<Long, RawUploadData> rawDataMap = new WeakHashMap<Long, RawUploadData>();
 
     public UserUploadService() {
+    }
+
+    public void saveTags(List<Tag> tags) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG_NAME, ACCOUNT_TAG_ID FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = getTagsStmt.executeQuery();
+            List<Tag> existingTags = new ArrayList<Tag>();
+            while (rs.next()) {
+                String tagName = rs.getString(1);
+                long tagID = rs.getLong(2);
+                existingTags.add(new Tag(tagID, tagName));
+            }
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM ACCOUNT_TAG WHERE ACCOUNT_TAG_ID = ?");
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID) VALUES (?, ?)");
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TAG SET TAG_NAME = ? WHERE ACCOUNT_TAG_ID = ?");
+            for (Tag existingTag : existingTags) {
+                if (!tags.contains(existingTag)) {
+                    deleteStmt.setLong(1, existingTag.getId());
+                    deleteStmt.executeUpdate();
+                }
+            }
+            for (Tag tag : tags) {
+                if (tag.getId() == 0) {
+                    insertStmt.setString(1, tag.getName());
+                    insertStmt.setLong(2, SecurityUtil.getAccountID());
+                    insertStmt.execute();
+                } else {
+                    updateStmt.setString(1, tag.getName());
+                    updateStmt.setLong(2, tag.getId());
+                    updateStmt.executeUpdate();
+                }
+            }
+            deleteStmt.close();
+            insertStmt.close();
+            updateStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void tagDataSources(List<DataSourceDescriptor> dataSources, Tag tag) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement existingStmt = conn.prepareStatement("SELECT account_tag_id FROM data_source_to_tag WHERE data_source_id = ?");
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO data_source_to_tag (account_tag_id, data_source_id) values (?, ?)");
+            for (DataSourceDescriptor dsd : dataSources) {
+                Set<Long> existingIDs = new HashSet<Long>();
+                existingStmt.setLong(1, dsd.getId());
+                ResultSet rs = existingStmt.executeQuery();
+                while (rs.next()) {
+                    existingIDs.add(rs.getLong(1));
+                }
+                if (!existingIDs.contains(tag.getId())) {
+                    saveStmt.setLong(1, tag.getId());
+                    saveStmt.setLong(2, dsd.getId());
+                    saveStmt.execute();
+                }
+            }
+            existingStmt.close();
+            saveStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void untagDataSource(List<DataSourceDescriptor> dataSources, Tag tag) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM data_source_to_tag WHERE account_tag_id = ? AND data_source_id = ?");
+            for (DataSourceDescriptor dsd : dataSources) {
+                deleteStmt.setLong(1, tag.getId());
+                deleteStmt.setLong(2, dsd.getId());
+                deleteStmt.executeUpdate();
+            }
+            deleteStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public void deleteReports(List<EIDescriptor> descriptors) {
@@ -134,16 +227,70 @@ public class UserUploadService {
         }
     }
 
-    public List<SolutionInstallInfo> copyDataSource(long dataSourceID, String newName, boolean copyData, boolean includeChildren) {
-        SecurityUtil.authorizeFeed(dataSourceID, Roles.OWNER);
+    public List<DataSourceDescriptor> scopeCopy(List<DataSourceDescriptor> dataSources) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            Set<DataSourceDescriptor> allSources = new HashSet<DataSourceDescriptor>();
+            for (DataSourceDescriptor dsd : dataSources) {
+                SecurityUtil.authorizeFeed(dsd.getId(), Roles.OWNER);
+                FeedDefinition dataSource = feedStorage.getFeedDefinitionData(dsd.getId());
+                allSources.addAll(dataSource.getDataSources(conn));
+            }
+            return new ArrayList<DataSourceDescriptor>(allSources);
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public List<SolutionInstallInfo> copyDataSource(List<DataSourceDescriptor> dataSources, String newTag, boolean copyData) {
+
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            FeedDefinition existingDef = feedStorage.getFeedDefinitionData(dataSourceID, conn);
-            List<SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, dataSourceID, existingDef, newName, 0,
-                    SecurityUtil.getAccountID(), SecurityUtil.getUserName());
+            Set<Long> existing = new HashSet<Long>();
+            List<SolutionInstallInfo> infos = new ArrayList<SolutionInstallInfo>();
+            for (DataSourceDescriptor dataSource : dataSources) {
+                if (!existing.contains(dataSource.getId())) {
+                    FeedDefinition existingDef = feedStorage.getFeedDefinitionData(dataSource.getId(), conn);
+                    List<SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, dataSource.getId(), existingDef, existingDef.getFeedName(), 0,
+                            SecurityUtil.getAccountID(), SecurityUtil.getUserName());
+                    for (SolutionInstallInfo info : results) {
+                        existing.add(info.getPreviousID());
+                        infos.add(info);
+                    }
+                }
+            }
+
+            if (newTag != null) {
+                PreparedStatement getTagStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID FROM ACCOUNT_TAG WHERE TAG_NAME = ?");
+                getTagStmt.setString(1, newTag);
+                ResultSet rs = getTagStmt.executeQuery();
+                long tagID;
+                if (rs.next()) {
+                    tagID = rs.getLong(1);
+                } else {
+                    PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID) VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    insertStmt.setString(1, newTag);
+                    insertStmt.setLong(2, SecurityUtil.getAccountID());
+                    insertStmt.execute();
+                    tagID = Database.instance().getAutoGenKey(insertStmt);
+                    insertStmt.close();
+                }
+                getTagStmt.close();
+                PreparedStatement ps = conn.prepareStatement("INSERT INTO DATA_SOURCE_TO_TAG (DATA_SOURCE_ID, ACCOUNT_TAG_ID) VALUES (?, ?)");
+                for (DataSourceDescriptor desc : dataSources) {
+                    ps.setLong(1, desc.getId());
+                    ps.setLong(2, tagID);
+                    ps.execute();
+                }
+                ps.close();
+            }
+
             conn.commit();
-            return results;
+            return infos;
         } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();
@@ -337,14 +484,45 @@ public class UserUploadService {
 
             long dsTime = System.currentTimeMillis();
 
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+            PreparedStatement getTagsToDataSourcesStmt = conn.prepareStatement("SELECT DATA_SOURCE_TO_TAG.ACCOUNT_TAG_ID, DATA_SOURCE_ID FROM data_source_to_tag, account_tag WHERE " +
+                    "account_tag.account_tag_id = data_source_to_tag.account_tag_id and account_tag.account_id = ?");
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet tagRS = getTagsStmt.executeQuery();
+            Map<Long, Tag> tags = new HashMap<Long, Tag>();
+            while (tagRS.next()) {
+                tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2)));
+            }
+
+            getTagsToDataSourcesStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet dsTagRS = getTagsToDataSourcesStmt.executeQuery();
+            Map<Long, List<Tag>> dsToTagMap = new HashMap<Long, List<Tag>>();
+            while (dsTagRS.next()) {
+                long dataSourceID = dsTagRS.getLong(2);
+                long tagID = dsTagRS.getLong(1);
+                Tag tag = tags.get(tagID);
+                List<Tag> t = dsToTagMap.get(dataSourceID);
+                if (t == null) {
+                    t = new ArrayList<Tag>();
+                    dsToTagMap.put(dataSourceID, t);
+                }
+                t.add(tag);
+            }
+            getTagsStmt.close();
+            getTagsToDataSourcesStmt.close();
+
 
             Iterator<DataSourceDescriptor> dataSourceIter = dataSources.iterator();
             while (dataSourceIter.hasNext()) {
                 DataSourceDescriptor dataSource = dataSourceIter.next();
                 if (!keep(dataSource, onlyMyData)) {
                     dataSourceIter.remove();
+                } else {
+                    dataSource.setTags(dsToTagMap.get(dataSource.getId()));
                 }
             }
+
+
 
             AnalysisStorage analysisStorage = new AnalysisStorage();
 
@@ -515,6 +693,7 @@ public class UserUploadService {
             int dashboardCount = 0;
             MyDataTree myDataTree = new MyDataTree(results, onlyMyData);
             myDataTree.setDashboardCount(dashboardCount);
+            myDataTree.setTags(new ArrayList<Tag>(tags.values()));
             myDataTree.setDataSourceCount(dataSourceCount);
             myDataTree.setReportCount(reportCount);
             conn.commit();
@@ -656,19 +835,38 @@ public class UserUploadService {
             } else {
                 byte[] bytes = null;
                 if (uploadContext instanceof FlatFileUploadContext) {
-                    FlatFileUploadContext flatFileUploadContext = (FlatFileUploadContext) uploadContext;
-                    PreparedStatement ps = conn.prepareStatement("SELECT BYTES FROM upload_bytes WHERE upload_key = ?");
-                    ps.setString(1, flatFileUploadContext.getUploadKey());
-                    ResultSet rs = ps.executeQuery();
-                    rs.next();
-                    bytes = rs.getBytes(1);
-                    ps.close();
-                    ByteArrayOutputStream streamBuilder = new ByteArrayOutputStream();
-                    ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(bytes)));
-                    zis.getNextEntry();
-                    IOUtils.copy(zis, streamBuilder);
-                    bytes = streamBuilder.toByteArray();
-                    zis.close();
+                    AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+                    S3Object object = s3.getObject(new GetObjectRequest("archival1", ((FlatFileUploadContext)uploadContext).getUploadKey()+".zip"));
+                    byte retrieveBuf[];
+                    retrieveBuf = new byte[1];
+                    InputStream bfis = object.getObjectContent();
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    while (bfis.read(retrieveBuf) != -1) {
+                        baos.write(retrieveBuf);
+                    }
+                    byte[] resultBytes = baos.toByteArray();
+                    ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
+                    ZipInputStream zin = new ZipInputStream(bais);
+                    zin.getNextEntry();
+
+                    byte[] buffer = new byte[8192];
+                    ByteArrayOutputStream fout = new ByteArrayOutputStream();
+                    BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
+                    int nBytes;
+                    while ((nBytes = zin.read(buffer)) != -1) {
+                        bufOS.write(buffer, 0, nBytes);
+                    }
+                    /*for (int c = zin.read(); c != -1; c = zin.read()) {
+                        bufOS.write(c);
+                    }*/
+                    bufOS.close();
+                    fout.close();
+
+                    bytes = fout.toByteArray();
+
+                    baos = null;
+                    bufOS = null;
+                    fout = null;
                 }
                 List<AnalysisItem> fields = uploadContext.guessFields(conn, bytes);
                 List<FieldUploadInfo> fieldInfos = new ArrayList<FieldUploadInfo>();
@@ -702,18 +900,39 @@ public class UserUploadService {
             byte[] bytes = null;
             if (uploadContext instanceof FlatFileUploadContext) {
                 FlatFileUploadContext flatFileUploadContext = (FlatFileUploadContext) uploadContext;
-                PreparedStatement ps = conn.prepareStatement("SELECT BYTES FROM upload_bytes WHERE upload_key = ?");
-                ps.setString(1, flatFileUploadContext.getUploadKey());
-                ResultSet rs = ps.executeQuery();
-                rs.next();
-                bytes = rs.getBytes(1);
-                ps.close();
-                ByteArrayOutputStream streamBuilder = new ByteArrayOutputStream();
-                ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(bytes)));
-                zis.getNextEntry();
-                IOUtils.copy(zis, streamBuilder);
-                bytes = streamBuilder.toByteArray();
-                zis.close();
+                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+                S3Object object = s3.getObject(new GetObjectRequest("archival1", flatFileUploadContext.getUploadKey()+".zip"));
+
+                byte retrieveBuf[];
+                retrieveBuf = new byte[1];
+                InputStream bfis = object.getObjectContent();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while (bfis.read(retrieveBuf) != -1) {
+                    baos.write(retrieveBuf);
+                }
+                byte[] resultBytes = baos.toByteArray();
+                ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
+                ZipInputStream zin = new ZipInputStream(bais);
+                zin.getNextEntry();
+
+                byte[] buffer = new byte[8192];
+                ByteArrayOutputStream fout = new ByteArrayOutputStream();
+                BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
+                int nBytes;
+                while ((nBytes = zin.read(buffer)) != -1) {
+                    bufOS.write(buffer, 0, nBytes);
+                }
+                /*for (int c = zin.read(); c != -1; c = zin.read()) {
+                    bufOS.write(c);
+                }*/
+                bufOS.close();
+                fout.close();
+
+                bytes = fout.toByteArray();
+
+                baos = null;
+                bufOS = null;
+                fout = null;
             }
             long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible, bytes);
             uploadResponse = new UploadResponse(dataSourceID);
@@ -894,6 +1113,24 @@ public class UserUploadService {
         byte[] userData;
     }
 
+    public void deleteUserUploads(List<DataSourceDescriptor> dataSources) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            for (DataSourceDescriptor dataSource : dataSources) {
+                deleteUserUpload(dataSource.getId(), conn);
+            }
+            conn.commit();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
     public void deleteUserUpload(long dataFeedID) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -1021,7 +1258,6 @@ public class UserUploadService {
                     final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                     final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
                     final String personaName = SecurityUtil.getPersonaName();
-                    //final boolean accountReports = SecurityUtil.isAccountReports();
                     new Thread(new Runnable() {
 
                         public void run() {
@@ -1122,18 +1358,40 @@ public class UserUploadService {
         try {
             conn.setAutoCommit(false);
             FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
-            PreparedStatement ps = conn.prepareStatement("SELECT BYTES FROM upload_bytes WHERE upload_key = ?");
-            ps.setString(1, uploadKey);
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            byte[] bytes = rs.getBytes(1);
-            ps.close();
-            ByteArrayOutputStream streamBuilder = new ByteArrayOutputStream();
-            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(bytes)));
-            zis.getNextEntry();
-            IOUtils.copy(zis, streamBuilder);
-            bytes = streamBuilder.toByteArray();
-            zis.close();
+            AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+            S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey+".zip"));
+
+            byte retrieveBuf[];
+            retrieveBuf = new byte[1];
+            InputStream bfis = object.getObjectContent();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            while (bfis.read(retrieveBuf) != -1) {
+                baos.write(retrieveBuf);
+            }
+            byte[] resultBytes = baos.toByteArray();
+            ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
+            ZipInputStream zin = new ZipInputStream(bais);
+            zin.getNextEntry();
+
+            byte[] buffer = new byte[8192];
+            ByteArrayOutputStream fout = new ByteArrayOutputStream();
+            BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
+            int nBytes;
+            while ((nBytes = zin.read(buffer)) != -1) {
+                bufOS.write(buffer, 0, nBytes);
+            }
+            /*for (int c = zin.read(); c != -1; c = zin.read()) {
+                bufOS.write(c);
+            }*/
+            bufOS.close();
+            fout.close();
+
+            byte[] bytes = fout.toByteArray();
+
+            baos = null;
+            bufOS = null;
+            fout = null;
+
             UserUploadAnalysis analysis = dataSource.getUploadFormat().analyze(bytes);
             Map<String, AnalysisItem> fieldMap = new HashMap<String, AnalysisItem>();
             for (AnalysisItem field : dataSource.getFields()) {
@@ -1190,21 +1448,44 @@ public class UserUploadService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
+            System.out.println(Runtime.getRuntime().freeMemory() + " - " + Runtime.getRuntime().totalMemory());
             FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
 
-            PreparedStatement ps = conn.prepareStatement("SELECT BYTES FROM upload_bytes WHERE upload_key = ?");
-            ps.setString(1, uploadKey);
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            byte[] bytes = rs.getBytes(1);
-            ps.close();
-            ByteArrayOutputStream streamBuilder = new ByteArrayOutputStream();
-            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(bytes)));
-            zis.getNextEntry();
-            IOUtils.copy(zis, streamBuilder);
-            bytes = streamBuilder.toByteArray();
-            zis.close();
+            AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+            S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey+".zip"));
 
+            byte retrieveBuf[];
+            retrieveBuf = new byte[1];
+            InputStream bfis = object.getObjectContent();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            while (bfis.read(retrieveBuf) != -1) {
+                baos.write(retrieveBuf);
+            }
+            byte[] resultBytes = baos.toByteArray();
+            baos = null;
+            ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
+            ZipInputStream zin = new ZipInputStream(bais);
+            zin.getNextEntry();
+
+            byte[] buffer = new byte[8192];
+            ByteArrayOutputStream fout = new ByteArrayOutputStream();
+            BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
+            int nBytes;
+            while ((nBytes = zin.read(buffer)) != -1) {
+                bufOS.write(buffer, 0, nBytes);
+            }
+            /*for (int c = zin.read(); c != -1; c = zin.read()) {
+                bufOS.write(c);
+            }*/
+            bufOS.close();
+            fout.close();
+
+            byte[] bytes = fout.toByteArray();
+
+            bufOS = null;
+            fout = null;
+
+            System.out.println(Runtime.getRuntime().freeMemory() + " - " + Runtime.getRuntime().totalMemory());
             if (dataSource.getUploadFormat() instanceof CsvFileUploadFormat) {
                 FileProcessOptimizedUpdateScheduledTask task = new FileProcessOptimizedUpdateScheduledTask();
                 task.setFeedID(feedID);
@@ -1386,7 +1667,6 @@ public class UserUploadService {
                 final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                 final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
                 final String personaName = SecurityUtil.getPersonaName();
-                //final boolean accountReports = SecurityUtil.isAccountReports();
                 new Thread(new Runnable() {
 
                     public void run() {

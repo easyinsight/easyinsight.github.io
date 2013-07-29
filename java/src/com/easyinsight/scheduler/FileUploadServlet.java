@@ -1,5 +1,10 @@
 package com.easyinsight.scheduler;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
@@ -7,15 +12,16 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.jets3t.service.impl.rest.httpclient.RestS3Service;
+import org.jets3t.service.model.S3Bucket;
+import org.jets3t.service.model.S3Object;
+import org.jets3t.service.security.AWSCredentials;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
@@ -47,6 +53,7 @@ public class FileUploadServlet extends HttpServlet {
                 }
             }
             ByteArrayOutputStream dest = new ByteArrayOutputStream();
+
             ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(dest));
             zos.putNextEntry(new ZipEntry("data.csv"));
             zos.write(bytes);
@@ -55,6 +62,7 @@ public class FileUploadServlet extends HttpServlet {
             int start = bytes.length;
             bytes = dest.toByteArray();
             System.out.println("compressed from " + start + " to " + bytes.length);
+
             EIConnection conn = Database.instance().getConnection();
             try {
                 PreparedStatement ps = conn.prepareStatement("SELECT UPLOAD_BYTES_ID, USER_ID FROM UPLOAD_BYTES WHERE UPLOAD_KEY = ?");
@@ -62,14 +70,20 @@ public class FileUploadServlet extends HttpServlet {
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
                     long id = rs.getLong(1);
-                    long userID = rs.getLong(2);
+                    ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+                    AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+                    ObjectMetadata objectMetadata = new ObjectMetadata();
+                    objectMetadata.setContentLength(bytes.length);
+                    s3.putObject(new PutObjectRequest("archival1", uploadKey + ".zip", stream, objectMetadata));
+
+                    /*long userID = rs.getLong(2);
                     ps.close();
                     PreparedStatement updateStmt = conn.prepareStatement("UPDATE UPLOAD_BYTES SET BYTES = ? WHERE UPLOAD_BYTES_ID = ?");
                     ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
                     updateStmt.setBinaryStream(1, stream, bytes.length);
                     updateStmt.setLong(2, id);
                     updateStmt.execute();
-                    updateStmt.close();
+                    updateStmt.close();*/
                 } else {
                     throw new RuntimeException("No upload key found matching the specified parameter.");
                 }
