@@ -60,7 +60,7 @@ public class FileUploadServlet extends HttpServlet {
             bytes = dest.toByteArray();
             System.out.println("compressed from " + start + " to " + bytes.length);
 
-            /*EIConnection conn = Database.instance().getConnection();
+            EIConnection conn = Database.instance().getConnection();
             try {
                 PreparedStatement ps = conn.prepareStatement("SELECT UPLOAD_BYTES_ID, USER_ID FROM UPLOAD_BYTES WHERE UPLOAD_KEY = ?");
                 ps.setString(1, uploadKey);
@@ -82,7 +82,7 @@ public class FileUploadServlet extends HttpServlet {
                 }
             } finally {
                 Database.closeConnection(conn);
-            }*/
+            }
         } catch (Exception e) {
             LogClass.error(e);
         }
