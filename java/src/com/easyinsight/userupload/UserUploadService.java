@@ -4,6 +4,8 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.config.ConfigLoader;
@@ -45,7 +47,9 @@ import java.io.*;
 import java.util.*;
 import java.util.Date;
 import java.sql.*;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.util.ServiceUtil;
@@ -67,6 +71,56 @@ public class UserUploadService {
     private static Map<Long, RawUploadData> rawDataMap = new WeakHashMap<Long, RawUploadData>();
 
     public UserUploadService() {
+    }
+
+    public boolean validateUpload(String uploadKey) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT UPLOAD_SUCCESSFUL FROM UPLOAD_BYTES WHERE UPLOAD_KEY = ? AND USER_ID = ?");
+
+            ps.setString(1, uploadKey);
+            ps.setLong(2, SecurityUtil.getUserID());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getBoolean(1);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return false;
+    }
+
+    public void hackyUpload(String uploadKey, byte[] bytes) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT UPLOAD_BYTES_ID FROM UPLOAD_BYTES WHERE UPLOAD_KEY = ? AND USER_ID = ?");
+
+            ps.setString(1, uploadKey);
+            ps.setLong(2, SecurityUtil.getUserID());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                ByteArrayOutputStream dest = new ByteArrayOutputStream();
+
+                ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(dest));
+                zos.putNextEntry(new ZipEntry("data.csv"));
+                zos.write(bytes);
+                zos.closeEntry();
+                zos.close();
+                bytes = dest.toByteArray();
+                ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+                ObjectMetadata objectMetadata = new ObjectMetadata();
+                objectMetadata.setContentLength(bytes.length);
+                s3.putObject(new PutObjectRequest("archival1", uploadKey + ".zip", stream, objectMetadata));
+                stream.close();
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public void saveTags(List<Tag> tags) {
