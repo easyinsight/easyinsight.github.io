@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.ReportKey;
 import com.easyinsight.intention.Intention;
@@ -68,6 +69,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private DataSourceInfo dataSourceInfo;
     private boolean kpiSource;
     private List<AddonReport> addonReports;
+
 
     public List<AddonReport> getAddonReports() {
         return addonReports;
@@ -643,7 +645,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         feedDefinition.setDataFeedID(0);
         feedDefinition.setApiKey(RandomTextGenerator.generateText(12));
         feedDefinition.setAccountVisible(false);
-        feedDefinition.setLastRefreshStart(null);
+        feedDefinition.setLastRefreshStart(new Date(1));
         List<FeedFolder> clonedFolders = new ArrayList<FeedFolder>();
         for (FeedFolder feedFolder : getFolders()) {
             try {
@@ -876,5 +878,11 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public boolean rebuildFieldWindow() {
         return false;
+    }
+
+    public Collection<DataSourceDescriptor> getDataSources(EIConnection conn) throws SQLException {
+        Set<DataSourceDescriptor> dataSources = new HashSet<DataSourceDescriptor>();
+        dataSources.add(new DataSourceDescriptor(getFeedName(), getDataFeedID(), getDataSourceType(), isAccountVisible(), getDataSourceBehavior()));
+        return dataSources;
     }
 }

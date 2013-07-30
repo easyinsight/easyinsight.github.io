@@ -42,10 +42,15 @@ public class JSONFeed extends Feed {
             String url = source.getUrl();
             String nextPageString = source.getNextPageString();
 
-            Map<String, Key> keys = new HashMap<String, Key>();
+            /*Map<String, List<Key>> keys = new HashMap<String, List<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
-            }
+                List<Key> keyList = keys.get(analysisItem.getKey().toKeyString());
+                if (keyList == null) {
+                    keyList = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyList);
+                }
+                keyList.add(analysisItem.createAggregateKey());
+            }*/
 
             //SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
             HttpClient client = new HttpClient();
@@ -114,23 +119,23 @@ public class JSONFeed extends Feed {
                         String keyName = item.getKey().toKeyString();
                         Object value = object.get(keyName);
                         if (value == null) {
-                            row.addValue(keys.get(keyName), new EmptyValue());
+                            row.addValue(item.createAggregateKey(), new EmptyValue());
                         } else if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                             AnalysisDateDimension date = (AnalysisDateDimension) item;
                             DateFormat df = new SimpleDateFormat(date.getCustomDateFormat());
                             try {
-                                row.addValue(keys.get(keyName), df.parse(value.toString()));
+                                row.addValue(item.createAggregateKey(), df.parse(value.toString()));
                             } catch (ParseException e) {
-                                row.addValue(keys.get(keyName), new EmptyValue());
+                                row.addValue(item.createAggregateKey(), new EmptyValue());
                             }
                         } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                             if (value instanceof Number) {
-                                row.addValue(keys.get(keyName), (Number) value);
+                                row.addValue(item.createAggregateKey(), (Number) value);
                             } else {
-                                row.addValue(keys.get(keyName), Double.parseDouble(value.toString()));
+                                row.addValue(item.createAggregateKey(), Double.parseDouble(value.toString()));
                             }
                         } else {
-                            row.addValue(keys.get(keyName), value.toString());
+                            row.addValue(item.createAggregateKey(), value.toString());
                         }
                     }
                 }

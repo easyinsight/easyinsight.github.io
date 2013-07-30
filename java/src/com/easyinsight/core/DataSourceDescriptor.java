@@ -1,5 +1,6 @@
 package com.easyinsight.core;
 
+import com.easyinsight.tag.Tag;
 import com.easyinsight.userupload.CustomFolder;
 
 import java.util.ArrayList;
@@ -23,6 +24,24 @@ public class DataSourceDescriptor extends EIDescriptor {
     private int dataSourceBehavior;
     private List<EIDescriptor> children = new ArrayList<EIDescriptor>();
     private List<CustomFolder> customFolders = new ArrayList<CustomFolder>();
+    private List<Tag> tags;
+    private int rowCount;
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
+    public int getRowCount() {
+        return rowCount;
+    }
+
+    public void setRowCount(int rowCount) {
+        this.rowCount = rowCount;
+    }
 
     public List<CustomFolder> getCustomFolders() {
         return customFolders;

@@ -25,8 +25,8 @@ public class FilterStringCheckbox extends GridCheckbox {
 
     public function FilterStringCheckbox() {
         super();
-        this.width = 140;
-        this.cbWidth = 140;
+        this.width = 290;
+        this.cbWidth = 290;
         this.moveY = 4;
     }
 

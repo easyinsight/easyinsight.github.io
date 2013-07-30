@@ -1,6 +1,7 @@
 package com.easyinsight.userupload;
 
 import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.tag.Tag;
 
 import java.util.List;
 
@@ -15,6 +16,8 @@ public class MyDataTree {
     private int reportCount;
     private int dashboardCount;
     private int dataSourceCount;
+    private boolean accountOverSize;
+    private List<Tag> tags;
 
     public MyDataTree() {
     }
@@ -22,6 +25,22 @@ public class MyDataTree {
     public MyDataTree(List<EIDescriptor> objects, boolean includeGroup) {
         this.objects = objects;
         this.includeGroup = includeGroup;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
+    public boolean isAccountOverSize() {
+        return accountOverSize;
+    }
+
+    public void setAccountOverSize(boolean accountOverSize) {
+        this.accountOverSize = accountOverSize;
     }
 
     public int getReportCount() {
