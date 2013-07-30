@@ -123,7 +123,7 @@ public class UserUploadService {
         }
     }
 
-    public void saveTags(List<Tag> tags) {
+    public List<Tag> saveTags(List<Tag> tags) {
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG_NAME, ACCOUNT_TAG_ID FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
@@ -136,7 +136,7 @@ public class UserUploadService {
                 existingTags.add(new Tag(tagID, tagName));
             }
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM ACCOUNT_TAG WHERE ACCOUNT_TAG_ID = ?");
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID) VALUES (?, ?)");
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID) VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TAG SET TAG_NAME = ? WHERE ACCOUNT_TAG_ID = ?");
             for (Tag existingTag : existingTags) {
                 if (!tags.contains(existingTag)) {
@@ -149,6 +149,8 @@ public class UserUploadService {
                     insertStmt.setString(1, tag.getName());
                     insertStmt.setLong(2, SecurityUtil.getAccountID());
                     insertStmt.execute();
+                    long id = Database.instance().getAutoGenKey(insertStmt);
+                    tag.setId(id);
                 } else {
                     updateStmt.setString(1, tag.getName());
                     updateStmt.setLong(2, tag.getId());
@@ -158,6 +160,7 @@ public class UserUploadService {
             deleteStmt.close();
             insertStmt.close();
             updateStmt.close();
+            return tags;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

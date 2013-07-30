@@ -98,10 +98,6 @@
             var selected:ArrayCollection = new ArrayCollection();
             for each (var dsd:DataSourceDescriptor in dataProvider) {
                 if (dsd.selected) {
-                    if (dsd.tags == null) {
-                        dsd.tags = new ArrayCollection();
-                    }
-                    dsd.tags.addItem(addTag);
                     selected.addItem(dsd);
                 }
             }
@@ -113,9 +109,6 @@
             var selected:ArrayCollection = new ArrayCollection();
             for each (var dsd:DataSourceDescriptor in dataProvider) {
                 if (dsd.selected) {
-                    if (dsd.tags != null) {
-                        dsd.tags.removeItemAt(dsd.tags.getItemIndex(addTag));
-                    }
                     selected.addItem(dsd);
                 }
             }
@@ -138,8 +131,8 @@
             if (_tags != null) {
                 tagOptions.addItem({ label: "Manage Tags...", op: "manageTags" });
                 for each (var opTag:Tag in _tags) {
-                    tagOptions.addItem({label: "Add tag " + opTag.name + " to selected", data: opTag, op: "add"});
-                    tagOptions.addItem({label: "Remove tag " + opTag.name + " from selected", data: opTag, op: "remove"});
+                    tagOptions.addItem({label: "Add tag - " + opTag.name + " - to selected", data: opTag, op: "add"});
+                    tagOptions.addItem({label: "Remove tag - " + opTag.name + " - from selected", data: opTag, op: "remove"});
                 }
             }
             this.tagOptions = tagOptions;
@@ -372,7 +365,7 @@
         }
 
         private function tagChanges():void {
-
+            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
         }
 
         [Bindable]
