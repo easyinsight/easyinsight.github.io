@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+
+        public var existingTags:ArrayCollection;
+
+        [Bindable]
+        private var tags:ArrayCollection;
+
+        private function save():void {
+            ProgressAlert.alert(this, "Saving tags...", null, uploadService.saveTags);
+            uploadService.saveTags.send(tags);
+        }
+
+        private function onCreation():void {
+            tags = new ArrayCollection(existingTags.toArray());
+        }
+
+        private function addTag():void {
+            var window:CreateTagWindow = new CreateTagWindow();
+            window.addEventListener(TagMetadataEvent.TAG_CREATE, onCreate, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onCreate(event:TagMetadataEvent):void {
+            tags.addItem(event.tag);
+        }
+
+        private function deleteSelected():void {
+            var selected:ArrayCollection = new ArrayCollection();
+            for each (var tag:Tag in tags) {
+                if (tag.selected) {
+                    selected.addItem(tag);
+                }
+            }
+            for each (var selectedTag:Tag in selected) {
+                tags.removeItemAt(tags.getItemIndex(selectedTag));
+            }
+        }
+
+        private function saved():void {
+            dispatchEvent(new TagMetadataEvent(TagMetadataEvent.REFRESH_TAGS, null, tags));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="uploadService" destination="userUpload">
+        <mx:method name="saveTags" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:HBox>
+        <util:SaveButton label="Add Tag..." click="addTag()" fontSize="12"/>
+        <util:SaveButton label="Delete Selected..." click="deleteSelected()" fontSize="12"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{tags}">
+        <mx:columns>
+            <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="50" headerText=""/>
+            <mx:DataGridColumn dataField="name" headerText="Tag" width="300"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>
+

@@ -21,6 +21,7 @@ import com.easyinsight.etl.LookupTable;
 import com.easyinsight.etl.LookupTableUtil;
 import com.easyinsight.scorecard.ScorecardInternalService;
 import com.easyinsight.storage.DatabaseShardException;
+import com.easyinsight.tag.Tag;
 import com.easyinsight.userupload.AnalysisItemFormatMapper;
 import com.easyinsight.userupload.ExcelUploadFormat;
 import com.easyinsight.userupload.UploadPolicy;
@@ -688,18 +689,57 @@ public class FeedService {
 
     public List<DataSourceDescriptor> searchForSubscribedFeeds() {
         long userID = SecurityUtil.getUserID();
+        EIConnection conn = Database.instance().getConnection();
         try {
-            List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(userID, SecurityUtil.getAccountID());
+            List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(userID, SecurityUtil.getAccountID(), conn, true);
             Collections.sort(dataSources, new Comparator<DataSourceDescriptor>() {
 
                 public int compare(DataSourceDescriptor dataSourceDescriptor, DataSourceDescriptor dataSourceDescriptor1) {
                     return dataSourceDescriptor.getName().compareTo(dataSourceDescriptor1.getName());
                 }
             });
+
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+            PreparedStatement getTagsToDataSourcesStmt = conn.prepareStatement("SELECT DATA_SOURCE_TO_TAG.ACCOUNT_TAG_ID, DATA_SOURCE_ID FROM data_source_to_tag, account_tag WHERE " +
+                    "account_tag.account_tag_id = data_source_to_tag.account_tag_id and account_tag.account_id = ?");
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet tagRS = getTagsStmt.executeQuery();
+            Map<Long, Tag> tags = new HashMap<Long, Tag>();
+            while (tagRS.next()) {
+                tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2)));
+            }
+
+            getTagsToDataSourcesStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet dsTagRS = getTagsToDataSourcesStmt.executeQuery();
+            Map<Long, List<Tag>> dsToTagMap = new HashMap<Long, List<Tag>>();
+            while (dsTagRS.next()) {
+                long dataSourceID = dsTagRS.getLong(2);
+                long tagID = dsTagRS.getLong(1);
+                Tag tag = tags.get(tagID);
+                List<Tag> t = dsToTagMap.get(dataSourceID);
+                if (t == null) {
+                    t = new ArrayList<Tag>();
+                    dsToTagMap.put(dataSourceID, t);
+                }
+                t.add(tag);
+            }
+            getTagsStmt.close();
+            getTagsToDataSourcesStmt.close();
+
+            for (DataSourceDescriptor dataSourceDescriptor : dataSources) {
+                List<Tag> tagList = dsToTagMap.get(dataSourceDescriptor.getId());
+                if (tagList == null) {
+                    tagList = new ArrayList<Tag>();
+                }
+                dataSourceDescriptor.setTags(tagList);
+            }
+
             return dataSources;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
@@ -718,6 +758,7 @@ public class FeedService {
         try {
             FederatedDataSource federatedDataSource = new FederatedDataSource();
             federatedDataSource.setFeedName(name);
+            federatedDataSource.setAccountVisible(true);
             federatedDataSource.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID()));
             federatedDataSource.setSources(sources);
             federatedDataSource.populateFields(conn);
