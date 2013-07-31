@@ -11,6 +11,7 @@ public class MyDataTree {
     public var dashboardCount:int;
     public var dataSourceCount:int;
     public var accountOverSize:Boolean;
+    public var tags:ArrayCollection;
 
     public function MyDataTree() {
     }

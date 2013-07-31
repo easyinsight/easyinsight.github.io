@@ -24,6 +24,8 @@ public class DataSourceDescriptor extends EIDescriptor{
     public var logoImage:ByteArray;
     public var children:ArrayCollection;
     public var customFolders:ArrayCollection;
+    public var tags:ArrayCollection;
+    public var rowCount:int;
 
     public function DataSourceDescriptor() {
         super();

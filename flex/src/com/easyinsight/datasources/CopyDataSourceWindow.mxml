@@ -2,24 +2,42 @@
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()" backgroundColor="#FFFFFF">
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
+        import com.easyinsight.listing.Tag;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         [Bindable]
         private var dataSources:ArrayCollection;
 
+        private var selectedSources:ArrayCollection;
+
         private function next():void {
-            var dsToUse:DataSourceDescriptor = null;
+            var selected:ArrayCollection = new ArrayCollection();
+
             for each (var ds:DataSourceDescriptor in dataSources) {
                 if (ds.selected) {
-                    dsToUse = ds;
+                    selected.addItem(ds);
+
                 }
             }
+            if (selected.length == 0) {
+                Alert.show("You must select at least one data source.");
+            } else {
+                selectedSources = selected;
+                ProgressAlert.alert(this, "Determing data sources...", null, uploadService.scopeCopy);
+                uploadService.scopeCopy.send(selected);
+            }
+            /*ProgressAlert.alert(this, "Copying...", null, uploadService.copyDataSource);
+            uploadService.copyDataSource.send(dsToUse.id, "Copy Name", false, true);*/
+        }
+
+        private function save():void {
             ProgressAlert.alert(this, "Copying...", null, uploadService.copyDataSource);
-            uploadService.copyDataSource.send(dsToUse.id, "Copy Name", false, true);
+            uploadService.copyDataSource.send(selectedSources, updateTagCheckbox.selected ? replaceInput.text : null, false);
         }
 
         private function copied():void {
@@ -28,27 +46,102 @@
         }
 
         private function onCreation():void {
+            var tags:ArrayCollection = new ArrayCollection(availableTags.toArray());
+            tags.addItemAt({name:"[ Select a Tag to Filter ]"}, 0);
+            this.tags = tags;
             feedService.searchForSubscribedFeeds.send();
+        }
+
+        private function filterOnTag(obj:Object):Boolean {
+            if (selectedTag != null) {
+                var dsd:DataSourceDescriptor = obj as DataSourceDescriptor;
+                if (dsd.tags != null) {
+                    for each (var tag:Tag in dsd.tags) {
+                        if (selectedTag.id == tag.id) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            } else {
+                return true;
+            }
         }
 
         private function gotDataSources():void {
             dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+            dataSources.filterFunction = filterOnTag;
         }
+
+        [Bindable]
+        private var selectedDataSources:ArrayCollection;
+
+        public var availableTags:ArrayCollection;
+
+        [Bindable]
+        private var tags:ArrayCollection;
+
+        private function scoped():void {
+            selectedDataSources = uploadService.scopeCopy.lastResult as ArrayCollection;
+            index++;
+        }
+
+
+        private var selectedTag:Tag = null;
+
+        private function updateFilter():void {
+            selectedTag = tagBox.selectedItem as Tag;
+            dataSources.refresh();
+        }
+
+        [Bindable]
+        private var index:int = 0;
         ]]></mx:Script>
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="uploadService" destination="userUpload">
         <mx:method name="copyDataSource" result="copied()"/>
+        <mx:method name="scopeCopy" result="scoped()"/>
     </mx:RemoteObject>
-    <mx:DataGrid id="sourceGrid" dataProvider="{dataSources}" rowHeight="28" height="400">
-        <mx:columns>
-            <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="50"/>
-            <mx:DataGridColumn dataField="name" width="400"/>
-        </mx:columns>
-    </mx:DataGrid>
-    <mx:HBox width="100%" horizontalAlign="center">
-        <util:SaveButton label="Next" click="next()"/>
-        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
-    </mx:HBox>
+    <mx:ViewStack selectedIndex="{index}" resizeToContent="true">
+        <mx:VBox>
+            <mx:HBox>
+                <mx:Label text="Tag:"/>
+                <mx:ComboBox id="tagBox" dataProvider="{tags}" labelField="name" change="updateFilter()"/>
+            </mx:HBox>
+            <mx:DataGrid id="sourceGrid" dataProvider="{dataSources}" rowHeight="28" height="400">
+                <mx:columns>
+                    <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="50"/>
+                    <mx:DataGridColumn dataField="name" width="400"/>
+                </mx:columns>
+            </mx:DataGrid>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <util:SaveButton label="Next" click="next()"/>
+                <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            </mx:HBox>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Form>
+                <mx:FormItem label="Do you want to copy reports and dashboards associated with the selected data sources?">
+                    <mx:CheckBox id="copyReportsCheckbox"/>
+                </mx:FormItem>
+                <mx:FormItem label="Do you want to update the selected tag to a new value for the selected data sources?">
+                    <mx:CheckBox id="updateTagCheckbox"/>
+                </mx:FormItem>
+                <mx:FormItem label="What's the new tag to use?">
+                    <mx:TextInput id="replaceInput" width="300" enabled="{updateTagCheckbox.selected}"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:DataGrid id="blahGrid" dataProvider="{selectedDataSources}" width="400" rowHeight="28">
+                <mx:columns>
+                    <mx:DataGridColumn dataField="name" width="400"/>
+                </mx:columns>
+            </mx:DataGrid>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <util:SaveButton label="Copy" click="save()"/>
+                <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            </mx:HBox>
+        </mx:VBox>
+    </mx:ViewStack>
 </util:EITitleWindow>

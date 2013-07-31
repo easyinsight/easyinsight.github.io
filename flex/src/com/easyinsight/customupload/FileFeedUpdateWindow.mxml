@@ -32,10 +32,16 @@
 				var uploadIDString:String = xml.uploadID.toString();
 				var uploadID:Number = parseInt(uploadIDString);
                 this.rawUploadID = uploadID;*/
-                successMessage.visible = true;
-                //formatBox.enabled = true;
-                replaceButton.enabled = true;
-                appendButton.enabled = true;   
+                if (loadingByHack) {
+                    ProgressAlert.alert(this, "Analyzing...", null, uploadService.hackyUpload);
+                    uploadService.hackyUpload(uploadKey, file.data);
+                    loadingByHack = false;
+                } else {
+                    successMessage.visible = true;
+                    //formatBox.enabled = true;
+                    replaceButton.enabled = true;
+                    appendButton.enabled = true;
+                }
             }
 
             // Called when the window has completed startup
@@ -68,17 +74,34 @@
                 file.upload( request );
             }
 
+        private var loadingByHack:Boolean = false;
+
+        private function validatedUpload():void {
+            var validUpload:Boolean = uploadService.validateUpload.lastResult as Boolean;
+            if (!validUpload) {
+                loadingByHack = true;
+                file.load();
+            } else {
+                ProgressAlert.alert(this, "Analyzing...", null, uploadService.analyzeUpdate);
+                uploadService.analyzeUpdate.send(_feedID, uploadKey);
+            }
+        }
+
+        private function hackyUploaded():void {
+            ProgressAlert.alert(this, "Analyzing...", null, uploadService.analyzeUpdate);
+            uploadService.analyzeUpdate.send(_feedID, uploadKey);
+        }
 			
 			private function replace():void {
                 op = 2;
-                ProgressAlert.alert(this, "Analyzing...", null, uploadService.analyzeUpdate);
-                uploadService.analyzeUpdate.send(_feedID, uploadKey);
+                ProgressAlert.alert(this, "Analyzing...", null, uploadService.validateUpload);
+                uploadService.validateUpload.send(uploadKey);
 			}
 			
 			private function append():void {
                 op = 1;
-                ProgressAlert.alert(this, "Analyzing...", null, uploadService.analyzeUpdate);
-                uploadService.analyzeUpdate.send(_feedID, uploadKey);
+                ProgressAlert.alert(this, "Analyzing...", null, uploadService.validateUpload);
+                uploadService.validateUpload.send(uploadKey);
 			}
 			
 			private function cancel():void {
@@ -129,6 +152,8 @@
 	</mx:Script>
 	<mx:RemoteObject id="uploadService" destination="userUpload">
 		<mx:method name="updateData" result="updatedData()"/>
+		<mx:method name="validateUpload" result="validatedUpload()"/>
+		<mx:method name="hackyUpload" result="hackyUploaded()"/>
 		<mx:method name="analyzeUpdate" result="analyzedUpdate()"/>
         <mx:method name="startUpload" result="gotUploadKey()"/>
 	</mx:RemoteObject>

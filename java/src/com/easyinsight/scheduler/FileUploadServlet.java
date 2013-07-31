@@ -12,10 +12,6 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.jets3t.service.impl.rest.httpclient.RestS3Service;
-import org.jets3t.service.model.S3Bucket;
-import org.jets3t.service.model.S3Object;
-import org.jets3t.service.security.AWSCredentials;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,14 +36,15 @@ public class FileUploadServlet extends HttpServlet {
         try {
             FileItemFactory factory = new DiskFileItemFactory();
             ServletFileUpload upload = new ServletFileUpload(factory);
+            upload.setHeaderEncoding("UTF-8");
             List items = upload.parseRequest(req);
             String uploadKey = req.getParameter("uploadKey");
             byte[] bytes = null;
             for (Object obj : items) {
                 FileItem fileItem = (FileItem) obj;
-
+                System.out.println("File item " + fileItem.getFieldName() + " - " + fileItem.getName() + " - " + fileItem.getContentType() + " - " + fileItem.getSize());
                 if (fileItem.isFormField()) {
-                } else {
+                } else if (fileItem.getSize() > 0) {
                     bytes = fileItem.get();
                     System.out.println("got " + bytes.length + " bytes");
                 }
@@ -76,14 +73,10 @@ public class FileUploadServlet extends HttpServlet {
                     objectMetadata.setContentLength(bytes.length);
                     s3.putObject(new PutObjectRequest("archival1", uploadKey + ".zip", stream, objectMetadata));
 
-                    /*long userID = rs.getLong(2);
-                    ps.close();
-                    PreparedStatement updateStmt = conn.prepareStatement("UPDATE UPLOAD_BYTES SET BYTES = ? WHERE UPLOAD_BYTES_ID = ?");
-                    ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
-                    updateStmt.setBinaryStream(1, stream, bytes.length);
+                    PreparedStatement updateStmt = conn.prepareStatement("UPDATE UPLOAD_BYTES SET UPLOAD_SUCCESSFUL = ? WHERE UPLOAD_BYTES_ID = ?");
+                    updateStmt.setBoolean(1, true);
                     updateStmt.setLong(2, id);
-                    updateStmt.execute();
-                    updateStmt.close();*/
+                    updateStmt.executeUpdate();
                 } else {
                     throw new RuntimeException("No upload key found matching the specified parameter.");
                 }
@@ -93,11 +86,5 @@ public class FileUploadServlet extends HttpServlet {
         } catch (Exception e) {
             LogClass.error(e);
         }
-    }
-
-    private void processFormField(FileItem item) {
-        String name = item.getFieldName();
-        String value = item.getString();
-        System.out.println("Item name: Ó + name + " + " value: " + value);
     }
 }

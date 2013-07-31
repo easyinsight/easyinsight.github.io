@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" backgroundColor="#FFFFFF"
+        paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:Script><![CDATA[
+        import com.easyinsight.customupload.UploadConfigEvent;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var dataSources:ArrayCollection;
+
+        private function apply():void {
+            ProgressAlert.alert(this, "Deleting...", null, uploadService.deleteUserUploads);
+            uploadService.deleteUserUploads.send(dataSources);
+        }
+
+        private function deleted():void {
+            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="uploadService" destination="userUpload">
+        <mx:method name="deleteUserUploads" result="deleted()"/>
+    </mx:RemoteObject>
+    <mx:Text text="Are you want to delete the following data sources? This action will delete the data sources and all reports and dashboards built on these data sources."
+            width="300"/>
+    <mx:List dataProvider="{dataSources}" labelField="name" width="300"/>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Delete Selected" click="apply()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EITitleWindow>

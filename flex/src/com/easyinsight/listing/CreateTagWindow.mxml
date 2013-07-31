@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private function create():void {
+            var tag:Tag = new Tag();
+            tag.name = textInput.text;
+            dispatchEvent(new TagMetadataEvent(TagMetadataEvent.TAG_CREATE, tag, null));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <mx:Label text="Tag Name:"/>
+        <mx:TextInput id="textInput" width="200"/>
+    </mx:HBox>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Create" click="create()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>
