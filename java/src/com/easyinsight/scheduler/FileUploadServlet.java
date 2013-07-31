@@ -36,7 +36,7 @@ public class FileUploadServlet extends HttpServlet {
         try {
             FileItemFactory factory = new DiskFileItemFactory();
             ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setHeaderEncoding("UTF-8");
+            //upload.setHeaderEncoding("UTF-8");
             List items = upload.parseRequest(req);
             String uploadKey = req.getParameter("uploadKey");
             byte[] bytes = null;
