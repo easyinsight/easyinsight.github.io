@@ -21,6 +21,11 @@ Application {
     font-family: "Helvetica Neue", "Helvetica";
 }
 
+.fallThroughFontsButton {
+    font-family: "Helvetica Neue", "Helvetica";
+    font-size: 11px;
+}
+
 /*@font-face {
     src: url("/com/easyinsight/skin/osx/opensans.swf");
     fontFamily: "Open Sans";
@@ -680,4 +685,9 @@ TransformContainer {
     font-sharpness: -221;
     font-thickness: 4;
     fontWeight: bold;
+}
+
+.toggledLinkButton {
+    fontWeight: bold;
+    font-family: 'Open Sans Bold';
 }
