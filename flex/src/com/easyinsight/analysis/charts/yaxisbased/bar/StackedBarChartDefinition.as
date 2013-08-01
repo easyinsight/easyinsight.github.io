@@ -104,6 +104,11 @@ public class StackedBarChartDefinition extends YAxisDefinition{
             newObject[dimensionValue] = object[measures.getItemAt(0).qualifiedName()];
             newObject[stackItem.qualifiedName() + "_ORIGINAL"] = stackVal;
             newObject[yaxis.qualifiedName() + "_ORIGINAL"] = xValVal;
+            if (xValVal.sortValue != null) {
+                newObject[yaxis.qualifiedName() + "_SORT"] = xValVal.sortValue.getValue();
+            } else {
+                newObject[yaxis.qualifiedName() + "_SORT"] = xVal;
+            }
             if (!uniques.contains(dimensionValue)) {
                 uniques.addItem(dimensionValue);
             }
@@ -120,7 +125,7 @@ public class StackedBarChartDefinition extends YAxisDefinition{
 
     private function sortByYAxis(results:ArrayCollection, uniques:ArrayCollection):void {
         var sort:Sort = new Sort();
-        sort.fields = [ new SortField(yaxis.qualifiedName(), true, columnSort == ChartDefinition.SORT_Y_ASCENDING)];
+        sort.fields = [ new SortField(yaxis.qualifiedName() + "_SORT", true, columnSort != ChartDefinition.SORT_X_ASCENDING)];
         results.sort = sort;
         results.refresh();
     }
