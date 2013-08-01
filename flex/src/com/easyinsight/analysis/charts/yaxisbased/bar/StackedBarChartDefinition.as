@@ -125,7 +125,7 @@ public class StackedBarChartDefinition extends YAxisDefinition{
 
     private function sortByYAxis(results:ArrayCollection, uniques:ArrayCollection):void {
         var sort:Sort = new Sort();
-        sort.fields = [ new SortField(yaxis.qualifiedName() + "_SORT", true, columnSort != ChartDefinition.SORT_X_ASCENDING)];
+        sort.fields = [ new SortField(yaxis.qualifiedName() + "_SORT", true, columnSort == ChartDefinition.SORT_Y_ASCENDING)];
         results.sort = sort;
         results.refresh();
     }
