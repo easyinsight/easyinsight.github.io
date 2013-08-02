@@ -111,6 +111,11 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
             newObject[stackItem.qualifiedName()] = dimensionValue;
             newObject[stackItem.qualifiedName() + "_ORIGINAL"] = stackVal;
             newObject[xaxis.qualifiedName() + "_ORIGINAL"] = xValVal;
+            if (xValVal.sortValue != null) {
+                newObject[xaxis.qualifiedName() + "_SORT"] = xValVal.sortValue.getValue();
+            } else {
+                newObject[xaxis.qualifiedName() + "_SORT"] = xVal;
+            }
 
             newObject[dimensionValue] = measureValue;
             if (!uniques.contains(dimensionValue)) {
@@ -132,7 +137,7 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
 
     private function sortByXAxis(results:ArrayCollection, uniques:ArrayCollection):void {
         var sort:Sort = new Sort();
-        sort.fields = [ new SortField(xaxis.qualifiedName(), true, columnSort != ChartDefinition.SORT_X_ASCENDING)];
+        sort.fields = [ new SortField(xaxis.qualifiedName() + "_SORT", true, columnSort != ChartDefinition.SORT_X_ASCENDING)];
         results.sort = sort;
         results.refresh();
     }

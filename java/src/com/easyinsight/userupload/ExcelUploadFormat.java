@@ -49,7 +49,9 @@ public class ExcelUploadFormat extends UploadFormat {
             GridData gridData = new GridData();
 
             ByteArrayInputStream bais = new ByteArrayInputStream(data);
+
             HSSFWorkbook wb = new HSSFWorkbook(bais);
+
             HSSFSheet sheet = wb.getSheetAt(0);
 
             String[] headerColumns = getHeaderColumns(sheet);

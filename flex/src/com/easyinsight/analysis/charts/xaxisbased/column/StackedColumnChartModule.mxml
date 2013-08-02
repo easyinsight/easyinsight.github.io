@@ -97,7 +97,7 @@
         private var dataCanvas:CartesianDataCanvas;
 
         private function drawGoalLine(data:ArrayCollection, additionalProps:Object):void {
-            if (xAxisItem.reportFieldExtension != null && xAxisItem.reportFieldExtension is ChartReportFieldExtension) {
+            if (data.length > 0 && xAxisItem.reportFieldExtension != null && xAxisItem.reportFieldExtension is ChartReportFieldExtension) {
                 var cfre:ChartReportFieldExtension = xAxisItem.reportFieldExtension as ChartReportFieldExtension;
                 if (cfre.goal != null) {
 
@@ -229,6 +229,7 @@
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             columnChartDef = analysisDefinition as StackedColumnChartDefinition;
+
 
             if (dataSet.length > 0) {
 

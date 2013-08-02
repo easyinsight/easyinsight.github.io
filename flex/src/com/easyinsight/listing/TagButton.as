@@ -22,9 +22,11 @@ public class TagButton extends LinkButton {
     private function onClick(event:MouseEvent):void {
         if (tagSelected) {
             tagSelected = false;
+            styleName = null;
             dispatchEvent(new TagEvent(TagEvent.TAG_UNSELECTED, tag));
         } else {
             tagSelected = true;
+            styleName = "toggledLinkButton";
             dispatchEvent(new TagEvent(TagEvent.TAG_SELECTED, tag));
         }
     }

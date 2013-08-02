@@ -46,6 +46,7 @@
         }
 
         private function saved():void {
+            var tags:ArrayCollection = uploadService.saveTags.lastResult as ArrayCollection;
             dispatchEvent(new TagMetadataEvent(TagMetadataEvent.REFRESH_TAGS, null, tags));
             PopUpManager.removePopUp(this);
         }
