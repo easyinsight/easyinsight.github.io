@@ -30,11 +30,8 @@
 
             nextButton.enabled = false;
             finishingSection.visible = true;
-            var context:FlatFileUploadContext = new FlatFileUploadContext();
-            context.uploadKey = uploadKey;
-            context.type = type;
-            uploadService.analyzeUpload.send(context);
-            
+            ProgressAlert.alert(this, "Validating...", null, uploadService.validateUpload);
+            uploadService.validateUpload.send(uploadKey);
         }
 
         private function created():void {
@@ -62,14 +59,15 @@
         // Specifically manages response data
         public function doComplete( event:Event ):void
         {
-            fileData = file.data;
-            
-            /*var xml:XML = new XML(event.data);
-            var uploadIDString:String = xml.uploadID.toString();
-            this.uploadID = parseInt(uploadIDString);*/
-            successMessage.visible = true;
-            //formatBox.enabled = true;
-            nextButton.enabled = true;
+            if (loadingByHack) {
+                ProgressAlert.alert(this, "Analyzing...", null, uploadService.hackyUpload);
+                uploadService.hackyUpload.send(uploadKey, file.data);
+                loadingByHack = false;
+            } else {
+                successMessage.visible = true;
+                //formatBox.enabled = true;
+                nextButton.enabled = true;
+            }
         }
 
         // Called when the application has completed startup
@@ -108,23 +106,30 @@
             progressBar.visible = true;
             uploadButton.enabled = false;
             file.upload( request );
+        }
 
-            /*var request:URLRequest = new URLRequest( "/app/UploadExample" );
-            var vars:URLVariables = new URLVariables();
+        private var loadingByHack:Boolean = false;
 
-            // Set the data fields as appropriate
-            vars.userName = new String(User.getInstance().userName);
-            vars.password = new String(User.getInstance().password);
+        private function validatedUpload():void {
+            var validUpload:Boolean = uploadService.validateUpload.lastResult as Boolean;
+            if (!validUpload) {
+                loadingByHack = true;
+                file.load();
+            } else {
+                ProgressAlert.alert(this, "Analyzing...", null, uploadService.analyzeUpload);
+                var context:FlatFileUploadContext = new FlatFileUploadContext();
+                context.uploadKey = uploadKey;
+                context.type = type;
+                uploadService.analyzeUpload.send(context);
+            }
+        }
 
-            // Assign the data fields to the request
-            request.data = vars;
-
-            progressBar.visible = true;
-
-            // Start the file upload process
-            file.upload( request );*/
-            /*progressBar.visible = true;
-            file.load();*/
+        private function hackyUploaded():void {
+            ProgressAlert.alert(this, "Analyzing...", null, uploadService.analyzeUpload);
+            var context:FlatFileUploadContext = new FlatFileUploadContext();
+            context.uploadKey = uploadKey;
+            context.type = type;
+            uploadService.analyzeUpload.send(context);
         }
 
         private var uploadKey:String;
@@ -140,6 +145,8 @@
 	</mx:Script>
 	<mx:RemoteObject id="uploadService" destination="userUpload">
 		<mx:method name="analyzeUpload" result="created()"/>
+        <mx:method name="validateUpload" result="validatedUpload()"/>
+        <mx:method name="hackyUpload" result="hackyUploaded()"/>
 		<mx:method name="startUpload" result="gotUploadKey()"/>
 	</mx:RemoteObject>
 	<mx:HBox id="coreVBox" backgroundColor="#FFFFFF" paddingRight="10" paddingBottom="10" paddingLeft="10" paddingTop="10">

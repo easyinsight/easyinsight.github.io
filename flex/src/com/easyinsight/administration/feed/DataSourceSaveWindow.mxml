@@ -74,7 +74,7 @@
     <mx:RemoteObject id="feedService" destination="feeds">
 		<mx:method name="updateFeedDefinition" result="saved()" fault="onFault(event)"/>
 	</mx:RemoteObject>
-    <mx:ViewStack selectedIndex="{stackIndex}" width="530" height="400" backgroundColor="#FFFFFF">
+    <mx:ViewStack selectedIndex="{stackIndex}" width="550" height="400" backgroundColor="#FFFFFF">
         <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" styleName="fallThroughFonts">
             <!-- what do you want to call this report? -->
             <mx:Label text="What do you want to name this data source?" fontSize="14" fontWeight="bold"/>
