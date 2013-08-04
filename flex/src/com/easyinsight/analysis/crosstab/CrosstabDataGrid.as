@@ -12,6 +12,7 @@ import flash.display.Graphics;
 import flash.display.Shape;
 import flash.display.Sprite;
 import flash.geom.Matrix;
+import flash.utils.Dictionary;
 
 import mx.controls.AdvancedDataGrid;
 import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
@@ -32,6 +33,11 @@ public class CrosstabDataGrid extends AdvancedDataGrid {
     public function CrosstabDataGrid() {
     }
 
+    public function clearRenderers():void {
+        this.itemRendererToFactoryMap = new Dictionary(false);
+        this.visibleData = new Object();
+        this.listData = null;
+    }
 
     public function set headerBackgroundColor(value:uint):void {
         _headerBackgroundColor = value;
