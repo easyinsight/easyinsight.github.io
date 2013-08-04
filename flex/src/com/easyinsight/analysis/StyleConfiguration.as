@@ -175,6 +175,7 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", CrosstabDefinition(report).summaryBackgroundColor, report));
             items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", CrosstabDefinition(report).summaryTextColor, report));
             items.addItem(new ComboBoxReportFormItem("Align", "align", CrosstabDefinition(report).align, report, ["left", "center", "right"]));
+            items.addItem(new CheckBoxReportFormItem("Exclude Zero Rows", "excludeZero", CrosstabDefinition(report).excludeZero, report));
         }
         if (report is GaugeDefinition) {
             items.addItem(new NumericReportFormItem("Alert Point 1", "alertPoint1", GaugeDefinition(report).alertPoint1, report, 0, 1000000000));

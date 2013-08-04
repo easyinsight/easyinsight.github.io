@@ -24,6 +24,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     private int labelFontSize;
     private String labelFontWeight;
     private int labelInsideFontColor;
+    private int legendMaxWidth;
     private boolean useInsideLabelFontColor;
     private List<MultiColor> multiColors = new ArrayList<MultiColor>();
     private String stackSort;
@@ -38,6 +39,14 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
             }
         }
         return components;
+    }
+
+    public int getLegendMaxWidth() {
+        return legendMaxWidth;
+    }
+
+    public void setLegendMaxWidth(int legendMaxWidth) {
+        this.legendMaxWidth = legendMaxWidth;
     }
 
     public String getStackSort() {
@@ -143,6 +152,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         useChartColor = findBooleanProperty(properties, "useChartColor", false);
         columnSort = findStringProperty(properties, "columnSort", "Unsorted");
         labelFontWeight = findStringProperty(properties, "labelFontWeight", "none");
+        legendMaxWidth = (int) findNumberProperty(properties, "legendMaxWidth", 200);
         labelFontSize = (int) findNumberProperty(properties, "labelFontSize", 12);
         labelPosition = findStringProperty(properties, "labelPosition", "none");
         labelInsideFontColor = (int) findNumberProperty(properties, "labelInsideFontColor", 0);
@@ -155,6 +165,7 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportNumericProperty("chartColor", chartColor));
+        properties.add(new ReportNumericProperty("legendMaxWidth", legendMaxWidth));
         properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
         properties.add(new ReportStringProperty("columnSort", columnSort));
         properties.add(new ReportStringProperty("stackSort", stackSort));
