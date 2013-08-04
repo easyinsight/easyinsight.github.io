@@ -59,6 +59,11 @@ public class DataService {
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
                                                               @Nullable WSAnalysisDefinition report, List<FilterDefinition> additionalFilters, FilterDefinition requester,
                                                               @Nullable Dashboard dashboard) {
+        try {
+            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (InterruptedException e) {
+            return null;
+        }
         EIConnection conn = Database.instance().getConnection();
         try {
             if (reportID > 0) {
@@ -111,6 +116,7 @@ public class DataService {
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
+            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
@@ -460,6 +466,12 @@ public class DataService {
             int rowOffset = crosstabReport.getMeasures().size() > 1 ? 3 : 2;
             for (int j = 0; j < (crosstab.getRowSections().size() + crosstabReport.getColumns().size()) + rowOffset; j++) {
                 Map<String, CrosstabValue> resultMap = new HashMap<String, CrosstabValue>();
+                if (crosstabReport.isExcludeZero()) {
+                    CrosstabValue summaryValue = values[j][((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size())];
+                    if (summaryValue.getValue().toDouble() == 0) {
+                        continue;
+                    }
+                }
                 for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size() + 1); i++) {
                     CrosstabValue crosstabValue = values[j][i];
                     if (crosstabValue == null) {
@@ -1351,6 +1363,12 @@ public class DataService {
             List<CrosstabMapWrapper> resultData = new ArrayList<CrosstabMapWrapper>();
             int rowOffset = analysisDefinition.getMeasures().size() > 1 ? 3 : 2;
             for (int j = 0; j < (crosstab.getRowSections().size() + analysisDefinition.getColumns().size()) + rowOffset; j++) {
+                if (analysisDefinition.isExcludeZero()) {
+                    CrosstabValue summaryValue = values[j][((crosstab.getColumnSections().size() * analysisDefinition.getMeasures().size()) + analysisDefinition.getRows().size())];
+                    if (summaryValue != null && summaryValue.getValue() != null && summaryValue.getValue().toDouble() != null && summaryValue.getValue().toDouble() == 0) {
+                        continue;
+                    }
+                }
                 Map<String, CrosstabValue> resultMap = new HashMap<String, CrosstabValue>();
                 for (int i = 0; i < ((crosstab.getColumnSections().size() * analysisDefinition.getMeasures().size()) + analysisDefinition.getRows().size() + 1); i++) {
                     CrosstabValue crosstabValue = values[j][i];
