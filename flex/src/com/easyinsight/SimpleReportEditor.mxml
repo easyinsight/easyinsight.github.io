@@ -242,7 +242,7 @@
                     majorProblemBar = new MajorProblemBar();
                     majorProblemBar.simpleReportEditor = this;
                     majorProblemBar.intentionSuggestion = suggestions.getItemAt(0) as IntentionSuggestion;
-                    majorProblemBar.fields = wrappers;
+                    majorProblemBar.fields = getWrappers();
                     majorProblemBar.dataSourceID = dataService.dataFeedID;
                     rightBox.addChildAt(majorProblemBar, 0);
                 }
@@ -379,7 +379,7 @@
             var joinWindow:ReportJoinWindow = new ReportJoinWindow();
             joinWindow.addonReports = _analysisDefinition.addonReports;
             var items:ArrayCollection = new ArrayCollection();
-            for each (var wrapper:AnalysisItemWrapper in wrappers) {
+            for each (var wrapper:AnalysisItemWrapper in getWrappers()) {
                 items.addItem(wrapper.analysisItem);
             }
             joinWindow.fields = items;
@@ -919,9 +919,13 @@
         }
 
         private function onFieldUpdate(event:AddedItemUpdateEvent):void {
-            availableFields.removeItemAt(availableFields.getItemIndex(event.wrapper));
+            if (availableFields.getItemIndex(event.wrapper) != -1) {
+                availableFields.removeItemAt(availableFields.getItemIndex(event.wrapper));
+            }
             availableFields.addItem(event.wrapper);
-            analysisDefinition.addedItems.removeItemAt(analysisDefinition.addedItems.getItemIndex(event.previousItem));
+            if (analysisDefinition.addedItems.getItemIndex(event.previousItem) != -1) {
+                analysisDefinition.addedItems.removeItemAt(analysisDefinition.addedItems.getItemIndex(event.previousItem));
+            }
             analysisDefinition.addedItems.addItem(event.newItem);
         }
 
@@ -1046,10 +1050,14 @@
             }
         }
 
+        private function getWrappers():ArrayCollection {
+            return new ArrayCollection(wrappers.toArray());
+        }
+
         private function editReportProperties(index:int = 0):void {
             var window:GenericDefinitionEditWindow = new GenericDefinitionEditWindow();
             window.definition = analysisDefinition;
-            window.allFields = wrappers;
+            window.allFields = getWrappers();
             window.startIndex = index;
             window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, function (event:ReportPreferencesEvent):void {
                 dispatchEvent(new AnalysisChangedEvent());
@@ -1145,7 +1153,7 @@
             window.dataSourceID = dataService.dataFeedID;
             window.analysisDefinition = analysisDefinition;
             window.dataView = dataView;
-            window.wrappers = wrappers;
+            window.wrappers = getWrappers();
             window.joinsCustomizable = joinsCustomizable;
             window.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged, false, 0, true);
             window.addEventListener(AnalyzeEvent.ANALYZE, onRevision, false, 0, true);
@@ -1162,15 +1170,28 @@
             var window:CustomFieldWindow = new CustomFieldWindow();
             window.dataSourceID = dataService.dataFeedID;
             window.analysisDefinition = analysisDefinition;
-            window.wrappers = wrappers;
+            window.wrappers = getWrappers();
             window.availableFields = availableFields;
             window.addEventListener(FieldEditorEvent.FIELD_EDITOR_OPENED, onFieldEditorOpen, false, 0, true);
             window.addEventListener(FieldEditorEvent.FIELD_EDITOR_CLOSED, onFieldEditorClose, false, 0, true);
             window.addEventListener(ReportEditorFieldEvent.ITEM_COPY, fieldEventHandler.copyField, false, 0, true);
             window.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged, false, 0, true);
+            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onAnalysisItemEdit, false, 0, true);
             PopUpManager.addPopUp(window, this);
             window.x = customFieldButton.x - 20;
             window.y = customFieldButton.y + customFieldButton.height + 10;
+        }
+
+        private function onAnalysisItemEdit(event:AnalysisItemEditEvent):void {
+            var node:AnalysisItemNode = new AnalysisItemNode();
+            node.analysisItem = event.analysisItem;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
+            availableFields.addItem(wrapper);
+            wrappers.addItem(wrapper);
+            if (_analysisDefinition.addedItems == null) {
+                _analysisDefinition.addedItems = new ArrayCollection();
+            }
+            _analysisDefinition.addedItems.addItem(event.analysisItem);
         }
 
         private function onViewInHTML():void {
@@ -1246,7 +1267,7 @@
 
         private function showQuickActions():void {
             var items:ArrayCollection = new ArrayCollection();
-            for each (var wrapper:AnalysisItemWrapper in wrappers) {
+            for each (var wrapper:AnalysisItemWrapper in getWrappers()) {
                 items.addItem(wrapper.analysisItem);
             }
             var window:IntentionListWindow = new IntentionListWindow();
@@ -1256,7 +1277,7 @@
             window.fields = items;
             window.allFields = availableFields;
             window.dataSourceDisplay = dataSourceInfo;
-            window.wrappers = wrappers;
+            window.wrappers = getWrappers();
             window.transformContainer = transformContainer;
             window.dataView = dataView;
             window.suggestions = quickActions;

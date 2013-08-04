@@ -338,7 +338,7 @@ public class TransformContainer extends HBox
     public function addNewFilter(advancedAvailable:Boolean = true):void {
         var window:NewFilterWindow = new NewFilterWindow();
         window.filterSource = _filterSource;
-        window.availableFields = this._analysisItems;
+        window.availableFields = new ArrayCollection(this._analysisItems.toArray());
         window.advancedAvailable = advancedAvailable;
         window.addEventListener(NewFilterEvent.NEW_FILTER, onFilterCreation, false, 0, true);
         PopUpManager.addPopUp(window, this, true);
