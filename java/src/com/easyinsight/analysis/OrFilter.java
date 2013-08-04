@@ -98,6 +98,7 @@ public class OrFilter extends FilterDefinition {
             }
         }
         materializedOrFilter.setFilters(materializedFilters);
+        materializedOrFilter.setOriginalFilters(filters);
         return materializedOrFilter;
     }
 

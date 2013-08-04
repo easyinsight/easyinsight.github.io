@@ -103,15 +103,6 @@
         private function onNewItem(event:AnalysisItemEditEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
             dispatchEvent(event);
-            var node:AnalysisItemNode = new AnalysisItemNode();
-            node.analysisItem = event.analysisItem;
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
-            _availableFields.addItem(wrapper);
-            _wrappers.addItem(wrapper);
-            if (_analysisDefinition.addedItems == null) {
-                _analysisDefinition.addedItems = new ArrayCollection();
-            }
-            _analysisDefinition.addedItems.addItem(event.analysisItem);
         }
 
         public function createHierarchy():void {

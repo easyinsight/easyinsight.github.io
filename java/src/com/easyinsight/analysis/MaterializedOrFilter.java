@@ -13,6 +13,7 @@ import java.util.List;
 public class MaterializedOrFilter extends MaterializedFilterDefinition {
 
     private List<MaterializedFilterDefinition> filters;
+    private List<FilterDefinition> originalFilters;
 
     public MaterializedOrFilter(AnalysisItem key) {
         super(key);
@@ -22,13 +23,22 @@ public class MaterializedOrFilter extends MaterializedFilterDefinition {
         this.filters = filters;
     }
 
+    public void setOriginalFilters(List<FilterDefinition> originalFilters) {
+        this.originalFilters = originalFilters;
+    }
+
     public DataSet processDataSet(DataSet dataSet, IFilterProcessor filterProcessor, FilterDefinition filterDefinition) {
         DataSet resultDataSet = new DataSet();
         for (IRow row : dataSet.getRows()) {
             boolean rowValid = false;
-            for (MaterializedFilterDefinition filter : filters) {
+            for (int i = 0; i < filters.size(); i++) {
+                MaterializedFilterDefinition filter = filters.get(i);
+                FilterDefinition original = originalFilters.get(i);
                 Value value = row.getValue(filter.getKey());
-                if (filter.allows(value)) {
+                boolean allows = filter.allows(value);
+                if (!original.isNotCondition() && allows) {
+                    rowValid = true;
+                } else if (original.isNotCondition() && !allows) {
                     rowValid = true;
                 }
             }

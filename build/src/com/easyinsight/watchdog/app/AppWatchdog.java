@@ -4,9 +4,6 @@ import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
 import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
 
 import java.io.*;
 import java.util.zip.ZipInputStream;
@@ -83,22 +80,44 @@ public class AppWatchdog {
         }
     }
 
-    public void updateFromS3() {
+    public void download() {
         try {
+            File file = new File("/opt/tomcat/code.zip");
+            if (file.exists()) {
+                boolean success = file.delete();
+                if (!success) {
+                    throw new RuntimeException("Could not delete existing code.zip");
+                }
+            }
+            boolean success = file.createNewFile();
+            if (!success) {
+                throw new RuntimeException("Could not create new code.zip");
+            }
+            FileOutputStream fos = new FileOutputStream(file);
             AWSCredentials credentials = new AWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             RestS3Service s3Service = new RestS3Service(credentials);
             S3Bucket bucket = s3Service.getBucket("eiproduction");
             S3Object object = s3Service.getObject(bucket, "code.zip");
-            byte retrieveBuf[];
-            retrieveBuf = new byte[1];
+            byte[] buffer = new byte[8192];
+            BufferedOutputStream bufOS = new BufferedOutputStream(fos, 8192);
             InputStream bfis = object.getDataInputStream();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            while (bfis.read(retrieveBuf) != -1) {
-                baos.write(retrieveBuf);
+            int nBytes;
+            while ((nBytes = bfis.read(buffer)) != -1) {
+                bufOS.write(buffer, 0, nBytes);
             }
-            byte[] resultBytes = baos.toByteArray();
-            ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
-            ZipInputStream zin = new ZipInputStream(bais);
+            fos.flush();
+            fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void update() {
+        try {
+            File file = new File("/opt/tomcat/code.zip");
+            FileInputStream fis = new FileInputStream(file);
+            BufferedInputStream bis = new BufferedInputStream(fis, 8192);
+            ZipInputStream zin = new ZipInputStream(bis);
             ZipEntry ze;
             while ((ze = zin.getNextEntry()) != null) {
                 System.out.println("Unzipping " + ze.getName());
