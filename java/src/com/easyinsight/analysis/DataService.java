@@ -468,7 +468,7 @@ public class DataService {
                 Map<String, CrosstabValue> resultMap = new HashMap<String, CrosstabValue>();
                 if (crosstabReport.isExcludeZero()) {
                     CrosstabValue summaryValue = values[j][((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size())];
-                    if (summaryValue.getValue().toDouble() == 0) {
+                    if (summaryValue != null && summaryValue.getValue() != null && summaryValue.getValue().toDouble() != null && summaryValue.getValue().toDouble() == 0) {
                         continue;
                     }
                 }
