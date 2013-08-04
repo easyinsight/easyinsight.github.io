@@ -24,7 +24,9 @@ public class AppWatchdogServlet extends HttpServlet {
         } else if ("restart".equals(operation)) {
             new AppWatchdog().restart();
         } else if ("update".equals(operation)) {
-            new AppWatchdog().updateFromS3();
+            new AppWatchdog().update();
+        } else if ("download".equals(operation)) {
+            new AppWatchdog().download();
         }
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);

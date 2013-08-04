@@ -16,14 +16,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.Mac;
-import java.util.List;
-import java.util.Date;
-import java.util.ArrayList;
+import java.util.*;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.net.URLEncoder;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 import java.security.SignatureException;
 
@@ -34,19 +31,17 @@ import java.security.SignatureException;
  */
 public class AppInstanceTask extends Task {
 
-    protected static final String APP_AMI = "ami-3935db50";
+    protected static final String APP_AMIS = "ami-cb20a2a2";
     protected static final String STAGING_AMI = "ami-2ed93b47";
+    protected static final String LARGE_AMI = "ami-6bf83302";
 
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
-    private static String hmacString = "Action{0}AWSAccessKeyId{1}SignatureVersion1Timestamp{2}Version2006-10-01";
-    private static String queryString = "https://ec2.amazonaws.com?Action={0}&AWSAccessKeyId={1}&SignatureVersion=1&Timestamp={2}&" +
-            "Version=2006-10-01&Signature={3}";
 
     private String password;
     private String userName;
 
     protected String getAMI() {
-        return APP_AMI;
+        return APP_AMIS;
     }
 
     public String getUserName() {
@@ -67,15 +62,18 @@ public class AppInstanceTask extends Task {
 
     protected List<String> getInstances() throws ParserConfigurationException, SignatureException, IOException, SAXException {
         String action = "DescribeInstances";
-        System.out.println(getAMI());
+        System.out.println(Arrays.asList(getAMI()));
             Date date = new Date();
             String timestamp = getDateAsISO8601String(date);
             String accessKey = "0AWCBQ78TJR8QCY8ABG2";
-            String signature = MessageFormat.format(hmacString, action, accessKey, timestamp);
+        String hmacString = "Action{0}AWSAccessKeyId{1}SignatureVersion1Timestamp{2}Version2006-10-01";
+        String signature = MessageFormat.format(hmacString, action, accessKey, timestamp);
             System.out.println(signature);
-            String base64Sig = calculateRFC2104HMAC(signature, "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+                String base64Sig = calculateRFC2104HMAC(signature, "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             timestamp = URLEncoder.encode(getDateAsISO8601String(date), "UTF-8");
-            String urlString = MessageFormat.format(queryString, action, accessKey, timestamp, URLEncoder.encode(base64Sig, "UTF-8"));
+        String queryString = "https://ec2.amazonaws.com?Action={0}&AWSAccessKeyId={1}&SignatureVersion=1&Timestamp={2}&" +
+                "Version=2006-10-01&Signature={3}";
+        String urlString = MessageFormat.format(queryString, action, accessKey, timestamp, URLEncoder.encode(base64Sig, "UTF-8"));
             System.out.println(urlString);
             HttpClient httpClient = new HttpClient();
             HttpMethod method = new GetMethod(urlString);
