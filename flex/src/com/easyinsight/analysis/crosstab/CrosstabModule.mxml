@@ -97,6 +97,7 @@
                     dataGrid.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
                 }
                 dataGrid.height = (translated.length) * 22 + 4;
+                dataGrid.clearRenderers();
                 dataGrid.dataProvider = translated;
 
             }

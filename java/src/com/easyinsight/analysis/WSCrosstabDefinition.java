@@ -21,6 +21,15 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
     private int summaryBackgroundColor = 0x555555;
     private int summaryTextColor = 0xFFFFFF;
     private String align;
+    private boolean excludeZero;
+
+    public boolean isExcludeZero() {
+        return excludeZero;
+    }
+
+    public void setExcludeZero(boolean excludeZero) {
+        this.excludeZero = excludeZero;
+    }
 
     public String getAlign() {
         return align;
@@ -128,6 +137,7 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         headerTextColor = (int) findNumberProperty(properties, "headerTextColor", 0xFFFFFF);
+        excludeZero = findBooleanProperty(properties, "excludeZero", false);
         summaryTextColor = (int) findNumberProperty(properties, "summaryTextColor", 0xFFFFFF);
         headerBackgroundColor = (int) findNumberProperty(properties, "headerBackgroundColor", 0x333333);
         summaryBackgroundColor = (int) findNumberProperty(properties, "summaryBackgroundColor", 0x555555);
@@ -137,6 +147,7 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportNumericProperty("headerTextColor", headerTextColor));
+        properties.add(new ReportBooleanProperty("excludeZero", excludeZero));
         properties.add(new ReportNumericProperty("headerBackgroundColor", headerBackgroundColor));
         properties.add(new ReportNumericProperty("summaryTextColor", summaryTextColor));
         properties.add(new ReportNumericProperty("summaryBackgroundColor", summaryBackgroundColor));
