@@ -1,25 +1,23 @@
 <?xml version="1.0"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*" xmlns:containers="flexlib.containers.*"
-         width="100%"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%"
          height="100%" horizontalAlign="center" initialize="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
+        import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.datasources.CopyDataSourceWindow;
         import com.easyinsight.datasources.DataSourceType;
-        import com.easyinsight.util.ProgressAlert;
 
-        import mx.controls.Alert;
-        import mx.core.UIComponent;
-        import mx.events.FlexEvent;
-
-        import mx.events.MenuEvent;
-
-
+        /*import com.easyinsight.datasources.NewReportDataSourceWindow;*/
         import com.easyinsight.feedassembly.CompositeCreator;
+        import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.RolloverLabelEvent;
+
         import mx.collections.ArrayCollection;
         import mx.formatters.DateFormatter;
         import mx.managers.PopUpManager;
@@ -36,152 +34,15 @@
         public function set dataProvider(value:ArrayCollection):void {
             if (_dataProvider == value) return;
             _dataProvider = value;
-            _dataProvider.filterFunction = filterOnTag;
-            _dataProvider.refresh();
             dispatchEvent(new Event("dataProviderChanged"));
             if (dataSourceGrid != null) {
                 dataSourceGrid.invalidateSize();
             }
         }
 
-        private var selectedTags:ArrayCollection = new ArrayCollection();
 
-        private function onTag(event:TagEvent):void {
-            selectedTags.addItem(event.tag);
-            dataProvider.refresh();
-        }
-
-        private function onUnTag(event:TagEvent):void {
-            var index:int = 0;
-            var i:int = 0;
-            for each (var tag:Tag in selectedTags) {
-                if (tag.id == event.tag.id) {
-                    index = i;
-                    break;
-                }
-                i++;
-            }
-            selectedTags.removeItemAt(index);
-            dataProvider.refresh();
-        }
-
-        private var _tags:ArrayCollection;
-
-        [Bindable(event="tagsChanged")]
-        public function get tags():ArrayCollection {
-            return _tags;
-        }
-
-        public function set tags(value:ArrayCollection):void {
-            if (_tags == value) return;
-            _tags = value;
-            populateTags(value);
-            dispatchEvent(new Event("tagsChanged"));
-        }
-
-        private function onItemClick(event:MenuEvent):void {
-            var op:String = event.item.op;
-            if (op == "manageTags") {
-                var window:ManageTagWindow = new ManageTagWindow();
-                window.existingTags = tags;
-                window.addEventListener(TagMetadataEvent.REFRESH_TAGS, onRefreshTags);
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-            } else if (op == "add") {
-                var addTag:Tag = event.item.data as Tag;
-                applyTag(addTag);
-            } else if (op == "remove") {
-                var removeTag:Tag = event.item.data as Tag;
-                applyTag(removeTag);
-            } else if (op == "joinDataSources") {
-                createCompositeFeed();
-            } else if (op == "copyDataSources") {
-                blah();
-            } else if (op == "customizeTopReports") {
-                blah1();
-            }
-        }
-
-        private function onRefreshTags(event:TagMetadataEvent):void {
-            selectedTags = new ArrayCollection();
-            this.tags = event.tags;
-            dataProvider.refresh();
-        }
-
-        private function applyTag(addTag:Tag):void {
-            var selected:ArrayCollection = new ArrayCollection();
-            for each (var dsd:DataSourceDescriptor in dataProvider) {
-                if (dsd.selected) {
-                    selected.addItem(dsd);
-                }
-            }
-            ProgressAlert.alert(this, "Tagging...", null, uploadService.tagDataSources);
-            uploadService.tagDataSources.send(selected, addTag);
-        }
-
-        private function removeTag(addTag:Tag):void {
-            var selected:ArrayCollection = new ArrayCollection();
-            for each (var dsd:DataSourceDescriptor in dataProvider) {
-                if (dsd.selected) {
-                    selected.addItem(dsd);
-                }
-            }
-            ProgressAlert.alert(this, "Tagging...", null, uploadService.untagDataSource);
-            uploadService.untagDataSource.send(selected, addTag);
-        }
-
-        private function populateTags(tags:ArrayCollection):void {
-
-            if (tagBox != null) {
-                tagBox.removeAllChildren();
-            }
-            for each (var tag:Tag in tags) {
-                var tagButton:TagButton = new TagButton();
-                tagButton.data = tag;
-                if (selectedTags != null) {
-                    for each (var selectedTag:Tag in selectedTags) {
-                        if (selectedTag.id == tag.id) {
-                            tagButton.selectionState = true;
-                            break;
-                        }
-                    }
-                }
-                if (tagBox != null) {
-                    tagBox.addChild(tagButton);
-                }
-            }
-            var tagOptions:ArrayCollection = new ArrayCollection();
-            if (_tags != null) {
-                tagOptions.addItem({ label: "Manage Tags...", op: "manageTags" });
-                for each (var opTag:Tag in _tags) {
-                    tagOptions.addItem({label: "Add tag - " + opTag.name + " - to selected", data: opTag, op: "add"});
-                    tagOptions.addItem({label: "Remove tag - " + opTag.name + " - from selected", data: opTag, op: "remove"});
-                }
-            }
-            this.tagOptions = tagOptions;
-        }
-
-        private function filterOnTag(obj:Object):Boolean {
-            if (selectedTags != null && selectedTags.length > 0) {
-                var dsd:DataSourceDescriptor = obj as DataSourceDescriptor;
-                if (dsd.tags != null) {
-                    for each (var tag:Tag in dsd.tags) {
-                        for each (var dsTag:Tag in selectedTags) {
-                            if (dsTag.id == tag.id) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                return false;
-            } else {
-                return true;
-            }
-        }
 
         private function onCreation():void {
-            addEventListener(TagEvent.TAG_SELECTED, onTag);
-            addEventListener(TagEvent.TAG_UNSELECTED, onUnTag);
             formatter = new DateFormatter();
             switch (User.getInstance().dateFormat) {
                 case 0:
@@ -201,11 +62,6 @@
                     break;
             }
             customizeVisible = User.getInstance().accountAdmin;
-            for each (var tag:Tag in tags) {
-                var tagButton:TagButton = new TagButton();
-                tagButton.data = tag;
-                tagBox.addChild(tagButton);
-            }
         }
 
         override protected function measure():void {
@@ -252,10 +108,10 @@
                 addChildAt(topReports, 0);
             }
             /*var dTip:DataSourcesTip = new DataSourcesTip();
-             if (topBox == null) {
-             topBox = new HBox();
-             addChildAt(dTip, 0);
-             }*/
+            if (topBox == null) {
+                topBox = new HBox();
+                addChildAt(dTip, 0);
+            }*/
             if (User.getInstance().newsDate != null) {
                 if (User.getInstance().newsDismissDate == null || User.getInstance().newsDismissDate.getTime() < User.getInstance().newsDate.getTime()) {
                     if (getChildren().length > 0 && !(getChildAt(0) is NewsBar)) {
@@ -270,11 +126,11 @@
                 }
             }
             /*var getHelp:GetHelp = new GetHelp();
-             if (topBox == null) {
-             topBox = new HBox();
-             addChildAt(topBox, 0);
-             }
-             topBox.addChild(getHelp);*/
+            if (topBox == null) {
+                topBox = new HBox();
+                addChildAt(topBox, 0);
+            }
+            topBox.addChild(getHelp);*/
 
             if (User.getInstance().accountOverSize) {
                 var mb:AccountMessageBar = new AccountMessageBar();
@@ -293,11 +149,11 @@
 
         private function createDateLabelFunction(value:Object, column:DataGridColumn):String {
             var descriptor:DataSourceDescriptor = value as DataSourceDescriptor;
-            if (descriptor.dataSourceType == DataSourceType.COMPOSITE) {
+            /*if (descriptor.dataSourceType == DataSourceType.COMPOSITE) {
                 return "( Composite )";
             } else if (descriptor.dataSourceType == DataSourceType.FEDERATED) {
                 return "( Federated ) ";
-            } else if (descriptor.lastDataTime == null) {
+            } else*/ if (descriptor.lastDataTime == null) {
                 return "( No Data )";
             } else {
                 return formatter.format(descriptor.lastDataTime);
@@ -321,10 +177,10 @@
         }
 
         /*private function blah():void {
-         var window:NewReportDataSourceWindow = new NewReportDataSourceWindow();
-         PopUpManager.addPopUp(window, this, true);
-         PopUpUtil.centerPopUp(window);
-         }*/
+            var window:NewReportDataSourceWindow = new NewReportDataSourceWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }*/
 
         [Bindable]
         public var topItems:ArrayCollection = new ArrayCollection();
@@ -356,7 +212,6 @@
 
         private function blah():void {
             var window:CopyDataSourceWindow = new CopyDataSourceWindow();
-            window.availableTags = tags;
             window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, onRefresh, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
@@ -365,118 +220,25 @@
         private function onRefresh(event:UploadConfigEvent):void {
             dispatchEvent(event);
         }
-
-        [Bindable]
-        private var tagOptions:ArrayCollection;
-
-        private function deleteSelected():void {
-            var selected:ArrayCollection = new ArrayCollection();
-            for each (var dsd:DataSourceDescriptor in dataProvider) {
-                if (dsd.selected) {
-                    selected.addItem(dsd);
-                }
-            }
-            if (selected.length == 0) {
-                Alert.show("You must select at least one data source.");
-            } else {
-                var window:DeleteDataSourceWindow = new DeleteDataSourceWindow();
-                window.dataSources = selected;
-                window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, onRefresh, false, 0, true);
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-            }
-        }
-
-        private function tagChanges():void {
-            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
-        }
-
-        [Bindable]
-        private var actions:ArrayCollection = new ArrayCollection([ {label: "Join data sources", op: "joinDataSources"},
-            {label: "Copy data sources", op: "copyDataSources"},
-            {label: "Customize top reports", op: "customizeTopReports"}
-        ]);
-
-        protected static function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
-        {
-            // resize the FlowBox manually, as the internal calculation doesn't work
-
-            var fb:FlowBox = event.target as FlowBox;
-
-            if (fb != null)
-            {
-                if (fb.numChildren > 0)
-                {
-                    // default the needed height to the top view metric
-
-                    var maxBottom:int = fb.viewMetrics.top;
-
-                    // Iterate over the children of the FlowBox to find the bottom-most bottom, so
-                    // we can determine how big / small we can make the FlowBox.
-                    // If it's a UIComponent, include it if the includeInLayout property is true.
-                    // If it's not a UIComponent, include it if the visible property is true.
-
-                    for (var idx:int = 0; idx < fb.numChildren; idx++)
-                    {
-                        var displayObject:DisplayObject = fb.getChildAt(idx);
-
-                        if ((displayObject is UIComponent && (displayObject as
-                                UIComponent).includeInLayout) ||
-                                (!(displayObject is UIComponent) && displayObject.visible))
-                        {
-                            var thisBottom:int = fb.getChildAt(idx).y + fb.getChildAt(idx).height;
-
-                            if (thisBottom > maxBottom)
-                                maxBottom = thisBottom;
-                        }
-                    }
-
-                    fb.height = maxBottom + fb.viewMetrics.bottom +
-                            fb.getStyle("paddingBottom") + 1;
-                }
-                else
-                {
-                    fb.height = fb.viewMetrics.top + fb.viewMetrics.bottom;
-                }
-            }
-        }
         ]]></mx:Script>
-    <mx:Style>
-        .myCustomPopUpStyleName {
-            fontSize: 12;
-            fontFamily: "Lucida Grande";
-            textAlign: left;
-            dropShadowEnabled: false;
-            borderStyle: solid;
-            borderThickness: 1;
-            cornerRadius: 8;
-        }
-    </mx:Style>
-    <mx:RemoteObject destination="userUpload" id="uploadService">
-        <mx:method name="tagDataSources" result="tagChanges()"/>
-        <mx:method name="untagDataSource" result="tagChanges()"/>
-    </mx:RemoteObject>
+
+
     <mx:HBox width="680" verticalAlign="middle">
         <mx:Label text="Data Sources" fontSize="20" maxWidth="300"/>
         <mx:Spacer width="100%"/>
-        <listing:ArghButton label="Actions..." styleName="grayButton" itemClick="onItemClick(event)" visible="{customizeVisible}" width="160" id="actionButton"
-                            dataProvider="{actions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
-        <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onItemClick(event)" visible="{customizeVisible}" width="160" id="newButton"
-                            dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
-        <mx:LinkButton label="Delete Selected" click="deleteSelected()" fontSize="12" visible="{customizeVisible}"/>
+        <mx:LinkButton label="Join data sources" click="createCompositeFeed()" fontSize="12"/>
+        <!--<mx:LinkButton label="Copy data sources" click="blah()" fontSize="12"/>-->
+        <!--<mx:LinkButton label="Data source from report" click="blah()" fontSize="12"/>-->
+        <mx:LinkButton label="Customize top reports" click="blah1()" fontSize="12" visible="{customizeVisible}"/>
     </mx:HBox>
-    <containers:FlowBox id="tagBox" width="100%" updateComplete="adapterFlowBoxUpdateCompleteHandler(event)">
-
-    </containers:FlowBox>
     <mx:HBox paddingLeft="10" paddingRight="10"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
          backgroundColor="#FFFFFF" paddingTop="5" paddingBottom="5">
 
         <mx:DataGrid fontSize="12" horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
             verticalGridLines="true" id="dataSourceGrid" horizontalScrollPolicy="off" verticalScrollPolicy="off" selectable="false"
-                dataProvider="{dataProvider}" rowHeight="24" updateComplete="">
+                dataProvider="{dataProvider}" rowHeight="24">
             <mx:columns>
-                <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>
                 <mx:DataGridColumn dataField="name" itemRenderer="com.easyinsight.listing.MyDataNameRenderer" headerText="Data Source" width="400" sortCompareFunction="nameSort"/>
                 <mx:DataGridColumn dataField="lastDataTime" labelFunction="createDateLabelFunction" headerText="Last Data Time" width="140"
                         sortCompareFunction="customSort"/>
