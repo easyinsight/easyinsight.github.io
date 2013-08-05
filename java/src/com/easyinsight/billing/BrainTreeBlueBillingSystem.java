@@ -235,15 +235,18 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                             account.getBillingInfo().add(info);
                             transactions.add(t.getId());
                             String invoiceBody = info.toInvoiceText(account);
-                            /*for (User user : account.getUsers()) {
-                                if (user.isInvoiceRecipient()) {
-                                    try {
-                                        new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, "support@easy-insight.com", false, "Easy Insight");
-                                    } catch (Exception e) {
-                                        LogClass.error(e);
+                            if (account.isNewPricingModelInvoice()) {
+                                for (User user : account.getUsers()) {
+                                    if (user.isInvoiceRecipient()) {
+                                        System.out.println("Sending out invoice email to " + user.getEmail());
+                                        try {
+                                            new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, "support@easy-insight.com", false, "Easy Insight");
+                                        } catch (Exception e) {
+                                            LogClass.error(e);
+                                        }
                                     }
                                 }
-                            }*/
+                            }
                         }
                     }
                 }
