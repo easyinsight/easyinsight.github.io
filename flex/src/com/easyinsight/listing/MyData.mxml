@@ -148,7 +148,7 @@
 
         private function gotFeedAnalysisTree():void {
             var myDataTree:MyDataTree = uploadService.getFeedAnalysisTree.lastResult as MyDataTree;
-
+            tags = myDataTree.tags;
             var dataSourceArray:Array = [];
             for each (var desc:EIDescriptor in myDataTree.objects) {
                 if (desc.getType() == EIDescriptor.DATA_SOURCE) {
@@ -191,8 +191,22 @@
                 dataGrid = new DataSourceGrid();
                 dataGrid.topItems = accountReports;
                 BindingUtils.bindProperty(dataGrid, "dataProvider", this, "dataSources");
+                BindingUtils.bindProperty(dataGrid, "tags", this, "tags");
             }
             blah.addChild(dataGrid);
+        }
+
+        private var _tags:ArrayCollection;
+
+        [Bindable(event="tagsChanged")]
+        public function get tags():ArrayCollection {
+            return _tags;
+        }
+
+        public function set tags(value:ArrayCollection):void {
+            if (_tags == value) return;
+            _tags = value;
+            dispatchEvent(new Event("tagsChanged"));
         }
 
         private var dataGrid:DataSourceGrid;
@@ -203,7 +217,9 @@
             currentState = "";
             if (dataSourceDescriptor != null && dsList != null && IDataSourceSpecificList(dsList).dataSourceDescriptor != null &&
                     dataSourceDescriptor.id == IDataSourceSpecificList(dsList).dataSourceDescriptor.id) {
+                IDataSourceSpecificList(dsList).showBack = dataSources.length > 1;
                 dsList.data = dataSourceDescriptor;
+                dsList.invalidateProperties();
                 return;
             }
             blah.removeAllChildren();
