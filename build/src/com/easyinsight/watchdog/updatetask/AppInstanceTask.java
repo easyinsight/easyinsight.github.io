@@ -33,7 +33,7 @@ public class AppInstanceTask extends Task {
 
     protected static final String APP_AMIS = "ami-cb20a2a2";
     protected static final String STAGING_AMI = "ami-2ed93b47";
-    protected static final String LARGE_AMI = "ami-6bf83302";
+    protected static final String LARGE_AMI = "ami-bc89cdd5";
 
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
 
