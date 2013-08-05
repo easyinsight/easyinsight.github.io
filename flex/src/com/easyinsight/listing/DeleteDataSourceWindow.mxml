@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" backgroundColor="#FFFFFF"
-        paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" horizontalAlign="center">
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.util.ProgressAlert;
@@ -25,7 +25,7 @@
         <mx:method name="deleteUserUploads" result="deleted()"/>
     </mx:RemoteObject>
     <mx:Text text="Are you want to delete the following data sources? This action will delete the data sources and all reports and dashboards built on these data sources."
-            width="300"/>
+            width="400" styleName="fallThroughFonts" fontSize="16"/>
     <mx:List dataProvider="{dataSources}" labelField="name" width="300"/>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="Delete Selected" click="apply()"/>
