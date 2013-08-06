@@ -161,7 +161,7 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
                 gridRow.percentHeight = 100;
             }
         }
-        initialRetrieve();
+        //initialRetrieve();
     }
 
     private function onDimensions(event:GridDimensionEvent):void {
