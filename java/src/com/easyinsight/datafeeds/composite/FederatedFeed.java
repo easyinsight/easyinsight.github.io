@@ -39,7 +39,7 @@ public class FederatedFeed extends Feed {
                         DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
                         Key parentKey = derivedKey.getParentKey();
                         for (AnalysisItem field : feed.getDataSource().getFields()) {
-                            if (field.getKey().toKeyString().equals(parentKey.toKeyString())) {
+                            if (field.getKey().toKeyString().equals(parentKey.toKeyString()) && field.isKeyColumn() == analysisItem.isKeyColumn()) {
                                 matched = true;
                                 childAnalysisItems.add(field);
                                 List<AnalysisItem> items = map.get(field);
@@ -56,7 +56,7 @@ public class FederatedFeed extends Feed {
                         for (FieldMapping fieldMapping : source.getFieldMappings()) {
                             if (fieldMapping.getFederatedKey().equals(analysisItem.toOriginalDisplayName())) {
                                 for (AnalysisItem field : feed.getDataSource().getFields()) {
-                                    if (field.toOriginalDisplayName().equals(fieldMapping.getSourceKey())) {
+                                    if (field.toOriginalDisplayName().equals(fieldMapping.getSourceKey()) && field.isKeyColumn() == analysisItem.isKeyColumn()) {
                                         matched = true;
                                         childAnalysisItems.add(field);
                                         List<AnalysisItem> items = map.get(field);
@@ -72,7 +72,7 @@ public class FederatedFeed extends Feed {
                     }
                     if (!matched) {
                         for (AnalysisItem field : feed.getDataSource().getFields()) {
-                            if (field.toOriginalDisplayName().equals(analysisItem.toOriginalDisplayName())) {
+                            if (field.toOriginalDisplayName().equals(analysisItem.toOriginalDisplayName()) && field.isKeyColumn() == analysisItem.isKeyColumn()) {
                                 childAnalysisItems.add(field);
                                 List<AnalysisItem> items = map.get(field);
                                 if (items == null) {

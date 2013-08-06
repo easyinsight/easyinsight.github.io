@@ -31,9 +31,18 @@ public class TagButton extends LinkButton {
         }
     }
 
+    public function set selectionState(selected:Boolean):void {
+        tagSelected = selected;
+        if (tagSelected) {
+            styleName = "toggledLinkButton";
+        } else {
+            styleName = null;
+        }
+    }
+
     override public function set data(val:Object):void {
         tag = val as Tag;
-        label = tag.name;
+        label = tag.name + " - "+ tag.id;
     }
 
     override public function get data():Object {

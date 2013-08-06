@@ -60,7 +60,7 @@
     </mx:HBox>
     <mx:DataGrid dataProvider="{tags}">
         <mx:columns>
-            <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="50" headerText=""/>
+            <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>
             <mx:DataGridColumn dataField="name" headerText="Tag" width="300"/>
         </mx:columns>
     </mx:DataGrid>

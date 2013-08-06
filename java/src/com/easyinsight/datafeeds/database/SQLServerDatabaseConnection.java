@@ -108,6 +108,9 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
                         case Types.VARCHAR:
                         case Types.LONGVARCHAR:
                             String string = rs.getString(i);
+                            if (string != null) {
+                                string = string.trim();
+                            }
                             row.addValue(analysisItem.getKey(), string);
                             break;
 
