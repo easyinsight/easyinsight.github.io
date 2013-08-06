@@ -267,6 +267,8 @@ public class FunctionFactory {
             return new DateLevelFunction();
         } else if (s.equals("dateformatnoshift")) {
             return new EIDateFormatNoShiftFunction();
+        } else if (s.equals("adjustfilter")) {
+            return new AdjustFilterFunction();
         }else {
             return null;
         }
