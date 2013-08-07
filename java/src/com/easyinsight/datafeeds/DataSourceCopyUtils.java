@@ -43,6 +43,7 @@ public class DataSourceCopyUtils {
         }
         clonedFeedDefinition.setDateCreated(new Date());
         clonedFeedDefinition.setDateUpdated(new Date());
+        clonedFeedDefinition.setLastRefreshStart(new Date(1));
         if (newDataSourceName != null) {
             clonedFeedDefinition.setFeedName(newDataSourceName);
         }
@@ -129,6 +130,7 @@ public class DataSourceCopyUtils {
         DataSourceCloneResult result = feedDefinition.cloneDataSource(conn);
         FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID, accountID));
+        clonedFeedDefinition.setLastRefreshStart(new Date(1));
         clonedFeedDefinition.setOwnerName(userName);
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
         return result;
