@@ -8,21 +8,31 @@
 package com.easyinsight.listing {
 import flash.events.MouseEvent;
 
-import mx.controls.LinkButton;
+import mx.containers.Canvas;
+import mx.controls.Text;
 
-public class TagButton extends LinkButton {
+public class TagButton extends Canvas {
 
     public var tag:Tag;
     private var tagSelected:Boolean;
 
+    private var tagLabel:Text;
+
     public function TagButton() {
         addEventListener(MouseEvent.CLICK, onClick);
+        tagLabel = new Text();
+        addChild(tagLabel);
+        mouseChildren = false;
+        mouseEnabled = true;
+        buttonMode = true;
+        useHandCursor = true;
+        styleName = "defaultLinkButton";
     }
 
     private function onClick(event:MouseEvent):void {
         if (tagSelected) {
             tagSelected = false;
-            styleName = null;
+            styleName = "defaultLinkButton";
             dispatchEvent(new TagEvent(TagEvent.TAG_UNSELECTED, tag));
         } else {
             tagSelected = true;
@@ -36,13 +46,13 @@ public class TagButton extends LinkButton {
         if (tagSelected) {
             styleName = "toggledLinkButton";
         } else {
-            styleName = null;
+            styleName = "defaultLinkButton";
         }
     }
 
     override public function set data(val:Object):void {
         tag = val as Tag;
-        label = tag.name + " - "+ tag.id;
+        tagLabel.text = tag.name + " - "+ tag.id;
     }
 
     override public function get data():Object {

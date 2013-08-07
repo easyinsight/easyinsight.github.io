@@ -141,7 +141,7 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
 
                 long daysSinceChange = delta / (60 * 60 * 1000 * 24);
 
-                if (source.isIncrementalRefresh() && daysSinceChange > 2) {
+                if (source.isIncrementalRefresh() && daysSinceChange > 2 && !source.isForceProjectRefresh()) {
                     continue;
                 }
 

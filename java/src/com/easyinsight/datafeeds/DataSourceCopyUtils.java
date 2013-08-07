@@ -27,11 +27,11 @@ import org.hibernate.Session;
  */
 public class DataSourceCopyUtils {
 
-    public static List<SolutionInstallInfo> installFeed(long userID, Connection conn, boolean copyData, long feedID,
+    public static Map<Long, SolutionInstallInfo> installFeed(long userID, Connection conn, boolean copyData,
                                                         FeedDefinition feedDefinition, String newDataSourceName,
                                                         long solutionID, long accountID, String userName) throws Exception {
         FeedStorage feedStorage = new FeedStorage();
-        List<SolutionInstallInfo> infos = new ArrayList<SolutionInstallInfo>();
+        Map<Long, SolutionInstallInfo> infos = new HashMap<Long, SolutionInstallInfo>();
 
         // result here needs to have the core keys
         // 
@@ -43,6 +43,7 @@ public class DataSourceCopyUtils {
         }
         clonedFeedDefinition.setDateCreated(new Date());
         clonedFeedDefinition.setDateUpdated(new Date());
+        clonedFeedDefinition.setLastRefreshStart(new Date(1));
         if (newDataSourceName != null) {
             clonedFeedDefinition.setFeedName(newDataSourceName);
         }
@@ -59,7 +60,8 @@ public class DataSourceCopyUtils {
 
         DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(clonedFeedDefinition.getFeedName(), clonedFeedDefinition.getDataFeedID(),
                 clonedFeedDefinition.getFeedType().getType(), false, clonedFeedDefinition.getDataSourceBehavior());
-        infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), dataSourceDescriptor, clonedFeedDefinition.getFeedName(), requiresConfig));
+        infos.put(feedDefinition.getDataFeedID(), new SolutionInstallInfo(feedDefinition.getDataFeedID(), dataSourceDescriptor, clonedFeedDefinition.getFeedName(), requiresConfig, result.getKeyReplacementMap(),
+                clonedFeedDefinition));
         PreparedStatement getReports = conn.prepareStatement("SELECT ANALYSIS_ID FROM ANALYSIS WHERE DATA_FEED_ID = ? AND TEMPORARY_REPORT = ?");
         getReports.setLong(1, feedDefinition.getDataFeedID());
         getReports.setBoolean(2, false);
@@ -129,6 +131,7 @@ public class DataSourceCopyUtils {
         DataSourceCloneResult result = feedDefinition.cloneDataSource(conn);
         FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID, accountID));
+        clonedFeedDefinition.setLastRefreshStart(new Date(1));
         clonedFeedDefinition.setOwnerName(userName);
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
         return result;

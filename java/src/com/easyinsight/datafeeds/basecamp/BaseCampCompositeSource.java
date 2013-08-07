@@ -53,11 +53,20 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     private String token;
     private boolean incrementalRefresh = true;
     private boolean companyProjectJoinMode;
+    private boolean forceProjectRefresh = false;
 
     private transient BaseCampCache basecampCache;
 
     public BaseCampCompositeSource() {
         setFeedName("Basecamp");
+    }
+
+    public boolean isForceProjectRefresh() {
+        return forceProjectRefresh;
+    }
+
+    public void setForceProjectRefresh(boolean forceProjectRefresh) {
+        this.forceProjectRefresh = forceProjectRefresh;
     }
 
     public boolean isCompanyProjectJoinMode() {
@@ -266,7 +275,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         clearStmt.executeUpdate();
         clearStmt.close();
         PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO BASECAMP (DATA_FEED_ID, URL, INCLUDE_ARCHIVED," +
-                "include_inactive, INCLUDE_COMMENTS, INCLUDE_TODO_COMMENTS, INCREMENTAL_REFRESH, COMPANY_PROJECT_JOIN) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                "include_inactive, INCLUDE_COMMENTS, INCLUDE_TODO_COMMENTS, INCREMENTAL_REFRESH, COMPANY_PROJECT_JOIN, full_projects) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
         basecampStmt.setString(2, getUrl());
         basecampStmt.setBoolean(3, isIncludeArchived());
@@ -275,6 +284,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         basecampStmt.setBoolean(6, isIncludeTodoComments());
         basecampStmt.setBoolean(7, incrementalRefresh);
         basecampStmt.setBoolean(8, companyProjectJoinMode);
+        basecampStmt.setBoolean(9, forceProjectRefresh);
         basecampStmt.execute();
         basecampStmt.close();
         if (this.token != null && !"".equals(this.token.trim())) {
@@ -289,7 +299,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
         PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, INCLUDE_ARCHIVED, INCLUDE_INACTIVE, INCLUDE_COMMENTS, INCLUDE_TODO_COMMENTS, INCREMENTAL_REFRESH," +
-                "COMPANY_PROJECT_JOIN FROM " +
+                "COMPANY_PROJECT_JOIN, full_projects FROM " +
                 "BASECAMP WHERE DATA_FEED_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
@@ -301,6 +311,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
             this.setIncludeTodoComments(rs.getBoolean(5));
             this.setIncrementalRefresh(rs.getBoolean(6));
             this.setCompanyProjectJoinMode(rs.getBoolean(7));
+            this.setForceProjectRefresh(rs.getBoolean(8));
         }
         loadStmt.close();
     }

@@ -1066,7 +1066,11 @@ public class FeedStorage {
 
             Date lastDataTime;
             if (lastTime != null) {
-                lastDataTime = new Date(lastTime.getTime());
+                if (lastTime.getTime() < 100000) {
+                    lastDataTime = null;
+                } else {
+                    lastDataTime = new Date(lastTime.getTime());
+                }
             } else {
                 lastDataTime = creationDate;
             }

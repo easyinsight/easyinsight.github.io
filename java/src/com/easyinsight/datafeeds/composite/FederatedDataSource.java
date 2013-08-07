@@ -4,21 +4,18 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.analysis.ReplacementMap;
 import com.easyinsight.analysis.WSAnalysisDefinition;
+import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.userupload.UserUploadInternalService;
+import com.easyinsight.solutions.SolutionInstallInfo;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -42,10 +39,10 @@ public class FederatedDataSource extends FeedDefinition {
         for (FederationSource federationSource : sources) {
             long id = federationSource.getDataSourceID();
             FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(id, conn);
-            DataSourceCloneResult result = DataSourceCopyUtils.cloneFeed(SecurityUtil.getUserID(), conn, childDefinition, false, SecurityUtil.getAccountID(), SecurityUtil.getUserName());
-            FeedDefinition clonedDefinition = result.getFeedDefinition();
-            DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
-            new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);
+            Map<Long, SolutionInstallInfo> infos = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, false, childDefinition, childDefinition.getFeedName(), 0, SecurityUtil.getAccountID(), SecurityUtil.getUserName());
+            FeedDefinition clonedDefinition = infos.get(id).getNewDataSource();
+            //DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
+            //new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);
             FederationSource clonee = new FederationSource();
             clonee.setDataSourceID(clonedDefinition.getDataFeedID());
             clonedFederationSources.add(clonee);
@@ -251,5 +248,13 @@ public class FederatedDataSource extends FeedDefinition {
         for (Map.Entry<Long, AnalysisItem> replEntry : replacementMap.entrySet()) {
             replEntry.getValue().updateIDs(replacements);
         }
+    }
+
+    public Collection<DataSourceDescriptor> getDataSources(EIConnection conn) throws SQLException {
+        Collection<DataSourceDescriptor> sources = super.getDataSources(conn);
+        for (FederationSource source : this.sources) {
+            sources.addAll(new FeedStorage().getFeedDefinitionData(source.getDataSourceID(), conn).getDataSources(conn));
+        }
+        return sources;
     }
 }

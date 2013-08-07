@@ -9,6 +9,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.servlet.SystemSettings;
 import com.easyinsight.users.Account;
 import org.hibernate.Session;
 
@@ -578,18 +579,8 @@ public class CompositeFeedConnection implements Serializable, IJoin {
     }
 
     private void validateOperation(int operationCount, int accountType) {
-        if (accountType == Account.BASIC) {
-            if (operationCount > 5000000) {
-                throw new ReportException(new GenericReportFault("The query requesting data was too complex."));
-            }
-        } else if (accountType == Account.PLUS) {
-            if (operationCount > 7500000) {
-                throw new ReportException(new GenericReportFault("The query requesting data was too complex."));
-            }
-        } else {
-            if (operationCount > 10000000) {
-                throw new ReportException(new GenericReportFault("The query requesting data was too complex."));
-            }
+        if (operationCount > SystemSettings.instance().getMaxOperations()) {
+            throw new ReportException(new GenericReportFault("The query requesting data was too complex."));
         }
     }
 

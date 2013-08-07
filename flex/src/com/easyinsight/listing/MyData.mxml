@@ -134,6 +134,18 @@
 
         private var _dataSources:ArrayCollection;
 
+        private var _masterDataSources:ArrayCollection;
+
+        [Bindable(event="masterDataSourcesChanged")]
+        public function get masterDataSources():ArrayCollection {
+            return _masterDataSources;
+        }
+
+        public function set masterDataSources(value:ArrayCollection):void {
+            if (_masterDataSources == value) return;
+            _masterDataSources = value;
+            dispatchEvent(new Event("masterDataSourcesChanged"));
+        }
 
         [Bindable(event="dataSourcesChanged")]
         public function get dataSources():ArrayCollection {
@@ -162,6 +174,7 @@
                 }
             }
             this.dataSources = new ArrayCollection(dataSourceArray);
+            this.masterDataSources = new ArrayCollection(dataSourceArray);
 
             if (myDataTree.objects.length == 1) {
                 dataSourceDescriptor = myDataTree.objects.getItemAt(0) as DataSourceDescriptor;
@@ -217,7 +230,7 @@
             currentState = "";
             if (dataSourceDescriptor != null && dsList != null && IDataSourceSpecificList(dsList).dataSourceDescriptor != null &&
                     dataSourceDescriptor.id == IDataSourceSpecificList(dsList).dataSourceDescriptor.id) {
-                IDataSourceSpecificList(dsList).showBack = dataSources.length > 1;
+                IDataSourceSpecificList(dsList).showBack = masterDataSources.length > 1;
                 dsList.data = dataSourceDescriptor;
                 dsList.invalidateProperties();
                 return;
@@ -238,7 +251,7 @@
                 dsList = new SimplifiedDataSourceSpecificList();
             }
 
-            IDataSourceSpecificList(dsList).showBack = dataSources.length > 1;
+            IDataSourceSpecificList(dsList).showBack = masterDataSources.length > 1;
             dsList.data = dataSourceDescriptor;
             dsList.addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
             dsList.addEventListener("refresh", onRefresh);
