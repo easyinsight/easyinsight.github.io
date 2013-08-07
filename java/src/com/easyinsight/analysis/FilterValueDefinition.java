@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
+import com.easyinsight.servlet.SystemSettings;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Nodes;
@@ -293,7 +294,11 @@ public class FilterValueDefinition extends FilterDefinition {
                 return !"".equals(stringValue.toString()) && !"All".equals(stringValue.toString());
             } else if (value instanceof EmptyValue) {
                 return false;
+                // http://cl.ly/image/370S3T1U0f0D
             }
+        }
+        if (filteredValues.size() > SystemSettings.instance().getMaxFilterValues()) {
+            return false;
         }
         return super.validForQuery() && filteredValues.size() > 0;
     }

@@ -21,6 +21,10 @@ public class SystemSettings {
 
     private int semaphoreLimit = 2;
 
+    private int maxFilterValues = 10000;
+
+    private int maxOperations = 10000000;
+
     public SystemSettings() {
         timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -28,10 +32,12 @@ public class SystemSettings {
             public void run() {
                 EIConnection conn = Database.instance().getConnection();
                 try {
-                    PreparedStatement ps = conn.prepareStatement("SELECT user_activity_semaphore_limit FROM system_settings");
+                    PreparedStatement ps = conn.prepareStatement("SELECT user_activity_semaphore_limit, max_filter_values FROM system_settings");
                     ResultSet rs = ps.executeQuery();
                     if (rs.next()) {
                         semaphoreLimit = rs.getInt(1);
+                        maxFilterValues = rs.getInt(2);
+                        maxOperations = rs.getInt(3);
                     }
                 } catch (Exception e) {
                     LogClass.error(e);
@@ -46,6 +52,22 @@ public class SystemSettings {
         if (timer != null) {
             timer.cancel();
         }
+    }
+
+    public int getMaxOperations() {
+        return maxOperations;
+    }
+
+    public void setMaxOperations(int maxOperations) {
+        this.maxOperations = maxOperations;
+    }
+
+    public int getMaxFilterValues() {
+        return maxFilterValues;
+    }
+
+    public void setMaxFilterValues(int maxFilterValues) {
+        this.maxFilterValues = maxFilterValues;
     }
 
     public int getSemaphoreLimit() {
