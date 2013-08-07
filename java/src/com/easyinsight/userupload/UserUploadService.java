@@ -312,9 +312,9 @@ public class UserUploadService {
             for (DataSourceDescriptor dataSource : dataSources) {
                 if (!existing.contains(dataSource.getId())) {
                     FeedDefinition existingDef = feedStorage.getFeedDefinitionData(dataSource.getId(), conn);
-                    List<SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, dataSource.getId(), existingDef, existingDef.getFeedName(), 0,
+                    Map<Long, SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, existingDef, existingDef.getFeedName(), 0,
                             SecurityUtil.getAccountID(), SecurityUtil.getUserName());
-                    for (SolutionInstallInfo info : results) {
+                    for (SolutionInstallInfo info : results.values()) {
                         existing.add(info.getPreviousID());
                         infos.add(info);
                     }

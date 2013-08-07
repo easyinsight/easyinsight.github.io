@@ -1,6 +1,10 @@
 package com.easyinsight.solutions;
 
 import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.core.Key;
+import com.easyinsight.datafeeds.FeedDefinition;
+
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -11,18 +15,40 @@ public class SolutionInstallInfo {
 
     private long previousID;
     private EIDescriptor descriptor;
+    private FeedDefinition newDataSource;
     private boolean requiresConfiguration;
     private String feedName;
+    private Map<Key, Key> keyReplacementMap;
 
-    public SolutionInstallInfo(long previousID, EIDescriptor descriptor, boolean requiresConfiguration) {
+    /*public SolutionInstallInfo(long previousID, EIDescriptor descriptor, boolean requiresConfiguration) {
         this.previousID = previousID;
         this.descriptor = descriptor;
         this.requiresConfiguration = requiresConfiguration;
+    }*/
+
+    public SolutionInstallInfo(long previousID, EIDescriptor descriptor, String feedName, boolean requiresConfiguration, Map<Key, Key> keyReplacementMap, FeedDefinition newDataSource) {
+        this.previousID = previousID;
+        this.descriptor = descriptor;
+        this.requiresConfiguration = requiresConfiguration;
+        this.feedName = feedName;
+        this.keyReplacementMap = keyReplacementMap;
+        this.newDataSource = newDataSource;
     }
 
-    public SolutionInstallInfo(long previousID, EIDescriptor descriptor, String feedName, boolean requiresConfiguration) {
-        this(previousID, descriptor, requiresConfiguration);
-        this.feedName = feedName;
+    public FeedDefinition getNewDataSource() {
+        return newDataSource;
+    }
+
+    public void setNewDataSource(FeedDefinition newDataSource) {
+        this.newDataSource = newDataSource;
+    }
+
+    public Map<Key, Key> getKeyReplacementMap() {
+        return keyReplacementMap;
+    }
+
+    public void setKeyReplacementMap(Map<Key, Key> keyReplacementMap) {
+        this.keyReplacementMap = keyReplacementMap;
     }
 
     public boolean isRequiresConfiguration() {
