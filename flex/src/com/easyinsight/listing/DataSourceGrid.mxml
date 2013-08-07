@@ -92,7 +92,7 @@
                 applyTag(addTag);
             } else if (op == "remove") {
                 var removeTag:Tag = event.item.data as Tag;
-                applyTag(removeTag);
+                dropTag(removeTag);
             } else if (op == "joinDataSources") {
                 createCompositeFeed();
             } else if (op == "copyDataSources") {
@@ -119,7 +119,7 @@
             uploadService.tagDataSources.send(selected, addTag);
         }
 
-        private function removeTag(addTag:Tag):void {
+        private function dropTag(addTag:Tag):void {
             var selected:ArrayCollection = new ArrayCollection();
             for each (var dsd:DataSourceDescriptor in dataProvider) {
                 if (dsd.selected) {
