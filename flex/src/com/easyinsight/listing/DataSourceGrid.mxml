@@ -10,6 +10,8 @@
 
         import mx.controls.Alert;
         import mx.core.UIComponent;
+        import mx.events.CollectionEvent;
+        import mx.events.CollectionEventKind;
         import mx.events.FlexEvent;
 
         import mx.events.MenuEvent;
@@ -35,12 +37,21 @@
 
         public function set dataProvider(value:ArrayCollection):void {
             if (_dataProvider == value) return;
+            if (_dataProvider != null) {
+                _dataProvider.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onCollectionChange);
+            }
             _dataProvider = value;
+            _dataProvider.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCollectionChange);
             _dataProvider.filterFunction = filterOnTag;
             _dataProvider.refresh();
             dispatchEvent(new Event("dataProviderChanged"));
-            if (dataSourceGrid != null) {
-                dataSourceGrid.invalidateSize();
+        }
+
+        private function onCollectionChange(event:CollectionEvent):void {
+            if (event.kind == CollectionEventKind.REFRESH) {
+                if (dataSourceGrid != null) {
+                    invalidateSize();
+                }
             }
         }
 
