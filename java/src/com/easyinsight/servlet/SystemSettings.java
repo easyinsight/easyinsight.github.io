@@ -21,7 +21,7 @@ public class SystemSettings {
 
     private int semaphoreLimit = 2;
 
-    private int maxFilterValues = 10000;
+    private int maxFilterValues = 1000000;
 
     private int maxOperations = 10000000;
 
@@ -32,7 +32,7 @@ public class SystemSettings {
             public void run() {
                 EIConnection conn = Database.instance().getConnection();
                 try {
-                    PreparedStatement ps = conn.prepareStatement("SELECT user_activity_semaphore_limit, max_filter_values FROM system_settings");
+                    PreparedStatement ps = conn.prepareStatement("SELECT user_activity_semaphore_limit, max_filter_values, max_operations FROM system_settings");
                     ResultSet rs = ps.executeQuery();
                     if (rs.next()) {
                         semaphoreLimit = rs.getInt(1);
