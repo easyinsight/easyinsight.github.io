@@ -58,7 +58,7 @@
         <util:SaveButton label="Add Tag..." click="addTag()" fontSize="12"/>
         <util:SaveButton label="Delete Selected..." click="deleteSelected()" fontSize="12"/>
     </mx:HBox>
-    <mx:DataGrid dataProvider="{tags}">
+    <mx:DataGrid dataProvider="{tags}" dragEnabled="true" dropEnabled="true" dragMoveEnabled="true">
         <mx:columns>
             <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>
             <mx:DataGridColumn dataField="name" headerText="Tag" width="300"/>
