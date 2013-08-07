@@ -552,9 +552,9 @@ public class CompositeFeedDefinition extends FeedDefinition {
     }
 
     @Override
-    public DataSourceCloneResult cloneDataSource(Connection conn) throws Exception {
-        DataSourceCloneResult dataSourceCloneResult = super.cloneDataSource(conn);
-        CompositeFeedDefinition feedDefinition = (CompositeFeedDefinition) dataSourceCloneResult.getFeedDefinition();
+    public Map<Long, SolutionInstallInfo> cloneDataSource(Connection conn) throws Exception {
+        Map<Long, SolutionInstallInfo> infos = super.cloneDataSource(conn);
+        CompositeFeedDefinition feedDefinition = (CompositeFeedDefinition) infos.get(getDataFeedID()).getNewDataSource();
 
         // need clean model here
         // clone the core information
@@ -565,18 +565,12 @@ public class CompositeFeedDefinition extends FeedDefinition {
         List<CompositeFeedNode> newChildren = new ArrayList<CompositeFeedNode>();
         for (CompositeFeedNode child : getCompositeFeedNodes()) {
             FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
-            Map<Long, SolutionInstallInfo> infos = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, false, childDefinition, childDefinition.getFeedName(), 0, SecurityUtil.getAccountID(), SecurityUtil.getUserName());
-
-
+            infos.putAll(DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, false, childDefinition, childDefinition.getFeedName(), 0, SecurityUtil.getAccountID(), SecurityUtil.getUserName()));
             FeedDefinition clonedDefinition = infos.get(child.getDataFeedID()).getNewDataSource();
-            DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
-            //new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);
             replacementMap.putAll(infos);
             newChildren.add(new CompositeFeedNode(clonedDefinition.getDataFeedID(), child.getX(), child.getY(), child.getDataSourceName(), child.getDataSourceType(),
                     child.getRefreshBehavior()));
         }
-
-        // 
 
         feedDefinition.setCompositeFeedNodes(newChildren);
         List<CompositeFeedConnection> newConnections = new ArrayList<CompositeFeedConnection>();
@@ -600,7 +594,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 derivedKey.setParentKey(result.getKeyReplacementMap().get(derivedKey.getParentKey()));
             }
         }
-        return dataSourceCloneResult;
+        return infos;
     }
 
     protected void cloneFields() {

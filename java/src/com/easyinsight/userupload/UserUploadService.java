@@ -345,7 +345,7 @@ public class UserUploadService {
                 getTagStmt.close();
                 PreparedStatement ps = conn.prepareStatement("INSERT INTO DATA_SOURCE_TO_TAG (DATA_SOURCE_ID, ACCOUNT_TAG_ID) VALUES (?, ?)");
                 for (SolutionInstallInfo info : infos) {
-                    ps.setLong(1, info.getDescriptor().getId());
+                    ps.setLong(1, info.getNewDataSource().getDataFeedID());
                     ps.setLong(2, tagID);
                     ps.execute();
                 }

@@ -32,14 +32,14 @@ public class FederatedDataSource extends FeedDefinition {
     }
 
     @Override
-    public DataSourceCloneResult cloneDataSource(Connection conn) throws Exception {
-        DataSourceCloneResult dataSourceCloneResult = super.cloneDataSource(conn);
-        FederatedDataSource feedDefinition = (FederatedDataSource) dataSourceCloneResult.getFeedDefinition();
+    public Map<Long, SolutionInstallInfo> cloneDataSource(Connection conn) throws Exception {
+        Map<Long, SolutionInstallInfo> infos = super.cloneDataSource(conn);
+        FederatedDataSource federatedDataSource = (FederatedDataSource) infos.get(getDataFeedID()).getNewDataSource();
         List<FederationSource> clonedFederationSources = new ArrayList<FederationSource>();
         for (FederationSource federationSource : sources) {
             long id = federationSource.getDataSourceID();
             FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(id, conn);
-            Map<Long, SolutionInstallInfo> infos = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, false, childDefinition, childDefinition.getFeedName(), 0, SecurityUtil.getAccountID(), SecurityUtil.getUserName());
+            infos.putAll(DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, false, childDefinition, childDefinition.getFeedName(), 0, SecurityUtil.getAccountID(), SecurityUtil.getUserName()));
             FeedDefinition clonedDefinition = infos.get(id).getNewDataSource();
             //DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
             //new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);
@@ -47,8 +47,8 @@ public class FederatedDataSource extends FeedDefinition {
             clonee.setDataSourceID(clonedDefinition.getDataFeedID());
             clonedFederationSources.add(clonee);
         }
-        feedDefinition.setSources(clonedFederationSources);
-        return dataSourceCloneResult;
+        federatedDataSource.setSources(clonedFederationSources);
+        return infos;
     }
 
     public List<FederationSource> getSources() {
