@@ -565,7 +565,11 @@ public class CompositeFeedDefinition extends FeedDefinition {
         List<CompositeFeedNode> newChildren = new ArrayList<CompositeFeedNode>();
         for (CompositeFeedNode child : getCompositeFeedNodes()) {
             FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
-            infos.putAll(DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, false, childDefinition, childDefinition.getFeedName(), 0, SecurityUtil.getAccountID(), SecurityUtil.getUserName()));
+            Map<Long, SolutionInstallInfo> map = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, false, childDefinition, childDefinition.getFeedName(), 0,
+                    SecurityUtil.getAccountID(), SecurityUtil.getUserName(), infos);
+            if (map != null) {
+                infos.putAll(map);
+            }
             FeedDefinition clonedDefinition = infos.get(child.getDataFeedID()).getNewDataSource();
             replacementMap.putAll(infos);
             newChildren.add(new CompositeFeedNode(clonedDefinition.getDataFeedID(), child.getX(), child.getY(), child.getDataSourceName(), child.getDataSourceType(),

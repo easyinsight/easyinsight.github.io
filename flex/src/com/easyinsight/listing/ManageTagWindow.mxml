@@ -60,8 +60,8 @@
     </mx:HBox>
     <mx:DataGrid dataProvider="{tags}" dragEnabled="true" dropEnabled="true" dragMoveEnabled="true">
         <mx:columns>
-            <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>
-            <mx:DataGridColumn dataField="name" headerText="Tag" width="300"/>
+            <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText="" sortable="false"/>
+            <mx:DataGridColumn dataField="name" headerText="Tag" width="300" sortable="false"/>
         </mx:columns>
     </mx:DataGrid>
     <mx:HBox>
