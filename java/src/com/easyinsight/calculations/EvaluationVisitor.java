@@ -213,9 +213,14 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
                 DateValue dateValue = (DateValue) result;
                 NumericValue result2Value = (NumericValue) result2;
                 if (result2Value.getCalendarType() > 0) {
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(result2Value.getCalendarType(), result2Value.getCalendarValue());
-                    result = new DateValue(cal.getTime());
+                    if (dateValue.getDate() != null) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(dateValue.getDate());
+                        cal.add(result2Value.getCalendarType(), result2Value.getCalendarValue());
+                        result = new DateValue(cal.getTime());
+                    } else {
+                        result = new EmptyValue();
+                    }
                 } else {
                     long time = dateValue.getDate().getTime();
                     long delta = (long) (time + result2.toDouble());
