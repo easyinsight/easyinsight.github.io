@@ -176,7 +176,7 @@ public class Account {
     @Column(name="default_reporting_sharing")
     private boolean defaultReportSharing;
 
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name="creation_date")
     private Date creationDate;
 
