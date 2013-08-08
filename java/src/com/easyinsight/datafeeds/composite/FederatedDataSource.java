@@ -39,7 +39,10 @@ public class FederatedDataSource extends FeedDefinition {
         for (FederationSource federationSource : sources) {
             long id = federationSource.getDataSourceID();
             FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(id, conn);
-            infos.putAll(DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, false, childDefinition, childDefinition.getFeedName(), 0, SecurityUtil.getAccountID(), SecurityUtil.getUserName()));
+            Map<Long, SolutionInstallInfo> map = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, false, childDefinition, childDefinition.getFeedName(), 0, SecurityUtil.getAccountID(), SecurityUtil.getUserName(), infos);
+            if (map != null) {
+                infos.putAll(map);
+            }
             FeedDefinition clonedDefinition = infos.get(id).getNewDataSource();
             //DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
             //new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);

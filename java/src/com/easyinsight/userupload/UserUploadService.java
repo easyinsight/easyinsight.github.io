@@ -315,11 +315,15 @@ public class UserUploadService {
             conn.setAutoCommit(false);
             Set<Long> existing = new HashSet<Long>();
             List<SolutionInstallInfo> infos = new ArrayList<SolutionInstallInfo>();
+            Map<Long, SolutionInstallInfo> allInfos = new HashMap<Long, SolutionInstallInfo>();
             for (DataSourceDescriptor dataSource : dataSources) {
                 if (!existing.contains(dataSource.getId())) {
                     FeedDefinition existingDef = feedStorage.getFeedDefinitionData(dataSource.getId(), conn);
                     Map<Long, SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, existingDef, existingDef.getFeedName(), 0,
-                            SecurityUtil.getAccountID(), SecurityUtil.getUserName());
+                            SecurityUtil.getAccountID(), SecurityUtil.getUserName(), allInfos);
+                    if (results != null) {
+                        allInfos.putAll(results);
+                    }
                     for (SolutionInstallInfo info : results.values()) {
                         existing.add(info.getPreviousID());
                         infos.add(info);

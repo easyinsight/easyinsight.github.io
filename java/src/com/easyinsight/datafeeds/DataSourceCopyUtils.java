@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.util.*;
 
 import org.hibernate.Session;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: James Boe
@@ -27,9 +28,13 @@ import org.hibernate.Session;
  */
 public class DataSourceCopyUtils {
 
+    @Nullable
     public static Map<Long, SolutionInstallInfo> installFeed(long userID, Connection conn, boolean copyData,
                                                         FeedDefinition feedDefinition, String newDataSourceName,
-                                                        long solutionID, long accountID, String userName) throws Exception {
+                                                        long solutionID, long accountID, String userName, Map<Long, SolutionInstallInfo> existingInfos) throws Exception {
+        if (existingInfos.containsKey(feedDefinition.getDataFeedID())) {
+            return null;
+        }
         FeedStorage feedStorage = new FeedStorage();
         Map<Long, SolutionInstallInfo> infos;
 
