@@ -53,6 +53,7 @@ public class UserServiceResponse
     public var newsDate:Date;
     public var newsDismissDate:Date;
     public var accountOverSize:Boolean;
+    public var tagsAndCopyEnabled:Boolean;
 
     public function UserServiceResponse()
         {

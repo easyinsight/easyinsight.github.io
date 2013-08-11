@@ -62,6 +62,24 @@ public class UserServiceResponse {
     private Date newsDate;
     private Date newsDismissDate;
     private boolean accountOverSize;
+    private boolean accountReports;
+    private boolean tagsAndCopyEnabled;
+
+    public boolean isTagsAndCopyEnabled() {
+        return tagsAndCopyEnabled;
+    }
+
+    public void setTagsAndCopyEnabled(boolean tagsAndCopyEnabled) {
+        this.tagsAndCopyEnabled = tagsAndCopyEnabled;
+    }
+
+    public boolean isAccountReports() {
+        return accountReports;
+    }
+
+    public void setAccountReports(boolean accountReports) {
+        this.accountReports = accountReports;
+    }
 
     public boolean isGoogleAuth() {
         return googleAuth;
@@ -139,7 +157,7 @@ public class UserServiceResponse {
                                 account.getCurrencySymbol(), applicationSkin, account.getFirstDayOfWeek(),
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
                     new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst(), account.getPricingModel(),
-                account.isHeatMapEnabled(), newsDate, user.getNewsDismissDate(), accountOverSize);
+                account.isHeatMapEnabled(), newsDate, user.getNewsDismissDate(), accountOverSize, user.isTestAccountVisible(), account.isTagsAndCopyEnabled());
         response.setReportImage(bytes);
         return response;
     }
@@ -158,7 +176,7 @@ public class UserServiceResponse {
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
                                String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
                                boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst, int pricingModel, boolean reportMode,
-                               Date newsDate, Date newsDismissDate, boolean accountOverSize) {
+                               Date newsDate, Date newsDismissDate, boolean accountOverSize, boolean accountReports, boolean tagsAndCopyEnabled) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -201,6 +219,8 @@ public class UserServiceResponse {
         this.newsDate = newsDate;
         this.newsDismissDate = newsDismissDate;
         this.accountOverSize = accountOverSize;
+        this.accountReports = accountReports;
+        this.tagsAndCopyEnabled = tagsAndCopyEnabled;
     }
 
     public boolean isAccountOverSize() {

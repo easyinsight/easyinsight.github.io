@@ -100,6 +100,9 @@ public class Account {
     @Column(name="enterprise_addon_cost")
     private int enterpriseAddonCost;
 
+    @Column(name="tags_and_copy_enabled")
+    private boolean tagsAndCopyEnabled;
+
     @Column(name="google_domain_name")
     private String googleDomainName;
 
@@ -273,6 +276,14 @@ public class Account {
 
     public void setMaxRecords(int maxRecords) {
         this.maxRecords = maxRecords;
+    }
+
+    public boolean isTagsAndCopyEnabled() {
+        return tagsAndCopyEnabled;
+    }
+
+    public void setTagsAndCopyEnabled(boolean tagsAndCopyEnabled) {
+        this.tagsAndCopyEnabled = tagsAndCopyEnabled;
     }
 
     public int getEnterpriseAddonCost() {

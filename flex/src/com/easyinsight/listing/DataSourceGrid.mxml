@@ -2,6 +2,12 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*" xmlns:containers="flexlib.containers.*"
          width="100%"
          height="100%" horizontalAlign="center" initialize="onCreation()">
+    <mx:states>
+        <mx:State name="noTags">
+            <mx:RemoveChild target="{newButton}"/>
+            <mx:RemoveChild target="{tagBox}"/>
+        </mx:State>
+    </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.datasources.CopyDataSourceWindow;
@@ -212,6 +218,12 @@
                     break;
             }
             customizeVisible = User.getInstance().accountAdmin;
+            currentState = "noTags";
+            if (!User.getInstance().tagsAndCopyEnabled) {
+                actionButton.dataProvider = noTagActions;
+            } else {
+                actionButton.dataProvider = actions;
+            }
             for each (var tag:Tag in tags) {
                 var tagButton:TagButton = new TagButton();
                 tagButton.data = tag;
@@ -365,6 +377,9 @@
         [Bindable]
         private var customizeVisible:Boolean;
 
+        [Bindable]
+        private var tagsVisible:Boolean;
+
         private function blah():void {
             var window:CopyDataSourceWindow = new CopyDataSourceWindow();
             window.availableTags = tags;
@@ -405,6 +420,11 @@
         [Bindable]
         private var actions:ArrayCollection = new ArrayCollection([ {label: "Join data sources", op: "joinDataSources"},
             {label: "Copy data sources", op: "copyDataSources"},
+            {label: "Customize top reports", op: "customizeTopReports"}
+        ]);
+
+        [Bindable]
+        private var noTagActions:ArrayCollection = new ArrayCollection([ {label: "Join data sources", op: "joinDataSources"},
             {label: "Customize top reports", op: "customizeTopReports"}
         ]);
 
@@ -471,7 +491,7 @@
         <mx:Label text="Data Sources" fontSize="20" maxWidth="300"/>
         <mx:Spacer width="100%"/>
         <listing:ArghButton label="Actions..." styleName="grayButton" itemClick="onItemClick(event)" visible="{customizeVisible}" width="160" id="actionButton"
-                            dataProvider="{actions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
+                             labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
         <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onItemClick(event)" visible="{customizeVisible}" width="160" id="newButton"
                             dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
         <mx:LinkButton label="Delete Selected" click="deleteSelected()" fontSize="12" visible="{customizeVisible}"/>
@@ -485,7 +505,7 @@
 
         <mx:DataGrid fontSize="12" horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
             verticalGridLines="true" id="dataSourceGrid" horizontalScrollPolicy="off" verticalScrollPolicy="off" selectable="false"
-                dataProvider="{dataProvider}" rowHeight="24" updateComplete="">
+                dataProvider="{dataProvider}" rowHeight="24">
             <mx:columns>
                 <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>
                 <mx:DataGridColumn dataField="name" itemRenderer="com.easyinsight.listing.MyDataNameRenderer" headerText="Data Source" width="400" sortCompareFunction="nameSort"/>
