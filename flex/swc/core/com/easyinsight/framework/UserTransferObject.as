@@ -20,6 +20,7 @@ package com.easyinsight.framework
         public var autoRefreshReports:Boolean;
         public var analyst:Boolean = true;
         public var consultant:Boolean;
+        public var testAccountVisible:Boolean = true;
         public var lastLoginDate:Date;
 
         public var selected:Boolean;
