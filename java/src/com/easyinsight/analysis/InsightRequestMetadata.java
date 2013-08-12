@@ -37,10 +37,19 @@ public class InsightRequestMetadata implements Serializable {
     private transient Map<AnalysisItem, AnalysisItem> currencyMap = new HashMap<AnalysisItem, AnalysisItem>();
     private transient Set<AnalysisItem> postProcessJoins = new HashSet<AnalysisItem>();
     private List<AddonReport> addonReports;
+    private boolean noDataOnNoJoin;
     private String ip;
     private transient boolean noLogging;
 
     private long databaseTime = 0;
+
+    public boolean isNoDataOnNoJoin() {
+        return noDataOnNoJoin;
+    }
+
+    public void setNoDataOnNoJoin(boolean noDataOnNoJoin) {
+        this.noDataOnNoJoin = noDataOnNoJoin;
+    }
 
     public boolean isNoLogging() {
         return noLogging;

@@ -125,8 +125,27 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private boolean rowsEditable;
 
+    private int fetchSize;
+    private boolean noDataOnNoJoin;
+
     protected String generateDescription() {
         return "";
+    }
+
+    public int getFetchSize() {
+        return fetchSize;
+    }
+
+    public void setFetchSize(int fetchSize) {
+        this.fetchSize = fetchSize;
+    }
+
+    public boolean isNoDataOnNoJoin() {
+        return noDataOnNoJoin;
+    }
+
+    public void setNoDataOnNoJoin(boolean noDataOnNoJoin) {
+        this.noDataOnNoJoin = noDataOnNoJoin;
     }
 
     public int getGeneralSizeLimit() {
@@ -861,6 +880,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
         customFontFamily = findStringProperty(properties, "customFontFamily", "");
         useCustomFontFamily = findBooleanProperty(properties, "useCustomFontFamily", false);
         generalSizeLimit = (int) findNumberProperty(properties, "generalSizeLimit", 0);
+        fetchSize = (int) findNumberProperty(properties, "fetchSize", 0);
+        noDataOnNoJoin = findBooleanProperty(properties, "noDataOnNoJoin", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -882,6 +903,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("manualButRunFirst", manualButRunFirst));
         properties.add(new ReportBooleanProperty("useCustomFontFamily", useCustomFontFamily));
         properties.add(new ReportNumericProperty("generalSizeLimit", generalSizeLimit));
+        properties.add(new ReportNumericProperty("fetchSize", fetchSize));
+        properties.add(new ReportBooleanProperty("noDataOnNoJoin", noDataOnNoJoin));
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }

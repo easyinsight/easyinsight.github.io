@@ -103,6 +103,8 @@ import mx.collections.ArrayCollection;
         public var customFontFamily:String;
         public var useCustomFontFamily:Boolean;
     public var generalSizeLimit:int;
+    public var fetchSize:int;
+    public var noDataOnNoJoin:Boolean;
 
 		public function AnalysisDefinition()
 		{

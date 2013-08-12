@@ -360,11 +360,13 @@ public class StyleConfiguration {
         }
         if (report is TrendGridDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show KPI Name", "showKPIName", TrendGridDefinition(report).showKPIName, report));
+            items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
         }
         if (report is TextReport) {
             items.addItem(new ColorReportFormItem("Text Color", "fontColor", TextReport(report).fontColor, report));
         }
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
+        items.addItem(new CheckBoxReportFormItem("No Data on No Join", "noDataOnNoJoin", report.noDataOnNoJoin, report));
         items.addItem(new CheckBoxReportFormItem("Filter Optimization", "lookupTableOptimization", report.lookupTableOptimization, report));
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
         items.addItem(new CheckBoxReportFormItem("Log Report", "logReport", report.logReport, report));

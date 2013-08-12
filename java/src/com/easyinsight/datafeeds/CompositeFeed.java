@@ -331,6 +331,9 @@ public class CompositeFeed extends Feed {
             insightRequestMetadata.getSuggestions().add(new IntentionSuggestion("No Join in Data",
                     "We weren't able to find a way to join data on " + getName() + ".",
                     IntentionSuggestion.SCOPE_REPORT, IntentionSuggestion.WARNING_JOIN_FAILURE, IntentionSuggestion.WARNING));
+            if (insightRequestMetadata.isNoDataOnNoJoin()) {
+                return new DataSet();
+            }
             Map<QueryStateNode, DataSet> map = new HashMap<QueryStateNode, DataSet>();
 
             DataSet dataSet = new DataSet();
