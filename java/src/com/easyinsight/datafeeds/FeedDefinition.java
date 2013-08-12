@@ -6,6 +6,7 @@ import com.easyinsight.core.ReportKey;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.solutions.SolutionInstallInfo;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.SuggestedUser;
 import com.easyinsight.userupload.UploadPolicy;
@@ -617,7 +618,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return (FeedDefinition) super.clone();
     }
 
-    public DataSourceCloneResult cloneDataSource(Connection conn) throws Exception {
+    public Map<Long, SolutionInstallInfo> cloneDataSource(Connection conn) throws Exception {
         FeedDefinition feedDefinition = clone(conn);
         List<AnalysisItem> clonedFields = new ArrayList<AnalysisItem>();
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
@@ -657,7 +658,9 @@ public class FeedDefinition implements Cloneable, Serializable {
             }
         }
         feedDefinition.setFolders(clonedFolders);
-        return new DataSourceCloneResult(feedDefinition, keyReplacementMap);
+        Map<Long, SolutionInstallInfo> map = new HashMap<Long, SolutionInstallInfo>();
+        map.put(getDataFeedID(), new SolutionInstallInfo(getDataFeedID(), new DataSourceDescriptor(), getFeedName(), false, keyReplacementMap, feedDefinition));
+        return map;
     }
 
     public AnalysisItem findAnalysisItemByKey(String key) {

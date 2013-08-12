@@ -136,26 +136,32 @@ public class UserUploadService {
                 existingTags.add(new Tag(tagID, tagName));
             }
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM ACCOUNT_TAG WHERE ACCOUNT_TAG_ID = ?");
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID) VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TAG SET TAG_NAME = ? WHERE ACCOUNT_TAG_ID = ?");
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID, tag_index) VALUES (?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TAG SET TAG_NAME = ?, tag_index = ? WHERE ACCOUNT_TAG_ID = ?");
+
             for (Tag existingTag : existingTags) {
                 if (!tags.contains(existingTag)) {
                     deleteStmt.setLong(1, existingTag.getId());
                     deleteStmt.executeUpdate();
                 }
             }
+
+            int i = 0;
             for (Tag tag : tags) {
                 if (tag.getId() == 0) {
                     insertStmt.setString(1, tag.getName());
                     insertStmt.setLong(2, SecurityUtil.getAccountID());
+                    insertStmt.setInt(3, i);
                     insertStmt.execute();
                     long id = Database.instance().getAutoGenKey(insertStmt);
                     tag.setId(id);
                 } else {
                     updateStmt.setString(1, tag.getName());
-                    updateStmt.setLong(2, tag.getId());
+                    updateStmt.setInt(2, i);
+                    updateStmt.setLong(3, tag.getId());
                     updateStmt.executeUpdate();
                 }
+                i++;
             }
             deleteStmt.close();
             insertStmt.close();
@@ -309,12 +315,16 @@ public class UserUploadService {
             conn.setAutoCommit(false);
             Set<Long> existing = new HashSet<Long>();
             List<SolutionInstallInfo> infos = new ArrayList<SolutionInstallInfo>();
+            Map<Long, SolutionInstallInfo> allInfos = new HashMap<Long, SolutionInstallInfo>();
             for (DataSourceDescriptor dataSource : dataSources) {
                 if (!existing.contains(dataSource.getId())) {
                     FeedDefinition existingDef = feedStorage.getFeedDefinitionData(dataSource.getId(), conn);
-                    List<SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, dataSource.getId(), existingDef, existingDef.getFeedName(), 0,
-                            SecurityUtil.getAccountID(), SecurityUtil.getUserName());
-                    for (SolutionInstallInfo info : results) {
+                    Map<Long, SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, existingDef, existingDef.getFeedName(), 0,
+                            SecurityUtil.getAccountID(), SecurityUtil.getUserName(), allInfos);
+                    if (results != null) {
+                        allInfos.putAll(results);
+                    }
+                    for (SolutionInstallInfo info : results.values()) {
                         existing.add(info.getPreviousID());
                         infos.add(info);
                     }
@@ -338,8 +348,8 @@ public class UserUploadService {
                 }
                 getTagStmt.close();
                 PreparedStatement ps = conn.prepareStatement("INSERT INTO DATA_SOURCE_TO_TAG (DATA_SOURCE_ID, ACCOUNT_TAG_ID) VALUES (?, ?)");
-                for (DataSourceDescriptor desc : dataSources) {
-                    ps.setLong(1, desc.getId());
+                for (SolutionInstallInfo info : infos) {
+                    ps.setLong(1, info.getNewDataSource().getDataFeedID());
                     ps.setLong(2, tagID);
                     ps.execute();
                 }
@@ -541,12 +551,12 @@ public class UserUploadService {
 
             long dsTime = System.currentTimeMillis();
 
-            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? ORDER BY TAG_INDEX");
             PreparedStatement getTagsToDataSourcesStmt = conn.prepareStatement("SELECT DATA_SOURCE_TO_TAG.ACCOUNT_TAG_ID, DATA_SOURCE_ID FROM data_source_to_tag, account_tag WHERE " +
                     "account_tag.account_tag_id = data_source_to_tag.account_tag_id and account_tag.account_id = ?");
             getTagsStmt.setLong(1, SecurityUtil.getAccountID());
             ResultSet tagRS = getTagsStmt.executeQuery();
-            Map<Long, Tag> tags = new HashMap<Long, Tag>();
+            Map<Long, Tag> tags = new LinkedHashMap<Long, Tag>();
             while (tagRS.next()) {
                 tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2)));
             }

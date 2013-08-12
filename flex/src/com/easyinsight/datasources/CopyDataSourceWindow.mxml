@@ -1,9 +1,11 @@
 <?xml version="1.0"?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()" backgroundColor="#FFFFFF">
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()" backgroundColor="#FFFFFF"
+        paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.listing.Tag;
         import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -110,7 +112,7 @@
                 <mx:Label text="Tag:"/>
                 <mx:ComboBox id="tagBox" dataProvider="{tags}" labelField="name" change="updateFilter()"/>
             </mx:HBox>
-            <mx:DataGrid id="sourceGrid" dataProvider="{dataSources}" rowHeight="28" height="400">
+            <mx:DataGrid id="sourceGrid" dataProvider="{dataSources}" rowHeight="28" height="300">
                 <mx:columns>
                     <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="50"/>
                     <mx:DataGridColumn dataField="name" width="400"/>
@@ -121,7 +123,7 @@
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
         </mx:VBox>
-        <mx:VBox>
+        <mx:VBox creationComplete="PopUpUtil.centerPopUp(this)">
             <mx:Form>
                 <mx:FormItem label="Do you want to copy reports and dashboards associated with the selected data sources?">
                     <mx:CheckBox id="copyReportsCheckbox"/>
@@ -133,7 +135,7 @@
                     <mx:TextInput id="replaceInput" width="300" enabled="{updateTagCheckbox.selected}"/>
                 </mx:FormItem>
             </mx:Form>
-            <mx:DataGrid id="blahGrid" dataProvider="{selectedDataSources}" width="400" rowHeight="28">
+            <mx:DataGrid id="blahGrid" dataProvider="{selectedDataSources}" width="300" rowHeight="28">
                 <mx:columns>
                     <mx:DataGridColumn dataField="name" width="400"/>
                 </mx:columns>

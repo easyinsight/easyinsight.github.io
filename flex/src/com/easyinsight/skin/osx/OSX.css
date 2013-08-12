@@ -687,7 +687,20 @@ TransformContainer {
     fontWeight: bold;
 }
 
+.defaultLinkButton {
+    fontWeight: normal;
+    font-family: "Helvetica Neue", "Helvetica";
+    borderStyle: solid;
+    borderThickness: 1;
+    borderColor: #FFFFFF;
+    cornerRadius: 3px;
+}
+
 .toggledLinkButton {
     fontWeight: bold;
-    font-family: 'Open Sans Bold';
+    font-family: "Helvetica Neue", "Helvetica";
+    borderStyle: solid;
+    borderThickness: 1;
+    backgroundColor: #4499FF;
+    cornerRadius: 3px;
 }

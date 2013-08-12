@@ -95,6 +95,9 @@ public class User {
     @Column(name="news_dismiss_date")
     private Date newsDismissDate;
 
+    @Column(name="test_account_visible")
+    private boolean testAccountVisible = true;
+
     public User() {
     }
 
@@ -120,7 +123,16 @@ public class User {
         userTransferObject.setInvoiceRecipient(invoiceRecipient);
         userTransferObject.setAnalyst(analyst);
         userTransferObject.setLastLoginDate(lastLoginDate);
+        userTransferObject.setTestAccountVisible(testAccountVisible);
         return userTransferObject;
+    }
+
+    public boolean isTestAccountVisible() {
+        return testAccountVisible;
+    }
+
+    public void setTestAccountVisible(boolean testAccountVisible) {
+        this.testAccountVisible = testAccountVisible;
     }
 
     public Date getNewsDismissDate() {
@@ -357,6 +369,7 @@ public class User {
         setTitle(transferObject.getTitle());
         setOptInEmail(transferObject.isOptInEmail());
         setInvoiceRecipient(transferObject.isInvoiceRecipient());
+        setTestAccountVisible(transferObject.isTestAccountVisible());
         setRefreshReports(transferObject.isAutoRefreshReports());
         setAnalyst(transferObject.isAnalyst());
         if (transferObject.getFixedDashboardID() == 0) {

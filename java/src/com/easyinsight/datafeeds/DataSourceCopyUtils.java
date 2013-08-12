@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.dataset.DataSet;
@@ -19,6 +20,7 @@ import java.sql.ResultSet;
 import java.util.*;
 
 import org.hibernate.Session;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: James Boe
@@ -27,22 +29,27 @@ import org.hibernate.Session;
  */
 public class DataSourceCopyUtils {
 
-    public static List<SolutionInstallInfo> installFeed(long userID, Connection conn, boolean copyData, long feedID,
+    @Nullable
+    public static Map<Long, SolutionInstallInfo> installFeed(long userID, Connection conn, boolean copyData,
                                                         FeedDefinition feedDefinition, String newDataSourceName,
-                                                        long solutionID, long accountID, String userName) throws Exception {
+                                                        long solutionID, long accountID, String userName, Map<Long, SolutionInstallInfo> existingInfos) throws Exception {
+        if (existingInfos.containsKey(feedDefinition.getDataFeedID())) {
+            return null;
+        }
         FeedStorage feedStorage = new FeedStorage();
-        List<SolutionInstallInfo> infos = new ArrayList<SolutionInstallInfo>();
+        Map<Long, SolutionInstallInfo> infos;
 
         // result here needs to have the core keys
         // 
 
-        DataSourceCloneResult result = cloneFeed(userID, conn, feedDefinition, solutionID > 0, accountID, userName);
-        FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
+        infos = cloneFeed(userID, conn, feedDefinition, solutionID > 0, accountID, userName);
+        FeedDefinition clonedFeedDefinition = infos.get(feedDefinition.getDataFeedID()).getNewDataSource();
         if (solutionID > 0 && feedDefinition.requiresConfiguration()) {
             clonedFeedDefinition.setVisible(false);
         }
         clonedFeedDefinition.setDateCreated(new Date());
         clonedFeedDefinition.setDateUpdated(new Date());
+        clonedFeedDefinition.setLastRefreshStart(new Date(1));
         if (newDataSourceName != null) {
             clonedFeedDefinition.setFeedName(newDataSourceName);
         }
@@ -51,15 +58,9 @@ public class DataSourceCopyUtils {
         if ((feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL)) {
             buildClonedDataStores(copyData, feedDefinition, clonedFeedDefinition, conn);
         } else {
-            DataStorage.liveDataSource(result.getFeedDefinition().getDataFeedID(), conn, result.getFeedDefinition().getFeedType().getType());
+            DataStorage.liveDataSource(clonedFeedDefinition.getDataFeedID(), conn, clonedFeedDefinition.getFeedType().getType());
         }
         clonedFeedDefinition.postClone(conn);
-
-        boolean requiresConfig = solutionID > 0 && feedDefinition.requiresConfiguration();
-
-        DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(clonedFeedDefinition.getFeedName(), clonedFeedDefinition.getDataFeedID(),
-                clonedFeedDefinition.getFeedType().getType(), false, clonedFeedDefinition.getDataSourceBehavior());
-        infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), dataSourceDescriptor, clonedFeedDefinition.getFeedName(), requiresConfig));
         PreparedStatement getReports = conn.prepareStatement("SELECT ANALYSIS_ID FROM ANALYSIS WHERE DATA_FEED_ID = ? AND TEMPORARY_REPORT = ?");
         getReports.setLong(1, feedDefinition.getDataFeedID());
         getReports.setBoolean(2, false);
@@ -68,7 +69,11 @@ public class DataSourceCopyUtils {
         Session session = Database.instance().createSession(conn);
         while (reportRS.next()) {
             long reportID = reportRS.getLong(1);
-            new SolutionService().installReport(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, false, true, alreadyInstalledMap);
+            try {
+                new SolutionService().installReport(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, false, true, alreadyInstalledMap);
+            } catch (Exception e) {
+                LogClass.error("Could not install report " + reportID, e);
+            }
         }
         PreparedStatement getDashboards = conn.prepareStatement("SELECT DASHBOARD_ID, FOLDER FROM DASHBOARD WHERE DATA_SOURCE_ID = ? AND TEMPORARY_DASHBOARD = ?");
         getDashboards.setLong(1, feedDefinition.getDataFeedID());
@@ -77,7 +82,11 @@ public class DataSourceCopyUtils {
         while (dashboardRS.next()) {
             long reportID = dashboardRS.getLong(1);
             int folder = dashboardRS.getInt(2);
-            new SolutionService().installDashboard(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, false, true, alreadyInstalledMap, folder);
+            try {
+                new SolutionService().installDashboard(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, false, true, alreadyInstalledMap, folder);
+            } catch (Exception e) {
+                LogClass.error("Could not install dashboard " + reportID, e);
+            }
         }
         session.close();
         return infos;
@@ -123,12 +132,13 @@ public class DataSourceCopyUtils {
         }
     }
 
-    public static DataSourceCloneResult cloneFeed(long userID, Connection conn, FeedDefinition feedDefinition,
+    public static Map<Long, SolutionInstallInfo> cloneFeed(long userID, Connection conn, FeedDefinition feedDefinition,
                                                   boolean installingFromConnection, long accountID, String userName) throws Exception {
         FeedStorage feedStorage = new FeedStorage();
-        DataSourceCloneResult result = feedDefinition.cloneDataSource(conn);
-        FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
+        Map<Long, SolutionInstallInfo> result = feedDefinition.cloneDataSource(conn);
+        FeedDefinition clonedFeedDefinition = result.get(feedDefinition.getDataFeedID()).getNewDataSource();
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID, accountID));
+        clonedFeedDefinition.setLastRefreshStart(new Date(1));
         clonedFeedDefinition.setOwnerName(userName);
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
         return result;

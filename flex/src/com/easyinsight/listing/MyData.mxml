@@ -134,6 +134,18 @@
 
         private var _dataSources:ArrayCollection;
 
+        private var _masterDataSources:ArrayCollection;
+
+        [Bindable(event="masterDataSourcesChanged")]
+        public function get masterDataSources():ArrayCollection {
+            return _masterDataSources;
+        }
+
+        public function set masterDataSources(value:ArrayCollection):void {
+            if (_masterDataSources == value) return;
+            _masterDataSources = value;
+            dispatchEvent(new Event("masterDataSourcesChanged"));
+        }
 
         [Bindable(event="dataSourcesChanged")]
         public function get dataSources():ArrayCollection {
@@ -148,7 +160,7 @@
 
         private function gotFeedAnalysisTree():void {
             var myDataTree:MyDataTree = uploadService.getFeedAnalysisTree.lastResult as MyDataTree;
-
+            tags = myDataTree.tags;
             var dataSourceArray:Array = [];
             for each (var desc:EIDescriptor in myDataTree.objects) {
                 if (desc.getType() == EIDescriptor.DATA_SOURCE) {
@@ -162,6 +174,7 @@
                 }
             }
             this.dataSources = new ArrayCollection(dataSourceArray);
+            this.masterDataSources = new ArrayCollection(dataSourceArray);
 
             if (myDataTree.objects.length == 1) {
                 dataSourceDescriptor = myDataTree.objects.getItemAt(0) as DataSourceDescriptor;
@@ -191,8 +204,22 @@
                 dataGrid = new DataSourceGrid();
                 dataGrid.topItems = accountReports;
                 BindingUtils.bindProperty(dataGrid, "dataProvider", this, "dataSources");
+                BindingUtils.bindProperty(dataGrid, "tags", this, "tags");
             }
             blah.addChild(dataGrid);
+        }
+
+        private var _tags:ArrayCollection;
+
+        [Bindable(event="tagsChanged")]
+        public function get tags():ArrayCollection {
+            return _tags;
+        }
+
+        public function set tags(value:ArrayCollection):void {
+            if (_tags == value) return;
+            _tags = value;
+            dispatchEvent(new Event("tagsChanged"));
         }
 
         private var dataGrid:DataSourceGrid;
@@ -203,7 +230,9 @@
             currentState = "";
             if (dataSourceDescriptor != null && dsList != null && IDataSourceSpecificList(dsList).dataSourceDescriptor != null &&
                     dataSourceDescriptor.id == IDataSourceSpecificList(dsList).dataSourceDescriptor.id) {
+                IDataSourceSpecificList(dsList).showBack = masterDataSources.length > 1;
                 dsList.data = dataSourceDescriptor;
+                dsList.invalidateProperties();
                 return;
             }
             blah.removeAllChildren();
@@ -222,7 +251,7 @@
                 dsList = new SimplifiedDataSourceSpecificList();
             }
 
-            IDataSourceSpecificList(dsList).showBack = dataSources.length > 1;
+            IDataSourceSpecificList(dsList).showBack = masterDataSources.length > 1;
             dsList.data = dataSourceDescriptor;
             dsList.addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
             dsList.addEventListener("refresh", onRefresh);

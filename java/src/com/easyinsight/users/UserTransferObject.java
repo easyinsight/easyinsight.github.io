@@ -29,6 +29,8 @@ public class UserTransferObject {
     private boolean autoRefreshReports;
     private boolean analyst;
 
+    private boolean testAccountVisible;
+
     public UserTransferObject() {
     }
 
@@ -38,6 +40,14 @@ public class UserTransferObject {
         this.email = email;
         this.name = name;
         this.firstName = firstName;
+    }
+
+    public boolean isTestAccountVisible() {
+        return testAccountVisible;
+    }
+
+    public void setTestAccountVisible(boolean testAccountVisible) {
+        this.testAccountVisible = testAccountVisible;
     }
 
     public boolean isAnalyst() {
@@ -174,6 +184,7 @@ public class UserTransferObject {
         user.setInitialSetupDone(isInitialSetupDone());
         user.setRefreshReports(isAutoRefreshReports());
         user.setInvoiceRecipient(isInvoiceRecipient());
+        user.setTestAccountVisible(isTestAccountVisible());
         user.setAnalyst(isAnalyst());
         if (getFixedDashboardID() > 0) {
             user.setFixedDashboardID(getFixedDashboardID());

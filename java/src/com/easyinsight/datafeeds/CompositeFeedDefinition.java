@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.ReplacementMap;
+import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.analysis.AnalysisItem;
@@ -9,8 +10,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.security.Roles;
-import com.easyinsight.userupload.UserUploadInternalService;
+import com.easyinsight.solutions.SolutionInstallInfo;
 
 import java.sql.*;
 import java.util.*;
@@ -552,38 +552,38 @@ public class CompositeFeedDefinition extends FeedDefinition {
     }
 
     @Override
-    public DataSourceCloneResult cloneDataSource(Connection conn) throws Exception {
-        DataSourceCloneResult dataSourceCloneResult = super.cloneDataSource(conn);
-        CompositeFeedDefinition feedDefinition = (CompositeFeedDefinition) dataSourceCloneResult.getFeedDefinition();
+    public Map<Long, SolutionInstallInfo> cloneDataSource(Connection conn) throws Exception {
+        Map<Long, SolutionInstallInfo> infos = super.cloneDataSource(conn);
+        CompositeFeedDefinition feedDefinition = (CompositeFeedDefinition) infos.get(getDataFeedID()).getNewDataSource();
 
         // need clean model here
         // clone the core information
         // there's a "generate keys" phase, effectively
         // 
 
-        Map<Long, DataSourceCloneResult> replacementMap = new HashMap<Long, DataSourceCloneResult>();
+        Map<Long, SolutionInstallInfo> replacementMap = new HashMap<Long, SolutionInstallInfo>();
         List<CompositeFeedNode> newChildren = new ArrayList<CompositeFeedNode>();
         for (CompositeFeedNode child : getCompositeFeedNodes()) {
             FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
-            DataSourceCloneResult result = DataSourceCopyUtils.cloneFeed(SecurityUtil.getUserID(), conn, childDefinition, false, SecurityUtil.getAccountID(), SecurityUtil.getUserName());
-            FeedDefinition clonedDefinition = result.getFeedDefinition();
-            DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
-            new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);
-            replacementMap.put(child.getDataFeedID(), result);
+            Map<Long, SolutionInstallInfo> map = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, false, childDefinition, childDefinition.getFeedName(), 0,
+                    SecurityUtil.getAccountID(), SecurityUtil.getUserName(), infos);
+            if (map != null) {
+                infos.putAll(map);
+            }
+            FeedDefinition clonedDefinition = infos.get(child.getDataFeedID()).getNewDataSource();
+            replacementMap.putAll(infos);
             newChildren.add(new CompositeFeedNode(clonedDefinition.getDataFeedID(), child.getX(), child.getY(), child.getDataSourceName(), child.getDataSourceType(),
                     child.getRefreshBehavior()));
         }
-
-        // 
 
         feedDefinition.setCompositeFeedNodes(newChildren);
         List<CompositeFeedConnection> newConnections = new ArrayList<CompositeFeedConnection>();
         for (CompositeFeedConnection connection : feedDefinition.getConnections()) {
             CompositeFeedConnection newConnection = new CompositeFeedConnection();
-            newConnection.setSourceJoin(replacementMap.get(connection.getSourceFeedID()).getFeedDefinition().getField(connection.getSourceJoin().toKeyString()));
-            newConnection.setTargetJoin(replacementMap.get(connection.getTargetFeedID()).getFeedDefinition().getField(connection.getTargetJoin().toKeyString()));
-            newConnection.setSourceFeedID(replacementMap.get(connection.getSourceFeedID()).getFeedDefinition().getDataFeedID());
-            newConnection.setTargetFeedID(replacementMap.get(connection.getTargetFeedID()).getFeedDefinition().getDataFeedID());
+            newConnection.setSourceJoin(replacementMap.get(connection.getSourceFeedID()).getNewDataSource().getField(connection.getSourceJoin().toKeyString()));
+            newConnection.setTargetJoin(replacementMap.get(connection.getTargetFeedID()).getNewDataSource().getField(connection.getTargetJoin().toKeyString()));
+            newConnection.setSourceFeedID(replacementMap.get(connection.getSourceFeedID()).getNewDataSource().getDataFeedID());
+            newConnection.setTargetFeedID(replacementMap.get(connection.getTargetFeedID()).getNewDataSource().getDataFeedID());
             newConnections.add(newConnection);
         }
         feedDefinition.setConnections(newConnections);
@@ -593,12 +593,12 @@ public class CompositeFeedDefinition extends FeedDefinition {
             Key key = analysisItem.getKey();
             if (key instanceof DerivedKey) {
                 DerivedKey derivedKey = (DerivedKey) key;
-                DataSourceCloneResult result = replacementMap.get(derivedKey.getFeedID());
-                derivedKey.setFeedID(result.getFeedDefinition().getDataFeedID());
+                SolutionInstallInfo result = replacementMap.get(derivedKey.getFeedID());
+                derivedKey.setFeedID(result.getNewDataSource().getDataFeedID());
                 derivedKey.setParentKey(result.getKeyReplacementMap().get(derivedKey.getParentKey()));
             }
         }
-        return dataSourceCloneResult;
+        return infos;
     }
 
     protected void cloneFields() {
@@ -628,5 +628,16 @@ public class CompositeFeedDefinition extends FeedDefinition {
     @Override
     protected void onDelete(Connection conn) throws SQLException {
 
+    }
+
+    public Collection<DataSourceDescriptor> getDataSources(EIConnection conn) throws SQLException {
+        Collection<DataSourceDescriptor> sources = super.getDataSources(conn);
+        for (CompositeFeedNode node : getCompositeFeedNodes()) {
+            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(node.getDataFeedID(), conn);
+            if (feedDefinition.isVisible()) {
+                sources.addAll(feedDefinition.getDataSources(conn));
+            }
+        }
+        return sources;
     }
 }

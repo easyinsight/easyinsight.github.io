@@ -1637,6 +1637,7 @@ public class DataService {
             insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
 
             insightRequestMetadata.setAddonReports(analysisDefinition.getAddonReports());
+            insightRequestMetadata.setNoDataOnNoJoin(analysisDefinition.isNoDataOnNoJoin());
 
 
             if (insightRequestMetadata.getHierarchyOverrides() != null) {
