@@ -5,6 +5,8 @@
     <mx:states>
         <mx:State name="noTags">
             <mx:RemoveChild target="{newButton}"/>
+            <mx:RemoveChild target="{tagUpperRule}"/>
+            <mx:RemoveChild target="{tagLowerRule}"/>
             <mx:RemoveChild target="{tagBox}"/>
         </mx:State>
     </mx:states>
@@ -132,8 +134,12 @@
                     selected.addItem(dsd);
                 }
             }
-            ProgressAlert.alert(this, "Tagging...", null, uploadService.tagDataSources);
-            uploadService.tagDataSources.send(selected, addTag);
+            if (selected.length == 0) {
+                Alert.show("You must select at least one data source to tag.");
+            } else {
+                ProgressAlert.alert(this, "Tagging...", null, uploadService.tagDataSources);
+                uploadService.tagDataSources.send(selected, addTag);
+            }
         }
 
         private function dropTag(addTag:Tag):void {
@@ -143,8 +149,12 @@
                     selected.addItem(dsd);
                 }
             }
-            ProgressAlert.alert(this, "Tagging...", null, uploadService.untagDataSource);
-            uploadService.untagDataSource.send(selected, addTag);
+            if (selected.length == 0) {
+                Alert.show("You must select at least one data source to untag.");
+            } else {
+                ProgressAlert.alert(this, "Tagging...", null, uploadService.untagDataSource);
+                uploadService.untagDataSource.send(selected, addTag);
+            }
         }
 
         private function populateTags(tags:ArrayCollection):void {
@@ -218,10 +228,12 @@
                     break;
             }
             customizeVisible = User.getInstance().accountAdmin;
-            currentState = "noTags";
+
             if (!User.getInstance().tagsAndCopyEnabled) {
+                currentState = "noTags";
                 actionButton.dataProvider = noTagActions;
             } else {
+                currentState = "";
                 actionButton.dataProvider = actions;
             }
             for each (var tag:Tag in tags) {
@@ -496,9 +508,9 @@
                             dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
         <mx:LinkButton label="Delete Selected" click="deleteSelected()" fontSize="12" visible="{customizeVisible}"/>
     </mx:HBox>
-    <containers:FlowBox id="tagBox" width="100%" updateComplete="adapterFlowBoxUpdateCompleteHandler(event)">
-
-    </containers:FlowBox>
+    <mx:HRule id="tagUpperRule" width="200" strokeColor="#CCCCCC"/>
+    <containers:FlowBox id="tagBox" width="100%" updateComplete="adapterFlowBoxUpdateCompleteHandler(event)"/>
+    <mx:HRule id="tagLowerRule" width="200" strokeColor="#CCCCCC"/>
     <mx:HBox paddingLeft="10" paddingRight="10"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
          backgroundColor="#FFFFFF" paddingTop="5" paddingBottom="5">
