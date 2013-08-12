@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.dataset.DataSet;
@@ -68,7 +69,11 @@ public class DataSourceCopyUtils {
         Session session = Database.instance().createSession(conn);
         while (reportRS.next()) {
             long reportID = reportRS.getLong(1);
-            new SolutionService().installReport(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, false, true, alreadyInstalledMap);
+            try {
+                new SolutionService().installReport(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, false, true, alreadyInstalledMap);
+            } catch (Exception e) {
+                LogClass.error("Could not install report " + reportID, e);
+            }
         }
         PreparedStatement getDashboards = conn.prepareStatement("SELECT DASHBOARD_ID, FOLDER FROM DASHBOARD WHERE DATA_SOURCE_ID = ? AND TEMPORARY_DASHBOARD = ?");
         getDashboards.setLong(1, feedDefinition.getDataFeedID());
@@ -77,7 +82,11 @@ public class DataSourceCopyUtils {
         while (dashboardRS.next()) {
             long reportID = dashboardRS.getLong(1);
             int folder = dashboardRS.getInt(2);
-            new SolutionService().installDashboard(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, false, true, alreadyInstalledMap, folder);
+            try {
+                new SolutionService().installDashboard(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, false, true, alreadyInstalledMap, folder);
+            } catch (Exception e) {
+                LogClass.error("Could not install dashboard " + reportID, e);
+            }
         }
         session.close();
         return infos;
