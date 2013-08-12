@@ -234,6 +234,18 @@
                 actionButton.dataProvider = noTagActions;
             } else {
                 currentState = "";
+                var newColumns:Array = [];
+                for each (var o:Object in dataSourceGrid.columns) {
+                    newColumns.push(o);
+                }
+                var tagColumn:DataGridColumn = new DataGridColumn();
+                tagColumn.labelFunction = renderTags;
+                tagColumn.headerText = "Tags";
+                tagColumn.width = 140;
+                tagColumn.sortable = false;
+
+                newColumns.push(tagColumn);
+                dataSourceGrid.columns = newColumns;
                 actionButton.dataProvider = actions;
             }
             for each (var tag:Tag in tags) {
@@ -483,6 +495,23 @@
                 }
             }
         }
+
+        private function renderTags(value:Object, column:DataGridColumn):String {
+            var ds:DataSourceDescriptor = value as DataSourceDescriptor;
+            if (ds.tags == null || ds.tags.length == 0) {
+                return "";
+            } else {
+                var str:String = "";
+                for (var i:int = 0; i < ds.tags.length; i++) {
+                    var tag:Tag = ds.tags.getItemAt(i) as Tag;
+                    str += tag.name;
+                    if (i < (ds.tags.length - 1)) {
+                        str += ", ";
+                    }
+                }
+                return str;
+            }
+        }
         ]]></mx:Script>
     <mx:Style>
         .myCustomPopUpStyleName {
@@ -508,9 +537,9 @@
                             dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
         <mx:LinkButton label="Delete Selected" click="deleteSelected()" fontSize="12" visible="{customizeVisible}"/>
     </mx:HBox>
-    <mx:HRule id="tagUpperRule" width="200" strokeColor="#CCCCCC"/>
+    <mx:HRule id="tagUpperRule" width="100%" strokeColor="#CCCCCC"/>
     <containers:FlowBox id="tagBox" width="100%" updateComplete="adapterFlowBoxUpdateCompleteHandler(event)"/>
-    <mx:HRule id="tagLowerRule" width="200" strokeColor="#CCCCCC"/>
+    <mx:HRule id="tagLowerRule" width="100%" strokeColor="#CCCCCC"/>
     <mx:HBox paddingLeft="10" paddingRight="10"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
          backgroundColor="#FFFFFF" paddingTop="5" paddingBottom="5">
