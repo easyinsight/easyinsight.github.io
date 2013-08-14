@@ -71,11 +71,16 @@ public class AggregateKey extends NamedKey {
         return true;
     }
 
+    private transient Integer hashCode;
+
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + type;
-        result = 31 * result + (key != null ? key.hashCode() : 0);
-        return result;
+        if (hashCode == null) {
+            int result = super.hashCode();
+            result = 31 * result + type;
+            result = 31 * result + (key != null ? key.hashCode() : 0);
+            hashCode = result;
+        }
+        return hashCode;
     }
 }
