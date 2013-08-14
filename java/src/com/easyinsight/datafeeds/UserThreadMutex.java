@@ -1,5 +1,7 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.analysis.GenericReportFault;
+import com.easyinsight.analysis.ReportException;
 import com.easyinsight.servlet.SystemSettings;
 
 import java.util.HashMap;
@@ -33,7 +35,7 @@ public class UserThreadMutex {
                     System.out.println(userID + " could not retrieve a user thread semaphore, retrying and waiting.");
                     success = semaphore.tryAcquire(60000, TimeUnit.MILLISECONDS);
                     if (!success) {
-                        System.out.println(userID + " could not retrieve a user thread semaphore, timed out.");
+                        throw new ReportException(new GenericReportFault("STOP HURTING ME, CENDIE :("));
                     }
                 }
                 return success;
@@ -43,7 +45,7 @@ public class UserThreadMutex {
                     System.out.println(userID + " could not retrieve a user thread semaphore, retrying and waiting.");
                     success = semaphore.tryAcquire(60000, TimeUnit.MILLISECONDS);
                     if (!success) {
-                        System.out.println(userID + " could not retrieve a user thread semaphore, timed out.");
+                        throw new ReportException(new GenericReportFault("STOP HURTING ME, CENDIE :("));
                     }
                 }
                 return success;
