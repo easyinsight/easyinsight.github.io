@@ -123,10 +123,30 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private List<AddonReport> addonReports;
 
+    private boolean aggregateQueryIfPossible = true;
+
+    private boolean newFilterStrategy;
+
     private boolean rowsEditable;
 
     private int fetchSize;
     private boolean noDataOnNoJoin;
+
+    public boolean isAggregateQueryIfPossible() {
+        return aggregateQueryIfPossible;
+    }
+
+    public void setAggregateQueryIfPossible(boolean aggregateQueryIfPossible) {
+        this.aggregateQueryIfPossible = aggregateQueryIfPossible;
+    }
+
+    public boolean isNewFilterStrategy() {
+        return newFilterStrategy;
+    }
+
+    public void setNewFilterStrategy(boolean newFilterStrategy) {
+        this.newFilterStrategy = newFilterStrategy;
+    }
 
     protected String generateDescription() {
         return "";
@@ -882,6 +902,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         generalSizeLimit = (int) findNumberProperty(properties, "generalSizeLimit", 0);
         fetchSize = (int) findNumberProperty(properties, "fetchSize", 0);
         noDataOnNoJoin = findBooleanProperty(properties, "noDataOnNoJoin", false);
+        aggregateQueryIfPossible = findBooleanProperty(properties, "aggregateQueryIfPossible", true);
     }
 
     public List<ReportProperty> createProperties() {
@@ -905,6 +926,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportNumericProperty("generalSizeLimit", generalSizeLimit));
         properties.add(new ReportNumericProperty("fetchSize", fetchSize));
         properties.add(new ReportBooleanProperty("noDataOnNoJoin", noDataOnNoJoin));
+        properties.add(new ReportBooleanProperty("aggregateQueryIfPossible", aggregateQueryIfPossible));
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }

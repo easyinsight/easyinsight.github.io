@@ -1797,7 +1797,7 @@ public class DataService {
                 filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
             }
 
-            boolean aggregateQuery = true;
+            boolean aggregateQuery = analysisDefinition.isAggregateQueryIfPossible();
             Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
             items.remove(null);
             for (AnalysisItem analysisItem : items) {
@@ -1827,6 +1827,7 @@ public class DataService {
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             insightRequestMetadata.setLookupTableAggregate(analysisDefinition.isLookupTableOptimization());
             insightRequestMetadata.setReportItems(analysisDefinition.getAllAnalysisItems());
+            insightRequestMetadata.setNewFilterStrategy(analysisDefinition.isNewFilterStrategy());
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
 
             timeshift(validQueryItems, filters, feed);
