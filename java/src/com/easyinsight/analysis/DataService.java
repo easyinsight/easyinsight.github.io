@@ -1465,7 +1465,14 @@ public class DataService {
     }
 
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean ignoreCache) {
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success;
+        try {
+            success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (ReportException e) {
+            ListDataResults embeddedDataResults = new ListDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            return embeddedDataResults;
+        }
         EIConnection conn = Database.instance().getConnection();
         try {
             long startTime = System.currentTimeMillis();
