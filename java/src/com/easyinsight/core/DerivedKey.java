@@ -131,11 +131,16 @@ public class DerivedKey extends Key {
         return true;
     }
 
+    @Transient
+    private transient Integer cachedHashCode;
+
     public int hashCode() {
-        int result;
-        result = parentKey.hashCode();
-        result = 31 * result + (int) (feedID ^ (feedID >>> 32));
-        return result;
+        if (cachedHashCode == null) {
+            int result;
+            result = parentKey.hashCode();
+            cachedHashCode = 31 * result + (int) (feedID ^ (feedID >>> 32));
+        }
+        return cachedHashCode;
     }
 
     @Override
