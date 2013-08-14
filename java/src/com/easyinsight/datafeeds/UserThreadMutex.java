@@ -22,23 +22,35 @@ public class UserThreadMutex {
         return mutex;
     }
 
-    public void acquire(long userID) throws InterruptedException {
-        /*Semaphore semaphore = mutexMap.get(userID);
-        if (semaphore == null) {
-            semaphore = new Semaphore(SystemSettings.instance().getSemaphoreLimit());
-            mutexMap.put(userID, semaphore);
-            boolean success = semaphore.tryAcquire();
-            if (!success) {
-                System.out.println(userID + " could not retrieve a user thread semaphore, retrying and waiting.");
-                semaphore.tryAcquire(60000, TimeUnit.MILLISECONDS);
+    public boolean acquire(long userID) {
+        try {
+            Semaphore semaphore = mutexMap.get(userID);
+            if (semaphore == null) {
+                semaphore = new Semaphore(SystemSettings.instance().getSemaphoreLimit());
+                mutexMap.put(userID, semaphore);
+                boolean success = semaphore.tryAcquire();
+                if (!success) {
+                    System.out.println(userID + " could not retrieve a user thread semaphore, retrying and waiting.");
+                    success = semaphore.tryAcquire(60000, TimeUnit.MILLISECONDS);
+                    if (!success) {
+                        System.out.println(userID + " could not retrieve a user thread semaphore, timed out.");
+                    }
+                }
+                return success;
+            } else {
+                boolean success = semaphore.tryAcquire();
+                if (!success) {
+                    System.out.println(userID + " could not retrieve a user thread semaphore, retrying and waiting.");
+                    success = semaphore.tryAcquire(60000, TimeUnit.MILLISECONDS);
+                    if (!success) {
+                        System.out.println(userID + " could not retrieve a user thread semaphore, timed out.");
+                    }
+                }
+                return success;
             }
-        } else {
-            boolean success = semaphore.tryAcquire();
-            if (!success) {
-                System.out.println(userID + " could not retrieve a user thread semaphore, retrying and waiting.");
-                semaphore.tryAcquire(60000, TimeUnit.MILLISECONDS);
-            }
-        }*/
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static Map<Long, Semaphore> summarize() {
@@ -53,9 +65,9 @@ public class UserThreadMutex {
     }
 
     public void release(long userID) {
-        /*Semaphore semaphore = mutexMap.get(userID);
+        Semaphore semaphore = mutexMap.get(userID);
         if (semaphore != null) {
             semaphore.release();
-        }*/
+        }
     }
 }
