@@ -210,6 +210,7 @@ public class FilterValueDefinition extends FilterDefinition {
 
     public String toQuerySQL(String tableName) {
         StringBuilder queryBuilder = new StringBuilder();
+
         String columnName = getField().toKeySQL();
         queryBuilder.append(columnName);
         if (inclusive) {
@@ -225,7 +226,24 @@ public class FilterValueDefinition extends FilterDefinition {
         return queryBuilder.toString();
     }
 
+    public String toQuerySQL(String tableName, String sourceTableName, String sourceKeyName) {
+        StringBuilder queryBuilder = new StringBuilder();
+
+        queryBuilder.append(sourceTableName);
+        queryBuilder.append(".");
+        queryBuilder.append(sourceKeyName);
+
+        queryBuilder.append(" = ");
+        String columnName = getField().toKeySQL();
+        queryBuilder.append(columnName);
+
+        return queryBuilder.toString();
+    }
+
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        if (insightRequestMetadata.getFilterPropertiesMap().containsKey(this)) {
+            return start;
+        }
         List<Value> valueSet = new ArrayList<Value>();
         for (Object valueObject : filteredValues) {
             Value value;
@@ -297,6 +315,7 @@ public class FilterValueDefinition extends FilterDefinition {
                 // http://cl.ly/image/370S3T1U0f0D
             }
         }
+        System.out.println("filtered values size = " + filteredValues.size());
         if (filteredValues.size() > SystemSettings.instance().getMaxFilterValues()) {
             return false;
         }
