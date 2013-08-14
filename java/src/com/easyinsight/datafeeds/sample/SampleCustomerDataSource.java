@@ -56,12 +56,21 @@ public class SampleCustomerDataSource extends ServerDataSourceDefinition {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
-        for (int i = 0; i < 8; i++) {
-            IRow row = dataSet.createRow();
-            row.addValue(keys.get(CUSTOMER), customerNames[i]);
-            row.addValue(keys.get(INDUSTRY), industries[i % industries.length]);
-            row.addValue(keys.get(POSTAL_CODE), postalCodes[i]);
+        try {
+            for (int i = 0; i < 250000; i++) {
+                IRow row = dataSet.createRow();
+                row.addValue(keys.get(CUSTOMER), String.valueOf(i));
+                row.addValue(keys.get(INDUSTRY), industries[i % industries.length]);
+                row.addValue(keys.get(POSTAL_CODE), postalCodes[i % postalCodes.length]);
+                if (i % 1000 == 0) {
+                    IDataStorage.insertData(dataSet);
+                    dataSet = new DataSet();
+                }
+            }
+            IDataStorage.insertData(dataSet);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return dataSet;
+        return null;
     }
 }
