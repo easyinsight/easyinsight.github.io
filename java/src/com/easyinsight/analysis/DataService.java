@@ -21,7 +21,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.StandardReportPipeline;
-import flex.messaging.FlexContext;
 //import net.spy.memcached.MemcachedClient;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
@@ -59,11 +58,7 @@ public class DataService {
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
                                                               @Nullable WSAnalysisDefinition report, List<FilterDefinition> additionalFilters, FilterDefinition requester,
                                                               @Nullable Dashboard dashboard) {
-        try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            return null;
-        }
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             if (reportID > 0) {
@@ -115,8 +110,10 @@ public class DataService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             Database.closeConnection(conn);
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
@@ -316,6 +313,7 @@ public class DataService {
     }
 
     public EmbeddedTrendDataResults getEmbeddedTrendDataResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
@@ -445,12 +443,16 @@ public class DataService {
             embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
             return embeddedDataResults;
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             Database.closeConnection(conn);
         }
     }
 
     public EmbeddedCrosstabDataResults getEmbeddedCrosstabResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
                                                                   List<FilterDefinition> drillthroughFilters) {
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
@@ -505,6 +507,9 @@ public class DataService {
             results.setReportFault(new ServerError(e.getMessage()));
             return results;
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             Database.closeConnection(conn);
         }
     }
@@ -691,11 +696,7 @@ public class DataService {
 
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters, boolean ignoreCache) {
-        try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long startTime = System.currentTimeMillis();
@@ -758,34 +759,27 @@ public class DataService {
             results.setReportFault(new ServerError(e.getMessage()));
             return results;
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public static DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
+        ReportRetrieval reportRetrieval;
         try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            return null;
+            reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        try {
-            ReportRetrieval reportRetrieval;
-            try {
-                reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-            DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
-            if (analysisDefinition.isLogReport()) {
-                dataSet.setReportLog(reportRetrieval.getPipeline().toLogString());
-            }
-            dataSet.setPipelineData(reportRetrieval.getPipeline().getPipelineData());
-            return dataSet;
-        } finally {
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+        DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+        if (analysisDefinition.isLogReport()) {
+            dataSet.setReportLog(reportRetrieval.getPipeline().toLogString());
         }
+        dataSet.setPipelineData(reportRetrieval.getPipeline().getPipelineData());
+        return dataSet;
     }
 
     public static ExtendedDataSet extendedListDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
@@ -948,11 +942,7 @@ public class DataService {
 
     public EmbeddedTreeDataResults getEmbeddedTreeResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
                                                           List<FilterDefinition> drillthroughFilters) {
-        try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -986,18 +976,16 @@ public class DataService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             Database.closeConnection(conn);
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public EmbeddedCompareYearsDataResults getEmbeddedCompareYearsResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
                                                         List<FilterDefinition> drillthroughFilters) {
-        try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -1030,17 +1018,15 @@ public class DataService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             Database.closeConnection(conn);
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public CompareYearsDataResults getCompareYearsResults(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
-        try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -1066,18 +1052,16 @@ public class DataService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             Database.closeConnection(conn);
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public EmbeddedYTDDataResults getEmbeddedYTDResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
                                                         List<FilterDefinition> drillthroughFilters) {
-        try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -1114,17 +1098,15 @@ public class DataService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             Database.closeConnection(conn);
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public YTDDataResults getYTDResults(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
-        try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -1157,17 +1139,15 @@ public class DataService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             Database.closeConnection(conn);
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public TrendDataResults getTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
@@ -1294,17 +1274,15 @@ public class DataService {
             embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
             return embeddedDataResults;
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             Database.closeConnection(conn);
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public TreeDataResults getTreeDataResults(WSTreeDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
@@ -1337,17 +1315,15 @@ public class DataService {
             embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
             return embeddedDataResults;
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             Database.closeConnection(conn);
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public CrossTabDataResults getCrosstabDataResults(WSCrosstabDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
@@ -1401,17 +1377,15 @@ public class DataService {
             embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
             return embeddedDataResults;
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             Database.closeConnection(conn);
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
     public VerticalDataResults getVerticalDataResults(WSCombinedVerticalListDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         try {
             long start = System.currentTimeMillis();
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
@@ -1447,7 +1421,9 @@ public class DataService {
             embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
             return embeddedDataResults;
         } finally {
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
         }
     }
 
@@ -1489,11 +1465,7 @@ public class DataService {
     }
 
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean ignoreCache) {
-        try {
-            UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long startTime = System.currentTimeMillis();
@@ -1539,8 +1511,10 @@ public class DataService {
             embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
             return embeddedDataResults;
         } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
             Database.closeConnection(conn);
-            UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
         }
     }
 
