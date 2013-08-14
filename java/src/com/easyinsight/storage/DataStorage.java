@@ -839,7 +839,7 @@ public class DataStorage implements IDataStorage {
         Collection<Key> groupByItems = new HashSet<Key>();
         boolean aggregateQuery = insightRequestMetadata.isAggregateQuery() && !countDistinct;
 
-        createSelectClause(reportItems, selectBuilder, groupByBuilder, aggregateQuery, insightRequestMetadata.isOptimized());
+        createSelectClause(reportItems, selectBuilder, groupByBuilder, aggregateQuery, insightRequestMetadata.isOptimized(), insightRequestMetadata);
         selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
         createFromClause(version, fromBuilder, insightRequestMetadata);
         createWhereClause(filters, whereBuilder, insightRequestMetadata);
@@ -1128,7 +1128,8 @@ public class DataStorage implements IDataStorage {
         }
     }
 
-    private void createSelectClause(Collection<AnalysisItem> reportItems, StringBuilder selectBuilder, StringBuilder groupByBuilder, boolean aggregateQuery, boolean optimized) {
+    private void createSelectClause(Collection<AnalysisItem> reportItems, StringBuilder selectBuilder, StringBuilder groupByBuilder,
+                                    boolean aggregateQuery, boolean optimized, InsightRequestMetadata insightRequestMetadata) {
         for (AnalysisItem analysisItem : reportItems) {
             if (analysisItem.isDerived()) {
                 boolean stillOkay = false;
@@ -1175,12 +1176,18 @@ public class DataStorage implements IDataStorage {
                     groupByBuilder.append(",");
                 }
             } else {
-                if (aggregateQuery) {
-                    groupByBuilder.append("binary(" + columnName + ")");
-                    groupByBuilder.append(",");
+                Boolean distinct = insightRequestMetadata.getDistinctFieldMap().get(analysisItem);
+                if (distinct != null && distinct) {
+                    selectBuilder.append("distinct(").append(columnName).append(") as distinct").append(columnName);
+                    selectBuilder.append(",");
+                } else {
+                    if (aggregateQuery) {
+                        groupByBuilder.append("binary(" + columnName + ")");
+                        groupByBuilder.append(",");
+                    }
+                    selectBuilder.append(columnName);
+                    selectBuilder.append(",");
                 }
-                selectBuilder.append(columnName);
-                selectBuilder.append(",");
             }
 
         }

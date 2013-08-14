@@ -58,7 +58,14 @@ public class DataService {
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
                                                               @Nullable WSAnalysisDefinition report, List<FilterDefinition> additionalFilters, FilterDefinition requester,
                                                               @Nullable Dashboard dashboard) {
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success;
+        try {
+            success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (ReportException e) {
+            AnalysisItemResultMetadata metadata = new AnalysisItemResultMetadata();
+            metadata.setReportFault(e.getReportFault());
+            return metadata;
+        }
         EIConnection conn = Database.instance().getConnection();
         try {
             if (reportID > 0) {
@@ -79,6 +86,8 @@ public class DataService {
                 insightRequestMetadata.setJoinOverrides(report.getJoinOverrides());
                 insightRequestMetadata.setTraverseAllJoins(report.isFullJoins());
                 insightRequestMetadata.setAddonReports(report.getAddonReports());
+                insightRequestMetadata.setAggregateQuery(false);
+                insightRequestMetadata.getDistinctFieldMap().put(analysisItem, true);
 
                 if (requester != null && requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
                     String label = requester.getFieldChoiceFilterLabel();
