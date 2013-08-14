@@ -188,7 +188,7 @@ public class Row implements IRow, Serializable, Cloneable {
         }
         for (Key key : otherRow.dataSetKeys.getKeys()) {
             Value value = otherRow.getValue(key);
-            if (value.type() != Value.EMPTY && !"(Empty)".equals(value.toString())) {
+            if (value.type() != Value.EMPTY && (value.type() == Value.DATE || !"(Empty)".equals(value.toString()))) {
                 mergedRow.addValue(key, value);
             }
         }
