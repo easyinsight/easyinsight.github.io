@@ -52,7 +52,7 @@ public class TagButton extends Canvas {
 
     override public function set data(val:Object):void {
         tag = val as Tag;
-        tagLabel.text = tag.name + " - "+ tag.id;
+        tagLabel.text = tag.name;
     }
 
     override public function get data():Object {

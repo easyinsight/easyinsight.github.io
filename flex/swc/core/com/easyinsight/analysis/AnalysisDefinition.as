@@ -105,6 +105,8 @@ import mx.collections.ArrayCollection;
     public var generalSizeLimit:int;
     public var fetchSize:int;
     public var noDataOnNoJoin:Boolean;
+    public var aggregateQueryIfPossible:Boolean = true;
+    public var newFilterStrategy:Boolean = false;
 
 		public function AnalysisDefinition()
 		{

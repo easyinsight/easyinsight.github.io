@@ -41,7 +41,47 @@ public class InsightRequestMetadata implements Serializable {
     private String ip;
     private transient boolean noLogging;
 
+    private transient boolean newFilterStrategy;
+
+    private transient int fetchSize;
+
+    private transient Map<AnalysisItem, Boolean> distinctFieldMap = new HashMap<AnalysisItem, Boolean>();
+
+    private transient Map<FilterDefinition, AdvancedFilterProperties> filterPropertiesMap = new HashMap<FilterDefinition, AdvancedFilterProperties>();
+
     private long databaseTime = 0;
+
+    public Map<AnalysisItem, Boolean> getDistinctFieldMap() {
+        return distinctFieldMap;
+    }
+
+    public void setDistinctFieldMap(Map<AnalysisItem, Boolean> distinctFieldMap) {
+        this.distinctFieldMap = distinctFieldMap;
+    }
+
+    public int getFetchSize() {
+        return fetchSize;
+    }
+
+    public void setFetchSize(int fetchSize) {
+        this.fetchSize = fetchSize;
+    }
+
+    public boolean isNewFilterStrategy() {
+        return newFilterStrategy;
+    }
+
+    public void setNewFilterStrategy(boolean newFilterStrategy) {
+        this.newFilterStrategy = newFilterStrategy;
+    }
+
+    public Map<FilterDefinition, AdvancedFilterProperties> getFilterPropertiesMap() {
+        return filterPropertiesMap;
+    }
+
+    public void setFilterPropertiesMap(Map<FilterDefinition, AdvancedFilterProperties> filterPropertiesMap) {
+        this.filterPropertiesMap = filterPropertiesMap;
+    }
 
     public boolean isNoDataOnNoJoin() {
         return noDataOnNoJoin;

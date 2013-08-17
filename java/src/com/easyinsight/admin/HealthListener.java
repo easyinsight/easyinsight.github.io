@@ -1,5 +1,6 @@
 package com.easyinsight.admin;
 
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -8,6 +9,7 @@ import com.easyinsight.storage.DatabaseManager;
 import com.xerox.amazonws.sqs2.Message;
 import com.xerox.amazonws.sqs2.MessageQueue;
 import com.xerox.amazonws.sqs2.SQSUtils;
+import net.spy.memcached.MemcachedClient;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 
@@ -83,6 +85,7 @@ public class HealthListener implements Runnable {
                 status.setMessage(response);
                 status.setHealthInfo(new AdminService().getHealthInfo());
                 serverCache.put(InetAddress.getLocalHost().getHostName(), status);
+                MemCachedManager.add("servers" + InetAddress.getLocalHost().getHostName(), 120, status);
                 try {
                     Thread.sleep(60000);
                 } catch (InterruptedException e) {

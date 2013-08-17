@@ -759,6 +759,7 @@ public class DataStorage implements IDataStorage {
 
     private DataSet retrieveData(@NotNull Collection<AnalysisItem> reportItems, @Nullable Collection<FilterDefinition> filters, @Nullable Integer limit,
                                  @Nullable Map<Key, KeyMetadata> keys, int version, @Nullable InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        long startTime = System.currentTimeMillis();
         if (insightRequestMetadata == null) {
             insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setNow(new Date());
@@ -814,6 +815,22 @@ public class DataStorage implements IDataStorage {
             return new DataSet();
         }
         filters = eligibleFilters(filters, keyStrings);
+
+        if (insightRequestMetadata.isNewFilterStrategy()) {
+            for (FilterDefinition filter : filters) {
+                if (filter instanceof FilterValueDefinition) {
+                    FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
+                    if (filterValueDefinition.getFilteredValues().size() > 50) {
+                        KeyMetadata keyMetadata = keys.get(filter.getField().createAggregateKey(false));
+                        if (keyMetadata != null && keyMetadata.getType() == Value.STRING) {
+                            int type = keyMetadata.getType();
+                            String table = tempTableIt(filterValueDefinition, type);
+                            insightRequestMetadata.getFilterPropertiesMap().put(filterValueDefinition, new AdvancedFilterProperties(table, "blah"));
+                        }
+                    }
+                }
+            }
+        }
         StringBuilder queryBuilder = new StringBuilder();
         StringBuilder selectBuilder = new StringBuilder();
         StringBuilder fromBuilder = new StringBuilder();
@@ -821,18 +838,121 @@ public class DataStorage implements IDataStorage {
         StringBuilder groupByBuilder = new StringBuilder();
         Collection<Key> groupByItems = new HashSet<Key>();
         boolean aggregateQuery = insightRequestMetadata.isAggregateQuery() && !countDistinct;
-        createSelectClause(reportItems, selectBuilder, groupByBuilder, aggregateQuery, insightRequestMetadata.isOptimized());
+
+        createSelectClause(reportItems, selectBuilder, groupByBuilder, aggregateQuery, insightRequestMetadata.isOptimized(), insightRequestMetadata);
         selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
-        createFromClause(version, fromBuilder);
-        createWhereClause(filters, whereBuilder);
+        createFromClause(version, fromBuilder, insightRequestMetadata);
+        createWhereClause(filters, whereBuilder, insightRequestMetadata);
         createSQL(filters, limit, queryBuilder, selectBuilder, fromBuilder, whereBuilder, groupByBuilder, groupByItems);
-        PreparedStatement queryStmt = storageConn.prepareStatement(queryBuilder.toString());
+
+        PreparedStatement queryStmt;
+        if (insightRequestMetadata.getFetchSize() > 0) {
+            queryStmt = storageConn.prepareStatement(queryBuilder.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            queryStmt.setFetchSize(insightRequestMetadata.getFetchSize());
+        } else {
+            queryStmt = storageConn.prepareStatement(queryBuilder.toString());
+        }
+        //System.out.println(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
-        ResultSet dataRS = queryStmt.executeQuery();
-        processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery, insightRequestMetadata.isOptimized());
+        ResultSet dataRS;
+
+        try {
+            dataRS = queryStmt.executeQuery();
+            processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery, insightRequestMetadata.isOptimized());
+        } catch (Exception e) {
+            LogClass.error("On running " + queryBuilder.toString(), e);
+            throw new RuntimeException(e);
+        }
+        for (AdvancedFilterProperties properties : insightRequestMetadata.getFilterPropertiesMap().values()) {
+            Statement stmt = storageConn.createStatement();
+            stmt.execute("DROP TABLE " + properties.getTable());
+            stmt.close();
+        }
+        dataRS.close();
+        queryStmt.close();
+        insightRequestMetadata.addDatabaseTime(System.currentTimeMillis() - startTime);
         dataSet.setLastTime(metadata.getLastData());
+        //System.out.println("took " + (System.currentTimeMillis() - startTime));
         return dataSet;
+    }
+
+    private String tempTableIt(FilterValueDefinition filterValueDefinition, int type) throws SQLException {
+        Statement stmt = storageConn.createStatement();
+        String name = "dtt" + System.currentTimeMillis();
+        stmt.execute("CREATE TEMPORARY TABLE " + name + " ( BLAH VARCHAR(20)) ENGINE=MEMORY");
+        stmt.execute("LOCK TABLES " + name + " WRITE");
+
+        PreparedStatement preparedStatement = storageConn.prepareStatement("INSERT INTO " + name + " (BLAH) VALUES (?)");
+        Set<Value> valueSet = new LinkedHashSet<Value>(filterValueDefinition.getFilteredValues().size());
+        for (Object valueObject : filterValueDefinition.getFilteredValues()) {
+            Value value;
+            if (valueObject instanceof Value) {
+                value = (Value) valueObject;
+            } else if (valueObject instanceof String) {
+                value = new StringValue((String) valueObject);
+            } else if (valueObject instanceof Number) {
+                value = new NumericValue((Number) valueObject);
+            } else if (valueObject instanceof Date) {
+                value = new DateValue((Date) valueObject);
+            } else if (valueObject == null) {
+                value = new EmptyValue();
+            } else {
+                throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
+            }
+            if (value instanceof StringValue) {
+                StringValue stringValue = (StringValue) value;
+                if ("(No Value)".equals(stringValue.getValue())) {
+                    value = new EmptyValue();
+                }
+            }
+            valueSet.add(value);
+        }
+        if (type == Value.NUMBER) {
+            for (Value value : valueSet) {
+                preparedStatement.setDouble(1, value.toDouble());
+                preparedStatement.execute();
+                // 16,777,216
+            }
+        } else if (type == Value.DATE) {
+            for (Value value : valueSet) {
+                if (value.type() == Value.DATE) {
+                    DateValue dateValue = (DateValue) value;
+                    preparedStatement.setTimestamp(1, new java.sql.Timestamp(dateValue.getDate().getTime()));
+                } else {
+                    preparedStatement.setNull(1, Types.TIMESTAMP);
+                }
+                preparedStatement.execute();
+            }
+        } else if (type == Value.STRING) {
+            int i = 0;
+            for (Value value : valueSet) {
+                preparedStatement.setString(1, value.toString());
+                preparedStatement.addBatch();
+                i++;
+                if (i == 1000) {
+                    i = 0;
+                    preparedStatement.executeBatch();
+                }
+            }
+            if (i > 0) {
+                preparedStatement.executeBatch();
+            }
+        } else if (type == Value.EMPTY) {
+            for (Value value : valueSet) {
+                preparedStatement.setString(1, value.toString());
+                preparedStatement.execute();
+            }
+        } else {
+            for (Value value : valueSet) {
+                preparedStatement.setString(1, value.toString());
+                preparedStatement.execute();
+            }
+        }
+        preparedStatement.close();
+        stmt.execute("UNLOCK TABLES");
+        stmt.close();
+        return name;
     }
 
     @NotNull
@@ -970,12 +1090,17 @@ public class DataStorage implements IDataStorage {
         return groupByBuilder;
     }
 
-    private void createWhereClause(Collection<FilterDefinition> filters, StringBuilder whereBuilder) {
+    private void createWhereClause(Collection<FilterDefinition> filters, StringBuilder whereBuilder, InsightRequestMetadata insightRequestMetadata) {
         if (filters != null && filters.size() > 0) {
             Iterator<FilterDefinition> filterIter = filters.iterator();
             while (filterIter.hasNext()) {
                 FilterDefinition filterDefinition = filterIter.next();
-                whereBuilder.append(filterDefinition.toQuerySQL(getTableName()));
+                AdvancedFilterProperties advancedFilterProperties = insightRequestMetadata.getFilterPropertiesMap().get(filterDefinition);
+                if (advancedFilterProperties != null) {
+                    whereBuilder.append(filterDefinition.toQuerySQL(getTableName(), advancedFilterProperties.getTable(), advancedFilterProperties.getKey()));
+                } else {
+                    whereBuilder.append(filterDefinition.toQuerySQL(getTableName()));
+                }
                 if (filterIter.hasNext()) {
                     whereBuilder.append(" AND ");
                 }
@@ -983,9 +1108,13 @@ public class DataStorage implements IDataStorage {
         }
     }
 
-    private void createFromClause(int version, StringBuilder fromBuilder) {
+    private void createFromClause(int version, StringBuilder fromBuilder, InsightRequestMetadata insightRequestMetadata) {
         String tableName = "df" + feedID + "v" + version;
         fromBuilder.append(tableName);
+        for (AdvancedFilterProperties properties : insightRequestMetadata.getFilterPropertiesMap().values()) {
+            String table = properties.getTable();
+            fromBuilder.append(",").append(table);
+        }
     }
 
     private void addAdditionalKeysToSelect(Collection<Key> additionalKeys, StringBuilder selectBuilder, Collection<Key> groupByItems) {
@@ -999,7 +1128,8 @@ public class DataStorage implements IDataStorage {
         }
     }
 
-    private void createSelectClause(Collection<AnalysisItem> reportItems, StringBuilder selectBuilder, StringBuilder groupByBuilder, boolean aggregateQuery, boolean optimized) {
+    private void createSelectClause(Collection<AnalysisItem> reportItems, StringBuilder selectBuilder, StringBuilder groupByBuilder,
+                                    boolean aggregateQuery, boolean optimized, InsightRequestMetadata insightRequestMetadata) {
         for (AnalysisItem analysisItem : reportItems) {
             if (analysisItem.isDerived()) {
                 boolean stillOkay = false;
@@ -1046,12 +1176,18 @@ public class DataStorage implements IDataStorage {
                     groupByBuilder.append(",");
                 }
             } else {
-                if (aggregateQuery) {
-                    groupByBuilder.append("binary(" + columnName + ")");
-                    groupByBuilder.append(",");
+                Boolean distinct = insightRequestMetadata.getDistinctFieldMap().get(analysisItem);
+                if (distinct != null && distinct) {
+                    selectBuilder.append("distinct(").append(columnName).append(") as distinct").append(columnName);
+                    selectBuilder.append(",");
+                } else {
+                    if (aggregateQuery) {
+                        groupByBuilder.append("binary(" + columnName + ")");
+                        groupByBuilder.append(",");
+                    }
+                    selectBuilder.append(columnName);
+                    selectBuilder.append(",");
                 }
-                selectBuilder.append(columnName);
-                selectBuilder.append(",");
             }
 
         }

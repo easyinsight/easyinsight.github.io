@@ -286,8 +286,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.sortSequence = sortSequence;
     }
 
+    @Transient
+    private transient String qualifiedName;
+
     public String qualifiedName() {
-        return key.internalString() + getQualifiedSuffix();
+        if (qualifiedName == null) {
+            qualifiedName = key.internalString() + getQualifiedSuffix();
+        }
+        return qualifiedName;
     }
 
     protected String getQualifiedSuffix() {

@@ -415,7 +415,7 @@
         <mx:Button icon="{scrollDownIcon}" click="scrollGridDown()" toolTip="Next Occurrence"/>
         <mx:Button icon="{scrollUpIcon}" click="scrollGridUp()" toolTip="Previous Occurrence"/>
         <mx:Button label="Add Direct Join..." click="addConnection()" styleName="grayButton"/>
-        <!--<mx:Button label="Add Composite Join..." click="addCompositeConnection()" styleName="grayButton"/>-->
+        <mx:Button label="Add Composite Join..." click="addCompositeConnection()" styleName="grayButton"/>
 <!--        <mx:Button label="Add Date Join..." click="addDateJoin()" styleName="grayButton"/>-->
     </mx:HBox>
     <util:EIDataGrid dataProvider="{connections}" rowHeight="28" dragMoveEnabled="true" dragEnabled="true" dropEnabled="true" id="dataGrid"

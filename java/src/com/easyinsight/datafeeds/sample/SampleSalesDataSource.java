@@ -62,10 +62,12 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
         DataSet dataSet = new DataSet();
         long startTime = System.currentTimeMillis();
         try {
-            for (int i = 0; i < 20000; i++) {
+            for (int i = 0; i < 200000; i++) {
                 IRow row = dataSet.createRow();
 
-                row.addValue(keys.get(CUSTOMER), customerNames[(int) (Math.random() * 8)]);
+                // michelle, 303-592-4079
+
+                row.addValue(keys.get(CUSTOMER), String.valueOf(i));
                 row.addValue(keys.get(PRODUCT), productNames[(int) (Math.random() * 5)]);
                 row.addValue(keys.get(QUANTITY), (int) (Math.random() * 3));
                 Calendar cal = Calendar.getInstance();

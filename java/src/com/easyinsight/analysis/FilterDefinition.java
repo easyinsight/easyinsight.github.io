@@ -267,6 +267,10 @@ public class FilterDefinition implements Serializable, Cloneable {
         throw new UnsupportedOperationException();
     }
 
+    public String toQuerySQL(String tableName, String sourceTableName, String sourceKeyName) {
+        throw new UnsupportedOperationException();
+    }
+
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         throw new UnsupportedOperationException();
     }

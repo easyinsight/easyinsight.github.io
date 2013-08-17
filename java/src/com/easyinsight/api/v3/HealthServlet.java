@@ -2,6 +2,7 @@ package com.easyinsight.api.v3;
 
 import com.easyinsight.admin.HealthListener;
 import com.easyinsight.admin.Status;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
@@ -29,6 +30,8 @@ public class HealthServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         EIConnection conn = Database.instance().getConnection();
         try {
+            String memcached = req.getParameter("memcached");
+
             PreparedStatement queryStmt = conn.prepareStatement("SELECT SERVER_HOST FROM SERVER WHERE ENABLED = ?");
             queryStmt.setBoolean(1, true);
             ResultSet rs = queryStmt.executeQuery();
@@ -37,7 +40,12 @@ public class HealthServlet extends HttpServlet {
             while (rs.next()) {
 
                 String host = rs.getString(1);
-                Status status = (Status) JCS.getInstance("servers").get(host);
+                Status status;
+                if (memcached != null) {
+                    status = (Status) MemCachedManager.get("servers" + host);
+                } else {
+                    status = (Status) JCS.getInstance("servers").get(host);
+                }
 
                 if (status == null) {
                     status = new Status();

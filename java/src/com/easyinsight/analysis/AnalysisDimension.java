@@ -143,10 +143,13 @@ public class AnalysisDimension extends AnalysisItem {
         if (value.type() == Value.STRING) {
             StringValue stringValue = (StringValue) value;
             try {
-                Value newValue = new NumericValue(Integer.parseInt(stringValue.toString()));
-                newValue.setLinks(value.getLinks());
-                newValue.setValueExtension(value.getValueExtension());
-                value = newValue;
+                String string = stringValue.getValue();
+                if (Character.isDigit(string.charAt(0))) {
+                    Value newValue = new NumericValue(Integer.parseInt(stringValue.toString()));
+                    newValue.setLinks(value.getLinks());
+                    newValue.setValueExtension(value.getValueExtension());
+                    value = newValue;
+                }
             } catch (NumberFormatException e) {
             }
         }

@@ -21,6 +21,19 @@ import java.util.List;
 public class SortComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         final List<AnalysisItem> sortItems = new ArrayList<AnalysisItem>(pipelineData.getReportItems());
+
+        boolean needToSort = false;
+        for (AnalysisItem analysisItem : sortItems) {
+            if (analysisItem.getSortSequence() != 0) {
+                needToSort = true;
+                break;
+            }
+        }
+
+        if (!needToSort) {
+            return dataSet;
+        }
+
         Collections.sort(sortItems, new Comparator<AnalysisItem>() {
 
             public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {

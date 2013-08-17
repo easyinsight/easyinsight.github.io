@@ -78,7 +78,11 @@ public class DMSServlet extends HttpServlet {
                 if (ConfigLoader.instance().isTaskRunner()) {
                     scheduler.start();
                 }
-                //MemCachedManager.initialize();
+                try {
+                    MemCachedManager.initialize();
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
                 healthListener = new HealthListener();
                 Thread thread = new Thread(healthListener);
                 thread.setDaemon(true);
@@ -117,7 +121,11 @@ public class DMSServlet extends HttpServlet {
 
         DatabaseManager.instance().shutdown();
 
-        //MemCachedManager.instance().shutdown();
+        try {
+            MemCachedManager.instance().shutdown();
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
 
 
         super.destroy();

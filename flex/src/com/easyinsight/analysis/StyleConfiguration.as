@@ -366,6 +366,7 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Text Color", "fontColor", TextReport(report).fontColor, report));
         }
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
+        items.addItem(new CheckBoxReportFormItem("Aggregate Query if Possible", "aggregateQueryIfPossible", report.aggregateQueryIfPossible, report));
         items.addItem(new CheckBoxReportFormItem("No Data on No Join", "noDataOnNoJoin", report.noDataOnNoJoin, report));
         items.addItem(new CheckBoxReportFormItem("Filter Optimization", "lookupTableOptimization", report.lookupTableOptimization, report));
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
@@ -375,6 +376,8 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Cacheable", "cacheable", report.cacheable, report));
         items.addItem(new CheckBoxReportFormItem("Run Before Manual", "manualButRunFirst", report.manualButRunFirst, report));
         items.addItem(new NumericReportFormItem("Cache Minutes", "cacheMinutes", report.cacheMinutes, report, 0, 50000));
+        items.addItem(new NumericReportFormItem("Fetch Size", "fetchSize", report.fetchSize, report, 0, 5000));
+        items.addItem(new CheckBoxReportFormItem("Filter Strategy", "newFilterStrategy", report.newFilterStrategy, report));
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];
         items.sort = sort;
