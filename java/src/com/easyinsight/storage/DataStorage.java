@@ -852,7 +852,7 @@ public class DataStorage implements IDataStorage {
         } else {
             queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         }
-        System.out.println(queryBuilder.toString());
+        //System.out.println(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
         ResultSet dataRS;
@@ -873,7 +873,7 @@ public class DataStorage implements IDataStorage {
         queryStmt.close();
         insightRequestMetadata.addDatabaseTime(System.currentTimeMillis() - startTime);
         dataSet.setLastTime(metadata.getLastData());
-        System.out.println("took " + (System.currentTimeMillis() - startTime));
+        //System.out.println("took " + (System.currentTimeMillis() - startTime));
         return dataSet;
     }
 
