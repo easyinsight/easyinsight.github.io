@@ -269,6 +269,10 @@ public class FunctionFactory {
             return new EIDateFormatNoShiftFunction();
         } else if (s.equals("adjustfilter")) {
             return new AdjustFilterFunction();
+        } else if (s.equals("directfilter")) {
+            return new DirectFilterFunction();
+        } else if (s.equals("overridefilter")) {
+            return new OverrideFilter();
         }else {
             return null;
         }

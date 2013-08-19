@@ -58,6 +58,7 @@ public class AnalysisBasedFeed extends Feed {
             items.add(analysisItem);
         }
         Map<FilterDefinition, AnalysisItem> filterMap = new HashMap<FilterDefinition, AnalysisItem>();
+
         for (FilterDefinition filter : filters) {
             if (filter.getField() != null) {
                 for (AnalysisItem analysisItem : fields) {
@@ -67,7 +68,20 @@ public class AnalysisBasedFeed extends Feed {
                         break;
                     }
                 }
+                if (filter.getFilterName() != null) {
+                    Boolean override = insightRequestMetadata.getFilterOverrideMap().get(filter.getFilterName());
+                    if (override != null && override) {
+                        Iterator<FilterDefinition> iter = analysisDefinition.getFilterDefinitions().iterator();
+                        while (iter.hasNext()) {
+                            FilterDefinition existing = iter.next();
+                            if (filter.getFilterName() != null && !"".equals(filter.getFilterName()) && existing.getFilterName() != null && !"".equals(existing.getFilterName())) {
+                                iter.remove();
+                            }
+                        }
+                    }
+                }
             }
+
             analysisDefinition.getFilterDefinitions().add(filter);
         }
         for (AnalysisItem analysisItem : fields) {

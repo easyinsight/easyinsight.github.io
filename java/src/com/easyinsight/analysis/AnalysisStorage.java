@@ -198,6 +198,58 @@ public class AnalysisStorage {
         return analysisDefinition;
     }
 
+    public WSAnalysisDefinition getAnalysisDefinition(long analysisID, Connection conn, boolean noCache) {
+        WSAnalysisDefinition analysisDefinition;
+        if (!noCache) {
+            analysisDefinition = fromCache(analysisID);
+        } else {
+            analysisDefinition = null;
+        }
+
+        if (analysisDefinition != null) return analysisDefinition;
+        int retries = 0;
+        while (retries < MAX_RETRIES && analysisDefinition == null) {
+            retries++;
+            Session session = Database.instance().createSession(conn);
+            try {
+                session.beginTransaction();
+                List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
+                if (results.size() > 0) {
+                    AnalysisDefinition savedReport = (AnalysisDefinition) results.get(0);
+                    savedReport.validate();
+                    analysisDefinition = savedReport.createBlazeDefinition();
+                }
+                InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                if (analysisDefinition.getMarmotScript() != null) {
+                    StringTokenizer toker = new StringTokenizer(analysisDefinition.getMarmotScript(), "\r\n");
+                    while (toker.hasMoreTokens()) {
+                        String line = toker.nextToken();
+                        if (FunctionFactory.functionRunsOnReportLoad(line)) {
+                            try {
+                                new ReportCalculation(line).apply(analysisDefinition, new ArrayList<AnalysisItem>(), new HashMap<String, List<AnalysisItem>>(),
+                                        new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                            } catch (Exception e) {
+                                LogClass.error(e);
+                            }
+                        }
+                    }
+                }
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+                if (e instanceof LockAcquisitionException && retries < MAX_RETRIES) {
+                    // lock acquisition exception, ignore
+                } else {
+                    throw new RuntimeException(e);
+                }
+            } finally {
+                session.close();
+            }
+        }
+        cacheReport(analysisDefinition);
+        return analysisDefinition;
+    }
+
     private void cacheReport(WSAnalysisDefinition analysisDefinition) {
         if (reportCache != null && analysisDefinition != null) {
             try {

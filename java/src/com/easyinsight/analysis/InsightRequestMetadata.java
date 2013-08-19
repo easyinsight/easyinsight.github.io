@@ -41,6 +41,8 @@ public class InsightRequestMetadata implements Serializable {
     private String ip;
     private transient boolean noLogging;
 
+    private transient Map<String, Boolean> filterOverrideMap = new HashMap<String, Boolean>();
+
     private transient boolean newFilterStrategy;
 
     private transient int fetchSize;
@@ -48,6 +50,14 @@ public class InsightRequestMetadata implements Serializable {
     private transient Map<AnalysisItem, Boolean> distinctFieldMap = new HashMap<AnalysisItem, Boolean>();
 
     private transient Map<FilterDefinition, AdvancedFilterProperties> filterPropertiesMap = new HashMap<FilterDefinition, AdvancedFilterProperties>();
+
+    public Map<String, Boolean> getFilterOverrideMap() {
+        return filterOverrideMap;
+    }
+
+    public void setFilterOverrideMap(Map<String, Boolean> filterOverrideMap) {
+        this.filterOverrideMap = filterOverrideMap;
+    }
 
     private long databaseTime = 0;
 
