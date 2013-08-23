@@ -175,9 +175,6 @@
                 recGrid.verticalScrollPolicy = "off";
                 recGrid.height = recGrid.measureHeightOfItems(0, recommendedReports.length) + recGrid.headerHeight + 4;
             }
-            if (reports != null) {
-                reportGrid.height = reportGrid.measureHeightOfItems(0, reports.length) + reportGrid.headerHeight + 4;
-            }
         }
 
                 ]]>
@@ -205,8 +202,8 @@
         </mx:HBox>
         <mx:Label text="Recommended Reports and Dashboards" fontSize="16" fontWeight="bold"/>
         <genredata:SolutionExchangeGridPage dataProvider="{recommendedReports}" verticalScrollPolicy="off" id="recGrid"/>
-        <mx:Label text="All Reports and Dashboards" fontSize="16" fontWeight="bold"/>
-        <genredata:SolutionExchangeGridPage dataProvider="{reports}" height="100%" verticalScrollPolicy="off" id="reportGrid"/>
+        <!--<mx:Label text="All Reports and Dashboards" fontSize="16" fontWeight="bold"/>
+        <genredata:SolutionExchangeGridPage dataProvider="{reports}" height="100%" verticalScrollPolicy="off" id="reportGrid"/>-->
 
     </mx:VBox>
     </mx:Canvas>
