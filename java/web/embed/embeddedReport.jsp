@@ -71,6 +71,12 @@
 %><%= "<link rel=\"stylesheet\" type=\"text/css\" href=\""+cssInclude+"\" />"%><%
     }
 %>
+
+    <script type="text/javascript" language="JavaScript">
+        function loadPage(val) {
+            window.location.href = val;
+        }
+    </script>
     <jsp:include page="../html/methods.jsp">
         <jsp:param name="reportID" value="<%= report.getUrlKey() %>"/>
         <jsp:param name="dataSourceID" value="<%= report.getDataFeedID()%>"/>
