@@ -38,7 +38,7 @@ public class HTMLImageServlet extends HttpServlet {
                 resp.setContentType("application/x-download");
                 resp.setContentLength(bytes.length);
 
-                resp.setHeader("Content-disposition","inline; filename=" + report.getName()+".png" );
+                resp.setHeader("Content-Disposition","inline; filename=" + report.getName()+".png" );
                 resp.getOutputStream().write(bytes);
                 resp.getOutputStream().flush();
             } else {

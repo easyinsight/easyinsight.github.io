@@ -57,7 +57,7 @@ public class ExcelServlet extends HttpServlet {
                         resp.setHeader("Cache-Control","no-cache"); //HTTP 1.1
                         resp.setHeader("Pragma","no-cache"); //HTTP 1.0
                     }
-                    resp.setHeader("Content-disposition","attachment; filename=" + reportName+"."+extension );
+                    resp.setHeader("Content-Disposition","attachment; filename=" + reportName+"."+extension );
                     resp.setDateHeader ("Expires", 0); //prevents caching at the proxy server
                     resp.getOutputStream().write(bytes);
                     resp.getOutputStream().flush();

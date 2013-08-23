@@ -6,6 +6,7 @@ import com.easyinsight.util.ProgressAlert;
 
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
+import flash.external.ExternalInterface;
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
 import flash.utils.ByteArray;
@@ -25,8 +26,9 @@ public class PDFCreator {
     }
 
     private function gotExcelID(event:ResultEvent):void {
-        var url:URLRequest = new URLRequest("/app/pdf");
-        navigateToURL(url, "_self");
+//        var url:URLRequest = new URLRequest("/app/pdf");
+//        navigateToURL(url, "_self");
+        ExternalInterface.call("loadPage", "/app/pdf");
     }
 
     public function exportReportToPDF(report:AnalysisDefinition, parent:UIComponent, coreView:DisplayObject):void {
