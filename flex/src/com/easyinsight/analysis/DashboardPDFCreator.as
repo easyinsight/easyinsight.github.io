@@ -4,6 +4,7 @@ import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.util.ProgressAlert;
 
 import flash.display.DisplayObject;
+import flash.external.ExternalInterface;
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
 
@@ -24,8 +25,10 @@ public class DashboardPDFCreator {
     }
 
     private static function gotExcelID(event:ResultEvent):void {
-        var url:URLRequest = new URLRequest("/app/pdf");
-        navigateToURL(url, "_blank");
+//        var url:URLRequest = new URLRequest("/app/pdf");
+//        navigateToURL(url, "_blank");
+        ExternalInterface.call("loadPage", "/app/pdf");
+
     }
 
     public function exportReportToPDF(dashboard:Dashboard, parent:UIComponent, coreView:DisplayObject, landscape:Boolean, headerObj:UIComponent = null):void {

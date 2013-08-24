@@ -8,6 +8,7 @@ import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.display.Sprite;
+import flash.external.ExternalInterface;
 import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
@@ -34,8 +35,9 @@ public class DashboardPrinter {
     }
 
     private function gotExcelID(event:ResultEvent):void {
-        var url:URLRequest = new URLRequest("/app/pdf");
-        navigateToURL(url, "_blank");
+//        var url:URLRequest = new URLRequest("/app/pdf");
+//        navigateToURL(url, "_blank");
+        ExternalInterface.call("loadPage", "/app/pdf");
     }
 
     public function exportReportToPDF(dashboard:Dashboard, parent:UIComponent, coreView:DisplayObject):void {

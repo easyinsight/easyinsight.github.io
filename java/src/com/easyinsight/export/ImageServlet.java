@@ -47,7 +47,7 @@ public class ImageServlet extends HttpServlet {
                     resp.setContentType("application/x-download");
                     resp.setContentLength(bytes.length);
                     reportName = URLEncoder.encode(reportName, "UTF-8");
-                    resp.setHeader("Content-disposition","inline; filename=" + reportName+".png" );
+                    resp.setHeader("Content-Disposition","attachment; filename=" + reportName+".png" );
                     String userAgent = req.getHeader("User-Agent");
                     if (userAgent != null && userAgent.contains("MSIE 8.0")) {
                         resp.setHeader("Cache-Control","private"); //HTTP 1.1

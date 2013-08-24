@@ -70,8 +70,9 @@
         }
 
         private function exported():void {
-            var url:URLRequest = new URLRequest("/app/excel");
-            navigateToURL(url, "_blank");
+//            var url:URLRequest = new URLRequest("/app/excel");
+//            navigateToURL(url, "_blank");
+            ExternalInterface.call("loadPage", "/app/excel");
         }
 
         public function gotFocus():void {

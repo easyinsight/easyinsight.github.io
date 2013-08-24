@@ -6,6 +6,7 @@ import com.easyinsight.util.ProgressAlert;
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
+import flash.external.ExternalInterface;
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
 import flash.utils.ByteArray;
@@ -25,8 +26,9 @@ public class PNGCreator {
     private var upload:RemoteObject;
 
     private function exported(event:ResultEvent):void {
-        var url:URLRequest = new URLRequest("/app/image");
-        navigateToURL(url, "_blank");
+//        var url:URLRequest = new URLRequest("/app/image");
+//        navigateToURL(url, "_blank");
+        ExternalInterface.call("loadPage", "/app/image");
     }
 
     public function exportPNG(renderable:DisplayObject, parent:UIComponent, reportName:String):void {

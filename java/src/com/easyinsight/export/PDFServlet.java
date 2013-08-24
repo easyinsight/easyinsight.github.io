@@ -46,7 +46,7 @@ public class PDFServlet extends HttpServlet {
                     resp.setContentType("application/x-download");
                     resp.setContentLength(bytes.length);
                     reportName = URLEncoder.encode(reportName, "UTF-8");
-                    resp.setHeader("Content-disposition","attachment; filename=" + reportName+".pdf" );
+                    resp.setHeader("Content-Disposition","attachment; filename=" + reportName+".pdf" );
                     String userAgent = req.getHeader("User-Agent");
                     if (userAgent != null && userAgent.contains("MSIE 8.0")) {
                         resp.setHeader("Cache-Control","private"); //HTTP 1.1

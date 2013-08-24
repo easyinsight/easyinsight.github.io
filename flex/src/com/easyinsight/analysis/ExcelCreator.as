@@ -3,6 +3,7 @@ import com.easyinsight.framework.InsightRequestMetadata;
 import com.easyinsight.util.ProgressAlert;
 
 import flash.display.DisplayObject;
+import flash.external.ExternalInterface;
 
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
@@ -44,8 +45,9 @@ public class ExcelCreator {
             var window:UIComponent = response.reportFault.createFaultWindow();
             PopUpManager.addPopUp(window, DisplayObject(Application.application), true);
         } else {
-            var url:URLRequest = new URLRequest("/app/excel");
-            navigateToURL(url, "_self");
+//            var url:URLRequest = new URLRequest("/app/excel");
+//            navigateToURL(url, "_self");
+            ExternalInterface.call("loadPage", "/app/excel");
         }
     }
 
