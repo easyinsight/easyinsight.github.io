@@ -87,6 +87,19 @@ public class FederatedFeed extends Feed {
                 Map<FilterDefinition, AnalysisItem> backMap = new HashMap<FilterDefinition, AnalysisItem>();
                 for (FilterDefinition filter : filters) {
                     boolean matched = false;
+                    if (filter.getField() != null) {
+                        if (filter.getField().getKey() instanceof DerivedKey) {
+                            DerivedKey derivedKey = (DerivedKey) filter.getField().getKey();
+                            Key parentKey = derivedKey.getParentKey();
+                            for (AnalysisItem field : feed.getDataSource().getFields()) {
+                                if (field.getKey().toKeyString().equals(parentKey.toKeyString()) && field.isKeyColumn() == filter.getField().isKeyColumn()) {
+                                    matched = true;
+                                    backMap.put(filter, filter.getField());
+                                    filter.setField(field);
+                                }
+                            }
+                        }
+                    }
                     for (FieldMapping fieldMapping : source.getFieldMappings()) {
                         if (fieldMapping.getFederatedKey().equals(filter.getField().toDisplay())) {
                             for (AnalysisItem field : feed.getDataSource().getFields()) {
