@@ -97,6 +97,7 @@ public class FederatedFeed extends Feed {
                                     matched = true;
                                     backMap.put(filter, filter.getField());
                                     filter.setField(field);
+                                    break;
                                 }
                             }
                         }
