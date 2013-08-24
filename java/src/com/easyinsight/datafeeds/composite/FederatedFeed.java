@@ -93,6 +93,7 @@ public class FederatedFeed extends Feed {
                             Key parentKey = derivedKey.getParentKey();
                             for (AnalysisItem field : feed.getDataSource().getFields()) {
                                 if (field.getKey().toKeyString().equals(parentKey.toKeyString()) && field.isKeyColumn() == filter.getField().isKeyColumn()) {
+                                    System.out.println("setting " + filter.getField().toDisplay() + " to " + field.toDisplay());
                                     matched = true;
                                     backMap.put(filter, filter.getField());
                                     filter.setField(field);
@@ -100,13 +101,15 @@ public class FederatedFeed extends Feed {
                             }
                         }
                     }
-                    for (FieldMapping fieldMapping : source.getFieldMappings()) {
-                        if (fieldMapping.getFederatedKey().equals(filter.getField().toDisplay())) {
-                            for (AnalysisItem field : feed.getDataSource().getFields()) {
-                                if (field.toDisplay().equals(fieldMapping.getSourceKey())) {
-                                    matched = true;
-                                    backMap.put(filter, filter.getField());
-                                    filter.setField(field);
+                    if (!matched) {
+                        for (FieldMapping fieldMapping : source.getFieldMappings()) {
+                            if (fieldMapping.getFederatedKey().equals(filter.getField().toDisplay())) {
+                                for (AnalysisItem field : feed.getDataSource().getFields()) {
+                                    if (field.toDisplay().equals(fieldMapping.getSourceKey())) {
+                                        matched = true;
+                                        backMap.put(filter, filter.getField());
+                                        filter.setField(field);
+                                    }
                                 }
                             }
                         }
