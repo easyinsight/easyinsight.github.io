@@ -74,7 +74,8 @@ public class AnalysisBasedFeed extends Feed {
                         Iterator<FilterDefinition> iter = analysisDefinition.getFilterDefinitions().iterator();
                         while (iter.hasNext()) {
                             FilterDefinition existing = iter.next();
-                            if (filter.getFilterName() != null && !"".equals(filter.getFilterName()) && existing.getFilterName() != null && !"".equals(existing.getFilterName())) {
+                            if (filter.getFilterName() != null && !"".equals(filter.getFilterName()) && existing.getFilterName() != null && !"".equals(existing.getFilterName()) &&
+                                    filter.getFilterName().equals(existing.getFilterName())) {
                                 iter.remove();
                             }
                         }
