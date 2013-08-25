@@ -798,7 +798,7 @@
                            visible="{admin}" id="configureButton"/>
             <mx:VRule height="10" strokeColor="#CCCCCC" id="configureRule"/>
             <mx:LinkButton label="Delete the data source" click="deleteSelf()" fontSize="12"
-                           visible="{admin}" id="deleteButton"/>
+                           visible="{admin &amp;&amp; !showBack}" id="deleteButton"/>
         </mx:HBox>
     </mx:VBox>
     <mx:VBox paddingLeft="10" paddingRight="10"

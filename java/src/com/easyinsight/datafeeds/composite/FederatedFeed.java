@@ -87,13 +87,30 @@ public class FederatedFeed extends Feed {
                 Map<FilterDefinition, AnalysisItem> backMap = new HashMap<FilterDefinition, AnalysisItem>();
                 for (FilterDefinition filter : filters) {
                     boolean matched = false;
-                    for (FieldMapping fieldMapping : source.getFieldMappings()) {
-                        if (fieldMapping.getFederatedKey().equals(filter.getField().toDisplay())) {
+                    if (filter.getField() != null) {
+                        if (filter.getField().getKey() instanceof DerivedKey) {
+                            DerivedKey derivedKey = (DerivedKey) filter.getField().getKey();
+                            Key parentKey = derivedKey.getParentKey();
                             for (AnalysisItem field : feed.getDataSource().getFields()) {
-                                if (field.toDisplay().equals(fieldMapping.getSourceKey())) {
+                                if (field.getKey().toKeyString().equals(parentKey.toKeyString()) && field.isKeyColumn() == filter.getField().isKeyColumn()) {
+                                    System.out.println("setting " + filter.getField().toDisplay() + " to " + field.toDisplay());
                                     matched = true;
                                     backMap.put(filter, filter.getField());
                                     filter.setField(field);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (!matched) {
+                        for (FieldMapping fieldMapping : source.getFieldMappings()) {
+                            if (fieldMapping.getFederatedKey().equals(filter.getField().toDisplay())) {
+                                for (AnalysisItem field : feed.getDataSource().getFields()) {
+                                    if (field.toDisplay().equals(fieldMapping.getSourceKey())) {
+                                        matched = true;
+                                        backMap.put(filter, filter.getField());
+                                        filter.setField(field);
+                                    }
                                 }
                             }
                         }
