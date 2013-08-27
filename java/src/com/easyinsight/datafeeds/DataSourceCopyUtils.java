@@ -44,9 +44,10 @@ public class DataSourceCopyUtils {
 
         infos = cloneFeed(userID, conn, feedDefinition, solutionID > 0, accountID, userName);
         FeedDefinition clonedFeedDefinition = infos.get(feedDefinition.getDataFeedID()).getNewDataSource();
-        if (solutionID > 0 && feedDefinition.requiresConfiguration()) {
-            clonedFeedDefinition.setVisible(false);
-        }
+        //if (solutionID > 0 && feedDefinition.requiresConfiguration()) {
+        clonedFeedDefinition.setVisible(false);
+        infos.get(feedDefinition.getDataFeedID()).setMakeVisible(feedDefinition.isVisible());
+        //}
         clonedFeedDefinition.setDateCreated(new Date());
         clonedFeedDefinition.setDateUpdated(new Date());
         clonedFeedDefinition.setLastRefreshStart(new Date(1));
@@ -67,14 +68,17 @@ public class DataSourceCopyUtils {
         ResultSet reportRS = getReports.executeQuery();
         Map<Long, AnalysisDefinition> alreadyInstalledMap = new HashMap<Long, AnalysisDefinition>();
         Session session = Database.instance().createSession(conn);
+        List<Long> reports = new ArrayList<Long>();
         while (reportRS.next()) {
             long reportID = reportRS.getLong(1);
             try {
-                new SolutionService().installReport(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, false, true, alreadyInstalledMap);
+                reports.add(new SolutionService().installReport(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, true, true, alreadyInstalledMap).getId());
             } catch (Exception e) {
                 LogClass.error("Could not install report " + reportID, e);
             }
         }
+        getReports.close();
+        List<Long> dashboards = new ArrayList<Long>();
         PreparedStatement getDashboards = conn.prepareStatement("SELECT DASHBOARD_ID, FOLDER FROM DASHBOARD WHERE DATA_SOURCE_ID = ? AND TEMPORARY_DASHBOARD = ?");
         getDashboards.setLong(1, feedDefinition.getDataFeedID());
         getDashboards.setBoolean(2, false);
@@ -83,11 +87,14 @@ public class DataSourceCopyUtils {
             long reportID = dashboardRS.getLong(1);
             int folder = dashboardRS.getInt(2);
             try {
-                new SolutionService().installDashboard(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, false, true, alreadyInstalledMap, folder);
+                dashboards.add(new SolutionService().installDashboard(reportID, clonedFeedDefinition.getDataFeedID(), (EIConnection) conn, session, true, true, alreadyInstalledMap, folder).getId());
             } catch (Exception e) {
                 LogClass.error("Could not install dashboard " + reportID, e);
             }
         }
+        getDashboards.close();
+        infos.get(feedDefinition.getDataFeedID()).setReports(reports);
+        infos.get(feedDefinition.getDataFeedID()).setDashboards(dashboards);
         session.close();
         return infos;
     }
