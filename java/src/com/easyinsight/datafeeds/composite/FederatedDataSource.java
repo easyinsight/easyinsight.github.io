@@ -114,6 +114,7 @@ public class FederatedDataSource extends FeedDefinition {
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEDERATED_DATA_SOURCE WHERE data_source_id = ?");
         deleteStmt.setLong(1, getDataFeedID());
         deleteStmt.executeUpdate();
+        deleteStmt.close();
         PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO FEDERATED_DATA_SOURCE (DATA_SOURCE_ID, ANALYSIS_ITEM_ID) VALUES (?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         saveStmt.setLong(1, getDataFeedID());
@@ -143,6 +144,8 @@ public class FederatedDataSource extends FeedDefinition {
                 saveMappingsStmt.execute();
             }
         }
+        saveJoinStmt.close();
+        saveMappingsStmt.close();
     }
 
     @Override
