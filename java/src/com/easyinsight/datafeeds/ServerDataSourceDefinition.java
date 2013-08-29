@@ -50,6 +50,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
+    public DataSet getDataSet(Map<String, Key> keys, java.util.Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, java.util.Date lastRefreshDate,
+                              Map<String, Object> refreshProperties) throws ReportException {
+        throw new UnsupportedOperationException();
+    }
+
     public void defineCustomFields() {
 
     }
@@ -189,7 +194,8 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         return new MigrationResult(changed, keys);
     }
 
-    public String tempLoad(Map<String, Key> keys, Date now, @Nullable FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, EIConnection conn, boolean fullRefresh) throws Exception {
+    public String tempLoad(Map<String, Key> keys, Date now, @Nullable FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, EIConnection conn, boolean fullRefresh,
+                           Map<String, Object> refreshProperties) throws Exception {
         TempStorage tempStorage = DataStorage.tempConnection(this, conn);
         if (parentDefinition == null) {
             fullRefresh = fullRefresh && fullNightlyRefresh();
@@ -205,10 +211,16 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
         tempStorage.createTable(sql);
         System.out.println("Refreshing " + getDataFeedID() + " - " + getFeedName() + " at " + new Date());
-        DataSet dataSet = getDataSet(keys, now, parentDefinition, tempStorage, conn, callDataID, fullRefresh ? null : lastRefreshTime);
+        DataSet dataSet;
+        if (refreshProperties == null) {
+            dataSet = getDataSet(keys, now, parentDefinition, tempStorage, conn, callDataID, fullRefresh ? null : lastRefreshTime);
+        } else {
+            dataSet = getDataSet(keys, now, parentDefinition, tempStorage, conn, callDataID, fullRefresh ? null : lastRefreshTime, refreshProperties);
+        }
         if (dataSet != null) {
             tempStorage.insertData(dataSet);
         }
+        tempStorage.commit();
         System.out.println("Completed refresh of " + getDataFeedID() + " at " + new Date());
         return tempStorage.getTableName();
     }
@@ -225,8 +237,12 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         dataStorage.truncate();
     }
 
+    protected void clearData(DataStorage dataStorage, Map<String, Object> refreshProperties) throws SQLException {
+        clearData(dataStorage);
+    }
+
     public void applyTempLoad(EIConnection conn, long accountID, @Nullable FeedDefinition parentDefinition, Date lastRefreshTime,
-                              String tempTable, boolean fullRefresh, List<ReportFault> warnings) throws Exception {
+                              String tempTable, boolean fullRefresh, List<ReportFault> warnings, Map<String, Object> refreshProperties) throws Exception {
         DataStorage dataStorage = null;
         try {
             if (!noDataProcessing()) {
@@ -238,7 +254,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
                 }
                 boolean insert = clearsData(parentDefinition) || lastRefreshTime == null || lastRefreshTime.getTime() < 100 || fullRefresh;
                 if (insert) {
-                    clearData(dataStorage);
+                    clearData(dataStorage, refreshProperties);
                     dataStorage.insertFromSelect(tempTable);
                 } else {
                     if (getUpdateKeyName() == null) {
@@ -264,7 +280,8 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh, List<ReportFault> warnings) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime,
+                               boolean fullRefresh, List<ReportFault> warnings, Map<String, Object> refreshProperties) throws Exception {
         boolean changed = false;
         beforeRefresh(conn);
         MigrationResult migrationResult = migrations(conn, this);
@@ -273,10 +290,10 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
 
         conn.commit();
         conn.setAutoCommit(true);
-        String tempTable = tempLoad(keyMap, now, this, callDataID, lastRefreshTime, conn, fullRefresh);
+        String tempTable = tempLoad(keyMap, now, this, callDataID, lastRefreshTime, conn, fullRefresh, refreshProperties);
 
         conn.setAutoCommit(false);
-        applyTempLoad(conn, accountID, null, lastRefreshTime, tempTable, fullRefresh, warnings);
+        applyTempLoad(conn, accountID, null, lastRefreshTime, tempTable, fullRefresh, warnings, refreshProperties);
 
         refreshDone();
         return changed;
