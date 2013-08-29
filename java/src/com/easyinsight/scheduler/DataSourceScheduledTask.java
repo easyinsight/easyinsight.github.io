@@ -74,7 +74,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
                 LogClass.info("No user for data data source refresh.");
             } else {
                 PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin, USER.guest_user," +
-                        "ACCOUNT.FIRST_DAY_OF_WEEK, USER.ANALYST FROM USER, ACCOUNT " +
+                        "ACCOUNT.FIRST_DAY_OF_WEEK, USER.ANALYST, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
                         "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
                 queryStmt.setInt(1, Account.ACTIVE);
                 queryStmt.setInt(2, Account.TRIAL);
@@ -89,6 +89,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
                     boolean guestUser = rs.getBoolean(6);
                     int firstDayOfWeek = rs.getInt(7);
                     boolean analyst = rs.getBoolean(8);
+                    boolean accountReports = rs.getBoolean(9);
                     PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.persona_name FROM USER, PERSONA WHERE USER.PERSONA_ID = PERSONA.PERSONA_ID AND USER.USER_ID = ?");
                     stmt.setLong(1, userID);
                     ResultSet personaRS = stmt.executeQuery();
@@ -230,7 +231,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
         }
 
         public boolean invoke() throws Exception {
-            boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings);
+            boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings, null);
             sourceToRefresh.setVisible(true);
             sourceToRefresh.setLastRefreshStart(now);
             if (changed) {
