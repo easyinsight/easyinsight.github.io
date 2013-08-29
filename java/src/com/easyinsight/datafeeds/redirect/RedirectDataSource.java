@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -123,7 +124,7 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         redirectDataSourceID = rs.getLong(1);
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh, List<ReportFault> warnings) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh, List<ReportFault> warnings, Map<String, Object> reportProperties) throws Exception {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

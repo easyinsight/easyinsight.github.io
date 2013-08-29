@@ -48,7 +48,7 @@ public class InvalidateData extends Function {
             IServerDataSourceDefinition dataSourceDefinition = (IServerDataSourceDefinition) dataSource;
             if (dataSource.getLastRefreshStart() == null || dataSourceDefinition.hasNewData(dataSource.getLastRefreshStart(), parent, calculationMetadata.getConnection())) {
                 Date now = new Date();
-                boolean changed = dataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), calculationMetadata.getConnection(), null, null, dataSource.getLastRefreshStart(), false, new ArrayList<ReportFault>());
+                boolean changed = dataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), calculationMetadata.getConnection(), null, null, dataSource.getLastRefreshStart(), false, new ArrayList<ReportFault>(), null);
                 dataSource.setVisible(true);
                 dataSource.setLastRefreshStart(now);
                 if (changed) {
