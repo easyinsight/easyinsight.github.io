@@ -68,13 +68,10 @@ import mx.rpc.events.ResultEvent;
 		
 		public function SliderDateFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition = null) {
 			super();
+            this.feedID = feedID;
+            this.report = report;
 			this.analysisItem = analysisItem;
             _report = report;
-			dataService = new RemoteObject();
-			dataService.destination = "data";
-			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
-			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, new Date().getTimezoneOffset(), reportID, dashboardID, report);
 		}
 
         private function onFault(event:FaultEvent):void {
@@ -147,27 +144,81 @@ import mx.rpc.events.ResultEvent;
             _filterDefinition.enabled = checkbox.selected;
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
-		
-		private function gotMetadata(event:ResultEvent):void {
-			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
-			var dateMetadata:AnalysisDateDimensionResultMetadata = metadata as AnalysisDateDimensionResultMetadata;
-			this.lowDate = dateMetadata.earliestDate;
-            if (lowDate == null) {
-                lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
+
+        private var filterLabel:UIComponent;
+
+        private var feedID:int;
+
+        private var report:AnalysisDefinition;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (_filterDefinition == null || _filterDefinition.sliderRange) {
+                dataService = new RemoteObject();
+                dataService.destination = "data";
+                dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
+                dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
+                dataService.getAnalysisItemMetadata.send(feedID, analysisItem, new Date().getTimezoneOffset(), _reportID, _dashboardID, report);
+            } else {
+                createComponents();
             }
-			this.highDate = dateMetadata.latestDate;
-            if (highDate == null) {
-                highDate = new Date();
+        }
+
+        private function createComponents():void {
+
+            if (_filterDefinition == null) {
+                _filterDefinition = new FilterDateRangeDefinition();
+                _filterDefinition.startDate = lowDate;
+                _filterDefinition.endDate = highDate;
+                _filterDefinition.field = analysisItem;
+                if (analysisItem.hasType(AnalysisItemTypes.STEP)) {
+                    _filterDefinition.applyBeforeAggregation = false;
+                }
+                _filterDefinition.sliding = true;
+            } else {
+                if (_filterDefinition.startDate == null) {
+                    _filterDefinition.startDate = lowDate;
+                }
+                lowDate = _filterDefinition.startDate;
+                if (_filterDefinition.endDate == null) {
+                    _filterDefinition.endDate = highDate;
+                }
+                highDate = _filterDefinition.endDate;
+                if (_filterDefinition.startDateDimension != null) {
+                    leftIndex = 1;
+                    this.leftLabel = _filterDefinition.startDateDimension.display;
+                } else {
+                    leftIndex = 0;
+                }
+                if (_filterDefinition.endDateDimension != null) {
+                    rightIndex = 1;
+                    this.rightLabel = _filterDefinition.endDateDimension.display;
+                } else {
+                    rightIndex = 0;
+                }
             }
-			this.delta = highDate.valueOf() - lowDate.valueOf();
-			hslider = new HSlider();
-			hslider.thumbCount = 2;
-			hslider.liveDragging = false;
-			hslider.minimum = 0;
-            hslider.dataTipFormatFunction = dataTipFormatter;
-			hslider.maximum = 100;
-			hslider.values = [0, 100];
-			hslider.addEventListener(SliderEvent.THUMB_RELEASE, thumbRelease);
+
+            if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
+                var checkbox:CheckBox = new CheckBox();
+                checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
+                checkbox.toolTip = "Click to disable this filter.";
+                checkbox.addEventListener(Event.CHANGE, onChange);
+                addChild(checkbox);
+            }
+
+            if (_filterEditable) {
+                filterLabel = new LinkButton();
+                filterLabel.setStyle("fontSize", 12);
+                filterLabel.setStyle("textDecoration", "underline");
+                filterLabel.addEventListener(MouseEvent.CLICK, edit);
+                LinkButton(filterLabel).label = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            } else {
+                filterLabel = new Label();
+                Label(filterLabel).text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            }
+            filterLabel.styleName = "filterLabel";
+            addChild(filterLabel);
+
             var formatString:String;
             if (User.getInstance() == null) {
                 formatString = "YYYY-MM-DD";
@@ -190,102 +241,82 @@ import mx.rpc.events.ResultEvent;
                         break;
                 }
             }
-			lowField = new DateField();
-            lowField.formatString = formatString;
-			lowField.selectedDate = dateMetadata.earliestDate;
-			lowField.addEventListener(CalendarLayoutChangeEvent.CHANGE, lowDateChange);
-			highField = new DateField();
-			highField.selectedDate = dateMetadata.latestDate;
-            highField.formatString = formatString;
-			highField.addEventListener(CalendarLayoutChangeEvent.CHANGE, highDateChange);
-            //if (!_filterEditable) {
-            if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
-                var checkbox:CheckBox = new CheckBox();
-                checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
-                checkbox.toolTip = "Click to disable this filter.";
-                checkbox.addEventListener(Event.CHANGE, onChange);
-                addChild(checkbox);
-            }
-            //}
 
-            var filterLabel:UIComponent;
-            if (_filterEditable) {
-                filterLabel = new LinkButton();
-                filterLabel.setStyle("fontSize", 12);
-                filterLabel.setStyle("textDecoration", "underline");
-                filterLabel.addEventListener(MouseEvent.CLICK, edit);
-                LinkButton(filterLabel).label = FilterDefinition.getLabel(_filterDefinition, analysisItem);
-            } else {
-                filterLabel = new Label();
-                Label(filterLabel).text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            if (_filterDefinition.sliderRange) {
+                hslider = new HSlider();
+                hslider.thumbCount = 2;
+                hslider.liveDragging = false;
+                hslider.minimum = 0;
+                hslider.dataTipFormatFunction = dataTipFormatter;
+                hslider.maximum = 100;
+                hslider.values = [0, 100];
+                hslider.addEventListener(SliderEvent.THUMB_RELEASE, thumbRelease);
             }
-            filterLabel.styleName = "filterLabel";
-            addChild(filterLabel);
 
-            var leftSideStack:ViewStack = new ViewStack();
-            BindingUtils.bindProperty(leftSideStack, "selectedIndex", this, "leftIndex");
-            leftSideStack.resizeToContent = true;
-            var leftFieldBox:Box = new Box();
-            leftFieldBox.addChild(lowField);
-            leftSideStack.addChild(leftFieldBox);
-            var leftLabel:Label = new Label();
-            BindingUtils.bindProperty(leftLabel, "text", this, "leftLabel");
-            var leftBox:Box = new Box();
-            leftBox.addChild(leftLabel);
-            leftSideStack.addChild(leftBox);
-            var rightSideStack:ViewStack = new ViewStack();
-            BindingUtils.bindProperty(rightSideStack, "selectedIndex", this, "rightIndex");
-            rightSideStack.resizeToContent = true;
-            var rightFieldBox:Box = new Box();
-            rightFieldBox.addChild(highField);
-            rightSideStack.addChild(rightFieldBox);
-            var rightLabel:Label = new Label();
-            BindingUtils.bindProperty(rightLabel, "text", this, "rightLabel");
-            var rightBox:Box = new Box();
-            rightBox.addChild(rightLabel);
-            rightSideStack.addChild(rightBox);
-			addChild(leftSideStack);
-			addChild(hslider);
-			addChild(rightSideStack);
-			if (_filterDefinition == null) {
-				_filterDefinition = new FilterDateRangeDefinition();
-				_filterDefinition.startDate = dateMetadata.earliestDate;
-				_filterDefinition.endDate = dateMetadata.latestDate;
-				_filterDefinition.field = analysisItem;
-                if (analysisItem.hasType(AnalysisItemTypes.STEP)) {
-                    _filterDefinition.applyBeforeAggregation = false;    
-                }
-                _filterDefinition.sliding = true;
-			} else {
-                if (_filterDefinition.sliding && _filterDefinition.startDate != null && _filterDefinition.endDate != null) {
-                    var nowDelta:int = highDate.getTime() - _filterDefinition.endDate.getTime();
-                    _filterDefinition.startDate = new Date(_filterDefinition.startDate.getTime() + nowDelta);
-                    _filterDefinition.endDate = new Date(_filterDefinition.endDate.getTime() + nowDelta);
-                }
-				if (_filterDefinition.startDate == null) {
-					_filterDefinition.startDate = lowDate;
-				}
-				lowField.selectedDate = _filterDefinition.startDate;
-				if (_filterDefinition.endDate == null) {
-					_filterDefinition.endDate = highDate;
-				}
-                if (_filterDefinition.startDateDimension != null) {
-                    leftIndex = 1;
-                    this.leftLabel = _filterDefinition.startDateDimension.display;
-                } else {
-                    leftIndex = 0;
-                }
-                if (_filterDefinition.endDateDimension != null) {
-                    rightIndex = 1;
-                    this.rightLabel = _filterDefinition.endDateDimension.display;
-                } else {
-                    rightIndex = 0;
-                }
-				highField.selectedDate = _filterDefinition.endDate;
-				var newLowVal:int = ((lowField.selectedDate.valueOf() - lowDate.valueOf()) / delta) * 100;
-				var newHighVal:int = ((highField.selectedDate.valueOf() - lowDate.valueOf()) / delta) * 100;
-				hslider.values = [ newLowVal, newHighVal ] ;
-			}
+
+
+            if (_filterDefinition.startDateEnabled) {
+                lowField = new DateField();
+                lowField.editable = true;
+                lowField.formatString = formatString;
+                lowField.selectedDate = lowDate;
+                lowField.addEventListener(CalendarLayoutChangeEvent.CHANGE, lowDateChange);
+            }
+            if (_filterDefinition.endDateEnabled) {
+                highField = new DateField();
+                highField.editable = true;
+                highField.selectedDate = highDate;
+                highField.formatString = formatString;
+                highField.addEventListener(CalendarLayoutChangeEvent.CHANGE, highDateChange);
+            }
+
+            if (lowField != null) {
+                lowField.selectedDate = _filterDefinition.startDate;
+            }
+
+            if (highField != null) {
+                highField.selectedDate = _filterDefinition.endDate;
+            }
+
+            if (hslider != null) {
+                var newLowVal:int = ((lowField.selectedDate.valueOf() - lowDate.valueOf()) / delta) * 100;
+                var newHighVal:int = ((highField.selectedDate.valueOf() - lowDate.valueOf()) / delta) * 100;
+                hslider.values = [ newLowVal, newHighVal ] ;
+            }
+
+            if (lowField != null) {
+                var leftSideStack:ViewStack = new ViewStack();
+                BindingUtils.bindProperty(leftSideStack, "selectedIndex", this, "leftIndex");
+                leftSideStack.resizeToContent = true;
+                var leftFieldBox:Box = new Box();
+                leftFieldBox.addChild(lowField);
+                leftSideStack.addChild(leftFieldBox);
+                var leftLabel:Label = new Label();
+                BindingUtils.bindProperty(leftLabel, "text", this, "leftLabel");
+                var leftBox:Box = new Box();
+                leftBox.addChild(leftLabel);
+                leftSideStack.addChild(leftBox);
+                addChild(leftSideStack);
+            }
+
+            if (hslider != null) {
+                addChild(hslider);
+            }
+
+            if (highField != null) {
+                var rightSideStack:ViewStack = new ViewStack();
+                BindingUtils.bindProperty(rightSideStack, "selectedIndex", this, "rightIndex");
+                rightSideStack.resizeToContent = true;
+                var rightFieldBox:Box = new Box();
+                rightFieldBox.addChild(highField);
+                rightSideStack.addChild(rightFieldBox);
+                var rightLabel:Label = new Label();
+                BindingUtils.bindProperty(rightLabel, "text", this, "rightLabel");
+                var rightBox:Box = new Box();
+                rightBox.addChild(rightLabel);
+                rightSideStack.addChild(rightBox);
+                addChild(rightSideStack);
+            }
 
             if (_filterEditable) {
 
@@ -301,14 +332,30 @@ import mx.rpc.events.ResultEvent;
                 }
                 addChild(deleteButton);
             }
-			
+
 
             if (_loadingFromReport) {
                 _loadingFromReport = false;
 
             } else {
-			    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
             }
+        }
+
+        private function gotMetadata(event:ResultEvent):void {
+			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
+			var dateMetadata:AnalysisDateDimensionResultMetadata = metadata as AnalysisDateDimensionResultMetadata;
+			this.lowDate = dateMetadata.earliestDate;
+            if (lowDate == null) {
+                lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
+            }
+			this.highDate = dateMetadata.latestDate;
+            if (highDate == null) {
+                highDate = new Date();
+            }
+			this.delta = highDate.valueOf() - lowDate.valueOf();
+
+            createComponents();
 		}
 		
 		public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -317,7 +364,7 @@ import mx.rpc.events.ResultEvent;
 		
 		private function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
-			window.detailClass = DateRangeDetailEditor;
+			window.detailClass = DateRangeDetail;
 			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;
@@ -327,6 +374,9 @@ import mx.rpc.events.ResultEvent;
 		}
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
+            if (filterLabel is LinkButton) {
+                LinkButton(filterLabel).label = FilterDefinition.getLabel(event.filterDefinition, analysisItem);
+            }
             if (event.filterDefinition is FilterDateRangeDefinition) {
                 var filter:FilterDateRangeDefinition = event.filterDefinition as FilterDateRangeDefinition;
                 if (filter.startDateDimension != null) {
@@ -373,8 +423,10 @@ import mx.rpc.events.ResultEvent;
 		}
 		
 		private function lowDateChange(event:CalendarLayoutChangeEvent):void {
-			var newLowVal:int = ((event.newDate.valueOf() - lowDate.valueOf()) / delta) * 100;			
-			hslider.values = [ newLowVal, hslider.values[1] ] ;
+            if (hslider != null) {
+                var newLowVal:int = ((event.newDate.valueOf() - lowDate.valueOf()) / delta) * 100;
+                hslider.values = [ newLowVal, hslider.values[1] ] ;
+            }
             var date:Date = event.newDate;
             var offsetDelta:int = new Date().timezoneOffset - date.timezoneOffset;
             if (offsetDelta > 0) {
@@ -385,8 +437,10 @@ import mx.rpc.events.ResultEvent;
 		}
 		
 		private function highDateChange(event:CalendarLayoutChangeEvent):void {
-			var newHighVal:int = ((event.newDate.valueOf() - lowDate.valueOf()) / delta) * 100;
-			hslider.values = [ hslider.values[0], newHighVal ] ;
+            if (hslider != null) {
+                var newHighVal:int = ((event.newDate.valueOf() - lowDate.valueOf()) / delta) * 100;
+                hslider.values = [ hslider.values[0], newHighVal ] ;
+            }
             var date:Date = event.newDate;
             var offsetDelta:int = new Date().timezoneOffset - date.timezoneOffset;
             if (offsetDelta > 0) {

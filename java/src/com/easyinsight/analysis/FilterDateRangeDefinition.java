@@ -50,6 +50,15 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     @Column(name="sliding")
     private boolean sliding;
 
+    @Column(name="start_date_enabled")
+    private boolean startDateEnabled = true;
+
+    @Column(name="end_date_enabled")
+    private boolean endDateEnabled = true;
+
+    @Column(name="slider_range")
+    private boolean sliderRange = true;
+
     @Override
     public int type() {
         return FilterDefinition.DATE;
@@ -63,6 +72,30 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public boolean isStartDateEnabled() {
+        return startDateEnabled;
+    }
+
+    public void setStartDateEnabled(boolean startDateEnabled) {
+        this.startDateEnabled = startDateEnabled;
+    }
+
+    public boolean isEndDateEnabled() {
+        return endDateEnabled;
+    }
+
+    public void setEndDateEnabled(boolean endDateEnabled) {
+        this.endDateEnabled = endDateEnabled;
+    }
+
+    public boolean isSliderRange() {
+        return sliderRange;
+    }
+
+    public void setSliderRange(boolean sliderRange) {
+        this.sliderRange = sliderRange;
     }
 
     @Override
@@ -218,7 +251,10 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     public String toQuerySQL(String tableName) {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = "k" + getField().getKey().toBaseKey().getKeyID();
+
+
         queryBuilder.append(columnName);
+
         queryBuilder.append(" >= ? AND ");
         queryBuilder.append(columnName);
         queryBuilder.append(" <= ?");
