@@ -146,6 +146,9 @@
                     saveJoins.addItem(compJoin);
                 } else {
                     var saveJoin:JoinOverride = new JoinOverride();
+                    saveJoin.sourceCardinality = connection.sourceCardinality;
+                    saveJoin.targetCardinality = connection.targetCardinality;
+                    saveJoin.forceOuterJoin = connection.forceOuterJoin;
                     saveJoin.sourceItem = connection.sourceItem;
                     saveJoin.targetItem = connection.targetItem;
                     saveJoin.sourceName = connection.sourceFeedName;
@@ -301,6 +304,9 @@
                     saveJoins.addItem(compJoin);
                 } else {
                     var saveJoin:JoinOverride = new JoinOverride();
+                    saveJoin.forceOuterJoin = connection.forceOuterJoin;
+                    saveJoin.sourceCardinality = connection.sourceCardinality;
+                    saveJoin.targetCardinality = connection.targetCardinality;
                     saveJoin.sourceItem = connection.sourceItem;
                     saveJoin.targetItem = connection.targetItem;
                     saveJoin.sourceName = connection.sourceFeedName;
