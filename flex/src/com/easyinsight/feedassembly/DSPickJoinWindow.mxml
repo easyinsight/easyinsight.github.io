@@ -8,7 +8,6 @@
         import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.analysis.ReportKey;
         import com.easyinsight.quicksearch.EIDescriptor;
-        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ProgressAlert;
 
@@ -68,6 +67,10 @@
         }
 
         private function chooseSources():void {
+            if (sourceDataBox.selectedItem == null || targetDataBox.selectedItem == null) {
+                Alert.show("You need to select a data source.");
+                return;
+            }
             if (sourceDataBox.selectedItem.id == targetDataBox.selectedItem.id) {
                 Alert.show("You can't connect a data source to itself.");
             } else {
@@ -209,6 +212,14 @@
         }
 
         private function join():void {
+            if (sourceBox.selectedItem == null) {
+                Alert.show("You need to select a source field.");
+                return;
+            }
+            if (targetBox.selectedItem == null) {
+                Alert.show("You need to select a target field.");
+                return;
+            }
             var connects:ArrayCollection = new ArrayCollection();
             var connect:CompositeFeedConnection = new CompositeFeedConnection();
             if (sourceIDType == EIDescriptor.DATA_SOURCE) {
@@ -229,6 +240,8 @@
             connect.targetOuterJoin = rightJoinCheckbox.selected;
             connect.sourceJoinOnOriginal = leftMatchCheckbox.selected;
             connect.targetJoinOnOriginal = rightMatchCheckbox.selected;
+            connect.sourceCardinality = sourceCardinality.selectedItem == "One" ? CompositeFeedConnection.ONE : CompositeFeedConnection.MANY;
+            connect.targetCardinality = targetCardinality.selectedItem == "One" ? CompositeFeedConnection.ONE : CompositeFeedConnection.MANY;
             connects.addItem(connect);
             dispatchEvent(new JoinSelectionEvent(connects));
             PopUpManager.removePopUp(this);
@@ -244,6 +257,15 @@
                 advancedIndex = 1;
             }
         }
+
+        [Bindable]
+        private var joinDescription:String;
+
+        [Bindable]
+        private var sourceCardinalityOption:String = "One";
+
+        [Bindable]
+        private var targetCardinalityOption:String = "One";
         ]]></mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="getMultipleFeeds" result="gotFeeds()"/>
@@ -256,9 +278,9 @@
             <mx:Label text="Which data sources do you want to join?"/>
             <mx:HBox verticalAlign="middle">
                 <mx:Label text="I want to connect "/>
-                <mx:ComboBox id="sourceDataBox" dataProvider="{_dataSources}" labelField="name" selectedIndex="0"/>
+                <util:TextInputWithArrow id="sourceDataBox" dataProvider="{_dataSources}" labelField="name"/>
                 <mx:Label text="to"/>
-                <mx:ComboBox id="targetDataBox" dataProvider="{_dataSources}" labelField="name" selectedIndex="1"/>
+                <util:TextInputWithArrow id="targetDataBox" dataProvider="{_dataSources}" labelField="name"/>
             </mx:HBox>
             <mx:HBox width="100%" horizontalAlign="center">
                 <util:SaveButton label="Join These Data Sources" click="chooseSources()"/>
@@ -269,21 +291,51 @@
             <mx:HBox>
                 <mx:VBox>
                     <mx:Label text="{sourceFeedName}"/>
-                    <util:SmartComboBox id="sourceBox" dataProvider="{sourceFields}" labelField="display"/>
+                    <util:TextInputWithArrow id="sourceBox" dataProvider="{sourceFields}" labelField="display"/>
                 </mx:VBox>
                 <mx:VBox>
                     <mx:Label text="{targetFeedName}"/>
-                    <util:SmartComboBox id="targetBox" dataProvider="{targetFields}" labelField="display"/>
+                    <util:TextInputWithArrow id="targetBox" dataProvider="{targetFields}" labelField="display"/>
                 </mx:VBox>
+            </mx:HBox>
+            <mx:HBox width="100%" verticalAlign="middle">
+                <mx:CheckBox label="Ensure Outer Join" id="ensureOuterJoinCheckbox"/>
+                <mx:Spacer width="100%"/>
+                <mx:ComboBox id="sourceCardinality" selectedItem="{sourceCardinalityOption}">
+                    <mx:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:String>One</mx:String>
+                            <mx:String>Many</mx:String>
+                        </mx:ArrayCollection>
+                    </mx:dataProvider>
+                </mx:ComboBox>
+                <mx:Label text="to"/>
+                <mx:ComboBox id="targetCardinality" selectedItem="{targetCardinalityOption}">
+                    <mx:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:String>One</mx:String>
+                            <mx:String>Many</mx:String>
+                        </mx:ArrayCollection>
+                    </mx:dataProvider>
+                </mx:ComboBox>
             </mx:HBox>
             <mx:LinkButton label="Advanced Options" textDecoration="underline" click="toggleAdvanced()"/>
             <mx:ViewStack selectedIndex="{advancedIndex}" resizeToContent="true" creationPolicy="all">
                 <mx:Box/>
                 <mx:VBox>
-                    <mx:CheckBox label="Only Keep Matching Rows From Source" id="leftJoinCheckbox"/>
-                    <mx:CheckBox label="Only Keep Matching Rows From Target" id="rightJoinCheckbox"/>
-                    <mx:CheckBox label="Match Source Against Original Data" id="leftMatchCheckbox"/>
-                    <mx:CheckBox label="Match Target Against Original Data" id="rightMatchCheckbox"/>
+                    <mx:Text text="{joinDescription}" width="400"/>
+                    <mx:VBox>
+
+                        <mx:CheckBox label="Only Keep Matching Rows From Source (Inner Join)" id="leftJoinCheckbox"/>
+                        <!-- hide -->
+                        <mx:CheckBox label="Match Source Against Original Data" id="leftMatchCheckbox"/>
+                    </mx:VBox>
+                    <mx:VBox>
+
+                        <mx:CheckBox label="Only Keep Matching Rows From Target (Inner Join)" id="rightJoinCheckbox"/>
+                        <!-- hide -->
+                        <mx:CheckBox label="Match Target Against Original Data" id="rightMatchCheckbox"/>
+                    </mx:VBox>
                 </mx:VBox>
             </mx:ViewStack>
             <mx:HBox width="100%" horizontalAlign="center">
