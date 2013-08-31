@@ -887,9 +887,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             case AnalysisItemTypes.REAGGREGATE_MEASURE:
                 analysisItem = new ReaggregateAnalysisMeasure();
                 break;
-            case AnalysisItemTypes.SIX_SIGMA_MEASURE:
-                analysisItem = new SixSigmaMeasure();
-                break;
             case AnalysisItemTypes.STEP:
                 analysisItem = new AnalysisStep();
                 break;
