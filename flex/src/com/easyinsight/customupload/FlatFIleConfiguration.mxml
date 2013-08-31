@@ -42,7 +42,6 @@
             } else if (formatBox.selectedItem == "Excel 2003") {
                 ds.uploadFormat = new ExcelUploadFormat();
             } else if (formatBox.selectedItem == "CSV") {
-                Alert.show("setting to CSV");
                 ds.uploadFormat = new CsvFileUploadFormat();
             }
         }
