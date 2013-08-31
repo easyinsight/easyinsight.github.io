@@ -127,6 +127,8 @@ public class DMSServlet extends HttpServlet {
             LogClass.error(e);
         }
 
+        LogClass.info("Servlet shutdown complete...");
+
 
         super.destroy();
     }

@@ -2,6 +2,8 @@ package com.easyinsight.storage;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.servlet.SystemSettings;
 
 import java.util.*;
 import java.net.URL;
@@ -144,21 +146,27 @@ public class DatabaseManager {
     }
 
     public String chooseDatabase(Connection conn) throws SQLException {
-        PreparedStatement dbStmt = conn.prepareStatement("SELECT SUM(SIZE), DATABASE_NAME FROM FEED_PERSISTENCE_METADATA WHERE DATABASE_NAME IS NOT NULL GROUP BY DATABASE_NAME");
-        ResultSet dbSizes = dbStmt.executeQuery();
+        /*PreparedStatement stmt = conn.prepareStatement("SELECT SPECIAL_STORAGE FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+        stmt.setLong(1, SecurityUtil.getAccountID());
+        ResultSet storageRS = stmt.executeQuery();
+        storageRS.next();
+        String specialStorage = storageRS.getString(1);
+        stmt.close();
+        if (specialStorage != null && dbMap.containsKey(specialStorage)) {
+            return specialStorage;
+        }*/
+
         String dbToUse = null;
         long smallestSize = Long.MAX_VALUE;
         Set<String> foundDBs = new HashSet<String>(dbMap.keySet());
-        while (dbSizes.next()) {
-            long size = dbSizes.getLong(1);
-            String name = dbSizes.getString(2);
-            foundDBs.remove(name);
+        for (Map.Entry<String, Long> entry : SystemSettings.instance().getDatabaseMap().entrySet()) {
+            long size = entry.getValue();
+            foundDBs.remove(entry.getKey());
             if (size < smallestSize) {
-                dbToUse = name;
+                dbToUse = entry.getKey();
                 smallestSize = size;
             }
         }
-        dbStmt.close();
         if (!foundDBs.isEmpty()) {
             dbToUse = foundDBs.iterator().next();
         }        
