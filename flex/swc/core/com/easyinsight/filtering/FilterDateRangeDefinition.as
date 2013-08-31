@@ -8,6 +8,9 @@ import com.easyinsight.analysis.AnalysisDateDimension;
 	{
 		public var startDate:Date;
 		public var startDateDimension:AnalysisDateDimension;
+    public var endDateEnabled:Boolean = true;
+    public var startDateEnabled:Boolean = true;
+    public var sliderRange:Boolean = true;
         public var boundingStartDate:Date;
 		public var endDate:Date;
 		public var endDateDimension:AnalysisDateDimension;

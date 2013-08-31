@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.filtering.IFilterDetailEditor">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var startDateEnabled:Boolean;
+
+        [Bindable]
+        private var endDateEnabled:Boolean;
+
+        [Bindable]
+        private var dateSliderEnabled:Boolean;
+
+        private var dateFilter:FilterDateRangeDefinition;
+
+        public function makeUpdates():FilterDefinition {
+            dateFilter.sliderRange = dateSliderCheckBox.selected;
+            /*dateFilter.startDateEnabled = startDateCheckBox.selected;
+            dateFilter.endDateEnabled = endDateCheckBox.selected;*/
+            return dateFilter;
+        }
+
+        public function set filterDefinition(filterDefinition:FilterDefinition):void {
+            this.dateFilter = filterDefinition as FilterDateRangeDefinition;
+            dateSliderEnabled = dateFilter.sliderRange;
+            /*startDateEnabled = dateFilter.startDateEnabled;
+            endDateEnabled = dateFilter.endDateEnabled;*/
+        }
+
+        public function set feedID(feedID:int):void {
+        }
+
+        public function set fields(value:ArrayCollection):void {
+        }
+        ]]></mx:Script>
+    <mx:Form>
+        <!--<mx:FormItem label="Start Date Enabled:">
+            <mx:CheckBox id="startDateCheckBox" selected="{startDateEnabled}"/>
+        </mx:FormItem>
+        <mx:FormItem label="End Date Enabled:">
+            <mx:CheckBox id="endDateCheckBox" selected="{endDateEnabled}"/>
+        </mx:FormItem>-->
+        <mx:FormItem label="Date Slider Enabled">
+            <mx:CheckBox id="dateSliderCheckBox" selected="{dateSliderEnabled}"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:VBox>

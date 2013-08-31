@@ -480,7 +480,11 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                             if (value instanceof Number) {
                                 row.addValue(keys.get(keyName), (Number) value);
                             } else {
-                                row.addValue(keys.get(keyName), Double.parseDouble(value.toString()));
+                                try {
+                                    row.addValue(keys.get(keyName), Double.parseDouble(value.toString()));
+                                } catch (NumberFormatException e) {
+                                    // ignore
+                                }
                             }
                         } else {
                             row.addValue(keys.get(keyName), value.toString());

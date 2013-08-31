@@ -17,6 +17,7 @@ import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
+import mx.controls.CheckBox;
 
 import mx.controls.ComboBox;
 import mx.controls.DataGrid;
@@ -40,6 +41,9 @@ public class DateRangeDetailEditor extends VBox implements IFilterDetailEditor
     private var _upperDateItemDisplay:String;
     private var _settingsStackIndex:int;
 
+    private var lowerDateCheckbox:CheckBox;
+    private var upperDateCheckBox:CheckBox;
+    private var sliderRangeCheckBox:CheckBox;
 
     [Bindable(event="settingsStackIndexChanged")]
     public function get settingsStackIndex():int {
