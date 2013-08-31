@@ -3,6 +3,8 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
 
+        import mx.controls.Alert;
+
         [Bindable]
         private var url:String;
         [Bindable]
@@ -16,6 +18,13 @@
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:FileBasedFeedDefinition = feedDefinition as FileBasedFeedDefinition;
+            if (ds.uploadFormat is ExcelUploadFormat) {
+                selectedFormat = "Excel 2003";
+            } else if (ds.uploadFormat is XSSFExcelUploadFormat) {
+                selectedFormat = "Excel";
+            } else if (ds.uploadFormat is CsvFileUploadFormat) {
+                selectedFormat = "CSV";
+            }
             url = ds.url;
             jsonUserName = ds.userName;
             jsonPassword = ds.password;
@@ -28,12 +37,38 @@
             ds.httpMethod = int(methodGroup.selectedValue);
             ds.userName = userNameInput.text;
             ds.password = passwordInput.text;
+            if (formatBox.selectedItem == "Excel") {
+                ds.uploadFormat = new XSSFExcelUploadFormat();
+            } else if (formatBox.selectedItem == "Excel 2003") {
+                ds.uploadFormat = new ExcelUploadFormat();
+            } else if (formatBox.selectedItem == "CSV") {
+                Alert.show("setting to CSV");
+                ds.uploadFormat = new CsvFileUploadFormat();
+            }
         }
 
         public function validate():Boolean {
             return true;
         }
+
+        [Bindable]
+        private var selectedFormat:String;
         ]]></mx:Script>
+    <mx:Form paddingTop="20">
+        <mx:FormItem label="Format:">
+            <mx:ComboBox id="formatBox" selectedItem="{selectedFormat}">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>Excel</mx:String>
+                            <mx:String>Excel 2003</mx:String>
+                            <mx:String>CSV</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
+        </mx:FormItem>
+    </mx:Form>
     <mx:TextArea text="You can set up your flat file data source to pull from a remote location instead of having to upload the spreadsheet or CSV every time yourself." borderStyle="none" editable="false" width="650" height="50" fontSize="11"/>
     <mx:Form>
         <mx:FormItem label="File Download URL:" fontFamily="Tahoma" fontWeight="bold">
