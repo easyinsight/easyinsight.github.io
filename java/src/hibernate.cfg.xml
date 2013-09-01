@@ -83,7 +83,6 @@
         <mapping class="com.easyinsight.analysis.TreeMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeDefinitionState"/>
         <mapping class="com.easyinsight.analysis.YTDDefinitionState"/>
-        <mapping class="com.easyinsight.analysis.SixSigmaMeasure"/>
         <mapping class="com.easyinsight.analysis.AnalysisStep"/>
         <mapping class="com.easyinsight.analysis.LastValueFilter"/>
         <mapping class="com.easyinsight.analysis.FirstValueFilter"/>
@@ -93,7 +92,6 @@
         <mapping class="com.easyinsight.analysis.CustomRollingInterval"/>
         <mapping class="com.easyinsight.analysis.AnalysisItemFilterDefinition"/>
         <mapping class="com.easyinsight.analysis.MultiFlatDateFilter"/>
-        <mapping class="com.easyinsight.analysis.MonthCutoffFilter"/>
         <mapping class="com.easyinsight.analysis.DateLevelWrapper"/>
         <mapping class="com.easyinsight.analysis.OrderedFilterDefinition"/>
         <mapping class="com.easyinsight.analysis.NamedFilterReference"/>

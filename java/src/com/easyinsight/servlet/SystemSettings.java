@@ -6,9 +6,7 @@ import com.easyinsight.logging.LogClass;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -25,6 +23,8 @@ public class SystemSettings {
 
     private int maxOperations = 10000000;
 
+    private Map<String, Long> databaseMap = new HashMap<String, Long>();
+
     public SystemSettings() {
         timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -39,6 +39,15 @@ public class SystemSettings {
                         maxFilterValues = rs.getInt(2);
                         maxOperations = rs.getInt(3);
                     }
+                    ps.close();
+
+                    PreparedStatement dbStmt = conn.prepareStatement("SELECT SUM(SIZE), DATABASE_NAME FROM FEED_PERSISTENCE_METADATA WHERE DATABASE_NAME IS NOT NULL GROUP BY DATABASE_NAME");
+                    ResultSet dbRS = dbStmt.executeQuery();
+                    while (dbRS.next()) {
+                        long size = dbRS.getLong(1);
+                        String dbName = dbRS.getString(2);
+                        databaseMap.put(dbName, size);
+                    }
                 } catch (Exception e) {
                     LogClass.error(e);
                 } finally {
@@ -46,6 +55,10 @@ public class SystemSettings {
                 }
             }
         }, new Date(), 60000);
+    }
+
+    public Map<String, Long> getDatabaseMap() {
+        return new HashMap<String, Long>(databaseMap);
     }
 
     public void stop() {
