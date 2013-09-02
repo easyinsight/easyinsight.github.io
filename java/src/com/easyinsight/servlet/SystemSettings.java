@@ -54,7 +54,7 @@ public class SystemSettings {
                     Database.closeConnection(conn);
                 }
             }
-        }, new Date(), 60000);
+        }, new Date(), 3600000);
     }
 
     public Map<String, Long> getDatabaseMap() {
