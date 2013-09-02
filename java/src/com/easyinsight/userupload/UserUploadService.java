@@ -1547,35 +1547,79 @@ public class UserUploadService {
         }
     }
 
-    public CredentialsResponse updateData(long feedID, String uploadKey, boolean update, List<AnalysisItem> newFields) {
+    public void updateData(long feedID, String uploadKey, boolean update, List<AnalysisItem> newFields) {
         SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
-        if (newFields.size() > 0) {
-            EIConnection conn = Database.instance().getConnection();
-            try {
-                FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(feedID, conn);
-                dataSource.getFields().addAll(newFields);
-                new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
-                conn.commit();
-            } catch (Exception e) {
-                LogClass.error(e);
-                conn.rollback();
-                throw new RuntimeException(e);
-            } finally {
-                conn.setAutoCommit(true);
-                Database.closeConnection(conn);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            System.out.println(Runtime.getRuntime().freeMemory() + " - " + Runtime.getRuntime().totalMemory());
+            FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
+
+            AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+            S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey+".zip"));
+
+            byte retrieveBuf[];
+            retrieveBuf = new byte[1];
+            InputStream bfis = object.getObjectContent();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            while (bfis.read(retrieveBuf) != -1) {
+                baos.write(retrieveBuf);
             }
+            byte[] resultBytes = baos.toByteArray();
+            baos = null;
+            ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
+            ZipInputStream zin = new ZipInputStream(bais);
+            zin.getNextEntry();
+
+            byte[] buffer = new byte[8192];
+            ByteArrayOutputStream fout = new ByteArrayOutputStream();
+            BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
+            int nBytes;
+            while ((nBytes = zin.read(buffer)) != -1) {
+                bufOS.write(buffer, 0, nBytes);
+            }
+            /*for (int c = zin.read(); c != -1; c = zin.read()) {
+                bufOS.write(c);
+            }*/
+            bufOS.close();
+            fout.close();
+
+            byte[] bytes = fout.toByteArray();
+
+            bufOS = null;
+            fout = null;
+
+            System.out.println(SecurityUtil.getUserID() + " uploaded " + bytes.length + " bytes with key " + uploadKey + " for update of data source " + feedID + ".");
+            if (dataSource.getUploadFormat() instanceof CsvFileUploadFormat) {
+                FileProcessOptimizedUpdateScheduledTask task = new FileProcessOptimizedUpdateScheduledTask();
+                task.setFeedID(feedID);
+                task.setNewFields(newFields);
+                task.setUpdate(update);
+                task.setUserID(SecurityUtil.getUserID());
+                task.setAccountID(SecurityUtil.getAccountID());
+                task.updateData(feedID, update, conn, bytes);
+            } else {
+                FileProcessUpdateScheduledTask task = new FileProcessUpdateScheduledTask();
+                task.setFeedID(feedID);
+                task.setNewFields(newFields);
+                task.setUpdate(update);
+                task.setUserID(SecurityUtil.getUserID());
+                task.setAccountID(SecurityUtil.getAccountID());
+                task.updateData(feedID, update, conn, bytes);
+            }
+            conn.commit();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
-        Map<String, Object> refreshProperties = new HashMap<String, Object>();
-
-        refreshProperties.put("uploadKey", uploadKey);
-        refreshProperties.put("update", update);
-        refreshProperties.put("newFields", newFields);
-
-        return refreshData(feedID, refreshProperties);
     }
 
-    public CredentialsResponse updateData(long feedID, String uploadKey, boolean update) {
-        return updateData(feedID, uploadKey, update, null);
+    public void updateData(long feedID, String uploadKey, boolean update) {
+        updateData(feedID, uploadKey, update, null);
     }
 
     public long uploadPNG(byte[] bytes) {
