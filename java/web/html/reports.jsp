@@ -28,13 +28,6 @@
     <title>Easy Insight Reports and Dashboards</title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
-
-    <style type="text/css">
-        body {
-            padding-top: 45px;
-            padding-bottom: 40px;
-        }
-    </style>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <link href="/css/app.css" rel="stylesheet" />
     <script type="text/javascript" src="/js/bootstrap.js"></script>

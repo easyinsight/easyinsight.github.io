@@ -37,13 +37,6 @@
         }
 
     </script>
-
-    <style type="text/css">
-        body {
-            padding-top: 45px;
-            padding-bottom: 40px;
-        }
-    </style>
     <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
