@@ -124,7 +124,7 @@ public class DatabaseListener implements Runnable {
                                 SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
                                 try {
                                     UserUploadService.UploadDataSource source = new UserUploadService.UploadDataSource(conn, new ArrayList<ReportFault>(), new Date(),
-                                            dataSource, (IServerDataSourceDefinition) dataSource, null);
+                                            dataSource, (IServerDataSourceDefinition) dataSource, null, null);
                                     changed = source.invoke();
                                     conn.commit();
                                 } finally {

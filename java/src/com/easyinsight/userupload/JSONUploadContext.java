@@ -166,7 +166,7 @@ public class JSONUploadContext extends UploadContext {
         jsonDataSource.setJsonPath(jsonPath);
         jsonDataSource.setNextPageString(nextPagePath);
         long id = jsonDataSource.create(conn, analysisItems, null);
-        jsonDataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, "", null, true, new ArrayList<ReportFault>());
+        jsonDataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, "", null, true, new ArrayList<ReportFault>(), null);
         return id;
     }
 

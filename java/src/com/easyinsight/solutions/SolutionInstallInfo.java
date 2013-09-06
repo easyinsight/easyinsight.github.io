@@ -4,6 +4,7 @@ import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedDefinition;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,6 +20,9 @@ public class SolutionInstallInfo {
     private boolean requiresConfiguration;
     private String feedName;
     private Map<Key, Key> keyReplacementMap;
+    private List<Long> reports;
+    private List<Long> dashboards;
+    private boolean makeVisible;
 
     /*public SolutionInstallInfo(long previousID, EIDescriptor descriptor, boolean requiresConfiguration) {
         this.previousID = previousID;
@@ -33,6 +37,30 @@ public class SolutionInstallInfo {
         this.feedName = feedName;
         this.keyReplacementMap = keyReplacementMap;
         this.newDataSource = newDataSource;
+    }
+
+    public boolean isMakeVisible() {
+        return makeVisible;
+    }
+
+    public void setMakeVisible(boolean makeVisible) {
+        this.makeVisible = makeVisible;
+    }
+
+    public List<Long> getReports() {
+        return reports;
+    }
+
+    public void setReports(List<Long> reports) {
+        this.reports = reports;
+    }
+
+    public List<Long> getDashboards() {
+        return dashboards;
+    }
+
+    public void setDashboards(List<Long> dashboards) {
+        this.dashboards = dashboards;
     }
 
     public FeedDefinition getNewDataSource() {

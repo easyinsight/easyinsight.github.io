@@ -47,6 +47,9 @@ public class CompositeFeedConnection implements Serializable, IJoin {
     private String label = "";
     private boolean optimized;
     private String marmotScript;
+    private int sourceCardinality;
+    private int targetCardinality;
+    private int forceOuterJoin;
 
     public CompositeFeedConnection() {
     }
@@ -107,6 +110,30 @@ public class CompositeFeedConnection implements Serializable, IJoin {
         this.targetOuterJoin = targetOuterJoin;
         this.sourceJoinOnOriginal = sourceJoinOnOriginal;
         this.targetJoinOnOriginal = targetJoinOnOriginal;
+    }
+
+    public int getSourceCardinality() {
+        return sourceCardinality;
+    }
+
+    public void setSourceCardinality(int sourceCardinality) {
+        this.sourceCardinality = sourceCardinality;
+    }
+
+    public int getTargetCardinality() {
+        return targetCardinality;
+    }
+
+    public void setTargetCardinality(int targetCardinality) {
+        this.targetCardinality = targetCardinality;
+    }
+
+    public int getForceOuterJoin() {
+        return forceOuterJoin;
+    }
+
+    public void setForceOuterJoin(int forceOuterJoin) {
+        this.forceOuterJoin = forceOuterJoin;
     }
 
     public boolean isOptimized() {

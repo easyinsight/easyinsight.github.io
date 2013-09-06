@@ -271,7 +271,8 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     public void validateTableSetup(EIConnection conn) throws SQLException {
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh, List<ReportFault> warnings) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh, List<ReportFault> warnings,
+                               Map<String, Object> refreshProperties) throws Exception {
         boolean changed = false;
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
@@ -318,7 +319,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 }
                 tempTables.put(serverDataSourceDefinition.getDataFeedID(),
                         serverDataSourceDefinition.tempLoad(keyMap.get(serverDataSourceDefinition.getDataFeedID()), now,
-                        this, callDataID, lastRefreshTime, conn, fullRefresh));
+                        this, callDataID, lastRefreshTime, conn, fullRefresh, refreshProperties));
             }
             conn.setAutoCommit(false);
             for (IServerDataSourceDefinition source : sources) {
@@ -332,7 +333,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                     ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.RUNNING, info);
                 }
                 String tempTable = tempTables.get(serverDataSourceDefinition.getDataFeedID());
-                serverDataSourceDefinition.applyTempLoad(conn, accountID, this, lastRefreshTime, tempTable, fullRefresh, warnings);
+                serverDataSourceDefinition.applyTempLoad(conn, accountID, this, lastRefreshTime, tempTable, fullRefresh, warnings, null);
             }
             refreshDone();
             // record end time

@@ -188,6 +188,10 @@ public class CsvFileUploadFormat extends UploadFormat {
     }
 
     public void persist(Connection conn, long feedID) throws SQLException {
+        PreparedStatement clearExcel = conn.prepareStatement("DELETE FROM EXCEL_UPLOAD_FORMAT WHERE FEED_ID = ?");
+        clearExcel.setLong(1, feedID);
+        clearExcel.executeUpdate();
+        clearExcel.close();
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM FLAT_FILE_UPLOAD_FORMAT WHERE FEED_ID = ?");
         clearStmt.setLong(1, feedID);
         clearStmt.executeUpdate();
