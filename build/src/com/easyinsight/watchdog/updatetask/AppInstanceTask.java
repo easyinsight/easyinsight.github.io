@@ -31,7 +31,7 @@ import java.security.SignatureException;
  */
 public class AppInstanceTask extends Task {
 
-    protected static final String APP_AMIS = "ami-cb20a2a2";
+    protected static final String APP_AMIS = "ami-fd460494";
     protected static final String STAGING_AMI = "ami-6c692e05";
     protected static final String LARGE_AMI = "ami-46dd992f";
 
@@ -152,7 +152,6 @@ public class AppInstanceTask extends Task {
                 byte[] rawHmac = mac.doFinal(data.getBytes());
 
                 // base64-encode the hmac
-
                 result = new String(Base64.encodeBase64(rawHmac));
             }
             catch (Exception e) {

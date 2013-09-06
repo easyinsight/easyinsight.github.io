@@ -24,6 +24,10 @@ public class ValidAccountFilter implements Filter {
     }
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletRequest req = (HttpServletRequest) servletRequest;
+        if(req.getAttribute("public") != null && ((Boolean) req.getAttribute("public")) == true) {
+            filterChain.doFilter(servletRequest, servletResponse);
+        }
         String alternateDestination = null;
         EIConnection conn = Database.instance().getConnection();
         try {

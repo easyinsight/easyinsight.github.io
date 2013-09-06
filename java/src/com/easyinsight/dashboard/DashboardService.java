@@ -58,6 +58,27 @@ public class DashboardService {
         }
     }
 
+    public boolean isDashboardPublic(String urlKey) {
+        boolean isPublic = false;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT public_visible FROM DASHBOARD WHERE URL_KEY = ?");
+            stmt.setString(1, urlKey);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                isPublic = rs.getBoolean(1);
+            }
+        } catch (SQLException se) {
+            LogClass.error(se);
+            throw new RuntimeException(se);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+        return isPublic;
+
+    }
+
     public long canAccessDashboard(String urlKey) {
         try {
             long dashboardID = 0;
@@ -112,7 +133,7 @@ public class DashboardService {
             }
             session.flush();
             for (Dashboard tDashboard : dashboards.values()) {
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET TEMPORARY_DASHBOARD = ? where dashboard_id = ?");
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET TEMPORARY_DASHBOARD = ? WHERE dashboard_id = ?");
                 updateStmt.setBoolean(1, false);
                 updateStmt.setLong(2, tDashboard.getId());
                 updateStmt.executeUpdate();
@@ -278,19 +299,19 @@ public class DashboardService {
     public ReportMetrics rateDashboard(long dashboardID, int rating) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT dashboard_user_rating_id from dashboard_user_rating where " +
-                    "user_id = ? and dashboard_id = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT dashboard_user_rating_id FROM dashboard_user_rating WHERE " +
+                    "user_id = ? AND dashboard_id = ?");
             queryStmt.setLong(1, SecurityUtil.getUserID());
             queryStmt.setLong(2, dashboardID);
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
                 long id = rs.getLong(1);
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE dashboard_user_rating set rating = ? where dashboard_user_rating_id = ?");
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE dashboard_user_rating SET rating = ? WHERE dashboard_user_rating_id = ?");
                 updateStmt.setInt(1, rating);
                 updateStmt.setLong(2, id);
                 updateStmt.executeUpdate();
             } else {
-                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO dashboard_user_rating (rating, user_id, dashboard_id) values (?, ?, ?)");
+                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO dashboard_user_rating (rating, user_id, dashboard_id) VALUES (?, ?, ?)");
                 insertStmt.setInt(1, rating);
                 insertStmt.setLong(2, SecurityUtil.getUserID());
                 insertStmt.setLong(3, dashboardID);
@@ -319,7 +340,7 @@ public class DashboardService {
             return dashboard;
         } catch (Exception e) {
             LogClass.error("On retrieving dashboard " + dashboardID, e);
-                throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 

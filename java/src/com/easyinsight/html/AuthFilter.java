@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -26,9 +27,14 @@ public class AuthFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         boolean authorized = false;
         if (servletRequest instanceof HttpServletRequest) {
-            HttpSession session = ((HttpServletRequest) servletRequest).getSession(false);
+            HttpServletRequest req = (HttpServletRequest) servletRequest;
+            HttpSession session = req.getSession(false);
             if (session != null) {
                 authorized = (session.getAttribute("accountID") != null);
+            }
+
+            if(req.getAttribute("public") != null && ((Boolean) req.getAttribute("public")) == true) {
+                authorized = true;
             }
             if(!authorized) {
                 session = ((HttpServletRequest) servletRequest).getSession(true);
