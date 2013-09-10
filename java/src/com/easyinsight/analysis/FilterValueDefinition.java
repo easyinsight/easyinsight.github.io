@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
+import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.servlet.SystemSettings;
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -512,8 +513,11 @@ public class FilterValueDefinition extends FilterDefinition {
     @Override
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
         JSONObject jo = super.toJSON(filterHTMLMetadata);
-
-        AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, 0, 0, filterHTMLMetadata.getReport());
+        Dashboard db = filterHTMLMetadata.getDashboard();
+        WSAnalysisDefinition report = filterHTMLMetadata.getReport();
+        long dashboardID = db == null ? 0 : db.getId();
+        long reportID = report == null ? 0 : report.getAnalysisID();
+        AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, reportID, dashboardID, filterHTMLMetadata.getReport());
         if (metadata.getReportFault() != null) {
             return null;
         }
