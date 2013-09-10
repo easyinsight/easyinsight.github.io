@@ -27,6 +27,15 @@
         <filter-name>Auth</filter-name>
         <filter-class>com.easyinsight.html.AuthFilter</filter-class>
     </filter>
+    <filter>
+        <filter-name>DashboardFilter</filter-name>
+        <filter-class>com.easyinsight.html.DashboardFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>DisablePublic</filter-name>
+        <filter-class>com.easyinsight.html.DisablePublicFilter</filter-class>
+    </filter>
 
     <filter>
         <filter-name>BillingEnabled</filter-name>
@@ -67,6 +76,11 @@
         <filter-name>P3PFilter</filter-name>
         <filter-class>com.easyinsight.html.P3PFilter</filter-class>
     </filter>
+    <filter>
+         <filter-name>UrlRewriteFilter</filter-name>
+         <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+     </filter>
+
 
     <filter-mapping>
         <filter-name>P3PFilter</filter-name>
@@ -83,6 +97,11 @@
     <filter-mapping>
         <filter-name>BillingEnabled</filter-name>
         <url-pattern>/billing/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>DashboardFilter</filter-name>
+        <url-pattern>/html/dashboard/*</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
@@ -123,10 +142,6 @@
         <url-pattern>/html/*</url-pattern>
     </filter-mapping>
 
-    <filter>
-        <filter-name>UrlRewriteFilter</filter-name>
-        <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
-    </filter>
     <filter-mapping>
         <filter-name>UrlRewriteFilter</filter-name>
         <url-pattern>/*</url-pattern>
