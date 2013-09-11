@@ -241,6 +241,7 @@ window.drawDiagram = function (j, selector, reportID, afterRefresh) {
                 drawArrow(context, points[1], points[2]);
             }
         }
+        selector.show();
         afterRefresh();
 
     })();
