@@ -9,6 +9,7 @@ import com.easyinsight.intention.ReportPropertiesIntention;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ListSummaryComponent;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.SQLException;
@@ -131,6 +132,15 @@ public class WSTextDefinition extends WSAnalysisDefinition {
             throw new RuntimeException(e);
         }
         return p.toString();
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentFilters) throws JSONException {
+        JSONObject jo = super.toJSON(htmlReportMetadata, parentFilters);
+        jo.put("key", getUrlKey());
+        jo.put("url", "/app/htmlExport");
+        jo.put("type", "text_report");
+        return jo;
     }
 
     public List<ReportProperty> createProperties() {
