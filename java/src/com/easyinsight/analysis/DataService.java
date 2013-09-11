@@ -328,7 +328,22 @@ public class DataService {
             long start = System.currentTimeMillis();
             SecurityUtil.authorizeInsight(reportID);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
-            WSKPIDefinition analysisDefinition = (WSKPIDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
+            WSKPIDefinition analysisDefinition = (WSKPIDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            CacheKey cacheKey = null;
+            if (analysisDefinition.isCacheable()) {
+                List<String> filters = new ArrayList<String>();
+                XMLMetadata xmlMetadata = new XMLMetadata();
+                xmlMetadata.setConn(conn);
+                for (FilterDefinition filter : customFilters) {
+                    filters.add(filter.toXML(xmlMetadata).toXML());
+                }
+                cacheKey = new CacheKey(reportID, filters);
+                EmbeddedResults embeddedResults = ReportCache.instance().getResults(dataSourceID, cacheKey, analysisDefinition.getCacheMinutes());
+                if (embeddedResults != null) {
+                    LogClass.debug("*** Returning from cache");
+                    return (EmbeddedTrendDataResults) embeddedResults;
+                }
+            }
             RollingFilterDefinition reportFilter = null;
             for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
                 if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
@@ -436,6 +451,9 @@ public class DataService {
             trendDataResults.setTrendOutcomes(trendOutcomes);
             trendDataResults.setDataSourceInfo(dataSourceInfo);
             trendDataResults.setDefinition(analysisDefinition);
+            if (cacheKey != null) {
+                ReportCache.instance().storeReport(dataSourceID, cacheKey, trendDataResults);
+            }
             reportViewBenchmark(analysisDefinition, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
             return trendDataResults;
         } catch (com.easyinsight.security.SecurityException se) {
