@@ -13,6 +13,7 @@ import flash.events.MouseEvent;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.controls.Button;
+import mx.managers.PopUpManager;
 
 public class OrFilterCanvas extends HBox implements IFilter {
 
@@ -50,11 +51,28 @@ public class OrFilterCanvas extends HBox implements IFilter {
             addButton.setStyle("icon", addIcon);
             addButton.addEventListener(MouseEvent.CLICK, onAdd);
             addChild(addButton);
+            var editButton:Button = new Button();
+            editButton.setStyle("icon", ImageConstants.EDIT_ICON);
+            editButton.addEventListener(MouseEvent.CLICK, onEdit);
+            addChild(editButton);
             var deleteButton:Button = new Button();
             deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
             deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
             addChild(deleteButton);
         }
+    }
+
+    private function onEdit(event:MouseEvent):void {
+        var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
+        window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
+        window.filterDefinition = orFilter;
+        PopUpManager.addPopUp(window, this, true);
+        window.x = 50;
+        window.y = 50;
+    }
+
+    private function onFilterEdit(event:FilterEditEvent):void {
+        dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
     }
 
     private var _filterEditable:Boolean = false;

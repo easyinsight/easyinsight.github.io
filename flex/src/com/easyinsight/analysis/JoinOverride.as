@@ -34,6 +34,10 @@ public class JoinOverride {
     public var sourceJoinOriginal:Boolean;
     public var targetJoinOriginal:Boolean;
 
+    public var sourceCardinality:int;
+    public var targetCardinality:int;
+    public var forceOuterJoin:int;
+
     // composite join conditions
 
     public var sourceItems:ArrayCollection;
@@ -60,6 +64,9 @@ public class JoinOverride {
         } else {
             connection.targetReportID = ReportKey(targetItem.key).reportID;
         }
+        connection.sourceCardinality = sourceCardinality;
+        connection.targetCardinality = targetCardinality;
+        connection.forceOuterJoin = forceOuterJoin;
         connection.sourceFeedName = sourceName;
         connection.targetFeedName = targetName;
         connection.sourceItem = sourceItem;
@@ -73,9 +80,12 @@ public class JoinOverride {
     }
 
     public function matches(join:JoinOverride):Boolean {
-        return sourceItem.matches(join.sourceItem) &&
+        if (sourceItem != null && targetItem != null) {
+            return sourceItem.matches(join.sourceItem) &&
                 targetItem.matches(join.targetItem) &&
                 dataSourceID == join.dataSourceID;
+        }
+        return false;
     }
 
     public function updateFromSaved(join:JoinOverride):void {

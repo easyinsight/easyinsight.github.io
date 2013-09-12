@@ -312,7 +312,7 @@ public class UserUploadService {
 
         EIConnection conn = Database.instance().getConnection();
         try {
-            conn.setAutoCommit(false);
+
             Set<Long> existing = new HashSet<Long>();
             List<SolutionInstallInfo> infos = new ArrayList<SolutionInstallInfo>();
             Map<Long, SolutionInstallInfo> allInfos = new HashMap<Long, SolutionInstallInfo>();
@@ -330,6 +330,35 @@ public class UserUploadService {
                     }
                 }
             }
+
+            conn.setAutoCommit(false);
+
+            PreparedStatement dsVisibleStmt = conn.prepareStatement("UPDATE DATA_FEED SET VISIBLE = ? WHERE DATA_FEED_ID = ?");
+            PreparedStatement reportVisibleStmt = conn.prepareStatement("UPDATE ANALYSIS SET TEMPORARY_REPORT = ? WHERE ANALYSIS_ID = ?");
+            PreparedStatement dashboardVisibleStmt = conn.prepareStatement("UPDATE DASHBOARD SET TEMPORARY_DASHBOARD = ? WHERE DASHBOARD_ID = ?");
+
+            for (SolutionInstallInfo info : infos) {
+                if (info.isMakeVisible()) {
+                    dsVisibleStmt.setBoolean(1, true);
+                    dsVisibleStmt.setLong(2, info.getNewDataSource().getDataFeedID());
+                    dsVisibleStmt.executeUpdate();
+
+                    for (Long reportID : info.getReports()) {
+                        reportVisibleStmt.setBoolean(1, false);
+                        reportVisibleStmt.setLong(2, reportID);
+                        reportVisibleStmt.executeUpdate();
+                    }
+                    for (Long dashboardID : info.getDashboards()) {
+                        dashboardVisibleStmt.setBoolean(1, false);
+                        dashboardVisibleStmt.setLong(2, dashboardID);
+                        dashboardVisibleStmt.executeUpdate();
+                    }
+                }
+            }
+
+            dsVisibleStmt.close();
+            reportVisibleStmt.close();
+            dashboardVisibleStmt.close();
 
             if (newTag != null) {
                 PreparedStatement getTagStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID FROM ACCOUNT_TAG WHERE TAG_NAME = ?");
@@ -363,7 +392,9 @@ public class UserUploadService {
             conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            conn.setAutoCommit(true);
+            if (!conn.getAutoCommit()) {
+                conn.setAutoCommit(true);
+            }
             Database.closeConnection(conn);
         }
     }
@@ -1289,6 +1320,10 @@ public class UserUploadService {
     }
 
     public CredentialsResponse refreshData(long feedID) {
+        return refreshData(feedID, null);
+    }
+
+    public CredentialsResponse refreshData(long feedID, final Map<String, Object> refreshProperties) {
         SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
         try {
             CredentialsResponse credentialsResponse;
@@ -1353,7 +1388,7 @@ public class UserUploadService {
                                         DataSourceRefreshEvent info = new DataSourceRefreshEvent();
                                         info.setDataSourceName("Synchronizing with " + refreshable.getFeedName());
                                         ServiceUtil.instance().updateStatus(callID, ServiceUtil.RUNNING, info);
-                                        changed = changed || new DataSourceFactory().createSource(conn, warnings, now, sourceToRefresh, refreshable, callID).invoke();
+                                        changed = changed || new DataSourceFactory().createSource(conn, warnings, now, sourceToRefresh, refreshable, callID, refreshProperties).invoke();
                                         PreparedStatement stmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_REFRESH_LOG (REFRESH_TIME, DATA_SOURCE_ID) VALUES (?, ?)");
                                         stmt.setTimestamp(1, new Timestamp(now.getTime()));
                                         stmt.setLong(2, sourceToRefresh.getDataFeedID());
@@ -1744,7 +1779,7 @@ public class UserUploadService {
                         try {
                             conn.setAutoCommit(false);
                             Date now = new Date();
-                            boolean changed = new DataSourceFactory().createSource(conn, new ArrayList<ReportFault>(), now, dataSource, serverDataSourceDefinition, callID).invoke();
+                            boolean changed = new DataSourceFactory().createSource(conn, new ArrayList<ReportFault>(), now, dataSource, serverDataSourceDefinition, callID, null).invoke();
                             conn.commit();
                             DataSourceRefreshResult result = new DataSourceRefreshResult();
                             result.setDate(now);
@@ -1808,14 +1843,15 @@ public class UserUploadService {
     }
 
     public static class DataSourceFactory {
-        public IUploadDataSource createSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID) {
+        public IUploadDataSource createSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID,
+                                              Map<String, Object> properties) {
             if (sourceToRefresh.getFeedType().getType() == FeedType.SERVER_MYSQL.getType() ||
                     sourceToRefresh.getFeedType().getType() == FeedType.SERVER_SQL_SERVER.getType() ||
                     sourceToRefresh.getFeedType().getType() == FeedType.ORACLE.getType() ||
                     sourceToRefresh.getFeedType().getType() == FeedType.SERVER_POSTGRES.getType()) {
                 return new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), (ServerDatabaseConnection) sourceToRefresh);
             } else {
-                return new UploadDataSource(conn, warnings, now, sourceToRefresh, refreshable, callID);
+                return new UploadDataSource(conn, warnings, now, sourceToRefresh, refreshable, callID, properties);
             }
         }
     }
@@ -1885,18 +1921,21 @@ public class UserUploadService {
         private FeedDefinition sourceToRefresh;
         private IServerDataSourceDefinition refreshable;
         private String callID;
+        private Map<String, Object> refreshProperties;
 
-        public UploadDataSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID) {
+        public UploadDataSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID,
+                                Map<String, Object> refreshProperties) {
             this.conn = conn;
             this.warnings = warnings;
             this.now = now;
             this.sourceToRefresh = sourceToRefresh;
             this.refreshable = refreshable;
             this.callID = callID;
+            this.refreshProperties = refreshProperties;
         }
 
         public boolean invoke() throws Exception {
-            boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings);
+            boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings, refreshProperties);
             sourceToRefresh.setVisible(true);
             sourceToRefresh.setLastRefreshStart(now);
             if (changed) {

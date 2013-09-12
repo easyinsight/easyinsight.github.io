@@ -125,6 +125,9 @@ public class CompositeFeed extends Feed {
                             compositeFeedConnection.setTargetJoinOnOriginal(joinOverride.isTargetJoinOriginal());
                             compositeFeedConnection.setSourceOuterJoin(joinOverride.isSourceOuterJoin());
                             compositeFeedConnection.setTargetOuterJoin(joinOverride.isTargetOuterJoin());
+                            compositeFeedConnection.setForceOuterJoin(joinOverride.getForceOuterJoin());
+                            compositeFeedConnection.setSourceCardinality(joinOverride.getSourceCardinality());
+                            compositeFeedConnection.setTargetCardinality(joinOverride.getTargetCardinality());
                             if (joinOverride.getSourceItem().getKey() instanceof DerivedKey) {
                                 compositeFeedConnection.setSourceFeedID(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID());
                             } else {
@@ -234,21 +237,6 @@ public class CompositeFeed extends Feed {
         itemSet.removeAll(alwaysSet);
 
         if (itemSet.size() > 0) {
-            /*Map<Key, Key> keyMap = new HashMap<Key, Key>();
-            for (AnalysisItem analysisItem : getFields()) {
-                Key key = analysisItem.getKey();
-                if (key instanceof DerivedKey) {
-                    DerivedKey derivedKey = (DerivedKey) key;
-                    keyMap.put(derivedKey.getParentKey(), derivedKey);
-                }
-            }
-
-            for (AnalysisItem analysisItem : itemSet) {
-                Key replacement = keyMap.get(analysisItem.getKey());
-                if (replacement != null) {
-                    analysisItem.setKey(replacement);
-                }
-            }*/
 
             Iterator<AnalysisItem> analysisItemIterator = itemSet.iterator();
             while (analysisItemIterator.hasNext()) {
@@ -265,9 +253,6 @@ public class CompositeFeed extends Feed {
                 }
             }
         }
-        /*if (itemSet.size() > 0) {
-            throw new InvalidFieldsException(itemSet);
-        }*/
 
 
         for (IJoin connection : connections) {
@@ -288,9 +273,7 @@ public class CompositeFeed extends Feed {
             NamedPipeline pipeline = (NamedPipeline) insightRequestMetadata.findPipeline(getName());
             if (pipeline != null) {
                 WSListDefinition analysisDefinition = new WSListDefinition();
-                //analysisDefinition.setAddedItems(insightRequestMetadata.getFieldsForPipeline(pipeline.getName()));
                 List<AnalysisItem> fields = new ArrayList<AnalysisItem>(analysisItems);
-                //fields.addAll(insightRequestMetadata.getFieldsForPipeline(pipeline.getName()));
                 analysisDefinition.setColumns(fields);
                 pipeline.setup(analysisDefinition, insightRequestMetadata);
                 dataSet = pipeline.toDataSet(dataSet);
@@ -482,14 +465,17 @@ public class CompositeFeed extends Feed {
                         for (IJoin myConn : myConnections) {
                             FilterDefinition filter = filterMap.get(myConn);
                             if (filter == null && myConn instanceof CompositeFeedConnection) {
-                                QueryStateNode joinTargetNode;
-                                if (sourceNode.queryNodeKey().equals(myConn.sourceQueryNodeKey())) {
-                                    joinTargetNode = queryNodeMap.get(myConn.targetQueryNodeKey());
-                                } else {
-                                    joinTargetNode = queryNodeMap.get(myConn.sourceQueryNodeKey());
+                                CompositeFeedConnection c = (CompositeFeedConnection) myConn;
+                                if (c.getForceOuterJoin() == 0) {
+                                    QueryStateNode joinTargetNode;
+                                    if (sourceNode.queryNodeKey().equals(myConn.sourceQueryNodeKey())) {
+                                        joinTargetNode = queryNodeMap.get(myConn.targetQueryNodeKey());
+                                    } else {
+                                        joinTargetNode = queryNodeMap.get(myConn.sourceQueryNodeKey());
+                                    }
+                                    FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, joinTargetNode, (CompositeFeedConnection) myConn);
+                                    filterMap.put(myConn, joinFilter);
                                 }
-                                FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, joinTargetNode, (CompositeFeedConnection) myConn);
-                                filterMap.put(myConn, joinFilter);
                             }
                         }
                     }
@@ -573,14 +559,17 @@ public class CompositeFeed extends Feed {
                         for (IJoin myConn : myConnections) {
                             FilterDefinition filter = filterMap.get(myConn);
                             if (filter == null && myConn instanceof CompositeFeedConnection) {
-                                QueryStateNode targetNode;
-                                if (sourceNode.queryNodeKey().equals(myConn.sourceQueryNodeKey())) {
-                                    targetNode = queryNodeMap.get(myConn.targetQueryNodeKey());
-                                } else {
-                                    targetNode = queryNodeMap.get(myConn.sourceQueryNodeKey());
+                                CompositeFeedConnection c = (CompositeFeedConnection) myConn;
+                                if (c.getForceOuterJoin() == 0) {
+                                    QueryStateNode targetNode;
+                                    if (sourceNode.queryNodeKey().equals(myConn.sourceQueryNodeKey())) {
+                                        targetNode = queryNodeMap.get(myConn.targetQueryNodeKey());
+                                    } else {
+                                        targetNode = queryNodeMap.get(myConn.sourceQueryNodeKey());
+                                    }
+                                    FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, (CompositeFeedConnection) myConn);
+                                    filterMap.put(myConn, joinFilter);
                                 }
-                                FilterDefinition joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, (CompositeFeedConnection) myConn);
-                                filterMap.put(myConn, joinFilter);
                             }
                         }
                     }

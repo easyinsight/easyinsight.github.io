@@ -831,6 +831,12 @@ public class DataStorage implements IDataStorage {
                 }
             }
         }
+
+        boolean distinctValid = true;
+        for (AnalysisItem item : reportItems) {
+            distinctValid = distinctValid && insightRequestMetadata.getDistinctFieldMap().get(item) != null && insightRequestMetadata.getDistinctFieldMap().get(item) == true;
+        }
+
         StringBuilder queryBuilder = new StringBuilder();
         StringBuilder selectBuilder = new StringBuilder();
         StringBuilder fromBuilder = new StringBuilder();
@@ -839,7 +845,7 @@ public class DataStorage implements IDataStorage {
         Collection<Key> groupByItems = new HashSet<Key>();
         boolean aggregateQuery = insightRequestMetadata.isAggregateQuery() && !countDistinct;
 
-        createSelectClause(reportItems, selectBuilder, groupByBuilder, aggregateQuery, insightRequestMetadata.isOptimized(), insightRequestMetadata);
+        createSelectClause(reportItems, selectBuilder, groupByBuilder, aggregateQuery, insightRequestMetadata.isOptimized(), insightRequestMetadata, distinctValid);
         selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
         createFromClause(version, fromBuilder, insightRequestMetadata);
         createWhereClause(filters, whereBuilder, insightRequestMetadata);
@@ -1129,7 +1135,7 @@ public class DataStorage implements IDataStorage {
     }
 
     private void createSelectClause(Collection<AnalysisItem> reportItems, StringBuilder selectBuilder, StringBuilder groupByBuilder,
-                                    boolean aggregateQuery, boolean optimized, InsightRequestMetadata insightRequestMetadata) {
+                                    boolean aggregateQuery, boolean optimized, InsightRequestMetadata insightRequestMetadata, boolean distinctIsValid) {
         for (AnalysisItem analysisItem : reportItems) {
             if (analysisItem.isDerived()) {
                 boolean stillOkay = false;
@@ -1177,7 +1183,7 @@ public class DataStorage implements IDataStorage {
                 }
             } else {
                 Boolean distinct = insightRequestMetadata.getDistinctFieldMap().get(analysisItem);
-                if (distinct != null && distinct) {
+                if (distinct != null && distinct && distinctIsValid) {
                     selectBuilder.append("distinct(").append(columnName).append(") as distinct").append(columnName);
                     selectBuilder.append(",");
                 } else {

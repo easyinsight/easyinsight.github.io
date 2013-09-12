@@ -40,11 +40,7 @@ public class SixSigmaTest extends TestCase {
         AnalysisDimension customer = new AnalysisDimension("customer", true);
         AnalysisMeasure defects = new AnalysisMeasure("defects", AggregationTypes.SUM);
         AnalysisMeasure opportunities = new AnalysisMeasure("opportunities", AggregationTypes.SUM);
-        SixSigmaMeasure processSigma = createSigmaMeasure(defects, opportunities, SixSigmaMeasure.PROCESS_SIGMA, "ProcessSigma");
-        SixSigmaMeasure defectsPercentage = createSigmaMeasure(defects, opportunities, SixSigmaMeasure.DEFECT_PERCENTAGE, "DefectPercentage");
-        SixSigmaMeasure defectsPerMil = createSigmaMeasure(defects, opportunities, SixSigmaMeasure.DEFECTS_PER_MILLION_OPPS, "DefectsPerMillion");
-        SixSigmaMeasure yieldPercentage = createSigmaMeasure(defects, opportunities, SixSigmaMeasure.YIELD_PERCENTAGE, "YieldPercentage");
-        feedDefinition.setFields(Arrays.asList(customer, defects, opportunities, processSigma, defectsPercentage, defectsPerMil, yieldPercentage));
+
         new FeedService().updateFeedDefinition(feedDefinition);
         ValidatingPublishService validatingPublishService = new ValidatingPublishService() {
 
@@ -71,15 +67,6 @@ public class SixSigmaTest extends TestCase {
         ListDataResults results = (ListDataResults) new DataService().list(listDefinition, new InsightRequestMetadata());
         ListRow listRow = results.getRows()[0];
         
-    }
-
-    private SixSigmaMeasure createSigmaMeasure(AnalysisMeasure defects, AnalysisMeasure opportunities, int sigmaType, String name) {
-        SixSigmaMeasure sixSigmaMeasure = new SixSigmaMeasure();
-        sixSigmaMeasure.setKey(new NamedKey(name));
-        sixSigmaMeasure.setSigmaType(sigmaType);
-        sixSigmaMeasure.setTotalDefectsMeasure(defects);
-        sixSigmaMeasure.setTotalOpportunitiesMeasure(opportunities);
-        return sixSigmaMeasure;
     }
 
     private Row createRow() {

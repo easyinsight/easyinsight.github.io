@@ -53,6 +53,13 @@ public class JoinOverride implements Cloneable, Serializable {
     @Column(name="join_type")
     private int joinType = JoinOverride.NORMAL;
 
+    @Column(name="source_cardinality")
+    private int sourceCardinality;
+    @Column(name="target_cardinality")
+    private int targetCardinality;
+    @Column(name="force_outer_join")
+    private int forceOuterJoin;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "join_override_to_source_fields",
             joinColumns = @JoinColumn(name = "join_override_id", nullable = false),
@@ -66,6 +73,30 @@ public class JoinOverride implements Cloneable, Serializable {
 
     @Column(name="marmot_script")
     private String marmotScript;
+
+    public int getSourceCardinality() {
+        return sourceCardinality;
+    }
+
+    public void setSourceCardinality(int sourceCardinality) {
+        this.sourceCardinality = sourceCardinality;
+    }
+
+    public int getTargetCardinality() {
+        return targetCardinality;
+    }
+
+    public void setTargetCardinality(int targetCardinality) {
+        this.targetCardinality = targetCardinality;
+    }
+
+    public int getForceOuterJoin() {
+        return forceOuterJoin;
+    }
+
+    public void setForceOuterJoin(int forceOuterJoin) {
+        this.forceOuterJoin = forceOuterJoin;
+    }
 
     public void fromXML(Element element, XMLImportMetadata xmlImportMetadata) {
         Element sourceItemXML = (Element) (element.query("sourceItem").get(0)).getChild(0);

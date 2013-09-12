@@ -362,9 +362,6 @@ public class FilterDefinition implements Serializable, Cloneable {
             case FilterDefinition.LAST_VALUE:
                 filterDefinition = new LastValueFilter();
                 break;
-            case FilterDefinition.MONTH_CUTOFF:
-                filterDefinition = new MonthCutoffFilter();
-                break;
             case FilterDefinition.MULTI_FLAT_DATE:
                 filterDefinition = new MultiFlatDateFilter();
                 break;

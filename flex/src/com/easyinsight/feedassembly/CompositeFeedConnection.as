@@ -7,6 +7,9 @@ import com.easyinsight.analysis.Key;
 	[RemoteClass(alias="com.easyinsight.datafeeds.CompositeFeedConnection")]
 	public class CompositeFeedConnection
 	{
+        public static const ONE:int = 0;
+        public static const MANY:int = 0;
+
 		public var sourceJoin:Key;
 		public var targetJoin:Key;
         public var sourceReportID:int;
@@ -21,6 +24,9 @@ import com.easyinsight.analysis.Key;
         public var targetOuterJoin:Boolean;
         public var sourceJoinOnOriginal:Boolean;
         public var targetJoinOnOriginal:Boolean;
+        public var sourceCardinality:int = ONE;
+        public var targetCardinality:int = ONE;
+        public var forceOuterJoin:int;
         public var marmotScript:String;
 
 		public function CompositeFeedConnection()

@@ -13,8 +13,12 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
-    String userName = (String) session.getAttribute("userName");
-    com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+
+    String userName = null;
+    if(session.getAttribute("userName") != null) {
+        userName = (String) session.getAttribute("userName");
+        com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+    }
     try {
 
         String dashboardIDString = request.getParameter("dashboardID");

@@ -579,12 +579,26 @@ public class CompositeFeedDefinition extends FeedDefinition {
         feedDefinition.setCompositeFeedNodes(newChildren);
         List<CompositeFeedConnection> newConnections = new ArrayList<CompositeFeedConnection>();
         for (CompositeFeedConnection connection : feedDefinition.getConnections()) {
-            CompositeFeedConnection newConnection = new CompositeFeedConnection();
-            newConnection.setSourceJoin(replacementMap.get(connection.getSourceFeedID()).getNewDataSource().getField(connection.getSourceJoin().toKeyString()));
-            newConnection.setTargetJoin(replacementMap.get(connection.getTargetFeedID()).getNewDataSource().getField(connection.getTargetJoin().toKeyString()));
-            newConnection.setSourceFeedID(replacementMap.get(connection.getSourceFeedID()).getNewDataSource().getDataFeedID());
-            newConnection.setTargetFeedID(replacementMap.get(connection.getTargetFeedID()).getNewDataSource().getDataFeedID());
-            newConnections.add(newConnection);
+            try {
+                CompositeFeedConnection newConnection = new CompositeFeedConnection();
+                if (connection.getSourceJoin() != null) {
+                    newConnection.setSourceJoin(replacementMap.get(connection.getSourceFeedID()).getNewDataSource().getField(connection.getSourceJoin().toKeyString()));
+                } else if (connection.getSourceItem() != null) {
+                    newConnection.setSourceItem(replacementMap.get(connection.getSourceFeedID()).getNewDataSource().findAnalysisItemByDisplayName(connection.getSourceItem().toDisplay()));
+                    //newConnection.setSourceItem(replacementMap.get(connection.getSourceFeedID()).getNewDataSource().getField(connection.getSourceJoin().toKeyString()));
+                }
+                if (connection.getTargetJoin() != null) {
+                    newConnection.setTargetJoin(replacementMap.get(connection.getTargetFeedID()).getNewDataSource().getField(connection.getTargetJoin().toKeyString()));
+                } else if (connection.getTargetItem() != null) {
+                    newConnection.setTargetItem(replacementMap.get(connection.getTargetFeedID()).getNewDataSource().findAnalysisItemByDisplayName(connection.getTargetItem().toDisplay()));
+                    //newConnection.setTargetItem(replacementMap.get(connection.getTargetFeedID()).getNewDataSource().getField(connection.getTargetJoin().toKeyString()));
+                }
+                newConnection.setSourceFeedID(replacementMap.get(connection.getSourceFeedID()).getNewDataSource().getDataFeedID());
+                newConnection.setTargetFeedID(replacementMap.get(connection.getTargetFeedID()).getNewDataSource().getDataFeedID());
+                newConnections.add(newConnection);
+            } catch (Exception e) {
+                LogClass.error("On creating join " + connection.getSourceFeedName() + " - " + connection.getSourceFeedID() + " to " + connection.getTargetFeedName() + " - " + connection.getTargetFeedID(), e);
+            }
         }
         feedDefinition.setConnections(newConnections);
 

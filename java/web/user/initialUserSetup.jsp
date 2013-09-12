@@ -1,3 +1,4 @@
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <!DOCTYPE html>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
@@ -27,7 +28,17 @@
 
             <form class="well" method="post" action="firstLoginAction.jsp" style="width:100%" id="loginForm">
                 <div style="width:100%;text-align: center">
+                    <%
+                        if (request.getParameter("subdomain") != null) {
+                    %>
+                    <img src="<%= RedirectUtil.getURL(request, "/app/whiteLabelImage") %>" alt="Logo Image"/>
+                    <%
+                    } else {
+                    %>
                     <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
+                    <%
+                        }
+                    %>
                 </div>
 
                 <input type="hidden" id="urlhash" name="urlhash"/>

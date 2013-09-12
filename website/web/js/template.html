@@ -2,7 +2,7 @@
     <script type="text/template" id="stack">
 
         <% if(stack_items.length == 1) { %>
-            <%= Filter.filters({filter_values: filters}) %>
+            <%= Filter.filters({filter_values: filters, parent_id: id}) %>
             <%= dashboardComponent(stack_items[0].item) %>
         <% } else { %>
         <div class="tabbable">
