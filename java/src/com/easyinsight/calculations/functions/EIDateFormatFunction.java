@@ -44,7 +44,7 @@ public class EIDateFormatFunction extends Function implements IFunction {
             }
             TimeZone timeZone = TimeZone.getTimeZone(string);
 
-            cal = Calendar.getInstance();
+            cal = calculationMetadata.getCalendar();
             cal.setTimeZone(timeZone);
         }
 

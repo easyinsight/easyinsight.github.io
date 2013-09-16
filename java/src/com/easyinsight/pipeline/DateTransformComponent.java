@@ -32,7 +32,6 @@ public class DateTransformComponent implements IComponent {
             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
                 timezoneShift = date.isTimeshift();
-                System.out.println("using " + timezoneShift + " for " + date.toDisplay());
             }
             Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), timezoneShift, calendar);
 
