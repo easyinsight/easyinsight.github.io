@@ -203,7 +203,7 @@ public abstract class Pipeline {
 
         Map<UniqueKey, AnalysisItem> uniqueFields = new HashMap<UniqueKey, AnalysisItem>();
 
-        if (report.getUniqueIteMap() != null) {
+        if (insightRequestMetadata.getUniqueIteMap() != null) {
             Set<UniqueKey> ids = new HashSet<UniqueKey>();
             for (AnalysisItem analysisItem : allNeededAnalysisItems) {
                 Key key = analysisItem.getKey();
@@ -215,7 +215,7 @@ public abstract class Pipeline {
 
 
             for (UniqueKey id : ids) {
-                AnalysisDimension analysisDimension = (AnalysisDimension) report.getUniqueIteMap().get(id);
+                AnalysisDimension analysisDimension = (AnalysisDimension) insightRequestMetadata.getUniqueIteMap().get(id);
                 if (analysisDimension != null) {
                     //analysisDimension.setGroup(false);
                     uniqueFields.put(id, analysisDimension);
@@ -326,7 +326,7 @@ public abstract class Pipeline {
         pipelineData.setConn(conn);
         try {
             for (IComponent component : components) {
-                //System.out.println(component.getClass() + " - " + dataSet.getRows());
+                //System.out.println(component.getClass() + " - " + dataSet.getRows().size());
                 /*if (pipelineData.getReport().isLogReport()) {
                     logger.append("<h1>" + component.getClass().getName() + "</h1>");
                     logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, conn, pipelineData.getInsightRequestMetadata()));
