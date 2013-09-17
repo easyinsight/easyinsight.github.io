@@ -179,6 +179,7 @@ public class DataService {
             } else {
                 clone = new AnalysisDimension();
             }
+            //clone.setParentItemID(item.getAnalysisItemID());
             clone.setOriginalDisplayName(item.toDisplay());
             clone.setDisplayName(report.getName() + " - " + item.toDisplay());
             ReportKey reportKey = new ReportKey();
@@ -1757,7 +1758,6 @@ public class DataService {
                 }
             }
             insightRequestMetadata.setFieldToUniqueMap(analysisDefinition.getFieldToUniqueMap());
-            insightRequestMetadata.setUniqueIteMap(analysisDefinition.getUniqueIteMap());
             AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
             structure.setReport(analysisDefinition);
             structure.setInsightRequestMetadata(insightRequestMetadata);
