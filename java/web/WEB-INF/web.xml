@@ -255,6 +255,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ListDataSourcesByTag</servlet-name>
+        <display-name>ListDataSourcesByTag</display-name>
+        <servlet-class>com.easyinsight.api.v3.ListDataSourcesServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>ExportActivity</servlet-name>
         <display-name>ExportActivity</display-name>
         <servlet-class>com.easyinsight.export.ExportScheduledActivityServlet</servlet-class>
@@ -312,6 +318,11 @@
         <display-name>PDF</display-name>
         <servlet-class>com.easyinsight.export.PDFServlet</servlet-class>
         <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ListDataSources</servlet-name>
+        <display-name>ListDataSources</display-name>
     </servlet>
 
     <servlet>
@@ -686,6 +697,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>ListDataSourcesByTag</servlet-name>
+        <url-pattern>/json/listDataSourcesByTag</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>ReplaceRows</servlet-name>
         <url-pattern>/xml/replaceRows</url-pattern>
     </servlet-mapping>
@@ -808,6 +824,11 @@
     <servlet-mapping>
         <servlet-name>RunReportJSON</servlet-name>
         <url-pattern>/json/RunReport</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ListDataSources</servlet-name>
+        <url-pattern>/json/ListDataSources</url-pattern>
     </servlet-mapping>
 
     <!--<servlet-mapping>
