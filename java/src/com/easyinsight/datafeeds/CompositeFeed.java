@@ -436,7 +436,7 @@ public class CompositeFeed extends Feed {
                             } else {
                                 insightRequestMetadata.getUniqueIteMap().put(new UniqueKey(connection1.getTargetReportID(), UniqueKey.REPORT), rowIDDimension);
                             }
-                            source.addItem(rowIDDimension);
+                            target.addItem(rowIDDimension);
                         }
                         if (connection1.getTargetCardinality() == 1) {
                             AnalysisDimension rowIDDimension = new AnalysisDimension();
@@ -447,7 +447,7 @@ public class CompositeFeed extends Feed {
                             } else {
                                 insightRequestMetadata.getUniqueIteMap().put(new UniqueKey(connection1.getSourceReportID(), UniqueKey.REPORT), rowIDDimension);
                             }
-                            target.addItem(rowIDDimension);
+                            source.addItem(rowIDDimension);
                         }
                     }
                 }
