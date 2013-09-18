@@ -20,12 +20,24 @@ public class ChildConnection {
     private boolean rightJoin;
     private boolean leftOriginal;
     private boolean rightOriginal;
+    private int sourceCardinality;
+    private int targetCardinality;
+    private boolean forceOuterJoin;
 
     public ChildConnection(FeedType sourceFeedType, FeedType targetFeedType, String sourceKey, String targetKey) {
         this.sourceFeedType = sourceFeedType;
         this.targetFeedType = targetFeedType;
         this.sourceKey = sourceKey;
         this.targetKey = targetKey;
+    }
+
+    public ChildConnection(FeedType sourceFeedType, FeedType targetFeedType, String sourceKey, String targetKey, int sourceCardinality, int targetCardinality) {
+        this.sourceFeedType = sourceFeedType;
+        this.targetFeedType = targetFeedType;
+        this.sourceKey = sourceKey;
+        this.targetKey = targetKey;
+        this.sourceCardinality = sourceCardinality;
+        this.targetCardinality = targetCardinality;
     }
 
     public ChildConnection(FeedType sourceFeedType, FeedType targetFeedType, String sourceKey, String targetKey, boolean leftJoin, boolean rightJoin,
@@ -44,6 +56,18 @@ public class ChildConnection {
         this.sourceFeedType = sourceFeedType;
         this.targetFeedType = targetFeedType;
         this.fixedKey = fixedKey;
+    }
+
+    public int getSourceCardinality() {
+        return sourceCardinality;
+    }
+
+    public int getTargetCardinality() {
+        return targetCardinality;
+    }
+
+    public boolean isForceOuterJoin() {
+        return forceOuterJoin;
     }
 
     public FeedType getSourceFeedType() {
@@ -94,8 +118,11 @@ public class ChildConnection {
             if (targetKey == null) {
                 return null;
             }
-            return new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
+            CompositeFeedConnection conn = new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
                         sourceKey, targetKey, sourceDef.getFeedName(), targetDef.getFeedName(), leftJoin, rightJoin, leftOriginal, rightOriginal);
+            conn.setSourceCardinality(getSourceCardinality());
+            conn.setTargetCardinality(getTargetCardinality());
+            return conn;
         } else {
             return new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
                     fixedKey, fixedKey, sourceDef.getFeedName(), targetDef.getFeedName(), leftJoin, rightJoin, leftOriginal, rightOriginal);
