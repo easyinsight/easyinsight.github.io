@@ -1,8 +1,11 @@
 package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.filtering.FilterDefinition;
 
 import flash.events.EventDispatcher;
+
+import mx.utils.ObjectUtil;
 
 [Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.FilterDefinition")]
@@ -24,6 +27,8 @@ import flash.events.EventDispatcher;
         public static const MULTI_FLAT_DATE:int = 14;
         public static const MONTH_CUTOFF:int = 15;
 
+    public static var flexIDCtr:int = 0;
+
 		public var field:AnalysisItem;
 		public var applyBeforeAggregation:Boolean = true;
         public var filterID:int;
@@ -40,6 +45,7 @@ import flash.events.EventDispatcher;
     public var parentFilters:String;
     public var fieldChoiceFilterLabel:String;
     public var section:int;
+    public var flexID:int = flexIDCtr++;
 		
 		public function FilterDefinition()
 			{
@@ -55,7 +61,10 @@ import flash.events.EventDispatcher;
     }
 
     public function matches(filterDefinition:FilterDefinition):Boolean {
-        return field != null && filterDefinition.field != null && field.matches(filterDefinition.field) && getType() == filterDefinition.getType();
+        if (filterID != 00 && filterID == filterDefinition.filterID) {
+            return true;
+        }
+        return (flexID != 0 && flexID == filterDefinition.flexID);
     }
 
     public static function getLabel(filterDefinition:FilterDefinition, field:AnalysisItem):String {
@@ -117,6 +126,17 @@ import flash.events.EventDispatcher;
 
     public function get displayName():String {
         return getLabel(this, field);
+    }
+
+    public function clone():FilterDefinition {
+        var filter:FilterDefinition = ObjectUtil.copy(this) as FilterDefinition;
+        filter.filterID = 0;
+        subclassClone(filter);
+        return filter;
+    }
+
+    protected function subclassClone(filter:FilterDefinition):void {
+
     }
 }
 }
