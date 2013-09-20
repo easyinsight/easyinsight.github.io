@@ -14,6 +14,10 @@ import java.util.Set;
  * Time: 5:13 PM
  */
 public interface IJoin {
+
+    public static final int ONE = 0;
+    public static final int MANY = 1;
+
     Long getSourceFeedID();
 
     Long getTargetFeedID();
