@@ -772,12 +772,19 @@ public class DataStorage implements IDataStorage {
             keyStrings.add(key.toSQL());
         }
 
+        AnalysisItem rowIDField = null;
+
 
         if (keys == null) {
             keys = new HashMap<Key, KeyMetadata>();
             Iterator<AnalysisItem> iter = reportItems.iterator();
             while (iter.hasNext()) {
                 AnalysisItem analysisItem = iter.next();
+                if (analysisItem.isRowIDField()) {
+                    rowIDField = analysisItem;
+                    iter.remove();
+                    continue;
+                }
                 if (analysisItem.isDerived()) {
                     iter.remove();
                     continue;
@@ -861,11 +868,14 @@ public class DataStorage implements IDataStorage {
         //System.out.println(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
+
+
+
         ResultSet dataRS;
 
         try {
             dataRS = queryStmt.executeQuery();
-            processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery, insightRequestMetadata.isOptimized());
+            processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery, insightRequestMetadata.isOptimized(), rowIDField);
         } catch (Exception e) {
             LogClass.error("On running " + queryBuilder.toString(), e);
             throw new RuntimeException(e);
@@ -879,6 +889,9 @@ public class DataStorage implements IDataStorage {
         queryStmt.close();
         insightRequestMetadata.addDatabaseTime(System.currentTimeMillis() - startTime);
         dataSet.setLastTime(metadata.getLastData());
+        if (insightRequestMetadata.isLogReport()) {
+            System.out.println("Query " + queryBuilder.toString() + " took " + (System.currentTimeMillis() - startTime) + " ms to retrieve " + dataSet.getRows().size() + " rows");
+        }
         //System.out.println("took " + (System.currentTimeMillis() - startTime));
         return dataSet;
     }
@@ -980,9 +993,14 @@ public class DataStorage implements IDataStorage {
     }
 
     private void processQueryResults(@NotNull Collection<AnalysisItem> reportItems, @NotNull Map<Key, KeyMetadata> keys, @NotNull DataSet dataSet, @NotNull ResultSet dataRS,
-                                     boolean aggregateQuery, boolean optimized) throws SQLException {
+                                     boolean aggregateQuery, boolean optimized, @Nullable AnalysisItem rowIDItem) throws SQLException {
+        int rowID = 0;
         while (dataRS.next()) {
             IRow row = dataSet.createRow();
+            if (rowIDItem != null) {
+                rowID++;
+                row.addValue(rowIDItem.createAggregateKey(false), new StringValue(String.valueOf(rowID)));
+            }
             int i = 1;
             for (AnalysisItem analysisItem : reportItems) {
                 Key key = analysisItem.createAggregateKey(false);

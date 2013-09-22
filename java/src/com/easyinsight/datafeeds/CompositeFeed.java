@@ -1,12 +1,9 @@
 package com.easyinsight.datafeeds;
 
 
-import com.easyinsight.core.ReportKey;
-import com.easyinsight.core.Value;
+import com.easyinsight.core.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.DerivedKey;
 
 import com.easyinsight.analysis.*;
 
@@ -418,6 +415,7 @@ public class CompositeFeed extends Feed {
                     }
                     targetConnList.add(connection);
                     Edge edge = new Edge(connection);
+
                     QueryStateNode source = queryNodeMap.get(connection.sourceQueryNodeKey());
                     if (firstVertex == null) {
                         firstVertex = source;
@@ -426,6 +424,32 @@ public class CompositeFeed extends Feed {
                     QueryStateNode target = queryNodeMap.get(connection.targetQueryNodeKey());
                     //System.out.println("** adding edge of " + source.dataSourceName + " to " + target.dataSourceName);
                     reducedGraph.addEdge(source, target, edge);
+
+                    if (connection instanceof CompositeFeedConnection) {
+                        CompositeFeedConnection connection1 = (CompositeFeedConnection) connection;
+                        if (connection1.getSourceCardinality() == 1) {
+                            AnalysisDimension rowIDDimension = new AnalysisDimension();
+                            rowIDDimension.setKey(new NamedKey(connection1.getTargetFeedID() + "RowID"));
+                            rowIDDimension.setRowIDField(true);
+                            if (connection1.getTargetFeedID() != null) {
+                                insightRequestMetadata.getUniqueIteMap().put(new UniqueKey(connection1.getTargetFeedID(), UniqueKey.DERIVED), rowIDDimension);
+                            } else {
+                                insightRequestMetadata.getUniqueIteMap().put(new UniqueKey(connection1.getTargetReportID(), UniqueKey.REPORT), rowIDDimension);
+                            }
+                            target.addItem(rowIDDimension);
+                        }
+                        if (connection1.getTargetCardinality() == 1) {
+                            AnalysisDimension rowIDDimension = new AnalysisDimension();
+                            rowIDDimension.setKey(new NamedKey(connection1.getSourceFeedID() + "RowID"));
+                            rowIDDimension.setRowIDField(true);
+                            if (connection1.getSourceFeedID() != null) {
+                                insightRequestMetadata.getUniqueIteMap().put(new UniqueKey(connection1.getSourceFeedID(), UniqueKey.DERIVED), rowIDDimension);
+                            } else {
+                                insightRequestMetadata.getUniqueIteMap().put(new UniqueKey(connection1.getSourceReportID(), UniqueKey.REPORT), rowIDDimension);
+                            }
+                            source.addItem(rowIDDimension);
+                        }
+                    }
                 }
             }
         }
@@ -652,7 +676,6 @@ public class CompositeFeed extends Feed {
         if (pipeline != null) {
             WSListDefinition analysisDefinition = new WSListDefinition();
             analysisDefinition.setFieldToUniqueMap(insightRequestMetadata.getFieldToUniqueMap());
-            analysisDefinition.setUniqueIteMap(insightRequestMetadata.getUniqueIteMap());
             analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
             pipeline.setup(analysisDefinition, insightRequestMetadata);
             dataSet = pipeline.toDataSet(dataSet);

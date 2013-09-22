@@ -8,7 +8,7 @@ import com.easyinsight.analysis.Key;
 	public class CompositeFeedConnection
 	{
         public static const ONE:int = 0;
-        public static const MANY:int = 0;
+        public static const MANY:int = 1;
 
 		public var sourceJoin:Key;
 		public var targetJoin:Key;

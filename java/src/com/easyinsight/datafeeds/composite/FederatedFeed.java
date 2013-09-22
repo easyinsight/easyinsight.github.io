@@ -41,6 +41,9 @@ public class FederatedFeed extends Feed {
                         for (AnalysisItem field : feed.getDataSource().getFields()) {
                             if (field.getKey().toKeyString().equals(parentKey.toKeyString()) && field.isKeyColumn() == analysisItem.isKeyColumn()) {
                                 matched = true;
+                                if (insightRequestMetadata.isLogReport()) {
+                                    System.out.println("Field " + analysisItem.toDisplay() + " was matched to " + field.toDisplay() + " by derived key method.");
+                                }
                                 childAnalysisItems.add(field);
                                 List<AnalysisItem> items = map.get(field);
                                 if (items == null) {
@@ -58,6 +61,9 @@ public class FederatedFeed extends Feed {
                                 for (AnalysisItem field : feed.getDataSource().getFields()) {
                                     if (field.toOriginalDisplayName().equals(fieldMapping.getSourceKey()) && field.isKeyColumn() == analysisItem.isKeyColumn()) {
                                         matched = true;
+                                        if (insightRequestMetadata.isLogReport()) {
+                                            System.out.println("Field " + analysisItem.toDisplay() + " was matched to " + field.toDisplay() + " by field mapping.");
+                                        }
                                         childAnalysisItems.add(field);
                                         List<AnalysisItem> items = map.get(field);
                                         if (items == null) {
@@ -73,6 +79,9 @@ public class FederatedFeed extends Feed {
                     if (!matched) {
                         for (AnalysisItem field : feed.getDataSource().getFields()) {
                             if (field.toOriginalDisplayName().equals(analysisItem.toOriginalDisplayName()) && field.isKeyColumn() == analysisItem.isKeyColumn()) {
+                                if (insightRequestMetadata.isLogReport()) {
+                                    System.out.println("Field " + analysisItem.toDisplay() + " was matched to " + field.toDisplay() + " by data source field name.");
+                                }
                                 childAnalysisItems.add(field);
                                 List<AnalysisItem> items = map.get(field);
                                 if (items == null) {
@@ -81,6 +90,11 @@ public class FederatedFeed extends Feed {
                                 }
                                 items.add(analysisItem);
                             }
+                        }
+                    }
+                    if (!matched) {
+                        if (insightRequestMetadata.isLogReport()) {
+                            System.out.println("Field " + analysisItem.toDisplay() + " was not matched.");
                         }
                     }
                 }
