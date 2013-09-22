@@ -23,6 +23,7 @@ public class InsightRequestMetadata implements Serializable {
     private List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
     private boolean optimized;
     private boolean traverseAllJoins;
+    private boolean logReport;
     private Collection<AnalysisItem> reportItems;
     private boolean lookupTableAggregate;
     private List<AnalysisItem> additionalAnalysisItems = new ArrayList<AnalysisItem>();
@@ -50,6 +51,14 @@ public class InsightRequestMetadata implements Serializable {
     private transient Map<AnalysisItem, Boolean> distinctFieldMap = new HashMap<AnalysisItem, Boolean>();
 
     private transient Map<FilterDefinition, AdvancedFilterProperties> filterPropertiesMap = new HashMap<FilterDefinition, AdvancedFilterProperties>();
+
+    public boolean isLogReport() {
+        return logReport;
+    }
+
+    public void setLogReport(boolean logReport) {
+        this.logReport = logReport;
+    }
 
     public Map<String, Boolean> getFilterOverrideMap() {
         return filterOverrideMap;
