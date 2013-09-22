@@ -11,6 +11,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.*;
 import com.easyinsight.cache.Cache;
+import com.easyinsight.servlet.SystemSettings;
 import com.easyinsight.users.Account;
 
 import java.io.BufferedOutputStream;
@@ -983,6 +984,13 @@ public class DataStorage implements IDataStorage {
                     if (filterDefinition.getField() != null) {
                         if (!keyStrings.contains(filterDefinition.getField().getKey().toSQL())) {
                             continue;
+                        }
+                        if (filterDefinition instanceof FilterValueDefinition) {
+                            FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filterDefinition;
+                            if (filterValueDefinition.getFilteredValues() != null && filterValueDefinition.getFilteredValues().size() > SystemSettings.instance().getMaxFilterValues()) {
+                                System.out.println("Ignoring filter with " + filterValueDefinition.getFilteredValues().size() + " values");
+                                continue;
+                            }
                         }
                     }
                     eligibleFilters.add(filterDefinition);
