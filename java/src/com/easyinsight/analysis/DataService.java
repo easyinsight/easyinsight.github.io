@@ -262,6 +262,7 @@ public class DataService {
                     }
                 }
             }
+            //feedMetadata.setDataSourceFields(feed.getDataSource().getFields());
             WSListDefinition tempList = new WSListDefinition();
             tempList.setDataFeedID(feedID);
             tempList.setColumns(new ArrayList<AnalysisItem>());
@@ -1647,7 +1648,7 @@ public class DataService {
 
             insightRequestMetadata.setAddonReports(analysisDefinition.getAddonReports());
             insightRequestMetadata.setNoDataOnNoJoin(analysisDefinition.isNoDataOnNoJoin());
-
+            insightRequestMetadata.setLogReport(analysisDefinition.isLogReport());
 
             if (insightRequestMetadata.getHierarchyOverrides() != null) {
                 for (AnalysisItemOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
@@ -1758,6 +1759,7 @@ public class DataService {
                 }
             }
             insightRequestMetadata.setFieldToUniqueMap(analysisDefinition.getFieldToUniqueMap());
+
             AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
             structure.setReport(analysisDefinition);
             structure.setInsightRequestMetadata(insightRequestMetadata);
