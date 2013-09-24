@@ -88,6 +88,7 @@ public class DataService {
                 insightRequestMetadata.setAddonReports(report.getAddonReports());
                 insightRequestMetadata.setAggregateQuery(false);
                 insightRequestMetadata.getDistinctFieldMap().put(analysisItem, true);
+                insightRequestMetadata.setAdditionalAnalysisItems(report.getFieldsForDrillthrough());
 
                 if (requester != null && requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
                     String label = requester.getFieldChoiceFilterLabel();
@@ -407,6 +408,7 @@ public class DataService {
                 String key = entry.getKey();
                 List<AnalysisMeasure> measures = entry.getValue();
                 WSListDefinition tempReport = new WSListDefinition();
+                tempReport.setPassThroughFilters(true);
                 List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
                 columns.addAll(measures);
                 if (analysisDefinition.getGroupings() != null) {
@@ -452,6 +454,7 @@ public class DataService {
             EmbeddedTrendDataResults trendDataResults = new EmbeddedTrendDataResults();
             trendDataResults.setTrendOutcomes(trendOutcomes);
             trendDataResults.setDataSourceInfo(dataSourceInfo);
+            analysisDefinition.setFilterDefinitions(customFilters);
             trendDataResults.setDefinition(analysisDefinition);
             if (cacheKey != null) {
                 ReportCache.instance().storeReport(dataSourceID, cacheKey, trendDataResults);
@@ -1598,7 +1601,26 @@ public class DataService {
 
         private static ReportRetrieval reportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
                                                   @Nullable List<FilterDefinition> customFilters, @Nullable List<FilterDefinition> drillThroughFilters) throws SQLException {
-            if (customFilters != null) {
+            if (analysisDefinition.isPassThroughFilters()) {
+                Map<Long, FilterDefinition> map = new HashMap<Long, FilterDefinition>();
+                for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                    map.put(filter.getFilterID(), filter);
+                }
+                List<FilterDefinition> toSet = new ArrayList<FilterDefinition>();
+                List<FilterDefinition> toPass = new ArrayList<FilterDefinition>();
+                if (customFilters != null) {
+                    for (FilterDefinition filter : customFilters) {
+                        FilterDefinition inMap = map.get(filter.getFilterID());
+                        if (inMap != null) {
+                            toSet.add(filter);
+                        } else {
+                            toPass.add(filter);
+                        }
+                    }
+                }
+                insightRequestMetadata.setFilters(toPass);
+                analysisDefinition.setFilterDefinitions(toSet);
+            } else if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
             }
             if (drillThroughFilters != null) {
