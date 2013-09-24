@@ -220,6 +220,22 @@ ToggleButtonBar {
     fontWeight: normal;
 }
 
+.dashboardGrayButton {
+    cornerRadius: 0;
+    highlightAlphas: 0.5, 0.1;
+    fillColors: #333333, #333333, #333333, #333333;
+    fillAlphas: 1, 1, 1, 1;
+    color: #ffffff;
+    textRollOverColor: #dddddd;
+    textSelectedColor: #dddddd;
+    borderColor: #333333;
+    dropShadow: false;
+    shadowDistance: 0;
+    fontSize: 11;
+    fontWeight: normal;
+    fontFamily: "Helvetica Neue", "Helvetica";
+}
+
 .altGrayButton {
     cornerRadius: 5;
     highlightAlphas: 0.2, 0.1;
