@@ -15,6 +15,8 @@ import com.easyinsight.report.ReportSetupEvent;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.SaveButton;
 
+import flash.display.DisplayObject;
+
 import flash.events.Event;
 import flash.events.MouseEvent;
 
@@ -23,12 +25,13 @@ import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.controls.Label;
+import mx.controls.LinkButton;
 import mx.managers.PopUpManager;
 
 public class DashboardReportViewComponent extends VBox implements IDashboardViewComponent  {
 
     public var dashboardReport:DashboardReport;
-    private var viewFactory:EmbeddedViewFactory;
+    public var viewFactory:EmbeddedViewFactory;
 
     private var report:AnalysisDefinition;
 
@@ -124,21 +127,23 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         viewFactory.styleCanvas = false;
         viewFactory.usePreferredHeight = dashboardReport.autoCalculateHeight;
         viewFactory.reportID = dashboardReport.report.id;
-        viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
+        //viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
+        viewFactory.dataSourceID = dashboardReport.report.dataFeedID;
         viewFactory.dashboardID = dashboardEditorMetadata.dashboardID;
         viewFactory.reportPaddingWidth = dashboardEditorMetadata.dashboard.reportHorizontalPadding;
         viewFactory.spaceSides = false;
         if (dashboardReport.showLabel) {
             var blah:Box = new Box();
-            blah.height = 24;
+            blah.height = 28;
             blah.setStyle("backgroundColor", 0xDDDDDD);
             blah.setStyle("borderThickness", 1);
             blah.setStyle("borderStyle", "solid");
             blah.percentWidth = 100;
             blah.setStyle("horizontalAlign", "center");
-            var label:Label = new Label();
+            var label:LinkButton = new LinkButton();
             label.setStyle("fontSize", 14);
-            label.text = dashboardReport.report.name;
+            label.label = dashboardReport.report.name;
+            label.addEventListener(MouseEvent.CLICK, onLabelClick);
             blah.addChild(label);
             addChild(blah);
             labelBox = blah;
@@ -158,6 +163,49 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             viewFactory.contextMenu = PopupMenuFactory.reportFactory.createReportContextMenu(dashboardReport.report, viewFactory, this);
         }
 
+    }
+
+    private function onCollapse(event:ExperimentEvent):void {
+        removeChild(DisplayObject(event.currentTarget));
+        box = null;
+    }
+
+    private var box:ExperimentBox;
+
+    public function highlight():void {
+        setStyle("borderStyle", "solid");
+        setStyle("borderThickness", 1);
+        setStyle("borderColor", 0);
+    }
+
+    public function unhighlight():void {
+        setStyle("borderStyle", "none");
+        setStyle("borderThickness", 0);
+    }
+
+    private function onLabelClick(event:MouseEvent):void {
+        if (box == null) {
+            box = new ExperimentBox();
+            box.insightDescriptor = dashboardReport.report;
+            box.viewFactory = viewFactory;
+            var dashboardDescriptor:DashboardDescriptor = new DashboardDescriptor();
+            dashboardDescriptor.id = dashboardEditorMetadata.dashboardID;
+            dashboardDescriptor.urlKey = dashboardEditorMetadata.dashboard.urlKey;
+            dashboardDescriptor.name = dashboardEditorMetadata.dashboard.name;
+            dashboardDescriptor.dataSourceID = dashboardEditorMetadata.dashboard.dataSourceID;
+            box.dashboardDescriptor = dashboardDescriptor;
+            box.addEventListener(ExperimentEvent.EXPERIMENT_COLLAPSE, onCollapse, false, 0, true);
+            addChildAt(box, 1);
+        } else {
+            removeChild(box);
+            box = null;
+        }
+        /*var window:ExperimentWindow = new ExperimentWindow();
+        window.viewFactory = viewFactory;
+        window.insightDescriptor = dashboardReport.report;
+        window.x = event.currentTarget.x;
+        window.y = event.currentTarget.y;
+        PopUpManager.addPopUp(window, this, true);*/
     }
 
     private function onExport(event:Event):void {
