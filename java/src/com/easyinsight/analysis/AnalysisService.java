@@ -34,6 +34,7 @@ import java.util.Date;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.storage.CachedCalculationTransform;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.DatabaseManager;
 import com.easyinsight.storage.IDataTransform;
 import nu.xom.Builder;
 import nu.xom.Document;
@@ -1373,6 +1374,7 @@ public class AnalysisService {
             }
             drillThroughResponse.setDescriptor(descriptor);
             drillThroughResponse.setFilters(filters);
+            drillThroughResponse.setAdditionalFields(report.getAddedItems());
             return drillThroughResponse;
         } catch (Exception e) {
             LogClass.error(e);
