@@ -388,7 +388,7 @@
                 _breadCrumbs.push(new BreadCrumb(desc, transformContainer.getFilterDefinitions()));
                 if (event.descriptor is InsightDescriptor) {
                     dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, exchangeItem, reportList, reportIndex, _breadCrumbs,
-                            originalExchangeItem != null ? originalExchangeItem : desc)));
+                            originalExchangeItem != null ? originalExchangeItem : desc, event.additionalItems)));
                 } else if (event.descriptor is DashboardDescriptor) {
                     dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
                         initialFilters:event.filters, exchangeItem:exchangeItem, reportList:reportList, reportIndex:reportIndex,
@@ -589,6 +589,8 @@
                 }
                 showReportEditor = false;
             }
+            viewFactory.additionalItems = additionalItems;
+            report.fieldsForDrillthrough = additionalItems;
             var netFiltersSize:int = (_parameterFilters != null ? _parameterFilters.length : 0) + (report.filterDefinitions != null ? report.filterDefinitions.length : 0);
             if (netFiltersSize > 0) {
 
@@ -639,7 +641,6 @@
                     filterDefinitions = new ArrayCollection();
                 }
             }
-            viewFactory.additionalItems = additionalItems;
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             generateState();
             viewFactory.refresh();

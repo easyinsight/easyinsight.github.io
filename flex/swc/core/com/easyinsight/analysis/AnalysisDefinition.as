@@ -59,6 +59,8 @@ import mx.collections.ArrayCollection;
         public var addonReports:ArrayCollection = new ArrayCollection();
 		public var analysisID:int;
 		public var filterDefinitions:ArrayCollection = new ArrayCollection();
+        public var filtersForDrillthrough:ArrayCollection;
+    public var fieldsForDrillthrough:ArrayCollection;
 		public var dataScrubs:ArrayCollection = new ArrayCollection();
         public var logReport:Boolean;
         public var reportType:int;
@@ -107,6 +109,9 @@ import mx.collections.ArrayCollection;
     public var noDataOnNoJoin:Boolean;
     public var aggregateQueryIfPossible:Boolean = true;
     public var newFilterStrategy:Boolean = false;
+    public var customField1:String;
+    public var customField2:String;
+    public var newFieldModel:Boolean;
 
 		public function AnalysisDefinition()
 		{
