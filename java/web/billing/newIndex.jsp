@@ -198,17 +198,17 @@
 </div>
 <div class="container">
     <div class="row">
-        <div class="span12">
+        <div class="col-md-12">
             <div style="width:100%;text-align: center">
                 <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
             </div>
         </div>
-        <div class="span6 offset3" style="padding-top: 10px;padding-bottom: 10px">
+        <div class="col-md-6 col-md-offset-3" style="padding-top: 10px;padding-bottom: 10px">
             <h3 style="width:100%;text-align: center"><%= billingHeader %></h3>
             <p style="font-size:14px;font-family: 'PT Sans',arial,serif"><%= billingIntroParagraph %></p>
         </div>
         <div class="row">
-            <div class="span8 offset1">
+            <div class="col-md-8 col-md-offset-1">
                 <% if(request.getParameter("error") != null) { %>
                 <p><label class="error"><%
                     String errorCode = request.getParameter("response_code");
@@ -239,14 +239,14 @@
                         <div class="control-group">
                             <label class="control-label" for="firstname">First Name:</label>
                             <div class="controls">
-                                <input id="firstname" type="text" value="" name="customer[first_name]" class="span3"/>
+                                <input id="firstname" type="text" value="" name="customer[first_name]" class="col-md-3"/>
                             </div>
 
                         </div>
                         <div class="control-group">
                             <label class="control-label" for="lastname">Last Name:</label>
                             <div class="controls">
-                                <input id="lastname" type="text" value="" name="customer[last_name]" class="span3"/>
+                                <input id="lastname" type="text" value="" name="customer[last_name]" class="col-md-3"/>
                             </div>
                         </div>
 
@@ -308,7 +308,7 @@
                     </fieldset>
                 </form>
             </div>
-            <div class="span3">
+            <div class="col-md-3">
                 <div class="well" style="background-color: #d5d5d5">
                     <p><strong>Have questions?</strong></p>
                     <p>You can contact Easy Insight at 1-720-316-8174 or sales@easy-insight.com if you have any questions or concerns around your account billing.</p>

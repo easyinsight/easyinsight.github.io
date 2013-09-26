@@ -90,7 +90,7 @@
         </div>
         <div class="span12 well">
             <div class="row">
-                <div class="span8 offset2 well" style="background-color: #FFFFFF">
+                <div class="col-md-8 col-md-offset-2 well" style="background-color: #FFFFFF">
                     <div style="float:left;height:90px;padding-top:30px;padding-right:60px"><h4>Your account
                         has been changed to:</h4></div>
                     <div style="height:90px">
@@ -109,7 +109,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="span6 offset3 well" style="background-color: #FFFFFF">
+                <div class="col-md-6 col-md-offset-3 well" style="background-color: #FFFFFF">
                     <a href="<%= RedirectUtil.getURL(request, "/app") %>" class="btn">Back to Application</a>
                 </div>
             </div>

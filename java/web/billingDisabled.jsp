@@ -38,12 +38,12 @@
 </jsp:include>
 <div class="container">
     <div class="row">
-        <div class="span12">
+        <div class="col-md-12">
             <div style="width:100%;text-align: center">
                 <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
             </div>
         </div>
-        <div class="span6 offset3">
+        <div class="col-md-6 col-md-offset-3">
             <div class="well" style="text-align:center">
                 <h3>Billing Temporarily Disabled</h3>
                 <p>We're sorry, but billing is currently disabled as we're upgrading the billing system.  Please try again soon.</p>

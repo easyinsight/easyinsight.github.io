@@ -130,7 +130,7 @@
 </div>
 <div class="container">
     <div class="row">
-        <div class="span12">
+        <div class="col-md-12">
             <%= dashboard.getRootElement().toHTML(filterHTMLMetadata) %>
         </div>
     </div>

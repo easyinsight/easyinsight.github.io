@@ -184,7 +184,7 @@
         </div>
         <div class="span12">
             <div class="row well">
-                <div class="span4 offset4 well" style="background-color: #FFFFFF; border-color: #990000">
+                <div class="col-md-4 col-md-offset-4 well" style="background-color: #FFFFFF; border-color: #990000">
                     <div>
                         <span style="font-size: 14px"><%= confirmMessage %></span>
                         <p style="font-size: 14px"><%= message %></p>

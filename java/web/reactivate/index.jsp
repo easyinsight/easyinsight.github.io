@@ -43,7 +43,7 @@
 <div class="container">
     <div class="row">
 
-        <div class="span10 offset1">
+        <div class="col-md-10 col-md-offset-1">
 
             <form class="well" method="post" action="reactivateAction.jsp" style="width:100%" id="loginForm">
                 <div style="width:100%;text-align: center">

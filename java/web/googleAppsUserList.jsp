@@ -38,7 +38,7 @@
 <div class="container">
     <div class="row">
 
-        <div class="span8 offset2">
+        <div class="col-md-8 col-md-offset-2">
 
 
 
@@ -96,10 +96,10 @@
                 %>
                 </div>
                 <div class="row" style="padding-top:20px">
-                    <div class="span4" style="padding-top: 4px">
+                    <div class="col-md-4" style="padding-top: 4px">
                         <a style="font-size:20px" href="<%=RedirectUtil.getURL(request, "/app/")%>">I'll Do It Later</a>
                     </div>
-                    <div class="span3">
+                    <div class="col-md-3">
                         <div style="float:right">
                             <input type="submit" style="font-size:20px" class="btn btn-primary" value="Add Selected Contacts"/>
                         </div>

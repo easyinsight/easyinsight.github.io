@@ -33,12 +33,12 @@
 </jsp:include>
 <div class="container">
     <div class="row">
-        <div class="span12">
+        <div class="col-md-12">
             <div style="width:100%;text-align: center">
                 <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
             </div>
         </div>
-        <div class="span6 offset3">
+        <div class="col-md-6 col-md-offset-3">
             <div class="well" style="text-align:center">
                 <h3>Changing Billing Interval</h3>
                 <p>We don't yet support automatically changing from Monthly to Yearly or Yearly to Monthly billing. Please contact support at support@easy-insight.com and we'll assist you with the transition.</p>

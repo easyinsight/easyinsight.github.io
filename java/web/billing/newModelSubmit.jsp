@@ -10,6 +10,7 @@
 <%@ page import="com.braintreegateway.*" %>
 <%@ page import="com.easyinsight.html.BillingResponse" %>
 <%@ page import="com.easyinsight.logging.LogClass" %>
+<%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String postBillingMessage = "";
@@ -184,40 +185,10 @@
 
 %>
 <body>
-<%
-    //    String userName = (String) session.getAttribute("userName");
-//    com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
-//    try {
-
-%>
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <%--<a class="brand" href="#"><img src="/images/logo3.jpg"/></a>--%>
-            <div class="btn-group pull-right">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(user.getUserName()) %>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a href="../html/flashAppAction.jsp">Back to Full Interface</a></li>
-                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                </ul>
-            </div>
-            <div class="nav-collapse">
-                <ul class="nav">
-                    <li><a href="accountType.jsp">Account Configuration</a></li>
-                    <li class="active"><a href="#">Billing Setup</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+<jsp:include page="../header.jsp">
+    <jsp:param name="userName" value="<%= user.getName() %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
+</jsp:include>
 <div class="container">
     <div class="row">
         <div class="span12">

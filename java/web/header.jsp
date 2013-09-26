@@ -7,105 +7,52 @@
     int headerActive = Integer.parseInt(request.getParameter("headerActive"));
 %>
 
-<nav class="navbar navbar-default" role="navigation">
-  <!-- Brand and toggle get grouped for better mobile display -->
-  <div class="navbar-header">
-    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-      <span class="sr-only">Toggle navigation</span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-  </div>
-
-  <!-- Collect the nav links, forms, and other content for toggling -->
-  <div class="collapse navbar-collapse navbar-ex1-collapse">
-      <ul class="nav navbar-nav navbar-right">
-      <%
-              if (!loggedIn) {
-          %>
-
-              <li><a href="http://www.easy-insight.com/">Main Website</a></li>
-              <li class="active"><a href="/app/html">Sign In</a></li>
-
-    <%
-      } else { %>
-      <button class="btn dropdown-toggle" data-toggle="dropdown">
-          <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-          <span class="caret"></span>
-      </button>
-      <ul class="dropdown dropdown-menu">
-          <% if (phone) { %>
-          <li><a href="/app/html">Data Sources</a></li>
-          <li><a href="/app/billing/accountType.jsp">Account</a></li>
-          <li><a href="/app/whatsnew.jsp">What's New</a></li>
-          <% } else { %>
-          <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
-          <% } %>
-          <%--<li><a href="#">Profile</a></li>--%>
-          <li class="divider"></li>
-          <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
+<nav class="navbar_first navbar navbar-static-top navbar-inverse" role="navigation">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+    </div>
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <% if (loggedIn) { %>
+        <ul class="nav navbar-nav">
+            <li <%= headerActive == HtmlConstants.DATA_SOURCES_AND_REPORTS ? "class=\"active\"" : ""%>><a
+                    href="/app/html">Data Sources and Reports</a></li>
+            <li <%= headerActive == HtmlConstants.ACCOUNT ? "class=\"active\"" : ""%>><a
+                    href="/app/billing/accountType.jsp">Account</a></li>
+            <li <%= headerActive == HtmlConstants.WHATS_NEW ? "class=\"active\"" : ""%>><a
+                    href="/app/whatsnew.jsp">What's New</a></li>
         </ul>
-      <% } %>
-      </ul>
-  </div><!-- /.navbar-collapse -->
-</nav>
-
-<%--<div class="navbar navbar-default" role="navigation">
-    <div class="navbar-inner">
-        <div class="container">
-            <a data-target=".menu1" data-toggle="collapse" class="btn btn-navbar">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-
+        <% } %>
+        <ul class="nav navbar-nav navbar-right">
             <%
                 if (!loggedIn) {
             %>
-            <div class="span8 offset2">
-                <ul class="nav pull-right">
-                    <li><a href="http://www.easy-insight.com/">Main Website</a></li>
-                    <li class="active"><a href="/app/html">Sign In</a></li>
-                </ul>
-            </div>
+            <li><a href="http://www.easy-insight.com/">Main Website</a></li>
+            <li class="active"><a href="/app/html">Sign In</a></li>
+
             <%
-            } else {
-            %>
-            <div class="nav-collapse collapse span8 offset2 menu1">
-                <div class="btn-group pull-right">
-                        <button class="btn dropdown-toggle" data-toggle="dropdown">
-                            <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown dropdown-menu">
-                            <% if (phone) { %>
-                            <li><a href="/app/html">Data Sources</a></li>
-                            <li><a href="/app/billing/accountType.jsp">Account</a></li>
-                            <li><a href="/app/whatsnew.jsp">What's New</a></li>
-                            <% } else { %>
-                            <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
-                            <% } %>
-                            <li class="divider"></li>
-                            <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                        </ul>
-                </div>
-                <%
-                    }
-                %>
-                <% if (!phone && loggedIn) { %>
-                <div class="nav-collapse">
-                    <ul class="nav">
-                        <li <%= headerActive == HtmlConstants.DATA_SOURCES_AND_REPORTS ? "class=\"active\"" : ""%>><a
-                                href="/app/html">Data Sources and Reports</a></li>
-                        <li <%= headerActive == HtmlConstants.ACCOUNT ? "class=\"active\"" : ""%>><a
-                                href="/app/billing/accountType.jsp">Account</a></li>
-                        <li <%= headerActive == HtmlConstants.WHATS_NEW ? "class=\"active\"" : ""%>><a
-                                href="/app/whatsnew.jsp">What's New</a></li>
-                    </ul>
-                </div>
-                <% } %>
-            </div>
-        </div>
+            } else { %>
+            <li>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><!--<button class="btn btn-sm btn-default">-->
+                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
+                    <span class="caret"></span>
+                <!--</button>-->
+                </a>
+                <ul class="dropdown dropdown-menu">
+                    <% if(!phone) { %>
+                    <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
+                    <% } %>
+
+
+                    <li class="divider"></li>
+                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
+                </ul>
+            </li>
+            <% } %>
+        </ul>
     </div>
-</div>--%>
+</nav>

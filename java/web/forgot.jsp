@@ -17,7 +17,7 @@
 <div class="container">
     <div class="row">
 
-        <div class="span6 offset3">
+        <div class="col-md-6 col-md-offset-3">
 
             <form class="well" method="post" action="forgotPasswordAction.jsp" style="width:100%" id="loginForm">
                 <input type="hidden" name='OWASP_CSRFTOKEN' value="<%= session.getAttribute("OWASP_CSRFTOKEN")%>" />

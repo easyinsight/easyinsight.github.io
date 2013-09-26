@@ -5,6 +5,7 @@
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.users.UserAccountAdminService" %>
+<%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html lang="en">
 <head>
@@ -113,69 +114,39 @@
     </script>
 </head>
 <body>
+<jsp:include page="../header.jsp">
+    <jsp:param name="userName" value="<%= userName %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.ACCOUNT %>"/>
+</jsp:include>
 
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <%--<a class="brand" href="#"><img src="/images/logo3.jpg"/></a>--%>
-            <div class="btn-group pull-right">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <%
-                        if (account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.ACTIVE) {
-                    %>
-                    <li><a href="../html/flashAppAction.jsp">Back to Full Interface</a></li>
-                    <%
-                        }
-                    %>
-                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                </ul>
-            </div>
-            <div class="nav-collapse">
-                <ul class="nav">
-                    <li class="active"><a href="#">Account Configuration</a></li>
-                    <li><a href="/app/billing">Billing Setup</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
 <div class="container">
     <div class="row">
-        <div class="span12">
+        <div class="col-md-12">
             <div style="width:100%;text-align: center">
                 <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
             </div>
         </div>
         <div class="row">
-            <div class="span8 offset1" style="background-color: #E6E6E6;padding:10px;border-radius: 5px">
+            <div class="col-md-8 col-md-offset-1" style="background-color: #E6E6E6;padding:10px;border-radius: 5px">
                 <div class="row">
-                    <div class="span6">
+                    <div class="col-md-6">
                         <h3>Account Info</h3>
                     </div>
                 </div>
                 <% if (request.getParameter("success") != null) { %>
                 <div class="row">
-                    <div class="span8">
+                    <div class="col-md-8">
                         <p style="font-size: 12px;padding: 0;margin-bottom: 5px;color: #009900">Your account type has been changed.</p>
                     </div>
                 </div>
                 <% } %>
                 <div class="row">
-                    <div class="span8">
+                    <div class="col-md-8">
                         <p>Please note that you have a grandfathered account which doesn't match any of our newer packages.</p>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="offset2 span4">
+                    <div class="col-md-offset-2 col-md-8">
                         <div class="well" style="background-color: #FBFBFB">
                             <div style="float:left;height:75px;padding-top:30px;padding-right:60px"><h4>Your Current Account</h4></div>
                             <div style="height:75px">
@@ -195,12 +166,12 @@
                     <div class="tab-content">
                         <div class="tab-pane <%= account.getAccountType() == Account.BASIC ? "active" : ""%>" id="tab1" style="background-color: #F0F0F0;padding: 8px">
                             <div class="row" style="margin-bottom: 8px">
-                                <div class="span3">
+                                <div class="col-md-8">
                                     <h3>You have selected Basic</h3>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="span4">
+                                <div class="col-md-6">
                                     <h4>WHAT YOU GET</h4>
                                     <ul>
                                         <li>Five designers</li>
@@ -214,7 +185,7 @@
                                         <li>Connections to Salesforce and QuickBase</li>
                                     </ul>
                                 </div>
-                                <div class="span3" style="background-color:#FFFFFF;padding: 10px;width: 310px">
+                                <div class="col-md-3" style="background-color:#FFFFFF;padding: 10px;width: 310px">
                                     <form method="post" action="/app/billing/accountTypeAction.jsp?targetType=<%=Account.BASIC%>">
                                         <label>Bill Me</label>
                                         <select style="width:280px" name="billingInterval" onchange="updateBillingInterval(this)" id="basicBillingInterval">
@@ -252,12 +223,12 @@
                         </div>
                         <div class="tab-pane <%= account.getAccountType() == Account.PLUS ? "active" : ""%>" id="tab2" style="background-color: #F0F0F0;padding: 8px">
                             <div class="row" style="margin-bottom: 8px">
-                                <div class="span3">
+                                <div class="col-md-8">
                                     <h3>You have selected Plus</h3>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="span4">
+                                <div class="col-md-6">
                                     <h4>WHAT YOU GET</h4>
                                     <ul>
                                         <li>Unlimited designers</li>
@@ -271,7 +242,7 @@
                                         <li>Connections to Salesforce and QuickBase</li>
                                     </ul>
                                 </div>
-                                <div class="span3" style="background-color:#FFFFFF;padding: 10px;width: 310px">
+                                <div class="col-md-3" style="background-color:#FFFFFF;padding: 10px;width: 310px">
                                     <form method="post" action="/app/billing/accountTypeAction.jsp?targetType=<%=Account.PLUS%>">
 
                                         <label>Bill Me</label>
@@ -310,12 +281,12 @@
                         </div>
                         <div class="tab-pane <%= account.getAccountType() == Account.PROFESSIONAL ? "active" : ""%>" id="tab3" style="background-color: #F0F0F0;padding: 8px">
                             <div class="row" style="margin-bottom: 8px">
-                                <div class="span3">
+                                <div class="col-md-8">
                                     <h3>You have selected Professional</h3>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="span4">
+                                <div class="col-md-6">
                                     <h4>WHAT YOU GET</h4>
                                     <ul>
                                         <li>250 MB of data storage</li>
@@ -323,7 +294,7 @@
                                         <li>Data level access control</li>
                                     </ul>
                                 </div>
-                                <div class="span3" style="background-color:#FFFFFF;padding: 10px;width: 310px">
+                                <div class="col-md-3" style="background-color:#FFFFFF;padding: 10px;width: 310px">
                                     <form method="post" action="/app/billing/accountTypeAction.jsp?targetType=<%= Account.PROFESSIONAL %>">
                                         <label>Bill Me</label>
                                         <select style="width:280px" name="billingInterval" onchange="updateBillingInterval(this)" id="proBillingInterval">
@@ -363,7 +334,7 @@
                 </div>
 
             </div>
-            <div class="span3">
+            <div class="col-md-3">
                 <div class="well" style="background-color: #d5d5d5">
                     <p><strong>Have questions?</strong></p>
                     <p>You can contact Easy Insight at 1-720-316-8174 or sales@easy-insight.com if you have any questions or concerns around your account billing.</p>
