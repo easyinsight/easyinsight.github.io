@@ -20,13 +20,6 @@
     <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
     <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
-
-    <style type="text/css">
-        body {
-            padding-top: 45px;
-            padding-bottom: 40px;
-        }
-    </style>
     <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
@@ -191,7 +184,7 @@
         </div>
         <div class="span12">
             <div class="row well">
-                <div class="span4 offset4 well" style="background-color: #FFFFFF; border-color: #990000">
+                <div class="col-md-4 col-md-offset-4 well" style="background-color: #FFFFFF; border-color: #990000">
                     <div>
                         <span style="font-size: 14px"><%= confirmMessage %></span>
                         <p style="font-size: 14px"><%= message %></p>

@@ -34,16 +34,18 @@
             });
         }) %>
         <%= Filter.filters({ filter_values: filters }) %>
-        <div class="container-fluid">
+        <div class="container">
             <% if(show_label) { %>
-            <div class="row-fluid grid_header">
+            <div class="row grid_header">
+                <div class="col-md-12">
                 <%- label %>
+                </div>
             </div>
             <% } %>
             <% _.each(grid, function(e, i, l) { %>
-            <div class="row-fluid">
+            <div class="row">
                 <% _.each(e, function(a, j, m) { %>
-                <div class="dashboard_grid<% if(autoSize) { %> span<%- Math.floor(12 / e.length) %><% } %>">
+                <div class="dashboard_grid<% if(autoSize) { %> col-md-<%- Math.floor(12 / e.length) %><% } %>">
                     <%= dashboardComponent(a) %>
                 </div>
                 <% }) %>
@@ -76,7 +78,7 @@
                         Loading the report...
                     </div>
                     <div class="progress progress-striped active">
-                      <div class="bar" style="width: 100%;"></div>
+                      <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
                     </div>
                 </div>
                 <% if(report.metadata.adhoc_execution) { %>
@@ -301,8 +303,8 @@
     <div class="container"><%= Filter.filters({ filter_values: filters}) %></div>
     <div class="container dashboard_base well" style="padding-top:10px">
 
-        <div class="row-fluid">
-            <div class="span12"><%= dashboardComponent(base) %></div>
+        <div class="row">
+            <div class="col-md-12"><%= dashboardComponent(base) %></div>
         </div>
     </div>
 </script>

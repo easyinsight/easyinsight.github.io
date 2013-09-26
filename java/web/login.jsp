@@ -19,10 +19,6 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
 
     <style type="text/css">
-        body {
-            padding-top: 45px;
-            padding-bottom: 40px;
-        }
 
         .center_stuff {
             text-align:center;
@@ -116,7 +112,7 @@
 <div class="container">
     <div class="row">
 
-        <div class="span6 offset3">
+        <div class="col-md-6 col-md-offset-3">
 
             <form class="well" method="post" action="/app/loginAction.jsp" id="loginForm" onsubmit="preserveHash()">
                 <input type="hidden" name='OWASP_CSRFTOKEN' value="<%= session.getAttribute("OWASP_CSRFTOKEN")%>" />

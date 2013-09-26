@@ -116,8 +116,8 @@
     }
 %>
 <div class="container">
-<div class="row-fluid" id="filterRow">
-    <div class="span12">
+<div class="row" id="filterRow">
+    <div class="col-md-12">
 
         <%
             for (FilterDefinition filterDefinition : dashboard.getFilters()) {
@@ -134,7 +134,7 @@
 <div class="container" style="padding-top:10px">
     <jsp:include page="../html/refreshingDataSource.jsp"/>
     <div class="row">
-        <div class="span12">
+        <div class="col-md-12">
             <%= dashboard.getRootElement().toHTML(new FilterHTMLMetadata(dashboard, request, drillthroughArgh, true)) %>
         </div>
     </div>

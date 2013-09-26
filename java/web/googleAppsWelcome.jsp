@@ -11,10 +11,6 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
 
     <style type="text/css">
-        body {
-            padding-top: 45px;
-            padding-bottom: 40px;
-        }
 
         .center_stuff {
             text-align:center;
@@ -30,7 +26,7 @@
 <div class="container">
     <div class="row">
 
-        <div class="span8 offset2">
+        <div class="col-md-8 col-md-offset-2">
 
             <div class="well">
 
@@ -50,10 +46,10 @@
                     <li style="line-height:24px">Create designers and report viewers from your Google Apps users</li>
                 </ul>
                 <div class="row" style="padding-top:40px">
-                    <div class="span4" style="padding-top: 4px">
+                    <div class="col-md-4" style="padding-top: 4px">
                         <a style="font-size:20px" href="<%= RedirectUtil.getURL(request, "/app/linkToExistingAction.jsp")%>">Already have an Easy Insight account?</a>
                     </div>
-                    <div class="span3">
+                    <div class="col-md-3">
                         <div style="float:right">
                             <a class="btn btn-primary" style="font-size:20px" href="<%= RedirectUtil.getURL(request, "/app/googleAppsSettings.jsp")%>">Get Started</a>
                         </div>

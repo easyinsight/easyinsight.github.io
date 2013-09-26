@@ -43,7 +43,6 @@
         }
     </script>
     <script type="text/javascript" src="/js/dashboard.js"></script>
-
 </head>
 <body>
 <jsp:include page="../header.jsp">
@@ -53,19 +52,19 @@
 <div class="navbar">
     <div class="navbar-inner reportNavBarInner">
         <div class="container">
-            <div class="span6">
+            <div class="col-md-6">
                 <ul class="breadcrumb reportBreadcrumb">
 
-                    <li><a href="/app/html/">Data Sources</a> <span class="divider">/</span></li>
+                    <li><a href="/app/html/">Data Sources</a> <span class="divider"></span></li>
                     <li>
                         <a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
-                        </a><span class="divider">/</span></li>
+                        </a><span class="divider"></span></li>
                     <li class="active"><%= StringEscapeUtils.escapeHtml(dashboard.getName()) %>
                     </li>
 
                 </ul>
             </div>
-            <div class="span6">
+            <div class="col-md-6">
                 <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
                     <div class="btn-group">
 
