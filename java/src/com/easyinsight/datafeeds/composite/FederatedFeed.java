@@ -30,6 +30,9 @@ public class FederatedFeed extends Feed {
             DataSet dataSet = new DataSet();
             for (FederationSource source : sources) {
                 Feed feed = FeedRegistry.instance().getFeed(source.getDataSourceID(), conn);
+                if (insightRequestMetadata.isLogReport()) {
+                    System.out.println("Running report for child " + feed.getName() + "...");
+                }
 
                 Map<AnalysisItem, List<AnalysisItem>> map = new HashMap<AnalysisItem, List<AnalysisItem>>();
                 Set<AnalysisItem> childAnalysisItems = new HashSet<AnalysisItem>();
@@ -41,6 +44,9 @@ public class FederatedFeed extends Feed {
                         for (AnalysisItem field : feed.getDataSource().getFields()) {
                             if (field.getKey().toKeyString().equals(parentKey.toKeyString()) && field.isKeyColumn() == analysisItem.isKeyColumn()) {
                                 matched = true;
+                                if (insightRequestMetadata.isLogReport()) {
+                                    System.out.println("\tField " + analysisItem.toDisplay() + " was matched to " + field.toDisplay() + " by derived key method.");
+                                }
                                 childAnalysisItems.add(field);
                                 List<AnalysisItem> items = map.get(field);
                                 if (items == null) {
@@ -58,6 +64,9 @@ public class FederatedFeed extends Feed {
                                 for (AnalysisItem field : feed.getDataSource().getFields()) {
                                     if (field.toOriginalDisplayName().equals(fieldMapping.getSourceKey()) && field.isKeyColumn() == analysisItem.isKeyColumn()) {
                                         matched = true;
+                                        if (insightRequestMetadata.isLogReport()) {
+                                            System.out.println("\tField " + analysisItem.toDisplay() + " was matched to " + field.toDisplay() + " by field mapping.");
+                                        }
                                         childAnalysisItems.add(field);
                                         List<AnalysisItem> items = map.get(field);
                                         if (items == null) {
@@ -73,6 +82,9 @@ public class FederatedFeed extends Feed {
                     if (!matched) {
                         for (AnalysisItem field : feed.getDataSource().getFields()) {
                             if (field.toOriginalDisplayName().equals(analysisItem.toOriginalDisplayName()) && field.isKeyColumn() == analysisItem.isKeyColumn()) {
+                                if (insightRequestMetadata.isLogReport()) {
+                                    System.out.println("\tField " + analysisItem.toDisplay() + " was matched to " + field.toDisplay() + " by data source field name.");
+                                }
                                 childAnalysisItems.add(field);
                                 List<AnalysisItem> items = map.get(field);
                                 if (items == null) {
@@ -81,6 +93,11 @@ public class FederatedFeed extends Feed {
                                 }
                                 items.add(analysisItem);
                             }
+                        }
+                    }
+                    if (!matched) {
+                        if (insightRequestMetadata.isLogReport()) {
+                            System.out.println("\tField " + analysisItem.toDisplay() + " was not matched.");
                         }
                     }
                 }
@@ -137,6 +154,9 @@ public class FederatedFeed extends Feed {
                     for (Map.Entry<AnalysisItem, List<AnalysisItem>> entry : map.entrySet()) {
                         Value value = row.getValue(entry.getKey());
                         for (AnalysisItem valItem : entry.getValue()) {
+                            if (insightRequestMetadata.isLogReport()) {
+                                System.out.println("\tPutting value into " + valItem.toDisplay() + " for base field " + entry.getKey().toDisplay());
+                            }
                             newRow.addValue(valItem.createAggregateKey(), value);
                         }
 

@@ -89,8 +89,19 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name = "section")
     private int section;
 
+    @Column(name = "flex_id")
+    private long flexID;
+
     @Transient
     transient private String pipelineName;
+
+    public long getFlexID() {
+        return flexID;
+    }
+
+    public void setFlexID(long flexID) {
+        this.flexID = flexID;
+    }
 
     public void applyCalculationsBeforeRun(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
                                            Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) {

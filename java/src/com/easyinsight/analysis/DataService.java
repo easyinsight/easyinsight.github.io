@@ -88,6 +88,7 @@ public class DataService {
                 insightRequestMetadata.setAddonReports(report.getAddonReports());
                 insightRequestMetadata.setAggregateQuery(false);
                 insightRequestMetadata.getDistinctFieldMap().put(analysisItem, true);
+                insightRequestMetadata.setAdditionalAnalysisItems(report.getFieldsForDrillthrough());
 
                 if (requester != null && requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
                     String label = requester.getFieldChoiceFilterLabel();
@@ -179,6 +180,7 @@ public class DataService {
             } else {
                 clone = new AnalysisDimension();
             }
+            //clone.setParentItemID(item.getAnalysisItemID());
             clone.setOriginalDisplayName(item.toDisplay());
             clone.setDisplayName(report.getName() + " - " + item.toDisplay());
             ReportKey reportKey = new ReportKey();
@@ -261,6 +263,7 @@ public class DataService {
                     }
                 }
             }
+            //feedMetadata.setDataSourceFields(feed.getDataSource().getFields());
             WSListDefinition tempList = new WSListDefinition();
             tempList.setDataFeedID(feedID);
             tempList.setColumns(new ArrayList<AnalysisItem>());
@@ -328,7 +331,22 @@ public class DataService {
             long start = System.currentTimeMillis();
             SecurityUtil.authorizeInsight(reportID);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
-            WSKPIDefinition analysisDefinition = (WSKPIDefinition) new AnalysisStorage().getAnalysisDefinition(reportID);
+            WSKPIDefinition analysisDefinition = (WSKPIDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            CacheKey cacheKey = null;
+            if (analysisDefinition.isCacheable()) {
+                List<String> filters = new ArrayList<String>();
+                XMLMetadata xmlMetadata = new XMLMetadata();
+                xmlMetadata.setConn(conn);
+                for (FilterDefinition filter : customFilters) {
+                    filters.add(filter.toXML(xmlMetadata).toXML());
+                }
+                cacheKey = new CacheKey(reportID, filters);
+                EmbeddedResults embeddedResults = ReportCache.instance().getResults(dataSourceID, cacheKey, analysisDefinition.getCacheMinutes());
+                if (embeddedResults != null) {
+                    LogClass.debug("*** Returning from cache");
+                    return (EmbeddedTrendDataResults) embeddedResults;
+                }
+            }
             RollingFilterDefinition reportFilter = null;
             for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
                 if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
@@ -390,6 +408,7 @@ public class DataService {
                 String key = entry.getKey();
                 List<AnalysisMeasure> measures = entry.getValue();
                 WSListDefinition tempReport = new WSListDefinition();
+                tempReport.setPassThroughFilters(true);
                 List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
                 columns.addAll(measures);
                 if (analysisDefinition.getGroupings() != null) {
@@ -435,7 +454,11 @@ public class DataService {
             EmbeddedTrendDataResults trendDataResults = new EmbeddedTrendDataResults();
             trendDataResults.setTrendOutcomes(trendOutcomes);
             trendDataResults.setDataSourceInfo(dataSourceInfo);
+            analysisDefinition.setFilterDefinitions(customFilters);
             trendDataResults.setDefinition(analysisDefinition);
+            if (cacheKey != null) {
+                ReportCache.instance().storeReport(dataSourceID, cacheKey, trendDataResults);
+            }
             reportViewBenchmark(analysisDefinition, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
             return trendDataResults;
         } catch (com.easyinsight.security.SecurityException se) {
@@ -1578,7 +1601,26 @@ public class DataService {
 
         private static ReportRetrieval reportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
                                                   @Nullable List<FilterDefinition> customFilters, @Nullable List<FilterDefinition> drillThroughFilters) throws SQLException {
-            if (customFilters != null) {
+            if (analysisDefinition.isPassThroughFilters()) {
+                Map<Long, FilterDefinition> map = new HashMap<Long, FilterDefinition>();
+                for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                    map.put(filter.getFilterID(), filter);
+                }
+                List<FilterDefinition> toSet = new ArrayList<FilterDefinition>();
+                List<FilterDefinition> toPass = new ArrayList<FilterDefinition>();
+                if (customFilters != null) {
+                    for (FilterDefinition filter : customFilters) {
+                        FilterDefinition inMap = map.get(filter.getFilterID());
+                        if (inMap != null) {
+                            toSet.add(filter);
+                        } else {
+                            toPass.add(filter);
+                        }
+                    }
+                }
+                insightRequestMetadata.setFilters(toPass);
+                analysisDefinition.setFilterDefinitions(toSet);
+            } else if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
             }
             if (drillThroughFilters != null) {
@@ -1628,7 +1670,7 @@ public class DataService {
 
             insightRequestMetadata.setAddonReports(analysisDefinition.getAddonReports());
             insightRequestMetadata.setNoDataOnNoJoin(analysisDefinition.isNoDataOnNoJoin());
-
+            insightRequestMetadata.setLogReport(analysisDefinition.isLogReport());
 
             if (insightRequestMetadata.getHierarchyOverrides() != null) {
                 for (AnalysisItemOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
@@ -1739,7 +1781,7 @@ public class DataService {
                 }
             }
             insightRequestMetadata.setFieldToUniqueMap(analysisDefinition.getFieldToUniqueMap());
-            insightRequestMetadata.setUniqueIteMap(analysisDefinition.getUniqueIteMap());
+
             AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
             structure.setReport(analysisDefinition);
             structure.setInsightRequestMetadata(insightRequestMetadata);

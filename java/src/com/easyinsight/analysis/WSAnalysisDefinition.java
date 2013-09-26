@@ -109,12 +109,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean lookupTableOptimization;
     private boolean adHocExecution;
     private int headerFontSize = 24;
+    private List<AnalysisItem> fieldsForDrillthrough;
     private int maxHeaderWidth = 600;
     private int cacheMinutes;
     private boolean manualButRunFirst;
     private String customFontFamily;
     private boolean useCustomFontFamily;
     private int generalSizeLimit;
+    private boolean passThroughFilters;
 
     private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
@@ -131,6 +133,51 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private int fetchSize;
     private boolean noDataOnNoJoin;
+
+    private String customField1;
+    private String customField2;
+
+    private List<FilterDefinition> filtersForDrillthrough;
+
+    public List<AnalysisItem> getFieldsForDrillthrough() {
+        return fieldsForDrillthrough;
+    }
+
+    public void setFieldsForDrillthrough(List<AnalysisItem> fieldsForDrillthrough) {
+        this.fieldsForDrillthrough = fieldsForDrillthrough;
+    }
+
+    public List<FilterDefinition> getFiltersForDrillthrough() {
+        return filtersForDrillthrough;
+    }
+
+    public void setFiltersForDrillthrough(List<FilterDefinition> filtersForDrillthrough) {
+        this.filtersForDrillthrough = filtersForDrillthrough;
+    }
+
+    public boolean isPassThroughFilters() {
+        return passThroughFilters;
+    }
+
+    public void setPassThroughFilters(boolean passThroughFilters) {
+        this.passThroughFilters = passThroughFilters;
+    }
+
+    public String getCustomField1() {
+        return customField1;
+    }
+
+    public void setCustomField1(String customField1) {
+        this.customField1 = customField1;
+    }
+
+    public String getCustomField2() {
+        return customField2;
+    }
+
+    public void setCustomField2(String customField2) {
+        this.customField2 = customField2;
+    }
 
     public boolean isAggregateQueryIfPossible() {
         return aggregateQueryIfPossible;
@@ -855,14 +902,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
         this.fieldToUniqueMap = fieldToUniqueMap;
     }
 
-    public Map<UniqueKey, AnalysisItem> getUniqueIteMap() {
-        return uniqueIteMap;
-    }
-
-    public void setUniqueIteMap(Map<UniqueKey, AnalysisItem> uniqueIteMap) {
-        this.uniqueIteMap = uniqueIteMap;
-    }
-
     public boolean hasCustomResultsBridge() {
         return false;
     }
@@ -903,6 +942,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
         fetchSize = (int) findNumberProperty(properties, "fetchSize", 0);
         noDataOnNoJoin = findBooleanProperty(properties, "noDataOnNoJoin", false);
         aggregateQueryIfPossible = findBooleanProperty(properties, "aggregateQueryIfPossible", true);
+        customField1 = findStringProperty(properties, "customField1", "");
+        customField2 = findStringProperty(properties, "customField2", "");
     }
 
     public List<ReportProperty> createProperties() {
@@ -927,6 +968,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportNumericProperty("fetchSize", fetchSize));
         properties.add(new ReportBooleanProperty("noDataOnNoJoin", noDataOnNoJoin));
         properties.add(new ReportBooleanProperty("aggregateQueryIfPossible", aggregateQueryIfPossible));
+        properties.add(new ReportStringProperty("customField1", customField1));
+        properties.add(new ReportStringProperty("customField2", customField2));
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }

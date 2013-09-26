@@ -1015,4 +1015,15 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             }
         }
     }
+
+    @Transient
+    private transient boolean rowIDField;
+
+    public boolean isRowIDField() {
+        return rowIDField;
+    }
+
+    public void setRowIDField(boolean rowIDField) {
+        this.rowIDField = rowIDField;
+    }
 }

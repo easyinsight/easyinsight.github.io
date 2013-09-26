@@ -222,6 +222,9 @@
                     saveJoin.sourceName = connection.sourceFeedName;
                     saveJoin.targetName = connection.targetFeedName;
                     saveJoin.dataSourceID = selectedDataSource.id;
+                    saveJoin.forceOuterJoin = connection.forceOuterJoin;
+                    saveJoin.sourceCardinality = connection.sourceCardinality;
+                    saveJoin.targetCardinality = connection.targetCardinality;
                     saveJoin.marmotScript = connection.marmotScript;
                     saveJoins.addItem(saveJoin);
                 }

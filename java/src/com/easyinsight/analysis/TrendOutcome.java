@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Map;
  * Date: 9/26/11
  * Time: 2:04 PM
  */
-public class TrendOutcome {
+public class TrendOutcome implements Serializable {
     private Value now;
     private Value historical;
     private int direction;

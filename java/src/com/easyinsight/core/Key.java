@@ -25,7 +25,7 @@ public class Key implements Comparable<Key>, Serializable, Cloneable {
 
     public String toSQL() { throw new UnsupportedOperationException(); }
 
-    public Key toBaseKey() { throw new UnsupportedOperationException(); }
+    public Key toBaseKey() { return this; }
 
     public boolean isPrimaryKey() {
         return false;
@@ -69,17 +69,17 @@ public class Key implements Comparable<Key>, Serializable, Cloneable {
         this.keyID = keyID;
     }
 
-    public String toDisplayName() { throw new UnsupportedOperationException(); }
+    public String toDisplayName() { return ""; }
 
-    public boolean indexed() { throw new UnsupportedOperationException(); }
+    public boolean indexed() { return false; }
 
     public String toKeyString() {
-        throw new UnsupportedOperationException();
+        return "";
     }
     
-    public boolean matchesOrContains(Key key) { throw new UnsupportedOperationException(); };
+    public boolean matchesOrContains(Key key) { return false; }
 
-    public String internalString() { throw new UnsupportedOperationException(); }
+    public String internalString() { return ""; }
 
     public int compareTo(Key o) {
         return toDisplayName().compareTo(o.toDisplayName());

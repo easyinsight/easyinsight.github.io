@@ -45,10 +45,10 @@ public class UniqueField extends Function {
             throw new RuntimeException(e);
         }
         UniqueKey id = toID(match.getKey());
-        if (report.getUniqueIteMap() == null) {
-            report.setUniqueIteMap(new HashMap<UniqueKey, AnalysisItem>());
+        if (calculationMetadata.getInsightRequestMetadata().getUniqueIteMap() == null) {
+            calculationMetadata.getInsightRequestMetadata().setUniqueIteMap(new HashMap<UniqueKey, AnalysisItem>());
         }
-        report.getUniqueIteMap().put(id, clone);
+        calculationMetadata.getInsightRequestMetadata().getUniqueIteMap().put(id, clone);
         return null;
     }
 

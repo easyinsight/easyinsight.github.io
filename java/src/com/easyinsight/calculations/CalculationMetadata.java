@@ -31,6 +31,11 @@ public class CalculationMetadata {
     private FeedDefinition dataSource;
     private Map<String, ICalculationCache> cacheMap = new HashMap<String, ICalculationCache>();
     private List<IComponent> generatedComponents = new ArrayList<IComponent>();
+    private Calendar calendar = Calendar.getInstance();
+
+    public Calendar getCalendar() {
+        return calendar;
+    }
 
     public List<IComponent> getGeneratedComponents() {
         return generatedComponents;
