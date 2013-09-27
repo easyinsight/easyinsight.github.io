@@ -1602,9 +1602,9 @@ public class DataService {
         private static ReportRetrieval reportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
                                                   @Nullable List<FilterDefinition> customFilters, @Nullable List<FilterDefinition> drillThroughFilters) throws SQLException {
             if (analysisDefinition.isPassThroughFilters()) {
-                if (analysisDefinition.isLogReport()) {
+                //if (analysisDefinition.isLogReport()) {
                     System.out.println("Pass through filters");
-                }
+                //}
                 Map<Long, FilterDefinition> map = new HashMap<Long, FilterDefinition>();
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     map.put(filter.getFilterID(), filter);
@@ -1615,14 +1615,14 @@ public class DataService {
                     for (FilterDefinition filter : customFilters) {
                         FilterDefinition inMap = map.get(filter.getFilterID());
                         if (inMap != null) {
-                            if (analysisDefinition.isLogReport()) {
+                            //if (analysisDefinition.isLogReport()) {
                                 System.out.println("Including filter " + filter.getFilterID());
-                            }
+                            //}
                             toSet.add(filter);
                         } else {
-                            if (analysisDefinition.isLogReport()) {
+                            //if (analysisDefinition.isLogReport()) {
                                 System.out.println("Passing through filter " + filter.getFilterID());
-                            }
+                            //}
                             toPass.add(filter);
                         }
                     }
