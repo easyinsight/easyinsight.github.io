@@ -135,12 +135,12 @@
                 <label for="userName" class="promptLabel">
                     User Name or Email
                 </label>
-                <input type="text" name="userName" id="userName" style="width:100%;font-size:14px;height:28px" autocapitalize="off" autocorrect="off" autoFocus/>
+                <input type="text" class="form-control" name="userName" id="userName" style="width:100%;font-size:14px;height:28px" autocapitalize="off" autocorrect="off" autoFocus/>
 
                 <label for="password" class="promptLabel">
                     Password
                 </label>
-                <input type="password" name="password" id="password" style="width:100%;font-size:14px;height:28px"/>
+                <input type="password" class="form-control" name="password" id="password" style="width:100%;font-size:14px;height:28px"/>
                 <%
                     if (request.getParameter("error") != null) {
                 %>
@@ -159,7 +159,7 @@
                 <label class="checkbox">
                     <input type="checkbox" id="rememberMeCheckbox" name="rememberMeCheckbox">Remember me on this computer
                 </label>
-                <button class="btn btn-inverse" type="submit" value="Sign In">Sign In</button>
+                <button class="btn btn-default btn-inverse" type="submit" value="Sign In">Sign In</button>
                 <%--<button class="btn" id="googleApps">Sign In With <img src="/images/apps_logo_3D_online_medium.png" alt="Google Apps Login" height="16" width="72" /></button>--%>
                 <div class="signInBar" style="padding-top: 10px">
                     <a href="<%= RedirectUtil.getURL(request, "/app/newaccount")%>" style="font-size: 12px">No account yet?</a>

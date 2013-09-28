@@ -191,12 +191,12 @@
 </jsp:include>
 <div class="container">
     <div class="row">
-        <div class="span12">
+        <div class="col-md-12">
             <div style="width:100%;text-align: center">
                 <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
             </div>
         </div>
-        <div class="span12">
+        <div class="col-md-12">
             <div class="well" style="text-align:center">
                 <h3>Billing Successful!</h3>
 
