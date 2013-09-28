@@ -85,12 +85,12 @@
 </div>
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
+        <div class="span12">
             <div style="width:100%;text-align: center">
                 <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
             </div>
         </div>
-        <div class="col-md-12 well">
+        <div class="span12 well">
             <div class="row">
                 <div class="col-md-8 col-md-offset-2 well" style="background-color: #FFFFFF">
                     <div style="float:left;height:90px;padding-top:30px;padding-right:60px"><h4>Your free trial account
