@@ -5,10 +5,7 @@ import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.FunctionFactory;
-import com.easyinsight.core.InsightDescriptor;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.ReportKey;
-import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -1632,10 +1629,23 @@ public class DataService {
 
         private static ReportRetrieval reportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
                                                   @Nullable List<FilterDefinition> customFilters, @Nullable List<FilterDefinition> drillThroughFilters) throws SQLException {
+            if (customFilters != null) {
+                Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
+                if (feed.getDataSource() instanceof CompositeFeedDefinition) {
+                    CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feed.getDataSource();
+                    Iterator<FilterDefinition> iter = customFilters.iterator();
+                    while (iter.hasNext()) {
+                        FilterDefinition filter = iter.next();
+                        if (filter.getField() != null && filter.getField().getKey() instanceof DerivedKey) {
+                            DerivedKey derivedKey = (DerivedKey) filter.getField().getKey();
+                            if (!compositeFeedDefinition.handles(derivedKey)) {
+                                iter.remove();
+                            }
+                        }
+                    }
+                }
+            }
             if (analysisDefinition.isPassThroughFilters()) {
-                //if (analysisDefinition.isLogReport()) {
-                    System.out.println("Pass through filters");
-                //}
                 Map<Long, FilterDefinition> map = new HashMap<Long, FilterDefinition>();
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     map.put(filter.getFilterID(), filter);
@@ -1646,14 +1656,8 @@ public class DataService {
                     for (FilterDefinition filter : customFilters) {
                         FilterDefinition inMap = map.get(filter.getFilterID());
                         if (inMap != null) {
-                            //if (analysisDefinition.isLogReport()) {
-                                System.out.println("Including filter " + filter.getFilterID());
-                            //}
                             toSet.add(filter);
                         } else {
-                            //if (analysisDefinition.isLogReport()) {
-                                System.out.println("Passing through filter " + filter.getFilterID());
-                            //}
                             toPass.add(filter);
                         }
                     }
