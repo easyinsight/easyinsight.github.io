@@ -64,7 +64,7 @@ public class DataSourceConnectivityReportFault extends ReportFault {
 
     @Override
     public String toHTML() {
-        String fullURL = "<div class=\"col-md-12\" style=\"text-align:center\" id=\"reportErrorDiv\">\n" +
+        String fullURL = "<div class=\"span12\" style=\"text-align:center\" id=\"reportErrorDiv\">\n" +
                 "We ran into a configuration problem with the data source in trying to retrieve data for this report. Please log into the full interface and try the same operation in order to resolve the configuration problem."+
                 "</div>";
         System.out.println(fullURL);

@@ -112,6 +112,11 @@
                             </div>
         <div style="margin-left:200px;padding-right: 10px;min-height: 300px">
                     <%
+                        /*String pageNumberString = request.getParameter("page");
+                        int pageNumber = 0;
+                        if (pageNumberString != null) {
+                            pageNumber = Integer.parseInt(pageNumberString);
+                        }*/
 
 
 

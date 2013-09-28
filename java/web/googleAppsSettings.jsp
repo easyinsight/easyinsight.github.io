@@ -11,6 +11,11 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
 
     <style type="text/css">
+        body {
+            padding-top: 45px;
+            padding-bottom: 40px;
+        }
+
         .center_stuff {
             text-align:center;
         }
@@ -26,7 +31,7 @@
 <div class="container">
     <div class="row">
 
-        <div class="col-md-8 col-md-offset-2">
+        <div class="span8 offset2">
 
             <form class="well" method="post" action="/app/googleAppsCreateAction.jsp" id="loginForm">
 
@@ -56,10 +61,10 @@
                     policies.
                 </div>
                 <div class="row" style="padding-top: 15px">
-                    <div class="col-md-3 col-md-offset-2">
+                    <div class="span3 offset2">
                         <input style="font-size:20px" type="submit" class="btn btn-primary" value="Create Account"/>
                     </div>
-                    <div class="col-md-2">
+                    <div class="span2">
                         <div style="padding-top: 6px">
                             <a style="font-size:20px" href="googleAppsWelcome.jsp">Cancel</a>
                         </div>

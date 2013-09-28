@@ -86,33 +86,204 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
 </jsp:include>
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-<div class="navbar navbar-pills">
-
-    <ul class="breadcrumb reportBreadcrumb navbar-nav">
-        <li><a href="/app/html/">Data Sources</a> <span class="divider"></span></li>
-        <li>
-            <a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
-            </a><span class="divider"></span></li>
-        <li class="active"><%= StringEscapeUtils.escapeHtml(report.getName()) %>
-        </li>
-    </ul>
-
-</div>
+<div class="navbar">
+    <div class="navbar-inner reportNavBarInner">
+        <div class="container">
+            <div class="span4">
+                <ul class="breadcrumb reportBreadcrumb">
+                    <li><a href="/app/html/">Data Sources</a> <span class="divider">/</span></li>
+                    <li>
+                        <a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
+                        </a><span class="divider">/</span></li>
+                    <li class="active"><%= StringEscapeUtils.escapeHtml(report.getName()) %>
+                    </li>
+                </ul>
+            </div>
+            <div class="span8">
+                <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
+                    <div class="btn-group" style="padding-top: 0;margin-top: 0">
+                        <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                            Export the Report
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <button class="btn btn-inverse" type="button"
+                                        onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'"
+                                        style="padding:5px;margin:5px;width:150px">Export to Excel
+                                </button>
+                            </li>
+                            <li>
+                                <button class="btn btn-inverse" type="button"
+                                        onclick="$('#emailReportWindow').modal(true, true, true)"
+                                        style="padding:5px;margin:5px;width:150px">Email the Report
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="btn-group">
+                        <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                            Refresh Data
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <button class="btn btn-inverse" type="button" onclick="refreshReport()"
+                                        style="padding:5px;margin:5px;width:150px">Refresh the Report
+                                </button>
+                            </li>
+                            <%
+                                FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
+                                if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
+                            %>
+                            <li>
+                                <button class="btn btn-inverse" type="button" id="refreshDataSourceButton"
+                                        onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh
+                                    Data
+                                    Source
+                                </button>
+                            </li>
+                            <%
+                                }
+                            %>
+                        </ul>
+                    </div>
+                    <%
+                        boolean visibleFilter = false;
+                        for (FilterDefinition filter : report.getFilterDefinitions()) {
+                            if (filter.isShowOnReportView()) {
+                                visibleFilter = true;
+                                break;
+                            }
+                        }
+                        if (visibleFilter) {
+                    %>
+                    <div class="btn-group">
+                        <button class="btn btn-inverse" onclick="toggleFilters()">Toggle Filters</button>
+                    </div>
+                    <%
+                        }
+                    %>
+                    <div class="btn-group">
+                        <a href="<%= RedirectUtil.getURL(request, "/app/#analysisID=" + report.getUrlKey())%>"
+                           class="btn btn-inverse">Edit Report</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-<div class="container" id="reportHeader">
+</div>
+<%--<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container-fluid">
+            <a data-target=".nav-collapse" data-toggle="collapse" class="btn btn-navbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <div class="nav-collapse">
+                <div class="btn-group pull-right">
+                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <% if (phone) { %>
+                            <li><a href="/app/html">Data Sources</a></li>
+                            <li><a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%=StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a></li>
+                            <li><a href="#" onclick="toggleFilters()">Toggle Filters</a></li>
+                            <li><a href="#" onclick="refreshReport()">Refresh Report</a></li>
+                        <%
+                            FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
+                            if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
+                        %>
+                            <li><a href="#" onclick="refreshDataSource()">Refresh the Data Source</a></li>
+                        <%
+                            }
+                        %>
+                        <% } else { %>
+                            <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
+                        <% } %>
+                        &lt;%&ndash;<li><a href="#">Profile</a></li>&ndash;%&gt;
+                        <li class="divider"></li>
+                        <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <% if (!phone) { %>
+            <div class="nav-collapse">
+                <ul class="nav">
+                    <li><a href="/app/html">Data Sources</a></li>
+                    <li><a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%=StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a></li>
+                    <li class="active"><a href="#"><%= StringEscapeUtils.escapeHtml(report.getName()) %></a></li>
+                </ul>
+            </div>
+            <div class="nav-collapse btn-toolbar" style="margin-top:0px;margin-bottom: 0px">
+                <div class="btn-group">
+                    <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                        Export the Report
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><button class="btn btn-inverse" type="button" onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'" style="padding:5px;margin:5px;width:150px">Export to Excel</button></li>
+                        <li><button class="btn btn-inverse" type="button" onclick="$('#emailReportWindow').modal(true, true, true)" style="padding:5px;margin:5px;width:150px">Email the Report</button></li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                        Refresh Data
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><button class="btn btn-inverse" type="button" onclick="refreshReport()" style="padding:5px;margin:5px;width:150px">Refresh the Report</button></li>
+                        <%
+                            FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
+                            if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
+                        %>
+                        <li><button class="btn btn-inverse" type="button" id="refreshDataSourceButton" onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh Data Source</button></li>
+                        <%
+                            }
+                        %>
+                    </ul>
+                </div>
+                <%
+                    boolean visibleFilter = false;
+                    for (FilterDefinition filter : report.getFilterDefinitions()) {
+                        if (filter.isShowOnReportView()) {
+                            visibleFilter = true;
+                            break;
+                        }
+                    }
+                    if (visibleFilter) {
+                %>
+                <div class="btn-group">
+                    <button class="btn btn-inverse" onclick="toggleFilters()">Toggle Filters</button>
+                </div>
+                <%
+                    }
+                    if (!iPad && editable) {
+                %>
+                <div class="btn-group">
+                    <a href="<%= RedirectUtil.getURL(request, "/app/#analysisID=" + report.getUrlKey())%>" class="btn btn-inverse">Edit Report</a>
+                </div>
+                <%
+                    }
+                %>
+            </div>
+            <% } %>
+        </div>
+    </div>
+</div>--%>
+<div class="container-fluid" id="reportHeader">
     <%= uiData.createHeader(report.getName()) %>
-    <div class="row" id="filterRow">
-        <div class="col-md-12 filters">
+    <div class="row-fluid" id="filterRow">
+        <div class="span12">
             <%
                 for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
                     if (filterDefinition.isShowOnReportView()) {
             %>
-            <div class="filter"><%=filterDefinition.toHTML(new FilterHTMLMetadata(report))%>
+            <div class="filterDiv"><%=filterDefinition.toHTML(new FilterHTMLMetadata(report))%>
             </div>
             <%
                     }
@@ -129,7 +300,7 @@
     <jsp:include page="refreshingDataSource.jsp"/>
 
     <div class="row">
-        <div class="col-md-12">
+        <div class="span12">
             <div class="well reportWell" style="background-color: #FFFFFF">
                 <div id="chartpseudotooltip" style="z-index:100;"></div>
                 <div id="reportTarget">

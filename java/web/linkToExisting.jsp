@@ -11,6 +11,10 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
 
     <style type="text/css">
+        body {
+            padding-top: 45px;
+            padding-bottom: 40px;
+        }
 
         .center_stuff {
             text-align:center;
@@ -27,7 +31,7 @@
 <div class="container">
     <div class="row">
 
-        <div class="col-md-6 col-md-offset-3">
+        <div class="span6 offset3">
 
             <form class="well" method="post" action="/app/linkToExistingAction.jsp" id="loginForm" onsubmit="preserveHash()">
 
@@ -40,10 +44,10 @@
                 <p>Let's go through the steps to create your Easy Insight account:</p>
 
                 <div class="row">
-                    <div class="col-md-2">
+                    <div class="span2">
                         Already have an Easy Insight account?
                     </div>
-                    <div class="col-md-2">
+                    <div class="span2">
                         <button class="btn">Get Started</button>
                     </div>
                 </div>

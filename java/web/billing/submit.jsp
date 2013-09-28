@@ -190,6 +190,13 @@
     <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
     <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
+
+    <style type="text/css">
+        body {
+            padding-top: 45px;
+            padding-bottom: 40px;
+        }
+    </style>
     <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
@@ -236,12 +243,12 @@
 </div>
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
+        <div class="span12">
             <div style="width:100%;text-align: center">
                 <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
             </div>
         </div>
-        <div class="col-md-12">
+        <div class="span12">
             <div class="well" style="text-align:center">
                 <h3>Billing Successful!</h3>
                 <p><%= postBillingMessage %></p>

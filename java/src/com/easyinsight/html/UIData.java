@@ -48,7 +48,7 @@ public class UIData {
 
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"row-fluid dashboard_header\">\n" +
-                "        <div class=\"col-md-12\">\n");
+                "        <div class=\"span12\">\n");
         if (applicationSkin != null && applicationSkin.isReportHeader()) {
             sb.append("            <div style=\"").append(headerStyle).append("\">\n");
             if(properties != null && properties.isImageFullHeader()) {

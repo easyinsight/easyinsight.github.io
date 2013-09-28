@@ -10,6 +10,13 @@
     <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
     <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
+
+    <style type="text/css">
+        body {
+            padding-top: 45px;
+            padding-bottom: 40px;
+        }
+    </style>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
 </head>
@@ -23,7 +30,7 @@
 <div class="container">
     <div class="row">
 
-        <div class="col-md-6 col-md-offset-3">
+        <div class="span6 offset3">
 
             <form class="well" method="post" action="resetPasswordAction.jsp" style="width:100%" id="loginForm">
                 <div style="width:100%;text-align: center">

@@ -18,6 +18,10 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
 
     <style type="text/css">
+        body {
+            padding-top: 45px;
+            padding-bottom: 40px;
+        }
 
         .center_stuff {
             text-align:center;
@@ -92,7 +96,7 @@
 <div class="container">
     <div class="row">
 
-        <div class="col-md-6 col-md-offset-3">
+        <div class="span6 offset3">
 
             <form class="well" method="get" action="/app/openid" id="loginForm" onsubmit="preserveHash()">
 

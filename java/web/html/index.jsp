@@ -18,7 +18,20 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Data Sources</title>
-    <jsp:include page="bootstrapHeader.jsp"/>
+    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
+
+    <style type="text/css">
+        body {
+            padding-top: 45px;
+            padding-bottom: 40px;
+        }
+    </style>
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet" />
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
 </head>
 <body>
 <%
@@ -33,20 +46,29 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
 </jsp:include>
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <ul class="breadcrumb">
-                <li class="active">Data Sources</li>
-
-            </ul>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span3">
+            <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
+            <div class="well sidebar-nav">
+                <ul class="nav nav-list">
+                    <li class="nav-header">Recent Actions</li>
+                    <%
+                        Collection<ActionLog> actions = new AdminService().getRecentHTMLActions();
+                        for (ActionLog actionLog : actions) {
+                            if (actionLog instanceof ActionReportLog && actionLog.getActionType() == ActionReportLog.VIEW) {
+                                ActionReportLog actionReportLog = (ActionReportLog) actionLog;
+                                out.println("<li><a href=\"report/" + actionReportLog.getInsightDescriptor().getUrlKey() + "\">View " + actionReportLog.getInsightDescriptor().getName() + "</a></li>");
+                            } else if (actionLog instanceof ActionDashboardLog && actionLog.getActionType() == ActionDashboardLog.VIEW) {
+                                ActionDashboardLog actionDashboardLog = (ActionDashboardLog) actionLog;
+                                out.println("<li><a href=\"dashboard/" + actionDashboardLog.getDashboardDescriptor().getUrlKey() + "\">View " + actionDashboardLog.getDashboardDescriptor().getName() + "</a></li>");
+                            }
+                        }
+                    %>
+                </ul>
+            </div>
         </div>
-    </div>
-</div>
-<div class="container">
-    <div class="row">
-        <jsp:include page="../recent_actions.jsp" />
-        <div class="col-md-9">
+        <div class="span9">
             <table class="table table-striped table-bordered">
                 <thead>
                     <tr>

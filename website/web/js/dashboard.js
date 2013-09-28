@@ -292,7 +292,7 @@ $(function () {
         $("#base").append(dashboard(dashboardJSON));
 
         $(".nav-pills").css("background-color", dashboardJSON["styles"]["alternative_stack_start"])
-        $(".dashboard_base > .row > .col-md-12 > .tabbable > .nav-pills").css("background-color", dashboardJSON["styles"]["main_stack_start"])
+        $(".dashboard_base > .row-fluid > .span12 > .tabbable > .nav-pills").css("background-color", dashboardJSON["styles"]["main_stack_start"])
 
         var filterMap = _.reduce(dashboardJSON["filters"], function (m, i) {
             m["filter" + i.id] = {"filter": i, "parent": null };
@@ -476,8 +476,7 @@ $(function () {
             renderReport(reportMap[$(z.parent()).attr("id")], dashboardJSON["id"], true);
         })
 
-        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-
+        $('a[data-toggle="tab"]').on('shown', function (e) {
             $(".filter").removeClass("hideFilter");
             var q = $(e.target).parent().parent();
             var s = stackMap[q.attr("id")];
