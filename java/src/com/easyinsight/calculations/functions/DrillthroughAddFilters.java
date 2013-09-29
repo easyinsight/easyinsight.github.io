@@ -42,6 +42,20 @@ public class DrillthroughAddFilters extends Function {
                 drillthroughCalculationMetadata.getDrillThroughFilters().add(clone);
             }
         }
+        if (drillthroughCalculationMetadata.getReport().getFiltersForDrillthrough() != null) {
+            for (FilterDefinition filterDefinition : drillthroughCalculationMetadata.getReport().getFiltersForDrillthrough()) {
+                if (!(filterDefinition instanceof AnalysisItemFilterDefinition)) {
+                    FilterDefinition clone;
+                    try {
+                        clone = filterDefinition.clone();
+                    } catch (CloneNotSupportedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    clone.setToggleEnabled(true);
+                    drillthroughCalculationMetadata.getDrillThroughFilters().add(clone);
+                }
+            }
+        }
 
         return null;
     }
