@@ -54,6 +54,7 @@ public class UserServiceResponse
     public var newsDismissDate:Date;
     public var accountOverSize:Boolean;
     public var tagsAndCopyEnabled:Boolean;
+    public var hourlyRefreshEnabled:Boolean;
 
     public function UserServiceResponse()
         {

@@ -3,10 +3,7 @@ package com.easyinsight.scheduler;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.*;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Column;
+import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,32 +30,48 @@ public class DataSourceTaskGenerator extends TaskGenerator {
         this.activityID = activityID;
     }
 
+    @Transient
+    private long dataSourceID;
+
+    protected ScheduledTask createTask() {
+        DataSourceScheduledTask task = new DataSourceScheduledTask();
+        task.setDataSourceID(dataSourceID);
+        return task;
+    }
+
     @Override
     public List<ScheduledTask> generateTasks(Date now, EIConnection conn) throws SQLException {
         ScheduleType scheduleType = getScheduleType(conn);
         Date lastRunTime = findStartTaskDate();
-        Date time = scheduleType.runTime(lastRunTime, now);
-        if (time != null) {
-            PreparedStatement findDataStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM SCHEDULED_DATA_SOURCE_REFRESH WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
-            findDataStmt.setLong(1, activityID);
-            List<ScheduledTask> results;
-            ResultSet rs = findDataStmt.executeQuery();
-            if (rs.next()) {
+
+        PreparedStatement findDataStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, INTERVAL_TYPE, INTERVAL_UNITS FROM " +
+                "SCHEDULED_DATA_SOURCE_REFRESH WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+        findDataStmt.setLong(1, activityID);
+        List<ScheduledTask> results;
+        ResultSet rs = findDataStmt.executeQuery();
+        if (rs.next()) {
+            dataSourceID = rs.getLong(1);
+            int intervalType = rs.getInt(2);
+            if (intervalType == DataSourceRefreshActivity.HOURLY) {
+                return super.generateTasks(now, conn);
+            } else {
+                Date time = scheduleType.runTime(lastRunTime, now);
+                if (time == null) {
+                    return Collections.emptyList();
+                }
                 DataSourceScheduledTask dataSourceScheduledTask = new DataSourceScheduledTask();
-                dataSourceScheduledTask.setDataSourceID(rs.getLong(1));
+                dataSourceScheduledTask.setDataSourceID(dataSourceID);
                 dataSourceScheduledTask.setStatus(ScheduledTask.SCHEDULED);
                 dataSourceScheduledTask.setExecutionDate(time);
                 dataSourceScheduledTask.setTaskGeneratorID(getTaskGeneratorID());
                 setLastTaskDate(time);
                 results = Arrays.asList((ScheduledTask) dataSourceScheduledTask);
-            } else {
-                results = Collections.emptyList();
             }
-            findDataStmt.close();
-            return results;
         } else {
-            return Collections.emptyList();
+            results = Collections.emptyList();
         }
+        findDataStmt.close();
+        return results;
     }
 
     private ScheduleType getScheduleType(EIConnection conn) throws SQLException {
