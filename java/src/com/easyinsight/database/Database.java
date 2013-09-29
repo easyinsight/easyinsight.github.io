@@ -47,7 +47,10 @@ public class Database {
                 configuration.setProperty("hibernate.connection.username", userName);
                 configuration.setProperty("hibernate.connection.password", password);
                 sessionFactory = configuration.buildSessionFactory();
-                Thread thread = new Thread(new KeepAliveThread(this));
+                keepAliveThreadRunnable = new KeepAliveThread(this);
+                Thread thread = new Thread(keepAliveThreadRunnable);
+                keepAliveThread = thread;
+                thread.setName("Keep Alive");
                 thread.setDaemon(true);
                 thread.start();
             } catch (Throwable e) {
@@ -55,6 +58,9 @@ public class Database {
             }
         }
     }
+
+    private Thread keepAliveThread;
+    private KeepAliveThread keepAliveThreadRunnable;
 
     public String getID() {
         return this.id;
@@ -66,6 +72,18 @@ public class Database {
 
     public static Database create(String host, String port, String databaseName, String userName, String password, String id) {
         return new Database(host, port, databaseName, userName, password, false, id);
+    }
+
+    public static Database create(String host, String port, String databaseName, String userName, String password, String id, boolean withHibernate) {
+        return new Database(host, port, databaseName, userName, password, withHibernate, id);
+    }
+
+    public static void initialize(String host, String port, String databaseName, String userName, String password) {
+        if (instance == null) {
+            instance = new Database(host, port,
+                    databaseName, userName,
+                    password, true, "Core");
+        }
     }
 
     public static void initialize() {
@@ -140,11 +158,20 @@ public class Database {
 
     public void shutdown() {
         try {
-            dataSource.close();
-            //connectionPool.close();
+            try {
+                if (keepAliveThread != null) {
+                    keepAliveThreadRunnable.setRunning(false);
+                    keepAliveThread.interrupt();
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
             if (sessionFactory != null) {
                 sessionFactory.close();
             }
+            dataSource.close();
+            //connectionPool.close();
+
         } catch (Exception e) {
             LogClass.error(e);
         }
