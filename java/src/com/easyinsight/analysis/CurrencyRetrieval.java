@@ -60,7 +60,7 @@ public class CurrencyRetrieval {
         }  finally {
             Database.closeConnection(conn);
         }
-        new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             public void run() {
                 EIConnection conn = Database.instance().getConnection();
                 try {
@@ -95,8 +95,9 @@ public class CurrencyRetrieval {
                     Database.closeConnection(conn);
                 }
             }
-        }).start();
-
+        });
+        thread.setName("Currency Retrieval");
+        thread.start();
     }
 
     public static void main(String[] args) throws Exception {
