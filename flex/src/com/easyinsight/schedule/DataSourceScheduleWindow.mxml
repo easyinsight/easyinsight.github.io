@@ -2,6 +2,7 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                     xmlns:schedule="com.easyinsight.schedule.*">
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
         import com.easyinsight.solutions.DataSourceDescriptor;
 
         import mx.managers.PopUpManager;
@@ -36,8 +37,13 @@
             if (_activity != null) {
                 dataSourceID = _activity.dataSourceID;
                 refreshText = "Scheduled refresh of " + _activity.dataSourceName;
+                hoursLevel = _activity.intervalNumber == DataSourceRefreshActivity.HOURLY;
+                selectedHours = _activity.intervalUnits > 0 ? String(_activity.intervalUnits) : "";
             } else {
                 refreshText = "Scheduled refresh of " + _dataSource.name;
+            }
+            if (User.getInstance().hourlyRefreshEnabled) {
+                stackIndex = 1;
             }
         }
 
@@ -54,6 +60,10 @@
                     DataSourceRefreshActivity(activity).dataSourceID = _dataSource.id;
                     DataSourceRefreshActivity(activity).dataSourceName = _dataSource.name;
                 }
+                if (stackIndex == 1) {
+                    DataSourceRefreshActivity(activity).intervalNumber = intervalTypeCheckbox.selected ? DataSourceRefreshActivity.HOURLY : DataSourceRefreshActivity.DAILY;
+                    DataSourceRefreshActivity(activity).intervalUnits = int(hoursInput.text);
+                }
                 var utcOffset:int = new Date().getTimezoneOffset();
                 exportService.addOrUpdateSchedule.send(_activity, utcOffset);
             }
@@ -69,7 +79,14 @@
             PopUpManager.removePopUp(this);
         }
 
+        [Bindable]
+        private var stackIndex:int = 0;
 
+        [Bindable]
+        private var hoursLevel:Boolean = false;
+
+        [Bindable]
+        private var selectedHours:String = "";
         ]]></mx:Script>
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="addOrUpdateSchedule" result="saved()"/>
@@ -77,6 +94,17 @@
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" horizontalAlign="center">
         <mx:Label text="{refreshText}" fontSize="16"/>
         <schedule:ScheduleConfiguration id="scheduleConfiguration" activity="{activity}"/>
+        <mx:ViewStack selectedIndex="{stackIndex}">
+            <mx:Box/>
+            <mx:Form>
+                <mx:FormItem label="Customize to Hours:">
+                    <mx:CheckBox id="intervalTypeCheckbox" selected="{hoursLevel}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Hours:" enabled="{intervalTypeCheckbox.selected}">
+                    <mx:TextInput id="hoursInput" text="{selectedHours}"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:ViewStack>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Save" click="save()"/>
             <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>

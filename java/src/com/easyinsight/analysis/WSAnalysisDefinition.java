@@ -109,12 +109,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean lookupTableOptimization;
     private boolean adHocExecution;
     private int headerFontSize = 24;
+    private List<AnalysisItem> fieldsForDrillthrough;
     private int maxHeaderWidth = 600;
     private int cacheMinutes;
     private boolean manualButRunFirst;
     private String customFontFamily;
     private boolean useCustomFontFamily;
     private int generalSizeLimit;
+    private boolean passThroughFilters;
 
     private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
@@ -134,6 +136,32 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private String customField1;
     private String customField2;
+
+    private List<FilterDefinition> filtersForDrillthrough;
+
+    public List<AnalysisItem> getFieldsForDrillthrough() {
+        return fieldsForDrillthrough;
+    }
+
+    public void setFieldsForDrillthrough(List<AnalysisItem> fieldsForDrillthrough) {
+        this.fieldsForDrillthrough = fieldsForDrillthrough;
+    }
+
+    public List<FilterDefinition> getFiltersForDrillthrough() {
+        return filtersForDrillthrough;
+    }
+
+    public void setFiltersForDrillthrough(List<FilterDefinition> filtersForDrillthrough) {
+        this.filtersForDrillthrough = filtersForDrillthrough;
+    }
+
+    public boolean isPassThroughFilters() {
+        return passThroughFilters;
+    }
+
+    public void setPassThroughFilters(boolean passThroughFilters) {
+        this.passThroughFilters = passThroughFilters;
+    }
 
     public String getCustomField1() {
         return customField1;

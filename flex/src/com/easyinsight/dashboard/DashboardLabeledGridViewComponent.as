@@ -2,6 +2,8 @@ package com.easyinsight.dashboard {
 
 import com.easyinsight.analysis.list.SizeOverrideEvent;
 
+import flash.events.MouseEvent;
+
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.Grid;
@@ -10,7 +12,9 @@ import mx.containers.GridRow;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.controls.Label;
+import mx.controls.LinkButton;
 import mx.core.UIComponent;
+import mx.managers.PopUpManager;
 
 public class DashboardLabeledGridViewComponent extends VBox implements IDashboardViewComponent {
 
@@ -66,6 +70,22 @@ public class DashboardLabeledGridViewComponent extends VBox implements IDashboar
 
     private var grid:Grid;
 
+    private var box:GridExperimentBox;
+
+    private function onLabelClick(event:MouseEvent):void {
+        if (box == null) {
+            box = new GridExperimentBox();
+            box.percentWidth = 100;
+            box.dashboardGrid = dashboardGrid;
+            box.dashboardGridViewComponent = this;
+            addChildAt(box, 1);
+        } else {
+            box.destroy();
+            removeChild(box);
+            box = null;
+        }
+    }
+
     protected override function createChildren():void {
         super.createChildren();
         var hb:HBox = new HBox();
@@ -75,16 +95,17 @@ public class DashboardLabeledGridViewComponent extends VBox implements IDashboar
 
         var blah:Box = new Box();
         hb.addChild(blah);
-        blah.height = 24;
+        blah.height = 28;
         blah.setStyle("backgroundColor", 0xDDDDDD);
         blah.setStyle("borderThickness", 1);
         blah.setStyle("borderStyle", "solid");
 
         blah.percentWidth = 100;
         blah.setStyle("horizontalAlign", "center");
-        var label:Label = new Label();
+        var label:LinkButton = new LinkButton();
         label.setStyle("fontSize", 14);
-        label.text = dashboardGrid.label;
+        label.label = dashboardGrid.label;
+        label.addEventListener(MouseEvent.CLICK, onLabelClick);
         blah.addChild(label);
         addChild(hb);
         grid = new Grid();
@@ -163,6 +184,12 @@ public class DashboardLabeledGridViewComponent extends VBox implements IDashboar
             percentHeight = 100;
             grid.percentHeight = 100;
         }
+    }
+
+    public function findChild(x:int, y:int):IDashboardViewComponent {
+        var gridRow:GridRow = grid.getChildAt(y) as GridRow;
+        var gridItem:GridItem = gridRow.getChildAt(x) as GridItem;
+        return gridItem.getChildAt(0) as IDashboardViewComponent;
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {

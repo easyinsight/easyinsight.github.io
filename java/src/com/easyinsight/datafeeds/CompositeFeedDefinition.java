@@ -33,6 +33,18 @@ public class CompositeFeedDefinition extends FeedDefinition {
         return uniqueFields;
     }
 
+    public boolean handles(DerivedKey key) {
+        if (key.getFeedID() == getDataFeedID()) {
+            return true;
+        }
+        for (CompositeFeedNode node : compositeFeedNodes) {
+            if (node.getDataFeedID() == key.getFeedID()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void setUniqueFields(Map<Long, AnalysisItem> uniqueFields) {
         this.uniqueFields = uniqueFields;
     }

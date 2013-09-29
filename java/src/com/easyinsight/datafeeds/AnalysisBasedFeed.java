@@ -46,6 +46,9 @@ public class AnalysisBasedFeed extends Feed {
         localInsightRequestMetadata.setIp(insightRequestMetadata.getIp());
         localInsightRequestMetadata.setNow(insightRequestMetadata.getNow());
         List<FilterDefinition> reportFilters = new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions());
+        if (insightRequestMetadata.getFilters() != null) {
+            reportFilters.addAll(insightRequestMetadata.getFilters());
+        }
         List<AnalysisItem> fields = new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values());
         Map<Key, List<Key>> map = new HashMap<Key, List<Key>>();
         Map<String, List<AnalysisItem>> map1 = new HashMap<String, List<AnalysisItem>>();
@@ -124,6 +127,10 @@ public class AnalysisBasedFeed extends Feed {
             } else {
                 System.out.println("not found in cache");
             }
+        }
+        if (insightRequestMetadata.getFilters() != null) {
+            analysisDefinition.getFilterDefinitions().addAll(insightRequestMetadata.getFilters());
+
         }
         DataSet dataSet = DataService.listDataSet(analysisDefinition, localInsightRequestMetadata, conn);
         // map this data set back into the original one

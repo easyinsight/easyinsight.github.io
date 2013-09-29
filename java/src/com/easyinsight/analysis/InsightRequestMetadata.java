@@ -52,6 +52,16 @@ public class InsightRequestMetadata implements Serializable {
 
     private transient Map<FilterDefinition, AdvancedFilterProperties> filterPropertiesMap = new HashMap<FilterDefinition, AdvancedFilterProperties>();
 
+    private transient Collection<FilterDefinition> filters;
+
+    public Collection<FilterDefinition> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(Collection<FilterDefinition> filters) {
+        this.filters = filters;
+    }
+
     public boolean isLogReport() {
         return logReport;
     }

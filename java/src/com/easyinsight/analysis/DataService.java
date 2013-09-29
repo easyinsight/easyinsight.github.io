@@ -5,10 +5,7 @@ import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.FunctionFactory;
-import com.easyinsight.core.InsightDescriptor;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.ReportKey;
-import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -88,6 +85,7 @@ public class DataService {
                 insightRequestMetadata.setAddonReports(report.getAddonReports());
                 insightRequestMetadata.setAggregateQuery(false);
                 insightRequestMetadata.getDistinctFieldMap().put(analysisItem, true);
+                insightRequestMetadata.setAdditionalAnalysisItems(report.getFieldsForDrillthrough());
 
                 if (requester != null && requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
                     String label = requester.getFieldChoiceFilterLabel();
@@ -363,8 +361,38 @@ public class DataService {
                 }
             }
             Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
+            Map<String, Boolean> passthroughMap = new HashMap<String, Boolean>();
 
             for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+                String keyLabel;
+                String fieldSourcing;
+                boolean passthrough = false;
+
+                if (analysisItem.getKey() instanceof ReportKey) {
+                    ReportKey reportKey = (ReportKey) analysisItem.getKey();
+                    fieldSourcing = String.valueOf(reportKey.getReportID());
+                    passthrough = true;
+                } else {
+                    AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
+                    List<AnalysisItem> fields = new ArrayList<AnalysisItem>(FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn).getFields());
+                    fields.addAll(analysisDefinition.allAddedItems(insightRequestMetadata));
+                    Collection<AnalysisItem> needed = analysisItem.getAnalysisItems(fields, Arrays.asList(analysisItem), false, true,
+                            new ArrayList<AnalysisItem>(), structure);
+                    Long addonReportID = null;
+                    for (AnalysisItem analysisItem1 : needed) {
+                        if (analysisItem1.getKey() instanceof ReportKey) {
+                            ReportKey reportKey = (ReportKey) analysisItem1.getKey();
+                            addonReportID = reportKey.getReportID();
+                        }
+                    }
+                    if (addonReportID == null) {
+                        fieldSourcing = "";
+                    } else {
+                        fieldSourcing = String.valueOf(addonReportID);
+                        passthrough = true;
+                    }
+                }
+
                 if (analysisItem.getReportFieldExtension() != null && reportFilter != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
                     TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
                     if (trendReportFieldExtension.getDate() != null) {
@@ -378,35 +406,37 @@ public class DataService {
                             rollingFilterDefinition.setCustomIntervalType(reportFilter.getCustomIntervalType());
                         }
                         analysisItem.getFilters().add(rollingFilterDefinition);
-                        List<AnalysisMeasure> measures = trendMap.get(dateDimension.qualifiedName());
-                        if (measures == null) {
-                            measures = new ArrayList<AnalysisMeasure>();
-                            trendMap.put(dateDimension.qualifiedName(), measures);
-                        }
-                        measures.add((AnalysisMeasure) analysisItem);
+                        keyLabel = dateDimension.qualifiedName();
                     } else {
-                        List<AnalysisMeasure> measures = trendMap.get("");
-                        if (measures == null) {
-                            measures = new ArrayList<AnalysisMeasure>();
-                            trendMap.put("", measures);
-                        }
-                        measures.add((AnalysisMeasure) analysisItem);
+                        keyLabel = "";
                     }
                 } else {
-                    List<AnalysisMeasure> measures = trendMap.get("");
-                    if (measures == null) {
-                        measures = new ArrayList<AnalysisMeasure>();
-                        trendMap.put("", measures);
-                    }
-                    measures.add((AnalysisMeasure) analysisItem);
+                    keyLabel = "";
+                }
+                String fullKey =  keyLabel + fieldSourcing;
+                List<AnalysisMeasure> measures = trendMap.get(fullKey);
+                if (measures == null) {
+                    measures = new ArrayList<AnalysisMeasure>();
+                    trendMap.put(fullKey, measures);
+                }
+                measures.add((AnalysisMeasure) analysisItem);
+                if (passthrough) {
+                    passthroughMap.put(fullKey, true);
                 }
             }
+
             List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
             DataSourceInfo dataSourceInfo = null;
             for (Map.Entry<String, List<AnalysisMeasure>> entry : trendMap.entrySet()) {
                 String key = entry.getKey();
                 List<AnalysisMeasure> measures = entry.getValue();
                 WSListDefinition tempReport = new WSListDefinition();
+                // what's the logic to use on this?
+                Boolean passthrough = passthroughMap.get(key);
+                if (passthrough != null && passthrough) {
+                    tempReport.setPassThroughFilters(true);
+                }
+                //
                 List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
                 columns.addAll(measures);
                 if (analysisDefinition.getGroupings() != null) {
@@ -452,6 +482,7 @@ public class DataService {
             EmbeddedTrendDataResults trendDataResults = new EmbeddedTrendDataResults();
             trendDataResults.setTrendOutcomes(trendOutcomes);
             trendDataResults.setDataSourceInfo(dataSourceInfo);
+            analysisDefinition.setFilterDefinitions(customFilters);
             trendDataResults.setDefinition(analysisDefinition);
             if (cacheKey != null) {
                 ReportCache.instance().storeReport(dataSourceID, cacheKey, trendDataResults);
@@ -1599,6 +1630,41 @@ public class DataService {
         private static ReportRetrieval reportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
                                                   @Nullable List<FilterDefinition> customFilters, @Nullable List<FilterDefinition> drillThroughFilters) throws SQLException {
             if (customFilters != null) {
+                Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
+                if (feed.getDataSource() instanceof CompositeFeedDefinition) {
+                    CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feed.getDataSource();
+                    Iterator<FilterDefinition> iter = customFilters.iterator();
+                    while (iter.hasNext()) {
+                        FilterDefinition filter = iter.next();
+                        if (filter.getField() != null && filter.getField().getKey() instanceof DerivedKey) {
+                            DerivedKey derivedKey = (DerivedKey) filter.getField().getKey();
+                            if (!compositeFeedDefinition.handles(derivedKey)) {
+                                iter.remove();
+                            }
+                        }
+                    }
+                }
+            }
+            if (analysisDefinition.isPassThroughFilters()) {
+                Map<Long, FilterDefinition> map = new HashMap<Long, FilterDefinition>();
+                for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                    map.put(filter.getFilterID(), filter);
+                }
+                List<FilterDefinition> toSet = new ArrayList<FilterDefinition>();
+                List<FilterDefinition> toPass = new ArrayList<FilterDefinition>();
+                if (customFilters != null) {
+                    for (FilterDefinition filter : customFilters) {
+                        FilterDefinition inMap = map.get(filter.getFilterID());
+                        if (inMap != null) {
+                            toSet.add(filter);
+                        } else {
+                            toPass.add(filter);
+                        }
+                    }
+                }
+                insightRequestMetadata.setFilters(toPass);
+                analysisDefinition.setFilterDefinitions(toSet);
+            } else if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
             }
             if (drillThroughFilters != null) {

@@ -252,15 +252,33 @@ public class Account {
     @Column(name="vat")
     private String vat;
 
+    @Column(name="special_storage")
+    private String specialStorage;
+
     @Column(name="new_pricing_model_invoice")
     private boolean newPricingModelInvoice;
 
     @Column(name="default_max_records")
     private int maxRecords;
 
-    private static final double GROUP_BILLING_AMOUNT = 200.00;
-    private static final double PLUS_BILLING_AMOUNT = 75.00;
-    private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+    @Column(name="hourly_refresh_enabled")
+    private boolean hourlyRefreshEnabled;
+
+    public boolean isHourlyRefreshEnabled() {
+        return hourlyRefreshEnabled;
+    }
+
+    public void setHourlyRefreshEnabled(boolean hourlyRefreshEnabled) {
+        this.hourlyRefreshEnabled = hourlyRefreshEnabled;
+    }
+
+    public String getSpecialStorage() {
+        return specialStorage;
+    }
+
+    public void setSpecialStorage(String specialStorage) {
+        this.specialStorage = specialStorage;
+    }
 
     public boolean isNewPricingModelInvoice() {
         return newPricingModelInvoice;
