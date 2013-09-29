@@ -53,6 +53,7 @@ public class DataSourceTaskGenerator extends TaskGenerator {
             dataSourceID = rs.getLong(1);
             int intervalType = rs.getInt(2);
             if (intervalType == DataSourceRefreshActivity.HOURLY) {
+                System.out.println("Scheduling hourly " + dataSourceID);
                 return super.generateTasks(now, conn);
             } else {
                 Date time = scheduleType.runTime(lastRunTime, now);
