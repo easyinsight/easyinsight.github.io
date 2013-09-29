@@ -78,6 +78,7 @@ public class GridExperimentBox extends Box {
         var box:ExperimentBox = new ExperimentBox();
         box.viewFactory = comp.viewFactory;
         box.insightDescriptor = comp.dashboardReport.report;
+        box.dashboardReportViewComponent = comp;
         removeChild(grid);
         addChild(box);
     }
