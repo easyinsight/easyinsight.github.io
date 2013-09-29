@@ -77,6 +77,12 @@
             transformContainer.hideFilters(event.filters);
         }
 
+        public function resetState():void {
+            var so:SharedObject = SharedObject.getLocal("d" + dashboard.urlKey + dashboard.version);
+            so.clear();
+            so.flush();
+        }
+
         public function createDashboard(width:int = 0, height:int = 0):IDashboardViewComponent {
 
             addEventListener(DashboardReportLoadEvent.DASHBOARD_REPORT_LOAD, onReportLoad);
@@ -160,6 +166,8 @@
             var visibleCount:int = 0;
             for each (var visibleFilter:FilterDefinition in toUse) {
                 if (visibleFilter.showOnReportView) {
+                    // retrieve and compare to version
+                    //visibleFilter.loadFromSharedObject(null, 0, dashboard.urlKey, dashboard.version);
                     visibleCount++;
                 }
             }
@@ -198,6 +206,10 @@
             });
             dashboardCanvas.addChild(rootView as UIComponent);
             loadingBox.parent.removeChild(loadingBox);
+            return rootView;
+        }
+
+        public function getRootView():IDashboardViewComponent {
             return rootView;
         }
 
