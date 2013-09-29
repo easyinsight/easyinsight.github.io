@@ -188,6 +188,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             box = new ExperimentBox();
             box.insightDescriptor = dashboardReport.report;
             box.viewFactory = viewFactory;
+            box.dashboardReportViewComponent = this;
             var dashboardDescriptor:DashboardDescriptor = new DashboardDescriptor();
             dashboardDescriptor.id = dashboardEditorMetadata.dashboardID;
             dashboardDescriptor.urlKey = dashboardEditorMetadata.dashboard.urlKey;
