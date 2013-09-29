@@ -93,6 +93,7 @@ public class Scheduler {
                 }
             }
         };
+        thread.setName("Scheduler");
         thread.start();
     }
 
