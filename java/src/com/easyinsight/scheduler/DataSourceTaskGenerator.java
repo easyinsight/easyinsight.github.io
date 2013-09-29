@@ -49,29 +49,32 @@ public class DataSourceTaskGenerator extends TaskGenerator {
         findDataStmt.setLong(1, activityID);
         List<ScheduledTask> results;
         ResultSet rs = findDataStmt.executeQuery();
-        if (rs.next()) {
-            dataSourceID = rs.getLong(1);
-            int intervalType = rs.getInt(2);
-            if (intervalType == DataSourceRefreshActivity.HOURLY) {
-                System.out.println("Scheduling hourly " + dataSourceID);
-                return super.generateTasks(now, conn);
-            } else {
-                Date time = scheduleType.runTime(lastRunTime, now);
-                if (time == null) {
-                    return Collections.emptyList();
+        try {
+            if (rs.next()) {
+                dataSourceID = rs.getLong(1);
+                int intervalType = rs.getInt(2);
+                if (intervalType == DataSourceRefreshActivity.HOURLY) {
+                    System.out.println("Scheduling hourly " + dataSourceID);
+                    return super.generateTasks(now, conn);
+                } else {
+                    Date time = scheduleType.runTime(lastRunTime, now);
+                    if (time == null) {
+                        return Collections.emptyList();
+                    }
+                    DataSourceScheduledTask dataSourceScheduledTask = new DataSourceScheduledTask();
+                    dataSourceScheduledTask.setDataSourceID(dataSourceID);
+                    dataSourceScheduledTask.setStatus(ScheduledTask.SCHEDULED);
+                    dataSourceScheduledTask.setExecutionDate(time);
+                    dataSourceScheduledTask.setTaskGeneratorID(getTaskGeneratorID());
+                    setLastTaskDate(time);
+                    results = Arrays.asList((ScheduledTask) dataSourceScheduledTask);
                 }
-                DataSourceScheduledTask dataSourceScheduledTask = new DataSourceScheduledTask();
-                dataSourceScheduledTask.setDataSourceID(dataSourceID);
-                dataSourceScheduledTask.setStatus(ScheduledTask.SCHEDULED);
-                dataSourceScheduledTask.setExecutionDate(time);
-                dataSourceScheduledTask.setTaskGeneratorID(getTaskGeneratorID());
-                setLastTaskDate(time);
-                results = Arrays.asList((ScheduledTask) dataSourceScheduledTask);
+            } else {
+                results = Collections.emptyList();
             }
-        } else {
-            results = Collections.emptyList();
+        } finally {
+            findDataStmt.close();
         }
-        findDataStmt.close();
         return results;
     }
 
