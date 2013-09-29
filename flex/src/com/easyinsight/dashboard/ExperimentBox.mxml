@@ -4,6 +4,7 @@
         import com.easyinsight.analysis.EmbeddedViewFactory;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.report.BreadCrumb;
+        import com.easyinsight.report.EmbeddedReportExportWindow;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.report.ReportExportWindow;
         import com.easyinsight.solutions.InsightDescriptor;
@@ -15,29 +16,52 @@
         public var viewFactory:EmbeddedViewFactory;
         public var insightDescriptor:InsightDescriptor;
         public var dashboardDescriptor:DashboardDescriptor;
+        public var dashboardReportViewComponent:DashboardReportViewComponent;
 
         private function exportReport():void {
             viewFactory.updateExportMetadata();
-            var window:ReportExportWindow = new ReportExportWindow();
-            window.report = viewFactory.report;
-            window.coreView = viewFactory.getChildAt(0);
-            PopUpManager.addPopUp(window, Application(Application.application), true);
-            PopUpUtil.centerPopUp(window);
-            PopUpManager.removePopUp(this);
+            if (dashboardReportViewComponent.dashboardEditorMetadata.fixedID) {
+                var embedWindow:EmbeddedReportExportWindow = new EmbeddedReportExportWindow();
+                embedWindow.report = viewFactory.report;
+                embedWindow.coreView = viewFactory.getChildAt(0);
+                PopUpManager.addPopUp(embedWindow, Application(Application.application), true);
+                PopUpUtil.centerPopUp(embedWindow);
+                PopUpManager.removePopUp(this);
+            } else {
+                var window:ReportExportWindow = new ReportExportWindow();
+                window.report = viewFactory.report;
+                window.coreView = viewFactory.getChildAt(0);
+                PopUpManager.addPopUp(window, Application(Application.application), true);
+                PopUpUtil.centerPopUp(window);
+                PopUpManager.removePopUp(this);
+            }
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (dashboardReportViewComponent.dashboardEditorMetadata.fixedID) {
+                removeChild(navigateButton);
+            }
         }
 
         private function navigateToReport():void {
+            var pos:DashboardStackPositions = new DashboardStackPositions();
+            DashboardRenderer(dashboardReportViewComponent.dashboardEditorMetadata.dashboardView).getRootView().stackPopulate(pos);
             var _breadCrumbs:Array = [];
-            _breadCrumbs.push(new BreadCrumb(dashboardDescriptor, null));
+            _breadCrumbs.push(new BreadCrumb(dashboardDescriptor, null, pos));
+            // need to preserve stack position + filters, but if we're doing that as is...
             viewFactory.dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, null, null, 0, _breadCrumbs)));
             PopUpManager.removePopUp(this);
         }
 
-        private function configure():void {
-            // nothing yet
-        }
+        /*private function configure():void {
+            var window:ExperimentConfigWindow = new ExperimentConfigWindow();
+            window.dashboardReportViewComponent = dashboardReportViewComponent;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }*/
         ]]></mx:Script>
-    <mx:Button label="Export Report" click="exportReport()" styleName="dashboardGrayButton"/>
-    <mx:Button label="Navigate to Report" click="navigateToReport()" styleName="dashboardGrayButton"/>
-    <!--<mx:Button label="Configure" click="configure()" styleName="dashboardGrayButton"/>-->
+    <mx:Button label="Export Report" click="exportReport()" styleName="dashboardGrayButton" id="exportButton"/>
+    <mx:Button label="Navigate to Report" click="navigateToReport()" styleName="dashboardGrayButton" id="navigateButton"/>
+    <!--<mx:Button label="Configure" click="configure()" styleName="dashboardGrayButton" id="configureButton"/>-->
 </mx:HBox>
