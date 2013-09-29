@@ -78,9 +78,9 @@
         }
 
         public function resetState():void {
-            var so:SharedObject = SharedObject.getLocal("d" + dashboard.urlKey + dashboard.version);
+            /*var so:SharedObject = SharedObject.getLocal("d" + dashboard.urlKey + dashboard.version);
             so.clear();
-            so.flush();
+            so.flush();*/
         }
 
         public function createDashboard(width:int = 0, height:int = 0):IDashboardViewComponent {
