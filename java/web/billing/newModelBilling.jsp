@@ -12,6 +12,7 @@
 <%@ page import="com.easyinsight.billing.BrainTreeBlueBillingSystem" %>
 <%@ page import="com.braintreegateway.CustomerRequest" %>
 <%@ page import="com.easyinsight.html.BillingResponse" %>
+<%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html lang="en">
 <head>
@@ -104,40 +105,10 @@
             billingIntroParagraph = "";
         }
 %>
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <%--<a class="brand" href="#"><img src="/images/logo3.jpg"/></a>--%>
-            <div class="btn-group pull-right">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <%
-                        if (account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.ACTIVE) {
-                    %>
-                    <li><a href="../html/flashAppAction.jsp">Back to Full Interface</a></li>
-                    <%
-                        }
-                    %>
-                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                </ul>
-            </div>
-            <div class="nav-collapse">
-                <ul class="nav">
-                    <li><a href="accountType.jsp">Account Configuration</a></li>
-                    <li class="active"><a href="#">Billing Setup</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+<jsp:include page="../header.jsp">
+    <jsp:param name="userName" value="<%= userName %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.ACCOUNT %>"/>
+</jsp:include>
 <div class="container">
     <div class="row">
         <div class="col-md-12">
