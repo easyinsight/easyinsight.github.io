@@ -1629,7 +1629,7 @@ public class DataService {
 
         private static ReportRetrieval reportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
                                                   @Nullable List<FilterDefinition> customFilters, @Nullable List<FilterDefinition> drillThroughFilters) throws SQLException {
-            if (customFilters != null) {
+            /*if (customFilters != null) {
                 Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
                 if (feed.getDataSource() instanceof CompositeFeedDefinition) {
                     CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feed.getDataSource();
@@ -1644,7 +1644,7 @@ public class DataService {
                         }
                     }
                 }
-            }
+            }*/
             if (analysisDefinition.isPassThroughFilters()) {
                 Map<Long, FilterDefinition> map = new HashMap<Long, FilterDefinition>();
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
