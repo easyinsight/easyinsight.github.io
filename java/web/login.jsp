@@ -161,7 +161,7 @@
                 <label class="checkbox">
                     <input type="checkbox" id="rememberMeCheckbox" name="rememberMeCheckbox">Remember me on this computer
                 </label>
-                <button class="btn btn-inverse" type="submit" value="Sign In">Sign In</button>
+                <button class="btn btn-default" type="submit" value="Sign In">Sign In</button>
                 <%--<button class="btn" id="googleApps">Sign In With <img src="/images/apps_logo_3D_online_medium.png" alt="Google Apps Login" height="16" width="72" /></button>--%>
                 <div class="signInBar" style="padding-top: 10px">
                     <a href="<%= RedirectUtil.getURL(request, "/app/newaccount")%>" style="font-size: 12px">No account yet?</a>
