@@ -11,6 +11,7 @@ import com.easyinsight.framework.InsightRequestMetadata;
 import flash.events.EventDispatcher;
 
 import mx.collections.ArrayCollection;
+import mx.controls.Alert;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -85,7 +86,9 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var insightRequestMetadata:InsightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.refreshAllSources = refreshAll;
-        insightRequestMetadata.additionalAnalysisItems = additionalAnalysisItems;
+        if (additionalAnalysisItems != null) {
+            insightRequestMetadata.additionalAnalysisItems = additionalAnalysisItems;
+        }
         insightRequestMetadata.utcOffset = new Date().getTimezoneOffset();
         insightRequestMetadata.noCache = noCache;
         insightRequestMetadata.hierarchyOverrides = hierarchyOverrides;

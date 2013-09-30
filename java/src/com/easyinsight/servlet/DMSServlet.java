@@ -84,9 +84,10 @@ public class DMSServlet extends HttpServlet {
                     LogClass.error(e);
                 }
                 healthListener = new HealthListener();
-                Thread thread = new Thread(healthListener);
-                thread.setDaemon(true);
-                thread.start();
+                healthThread = new Thread(healthListener);
+                healthThread.setName("Health Listener");
+                healthThread.setDaemon(true);
+                healthThread.start();
             }
             LogClass.info("Started the server.");
         } catch (Throwable e) {
@@ -94,6 +95,8 @@ public class DMSServlet extends HttpServlet {
             throw new ServletException(e);
         }
     }
+
+    private Thread healthThread;
 
     public void destroy() {
         LogClass.info("Shutting down...");
@@ -113,7 +116,12 @@ public class DMSServlet extends HttpServlet {
         if (scheduler != null) {
             scheduler.stop();
         }
-        healthListener.stop();
+        try {
+            healthListener.stop();
+            healthThread.interrupt();
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
         EventDispatcher.instance().setRunning(false);
         EventDispatcher.instance().interrupt();
         SystemSettings.instance().stop();

@@ -18,8 +18,31 @@ import java.util.Date;
  * Time: 9:36:52 PM
  */
 public class DataSourceRefreshActivity extends ScheduledActivity {
+
+    public static final int DAILY = 0;
+    public static final int HOURLY = 1;
+
     private long dataSourceID;
     private String dataSourceName;
+
+    private int intervalNumber;
+    private int intervalUnits;
+
+    public int getIntervalUnits() {
+        return intervalUnits;
+    }
+
+    public void setIntervalUnits(int intervalUnits) {
+        this.intervalUnits = intervalUnits;
+    }
+
+    public int getIntervalNumber() {
+        return intervalNumber;
+    }
+
+    public void setIntervalNumber(int intervalNumber) {
+        this.intervalNumber = intervalNumber;
+    }
 
     public String getDataSourceName() {
         return dataSourceName;
@@ -47,15 +70,18 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
         clearStmt.setLong(1, getScheduledActivityID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SCHEDULED_DATA_SOURCE_REFRESH (DATA_SOURCE_ID, SCHEDULED_ACCOUNT_ACTIVITY_ID) VALUES (?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SCHEDULED_DATA_SOURCE_REFRESH (DATA_SOURCE_ID, SCHEDULED_ACCOUNT_ACTIVITY_ID, " +
+                "INTERVAL_TYPE, INTERVAL_UNITS) VALUES (?, ?, ?, ?)");
         insertStmt.setLong(1, dataSourceID);
         insertStmt.setLong(2, getScheduledActivityID());
+        insertStmt.setInt(3, intervalNumber);
+        insertStmt.setInt(4, intervalUnits);
         insertStmt.execute();
         insertStmt.close();
     }
 
     protected void customLoad(EIConnection conn) throws SQLException {
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, DATA_FEED.FEED_NAME FROM " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, DATA_FEED.FEED_NAME, INTERVAL_TYPE, INTERVAL_UNITS FROM " +
                 "SCHEDULED_DATA_SOURCE_REFRESH, DATA_FEED WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ? AND DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID");
         queryStmt.setLong(1, getScheduledActivityID());
@@ -63,6 +89,8 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
         rs.next();
         dataSourceID = rs.getLong(1);
         dataSourceName = rs.getString(2);
+        intervalNumber = rs.getInt(3);
+        intervalUnits = rs.getInt(4);
         queryStmt.close();
         PreparedStatement queryProblemStmt = conn.prepareStatement("SELECT problem_text FROM DATA_SOURCE_PROBLEM WHERE DATA_SOURCE_ID = ?");
         queryProblemStmt.setLong(1, getDataSourceID());
@@ -115,7 +143,11 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
             DataSourceTaskGenerator generator = new DataSourceTaskGenerator();
             generator.setStartTaskDate(new Date());
             generator.setActivityID(getScheduledActivityID());
-            generator.setTaskInterval(24 * 1000 * 60 * 60);
+            if (intervalNumber == DAILY) {
+                generator.setTaskInterval(24 * 1000 * 60 * 60);
+            } else if (intervalNumber == HOURLY) {
+                generator.setTaskInterval(1000 * 60 * 60 * intervalUnits);
+            }
             session.save(generator);
             session.flush();
         } finally {
