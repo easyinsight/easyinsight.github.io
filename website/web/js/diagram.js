@@ -153,8 +153,13 @@ window.drawDiagram = function (j, selector, reportID, afterRefresh) {
         var fromCenter = centerXY(fromNode);
         var upperRight = upperRightXY(fromNode);
         var toCenter = centerXY(toNode);
+//        console.log(fromXY.x + ", " + fromXY.y + " " + fromCenter.x + ", " + fromCenter.y)
+//        console.log(toCenter.x + ", " + toCenter.y);
         var inequality1 = pointPoint(fromXY.x, fromXY.y, fromCenter.x, fromCenter.y)(toCenter.x, toCenter.y);
+//        console.log(inequality1)
         var inequality2 = pointPoint(fromCenter.x, fromCenter.y, upperRight.x, upperRight.y)(toCenter.x, toCenter.y);
+//        console.log(inequality2);
+
         if (inequality1 > 0 && inequality2 > 0) {
             return Direction.TOP;
         } else if (inequality1 > 0 && inequality2 < 0) {
@@ -182,6 +187,7 @@ window.drawDiagram = function (j, selector, reportID, afterRefresh) {
     }
 
     (function () {
+        selector.show();
         if (Object.keys(diagram).length == 0) {
             $("#reportWell").hide();
             $("#reportWell")
@@ -208,6 +214,8 @@ window.drawDiagram = function (j, selector, reportID, afterRefresh) {
                 canvas.height = bottomRight.y;
             }
         }
+
+        $(canvas).parent().height(canvas.height);
 
         var context = canvas.getContext("2d");
 
@@ -241,7 +249,7 @@ window.drawDiagram = function (j, selector, reportID, afterRefresh) {
                 drawArrow(context, points[1], points[2]);
             }
         }
-        selector.show();
+
         afterRefresh();
 
     })();

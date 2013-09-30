@@ -7,6 +7,7 @@
 <%@ page import="com.easyinsight.users.UserAccountAdminService" %>
 <%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page import="java.text.NumberFormat" %>
+<%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html lang="en">
 <head>
@@ -18,14 +19,6 @@
     <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
     <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
-
-
-    <style type="text/css">
-        body {
-            padding-top: 45px;
-            padding-bottom: 40px;
-        }
-    </style>
     <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
@@ -128,71 +121,42 @@
 </head>
 <body>
 
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <%--<a class="brand" href="#"><img src="/images/logo3.jpg"/></a>--%>
-            <div class="btn-group pull-right">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <%
-                        if (account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.ACTIVE) {
-                    %>
-                    <li><a href="../html/flashAppAction.jsp">Back to Full Interface</a></li>
-                    <%
-                        }
-                    %>
-                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                </ul>
-            </div>
-            <div class="nav-collapse">
-                <ul class="nav">
-                    <li class="active"><a href="#">Account Configuration</a></li>
-                    <li><a href="/app/billing">Billing Setup</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+<jsp:include page="../header.jsp">
+    <jsp:param name="userName" value="<%= userName %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.ACCOUNT %>"/>
+</jsp:include>
+
 <div class="container">
     <div class="row">
-        <div class="span12">
+        <div class="col-md-12">
             <div style="width:100%;text-align: center">
                 <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
             </div>
         </div>
         <div class="row">
-            <div class="span8 offset1" style="background-color: #E6E6E6;padding:10px;border-radius: 5px">
+            <div class="col-md-8 col-md-offset-1" style="background-color: #E6E6E6;padding:10px;border-radius: 5px">
                 <div class="row">
-                    <div class="span6">
+                    <div class="col-md-6">
                         <h3>Account Info</h3>
                     </div>
                 </div>
                 <% if (request.getParameter("success") != null) { %>
                 <div class="row">
-                    <div class="span8">
+                    <div class="col-md-8">
                         <p style="font-size: 12px;padding: 0;margin-bottom: 5px;color: #009900">Your account type has
                             been changed.</p>
                     </div>
                 </div>
                 <% } %>
                 <div class="row">
-                    <div class="offset2 span5">
+                    <div class="col-md-offset-1 col-md-10">
                         <div class="well" style="background-color: #FBFBFB">
                             <%
                                 if (trial) {
                             %>
-                            <div style="float:left;height:90px;padding-top:30px;padding-right:60px"><h4>Your Free Trial
+                            <div style="float:left;height:110px;padding-top:30px;padding-right:60px"><h4>Your Free Trial
                                 Account</h4></div>
-                            <div style="height:90px">
+                            <div style="height:110px">
                                 <p><%= account.getCoreDesigners() + account.getAddonDesigners() %> Designers
                                 </p>
 
@@ -208,20 +172,16 @@
                             <%
                             } else {
                             %>
-                            <div style="float:left;height:90px;padding-top:30px;padding-right:60px"><h4>Your Current
+                            <div style="float:left;height:110px;padding-top:30px;padding-right:60px"><h4>Your Current
                                 Account</h4></div>
-                            <div style="height:90px">
+                            <div style="height:110px">
                                 <p><%= account.getCoreDesigners() + account.getAddonDesigners() %> Designers
                                 </p>
 
                                 <p><%= account.getCoreSmallBizConnections() + account.getAddonSmallBizConnections() %> Small Business Connections
                                 </p>
-                                <p><%= Account.humanReadableByteCount(account.getCoreStorage() + (long) account.getAddonStorageUnits() * 250000000L, true) %> Custom Data Storage
-                                </p>
-                                <p>Billed <%= account.billingInterval() %>
-                                </p>
-
-
+                                <p><%= Account.humanReadableByteCount(account.getCoreStorage() + (long) account.getAddonStorageUnits() * 250000000L, true) %> Custom Data Storage</p>
+                                <p>Billed <%= account.billingInterval() %></p>
                             </div>
                             <%
                                 }
@@ -234,28 +194,28 @@
                 <div style="background-color: #F0F0F0;padding: 8px">
                     <div style="background-color:#FFFFFF;padding: 10px;">
                         <div class="row">
-                            <div class="span3">
+                            <div class="col-md-3">
                                 <h3>Designers</h3>
                             </div>
-                            <div class="span1" style="text-align: center">
+                            <div class="col-md-2" style="text-align: center">
                                 <div>
                                     <h3><%= account.getCoreDesigners()%></h3>
                                     <h5>Free</h5>
                                 </div>
                             </div>
-                            <div class="span1" style="text-align: center">
+                            <div class="col-md-2" style="text-align: center">
                                 <div>
                                     <h3 id="additionalDesigners"><%= account.getAddonDesigners() %></h3>
                                     <h5>Additional</h5>
                                 </div>
                             </div>
-                            <div class="span1" style="text-align: center">
+                            <div class="col-md-2" style="text-align: center">
                                 <div>
                                     <h3 id="totalDesigners"><%= account.getCoreDesigners() + account.getAddonDesigners()%></h3>
                                     <h5>Total</h5>
                                 </div>
                             </div>
-                            <div class="span1" style="text-align: center">
+                            <div class="col-md-2" style="text-align: center">
                                 <div>
                                     <h3 id="designerCost">$<%= account.getAddonDesigners() * 25 %></h3>
                                     <h5>Cost</h5>
@@ -263,28 +223,28 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="span3">
+                            <div class="col-md-3">
                                 <h3>Small Business Connections</h3>
                             </div>
-                            <div class="span1" style="text-align: center">
+                            <div class="col-md-2" style="text-align: center">
                                 <div>
                                     <h3><%= account.getCoreSmallBizConnections()%></h3>
                                     <h5>Free</h5>
                                 </div>
                             </div>
-                            <div class="span1" style="text-align: center">
+                            <div class="col-md-2" style="text-align: center">
                                 <div>
                                     <h3 id="additionalConnections"><%= account.getAddonSmallBizConnections()%></h3>
                                     <h5>Additional</h5>
                                 </div>
                             </div>
-                            <div class="span1" style="text-align: center">
+                            <div class="col-md-2" style="text-align: center">
                                 <div>
                                     <h3 id="totalConnections"><%= account.getCoreSmallBizConnections() + account.getAddonSmallBizConnections()%></h3>
                                     <h5>Total</h5>
                                 </div>
                             </div>
-                            <div class="span1" style="text-align: center">
+                            <div class="col-md-2" style="text-align: center">
                                 <div>
                                     <h3 id="connectionCost">$<%= account.getAddonSmallBizConnections() * 25%></h3>
                                     <h5>Cost</h5>
@@ -292,28 +252,28 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="span3">
+                            <div class="col-md-3">
                                 <h3>Custom Data Storage</h3>
                             </div>
-                            <div class="span1" style="text-align: center">
+                            <div class="col-md-2" style="text-align: center">
                                 <div>
                                     <h3><%= account.getCoreStorage() / 1000000 %> MB</h3>
                                     <h5>Free</h5>
                                 </div>
                             </div>
-                            <div class="span1" style="text-align: center">
+                            <div class="col-md-2" style="text-align: center">
                                 <div>
                                     <h3 id="additionalStorage"><%= account.getAddonStorageUnits()%></h3>
                                     <h5>250 MB addons</h5>
                                 </div>
                             </div>
-                            <div class="span1" style="text-align: center">
+                            <div class="col-md-2" style="text-align: center">
                                 <div>
                                     <h3 id="totalStorage"><%= (account.getCoreStorage() + ((long) account.getAddonStorageUnits() * 250000000L)) / 1000000 %> MB</h3>
                                     <h5>Total</h5>
                                 </div>
                             </div>
-                            <div class="span1" style="text-align: center">
+                            <div class="col-md-2" style="text-align: center">
                                 <div>
                                     <h3 id="storageCost">$<%= account.getAddonStorageUnits() * 150%></h3>
                                     <h5>Cost</h5>
@@ -324,9 +284,9 @@
                     </div>
                     <form method="post"
                           action="/app/billing/newModelAccountTypeAction.jsp">
-                    <div class="row" style="padding-top: 20px;text-align: center">
+                    <div class="row" style="padding: 20px 18px inherit;text-align: center">
 
-                            <div class="span4" style="background-color:#FFFFFF;padding: 10px;text-align: left">
+                            <div class="col-md-6" style="background-color:#FFFFFF;padding: 10px; margin: 10px;text-align: left">
 
                                 <label style="font-size: 14px">Additional Designers ($50/per)</label>
                                 <input type="number" min="0" style="width:290px" name="numberDesigners"
@@ -340,15 +300,9 @@
                                 <input type="number" min="0" style="width:290px" name="numberStorageBlocks"
                                        value="<%= account.getAddonStorageUnits() %>" id="numberStorageBlocks"
                                        onchange="updateStorageCostPro(this)">
-                                <%--<label style="font-size: 14px">Bill Me</label>
-                                <select style="width:280px" name="billingInterval"
-                                        onchange="updateBillingInterval(this)" id="proBillingInterval">
-                                    <option value="1">Monthly</option>
-                                    <option <%= annual ? "selected=\"selected\"" : "" %> value="2">Yearly</option>
-                                </select>--%>
 
                             </div>
-                            <div class="span3" style="background-color:#FFFFFF;padding: 10px;width:313px;text-align: left">
+                            <div class="col-md-4" style="background-color:#FFFFFF;padding: 10px; margin: 10px;width:313px;text-align: left">
                                 <div style="float:right">
                                     <span style="font-size: 14px">$50.00</span>
                                 </div>
@@ -400,7 +354,7 @@
                 </div>
 
             </div>
-            <div class="span3">
+            <div class="col-md-3">
                 <div class="well" style="background-color: #d5d5d5">
                     <p><strong>Have questions?</strong></p>
 

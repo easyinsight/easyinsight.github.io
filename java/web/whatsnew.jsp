@@ -18,13 +18,6 @@
     <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
     <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
-
-    <style type="text/css">
-        body {
-            padding-top: 45px;
-            padding-bottom: 40px;
-        }
-    </style>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
 </head>
@@ -45,8 +38,8 @@
 </jsp:include>
 <div class="container">
     <div class="row">
-        <div class="span12">
-            <div class="span6 offset3">
+        <div class="col-md-12">
+            <div class="col-md-6 col-md-offset-3">
                 <div style="width:100%;text-align: center">
                     <h2>What's New with Easy Insight</h2>
                 </div>
@@ -73,15 +66,15 @@
             List<String> tagList = new ArrayList<String>(tags);
             Collections.sort(tagList);
         %>
-        <div class="span3">
+        <div class="col-md-3">
             <div class="container">
                 <div class="row">
-                    <div class="span2">
+                    <div class="col-md-2">
                         <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="span3">
+                    <div class="col-md-12">
                         <div class="well">
                             <div><a href="whatsnew.jsp" style="font-size:16px">All</a></div>
                             <%
@@ -96,7 +89,7 @@
                 </div>
             </div>
         </div>
-        <div class="span9">
+        <div class="col-md-9">
             <%
                 /*String pageNumberString = request.getParameter("page");
                 int pageNumber = 0;
@@ -129,12 +122,14 @@
                     }
             %>
             <div class="row" style="padding-top:10px">
-                <div class="span9">
+                <div class="col-md-12">
                     <div style="width:100%;text-align:center">
                         <h3><%= newsEntry.getTitle() %> - <%= new SimpleDateFormat("yyyy-MM-dd").format(newsEntry.getDate()) %></h3>
                     </div>
                 </div>
-                <div class="span9" style="padding-top:10px">
+                </div>
+            <div class="row">
+                <div class="col-md-12" style="padding-top:10px">
                     <div style="width:100%;text-align:center">
                         <p><%= newsEntry.getNews() %></p>
                     </div>
