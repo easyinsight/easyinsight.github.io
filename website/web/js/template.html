@@ -137,7 +137,9 @@
     </a>
     </div>
 
-    <div id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" class="modal hide">
+    <div id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
         <div class="modal-body">
             <div class="control-group">
                 <label class="control-label">Available Values</label>
@@ -160,7 +162,9 @@
             <button class="btn multi_value_save" data-dismiss="modal">Save</button>
             <button class="btn" data-dismiss="modal">Cancel</button>
         </div>
+            </div>
     </div>
+        </div>
 </script>
 
 <script type="text/template" id="rolling_date_filter_template">
@@ -244,7 +248,9 @@
         </a>
     </div>
 
-    <div id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" class="modal hide">
+    <div id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
         <div class="modal-body">
             <div class="control-group">
                 <select class="multi_flat_month_start">
@@ -276,11 +282,14 @@
                     <option value="11"<% if(data.max == 11) { %> selected="selected"<% } %>>December</option>
                 </select>
             </div>
+
         </div>
         <div class="modal-footer">
             <button class="btn multi_flat_month_save" data-dismiss="modal">Save</button>
             <button class="btn" data-dismiss="modal">Cancel</button>
         </div>
+                </div>
+            </div>
     </div>
 </script>
 

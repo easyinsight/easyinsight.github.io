@@ -159,3 +159,7 @@ a.trendDrillthrough {
     background-image: none;
     background-color: #F5F5F5;
 }
+
+ul.unstyled {
+    list-style-type: none;
+}

@@ -343,7 +343,7 @@ $(function () {
         });
 
         $(".multi_value_save").click(function (e) {
-            var a = $(e.target || e.srcElement).parent().parent();
+            var a = $(e.target || e.srcElement).parent().parent().parent().parent();
             var f = filterMap[a.attr("id").split("_")[0]];
             var selects = $("li input:checked", a);
             var selectVals = $.map(selects, function (e, i) {
@@ -363,7 +363,7 @@ $(function () {
         });
 
         $(".multi_flat_month_save").click(function (e) {
-            var a = $(e.target).parent().parent();
+            var a = $(e.target).parent().parent().parent().parent();
             var f = filterMap[a.attr("id").split("_")[0]];
             var min = $(".multi_flat_month_start", a).val();
             var max = $(".multi_flat_month_end", a).val();
