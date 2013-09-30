@@ -154,3 +154,8 @@ a.trendDrillthrough {
 .sortData {
     display: none;
 }
+
+.well {
+    background-image: none;
+    background-color: #F5F5F5;
+}
