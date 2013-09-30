@@ -15,9 +15,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Sign In</title>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-
+    <jsp:include page="html/bootstrapHeader.jsp" />
     <style type="text/css">
 
         .center_stuff {
@@ -26,9 +24,13 @@
         #googleApps {
             color: #4a4b4c;
         }
+
+        body {
+            padding-top: 45px;
+            background-image: none;
+        }
+
     </style>
-    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
     <script type="text/javascript">
         function preserveHash() {
             $('input[name=urlhash]').val(window.location.hash);
@@ -159,7 +161,7 @@
                 <label class="checkbox">
                     <input type="checkbox" id="rememberMeCheckbox" name="rememberMeCheckbox">Remember me on this computer
                 </label>
-                <button class="btn btn-default btn-inverse" type="submit" value="Sign In">Sign In</button>
+                <button class="btn btn-inverse" type="submit" value="Sign In">Sign In</button>
                 <%--<button class="btn" id="googleApps">Sign In With <img src="/images/apps_logo_3D_online_medium.png" alt="Google Apps Login" height="16" width="72" /></button>--%>
                 <div class="signInBar" style="padding-top: 10px">
                     <a href="<%= RedirectUtil.getURL(request, "/app/newaccount")%>" style="font-size: 12px">No account yet?</a>
