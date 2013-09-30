@@ -50,7 +50,9 @@ public class DatabaseListener implements Runnable {
         } catch (ClassNotFoundException e) {
             LogClass.error(e);
         }
-        new Thread(instance).start();
+        Thread thread = new Thread(instance);
+        thread.setName("Database Listener");
+        thread.start();
     }
 
     public void stop() {

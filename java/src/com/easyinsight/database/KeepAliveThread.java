@@ -19,8 +19,15 @@ public class KeepAliveThread implements Runnable {
         this.database = database;
     }
 
+    private boolean running;
+
+    public void setRunning(boolean running) {
+        this.running = running;
+    }
+
     public void run() {
-        while (true) {
+        running = true;
+        while (running) {
             Connection conn = database.getConnection();
             try {
                 PreparedStatement stmt = conn.prepareStatement("SHOW TABLES");
@@ -33,7 +40,6 @@ public class KeepAliveThread implements Runnable {
             try {
                 Thread.sleep(1000 * 60 * 60);
             } catch (InterruptedException e) {
-                LogClass.error(e);
             }
         }
     }
