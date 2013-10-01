@@ -59,7 +59,6 @@
     </title>
     <jsp:include page="bootstrapHeader.jsp"/>
     <jsp:include page="reportDashboardHeader.jsp"/>
-
     <%
         List<String> jsIncludes = report.javaScriptIncludes();
         for (String jsInclude : jsIncludes) {
@@ -72,7 +71,7 @@
 %>
     <jsp:include page="methods.jsp">
         <jsp:param name="reportID" value="<%= report.getUrlKey() %>"/>
-        <jsp:param name="dataSourceID" value="<%= report.getDataFeedID()%>"/>
+        <jsp:param name="urlKey" value="<%= dataSourceDescriptor.getUrlKey() %>"/>
     </jsp:include>
     <jsp:include page="reportLogic.jsp">
         <jsp:param name="reportID" value="<%= report.getAnalysisID()%>"/>
@@ -102,9 +101,80 @@
     </ul>
 
 </div>
+        <div class="col-md-6">
+        <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
+                           <div class="btn-group" style="padding-top: 0;margin-top: 0">
+                               <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                                   Export the Report
+                                   <span class="caret"></span>
+                               </a>
+                               <ul class="dropdown-menu">
+                                   <li>
+                                       <button class="btn btn-inverse" type="button"
+                                               onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'"
+                                               style="padding:5px;margin:5px;width:150px">Export to Excel
+                                       </button>
+                                   </li>
+                                   <li>
+                                       <button class="btn btn-inverse" type="button"
+                                               onclick="$('#emailReportWindow').modal(true, true, true)"
+                                               style="padding:5px;margin:5px;width:150px">Email the Report
+                                       </button>
+                                   </li>
+                               </ul>
+                           </div>
+                           <div class="btn-group">
+                               <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                                   Refresh Data
+                                   <span class="caret"></span>
+                               </a>
+                               <ul class="dropdown-menu">
+                                   <li>
+                                       <button class="btn btn-inverse" type="button" onclick="refreshReport()"
+                                               style="padding:5px;margin:5px;width:150px">Refresh the Report
+                                       </button>
+                                   </li>
+                                   <%
+                                       FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
+                                       if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
+                                   %>
+                                   <li>
+                                       <button class="btn btn-inverse" type="button" id="refreshDataSourceButton"
+                                               onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh
+                                           Data
+                                           Source
+                                       </button>
+                                   </li>
+                                   <%
+                                       }
+                                   %>
+                               </ul>
+                           </div>
+                           <%
+                               boolean visibleFilter = false;
+                               for (FilterDefinition filter : report.getFilterDefinitions()) {
+                                   if (filter.isShowOnReportView()) {
+                                       visibleFilter = true;
+                                       break;
+                                   }
+                               }
+                               if (visibleFilter) {
+                           %>
+                           <div class="btn-group">
+                               <button class="btn btn-inverse" onclick="toggleFilters()">Toggle Filters</button>
+                           </div>
+                           <%
+                               }
+                           %>
+                           <div class="btn-group">
+                               <a href="<%= RedirectUtil.getURL(request, "/app/#analysisID=" + report.getUrlKey())%>"
+                                  class="btn btn-inverse">Edit Report</a>
+                           </div>
+                       </div>
+        </div>
+                   </div>
             </div>
         </div>
-    </div>
 <div class="container" id="reportHeader">
     <%= uiData.createHeader(report.getName()) %>
     <div class="row" id="filterRow">

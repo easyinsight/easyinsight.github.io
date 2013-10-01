@@ -28,18 +28,49 @@ var afterRefresh = function (selector) {
     }
 }
 
-var beforeRefresh = function(selector) {
-    return function() {
+var beforeRefresh = function (selector) {
+    return function () {
         $(".reportArea", selector.parent()).hide();
         $(selector).show();
     }
 }
 
-var selectedIndex = function(id) {
+function refreshDataSource(dataSourceID) {
+    $("#refreshDiv").show();
+    $("#problemHTML").hide();
+    $.getJSON('/app/refreshDataSource?urlKey=' + dataSourceID, function (data) {
+        var callDataID = data["callDataID"];
+        again(callDataID);
+    });
+}
+
+function again(callDataID) {
+    setTimeout(function () {
+        $.getJSON('/app/refreshStatus?callDataID=' + callDataID, function (data) {
+            onDataSourceResult(data, callDataID);
+        });
+    }, 5000);
+}
+function onDataSourceResult(data, callDataID) {
+    var status = data["status"];
+    if (status == 1) {
+        // running
+        again(callDataID);
+    } else if (status == 2) {
+        $("#refreshDiv").hide();
+        refreshReport();
+    } else {
+        $("#refreshDiv").hide();
+        $("#problemHTML").show();
+        $("#problemHTML").html(data["problemHTML"]);
+    }
+}
+
+var selectedIndex = function (id) {
     var v = $("#" + id);
     var s = $("#" + id + " > .active");
-    for(var i = 0;i < v.children().length;i++) {
-        if(v.children()[i] == s[0]) {
+    for (var i = 0; i < v.children().length; i++) {
+        if (v.children()[i] == s[0]) {
             return i;
         }
     }
@@ -67,14 +98,14 @@ var toFilterString = function (f) {
         return "filter" + f.id + "=" + f.selected;
     } else if (f.type == "multi_date") {
         return ["filter" + f.id + "start=" + f.min, "filter" + f.id + "end=" + f.max];
-    } else if(f.type == "field_filter") {
+    } else if (f.type == "field_filter") {
         return "filter" + f["id"] + "=" + f.selected;
     } else
         return ["filter" + f["id"] + "direction=0", "filter" + f["id"] + "value=1", "filter" + f["id"] + "interval=2"];
 }
 
-var confirmRender = function(o, f) {
-    return function(data) {
+var confirmRender = function (o, f) {
+    return function (data) {
         var id = o.report.id;
         if ($("#" + id + " :visible").size() == 0) {
             o.rendered = false;
@@ -92,7 +123,7 @@ var renderReport = function (o, dashboardID, reload) {
     var id = o.report.id;
     var filterStrings = [];
     var i;
-    if (!reload && o.rendered ) {
+    if (!reload && o.rendered) {
         return;
     }
     if ($("#" + id + " :visible").size() == 0) {
@@ -202,10 +233,10 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
     }
 }
 
-var hideFilter = function(id, filterMap) {
+var hideFilter = function (id, filterMap) {
     $(".filter" + id).addClass("hideFilter");
-    for(var f in filterMap) {
-        if(filterMap[f].filter.id == id) {
+    for (var f in filterMap) {
+        if (filterMap[f].filter.id == id) {
             filterMap[f].filter.override = true;
         }
     }
@@ -219,16 +250,16 @@ var hideFilters = function (obj, filterMap) {
         for (var i = 0; i < obj.report.overrides.length; i++)
             hideFilter(obj.report.overrides[i], filterMap);
     }
-    if(obj.type == "stack") {
+    if (obj.type == "stack") {
         var ss;
-        if(obj.children.length == 1) {
+        if (obj.children.length == 1) {
             ss = 0;
         } else {
             ss = selectedIndex(obj.id);
         }
         hideFilters(obj.children[ss], filterMap);
-    } else if(obj.type != "report" && obj.type != "text") {
-        for(var i = 0;i < obj.children.length;i++) {
+    } else if (obj.type != "report" && obj.type != "text") {
+        for (var i = 0; i < obj.children.length; i++) {
             hideFilters(obj.children[i], filterMap);
         }
     }
@@ -267,7 +298,7 @@ $(function () {
                     return Filter.flat_date_year({data: obj, parent_id: parent_id});
                 else if (obj.type == "multi_date")
                     return Filter.multi_flat_date_month({data: obj, parent_id: parent_id})
-                else if(obj.type == "field_filter")
+                else if (obj.type == "field_filter")
                     return Filter.field_filter({data: obj, parent_id: parent_id});
             },
             multi_flat_date_month: _.template($("#multi_flat_date_filter", s).html()),
@@ -426,10 +457,10 @@ $(function () {
             }
         });
 
-        $(".field_filter").change(function(e) {
+        $(".field_filter").change(function (e) {
             var f = filterMap[$(e.target).attr("id").split("_")[0]];
             f.filter.selected = $(e.target).val();
-            if(f.parent == null) {
+            if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], true);
             } else {
                 renderReports(f.parent, dashboardJSON["id"], true);
@@ -483,7 +514,7 @@ $(function () {
             var s = stackMap[q.attr("id")];
             var t = q.children();
             var selected = -1;
-            for(var f in filterMap) {
+            for (var f in filterMap) {
                 filterMap[f].filter.override = false;
             }
 
