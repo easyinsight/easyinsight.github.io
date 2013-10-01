@@ -49,8 +49,7 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
 </jsp:include>
-<div class="navbar">
-    <div class="navbar-inner reportNavBarInner">
+<div class="nav nav-pills reportNav">
         <div class="container">
             <div class="col-md-6">
                 <ul class="breadcrumb reportBreadcrumb">
@@ -92,7 +91,6 @@
                 </div>
             </div>
         </div>
-    </div>
 </div>
 
 <div class="container-fluid">

@@ -165,6 +165,7 @@ a:focus {
     padding: 20px;
 }
 
-.navbar_first {
+nav.navbar_first {
     padding-bottom: 0px;
+    margin-bottom: 0px;
 }
