@@ -291,7 +291,7 @@ $(function () {
 
         $("#base").append(dashboard(dashboardJSON));
 
-        $(".nav-pills").css("background-color", dashboardJSON["styles"]["alternative_stack_start"])
+        $(".dashboardStackNav").css("background-color", dashboardJSON["styles"]["alternative_stack_start"])
         $(".dashboard_base > .row > .col-md-12 > .tabbable > .nav-pills").css("background-color", dashboardJSON["styles"]["main_stack_start"])
 
         var filterMap = _.reduce(dashboardJSON["filters"], function (m, i) {

@@ -86,12 +86,13 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
 </jsp:include>
+<div class="nav navbar-pills reportNav">
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
-<div class="navbar navbar-pills">
+        <div class="col-md-6">
 
-    <ul class="breadcrumb reportBreadcrumb navbar-nav">
+
+    <ul class="breadcrumb reportBreadcrumb">
         <li><a href="/app/html/">Data Sources</a> <span class="divider"></span></li>
         <li>
             <a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>

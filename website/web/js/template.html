@@ -6,7 +6,7 @@
             <%= dashboardComponent(stack_items[0].item) %>
         <% } else { %>
         <div class="tabbable">
-            <ul class="nav nav-pills" id="<%- id %>" style="text-align:center;">
+            <ul class="nav nav-pills dashboardStackNav" id="<%- id %>" style="text-align:center;">
                 <% _.each(stack_items, function(e, i, l) { %>
                 <li<%- i == 0 ? ' class=active' : '' %>>
                 <a class="argh" data-toggle="tab" href="#stack_<%- id %>_<%- e.item.id %>"><%- (typeof(e.label) ==
