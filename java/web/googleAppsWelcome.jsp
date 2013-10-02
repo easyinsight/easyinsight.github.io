@@ -7,17 +7,22 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Sign In</title>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-
+    <jsp:include page="html/bootstrapHeader.jsp" />
     <style type="text/css">
 
         .center_stuff {
             text-align:center;
         }
+        #googleApps {
+            color: #4a4b4c;
+        }
+
+        body {
+            padding-top: 45px;
+            background-image: none;
+        }
+
     </style>
-    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
 </head>
 <%
 
