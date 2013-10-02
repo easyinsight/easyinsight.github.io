@@ -131,7 +131,7 @@
 <script type="text/template" id="multi_value_filter_template">
     <div class="filter filter<%= data.id %>">
         <%= Filter.base_filter({data: data, parent_id: parent_id}) %> <a href="#<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" data-toggle="modal">
-        <button id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="btn multi_filter"><% if(data.selected.length == 1) { %><%-
+        <button id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="btn btn-default multi_filter"><% if(data.selected.length == 1) { %><%-
             data.selected[0] %><% } else { %><%- data.selected.length %> Items<% } %>
         </button>
     </a>
@@ -159,8 +159,8 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn multi_value_save" data-dismiss="modal">Save</button>
-            <button class="btn" data-dismiss="modal">Cancel</button>
+            <button class="btn btn-default multi_value_save" data-dismiss="modal">Save</button>
+            <button class="btn btn-default" data-dismiss="modal">Cancel</button>
         </div>
             </div>
     </div>
@@ -243,7 +243,7 @@
     <div class="filter filter<%= data.id %>">
         <%= Filter.base_filter({"data": data, "parent_id": typeof(parent_id) == "undefined" ? '' : parent_id}) %>
         <a href="#<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" data-toggle="modal">
-            <button id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="btn multi_flat_month"><%- short_months[data.min] %> to <%- short_months[data.max] %>
+            <button id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="btn btn-default multi_flat_month"><%- short_months[data.min] %> to <%- short_months[data.max] %>
             </button>
         </a>
     </div>
@@ -285,8 +285,8 @@
 
         </div>
         <div class="modal-footer">
-            <button class="btn multi_flat_month_save" data-dismiss="modal">Save</button>
-            <button class="btn" data-dismiss="modal">Cancel</button>
+            <button class="btn btn-default multi_flat_month_save" data-dismiss="modal">Save</button>
+            <button class="btn btn-default" data-dismiss="modal">Cancel</button>
         </div>
                 </div>
             </div>
