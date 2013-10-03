@@ -146,51 +146,50 @@ var renderReport = function (o, dashboardID, reload) {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getPieChartCallback(id, w, {})) }));
-//        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Chart.getPieChartCallback(id, w, {})))
     }
     else if (obj.metadata.type == "diagram") {
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, function (data) {
+        $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
             window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, afterRefresh($("#" + id + " .loading")));
-        }))
+        }) } ));
     }
     else if (obj.metadata.type == "list") {
-        $.ajax({
+        $.ajax($.extend(postData, {
             dataType: "text",
-            url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"),
+
             success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns))
-        });
+        }));
     } else if (obj.metadata.type == "bar") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Chart.getBarChartCallback(id, w, true, obj.metadata.styles)));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getBarChartCallback(id, w, true, obj.metadata.styles))}));
     } else if (obj.metadata.type == "column") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Chart.getColumnChartCallback(id, w, obj.metadata.styles)));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getColumnChartCallback(id, w, obj.metadata.styles)) }));
     }
     else if (obj.metadata.type == "area" || obj.metadata.type == "bubble" || obj.metadata.type == "plot" || obj.metadata.type == "line") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Chart.getCallback(id, w, true, obj.metadata.styles)));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getCallback(id, w, true, obj.metadata.styles))}));
     } else if (obj.metadata.type == "stacked_bar") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Chart.getStackedBarChart(id, w, obj.metadata.styles)));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedBarChart(id, w, obj.metadata.styles))}));
     } else if (obj.metadata.type == "stacked_column") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Chart.getStackedColumnChart(id, w, obj.metadata.styles)));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedColumnChart(id, w, obj.metadata.styles)) }));;
     } else if (obj.metadata.type == "gauge") {
         $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: null }))
         var v = JSON.stringify(obj.metadata.properties).replace(/\"/g, "");
         eval("var w = " + v);
-        $.getJSON(obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, Gauge.getCallback(id + "ReportArea", id, w, obj.metadata.max)))
+        $.ajax($.extend(postData, {success: confirmRender(o, Gauge.getCallback(id + "ReportArea", id, w, obj.metadata.max))}));
     } else {
-        $.get(obj.metadata.url + '?reportID=' + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID + "&" + filterStrings.join("&"), confirmRender(o, function (data) {
+        $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
             Utils.noData(data, function () {
                 $('#' + id + " .reportArea").html(data);
             }, null, id);
-        }));
+        })}));;
     }
     o.rendered = true;
 }

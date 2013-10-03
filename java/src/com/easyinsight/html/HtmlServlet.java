@@ -114,7 +114,7 @@ public class HtmlServlet extends HttpServlet {
                                 }
                             } else if (filter instanceof RollingFilterDefinition) {
                                 RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;
-                                Integer value = (Integer) curFilter.get("interval_type");
+                                Integer value = curFilter != null ? (Integer) curFilter.get("interval_type") : null;
                                 if (value != null) {
                                     int filterValue = value;
                                     rollingFilterDefinition.setInterval(filterValue);
@@ -129,9 +129,9 @@ public class HtmlServlet extends HttpServlet {
                                 }
                             } else if (filter instanceof AnalysisItemFilterDefinition) {
                                 AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
-                                String value = (String) curFilter.get("selected");
+                                Integer value = curFilter != null ? (Integer) curFilter.get("selected") : null;
                                 if (value != null) {
-                                    long fieldID = Long.parseLong(value);
+                                    long fieldID = Long.valueOf(value);
                                     for (AnalysisItem item : analysisItemFilterDefinition.getAvailableItems()) {
                                         if (item.getAnalysisItemID() == fieldID) {
                                             analysisItemFilterDefinition.setTargetItem(item);
@@ -141,18 +141,18 @@ public class HtmlServlet extends HttpServlet {
                                 }
                             } else if (filter instanceof FlatDateFilter) {
                                 FlatDateFilter flatDateFilter = (FlatDateFilter) filter;
-                                String value = (String) curFilter.get("selected");
+                                String value = curFilter != null ? (String) curFilter.get("selected") : null;
                                 if (value != null) {
                                     flatDateFilter.setValue(Integer.parseInt(value));
                                 }
                             } else if (filter instanceof MultiFlatDateFilter) {
                                 MultiFlatDateFilter multiFlatDateFilter = (MultiFlatDateFilter) filter;
-                                String startMonthString = (String) curFilter.get("start");
-                                String endMonthString = (String) curFilter.get("end");
+                                Integer startMonthString = curFilter != null ? (Integer) curFilter.get("start") : null;
+                                Integer endMonthString = curFilter != null ? (Integer) curFilter.get("end") : null;
                                 List<DateLevelWrapper> levels = new ArrayList<DateLevelWrapper>();
                                 if (startMonthString != null && endMonthString != null) {
-                                    int startMonth = Integer.parseInt(startMonthString);
-                                    int endMonth = Integer.parseInt(endMonthString);
+                                    int startMonth = startMonthString;
+                                    int endMonth = endMonthString;
                                     for (int i = startMonth; i <= endMonth; i++) {
                                         DateLevelWrapper wrapper = new DateLevelWrapper();
                                         wrapper.setDateLevel(i);
@@ -163,8 +163,8 @@ public class HtmlServlet extends HttpServlet {
 
                             } else if (filter instanceof FilterDateRangeDefinition) {
                                 FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filter;
-                                String startDate = (String) curFilter.get("start");
-                                String endDate = (String) curFilter.get("end");
+                                String startDate = curFilter != null ? (String) curFilter.get("start") : null;
+                                String endDate = curFilter != null ? (String) curFilter.get("end") : null;
                                 DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
                                 if (startDate != null) {
                                     filterDateRangeDefinition.setStartDate(dateFormat.parse(startDate));
@@ -173,7 +173,7 @@ public class HtmlServlet extends HttpServlet {
                                     filterDateRangeDefinition.setEndDate(dateFormat.parse(endDate));
                                 }
                             }
-                            Boolean enabledParam = (Boolean) curFilter.get("enabled");
+                            Boolean enabledParam = curFilter != null ? (Boolean) curFilter.get("enabled") : null;
                             if (enabledParam != null) {
                                 filter.setEnabled(enabledParam);
                             }
