@@ -189,7 +189,7 @@
             <option value="<%= e.interval %>"<% if(data.interval_type == e.interval) { %> selected="selected"<% } %>><%- e.name %></option>
             <% }) %>
         </select>
-        <span class="custom<% if(data.interval_type != "18") { %> hide<% } %>">
+        <span class="custom<% if(data.interval_type != "18") { %> hideFilter<% } %>">
             <select id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>_custom_direction" class="rolling_filter_direction">
                 <option value="0"<% if(data.direction == "0") {%> selected="selected"<% } %>>Last</option>
                 <option value="1"<% if(data.direction == "1") {%> selected="selected"<% } %>>Next</option>
