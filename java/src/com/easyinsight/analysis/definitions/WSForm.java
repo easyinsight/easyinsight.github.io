@@ -134,12 +134,11 @@ public class WSForm extends WSAnalysisDefinition {
             sb.append("<form class=\"form-horizontal\">\n");
             for (AnalysisItem analysisItem : columns) {
                 sb.append("<fieldset>\n");
-                sb.append("<div class=\"control-group\">\n");
+                sb.append("<div class=\"form-group\">\n");
                 String inputName = String.valueOf(analysisItem.getAnalysisItemID());
-                sb.append("<label class=\"control-label\" for=\"").append(inputName).append("\">").append(analysisItem.toDisplay()).append("</label>");
-                sb.append("<div class=\"controls\">");
-                //sb.append("<span class=\"help-inline\">").append(row.getValue(analysisItem).toHTMLString()).append("</span>");
-                sb.append("<input type=\"text\" class=\"input-xlarge\" readonly=\"readonly\" id=\"").append(inputName).append("\" value=\"").append(row.getValue(analysisItem).toHTMLString()).append("\">");
+                sb.append("<label class=\"col-md-4 control-label\" for=\"").append(inputName).append("\">").append(analysisItem.toDisplay()).append("</label>");
+                sb.append("<div class=\"col-md-6\">");
+                sb.append("<input type=\"text\" class=\"form-control\" readonly=\"readonly\" id=\"").append(inputName).append("\" value=\"").append(row.getValue(analysisItem).toHTMLString()).append("\">");
                 sb.append("</div>");
                 sb.append("</div>\n");
                 sb.append("</fieldset>\n");

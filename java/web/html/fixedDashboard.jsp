@@ -29,13 +29,6 @@
     <title>Easy Insight &mdash; <%= StringEscapeUtils.escapeHtml(dashboard.getName()) %></title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
-
-    <style type="text/css">
-        body {
-            padding-top: 40px;
-            padding-bottom: 40px;
-        }
-    </style>
     <link href="../assets/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
     <script type="text/javascript" src="/js/jquery.jqplot.min.js"></script>
@@ -137,7 +130,7 @@
 </div>
 <div class="container">
     <div class="row">
-        <div class="span12">
+        <div class="col-md-12">
             <%= dashboard.getRootElement().toHTML(filterHTMLMetadata) %>
         </div>
     </div>

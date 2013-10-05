@@ -28,13 +28,6 @@
     <title>Easy Insight Reports and Dashboards</title>
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
-
-    <style type="text/css">
-        body {
-            padding-top: 45px;
-            padding-bottom: 40px;
-        }
-    </style>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
 </head>
@@ -85,8 +78,8 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
 </jsp:include>
-<div class="container-fluid">
-    <div class="row-fluid">
+<div class="container">
+    <div class="row">
         <ul class="breadcrumb">
             <li><a href="../index.jsp">Data Sources</a> <span class="divider">/</span></li>
             <li><a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a><span class="divider">/</span></li>
@@ -94,9 +87,9 @@
         </ul>
     </div>
 </div>
-<div class="container-fluid">
-    <div class="row-fluid">
-        <div class="span3">
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
             <img src="/images/logo2.PNG"/>
             <div class="well sidebar-nav">
                 <ul class="nav nav-list">
@@ -116,7 +109,7 @@
                 </ul>
             </div>
         </div>
-        <div class="span9">
+        <div class="col-md-9">
             <table class="table table-striped table-bordered">
                 <thead>
                 <tr>

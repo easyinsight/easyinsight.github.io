@@ -1,5 +1,6 @@
 package com.easyinsight.html;
 
+import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.userupload.UserUploadService;
@@ -22,7 +23,8 @@ public class DataSourceRefreshServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
         SecurityUtil.populateThreadLocalFromSession(req);
         try {
-            long dataSourceID = Long.parseLong(req.getParameter("dataSourceID"));
+            String urlKey = req.getParameter("urlKey");
+            Long dataSourceID = new FeedService().openFeedIfPossible(urlKey).getFeedDescriptor().getId();
             CredentialsResponse credentialsResponse = new UserUploadService().refreshData(dataSourceID);
             String callDataID = credentialsResponse.getCallDataID();
             JSONObject jsonObject = new JSONObject();

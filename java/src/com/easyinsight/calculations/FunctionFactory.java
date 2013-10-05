@@ -273,6 +273,8 @@ public class FunctionFactory {
             return new DirectFilterFunction();
         } else if (s.equals("overridefilter")) {
             return new OverrideFilter();
+        } else if (s.equals("find")) {
+            return new FindRecord();
         }else {
             return null;
         }

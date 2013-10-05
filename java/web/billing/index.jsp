@@ -12,6 +12,7 @@
 <%@ page import="com.easyinsight.billing.BrainTreeBlueBillingSystem" %>
 <%@ page import="com.braintreegateway.CustomerRequest" %>
 <%@ page import="com.easyinsight.html.BillingResponse" %>
+<%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html lang="en">
 <head>
@@ -37,13 +38,6 @@
         }
 
     </script>
-
-    <style type="text/css">
-        body {
-            padding-top: 45px;
-            padding-bottom: 40px;
-        }
-    </style>
     <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
@@ -188,53 +182,23 @@
              billingMessage += " Your credit card will be charged upon submitting this form.";
         }
 %>
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <%--<a class="brand" href="#"><img src="/images/logo3.jpg"/></a>--%>
-            <div class="btn-group pull-right">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <%
-                        if (account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.ACTIVE) {
-                    %>
-                    <li><a href="../html/flashAppAction.jsp">Back to Full Interface</a></li>
-                    <%
-                        }
-                    %>
-                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                </ul>
-            </div>
-            <div class="nav-collapse">
-                <ul class="nav">
-                    <li><a href="accountType.jsp">Account Configuration</a></li>
-                    <li class="active"><a href="#">Billing Setup</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+<jsp:include page="../header.jsp">
+    <jsp:param name="userName" value="<%= userName %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.ACCOUNT %>"/>
+</jsp:include>
 <div class="container">
     <div class="row">
-        <div class="span12">
+        <div class="col-md-12">
             <div style="width:100%;text-align: center">
                 <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
             </div>
         </div>
-        <div class="span6 offset3" style="padding-top: 10px;padding-bottom: 10px">
+        <div class="col-md-6 col-md-offset-3" style="padding-top: 10px;padding-bottom: 10px">
             <h3 style="width:100%;text-align: center"><%= billingHeader %></h3>
             <p style="font-size:14px;font-family: 'PT Sans',arial,serif"><%= billingIntroParagraph %></p>
         </div>
         <div class="row">
-            <div class="span8 offset1">
+            <div class="col-md-8 col-md-offset-1">
                 <% if(request.getParameter("error") != null) { %>
                 <p><label class="error"><%
                     String errorCode = request.getParameter("response_code");
@@ -265,14 +229,14 @@
                         <div class="control-group">
                             <label class="control-label" for="firstname">First Name:</label>
                             <div class="controls">
-                                <input id="firstname" type="text" value="" name="customer[first_name]" class="span3"/>
+                                <input id="firstname" type="text" value="" name="customer[first_name]" class="col-md-3"/>
                             </div>
 
                         </div>
                         <div class="control-group">
                             <label class="control-label" for="lastname">Last Name:</label>
                             <div class="controls">
-                                <input id="lastname" type="text" value="" name="customer[last_name]" class="span3"/>
+                                <input id="lastname" type="text" value="" name="customer[last_name]" class="col-md-3"/>
                             </div>
                         </div>
 
@@ -334,7 +298,7 @@
                     </fieldset>
                 </form>
             </div>
-            <div class="span3">
+            <div class="col-md-3">
                 <div class="well" style="background-color: #d5d5d5">
                     <p><strong>Have questions?</strong></p>
                     <p>You can contact Easy Insight at 1-720-316-8174 or sales@easy-insight.com if you have any questions or concerns around your account billing.</p>

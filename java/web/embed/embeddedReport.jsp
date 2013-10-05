@@ -101,20 +101,20 @@
     }
 %>
     <div class="container">
-        <div class="row-fluid">
-            <div class="span12" style="text-align:center" id="refreshDiv">
+        <div class="row">
+            <div class="col-md-12" style="text-align:center" id="refreshDiv">
                 Refreshing the data source...
                 <div class="progress progress-striped active">
                     <div class="bar"
                          style="width: 100%;"></div>
                 </div>
             </div>
-            <div class="span12" style="text-align:center" id="problemHTML">
+            <div class="col-md-12" style="text-align:center" id="problemHTML">
             </div>
         </div>
         <% if (includeFilters) { %>
-        <div class="row-fluid" id="filterRow">
-            <div class="span12">
+        <div class="row" id="filterRow">
+            <div class="col-md-12">
                 <%
                     for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
                         if (filterDefinition.isShowOnReportView()) {
@@ -128,7 +128,7 @@
         </div>
         <% } %>
         <div class="row">
-            <div class="span12">
+            <div class="col-md-12">
                 <div style="background-color: #ffffff;margin:5px">
                     <div id="reportTarget">
                         <div id="reportTargetReportArea" class="reportArea">

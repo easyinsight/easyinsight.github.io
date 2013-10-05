@@ -7,19 +7,22 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Initial Setup</title>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
-    <link href="/css/bootstrap.css" rel="stylesheet">
-    <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
-
+    <jsp:include page="../html/bootstrapHeader.jsp" />
     <style type="text/css">
+
+        .center_stuff {
+            text-align:center;
+        }
+        #googleApps {
+            color: #4a4b4c;
+        }
+
         body {
             padding-top: 45px;
-            padding-bottom: 40px;
+            background-image: none;
         }
+
     </style>
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.js"></script>
 </head>
 <%
     String resetPassword = request.getParameter("passwordReset");
@@ -31,7 +34,7 @@
 <div class="container">
     <div class="row">
 
-        <div class="span6 offset3">
+        <div class="col-md-6 col-md-offset-3">
 
             <form class="well" method="post" action="firstLoginAction.jsp" style="width:100%" id="loginForm">
                 <div style="width:100%;text-align: center">
@@ -55,12 +58,12 @@
                 <label for="password" class="promptLabel">
                     Password
                 </label>
-                <input type="password" name="password" id="password" style="width:100%;font-size:14px;height:28px"/>
+                <input type="password" name="password" id="password" style="width:100%;font-size:14px;height:28px;margin-bottom:5px"/>
 
                 <label for="confirmPassword" class="promptLabel">
                     Confirm Password
                 </label>
-                <input type="password" name="confirmPassword" id="confirmPassword" style="width:100%;font-size:14px;height:28px"/>
+                <input type="password" name="confirmPassword" id="confirmPassword" style="width:100%;font-size:14px;height:28px;margin-bottom:5px"/>
                 <%
                     String errorString = (String) request.getSession().getAttribute("errorString");
                     if (errorString != null) {

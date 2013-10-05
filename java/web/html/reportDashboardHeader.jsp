@@ -32,5 +32,5 @@
 <script type="text/javascript" src="/js/visualizations/gauge.js"></script>
 
 
-<link href="/css/report.css" rel="stylesheet" />
 <link rel="stylesheet" type="text/css" href="/css/jquery.jqplot.css" />
+<link href="/css/report.css" rel="stylesheet" />

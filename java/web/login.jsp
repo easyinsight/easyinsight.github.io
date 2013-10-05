@@ -15,14 +15,8 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Sign In</title>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-
+    <jsp:include page="html/bootstrapHeader.jsp" />
     <style type="text/css">
-        body {
-            padding-top: 45px;
-            padding-bottom: 40px;
-        }
 
         .center_stuff {
             text-align:center;
@@ -30,9 +24,13 @@
         #googleApps {
             color: #4a4b4c;
         }
+
+        body {
+            padding-top: 45px;
+            background-image: none;
+        }
+
     </style>
-    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
     <script type="text/javascript">
         function preserveHash() {
             $('input[name=urlhash]').val(window.location.hash);
@@ -116,7 +114,7 @@
 <div class="container">
     <div class="row">
 
-        <div class="span6 offset3">
+        <div class="col-md-6 col-md-offset-3">
 
             <form class="well" method="post" action="/app/loginAction.jsp" id="loginForm" onsubmit="preserveHash()">
                 <input type="hidden" name='OWASP_CSRFTOKEN' value="<%= session.getAttribute("OWASP_CSRFTOKEN")%>" />
@@ -139,12 +137,12 @@
                 <label for="userName" class="promptLabel">
                     User Name or Email
                 </label>
-                <input type="text" name="userName" id="userName" style="width:100%;font-size:14px;height:28px" autocapitalize="off" autocorrect="off" autoFocus/>
+                <input type="text" class="form-control" name="userName" id="userName" style="width:100%;font-size:14px;height:28px" autocapitalize="off" autocorrect="off" autoFocus/>
 
                 <label for="password" class="promptLabel">
                     Password
                 </label>
-                <input type="password" name="password" id="password" style="width:100%;font-size:14px;height:28px"/>
+                <input type="password" class="form-control" name="password" id="password" style="width:100%;font-size:14px;height:28px"/>
                 <%
                     if (request.getParameter("error") != null) {
                 %>

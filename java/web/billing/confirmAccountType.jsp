@@ -9,6 +9,7 @@
 <%@ page import="java.text.NumberFormat" %>
 <%@ page import="org.joda.time.Days" %>
 <%@ page import="org.joda.time.DateTime" %>
+<%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html lang="en">
 <head>
@@ -20,13 +21,6 @@
     <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
     <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
-
-    <style type="text/css">
-        body {
-            padding-top: 45px;
-            padding-bottom: 40px;
-        }
-    </style>
     <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <script type="text/javascript" src="/js/bootstrap.js"></script>
@@ -148,50 +142,20 @@
         NumberFormat cf = NumberFormat.getCurrencyInstance();
         String blah = cf.format(Account.createDiscount(cost, accountTypeChange.isYearly()));
 %>
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <%--<a class="brand" href="#"><img src="/images/logo3.jpg"/></a>--%>
-            <div class="btn-group pull-right">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <%
-                        if (account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.ACTIVE) {
-                    %>
-                    <li><a href="../html/flashAppAction.jsp">Back to Full Interface</a></li>
-                    <%
-                        }
-                    %>
-                    <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
-                </ul>
-            </div>
-            <div class="nav-collapse">
-                <ul class="nav">
-                    <li class="active"><a href="/app/billing/accountType.jsp">Account Configuration</a></li>
-                    <li><a href="/app/billing">Billing Setup</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+<jsp:include page="../header.jsp">
+    <jsp:param name="userName" value="<%= userName %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.ACCOUNT %>"/>
+</jsp:include>
 <div class="container">
     <div class="row">
-        <div class="span12">
+        <div class="col-md-12">
             <div style="width:100%;text-align: center">
                 <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
             </div>
         </div>
-        <div class="span12">
+        <div class="col-md-12">
             <div class="row well">
-                <div class="span4 offset4 well" style="background-color: #FFFFFF; border-color: #990000">
+                <div class="col-md-4 col-md-offset-4 well" style="background-color: #FFFFFF; border-color: #990000">
                     <div>
                         <span style="font-size: 14px"><%= confirmMessage %></span>
                         <p style="font-size: 14px"><%= message %></p>

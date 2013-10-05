@@ -18,21 +18,22 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Sign In</title>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-
+    <jsp:include page="html/bootstrapHeader.jsp" />
     <style type="text/css">
-        body {
-            padding-top: 45px;
-            padding-bottom: 40px;
-        }
 
         .center_stuff {
-            text-align: center;
+            text-align:center;
         }
+        #googleApps {
+            color: #4a4b4c;
+        }
+
+        body {
+            padding-top: 45px;
+            background-image: none;
+        }
+
     </style>
-    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
 </head>
 <%
 
@@ -42,7 +43,7 @@
 <div class="container">
     <div class="row">
 
-        <div class="span8 offset2">
+        <div class="col-md-8 col-md-offset-2">
 
 
 
@@ -100,10 +101,10 @@
                 %>
                 </div>
                 <div class="row" style="padding-top:20px">
-                    <div class="span4" style="padding-top: 4px">
+                    <div class="col-md-4" style="padding-top: 4px">
                         <a style="font-size:20px" href="<%=RedirectUtil.getURL(request, "/app/")%>">I'll Do It Later</a>
                     </div>
-                    <div class="span3">
+                    <div class="col-md-3">
                         <div style="float:right">
                             <input type="submit" style="font-size:20px" class="btn btn-primary" value="Add Selected Contacts"/>
                         </div>

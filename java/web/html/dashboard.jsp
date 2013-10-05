@@ -43,29 +43,27 @@
         }
     </script>
     <script type="text/javascript" src="/js/dashboard.js"></script>
-
 </head>
 <body>
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
 </jsp:include>
-<div class="navbar">
-    <div class="navbar-inner reportNavBarInner">
+<div class="nav nav-pills reportNav">
         <div class="container">
-            <div class="span6">
+            <div class="col-md-6">
                 <ul class="breadcrumb reportBreadcrumb">
 
-                    <li><a href="/app/html/">Data Sources</a> <span class="divider">/</span></li>
+                    <li><a href="/app/html/">Data Sources</a> <span class="divider"></span></li>
                     <li>
                         <a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
-                        </a><span class="divider">/</span></li>
+                        </a><span class="divider"></span></li>
                     <li class="active"><%= StringEscapeUtils.escapeHtml(dashboard.getName()) %>
                     </li>
 
                 </ul>
             </div>
-            <div class="span6">
+            <div class="col-md-6">
                 <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
                     <div class="btn-group">
 
@@ -81,7 +79,7 @@
                             </li>
                             <li>
                                 <button class="btn btn-inverse" type="button" id="refreshDataSourceButton"
-                                        onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh
+                                        onclick="refreshDataSource('<%= dataSourceDescriptor.getUrlKey() %>')" style="padding:5px;margin:5px;width:150px">Refresh
                                     Data Source
                                 </button>
                             </li>
@@ -93,10 +91,9 @@
                 </div>
             </div>
         </div>
-    </div>
 </div>
 
-<div class="container-fluid">
+<div class="container">
     <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>
     <jsp:include page="refreshingDataSource.jsp"/>
     <div id="base"/>

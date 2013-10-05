@@ -4,7 +4,8 @@
 
     function refreshDataSource() {
         $("#refreshDiv").show();
-        $.getJSON('/app/refreshDataSource?dataSourceID=<%= request.getParameter("dataSourceID") %>', function(data) {
+        $("#problemHTML").hide();
+        $.getJSON('/app/refreshDataSource?urlKey=<%= request.getParameter("urlKey") %>', function(data) {
             var callDataID = data["callDataID"];
             again(callDataID);
         });
