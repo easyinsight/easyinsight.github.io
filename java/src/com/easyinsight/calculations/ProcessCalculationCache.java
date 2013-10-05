@@ -34,23 +34,25 @@ public class ProcessCalculationCache implements ICalculationCache {
             }
             rows.add(row);
         }
-        for (List<IRow> rows : rowMap.values()) {
-            Collections.sort(rows, new Comparator<IRow>() {
+        if (sortField != null) {
+            for (List<IRow> rows : rowMap.values()) {
+                Collections.sort(rows, new Comparator<IRow>() {
 
-                public int compare(IRow iRow, IRow iRow1) {
-                    Value val1 = iRow.getValue(sortField);
-                    Value val2 = iRow1.getValue(sortField);
-                    if (val1.type() == Value.EMPTY) {
-                        return -1;
-                    } else if (val2.type() == Value.EMPTY) {
-                        return 1;
-                    } else {
-                        DateValue dateValue1 = (DateValue) val1;
-                        DateValue dateValue2 = (DateValue) val2;
-                        return dateValue1.getDate().compareTo(dateValue2.getDate());
+                    public int compare(IRow iRow, IRow iRow1) {
+                        Value val1 = iRow.getValue(sortField);
+                        Value val2 = iRow1.getValue(sortField);
+                        if (val1.type() == Value.EMPTY) {
+                            return -1;
+                        } else if (val2.type() == Value.EMPTY) {
+                            return 1;
+                        } else {
+                            DateValue dateValue1 = (DateValue) val1;
+                            DateValue dateValue2 = (DateValue) val2;
+                            return dateValue1.getDate().compareTo(dateValue2.getDate());
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }
 
