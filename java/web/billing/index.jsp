@@ -264,7 +264,7 @@
                         <div class="form-group">
                             <label class="form-label" for="ccexpMonth">Expiration date:</label>
                             <div class="controls">
-                                <select class="form-control" id="ccexpMonth">
+                                <select id="ccexpMonth">
                                     <option value="01">01 - January</option>
                                     <option value="02">02 - February</option>
                                     <option value="03">03 - March</option>
@@ -278,7 +278,7 @@
                                     <option value="11">11 - November</option>
                                     <option value="12">12 - December</option>
                                 </select> /
-                                <select class="form-control" id="ccexpYear">
+                                <select id="ccexpYear">
                                     <option value="10">10</option>
                                     <option value="11">11</option>
                                     <option value="12">12</option>
@@ -294,7 +294,7 @@
                             </div>
                         </div>
                         <p><%= billingMessage %></p>
-                        <button class="btn btn-inverse" type="submit" value="" name="commit">Submit</button>
+                        <button class="btn btn-default" type="submit" value="" name="commit">Submit</button>
                     </fieldset>
                 </form>
             </div>
