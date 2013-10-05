@@ -7,6 +7,8 @@ package com.easyinsight.account
 		public var successful:Boolean;
 		public var userID:int;
 		public var failureMessage:String;
+        public var token:String;
+        public var url:String;
 		
 		public function UserCreationResponse()
 		{

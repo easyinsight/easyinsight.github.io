@@ -38,6 +38,7 @@
             currencySymbol = accountSettings.currencySymbol;
             firstDayOfWeek = accountSettings.firstDayOfWeek;
             defaultMaxResults = String(accountSettings.maxResults);
+            sendEmail = accountSettings.sendEmail;
         }
 
         private function save():void {
@@ -47,6 +48,7 @@
             accountSettings.currencySymbol = currencySymbolInput.text;
             accountSettings.firstDayOfWeek = dayBox.selectedItem.data;
             accountSettings.maxResults = int(defaultMaxResultsInput.text);
+            accountSettings.sendEmail = emailSetupCheckbox.selected;
             ProgressAlert.alert(this, "Saving settings...", null, userService.saveAccountSettings);
             User.getInstance().dateFormat = accountSettings.dateFormat;
             userService.saveAccountSettings.send(accountSettings);
@@ -69,6 +71,9 @@
 
         [Bindable]
         private var dateFormat:int;
+
+        [Bindable]
+        private var sendEmail:Boolean;
         ]]></mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
         <mx:method name="getAccountSettings" result="gotSettings()"/>
@@ -115,6 +120,9 @@
             </mx:FormItem>
             <mx:FormItem label="Default Max Rows for List Reports:">
                 <mx:TextInput id="defaultMaxResultsInput" text="{defaultMaxResults}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Send Email to New Users:">
+                <mx:CheckBox id="emailSetupCheckbox" selected="{sendEmail}"/>
             </mx:FormItem>
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">

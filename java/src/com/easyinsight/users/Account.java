@@ -264,6 +264,17 @@ public class Account {
     @Column(name="hourly_refresh_enabled")
     private boolean hourlyRefreshEnabled;
 
+    @Column(name="send_emails_to_new_users")
+    private boolean sendEmailsToNewUsers = true;
+
+    public boolean isSendEmailsToNewUsers() {
+        return sendEmailsToNewUsers;
+    }
+
+    public void setSendEmailsToNewUsers(boolean sendEmailsToNewUsers) {
+        this.sendEmailsToNewUsers = sendEmailsToNewUsers;
+    }
+
     public boolean isHourlyRefreshEnabled() {
         return hourlyRefreshEnabled;
     }

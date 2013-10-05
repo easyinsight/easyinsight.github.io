@@ -496,7 +496,47 @@ public class UserAccountAdminService {
     public static final int DEFAULT = 1;
     public static final int GOOGLE_APPS = 2;
 
-    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, boolean requirePasswordChange, final int source) {
+    public UserCreationResponse regenerateInviteLink(long userID) {
+        SecurityUtil.authorizeAccountAdmin();
+        long accountID = SecurityUtil.getAccountID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT EMAIL, ACCOUNT.subdomain_enabled FROM USER, ACCOUNT WHERE USER.USER_ID = ? AND ACCOUNT.ACCOUNT_ID = ? AND " +
+                    "USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID");
+            queryStmt.setLong(1, userID);
+            queryStmt.setLong(2, accountID);
+            ResultSet rs = queryStmt.executeQuery();
+            rs.next();
+            boolean subdomainEnabled = rs.getBoolean(2);
+            String loginURL;
+            if (subdomainEnabled) {
+                loginURL = "https://therapyworks.easy-insight.com/";
+            } else {
+                loginURL = "https://www.easy-insight.com/app";
+            }
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM new_user_link WHERE user_id = ?");
+            deleteStmt.setLong(1, userID);
+            deleteStmt.executeUpdate();
+            UserCreationResponse userCreationResponse = new UserCreationResponse(userID);
+            String token = RandomTextGenerator.generateText(30);
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO new_user_link (user_id, date_issued, token) values (?, ?, ?)");
+            saveStmt.setLong(1, userID);
+            saveStmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+            saveStmt.setString(3, token);
+            saveStmt.execute();
+            userCreationResponse.setToken(token);
+            userCreationResponse.setUrl(loginURL + "app/newUser?token=" + token);
+            return userCreationResponse;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, boolean requirePasswordChange, final int source,
+                                                 boolean sendEmail) {
         SecurityUtil.authorizeAccountAdmin();
         long accountID = SecurityUtil.getAccountID();
         UserCreationResponse userCreationResponse;
@@ -577,16 +617,27 @@ public class UserAccountAdminService {
                         }
                     }
                     conn.commit();
-                    new Thread(new Runnable() {
-                        public void run() {
-                            if (source == GOOGLE_APPS) {
-                                new AccountMemberInvitation().sendGoogleAppsAccountEmail(userEmail, adminFirstName, adminName, accountName, adminEmail);
-                            } else {
-                                new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password, accountName, loginURL, adminEmail, sso);
-                            }
-                        }
-                    }).start();
                     userCreationResponse = new UserCreationResponse(user.getUserID());
+                    if (!sendEmail) {
+                        String token = RandomTextGenerator.generateText(30);
+                        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO new_user_link (user_id, date_issued, token) values (?, ?, ?)");
+                        saveStmt.setLong(1, user.getUserID());
+                        saveStmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+                        saveStmt.setString(3, token);
+                        saveStmt.execute();
+                        userCreationResponse.setToken(token);
+                        userCreationResponse.setUrl(loginURL + "app/newUser?token=" + token);
+                    } else {
+                        new Thread(new Runnable() {
+                            public void run() {
+                                if (source == GOOGLE_APPS) {
+                                    new AccountMemberInvitation().sendGoogleAppsAccountEmail(userEmail, adminFirstName, adminName, accountName, adminEmail);
+                                } else {
+                                    new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password, accountName, loginURL, adminEmail, sso);
+                                }
+                                }
+                        }).start();
+                    }
                 }
             } catch (Exception e) {
                 LogClass.error(e);
@@ -610,8 +661,8 @@ public class UserAccountAdminService {
         return userCreationResponse;
     }
 
-    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, boolean requirePasswordChange) {
-        return addUserToAccount(userTransferObject, userDLSList, requirePasswordChange, DEFAULT);
+    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, boolean requirePasswordChange, boolean sendEmail) {
+        return addUserToAccount(userTransferObject, userDLSList, requirePasswordChange, DEFAULT, sendEmail);
     }
 
     /*
@@ -1024,7 +1075,7 @@ public class UserAccountAdminService {
 
         PreparedStatement statsStmt = conn.prepareStatement("SELECT max_users, max_size, core_small_biz_connections, addon_small_biz_connections," +
                 "core_designers, core_storage, addon_storage_units, pricing_model, addon_designers, addon_quickbase_connections," +
-                "unlimited_quickbase_connections, addon_salesforce_connections FROM account where account_id = ?");
+                "unlimited_quickbase_connections, addon_salesforce_connections, send_emails_to_new_users FROM account where account_id = ?");
         statsStmt.setLong(1, accountID);
         ResultSet statRS = statsStmt.executeQuery();
         statRS.next();
@@ -1040,7 +1091,7 @@ public class UserAccountAdminService {
         int addonQuickbaseConnections = statRS.getInt(10);
         boolean unlimitedQuickbaseConnections = statRS.getBoolean(11);
         int addonSalesforceConnections = statRS.getInt(12);
-
+        boolean sendEmailsToNewUsers = statRS.getBoolean(13);
         statsStmt.close();
 
         PreparedStatement dataSourceStmt = conn.prepareStatement("SELECT DATA_FEED_ID, FEED_TYPE FROM DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE " +
@@ -1126,6 +1177,8 @@ public class UserAccountAdminService {
         accountStats.setUsedSpace(usedSize);
         accountStats.setUsedSpaceString(Account.humanReadableByteCount(usedSize, true));
 
+        accountStats.setSendEmail(sendEmailsToNewUsers);
+
         if (pricingModel == Account.TIERED) {
             accountStats.setMaxSpace(maxSize);
             accountStats.setMaxSpaceString(Account.humanReadableByteCount(maxSize, true));
@@ -1159,6 +1212,7 @@ public class UserAccountAdminService {
             account.setReportSharingEnabled(accountSettings.isReportSharing());
             account.setCurrencySymbol(accountSettings.getCurrencySymbol());
             account.setMaxRecords(accountSettings.getMaxResults());
+            account.setSendEmailsToNewUsers(accountSettings.isSendEmail());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -1188,6 +1242,7 @@ public class UserAccountAdminService {
             accountSettings.setReportSharing(account.isReportSharingEnabled());
             accountSettings.setCurrencySymbol(account.getCurrencySymbol());
             accountSettings.setMaxResults(account.getMaxRecords());
+            accountSettings.setSendEmail(account.isSendEmailsToNewUsers());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);

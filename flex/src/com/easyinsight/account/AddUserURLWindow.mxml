@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" horizontalAlign="center">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var url:String;
+        ]]></mx:Script>
+    <mx:Text text="Copy the following URL and send it to the user. He or she will be prompted to set a password on first login."/>
+    <mx:HRule/>
+    <mx:Text text="{url}"/>
+    <util:SaveButton label="Copy to Clipboard" click="System.setClipboard(url)"/>
+    <mx:HRule/>
+    <util:SaveButton label="Close" click="PopUpManager.removePopUp(this)"/>
+</util:EISlimWindow>
