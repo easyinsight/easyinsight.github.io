@@ -1252,6 +1252,38 @@ public class UserService {
         return userServiceResponse;
     }
 
+    public UserServiceResponse authenticateWithEncrypted2(String userName, String encryptedPassword) {
+        UserServiceResponse userServiceResponse;
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        List results;
+        try {
+            conn.setAutoCommit(false);
+            results = session.createQuery("from User where email = ?").setString(0, userName).list();
+            if (results.size() > 0) {
+                User user = (User) results.get(0);
+                String actualPassword = user.getPassword();
+                if (encryptedPassword.equals(actualPassword)) {
+                    userServiceResponse = UserServiceResponse.createResponse(user, session, conn);
+                } else {
+                    userServiceResponse = new UserServiceResponse(false, "Invalid username or password, please try again.");
+                }
+            } else {
+                userServiceResponse = new UserServiceResponse(false, "Invalid username or password, please try again.");
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException();
+        } finally {
+            conn.setAutoCommit(true);
+            session.close();
+            Database.closeConnection(conn);
+        }
+        return userServiceResponse;
+    }
+
     public List<Scenario> getScenarios() {
         Session session = Database.instance().createSession();
         try {
