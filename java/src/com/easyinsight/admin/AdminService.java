@@ -46,6 +46,32 @@ public class AdminService {
         UserThreadMutex.release();
     }
 
+    public void disableGenerators() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement disableStmt = conn.prepareStatement("update task_generator set task_generator.disabled_generator = ? where task_generator.task_generator_id in (select data_activity_task_generator.task_generator_id from data_activity_task_generator, SCHEDULED_DATA_SOURCE_REFRESH, upload_policy_users, user, account where data_activity_task_generator.scheduled_activity_id = SCHEDULED_DATA_SOURCE_REFRESH.scheduled_account_activity_id and SCHEDULED_DATA_SOURCE_REFRESH.data_source_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id and user.account_id = account.account_id and (account.account_state = ?))");
+            disableStmt.setBoolean(1, true);
+            disableStmt.setLong(2, Account.DELINQUENT);
+            disableStmt.executeUpdate();
+            disableStmt.close();
+
+            disableStmt.setBoolean(1, false);
+            disableStmt.setLong(2, Account.ACTIVE);
+            disableStmt.executeUpdate();
+
+            disableStmt.setBoolean(1, false);
+            disableStmt.setLong(2, Account.TRIAL);
+            disableStmt.executeUpdate();
+            disableStmt.close();
+
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void fixTrialAccounts() {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
