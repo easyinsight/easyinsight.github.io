@@ -226,43 +226,43 @@
                         <input id="customer_vault_id" type="hidden" value="<%= account.getAccountID() %>" name="customer_vault_id" />
                         <input id="tr_data" type="hidden" value="<%= trData %>" name="tr_data"/>
 
-                        <div class="control-group">
-                            <label class="control-label" for="firstname">First Name:</label>
+                        <div class="form-group">
+                            <label class="form-label" for="firstname">First Name:</label>
                             <div class="controls">
-                                <input id="firstname" type="text" value="" name="customer[first_name]" class="col-md-3"/>
+                                <input id="firstname" class="form-control" type="text" value="" name="customer[first_name]" class="col-md-3"/>
                             </div>
 
                         </div>
-                        <div class="control-group">
-                            <label class="control-label" for="lastname">Last Name:</label>
+                        <div class="form-group">
+                            <label class="form-label" for="lastname">Last Name:</label>
                             <div class="controls">
-                                <input id="lastname" type="text" value="" name="customer[last_name]" class="col-md-3"/>
+                                <input id="lastname" class="form-control" type="text" value="" name="customer[last_name]" class="col-md-3"/>
                             </div>
                         </div>
 
-                        <div class="control-group">
-                            <label class="control-label" for="zip">Billing Zip/Postal Code:</label>
+                        <div class="form-group">
+                            <label class="form-label" for="zip">Billing Zip/Postal Code:</label>
                             <div class="controls">
-                                <input id="zip" type="text" value="" name="customer[credit_card][billing_address][postal_code]" />
+                                <input id="zip" type="text" class="form-control" value="" name="customer[credit_card][billing_address][postal_code]" />
                             </div>
                         </div>
 
-                        <div class="control-group">
-                            <label class="control-label" for="ccnumber">Credit Card Number:</label>
+                        <div class="form-group">
+                            <label class="form-label" for="ccnumber">Credit Card Number:</label>
                             <div class="controls">
-                                <input id="ccnumber" type="text" style="width:16.5em" name="customer[credit_card][number]"/>
+                                <input class="form-control" id="ccnumber" type="text" style="width:16.5em" name="customer[credit_card][number]"/>
                             </div>
                         </div>
 
-                        <div class="control-group">
-                            <label class="control-label" for="cvv">CVV/CVC:</label>
+                        <div class="form-group">
+                            <label class="form-label" for="cvv">CVV/CVC:</label>
                             <div class="controls">
-                                <input id="cvv" type="text" value="" name="customer[credit_card][cvv]" style="width:3.5em" />
+                                <input id="cvv" class="form-control" type="text" value="" name="customer[credit_card][cvv]" style="width:3.5em" />
                             </div>
                         </div>
 
-                        <div class="control-group">
-                            <label class="control-label" for="ccexpMonth">Expiration date:</label>
+                        <div class="form-group">
+                            <label class="form-label" for="ccexpMonth">Expiration date:</label>
                             <div class="controls">
                                 <select id="ccexpMonth">
                                     <option value="01">01 - January</option>
@@ -294,7 +294,7 @@
                             </div>
                         </div>
                         <p><%= billingMessage %></p>
-                        <button class="btn btn-inverse" type="submit" value="" name="commit">Submit</button>
+                        <button class="btn btn-default" type="submit" value="" name="commit">Submit</button>
                     </fieldset>
                 </form>
             </div>

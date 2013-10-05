@@ -33,8 +33,13 @@ public class EIDateFormatNoShiftFunction extends Function implements IFunction {
             throw new FunctionException("We couldn't parse the value of " + value.toString() + " as a date.");
         }
 
+
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(minusQuotes(getParameter(1)).toString());
-        return new StringValue(simpleDateFormat.format(date));
+        String string = simpleDateFormat.format(date);
+        if (calculationMetadata.getInsightRequestMetadata() != null && calculationMetadata.getInsightRequestMetadata().isLogReport()) {
+            System.out.println("Translated " + date + " to " + string);
+        }
+        return new StringValue(string);
     }
 
     @Override

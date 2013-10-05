@@ -17,6 +17,9 @@ public class AnalysisItemWrapper extends EventDispatcher
 		public function AnalysisItemWrapper(feedNode:FeedNode)	{
 			this._feedNode = feedNode;
 			displayName = feedNode.display;
+            if (displayName == null) {
+                displayName = "";
+            }
             _children = new ArrayCollection();
             for each (var child:FeedNode in feedNode.children) {
                 _children.addItem(new AnalysisItemWrapper(child));

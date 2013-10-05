@@ -107,7 +107,7 @@ public class DataService {
                     }
                 }
             }
-            timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed);
+            timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed, insightRequestMetadata);
             return feed.getMetadata(analysisItem, insightRequestMetadata, conn, report, additionalFilters, requester);
         } catch (ReportException re) {
             AnalysisItemResultMetadata metadata = new AnalysisItemResultMetadata();
@@ -873,11 +873,14 @@ public class DataService {
         }
     }
 
-    private static void timeshift(Collection<AnalysisItem> items, Collection<FilterDefinition> filters, Feed dataSource) {
+    private static void timeshift(Collection<AnalysisItem> items, Collection<FilterDefinition> filters, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
         for (AnalysisItem item : items) {
             if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension dateDim = (AnalysisDateDimension) item;
                 boolean dateTime = !dateDim.isDateOnlyField() && dataSource.getDataSource().checkDateTime(item.toOriginalDisplayName(), item.getKey());
+                if (insightRequestMetadata.isLogReport()) {
+                    System.out.println("Setting " + dateDim.toDisplay() + " to timeshift of " + dateTime);
+                }
                 dateDim.setTimeshift(dateTime);
             }
         }
@@ -1906,7 +1909,7 @@ public class DataService {
             insightRequestMetadata.setNewFilterStrategy(analysisDefinition.isNewFilterStrategy());
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
 
-            timeshift(validQueryItems, filters, feed);
+            timeshift(validQueryItems, filters, feed, insightRequestMetadata);
             dataSet = retrieveDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
             pipeline = new StandardReportPipeline(insightRequestMetadata.getIntermediatePipelines());
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata, allFields);

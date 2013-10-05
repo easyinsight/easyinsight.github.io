@@ -52,7 +52,11 @@ public class EIDateFormatFunction extends Function implements IFunction {
         if (cal != null) {
             simpleDateFormat.setCalendar(cal);
         }
-        return new StringValue(simpleDateFormat.format(date));
+        String string = simpleDateFormat.format(date);
+        if (calculationMetadata.getInsightRequestMetadata() != null && calculationMetadata.getInsightRequestMetadata().isLogReport()) {
+            System.out.println("Translated " + date + " to " + string);
+        }
+        return new StringValue(string);
     }
 
     @Override
