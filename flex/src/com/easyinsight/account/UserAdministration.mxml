@@ -59,12 +59,14 @@
             if (user.analyst) {
                 var userProfileEditor:NewUserDialog = new NewUserDialog();
                 userProfileEditor.user = user;
+                userProfileEditor.sendEmail = accountStats.sendEmailToNewUsers;
                 userProfileEditor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount, false, 0, true);
                 PopUpManager.addPopUp(userProfileEditor, this, true);
                 PopUpUtil.centerPopUp(userProfileEditor);
             } else {
                 var basicEditor:NamedUserDialog = new NamedUserDialog();
                 basicEditor.user = user;
+                basicEditor.sendEmail = accountStats.sendEmailToNewUsers;
                 basicEditor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount, false, 0, true);
                 PopUpManager.addPopUp(basicEditor, this, true);
                 PopUpUtil.centerPopUp(basicEditor);

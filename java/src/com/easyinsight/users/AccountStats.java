@@ -43,8 +43,17 @@ public class AccountStats {
     private int addonSalesforceConnections;
     private int usedQuickbaseConnections;
     private int usedSalesforceConnections;
+    private boolean sendEmail;
 
     private List<DataSourceStats> statsList;
+
+    public boolean isSendEmail() {
+        return sendEmail;
+    }
+
+    public void setSendEmail(boolean sendEmail) {
+        this.sendEmail = sendEmail;
+    }
 
     public boolean isUnlimitedQuickbaseConnections() {
         return unlimitedQuickbaseConnections;

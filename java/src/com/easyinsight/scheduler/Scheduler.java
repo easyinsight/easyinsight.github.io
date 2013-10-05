@@ -142,7 +142,7 @@ public class Scheduler {
     }
 
     private List<TaskGenerator> retrieveTaskGenerators(Session session) {
-        return session.createQuery("from TaskGenerator").list();
+        return session.createQuery("from TaskGenerator where disabledGenerator = ?").setBoolean(0, false).list();
     }
 
     private void releaseLock(String lockName) {

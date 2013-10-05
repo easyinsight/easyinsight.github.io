@@ -19,12 +19,14 @@
         import com.easyinsight.preferences.Persona;
         import com.easyinsight.preferences.UserDLS;
         import com.easyinsight.preferences.UserDLSConfig;
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
         import mx.containers.VBox;
         import mx.controls.Alert;
+        import mx.core.Application;
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
 
@@ -40,6 +42,8 @@
         private var firstName:String;
         [Bindable]
         private var userTitle:String;
+
+        public var sendEmail:Boolean;
 
         private var _accountAdmin:Boolean;
 
@@ -83,6 +87,12 @@
             var userCreationResponse:UserCreationResponse = creationService.addUserToAccount.lastResult as UserCreationResponse;
             if (userCreationResponse.successful) {
                 dispatchEvent(new RefreshAccountEvent());
+                if (!sendEmail) {
+                    var window:AddUserURLWindow = new AddUserURLWindow();
+                    window.url = userCreationResponse.url;
+                    PopUpManager.addPopUp(window, DisplayObject(Application.application), true);
+                    PopUpUtil.centerPopUp(window);
+                }
                 PopUpManager.removePopUp(this);
             } else {
                 Alert.show(userCreationResponse.failureMessage);
@@ -95,6 +105,11 @@
         }
 
         private function initHandlers():void {
+
+            if (!sendEmail) {
+                resendLabel = "Recreate Invite Link";
+            }
+
             if (userID == 0) {
                 currentState = "initialCreate";
                 resendButton.parent.removeChild(resendButton);
@@ -147,7 +162,7 @@
                 }
                 if (userID == 0) {
                     ProgressAlert.alert(this, "Adding user to account...", null, creationService.addUserToAccount);
-                    creationService.addUserToAccount.send(user, dlsList, requirePasswordChangeCheckbox.selected);
+                    creationService.addUserToAccount.send(user, dlsList, requirePasswordChangeCheckbox.selected, sendEmail);
                 } else {
                     ProgressAlert.alert(this, "Updating user...", null, creationService.updateUser);
                     creationService.updateUser.send(user, dlsList);
@@ -237,13 +252,28 @@
         }
 
         private function resendInvitation():void {
-            ProgressAlert.alert(this, "Resending the invitation email...", "The invitation email should have been resent.", creationService.resendInvite);
-            creationService.resendInvite.send(userID);
+            if (sendEmail) {
+                ProgressAlert.alert(this, "Resending the invitation email...", "The invitation email should have been resent.", creationService.resendInvite);
+                creationService.resendInvite.send(userID);
+            } else {
+                creationService.regenerateInviteLink.send(userID);
+            }
+        }
+
+        private function regenerated():void {
+            var userCreationResponse:UserCreationResponse = creationService.regenerateInviteLink.lastResult as UserCreationResponse;
+            var window:AddUserURLWindow = new AddUserURLWindow();
+            window.url = userCreationResponse.url;
+            PopUpManager.addPopUp(window, DisplayObject(Application.application), true);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function resent():void {
 
         }
+
+        [Bindable]
+        private var resendLabel:String = "Resend Invitation";
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
@@ -296,7 +326,7 @@
     </mx:TabNavigator>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="{createLabel}" click="save()"/>
-        <util:SaveButton label="Resend Invitation" click="resendInvitation()" id="resendButton"/>
+        <util:SaveButton label="{resendLabel}" click="resendInvitation()" id="resendButton"/>
         <util:SaveButton label="Convert to Designer" click="convertToViewer()" id="convertButton"/>
         <util:CancelButton label="Cancel" click="cancel()"/>
     </mx:HBox>
@@ -308,5 +338,6 @@
 		<mx:method name="updateUser" result="updated()"/>
 		<mx:method name="convertUser" result="converted()"/>
         <mx:method name="resendInvite" result="resent()"/>
+        <mx:method name="regenerateInviteLink" result="regenerated()"/>
 	</mx:RemoteObject>
 </util:EISlimWindow>

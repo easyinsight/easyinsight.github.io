@@ -15,8 +15,17 @@ public class AccountSettings {
     private String currencySymbol;
     private int firstDayOfWeek;
     private int maxResults;
+    private boolean sendEmail;
 
     public AccountSettings() {
+    }
+
+    public boolean isSendEmail() {
+        return sendEmail;
+    }
+
+    public void setSendEmail(boolean sendEmail) {
+        this.sendEmail = sendEmail;
     }
 
     public int getMaxResults() {

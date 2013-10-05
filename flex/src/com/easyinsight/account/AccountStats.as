@@ -33,6 +33,8 @@ public class AccountStats {
     public var apiUsedToday:Number;
     public var apiMaxToday:Number;
     public var statsList:ArrayCollection;
+
+    public var sendEmailToNewUsers:Boolean;
     
     public function AccountStats() {
     }

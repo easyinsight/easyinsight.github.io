@@ -57,7 +57,7 @@ public class FindRecord extends Function {
         ProcessCalculationCache processCalculationCache = (ProcessCalculationCache) calculationMetadata.getCache(new ProcessCacheBuilder(instanceIDField, null), processName);
         Value instanceValue = getParameter(0);
         List<IRow> rows = processCalculationCache.rowsForValue(instanceValue);
-        if (rows.size() == 0) {
+        if (rows == null || rows.size() == 0) {
             return new EmptyValue();
         }
         for (IRow row : rows) {

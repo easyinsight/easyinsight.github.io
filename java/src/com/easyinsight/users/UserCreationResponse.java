@@ -9,6 +9,8 @@ public class UserCreationResponse {
     private boolean successful;
     private long userID;
     private String failureMessage;
+    private String token;
+    private String url;
 
     public UserCreationResponse(String failureMessage) {
         this.failureMessage = failureMessage;
@@ -18,6 +20,22 @@ public class UserCreationResponse {
     public UserCreationResponse(long userID) {
         this.userID = userID;
         successful = true;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public boolean isSuccessful() {
