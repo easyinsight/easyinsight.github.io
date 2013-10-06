@@ -53,19 +53,15 @@ public class FindRecord extends Function {
         if (sortField == null) {
             throw new FunctionException("Could not find the specified field " + findName);
         }
-        System.out.println("Instance ID field = " + instanceIDField.toDisplay());
         String processName = minusQuotes(getParameter(1)).toString();
         ProcessCalculationCache processCalculationCache = (ProcessCalculationCache) calculationMetadata.getCache(new ProcessCacheBuilder(instanceIDField, null), processName);
         Value instanceValue = getParameter(0);
-        System.out.println("Instance ID value = " + instanceValue);
         List<IRow> rows = processCalculationCache.rowsForValue(instanceValue);
         if (rows == null || rows.size() == 0) {
-            System.out.println("Empty return set");
             return new EmptyValue();
         }
         for (IRow row : rows) {
             Value findValue = row.getValue(sortField);
-            System.out.println("\tComparing to " + findValue);
             if (findValue.toString().contains(lookingForValue)) {
                 return row.getValue(targetField);
             }

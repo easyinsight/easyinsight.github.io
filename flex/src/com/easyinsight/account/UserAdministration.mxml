@@ -138,6 +138,7 @@
 
         private function addUser():void {
             var newUserDialog:NewUserDialog = NewUserDialog(PopUpManager.createPopUp(this, NewUserDialog, true));
+            newUserDialog.sendEmail = accountStats.sendEmail;
             newUserDialog.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, addedUser, false, 0, true);
             PopUpUtil.centerPopUp(newUserDialog);
         }
@@ -145,6 +146,7 @@
         private function addBasicUser():void {
             var newUserDialog:NamedUserDialog = NamedUserDialog(PopUpManager.createPopUp(this, NamedUserDialog, true));
             newUserDialog.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, addedUser, false, 0, true);
+            newUserDialog.sendEmail = accountStats.sendEmail;
             PopUpUtil.centerPopUp(newUserDialog);
         }
 
