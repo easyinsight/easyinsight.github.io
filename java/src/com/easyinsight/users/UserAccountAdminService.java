@@ -580,7 +580,7 @@ public class UserAccountAdminService {
                     final String accountName = account.getName();
                     final String loginURL;
                     if (account.isSubdomainEnabled()) {
-                        loginURL = "https://therapyworks.easy-insight.com/";
+                        loginURL = "https://therapyworks.easy-insight.com/app";
                     } else {
                         loginURL = "https://www.easy-insight.com/app";
                     }
@@ -626,7 +626,7 @@ public class UserAccountAdminService {
                         saveStmt.setString(3, token);
                         saveStmt.execute();
                         userCreationResponse.setToken(token);
-                        userCreationResponse.setUrl(loginURL + "app/newUser?token=" + token);
+                        userCreationResponse.setUrl(loginURL + "/newUser?token=" + token);
                     } else {
                         new Thread(new Runnable() {
                             public void run() {
