@@ -34,7 +34,7 @@ public class AccountStats {
     public var apiMaxToday:Number;
     public var statsList:ArrayCollection;
 
-    public var sendEmailToNewUsers:Boolean;
+    public var sendEmail:Boolean;
     
     public function AccountStats() {
     }

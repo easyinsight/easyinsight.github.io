@@ -203,28 +203,24 @@
         <servlet-name>TokenRedirect</servlet-name>
         <display-name>TokenRedirect</display-name>
         <servlet-class>com.easyinsight.users.TokenRedirectServlet</servlet-class>
-        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>UnsubscribeServlet</servlet-name>
         <display-name>UnsubscribeServlet</display-name>
         <servlet-class>com.easyinsight.users.UnsubscribeServlet</servlet-class>
-        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>AccountActivation</servlet-name>
         <display-name>AccountActivation</display-name>
         <servlet-class>com.easyinsight.servlet.AccountActivationServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>Image</servlet-name>
         <display-name>Image</display-name>
         <servlet-class>com.easyinsight.export.ImageServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
     </servlet>
 
     <servlet>
@@ -237,21 +233,18 @@
         <servlet-name>HtmlImage</servlet-name>
         <display-name>HtmlImage</display-name>
         <servlet-class>com.easyinsight.export.HTMLImageServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>Excel</servlet-name>
         <display-name>Excel</display-name>
         <servlet-class>com.easyinsight.export.ExcelServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>ExportExcel</servlet-name>
         <display-name>ExportExcel</display-name>
         <servlet-class>com.easyinsight.export.ExportExcelServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
     </servlet>
 
     <servlet>
@@ -264,7 +257,6 @@
         <servlet-name>ExportActivity</servlet-name>
         <display-name>ExportActivity</display-name>
         <servlet-class>com.easyinsight.export.ExportScheduledActivityServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
     </servlet>
 
     <servlet>
@@ -289,21 +281,18 @@
         <servlet-name>ImportActivity</servlet-name>
         <display-name>ImportActivity</display-name>
         <servlet-class>com.easyinsight.export.ImportScheduledActivityServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>EIAdmin</servlet-name>
         <display-name>EIAdmin</display-name>
         <servlet-class>com.easyinsight.datafeeds.custom.EIAdminServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>EmailReport</servlet-name>
         <display-name>EmailReport</display-name>
         <servlet-class>com.easyinsight.export.EmailServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
     </servlet>
 
     <!--<servlet>
@@ -317,7 +306,6 @@
         <servlet-name>PDF</servlet-name>
         <display-name>PDF</display-name>
         <servlet-class>com.easyinsight.export.PDFServlet</servlet-class>
-        <load-on-startup>3</load-on-startup>
     </servlet>
 
     <servlet>
@@ -329,21 +317,18 @@
         <servlet-name>DefineDataSource</servlet-name>
         <display-name>DefineDataSource</display-name>
         <servlet-class>com.easyinsight.api.v3.DefineDataSourceServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>Me</servlet-name>
         <display-name>Me</display-name>
         <servlet-class>com.easyinsight.api.v3.MeServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>DefineCompositeDataSource</servlet-name>
         <display-name>DefineCompositeDataSource</display-name>
         <servlet-class>com.easyinsight.api.v3.DefineCompositeDataSourceServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <!--<servlet>
@@ -357,105 +342,96 @@
         <servlet-name>ReplaceRows</servlet-name>
         <display-name>ReplaceRows</display-name>
         <servlet-class>com.easyinsight.api.v3.ReplaceRowsServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>AddRows</servlet-name>
         <display-name>AddRows</display-name>
         <servlet-class>com.easyinsight.api.v3.AddRowsServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>UpdateRows</servlet-name>
         <display-name>UpdateRows</display-name>
         <servlet-class>com.easyinsight.api.v3.UpdateRowsServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>DrillThrough</servlet-name>
         <display-name>DrillThrough</display-name>
         <servlet-class>com.easyinsight.html.DrillthroughServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>NewUser</servlet-name>
+        <display-name>NewUser</display-name>
+        <servlet-class>com.easyinsight.servlet.NewUserServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>UpdateRowsByPK</servlet-name>
         <display-name>UpdateRowsByPK</display-name>
         <servlet-class>com.easyinsight.api.v3.UpdateRowsPKServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>BulkUpdateRows</servlet-name>
         <display-name>BulkUpdateRows</display-name>
         <servlet-class>com.easyinsight.api.v3.BulkUpdateRowsServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>RunReport</servlet-name>
         <display-name>RunReport</display-name>
         <servlet-class>com.easyinsight.api.v3.RunReportServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>RunReportJSON</servlet-name>
         <display-name>RunReportJSON</display-name>
         <servlet-class>com.easyinsight.api.v3.RunReportJSONServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>Commit</servlet-name>
         <display-name>Commit</display-name>
         <servlet-class>com.easyinsight.api.v3.CommitServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>HtmlExport</servlet-name>
         <display-name>HtmlExport</display-name>
         <servlet-class>com.easyinsight.html.HtmlExportServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>Gauge</servlet-name>
         <display-name>Gauge</display-name>
         <servlet-class>com.easyinsight.html.GaugeServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>ReportHeader</servlet-name>
         <display-name>ReportHeader</display-name>
         <servlet-class>com.easyinsight.html.ReportHeaderImageServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>SendGridEmailEvent</servlet-name>
         <display-name>SendGridEmailEvent</display-name>
         <servlet-class>com.easyinsight.email.SendGridEmailEventServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>DashboardPiece</servlet-name>
         <display-name>DashboardPiece</display-name>
         <servlet-class>com.easyinsight.html.DashboardPieceServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>BeginTransaction</servlet-name>
         <display-name>BeginTransaction</display-name>
         <servlet-class>com.easyinsight.api.v3.BeginTransactionServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
@@ -469,91 +445,78 @@
         <servlet-name>Health</servlet-name>
         <display-name>Health</display-name>
         <servlet-class>com.easyinsight.api.v3.HealthServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>OAuth</servlet-name>
         <display-name>OAuth</display-name>
         <servlet-class>com.easyinsight.users.OAuthServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>ColumnChart</servlet-name>
         <display-name>ColumnChart</display-name>
         <servlet-class>com.easyinsight.html.ColumnChartServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>PlotChart</servlet-name>
         <display-name>PlotChart</display-name>
         <servlet-class>com.easyinsight.html.PlotChartServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>DiagramChart</servlet-name>
         <display-name>DiagramChart</display-name>
         <servlet-class>com.easyinsight.html.DiagramChartServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>TwoAxisChart</servlet-name>
         <display-name>TwoAxisChart</display-name>
         <servlet-class>com.easyinsight.html.LineChartServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>StackedChart</servlet-name>
         <display-name>StackedChart</display-name>
         <servlet-class>com.easyinsight.html.StackedColumnChartServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>BubbleChart</servlet-name>
         <display-name>BubbleChart</display-name>
         <servlet-class>com.easyinsight.html.BubbleChartServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>DataSourceRefresh</servlet-name>
         <display-name>DataSourceRefresh</display-name>
         <servlet-class>com.easyinsight.html.DataSourceRefreshServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>CompleteInstallation</servlet-name>
         <display-name>CompleteInstallation</display-name>
         <servlet-class>com.easyinsight.html.CompleteInstallationServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>ConnectionInstalled</servlet-name>
         <display-name>ConnectionInstalled</display-name>
         <servlet-class>com.easyinsight.html.ConnectionInstalledServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>RefreshStatus</servlet-name>
         <display-name>RefreshStatus</display-name>
         <servlet-class>com.easyinsight.html.RefreshStatusServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>WhiteLabelImage</servlet-name>
         <display-name>WhiteLabelImage</display-name>
         <servlet-class>com.easyinsight.html.WhiteLabelImageServlet</servlet-class>
-        <load-on-startup>4</load-on-startup>
     </servlet>
 
     <!--<servlet>
@@ -704,6 +667,11 @@
     <servlet-mapping>
         <servlet-name>ReplaceRows</servlet-name>
         <url-pattern>/xml/replaceRows</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>NewUser</servlet-name>
+        <url-pattern>/newUser</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
