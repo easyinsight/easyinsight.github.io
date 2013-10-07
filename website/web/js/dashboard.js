@@ -82,11 +82,9 @@ var toFilterString = function (f) {
     if (!f.enabled || f.override)
         return $.extend(c, {enabled: false});
     else if (f.type == "single")
-        return $.extend(c, {selected: encodeURIComponent(f["selected"])})
+        return $.extend(c, {selected: f["selected"]})
     else if (f.type == "multiple")
-        return $.extend(c, {selected: $.map(f["selected"],function (e, i) {
-            return encodeURIComponent(e);
-        }) });
+        return $.extend(c, {selected: f["selected"] });
     else if (f.type == "rolling") {
         if (f.interval_type == "18")
             return $.extend(c, {interval_type: f.interval_type, direction: f.direction, value: f.value, interval: f.interval });
