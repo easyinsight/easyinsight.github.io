@@ -114,9 +114,20 @@ public class HtmlServlet extends HttpServlet {
                                 }
                             } else if (filter instanceof RollingFilterDefinition) {
                                 RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;
-                                Integer value = curFilter != null ? (Integer) curFilter.get("interval_type") : null;
-                                if (value != null) {
-                                    int filterValue = value;
+                                Object obj = curFilter != null ? curFilter.get("interval_type") : null;
+                                Integer filterValue = null;
+                                if (obj != null && obj instanceof String) {
+                                    String string = (String) obj;
+                                    try {
+                                        filterValue = Integer.parseInt(string);
+                                    } catch (NumberFormatException e) {
+                                        // ignore
+                                    }
+                                } else if (obj != null && obj instanceof Integer) {
+                                    filterValue = (Integer) obj;
+                                }
+
+                                if (filterValue != null) {
                                     rollingFilterDefinition.setInterval(filterValue);
                                     if (filterValue == MaterializedRollingFilterDefinition.CUSTOM) {
                                         int direction = Integer.parseInt((String) curFilter.get("direction"));
