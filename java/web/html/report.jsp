@@ -69,6 +69,9 @@
         jj.put("id", report.getUrlKey());
         jj.put("metadata", report.toJSON(new HTMLReportMetadata(), new ArrayList<FilterDefinition>()));
         intermediate.put("report", jj);
+        if(drillthroughArgh != null) {
+            reportJSON.put("drillthroughID", drillthroughArgh);
+        }
 %>
 
 <head>
