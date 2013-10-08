@@ -9,6 +9,8 @@
 <%@ page import="com.easyinsight.logging.LogClass" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="com.easyinsight.html.*" %>
+<%@ page import="org.json.JSONObject" %>
+<%@ page import="org.json.JSONArray" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -47,7 +49,26 @@
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(report.getDataFeedID());
 
         UIData uiData = Utils.createUIData();
-
+        JSONObject reportJSON = new JSONObject();
+        reportJSON.put("name", report.getName());
+        reportJSON.put("id", -1);
+        reportJSON.put("filters", new JSONArray());
+        JSONObject styleJSON = new JSONObject();
+        styleJSON.put("main_stack_start", "#FFFFFF");
+        styleJSON.put("alternative_stack_start", "#FFFFFF");
+        reportJSON.put("styles", styleJSON);
+        JSONObject intermediate = new JSONObject();
+        reportJSON.put("base", intermediate);
+        intermediate.put("show_label", false);
+        intermediate.put("id", report.getUrlKey() + "_container");
+        intermediate.put("overrides", new JSONArray());
+        intermediate.put("filters", new JSONArray());
+        intermediate.put("type", "report");
+        JSONObject jj = new JSONObject();
+        jj.put("name", report.getName());
+        jj.put("id", report.getUrlKey());
+        jj.put("metadata", report.toJSON(new HTMLReportMetadata(), new ArrayList<FilterDefinition>()));
+        intermediate.put("report", jj);
 %>
 
 <head>
@@ -69,16 +90,10 @@
 %><%= "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + cssInclude + "\" />"%><%
     }
 %>
-    <jsp:include page="methods.jsp">
-        <jsp:param name="reportID" value="<%= report.getUrlKey() %>"/>
-        <jsp:param name="urlKey" value="<%= dataSourceDescriptor.getUrlKey() %>"/>
-    </jsp:include>
-    <jsp:include page="reportLogic.jsp">
-        <jsp:param name="reportID" value="<%= report.getAnalysisID()%>"/>
-        <jsp:param name="drillthroughKey" value="<%= drillthroughArgh%>"/>
-        <jsp:param name="embedded" value="false"/>
-    </jsp:include>
-
+    <script type="text/javascript" src="/js/dashboard.js"></script>
+    <script type="text/javascript" language="JavaScript">
+        var dashboardJSON = <%= reportJSON %>;
+    </script>
 </head>
 <body>
 <jsp:include page="../header.jsp">
@@ -175,45 +190,14 @@
                    </div>
             </div>
         </div>
-<div class="container" id="reportHeader">
-    <%= uiData.createHeader(report.getName()) %>
-    <div class="row" id="filterRow">
-        <div class="col-md-12 filters">
-            <%
-                for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
-                    if (filterDefinition.isShowOnReportView()) {
-            %>
-            <div class="filter"><%=filterDefinition.toHTML(new FilterHTMLMetadata(report))%>
-            </div>
-            <%
-                    }
-                }
-            %>
-        </div>
-    </div>
-</div>
 <div class="container">
     <jsp:include page="exportModalWindow.jsp">
         <jsp:param name="reportID" value="<%= report.getUrlKey()%>"/>
     </jsp:include>
     <jsp:include page="emailReportWindow.jsp"/>
     <jsp:include page="refreshingDataSource.jsp"/>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="well reportWell" style="background-color: #FFFFFF">
-                <div id="chartpseudotooltip" style="z-index:100;"></div>
-                <div id="reportTarget">
-                    <div id="reportTargetReportArea" class="reportArea">
-                        <%= report.rootHTML() %>
-                    </div>
-                    <div class="noData">We didn't find any data for the fields and filters that you specified in the
-                        report.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <%= uiData.createHeader(report.getName()) %>
+    <div id="base"/>
 </div>
 </body>
 <%

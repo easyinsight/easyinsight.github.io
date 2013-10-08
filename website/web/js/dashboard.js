@@ -134,8 +134,9 @@ var renderReport = function (o, dashboardID, reload) {
         fullFilters[curFilters[i].id] = curFilters[i];
     }
     beforeRefresh($("#" + id + " .loading"))();
+    var dashboardComponent = dashboardID == -1 ? "" : ("&dashboardID=" + dashboardID);
     var postData = {
-        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID,
+        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent,
         contentType: "application/json; charset=UTF-8",
         data: JSON.stringify(fullFilters),
         type: "POST"
