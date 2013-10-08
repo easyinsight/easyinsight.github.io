@@ -176,7 +176,7 @@
                                if (visibleFilter) {
                            %>
                            <div class="btn-group">
-                               <button class="btn btn-inverse" onclick="toggleFilters()">Toggle Filters</button>
+                               <button class="btn btn-inverse toggle-filters">Toggle Filters</button>
                            </div>
                            <%
                                }
