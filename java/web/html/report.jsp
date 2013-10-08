@@ -20,20 +20,24 @@
         long reportID;
         List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
         String drillthroughArgh = request.getParameter("drillthroughKey");
+
+        InsightResponse insightResponse = null;
         if (drillthroughArgh != null) {
             DrillThroughData drillThroughData = Utils.drillThroughFiltersForReport(drillthroughArgh);
             drillthroughFilters = drillThroughData.getFilters();
             reportID = drillThroughData.getReportID();
+            insightResponse = new AnalysisService().openAnalysisIfPossibleByID(reportID);
         } else {
             String reportIDString = request.getParameter("reportID");
-            InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
-            if (insightResponse.getStatus() == InsightResponse.SUCCESS) {
-                reportID = insightResponse.getInsightDescriptor().getId();
-            } else if (insightResponse.getStatus() == InsightResponse.PRIVATE_ACCESS) {
-                throw new ReportAccessException();
-            } else {
-                throw new com.easyinsight.analysis.ReportNotFoundException("The report does not exist.");
-            }
+            insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
+        }
+
+        if (insightResponse.getStatus() == InsightResponse.SUCCESS) {
+            reportID = insightResponse.getInsightDescriptor().getId();
+        } else if (insightResponse.getStatus() == InsightResponse.PRIVATE_ACCESS) {
+            throw new ReportAccessException();
+        } else {
+            throw new com.easyinsight.analysis.ReportNotFoundException("The report does not exist.");
         }
         boolean phone = Utils.isPhone(request);
         boolean iPad = Utils.isTablet(request);
