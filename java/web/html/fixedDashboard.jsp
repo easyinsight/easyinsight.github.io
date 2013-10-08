@@ -1,140 +1,82 @@
 <!DOCTYPE html>
-<%@ page import="com.easyinsight.dashboard.DashboardService" %>
-<%@ page import="com.easyinsight.dashboard.Dashboard" %>
-<%@ page import="com.easyinsight.preferences.ApplicationSkin" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
+<%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
+<%@ page import="com.easyinsight.logging.LogClass" %>
+<%@ page import="com.easyinsight.analysis.*" %>
+<%@ page import="java.util.*" %>
+<%@ page import="com.easyinsight.html.*" %>
+<%@ page import="com.easyinsight.dashboard.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
-    String userName = (String) session.getAttribute("userName");
-    com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+
+    String userName = null;
+    if(session.getAttribute("userName") != null) {
+        userName = (String) session.getAttribute("userName");
+        com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+    }
     try {
-        long dashboardID = Long.parseLong(request.getParameter("dashboardID"));
+
+        String dashboardIDString = request.getParameter("dashboardID");
+        long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
+
         Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
-        ApplicationSkin applicationSkin = (ApplicationSkin) session.getAttribute("uiSettings");
-        String headerStyle = "width:100%;overflow: hidden;padding: 10px;";
-        String headerTextStyle = "width: 100%;text-align: center;font-size: 14px;padding-top: 10px;";
-        if (applicationSkin.isReportHeader()) {
-            int reportBackgroundColor = applicationSkin.getReportBackgroundColor();
-            headerStyle += "background-color: " + String.format("#%06X", (0xFFFFFF & reportBackgroundColor));
-            headerTextStyle += "color: " + String.format("#%06X", (0xFFFFFF & applicationSkin.getReportTextColor()));
-        }
+
+        FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, false);
+        DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
+        UIData uiData = Utils.createUIData();
 
 %>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Easy Insight &mdash; <%= StringEscapeUtils.escapeHtml(dashboard.getName()) %></title>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <link href="/css/bootstrap.css" rel="stylesheet">
-    <link href="../assets/css/bootstrap-responsive.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.js"></script>
-    <script type="text/javascript" src="/js/jquery.jqplot.min.js"></script>
-    <script type="text/javascript" src="/js/plugins/jqplot.barRenderer.min.js"></script>
-    <script type="text/javascript" src="/js/plugins/jqplot.categoryAxisRenderer.js"></script>
-    <script type="text/javascript" src="/js//plugins/jqplot.pointLabels.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/css/jquery.jqplot.css" />
+    <title>Easy Insight</title>
+    <jsp:include page="bootstrapHeader.jsp"/>
+    <jsp:include page="reportDashboardHeader.jsp"/>
     <script type="text/javascript">
+        var dashboardJSON = <%= dashboard.toJSON(filterHTMLMetadata) %>;
+        function afterRefresh() {
 
-        var filterBase = {};
-
-        /*$(document).ready(function() {
-         $.get('../htmlExport?reportID=1247', function(data) {
-         $('#reportTarget').html(data)
-         });
-         });*/
-
-        function updateFilter(name) {
-            var optionMenu = document.getElementById(name);
-            var chosenOption = optionMenu.options[optionMenu.selectedIndex];
-            filterBase[name] = chosenOption.value;
-            refreshReport();
-        }
-
-        function refreshDataSource() {
-            $.getJSON('../refreshDataSource?dataSourceID=<%= dashboard.getDataSourceID() %>', function(data) {
-                var callDataID = data["callDataID"];
-                again(callDataID);
-            });
-        }
-
-        function onDataSourceResult(data, callDataID) {
-            var status = data["status"];
-            if (status == 1) {
-                // running
-                again(callDataID);
-            } else if (status == 2) {
-                alert('done');
-            } else {
-                alert('failed');
-            }
-        }
-
-        function again(callDataID) {
-            setTimeout(function() {
-                $.getJSON('../refreshStatus?callDataID=' + callDataID, function(data) {
-                    onDataSourceResult(data, callDataID);
-                });
-            }, 5000);
-        }
-
-        function refreshReport(targetDiv, reportID) {
-            /*var strParams = "";
-             for (var filterValue in filterBase) {
-             var value = filterBase[filterValue];
-             strParams += filterValue + "=" + value + "&";
-             }*/
-            $.get('../htmlExport?reportID='+reportID, function(data) {
-                $(targetDiv).html(data)
-            });
         }
     </script>
+    <script type="text/javascript" src="/js/dashboard.js"></script>
 </head>
 <body>
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <div class="btn-group pull-right">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-user"></i> <%= userName %>
+<nav class="navbar_first navbar navbar-static-top navbar-inverse fixed_dashboard_navbar" role="navigation">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+    </div>
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <ul class="nav navbar-nav navbar-right fixed_dashboard_navbar_toggle">
+            <li>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><!--<button class="btn btn-sm btn-default">-->
+                    <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
                     <span class="caret"></span>
+                    <!--</button>-->
                 </a>
-                <ul class="dropdown-menu">
-                    <%--<li><a href="#">Profile</a></li>
-                    <li class="divider"></li>--%>
+                <ul class="dropdown dropdown-menu">
                     <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
                 </ul>
-            </div>
-        </div>
+            </li>
+        </ul>
     </div>
-</div>
-<div style="<%= headerStyle %>">
-    <div style="background-color: #FFFFFF;padding: 5px;float:left">
-        <%
+</nav>
 
-            if (applicationSkin.getReportHeaderImage() != null) {
-                out.println("<img src=\"/app/reportHeader\"/>");
-            }
-        %>
-    </div>
-    <div style="<%= headerTextStyle %>">
-        <%= StringEscapeUtils.escapeHtml(dashboard.getName()) %>
-    </div>
-</div>
 <div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <%= dashboard.getRootElement().toHTML(filterHTMLMetadata) %>
-        </div>
-    </div>
+    <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>
+    <jsp:include page="refreshingDataSource.jsp"/>
+    <div id="base"/>
 </div>
+
+
 </body>
 <%
     } finally {

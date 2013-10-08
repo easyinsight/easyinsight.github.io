@@ -472,8 +472,8 @@ public class FilterValueDefinition extends FilterDefinition {
             }
         } else {
             String divID = "filter" + getFilterID() + "div";
-            sb.append("<div id=\"").append(divID).append("\" class=\"modal hide\">");
-            sb.append("<div class=\"modal-body\">");
+            sb.append("<div id=\"").append(divID).append("\" class=\"modal\">");
+            sb.append("<div class=\"modal-dialog\"><div class=\"modal-content\"><div class=\"modal-body\">");
             sb.append("<div class=\"control-group\">");
             sb.append("<label class=\"control-label\" for=\"" + filterName + "\">Available Values</label>");
             sb.append("<div class=\"controls\">");
@@ -492,14 +492,16 @@ public class FilterValueDefinition extends FilterDefinition {
                 sb.append("</span></li>");
             }
             sb.append("</ul>");
+            sb.append("</div>");
+            sb.append("</div>");
+            sb.append("</div>");
 
-            sb.append("</div>");
-            sb.append("</div>");
-            sb.append("</div>");
             sb.append("<div class=\"modal-footer\">\n" +
                     "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiFilter('" + filterName + "','" + filterHTMLMetadata.getFilterKey() + "'," + filterHTMLMetadata.createOnChange() + ")\">˝Send</button>\n" +
                     "        <button class=\"btn\" data-dismiss=\"modal\" type=\"button\">Cancel</button>\n" +
                     "    </div>");
+            sb.append("</div>");
+            sb.append("</div>");
             sb.append("</div>");
             sb.append("<div class=\"filterLabel\">");
             if (!isToggleEnabled()) {
