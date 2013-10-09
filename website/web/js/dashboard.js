@@ -539,6 +539,10 @@ $(function () {
             }
             showFilters = !showFilters;
         })
+
+        $(".dashboardReportHeader").click(function(e) {
+            $(".reportMenu", $(e.target).parent()).slideToggle()
+        });
     })
 })
 

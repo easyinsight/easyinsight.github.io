@@ -70,6 +70,7 @@
     border-width: 1px;
     border-style: solid;
     border-color: #999999;
+    cursor: pointer;
 }
 
 .filters {
@@ -168,4 +169,8 @@ a:focus {
 nav.navbar_first {
     padding-bottom: 0px;
     margin-bottom: 0px;
+}
+
+.reportMenu {
+    display: none;
 }
