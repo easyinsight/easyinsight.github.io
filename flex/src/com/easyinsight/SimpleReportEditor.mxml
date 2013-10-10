@@ -511,10 +511,10 @@
             analysisDefinition.joinOverrides = joins;
         }
 
-        [Bindable]
+        /*[Bindable]
         private var defaultManualRun:Boolean;
 
-        private var dataSourceFields:ArrayCollection;
+        private var dataSourceFields:ArrayCollection;*/
 
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
             try {
@@ -522,7 +522,7 @@
                 this.feedMetadata = feedMetadata;
                 dataSourceInfo = feedMetadata.dataSourceInfo;
                 this.exchangeSave = feedMetadata.exchangeSave;
-                this.dataSourceFields = feedMetadata.dataSourceFields;
+                //this.dataSourceFields = feedMetadata.dataSourceFields;
                 this.admin = feedMetadata.dataSourceAdmin;
                 var cFactory:ClassFactory = new ClassFactory(AvailableFieldRenderer);
                 cFactory.properties = { dataSourceID:dataSourceID, calcRefactor:feedMetadata.allowRefactor };
