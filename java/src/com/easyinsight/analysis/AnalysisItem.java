@@ -18,7 +18,6 @@ import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.Nodes;
 import org.hibernate.Session;
-import org.hibernate.proxy.HibernateProxy;
 
 /**
  * User: James Boe
@@ -53,6 +52,12 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name = "lookup_table_id")
     private Long lookupTableID;
 
+    @Column(name="parent_item_id")
+    private Long parentItemID;
+
+    @Column(name="reload_from_data_source")
+    private boolean reloadFromDataSource;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "analysis_item_id")
@@ -70,6 +75,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     @Column(name = "display_name")
     private String displayName;
+
+    @Column(name="based_on_report_field")
+    private Long basedOnReportField;
 
     @Column(name = "sort_sequence")
     private int sortSequence;
@@ -118,6 +126,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name = "marmotscript")
     private String marmotScript;
 
+    @Transient
+    private AnalysisItem reportTemporaryItem;
+
     // field connection
 
     @Transient
@@ -132,6 +143,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     @Column(name = "field_type")
     private int fieldType;
+
+    @Column(name="flex_id")
+    private long flexID;
 
     /*@Transient
     private transient Set<String> pipelineSections;*/
@@ -150,6 +164,46 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public Long getBasedOnReportField() {
+        return basedOnReportField;
+    }
+
+    public void setBasedOnReportField(Long basedOnReportField) {
+        this.basedOnReportField = basedOnReportField;
+    }
+
+    public long getFlexID() {
+        return flexID;
+    }
+
+    public void setFlexID(long flexID) {
+        this.flexID = flexID;
+    }
+
+    public AnalysisItem getReportTemporaryItem() {
+        return reportTemporaryItem;
+    }
+
+    public void setReportTemporaryItem(AnalysisItem reportTemporaryItem) {
+        this.reportTemporaryItem = reportTemporaryItem;
+    }
+
+    public boolean isReloadFromDataSource() {
+        return reloadFromDataSource;
+    }
+
+    public void setReloadFromDataSource(boolean reloadFromDataSource) {
+        this.reloadFromDataSource = reloadFromDataSource;
+    }
+
+    public Long getParentItemID() {
+        return parentItemID;
+    }
+
+    public void setParentItemID(Long parentItemID) {
+        this.parentItemID = parentItemID;
     }
 
     public int getFieldType() {
@@ -685,6 +739,12 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     public void beforeSave() {
         if (lookupTableID != null && lookupTableID == 0) {
             lookupTableID = null;
+        }
+        if (parentItemID != null && parentItemID == 0) {
+            parentItemID = null;
+        }
+        if (basedOnReportField != null && basedOnReportField == 0) {
+            basedOnReportField = null;
         }
     }
 
