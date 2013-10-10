@@ -229,12 +229,12 @@ public class DataViewFactory extends VBox implements IRetrievable {
         reportCanvas.y = 10;
         canvas.addChild(reportCanvas);
         addChild(canvas);
-        if (overlayIndex == 0) {
+        //if (overlayIndex == 0) {
             noData = new NoData();
             currentComponent = noData;
             reportCanvas.addChildAt(noData, 0);
 
-        }
+        //}
         notConfigured = new NotConfigured();
         //notConfigured.controlBar = _controlBar;
         loadReportRenderer();
