@@ -32,6 +32,24 @@ public class DashboardStack extends DashboardElement {
     private boolean consolidateHeaderElements;
     private String selectionType;
     private int stackFontSize = 16;
+    private int defaultIndex;
+    private Map<String, FilterDefinition> overridenFilters;
+
+    public int getDefaultIndex() {
+        return defaultIndex;
+    }
+
+    public void setDefaultIndex(int defaultIndex) {
+        this.defaultIndex = defaultIndex;
+    }
+
+    public Map<String, FilterDefinition> getOverridenFilters() {
+        return overridenFilters;
+    }
+
+    public void setOverridenFilters(Map<String, FilterDefinition> overridenFilters) {
+        this.overridenFilters = overridenFilters;
+    }
 
     public int getStackFontSize() {
         return stackFontSize;
@@ -242,6 +260,7 @@ public class DashboardStack extends DashboardElement {
         if (changingDataSource) {
             // TODO: validate calculations and lookup tables--if necessary to create, should emit something with the report
             analysisItem.setLookupTableID(null);
+            analysisItem.setBasedOnReportField(null);
         }
     }
 
@@ -350,7 +369,16 @@ public class DashboardStack extends DashboardElement {
         JSONObject stack = super.toJSON(metadata, parentFilters);
         stack.put("id", getElementID());
         stack.put("type", "stack");
-        List<FilterDefinition> curFilters = new ArrayList(parentFilters);
+        if (getOverridenFilters() != null) {
+            for (FilterDefinition filter : getFilters()) {
+                FilterDefinition overrideFilter = getOverridenFilters().get(String.valueOf(filter.getFilterID()));
+                if (overrideFilter != null) {
+                    filter.override(overrideFilter);
+                    filter.setEnabled(overrideFilter.isEnabled());
+                }
+            }
+        }
+        List<FilterDefinition> curFilters = new ArrayList<FilterDefinition>(parentFilters);
         curFilters.addAll(getFilters());
         JSONArray stackItems = new JSONArray();
         stack.put("stack_items", stackItems);
