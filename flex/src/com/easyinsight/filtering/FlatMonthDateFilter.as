@@ -4,6 +4,7 @@ import com.easyinsight.analysis.AnalysisDateDimensionResultMetadata;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
@@ -36,6 +37,8 @@ public class FlatMonthDateFilter extends HBox implements IFilter
         _loadingFromReport = value;
     }
 
+    private var _retrievalState:IRetrievalState;
+
         private var _reportID:int;
 
     private var _dashboardID:int;
@@ -50,13 +53,16 @@ public class FlatMonthDateFilter extends HBox implements IFilter
         _dashboardID = value;
     }
 
+    private var filterMetadata:FilterMetadata;
 		
-		public function FlatMonthDateFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
+		public function FlatMonthDateFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
 			super();
 			this.analysisItem = analysisItem;
             _feedID = feedID;
             _reportID = reportID;
             _dashboardID = dashboardID;
+            _retrievalState = retrievalState;
+            this.filterMetadata = filterMetadata;
             setStyle("verticalAlign", "middle");
 		}
 
@@ -67,11 +73,23 @@ public class FlatMonthDateFilter extends HBox implements IFilter
         private function onChange(event:Event):void {
             var checkbox:CheckBox = event.currentTarget as CheckBox;
             _filterDefinition.enabled = checkbox.selected;
+            try {
+                if (_retrievalState != null) {
+                    _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+                }
+            } catch (e:Error) {
+            }
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
 
         private function onDataChange(event:Event):void {
             _filterDefinition.value = comboBox.selectedItem.value;
+            try {
+                if (_retrievalState != null) {
+                    _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+                }
+            } catch (e:Error) {
+            }
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
 

@@ -1,5 +1,6 @@
 package com.easyinsight.filtering {
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
@@ -20,12 +21,18 @@ public class GenericFilter extends HBox implements IFilter {
     public static const NULL_VALUE:int = 3;
     public static const NAMED_REF:int = 4;
 
-    public function GenericFilter(feedID:int, analysisItem:AnalysisItem, valueType:int) {
+    private var filterMetadata:FilterMetadata;
+
+    public function GenericFilter(feedID:int, analysisItem:AnalysisItem, valueType:int, retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
         super();
         _analysisItem = analysisItem;
+        this.filterMetadata = filterMetadata;
         _feedID = feedID;
         _valueType = valueType;
+        _retrievalState = retrievalState;
     }
+
+    private var _retrievalState:IRetrievalState;
 
     private var _filterDefinition:FilterDefinition;
     private var _valueType:int;

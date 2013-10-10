@@ -4,6 +4,7 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisItem;
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
@@ -49,13 +50,18 @@ import mx.rpc.events.ResultEvent;
         _dashboardID = value;
     }
 
+        private var _retrievalState:IRetrievalState;
+
+        private var filterMetadata:FilterMetadata;
 		
-		public function FlatDateFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
+		public function FlatDateFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
 			super();
 			this.analysisItem = analysisItem;
             _feedID = feedID;
             _reportID = reportID;
             _dashboardID = dashboardID;
+            _retrievalState = retrievalState;
+            this.filterMetadata = filterMetadata;
             setStyle("verticalAlign", "middle");
 		}
 
@@ -66,28 +72,41 @@ import mx.rpc.events.ResultEvent;
         private function onChange(event:Event):void {
             var checkbox:CheckBox = event.currentTarget as CheckBox;
             _filterDefinition.enabled = checkbox.selected;
+            if (_retrievalState != null) {
+                _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+            }
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
 
         private function onDataChange(event:Event):void {
             _filterDefinition.value = parseInt(comboBox.selectedItem as String);
+            if (_retrievalState != null) {
+                _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+            }
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
+        }
+
+        private var filterLabel:Label;
+        private var checkbox:CheckBox;
+
+        private function createCheckbox():void {
+            checkbox = new CheckBox();
+            checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
+            checkbox.toolTip = "Click to disable this filter.";
+            checkbox.addEventListener(Event.CHANGE, onChange);
+            addChildAt(checkbox, 0);
         }
 
         override protected function createChildren():void {
             super.createChildren();
             if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
-                var checkbox:CheckBox = new CheckBox();
-                checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
-                checkbox.toolTip = "Click to disable this filter.";
-                checkbox.addEventListener(Event.CHANGE, onChange);
-                addChild(checkbox);
+                createCheckbox();
             }
 
-            var label:Label = new Label();
-            label.styleName = "filterLabel";
-            label.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
-            addChild(label);
+            filterLabel = new Label();
+            filterLabel.styleName = "filterLabel";
+            filterLabel.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            addChild(filterLabel);
 
             comboBox = new ComboBox();
             comboBox.addEventListener(Event.CHANGE, onDataChange);
@@ -209,6 +228,19 @@ import mx.rpc.events.ResultEvent;
 		private function onFilterEdit(event:FilterEditEvent):void {
             if (event.filterDefinition is FilterDateRangeDefinition) {
 
+            }
+            if (filterLabel != null) {
+                filterLabel.text = FilterDefinition.getLabel(event.filterDefinition, analysisItem);
+            }
+            if (!event.filterDefinition.toggleEnabled) {
+                if (!checkbox) {
+                    createCheckbox();
+                }
+            } else {
+                if (checkbox) {
+                    removeChild(checkbox);
+                    checkbox = null;
+                }
             }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
 		}

@@ -1,6 +1,7 @@
 package com.easyinsight.filtering {
 import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRetrievalState;
 
 import com.easyinsight.analysis.Value;
 import com.easyinsight.skin.ImageConstants;
@@ -66,14 +67,18 @@ public class AutoCompleteFilter extends HBox implements IFilter {
     }
 
 
-    public function AutoCompleteFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
+    public function AutoCompleteFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
         super();
         this._feedID = feedID;
         this._analysisItem = analysisItem;
         this.reportID = reportID;
+        this._retrievalState = retrievalState;
         this.dashboardID = dashboardID;
+        this.filterMetadata = filterMetadata;
         setStyle("verticalAlign", "middle");
     }
+
+    private var filterMetadata:FilterMetadata;
 
     private var _filterEditable:Boolean = true;
 
@@ -84,6 +89,8 @@ public class AutoCompleteFilter extends HBox implements IFilter {
     public function set analysisItems(analysisItems:ArrayCollection):void {
         _analysisItems = analysisItems;
     }
+
+    private var _retrievalState:IRetrievalState;
 
     private function edit(event:MouseEvent):void {
         var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
@@ -114,6 +121,12 @@ public class AutoCompleteFilter extends HBox implements IFilter {
         var checkbox:CheckBox = event.currentTarget as CheckBox;
         _filterDefinition.enabled = checkbox.selected;
         textInput.enabled = checkbox.selected;
+        try {
+            if (_retrievalState != null) {
+                _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+            }
+        } catch (e:Error) {
+        }
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 
@@ -217,6 +230,12 @@ public class AutoCompleteFilter extends HBox implements IFilter {
             var newFilteredValues:ArrayCollection = new ArrayCollection();
             newFilteredValues.addItem(newValue);
             _filterDefinition.filteredValues = newFilteredValues;
+            try {
+                if (_retrievalState != null) {
+                    _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+                }
+            } catch (e:Error) {
+            }
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
     }

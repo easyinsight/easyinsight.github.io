@@ -1,6 +1,7 @@
 package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.skin.ImageConstants;
 
 import com.easyinsight.util.PopUpUtil;
@@ -31,17 +32,21 @@ import mx.managers.PopUpManager;
 		private var deleteButton:Button;
 		private var editButton:Button;
 		private var labelText:UIComponent;
-		private var dataService:RemoteObject;		
 		private var _analysisItems:ArrayCollection;
 
-		public function PatternFilter(feedID:int, analysisItem:AnalysisItem) {
+        private var filterMetadata:FilterMetadata;
+
+		public function PatternFilter(feedID:int, analysisItem:AnalysisItem, retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
 			super();
 			_analysisItem = analysisItem;
 			_feedID = feedID;
+            _retrievalState = retrievalState;
+            this.filterMetadata = filterMetadata;
 		}
 
         private var _loadingFromReport:Boolean = false;
 
+        private var _retrievalState:IRetrievalState;
 
     public function set loadingFromReport(value:Boolean):void {
         _loadingFromReport = value;
@@ -74,6 +79,12 @@ import mx.managers.PopUpManager;
         private function onChange(event:Event):void {
             var checkbox:CheckBox = event.currentTarget as CheckBox;
             _filterDefinition.enabled = checkbox.selected;
+            try {
+                if (_retrievalState != null) {
+                    _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+                }
+            } catch (e:Error) {
+            }
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
 

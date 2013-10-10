@@ -1,15 +1,19 @@
 package com.easyinsight.filtering {
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRetrievalState;
+import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
+import flash.net.SharedObject;
 
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.LinkButton;
@@ -24,18 +28,23 @@ public class MultiValueFilter extends HBox implements IFilter {
     private var _analysisItems:ArrayCollection;
 
     private var _loadingFromReport:Boolean = false;
-
+    private var _retrievalState:IRetrievalState;
 
     public function set loadingFromReport(value:Boolean):void {
         _loadingFromReport = value;
     }
 
-    public function MultiValueFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int) {
+    private var filterMetadata:FilterMetadata;
+
+    public function MultiValueFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboard:Dashboard, retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
         super();
         _analysisItem = analysisItem;
         _feedID = feedID;
         _reportID = reportID;
-        _dashboardID = dashboardID;
+        _dashboard = dashboard;
+        _retrievalState = retrievalState;
+        this.filterMetadata = filterMetadata;
+        _dashboardID = _dashboard != null ? _dashboard.id : 0;
     }
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -45,6 +54,7 @@ public class MultiValueFilter extends HBox implements IFilter {
     private var _reportID:int;
 
     private var _dashboardID:int;
+    private var _dashboard:Dashboard;
 
     public function set reportID(value:int):void {
         _reportID = value;
@@ -77,18 +87,27 @@ public class MultiValueFilter extends HBox implements IFilter {
     }
 
     private function onUpdated(event:Event):void {
+        if (_retrievalState != null) {
+            _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+        }
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 
     private function onFilterEdit(event:FilterEditEvent):void {
+        labelText.label = FilterDefinition.getLabel(event.filterDefinition, _analysisItem);
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
     }
 
     private function onChange(event:Event):void {
         var checkbox:CheckBox = event.currentTarget as CheckBox;
         _filterDefinition.enabled = checkbox.selected;
+        if (_retrievalState != null) {
+            _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+        }
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
+
+    private var labelText:LinkButton;
 
     override protected function createChildren():void {
         super.createChildren();
@@ -100,12 +119,11 @@ public class MultiValueFilter extends HBox implements IFilter {
         addChild(checkbox);
         //}
 
-        var labelText:UIComponent;
         labelText = new LinkButton();
         labelText.setStyle("fontSize", 12);
         labelText.addEventListener(MouseEvent.CLICK, edit);
         labelText.setStyle("textDecoration", "underline");
-        LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+        labelText.label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         addChild(labelText);
 
         /*if (editButton == null) {
@@ -144,6 +162,9 @@ public class MultiValueFilter extends HBox implements IFilter {
     public function toInclusive(filterValues:ArrayCollection):void {
         _filterDefinition.inclusive = true;
         _filterDefinition.filteredValues = filterValues;
+
+        // pkratsch@ameresco.com
+
         //updateState();
     }
 

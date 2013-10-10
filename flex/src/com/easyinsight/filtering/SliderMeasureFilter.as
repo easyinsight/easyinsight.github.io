@@ -1,6 +1,7 @@
 package com.easyinsight.filtering
 {
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.analysis.formatter.FormattingConfiguration;
 import com.easyinsight.skin.ImageConstants;
 
@@ -42,6 +43,8 @@ public class SliderMeasureFilter extends HBox implements IFilter
     private var _lowOperatorString:String;
     private var _highOperatorString:String;
 
+    private var _retrievalState:IRetrievalState;
+
     [Bindable(event="lowOperatorStringChanged")]
     public function set lowOperatorString(value:String):void {
         if(_lowOperatorString == value) return;
@@ -71,9 +74,13 @@ public class SliderMeasureFilter extends HBox implements IFilter
 
     private var _analysisItems:ArrayCollection;
 
-    public function SliderMeasureFilter(feedID:int, analysisItem:AnalysisItem) {
+    private var filterMetadata:FilterMetadata;
+
+    public function SliderMeasureFilter(feedID:int, analysisItem:AnalysisItem, retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
         super();
         this.analysisItem = analysisItem;
+        this.filterMetadata = filterMetadata;
+        this._retrievalState = retrievalState;
     }
 
     private var _loadingFromReport:Boolean = false;
@@ -172,6 +179,12 @@ public class SliderMeasureFilter extends HBox implements IFilter
     private function onChange(event:Event):void {
         var checkbox:CheckBox = event.currentTarget as CheckBox;
         _filterDefinition.enabled = checkbox.selected;
+        try {
+            if (_retrievalState != null) {
+                _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+            }
+        } catch (e:Error) {
+        }
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 

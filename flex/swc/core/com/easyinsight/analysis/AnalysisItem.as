@@ -151,7 +151,9 @@ public class AnalysisItem {
 
     public var locked:Boolean;*/
 
-    /*public function copy():AnalysisItem {
+    public function copy():AnalysisItem {
+        return this;
+    }/*
         var analysisItem:AnalysisItem = ObjectUtil.copy(this) as AnalysisItem;
         if (this.parentItemID != 0) {
             analysisItem.parentItemID = this.parentItemID;

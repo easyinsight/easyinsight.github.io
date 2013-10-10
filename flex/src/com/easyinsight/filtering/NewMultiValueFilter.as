@@ -2,15 +2,18 @@ package com.easyinsight.filtering {
 
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
+import flash.net.SharedObject;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.Label;
@@ -31,6 +34,8 @@ public class NewMultiValueFilter extends HBox implements IFilter {
 
     private var _loadingFromReport:Boolean = false;
 
+    private var _retrievalState:IRetrievalState;
+
     private var filterValues:Button;
 
 
@@ -38,7 +43,10 @@ public class NewMultiValueFilter extends HBox implements IFilter {
         _loadingFromReport = value;
     }
 
-    public function NewMultiValueFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition, otherFilters:ArrayCollection, dashboard:Dashboard) {
+    private var filterMetadata:FilterMetadata;
+
+    public function NewMultiValueFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition,
+                                        otherFilters:ArrayCollection, dashboard:Dashboard, retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
         super();
         _analysisItem = analysisItem;
         _feedID = feedID;
@@ -47,6 +55,8 @@ public class NewMultiValueFilter extends HBox implements IFilter {
         _report = report;
         _dashboard = dashboard;
         _otherFilters = otherFilters;
+        _retrievalState = retrievalState;
+        this.filterMetadata = filterMetadata;
         filterValues = new Button();
         filterValues.styleName = "multiFilterButton";
         setStyle("verticalAlign", "middle");
@@ -96,6 +106,9 @@ public class NewMultiValueFilter extends HBox implements IFilter {
 
     private function onUpdated(event:Event):void {
         updateFilterLabel();
+        if (_retrievalState != null) {
+            _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+        }
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 

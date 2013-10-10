@@ -237,16 +237,6 @@ public class DateRangeDetailEditor extends VBox implements IFilterDetailEditor
         var filterToReturn:FilterDefinition;
         if (choiceBox.selectedItem == "Fixed Date Range") {
             if (_filterDefinition is FilterDateRangeDefinition) {
-                if (leftComboBox.selectedIndex == 1) {
-                    FilterDateRangeDefinition(_filterDefinition).startDateDimension = lowerDateFieldsBox.selectedItem.analysisItem;
-                } else {
-                    FilterDateRangeDefinition(_filterDefinition).startDateDimension = null;
-                }
-                if (rightComboBox.selectedIndex == 1) {
-                    FilterDateRangeDefinition(_filterDefinition).endDateDimension = upperDateFieldsBox.selectedItem.analysisItem;
-                } else {
-                    FilterDateRangeDefinition(_filterDefinition).endDateDimension = null;
-                }
                 filterToReturn = _filterDefinition;
             } else {
                 var newFilter:FilterDateRangeDefinition = new FilterDateRangeDefinition();
@@ -279,14 +269,6 @@ public class DateRangeDetailEditor extends VBox implements IFilterDetailEditor
         this._filterDefinition = filterDefinition;
         if (_filterDefinition is FilterDateRangeDefinition) {
             var dateRange:FilterDateRangeDefinition = _filterDefinition as FilterDateRangeDefinition;
-            if (dateRange.startDateDimension != null) {
-                lowerStackIndex = 1;
-                lowerDateItemDisplay = dateRange.startDateDimension.display;
-            }
-            if (dateRange.endDateDimension != null) {
-                upperStackIndex = 1;
-                upperDateItemDisplay = dateRange.endDateDimension.display;
-            }
         }
     }
 

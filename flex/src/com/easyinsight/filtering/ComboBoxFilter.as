@@ -3,6 +3,7 @@ import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemResultMetadata;
+import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.analysis.ReportFault;
 
 import com.easyinsight.analysis.Value;
@@ -26,7 +27,6 @@ import mx.controls.ProgressBar;
 import mx.core.UIComponent;
 import mx.events.DropdownEvent;
 import mx.managers.PopUpManager;
-import mx.managers.PopUpManager;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -39,7 +39,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
 
     private var comboBox:ComboBox;
     private var deleteButton:Button;
-    private var editButton:Button;
+    //private var editButton:Button;
     private var _analysisItems:ArrayCollection;
 
     private var _filterEnabled:Boolean;
@@ -49,6 +49,8 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
     private var _dashboardID:int;
 
     private var _otherFilters:ArrayCollection;
+
+    private var _retrievalState:IRetrievalState;
 
     public function set otherFilters(value:ArrayCollection):void {
         _otherFilters = value;
@@ -77,19 +79,23 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
 
     private var _dashboard:Dashboard;
 
-    public function ComboBoxFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition, otherFilters:ArrayCollection, dashboard:Dashboard) {
+    public function ComboBoxFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition, otherFilters:ArrayCollection, dashboard:Dashboard,
+            retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
         super();
         this._report = report;
         this._feedID = feedID;
         this._analysisItem = analysisItem;
         this._dashboard = dashboard;
+        this._retrievalState = retrievalState;
         _otherFilters = otherFilters;
+        this.filterMetadata = filterMetadata;
         this.reportID = reportID;
         this.dashboardID = dashboardID;
         this.height = 23;
     }
 
     private var _filterEditable:Boolean = true;
+    private var filterMetadata:FilterMetadata;
 
     public function set filterEditable(editable:Boolean):void {
         _filterEditable = editable;
@@ -106,6 +112,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
         window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
         window.analysisItems = _analysisItems;
         window.filterDefinition = _filterDefinition;
+        window.otherFilters = _otherFilters;
         PopUpManager.addPopUp(window, this, true);
         window.x = 50;
         window.y = 50;
@@ -278,9 +285,6 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
                 }
                 addChild(filterLabel);
                 addChild(comboBox);
-                if (editButton) {
-                    addChild(editButton);
-                }
                 if (deleteButton) {
                     addChild(deleteButton);
                 }
@@ -299,13 +303,6 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             comboBox.y = (this.height - comboBox.height) / 2;
             comboBox.setActualSize(comboBox.measuredWidth, comboBox.measuredHeight);
             xPos += comboBox.measuredWidth;
-            if (editButton) {
-                xPos += 8;
-                editButton.x = xPos;
-                editButton.y = (this.height - editButton.height) / 2;
-                editButton.setActualSize(editButton.measuredWidth, editButton.measuredHeight);
-                xPos += editButton.measuredWidth + 8;
-            }
             if (deleteButton) {
                 xPos += 8;
                 deleteButton.x = xPos;
@@ -356,6 +353,12 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             _filterDefinition.filteredValues = newFilteredValues;
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
+        try {
+            if (_retrievalState != null) {
+                _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+            }
+        } catch (e:Error) {
+        }
     }
 
     public function updateState():Boolean {
@@ -373,7 +376,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
     }
 
     private function processMetadata(metadata:AnalysisItemResultMetadata):void {
-        if (metadata.reportFault != null) {
+        if (metadata.reportFault != null && !_filterDefinition.drillthrough) {
             var window:UIComponent = ReportFault(metadata.reportFault).createFaultWindow();
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
@@ -409,16 +412,18 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             strings = strings.reverse();
             comboBox.dataProvider = new ArrayCollection(strings);
             comboBox.rowCount = Math.min(strings.length, 15);
-            var selectedValue:String;
+            var selectedValue:String = null;
             if (_filterDefinition.filteredValues.length == 0 && strings.length > 0) {
                 _filterDefinition.filteredValues.addItem(strings[0]);
             }
             if (_filterDefinition.filteredValues.length > 0) {
-                var filterObj:Object = _filterDefinition.filteredValues.getItemAt(0);
-                if (filterObj is Value) {
-                    selectedValue = String(filterObj.getValue());
-                } else {
-                    selectedValue = filterObj as String;
+                if (selectedValue == null) {
+                    var filterObj:Object = _filterDefinition.filteredValues.getItemAt(0);
+                    if (filterObj is Value) {
+                        selectedValue = String(filterObj.getValue());
+                    } else {
+                        selectedValue = filterObj as String;
+                    }
                 }
                 var selectedIndex:int = strings.indexOf(selectedValue);
                 if (selectedIndex == -1) {

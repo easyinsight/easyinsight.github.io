@@ -2,7 +2,7 @@
 <util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
 	<mx:Script>
 		<![CDATA[
-        
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
 
@@ -33,6 +33,8 @@
         private var filterDetailEditor:IFilterDetailEditor;
 
         private var rebuild:Boolean = false;
+
+        public var otherFilters:ArrayCollection;
 
         public function set feedID(value:int):void {
             _feedID = value;
@@ -110,6 +112,27 @@
         }
 
         private function save():void {
+            if (parentNamesInput.text != null && parentNamesInput.text != "") {
+                var text:String = parentNamesInput.text;
+                var filterNames:Array = text.split(",");
+                for each (var filterName:String in filterNames) {
+                    var found:Boolean = false;
+                    if (otherFilters != null) {
+                        for each (var filter:FilterDefinition in otherFilters) {
+                            if (filter.filterName != null && filter.filterName == filterName) {
+                                found = true;
+                                break;
+                            }
+                        }
+                    } else {
+                        found = true;
+                    }
+                    if (!found) {
+                        Alert.show("We could not find the referenced parent filter of " + filterName + ".");
+                        return;
+                    }
+                }
+            }
             var previousDefinition:FilterDefinition = _filterDefinition;
             if (filterDetailEditor != null) {
                 _filterDefinition = filterDetailEditor.makeUpdates();

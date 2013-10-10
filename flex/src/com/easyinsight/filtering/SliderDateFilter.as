@@ -5,6 +5,8 @@ import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.IRetrievalState;
+import com.easyinsight.filtering.FilterMetadata;
 import com.easyinsight.framework.User;
 import com.easyinsight.skin.ImageConstants;
 
@@ -46,6 +48,7 @@ import mx.rpc.events.ResultEvent;
 
         private var _loadingFromReport:Boolean = false;
 
+        private var _retrievalState:IRetrievalState;
 
     public function set loadingFromReport(value:Boolean):void {
         _loadingFromReport = value;
@@ -65,12 +68,16 @@ import mx.rpc.events.ResultEvent;
 
         private var _report:AnalysisDefinition;
 
+        private var filterMetadata:FilterMetadata;
 		
-		public function SliderDateFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition = null) {
+		public function SliderDateFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, retrievalState:IRetrievalState,
+                                         filterMetadata:FilterMetadata, report:AnalysisDefinition = null) {
 			super();
             this.feedID = feedID;
             this.report = report;
 			this.analysisItem = analysisItem;
+            this.filterMetadata = filterMetadata;
+            this._retrievalState = retrievalState;
             _report = report;
 		}
 
@@ -142,6 +149,12 @@ import mx.rpc.events.ResultEvent;
         private function onChange(event:Event):void {
             var checkbox:CheckBox = event.currentTarget as CheckBox;
             _filterDefinition.enabled = checkbox.selected;
+            try {
+                if (_retrievalState != null) {
+                    _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+                }
+            } catch (e:Error) {
+            }
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
 
@@ -184,18 +197,9 @@ import mx.rpc.events.ResultEvent;
                     _filterDefinition.endDate = highDate;
                 }
                 highDate = _filterDefinition.endDate;
-                if (_filterDefinition.startDateDimension != null) {
-                    leftIndex = 1;
-                    this.leftLabel = _filterDefinition.startDateDimension.display;
-                } else {
-                    leftIndex = 0;
-                }
-                if (_filterDefinition.endDateDimension != null) {
-                    rightIndex = 1;
-                    this.rightLabel = _filterDefinition.endDateDimension.display;
-                } else {
-                    rightIndex = 0;
-                }
+
+                leftIndex = 0;
+                rightIndex = 0;
             }
 
             if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
@@ -379,18 +383,9 @@ import mx.rpc.events.ResultEvent;
             }
             if (event.filterDefinition is FilterDateRangeDefinition) {
                 var filter:FilterDateRangeDefinition = event.filterDefinition as FilterDateRangeDefinition;
-                if (filter.startDateDimension != null) {
-                    leftIndex = 1;
-                    this.leftLabel = filter.startDateDimension.display;
-                } else {
-                    leftIndex = 0;
-                }
-                if (filter.endDateDimension != null) {
-                    rightIndex = 1;
-                    this.rightLabel = filter.endDateDimension.display;
-                } else {
-                    rightIndex = 0;
-                }
+                leftIndex = 0;
+                rightIndex = 0;
+
             }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
 		}
@@ -418,7 +413,13 @@ import mx.rpc.events.ResultEvent;
 			_filterDefinition.startDate = newLowDate;
 			_filterDefinition.endDate = newHighDate;
 			lowField.selectedDate = newLowDate;
-			highField.selectedDate = newHighDate;			
+			highField.selectedDate = newHighDate;
+            try {
+                if (_retrievalState != null) {
+                    _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+                }
+            } catch (e:Error) {
+            }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, null, this));
 		}
 		
@@ -433,6 +434,12 @@ import mx.rpc.events.ResultEvent;
                 date.hours = 1;
             }
 			_filterDefinition.startDate = date;
+            try {
+                if (_retrievalState != null) {
+                    _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+                }
+            } catch (e:Error) {
+            }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, null, this));
 		}
 		
@@ -448,6 +455,12 @@ import mx.rpc.events.ResultEvent;
             }
 			_filterDefinition.endDate = date;
             _filterDefinition.sliding = false;
+            try {
+                if (_retrievalState != null) {
+                    _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+                }
+            } catch (e:Error) {
+            }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, null, this));
 		}
 		
