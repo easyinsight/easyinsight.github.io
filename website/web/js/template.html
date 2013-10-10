@@ -58,6 +58,8 @@
         <% if(show_label) { %>
         <div>
             <div class="dashboardReportHeader"><%- report.name %></div>
+
+            <div class="reportMenu"><a href="/app/html/report/<%= report.metadata.key %>">Navigate</a></div>
         </div>
         <% } %>
         <%= Filter.filters({ filter_values: report.metadata.filters, parent_id: id }) %>

@@ -116,7 +116,7 @@ var confirmRender = function (o, f) {
 
 }
 
-var renderReport = function (o, dashboardID, reload) {
+var renderReport = function (o, dashboardID, drillthroughID, reload) {
     var obj = o.report.report;
     var id = o.report.id;
     var filterStrings = [];
@@ -134,8 +134,10 @@ var renderReport = function (o, dashboardID, reload) {
         fullFilters[curFilters[i].id] = curFilters[i];
     }
     beforeRefresh($("#" + id + " .loading"))();
+    var dashboardComponent = dashboardID == -1 ? "" : ("&dashboardID=" + dashboardID);
+    var drillthroughComponent = typeof(drillthroughID) != "undefined" ? ("&drillThroughKey=" + drillthroughID) : "";
     var postData = {
-        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&dashboardID=" + dashboardID,
+        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent + drillthroughComponent,
         contentType: "application/json; charset=UTF-8",
         data: JSON.stringify(fullFilters),
         type: "POST"
@@ -271,13 +273,13 @@ var hideFilters = function (obj, filterMap) {
     }
 }
 
-var renderReports = function (obj, dashboardID, force) {
+var renderReports = function (obj, dashboardID, drillthroughID, force) {
     if (obj.type == "report") {
         if (!obj.report.report.metadata.adhoc_execution)
-            renderReport(obj, dashboardID, force);
+            renderReport(obj, dashboardID, drillthroughID, force);
     } else if (obj.type != "text") {
         for (var i = 0; i < obj.children.length; i++) {
-            renderReports(obj.children[i], dashboardID, force);
+            renderReports(obj.children[i], dashboardID, drillthroughID, force);
         }
     }
 }
@@ -340,14 +342,14 @@ $(function () {
         var graph = buildReportGraph(dashboardJSON["base"], dashboardJSON["filters"], filterMap, stackMap, reportMap);
 
         hideFilters(graph, filterMap);
-        renderReports(graph, dashboardJSON["id"], false);
+        renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], false);
         $(".single_filter").change(function (e) {
             var f = filterMap[$(e.target || e.srcElement).attr("id")]
             f.filter.selected = $(e.target || e.srcElement).val();
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
         });
 
@@ -355,9 +357,9 @@ $(function () {
             var f = filterMap[$(e.target).attr("id")];
             f.filter.selected = $(e.target).val();
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
         })
 
@@ -393,9 +395,9 @@ $(function () {
             $(".multi_filter", $(a).parent()).html(selectVals.length == 1 ? selectVals[0] : selectVals.length + " Items");
 
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
         });
 
@@ -408,9 +410,9 @@ $(function () {
             f.filter.max = parseInt(max);
             $("#" + a.attr("id").split("_")[0]).html(short_months[f.filter.min] + " to " + short_months[f.filter.max]);
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
         })
 
@@ -425,9 +427,9 @@ $(function () {
             }
             f.filter.interval_type = $(e.target || e.srcElement).val();
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
         });
 
@@ -436,9 +438,9 @@ $(function () {
             f.filter.direction = $(e.target || e.srcElement).val();
 
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
         });
 
@@ -447,9 +449,9 @@ $(function () {
             f.filter.value = parseInt($(e.target || e.srcElement).val());
 
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
         });
 
@@ -457,9 +459,9 @@ $(function () {
             var f = filterMap[$(e.target || e.srcElement).attr("id").split("_")[0]];
             f.filter.interval = $(e.target || e.srcElement).val();
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
         });
 
@@ -467,9 +469,9 @@ $(function () {
             var f = filterMap[$(e.target).attr("id").split("_")[0]];
             f.filter.selected = $(e.target).val();
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
         });
 
@@ -479,9 +481,9 @@ $(function () {
             f.filter.enabled = $(e.target || e.srcElement).is(":checked");
 
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
         });
 
@@ -490,9 +492,9 @@ $(function () {
             var f = filterMap[z.attr("id").split("_")[0]];
             f.filter.start_date = z.val();
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
         });
 
@@ -501,16 +503,16 @@ $(function () {
             var f = filterMap[z.attr("id").split("_")[0]];
             f.filter.end_date = z.val();
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], dashboardJSON["drillthroughID"], true);
             }
         });
 
         $(".adhoc").click(function (e) {
             var z = $(e.target);
             $(".adhoc_instructions", z.parent()).hide();
-            renderReport(reportMap[$(z.parent()).attr("id")], dashboardJSON["id"], true);
+            renderReport(reportMap[$(z.parent()).attr("id")], dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
         })
 
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -526,7 +528,7 @@ $(function () {
 
             hideFilters(graph, filterMap);
 
-            renderReports(s, dashboardJSON["id"], false);
+            renderReports(s, dashboardJSON["id"], dashboardJSON["drillthroughID"], false);
         });
         var showFilters = true;
         $('.toggle-filters').click(function (e) {
@@ -537,6 +539,10 @@ $(function () {
             }
             showFilters = !showFilters;
         })
+
+        $(".dashboardReportHeader").click(function(e) {
+            $(".reportMenu", $(e.target).parent()).slideToggle()
+        });
     })
 })
 

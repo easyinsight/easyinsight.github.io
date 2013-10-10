@@ -10,6 +10,7 @@
 <%@ page import="com.easyinsight.analysis.*" %>
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.html.*" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -20,14 +21,28 @@
         com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     }
     try {
+        String drillthroughKey = request.getParameter("drillthroughKey");
+        List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
+        long dashboardID = -1;
+        if(drillthroughKey != null) {
+            DrillThroughData drillThroughData = Utils.drillThroughFiltersForDashboard(drillthroughKey);
+            drillthroughFilters = drillThroughData.getFilters();
+            dashboardID = drillThroughData.getDashboardID();
+            SecurityUtil.authorizeDashboard(dashboardID);
+        } else {
+            String dashboardIDString = request.getParameter("dashboardID");
+            dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
+        }
 
-        String dashboardIDString = request.getParameter("dashboardID");
-        long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
         Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
         FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, false);
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
         UIData uiData = Utils.createUIData();
-
+        dashboard.getFilters().addAll(drillthroughFilters);
+        JSONObject jo = dashboard.toJSON(filterHTMLMetadata);
+        if(drillthroughKey != null) {
+            jo.put("drillthroughID", drillthroughKey);
+        }
 %>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,7 +52,7 @@
     <jsp:include page="bootstrapHeader.jsp"/>
     <jsp:include page="reportDashboardHeader.jsp"/>
     <script type="text/javascript">
-        var dashboardJSON = <%= dashboard.toJSON(filterHTMLMetadata) %>;
+        var dashboardJSON = <%= jo %>;
         function afterRefresh() {
 
         }
