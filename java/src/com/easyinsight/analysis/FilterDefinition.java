@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
@@ -71,6 +72,8 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name = "minimum_role")
     private int minimumRole = 4;
 
+    @Column(name="drillthrough")
+    private boolean drillthrough;
     @Column(name = "parent_filters")
     private String parentFilters;
 
@@ -152,6 +155,14 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     public int type() {
         return 0;
+    }
+
+    public boolean isDrillthrough() {
+        return drillthrough;
+    }
+
+    public void setDrillthrough(boolean drillthrough) {
+        this.drillthrough = drillthrough;
     }
 
     public String getParentFilters() {
@@ -267,7 +278,14 @@ public class FilterDefinition implements Serializable, Cloneable {
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
-        return getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
+        try {
+            return getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
+        } catch (Exception e) {
+            // ignore for now...
+            System.out.println("Ignoring for now...");
+            structure.getInsightRequestMetadata().getSuppressedFilters().add(this);
+            return new ArrayList<AnalysisItem>();
+        }
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
@@ -501,5 +519,9 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     public boolean sameFilter(FilterDefinition targetDefinition) {
         return getField().qualifiedName().equals(targetDefinition.getField().qualifiedName()) && type() == targetDefinition.type();
+    }
+
+    public void override(FilterDefinition overrideFilter) {
+
     }
 }

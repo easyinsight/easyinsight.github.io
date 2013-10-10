@@ -180,6 +180,7 @@ public class DataService {
             //clone.setParentItemID(item.getAnalysisItemID());
             clone.setOriginalDisplayName(item.toDisplay());
             clone.setDisplayName(report.getName() + " - " + item.toDisplay());
+            clone.setBasedOnReportField(item.getAnalysisItemID());
             ReportKey reportKey = new ReportKey();
             reportKey.setParentKey(item.getKey());
             reportKey.setReportID(addonReportID);
@@ -1542,6 +1543,8 @@ public class DataService {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+            List<ReportAuditEvent> events = new ArrayList<ReportAuditEvent>();
+            events.addAll(reportRetrieval.getDataSet().getAudits());
             DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
             boolean tooManyResults = false;
             if (results instanceof ListDataResults) {
@@ -1567,9 +1570,13 @@ public class DataService {
             long processingTime = elapsed - insightRequestMetadata.getDatabaseTime();
             results.setProcessingTime(processingTime);
             results.setDatabaseTime(insightRequestMetadata.getDatabaseTime());
+            if (insightRequestMetadata.isLogReport()) {
+                results.setAuditMessages(events);
+            }
             if (!insightRequestMetadata.isNoLogging()) {
                 reportEditorBenchmark(analysisDefinition, processingTime, insightRequestMetadata.getDatabaseTime(), conn);
             }
+
             return results;
         } catch (ReportException dae) {
             ListDataResults embeddedDataResults = new ListDataResults();
@@ -1722,6 +1729,25 @@ public class DataService {
             if (insightRequestMetadata.getHierarchyOverrides() != null) {
                 for (AnalysisItemOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
                     hierarchyOverride.apply(analysisDefinition.getAllAnalysisItems());
+                }
+            }
+
+            for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
+                if (filterDefinition.isDrillthrough() && filterDefinition.getField() != null) {
+                    Key key = filterDefinition.getField().getKey();
+                    if (key instanceof ReportKey) {
+                        ReportKey reportKey = (ReportKey) key;
+                        boolean valid = false;
+                        for (AddonReport addonReport : analysisDefinition.getAddonReports()) {
+                            if (addonReport.getReportID() == reportKey.getReportID()) {
+                                valid = true;
+                                break;
+                            }
+                        }
+                        if (!valid) {
+                            insightRequestMetadata.getSuppressedFilters().add(filterDefinition);
+                        }
+                    }
                 }
             }
 
