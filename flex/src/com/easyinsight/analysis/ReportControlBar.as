@@ -125,7 +125,7 @@ public class ReportControlBar extends FlowBox {
 
     protected function addDropAreaGrouping(grouping:ListDropAreaGrouping, parent:Container = null):void {
         BindingUtils.bindProperty(grouping, "analysisItems", this, "analysisItems");
-        BindingUtils.bindProperty(grouping, "dataSourceFields", this, "dataSourceFields");
+        //BindingUtils.bindProperty(grouping, "dataSourceFields", this, "dataSourceFields");
         grouping.dataSourceID = _dataSourceID;
         if (parent == null) {
             addChild(grouping);
