@@ -18,7 +18,7 @@ public class DataSet implements Serializable, Cloneable {
 
     private List<IRow> rows;
     private Date lastTime;
-    private List<String> audits = new ArrayList<String>();
+    private List<ReportAuditEvent> audits = new ArrayList<ReportAuditEvent>();
     private DataSetKeys dataSetKeys = new DataSetKeys();
     private String reportLog;
     private transient PipelineData pipelineData;
@@ -92,11 +92,11 @@ public class DataSet implements Serializable, Cloneable {
         this.reportLog = reportLog;
     }
 
-    public List<String> getAudits() {
+    public List<ReportAuditEvent> getAudits() {
         return audits;
     }
 
-    public void setAudits(List<String> audits) {
+    public void setAudits(List<ReportAuditEvent> audits) {
         this.audits = audits;
     }
 
