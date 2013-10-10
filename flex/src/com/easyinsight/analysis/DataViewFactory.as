@@ -264,17 +264,19 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
-        reportCanvas.width = canvas.width - 20;
-        reportCanvas.height = canvas.height - 20;
-        /*if (currentComponent != null && (currentComponent.height != reportCanvas.height || currentComponent.width != reportCanvas.width)) {
-            currentComponent.height = reportCanvas.height;
-            currentComponent.width = reportCanvas.width;
-            currentComponent.invalidateDisplayList();
-        }*/
-        if (currentComponent.height != reportCanvas.height || currentComponent.width != reportCanvas.width) {
-            currentComponent.height = reportCanvas.height;
-            currentComponent.width = reportCanvas.width;
-            currentComponent.invalidateDisplayList();
+        if (reportCanvas != null && canvas != null && currentComponent != null) {
+            reportCanvas.width = canvas.width - 20;
+            reportCanvas.height = canvas.height - 20;
+            /*if (currentComponent != null && (currentComponent.height != reportCanvas.height || currentComponent.width != reportCanvas.width)) {
+                currentComponent.height = reportCanvas.height;
+                currentComponent.width = reportCanvas.width;
+                currentComponent.invalidateDisplayList();
+            }*/
+            if (currentComponent.height != reportCanvas.height || currentComponent.width != reportCanvas.width) {
+                currentComponent.height = reportCanvas.height;
+                currentComponent.width = reportCanvas.width;
+                currentComponent.invalidateDisplayList();
+            }
         }
 
     }
