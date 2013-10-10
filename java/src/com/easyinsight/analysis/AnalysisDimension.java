@@ -144,7 +144,7 @@ public class AnalysisDimension extends AnalysisItem {
             StringValue stringValue = (StringValue) value;
             try {
                 String string = stringValue.getValue();
-                if (Character.isDigit(string.charAt(0))) {
+                if (string.length() > 0 && string.charAt(0) != '0' && Character.isDigit(string.charAt(0))) {
                     Value newValue = new NumericValue(Integer.parseInt(stringValue.toString()));
                     newValue.setLinks(value.getLinks());
                     newValue.setValueExtension(value.getValueExtension());
