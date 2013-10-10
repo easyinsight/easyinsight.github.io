@@ -90,7 +90,8 @@
 		<![CDATA[
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
-        import com.easyinsight.util.UserAudit;
+
+        import mx.controls.Alert;
 
         import mx.events.DropdownEvent;
 
@@ -165,7 +166,7 @@
             this.displayName = analysisItem.display;
             this.key = analysisItem.key;
             this.hidden = analysisItem.hidden;
-            this.fieldTooltip = analysisItem.tooltip;
+            //this.reload = analysisItem.reloadFromDataSource;
             if (analysisItem.fromField != null) {
                 loadFromAnother = analysisItem.fromField.display;
             }
@@ -231,9 +232,11 @@
             if (detailEditor != null) {
                 if (detailEditor.validate()) {
                     var analysisItem:AnalysisItem = detailEditor.createAnalysisItem(aggregationBox.selectedItem as String);
+                    if (analysisItem.getType() == startingAnalysisItem.getType()) {
+                        analysisItem = startingAnalysisItem;
+                    }
                     analysisItem.concrete = startingAnalysisItem.concrete;
                     analysisItem.lookupTableID = startingAnalysisItem.lookupTableID;
-                    // CAS238634-5MN4
                     /*if (analysisItem.getType() == existingType) {
                      analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
                      }*/
@@ -241,7 +244,7 @@
                     analysisItem.originalDisplayName = startingAnalysisItem.originalDisplayName != null ? startingAnalysisItem.originalDisplayName : startingAnalysisItem.display;
                     analysisItem.key = key;
                     analysisItem.hidden = hiddenCheckbox.selected;
-                    analysisItem.tooltip = fieldTooltipInput.text;
+                    //analysisItem.reloadFromDataSource = reloadCheckbox.selected;
                     detailEditor.save(analysisItem);
                     dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
                 }
@@ -335,8 +338,8 @@
             aggregationChange(prepareAggregationBox(index));
         }
 
-        [Bindable]
-        private var fieldTooltip:String;
+        /*[Bindable]
+        private var reload:Boolean;*/
 
         public function higlight():void {
         }
@@ -366,10 +369,9 @@
         <mx:FormItem label="Hidden: " direction="horizontal" id="hiddenText">
             <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>
         </mx:FormItem>
-        <mx:FormItem label="Tooltip: ">
-            <mx:TextArea text="{fieldTooltip}" id="fieldTooltipInput" width="250" height="50" borderStyle="inset"
-                    borderThickness="1"/>
-        </mx:FormItem>
+        <!--<mx:FormItem label="Reload from Data Source: " direction="horizontal">
+            <mx:CheckBox id="reloadCheckbox" selected="{reload}"/>
+        </mx:FormItem>-->
         <mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
             <mx:ViewStack resizeToContent="true" creationPolicy="all" selectedIndex="{aggIndex}">
                 <mx:Box>
