@@ -1,6 +1,9 @@
 package com.easyinsight.filtering
 {
+import com.easyinsight.filtering.CustomRollingInterval;
+
 import mx.collections.ArrayCollection;
+import mx.utils.ObjectUtil;
 
 [Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.RollingFilterDefinition")]
@@ -45,5 +48,23 @@ import mx.collections.ArrayCollection;
 		override public function getType():int {
 			return FilterDefinition.ROLLING_DATE;
 		}
+
+        override protected function subclassClone(filter:FilterDefinition):void {
+            var intervals:ArrayCollection = new ArrayCollection();
+            for each (var interval:CustomRollingInterval in this.intervals) {
+                var copiedInterval:CustomRollingInterval = ObjectUtil.copy(interval) as CustomRollingInterval;
+                copiedInterval.customRollingIntervalID = 0;
+                intervals.addItem(copiedInterval);
+            }
+            RollingDateRangeFilterDefinition(filter).intervals = intervals;
+        }
+
+        override public function getSaveValue():Object {
+            return interval;
+        }
+
+        override public function loadFromSharedObject(value:Object):void {
+            interval = value as int;
+        }
 	}
 }

@@ -33,6 +33,14 @@ public class OrFilter extends FilterDefinition {
         }
     }
 
+    override protected function subclassClone(filter:FilterDefinition):void {
+        var filters:ArrayCollection = new ArrayCollection();
+        for each (var childFilter:FilterDefinition in this.filters) {
+            filters.addItem(childFilter.clone());
+        }
+        OrFilter(filter).filters = filters;
+    }
+
     override public function updateFromReportView(editorFilter:FilterDefinition):void {
         super.updateFromReportView(editorFilter);
         var orFilter:OrFilter = editorFilter as OrFilter;

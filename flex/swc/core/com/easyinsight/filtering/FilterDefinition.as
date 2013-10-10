@@ -30,6 +30,7 @@ import mx.utils.ObjectUtil;
     public static var flexIDCtr:int = 0;
 
 		public var field:AnalysisItem;
+    public var drillthrough:Boolean;
 		public var applyBeforeAggregation:Boolean = true;
         public var filterID:int;
         public var intrinsic:Boolean = false;
@@ -52,6 +53,10 @@ import mx.utils.ObjectUtil;
 			super();
 		}
 
+    public function loadFromSharedObject(value:Object):void {
+
+    }
+
     public function retrieveParentFilters():Array {
         if (parentFilters == null || parentFilters == "") {
             return [];
@@ -61,7 +66,7 @@ import mx.utils.ObjectUtil;
     }
 
     public function matches(filterDefinition:FilterDefinition):Boolean {
-        if (filterID != 00 && filterID == filterDefinition.filterID) {
+        if (filterID != 0 && filterID == filterDefinition.filterID) {
             return true;
         }
         return (flexID != 0 && flexID == filterDefinition.flexID);
@@ -137,6 +142,10 @@ import mx.utils.ObjectUtil;
 
     protected function subclassClone(filter:FilterDefinition):void {
 
+    }
+
+    public function getSaveValue():Object {
+        return null;
     }
 }
 }
