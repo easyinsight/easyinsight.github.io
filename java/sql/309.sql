@@ -3,7 +3,7 @@ alter table dashboard add persist_state tinyint(4) not null default 0;
 
 alter table analysis_item add reload_from_data_source tinyint(4) not null default 0;
 alter table analysis_item add parent_item_id bigint(20) default null;
-alter table analysis_item add constraint analysis_item_ibfk9 foreign key (parent_item_id) references analysis_item (analysis_item_id) on delete set null;
+alter table analysis_item add constraint analysis_item_ibfk12 foreign key (parent_item_id) references analysis_item (analysis_item_id) on delete set null;
 
 alter table analysis_item add flex_id bigint(20) not null default 0;
 
