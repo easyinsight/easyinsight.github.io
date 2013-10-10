@@ -173,11 +173,11 @@ public class DataViewFactory extends VBox implements IRetrievable {
         forceRetrieve();
     }
 
-    private var _dataSourceFields:ArrayCollection;
+    /*private var _dataSourceFields:ArrayCollection;
 
     public function set dataSourceFields(value:ArrayCollection):void {
         _dataSourceFields = value;
-    }
+    }*/
 
     override protected function createChildren():void {
         super.createChildren();
@@ -192,7 +192,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _controlBar = createReportControlBar();
         _controlBar["id"] = "_controlBar";
         _controlBar.analysisItems = _availableFields;
-        _controlBar.dataSourceFields = _dataSourceFields;
+        //_controlBar.dataSourceFields = _dataSourceFields;
         _controlBar.dataSourceID = _dataSourceID;
         _controlBar.addEventListener(ReportDataEvent.REQUEST_DATA, onDataRequest, false, 0, true);
         _controlBar.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromControlBar, false, 0, true);

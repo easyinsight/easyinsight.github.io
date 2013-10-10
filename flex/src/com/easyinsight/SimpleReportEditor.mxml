@@ -326,7 +326,7 @@
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, loadingEvent);
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, loadingEvent);
             dataView.feedMetadata = feedMetadata;
-            dataView.dataSourceFields = dataSourceFields;
+            //dataView.dataSourceFields = dataSourceFields;
 
             //if (!defaultManualRun) {
                 viewWatcher = BindingUtils.bindProperty(dataViewFactory, "adHocMode", adHocButton, "adHoc");
