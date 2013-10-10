@@ -6,11 +6,13 @@
         [Event(name="dashboardLoad", type="com.easyinsight.dashboard.DashboardReportLoadEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.IRetrievalState;
         import com.easyinsight.filtering.AnalysisItemFilterDefinition;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.core.Container;
         import mx.core.UIComponent;
         import mx.events.FlexEvent;
@@ -57,6 +59,34 @@
             }
         }
 
+        public function positionsPopulate(positions:DashboardStackPositions):void {
+            if (transformContainer != null) {
+                for each (var filterDefinition:FilterDefinition in transformContainer.getFilterDefinitions()) {
+                    var map:Object = positions.filterMap["d"];
+                    if (map == null) {
+                        map = new Object();
+                        positions.filterMap["d"] = map;
+                    }
+                    map[filterDefinition.filterID] = filterDefinition;
+                }
+            }
+            rootView.stackPopulate(positions);
+        }
+
+        private var _retrievalState:IRetrievalState;
+
+
+        [Bindable(event="retrievalStateChanged")]
+        public function get retrievalState():IRetrievalState {
+            return _retrievalState;
+        }
+
+        public function set retrievalState(value:IRetrievalState):void {
+            if (_retrievalState == value) return;
+            _retrievalState = value;
+            dispatchEvent(new Event("retrievalStateChanged"));
+        }
+
         private var _dashboardStackPositions:DashboardStackPositions;
 
         public function set dashboardStackPositions(value:DashboardStackPositions):void {
@@ -78,9 +108,9 @@
         }
 
         public function resetState():void {
-            /*var so:SharedObject = SharedObject.getLocal("d" + dashboard.urlKey + dashboard.version);
+            var so:SharedObject = SharedObject.getLocal("d" + dashboard.urlKey + dashboard.version);
             so.clear();
-            so.flush();*/
+            so.flush();
         }
 
         public function createDashboard(width:int = 0, height:int = 0):IDashboardViewComponent {
@@ -167,6 +197,9 @@
             for each (var visibleFilter:FilterDefinition in toUse) {
                 if (visibleFilter.showOnReportView) {
                     // retrieve and compare to version
+                    if (_retrievalState != null) {
+                        _retrievalState.forFilter(visibleFilter, "", _dashboard.overridenFilters);
+                    }
                     //visibleFilter.loadFromSharedObject(null, 0, dashboard.urlKey, dashboard.version);
                     visibleCount++;
                 }
@@ -193,6 +226,7 @@
             dashboardEditorMetadata.borderThickness = dashboard.borderThickness;
             dashboardEditorMetadata.dashboard = dashboard;
             dashboardEditorMetadata.dashboardView = this;
+            dashboardEditorMetadata.retrievalState = _retrievalState;
             rootView = DashboardElementFactory.createViewUIComponent(dashboard.rootElement, dashboardEditorMetadata, null) as IDashboardViewComponent;
             Container(rootView).verticalScrollPolicy = "off";
             Container(rootView).horizontalScrollPolicy = "off";
@@ -282,7 +316,7 @@
                                           existingFilters="{filterDefinitions}"
                                           width="100%" feedID="{dataSourceID}"
                                           reportView="true" dashboardID="{_dashboardID}" updatedTransforms="transformsUpdated(event)"
-                    dashboard="{dashboard}"/>
+                    dashboard="{dashboard}" retrievalState="{retrievalState}" filterStorageKey=""/>
 
     </mx:ViewStack>
     <mx:Canvas width="100%" backgroundAlpha="1" borderColor="0" id="dashboardStyleArea">

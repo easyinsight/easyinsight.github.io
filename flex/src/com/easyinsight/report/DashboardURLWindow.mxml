@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="createLink()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.dashboard.Dashboard;
+        import com.easyinsight.dashboard.DashboardRenderer;
+        import com.easyinsight.dashboard.DashboardStackPositions;
+        import com.easyinsight.dashboard.IDashboardViewComponent;
+
+        import mx.managers.PopUpManager;
+
+        private var _url:String;
+
+
+        [Bindable(event="urlChanged")]
+        public function get url():String {
+            return _url;
+        }
+
+        public function set url(value:String):void {
+            if (_url == value) return;
+            _url = value;
+            dispatchEvent(new Event("urlChanged"));
+        }
+
+        private function createLink():void {
+            var pos:DashboardStackPositions = new DashboardStackPositions();
+            dashboardRenderer.positionsPopulate(pos);
+            dashboardService.saveDashboardLink.send(dashboard.id, pos);
+        }
+
+        public var dashboard:Dashboard;
+        public var rootView:IDashboardViewComponent;
+        public var dashboardRenderer:DashboardRenderer;
+
+        private function createdLink():void {
+            var key:String = dashboardService.saveDashboardLink.lastResult as String;
+            url = "https://www.easy-insight.com/app/#savedDashboardID=" + key;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="dashboardService" destination="dashboardService">
+        <mx:method name="saveDashboardLink" result="createdLink()"/>
+    </mx:RemoteObject>
+    <mx:VBox horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <mx:Text text="You can bookmark this link in your browser or send it to&#13;anyone else on your account with access to the report." fontSize="14"/>
+        <mx:TextArea text="{url}" selectable="true" editable="false" width="400" height="50" borderStyle="solid" borderThickness="1"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Copy to Clipboard" click="System.setClipboard(url)"/>
+            <util:CancelButton label="Close" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

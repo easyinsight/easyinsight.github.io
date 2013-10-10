@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var audits:ArrayCollection;
+
+        [Bindable]
+        private var auditTypes:ArrayCollection;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            var auditTypes:ArrayCollection = new ArrayCollection();
+            for each (var event:ReportAuditEvent in audits) {
+                if (!auditTypes.contains(event.auditType)) {
+                    auditTypes.addItem(event.auditType);
+                }
+            }
+            this.auditTypes = auditTypes;
+        }
+
+        // 1 is yes, 0 is no, -1 is n/a, exclude n/a's
+        // overall csi score = q6
+        ]]></mx:Script>
+    <mx:ComboBox id="auditTypeBox" dataProvider="{auditTypes}"/>
+    <mx:DataGrid dataProvider="{audits}" wordWrap="true">
+        <mx:columns>
+            <mx:DataGridColumn headerText="Event Type" dataField="auditType" width="150"/>
+            <mx:DataGridColumn headerText="Event Label" dataField="eventLabel" width="400"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <util:SaveButton label="Close" click="PopUpManager.removePopUp(this)"/>
+</util:EISlimWindow>

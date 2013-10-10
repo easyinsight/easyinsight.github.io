@@ -74,15 +74,16 @@
 
 
         private function url():void {
-            //var escapedName:String = _reportName.replace(/[ @\"&*#$%^~]/g, "-");
-            var url:String = "https://www.easy-insight.com/app/#reportID=" + _report.urlKey;
-            var urlWindow:URLWindow = new URLWindow();
+            var urlWindow:ReportURLWindow = new ReportURLWindow();
+            urlWindow.report = _report;
+            urlWindow.reportView = reportView;
             urlWindow.x = this.x;
             urlWindow.y = this.y;
-            urlWindow.url = url;
             PopUpManager.addPopUp(urlWindow, this, true);
             PopUpManager.removePopUp(this);
         }
+
+        public var reportView:ReportView;
 
         private function embed():void {
             var embedReportWindow:EmbedReportWindow = new EmbedReportWindow();
@@ -166,6 +167,11 @@
         <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/code.png')"
                                        headerText="JSON API to Report"
                                        click="jsonAPI()"/>
+    </mx:HBox>
+    <mx:HBox>
+        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/plasma_tv.png')"
+                                   headerText="URL"
+                                   click="url()"/>
     </mx:HBox>
     <util:CancelButton label="Cancel" click="this.close()"/>
 </util:EISlimWindow>

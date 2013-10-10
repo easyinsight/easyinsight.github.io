@@ -13,11 +13,14 @@
         import com.easyinsight.analysis.AnalysisItemOverrideEvent;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.EmbeddedViewFactory;
+        import com.easyinsight.analysis.IRetrievalState;
         import com.easyinsight.analysis.service.ReportRetrievalFault;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.customupload.ProblemDataEvent;
         import com.easyinsight.dashboard.DashboardDescriptor;
+        import com.easyinsight.dashboard.DashboardStackPositions;
+        import com.easyinsight.dashboard.LocalStorageRetrievalState;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.AnalysisItemFilterDefinition;
         import com.easyinsight.filtering.FilterDefinition;
@@ -56,6 +59,19 @@
             viewFactory.refresh();
         }
 
+        private var _retrievalState:IRetrievalState;
+
+        [Bindable(event="retrievalStateChanged")]
+        public function get retrievalState():IRetrievalState {
+            return _retrievalState;
+        }
+
+        public function set retrievalState(value:IRetrievalState):void {
+            if (_retrievalState == value) return;
+            _retrievalState = value;
+            dispatchEvent(new Event("retrievalStateChanged"));
+        }
+
         override protected function keptEntity():void {
             _showAddBar = false;
             generateState();
@@ -77,11 +93,14 @@
             _reportNavHandler = value;
         }
 
+        private var _forceDefault:Boolean = false;
+
         private function exportExcel():void {
             viewFactory.updateExportMetadata();
             var window:ReportExportWindow = new ReportExportWindow();
             window.report = viewFactory.report;
             window.coreView = viewFactory.getChildAt(0);
+            window.reportView = this;
             PopUpManager.addPopUp(window, this, true);
             window.x = exportButton.x - 20;
             window.y = exportButton.y + exportButton.height + 10;
@@ -385,7 +404,16 @@
                 desc.dataFeedID = report.dataFeedID;
                 desc.reportType = report.reportType;
                 desc.urlKey = report.urlKey;
-                _breadCrumbs.push(new BreadCrumb(desc, transformContainer.getFilterDefinitions()));
+                var positions:DashboardStackPositions = new DashboardStackPositions();
+                var map:Object = positions.filterMap["r"];
+                if (map == null) {
+                    map = new Object();
+                    positions.filterMap["r"] = map;
+                }
+                for each (var filter:FilterDefinition in transformContainer.getFilterDefinitions()) {
+                    map[filter.filterID] = filter;
+                }
+                _breadCrumbs.push(new BreadCrumb(desc, transformContainer.getFilterDefinitions(), positions));
                 if (event.descriptor is InsightDescriptor) {
                     dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, exchangeItem, reportList, reportIndex, _breadCrumbs,
                             originalExchangeItem != null ? originalExchangeItem : desc, event.additionalItems)));
@@ -484,10 +512,19 @@
             forceRefresh();
         }
 
+        public function positionsPopulate(positions:DashboardStackPositions):void {
+            if (transformContainer != null) {
+                var map:Object = new Object();
+                positions.filterMap["r"] = map;
+                for each (var filterDefinition:FilterDefinition in transformContainer.getFilterDefinitions()) {
+                    map[filterDefinition.filterID] = filterDefinition;
+                }
+            }
+        }
+
         override protected function createChildren():void {
             super.createChildren();
-            try {
-
+            //try {
                 viewFactory.reportID = _reportID;
                 viewFactory.dataSourceID = _dataSourceID;
                 //BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
@@ -529,7 +566,7 @@
                     backButton.addEventListener(MouseEvent.CLICK, function (event:MouseEvent):void {
                         _breadCrumbs.pop();
                         if (crumb.eiDescriptor is InsightDescriptor) {
-                            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), crumb.filters, null, null, 0, _breadCrumbs)));
+                            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), null, null, null, 0, _breadCrumbs, null, null, crumb.stackPositions)));
                         } else {
                             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:crumb.eiDescriptor.id,
                                 initialFilters:crumb.filters,
@@ -539,10 +576,34 @@
                     });
                     breadCrumbBox.addChild(backButton);
                 }
+                if (stackPositions != null) {
+                    var o:Object = stackPositions.filterMap["r"];
+                    if (o != null) {
+                        var f:ArrayCollection = new ArrayCollection();
+                        for each (var filter:FilterDefinition in o) {
+                            f.addItem(filter);
+                        }
+                        parameterFilters = f;
+                    }
+                }
                 viewFactory.setup();
-            } catch (e:Error) {
+            /*} catch (e:Error) {
                 Alert.show(e.message);
-            }
+            }*/
+        }
+
+        private var _stackPositions:DashboardStackPositions;
+
+
+        [Bindable(event="stackPositionsChanged")]
+        public function get stackPositions():DashboardStackPositions {
+            return _stackPositions;
+        }
+
+        public function set stackPositions(value:DashboardStackPositions):void {
+            if (_stackPositions == value) return;
+            _stackPositions = value;
+            dispatchEvent(new Event("stackPositionsChanged"));
         }
 
         private function runReport(event:MouseEvent = null):void {
@@ -553,6 +614,15 @@
             report = event.reportInfo.report;
             headerFontSize = report.headerFontSize;
             maxHeaderWidth = report.maxHeaderWidth;
+
+            if (!_forceDefault && report.enableLocalStorage && exchangeItem == null) {
+
+                /*var delegate:DashboardStackPositionsRetrievalState = null;
+                 if (dashboardStackPositions != null) {
+                 delegate = new DashboardStackPositionsRetrievalState(dashboardStackPositions);
+                 }*/
+                retrievalState = new LocalStorageRetrievalState(report.urlKey, 0, null);
+            }
 
             if (exchangeItem == null) {
                 var editItem:ContextMenuItem = new ContextMenuItem("Edit " + report.name);
@@ -630,6 +700,11 @@
                 }
                 for each (var remaining:FilterDefinition in fObj) {
                     toUse.addItem(remaining);
+                }
+                for each (var f:FilterDefinition in toUse) {
+                    if (retrievalState != null) {
+                        retrievalState.forFilter(f, "r" + report.urlKey, null);
+                    }
                 }
                 viewFactory.filterDefinitions = toUse;
                 filterDefinitions = toUse;
@@ -709,9 +784,11 @@
             box.visible = true;
             if (!_showAddBar) {
                 var feedFragmentObject:Object = new Object();
-                feedFragmentObject.reportID = report.urlKey;
-                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                BrowserManager.getInstance().setFragment(feedFragmentString);
+                if (stackPositions == null) {
+                    feedFragmentObject.reportID = report.urlKey;
+                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                    BrowserManager.getInstance().setFragment(feedFragmentString);
+                }
                 BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
             } else {
                 var templateFragmentObject:Object = new Object();
@@ -820,7 +897,7 @@
             <filtering:TransformContainer id="transformContainer" filterEditable="false"
                                           existingFilters="{filterDefinitions}"
                                           width="100%" feedID="{dataSourceID}"
-                                          reportView="true" reportID="{_reportID}" report="{report}"/>
+                                          reportView="true" reportID="{_reportID}" report="{report}" retrievalState="{retrievalState}"/>
         </mx:VBox>
     </mx:ViewStack>
     <mx:Canvas id="screenTarget" width="100%" height="100%"/>

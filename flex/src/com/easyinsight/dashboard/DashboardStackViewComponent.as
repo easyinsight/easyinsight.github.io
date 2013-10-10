@@ -59,9 +59,19 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     }
 
     public function stackPopulate(positions:DashboardStackPositions):void {
-        positions.saveStackPosition(dashboardStack, viewStack.selectedIndex);
+        positions.saveStackPosition(dashboardStack.urlKey, viewStack.selectedIndex);
         for each (var comp:IDashboardViewComponent in viewChildren) {
             comp.stackPopulate(positions);
+        }
+        if (transformContainer != null) {
+            for each (var filterDefinition:FilterDefinition in transformContainer.getFilterDefinitions()) {
+                var map:Object = positions.filterMap["s" + dashboardStack.urlKey];
+                if (map == null) {
+                    map = new Object();
+                    positions.filterMap["s" + dashboardStack.urlKey] = map;
+                }
+                map[filterDefinition.filterID] = filterDefinition;
+            }
         }
     }
 
@@ -80,6 +90,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             newComp.setStyle("showEffect", leftEffect);
         } else {
             return;
+        }
+        if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null) {
+            dashboardEditorMetadata.retrievalState.saveStackPosition(dashboardStack.urlKey, targetIndex);
         }
         dashboardEditorMetadata.transformContainer.hideFilters(new ArrayCollection());
         IDashboardViewComponent(newComp).initialRetrieve();
@@ -207,8 +220,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                 }
             }
         }
-        if (dashboardEditorMetadata != null && dashboardEditorMetadata.dashboardStackPositions != null && viewStack != null) {
-            var index:int = dashboardEditorMetadata.dashboardStackPositions.getStackPosition(dashboardStack);
+
+        if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null && viewStack != null) {
+            var index:int = dashboardEditorMetadata.retrievalState.getStackPosition(dashboardStack.urlKey);
             if (index != -1) {
                 viewStack.selectedIndex = index;
                 if (dashboardHeaderButtons != null && index != -1 && dashboardHeaderButtons.length > index) {
@@ -222,6 +236,33 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                 }
             }
         }
+        /*if (positionAsIs == -1) {
+            try {
+                var so:SharedObject = SharedObject.getLocal("d" + dashboardEditorMetadata.dashboard.urlKey);
+                if (so.size > 0) {
+                    var savedVersion:int = so.data.version;
+                    if (savedVersion == dashboardEditorMetadata.dashboard.version) {
+                        var stackPosition:int = so.data["de" + dashboardStack.urlKey];
+                        if (stackPosition > 0) {
+                            viewStack.selectedIndex = stackPosition;
+                            if (dashboardHeaderButtons != null && index != -1 && dashboardHeaderButtons.length > stackPosition) {
+                                if (selectedButton != null) {
+                                    selectedButton.selected = false;
+                                }
+                                if (dashboardHeaderButtons.getItemAt(stackPosition) is DashboardButton) {
+                                    DashboardButton(dashboardHeaderButtons.getItemAt(stackPosition)).selected = true;
+                                    selectedButton = DashboardButton(dashboardHeaderButtons.getItemAt(stackPosition));
+                                }
+                            }
+                        }
+                    } else {
+                        so.clear();
+                    }
+                }
+                so.flush();
+            } catch (e:Error) {
+            }
+        }*/
         addChild(viewStack);
 
     }
@@ -527,6 +568,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     private function createTransformContainer():TransformContainer {
         if (dashboardStack.filters.length > 0) {
             transformContainer = new TransformContainer();
+            transformContainer.retrievalState = dashboardEditorMetadata.retrievalState;
             transformContainer.setStyle("borderStyle", dashboardStack.filterBorderStyle);
             transformContainer.setStyle("borderColor", dashboardStack.filterBorderColor);
             transformContainer.setStyle("backgroundColor", dashboardStack.filterBackgroundColor);
@@ -543,6 +585,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                 }
                 stackFilterMap[filterDefinition.qualifiedName()] = filterToUse;
                 myFilterColl.addItem(filterToUse);
+            }
+            for each (var valFilter:FilterDefinition in myFilterColl) {
+                dashboardEditorMetadata.retrievalState.forFilter(valFilter, "s" + dashboardStack.urlKey, dashboardStack.overridenFilters);
             }
             transformContainer.existingFilters = myFilterColl;
             filterMap[elementID] = myFilterColl;

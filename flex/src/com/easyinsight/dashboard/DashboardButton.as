@@ -27,7 +27,7 @@ public class DashboardButton extends Canvas {
         mouseEnabled = true;
         mouseChildren = false;
         buttonMode = true;
-        this.height = 22;
+        this.height = 24;
     }
 
     private var _data:Object;
