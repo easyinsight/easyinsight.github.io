@@ -478,11 +478,11 @@ public class DataViewFactory extends VBox implements IRetrievable {
             try {
                 if (event.hasData) {
                     showReport();
-                    if (event.reportAudit != null && event.reportAudit.length > 0) {
+                    /*if (event.reportAudit != null && event.reportAudit.length > 0) {
                         _controlBar.createExplainButton();
                     } else {
                         _controlBar.deleteExplainButton();
-                    }
+                    }*/
                     _reportRenderer.renderReport(event.dataSet, _analysisDefinition, new Object(), event.additionalProperties);
                 } else {
                     showNoData();
