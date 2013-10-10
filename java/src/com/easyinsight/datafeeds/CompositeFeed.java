@@ -458,7 +458,7 @@ public class CompositeFeed extends Feed {
 
         DataSet dataSet = null;
 
-        List<String> auditStrings = new ArrayList<String>();
+        List<ReportAuditEvent> auditStrings = new ArrayList<ReportAuditEvent>();
 
         Map<QueryNodeKey, QueryData> map = new HashMap<QueryNodeKey, QueryData>();
 
@@ -555,7 +555,7 @@ public class CompositeFeed extends Feed {
                 dataSet = mergeAudit.getDataSet();
                 operations = mergeAudit.getOperations();
 
-                auditStrings.addAll(mergeAudit.getMergeStrings());
+                //auditStrings.addAll(mergeAudit.getMergeStrings());
                 sourceQueryData.dataSet = dataSet;
                 sourceQueryData.neededItems.addAll(targetQueryData.neededItems);
                 sourceQueryData.ids.addAll(targetQueryData.ids);
@@ -621,10 +621,20 @@ public class CompositeFeed extends Feed {
                         sourceQueryData = targetQueryData;
                         targetQueryData = swapData;
                     }
-                    FilterDefinition joinFilter = null;
+                    FilterValueDefinition joinFilter = null;
+                    String string = null;
                     if (insightRequestMetadata.isOptimized() && last.connection instanceof CompositeFeedConnection) {
                         joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, (CompositeFeedConnection) last.connection);
+                        if (joinFilter != null) {
+                            string = "Joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName + " with filter containing " + joinFilter.getFilteredValues().size() + " values.";
+                        }
                     }
+                    if (string == null) {
+                        string = "Joining " + sourceNode.dataSourceName + " to " + targetNode.dataSourceName + ".";
+                    }
+
+                    auditStrings.add(new ReportAuditEvent(ReportAuditEvent.JOIN_FILTER, string));
+
                     if (!swapped) {
                         if (targetQueryData.dataSet == null) {
                             if (insightRequestMetadata.isOptimized()) {
@@ -649,7 +659,7 @@ public class CompositeFeed extends Feed {
                             sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID, operations);
                     operations = mergeAudit.getOperations();
                     dataSet = mergeAudit.getDataSet();
-                    auditStrings.addAll(mergeAudit.getMergeStrings());
+                    //auditStrings.addAll(mergeAudit.getMergeStrings());
                     sourceQueryData.dataSet = dataSet;
                     sourceQueryData.neededItems.addAll(targetQueryData.neededItems);
                     sourceQueryData.ids.addAll(targetQueryData.ids);
@@ -671,7 +681,9 @@ public class CompositeFeed extends Feed {
             dataSet = postJoin.merge(dataSet, targetSet, null, queryStateNode.neededItems, null, queryStateNode.dataSourceName, conn, 0, queryStateNode.feedID, operations).getDataSet();
         }
 
-        dataSet.setAudits(auditStrings);
+        if (insightRequestMetadata.isLogReport()) {
+            dataSet.getAudits().addAll(auditStrings);
+        }
         Pipeline pipeline = insightRequestMetadata.findPipeline(getName());
         if (pipeline != null) {
             WSListDefinition analysisDefinition = new WSListDefinition();
@@ -729,7 +741,7 @@ public class CompositeFeed extends Feed {
         }
     }
 
-    private FilterDefinition createJoinFilter(QueryStateNode sourceNode, DataSet dataSet, QueryStateNode targetNode, CompositeFeedConnection connection) {
+    private FilterValueDefinition createJoinFilter(QueryStateNode sourceNode, DataSet dataSet, QueryStateNode targetNode, CompositeFeedConnection connection) {
         FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
         if (connection.getTargetJoin() == null) {
             if (connection.getTargetItem() == null || connection.getTargetItem().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
