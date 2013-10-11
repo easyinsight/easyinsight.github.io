@@ -514,7 +514,9 @@ public class DashboardService {
                     dashboardReport.setOverridenFilters(filters);
                 }
                 InsightDescriptor report = dashboardStackPositions.getReports().get(dashboardReport.getUrlKey());
-                dashboardReport.setReport(report);
+                if (report != null) {
+                    dashboardReport.setReport(report);
+                }
             }
         }
     }
