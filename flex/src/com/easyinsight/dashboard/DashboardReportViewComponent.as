@@ -186,23 +186,11 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             percentHeight = NaN;
         }
 
-        if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null) {
+        /*if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null) {
             var custom:InsightDescriptor = dashboardEditorMetadata.retrievalState.getReport(dashboardReport.urlKey);
             if (custom != null) {
                 dashboardReport.report = custom;
             }
-        }
-
-        /*try {
-            var so:SharedObject = SharedObject.getLocal("d" + dashboardEditorMetadata.dashboard.urlKey + dashboardEditorMetadata.dashboard.version);
-            if (so.size > 0) {
-                var customReport:InsightDescriptor = so.data["r" + dashboardReport.urlKey];
-                if (customReport != null) {
-                    dashboardReport.report = customReport;
-                }
-            }
-        } catch (e:Error) {
-
         }*/
 
         /*if (dashboardEditorMetadata.borderThickness > 0) {
