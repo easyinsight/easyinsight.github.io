@@ -557,6 +557,8 @@ public class CompositeFeedConnection implements Serializable, IJoin {
             }
         }
         DataSet result = new DataSet();
+        result.getAudits().addAll(sourceSet.getAudits());
+        result.getAudits().addAll(dataSet.getAudits());
         Map<Value, List<IRow>> indexCopy = new HashMap<Value, List<IRow>>(index);
         Iterator<IRow> targetIter = targetSetRows.iterator();
         while (targetIter.hasNext()) {
