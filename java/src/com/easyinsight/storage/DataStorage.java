@@ -822,7 +822,7 @@ public class DataStorage implements IDataStorage {
         if (reportItems.isEmpty()) {
             return new DataSet();
         }
-        filters = eligibleFilters(filters, keyStrings);
+        filters = eligibleFilters(filters, keyStrings, insightRequestMetadata);
 
         if (insightRequestMetadata.isNewFilterStrategy()) {
             for (FilterDefinition filter : filters) {
@@ -891,7 +891,8 @@ public class DataStorage implements IDataStorage {
         insightRequestMetadata.addDatabaseTime(System.currentTimeMillis() - startTime);
         dataSet.setLastTime(metadata.getLastData());
         if (insightRequestMetadata.isLogReport()) {
-            System.out.println("Query " + queryBuilder.toString() + " took " + (System.currentTimeMillis() - startTime) + " ms to retrieve " + dataSet.getRows().size() + " rows");
+            dataSet.getAudits().add(
+                    new ReportAuditEvent(ReportAuditEvent.QUERY, "Query took " + (System.currentTimeMillis() - startTime) + " ms to retrieve " + dataSet.getRows().size() + " rows"));
         }
         //System.out.println("took " + (System.currentTimeMillis() - startTime));
         return dataSet;
@@ -976,10 +977,13 @@ public class DataStorage implements IDataStorage {
     }
 
     @NotNull
-    private Collection<FilterDefinition> eligibleFilters(@Nullable Collection<FilterDefinition> filters, Set<String> keyStrings) {
+    private Collection<FilterDefinition> eligibleFilters(@Nullable Collection<FilterDefinition> filters, Set<String> keyStrings, InsightRequestMetadata insightRequestMetadata) {
         Collection<FilterDefinition> eligibleFilters = new ArrayList<FilterDefinition>();
         if (filters != null) {
             for (FilterDefinition filterDefinition : filters) {
+                if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
+                    continue;
+                }
                 if (filterDefinition.getPipelineName().equals(Pipeline.BEFORE) && filterDefinition.validForQuery()) {
                     if (filterDefinition.getField() != null) {
                         if (!keyStrings.contains(filterDefinition.getField().getKey().toSQL())) {
