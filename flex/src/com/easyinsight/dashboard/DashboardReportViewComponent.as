@@ -25,6 +25,7 @@ import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
+import mx.controls.Alert;
 import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.managers.PopUpManager;
@@ -166,24 +167,29 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     protected override function createChildren():void {
         super.createChildren();
 
-        if (dashboardEditorMetadata.borderThickness == 0) {
-            horizontalScrollPolicy = "off";
-            verticalScrollPolicy = "off";
-        }
-        var sizeInfo:SizeInfo = obtainPreferredSizeInfo();
-        if (sizeInfo.preferredWidth > 0) {
-            width = dashboardReport.preferredWidth;
-        } else {
-            percentWidth = 100;
-        }
-        if (sizeInfo.preferredHeight > 0) {
-            height = dashboardReport.preferredHeight;
-        } else if (!sizeInfo.autoCalcHeight && dashboardEditorMetadata.dashboard.absoluteSizing) {
-            height = 400;
-        } else if (!sizeInfo.autoCalcHeight) {
-            percentHeight = 100;
-        } else {
-            percentHeight = NaN;
+        try {
+            if (dashboardEditorMetadata.borderThickness == 0) {
+                horizontalScrollPolicy = "off";
+                verticalScrollPolicy = "off";
+            }
+            var sizeInfo:SizeInfo = obtainPreferredSizeInfo();
+            if (sizeInfo.preferredWidth > 0) {
+                width = dashboardReport.preferredWidth;
+            } else {
+                percentWidth = 100;
+            }
+            if (sizeInfo.preferredHeight > 0) {
+                height = dashboardReport.preferredHeight;
+            } else if (!sizeInfo.autoCalcHeight && dashboardEditorMetadata.dashboard.absoluteSizing) {
+                height = 400;
+            } else if (!sizeInfo.autoCalcHeight) {
+                percentHeight = 100;
+            } else {
+                percentHeight = NaN;
+            }
+        } catch (e:Error) {
+            Alert.show("1");
+            return;
         }
 
         /*if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null) {
@@ -198,46 +204,55 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             setStyle("borderThickness", 3);
             setStyle("borderColor", 0x00000);
         }*/
-        var controllerClass:Class = EmbeddedControllerLookup.controllerForType(dashboardReport.report.reportType);
-        var controller:IEmbeddedReportController = new controllerClass();
-        viewFactory = controller.createEmbeddedView();
-        viewFactory.styleCanvas = false;
-        viewFactory.usePreferredHeight = dashboardReport.autoCalculateHeight;
-        viewFactory.reportID = dashboardReport.report.id;
-        //viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
-        viewFactory.dataSourceID = dashboardReport.report.dataFeedID;
-        viewFactory.dashboardID = dashboardEditorMetadata.dashboardID;
-        viewFactory.reportPaddingWidth = dashboardEditorMetadata.dashboard.reportHorizontalPadding;
-        viewFactory.spaceSides = false;
-        if (dashboardReport.showLabel) {
-            var blah:Box = new Box();
-            blah.height = 28;
-            blah.setStyle("backgroundColor", 0xDDDDDD);
-            blah.setStyle("borderThickness", 1);
-            blah.setStyle("borderStyle", "solid");
-            blah.percentWidth = 100;
-            blah.setStyle("horizontalAlign", "center");
-            var label:LinkButton = new LinkButton();
-            label.setStyle("fontSize", 14);
-            label.label = dashboardReport.report.name;
-            label.addEventListener(MouseEvent.CLICK, onLabelClick);
-            blah.addChild(label);
-            addChild(blah);
-            labelBox = blah;
-            addChild(viewFactory);
-        } else {
-            addChild(viewFactory);
+        try {
+            var controllerClass:Class = EmbeddedControllerLookup.controllerForType(dashboardReport.report.reportType);
+            var controller:IEmbeddedReportController = new controllerClass();
+            viewFactory = controller.createEmbeddedView();
+            viewFactory.styleCanvas = false;
+            viewFactory.usePreferredHeight = dashboardReport.autoCalculateHeight;
+            viewFactory.reportID = dashboardReport.report.id;
+            //viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
+            viewFactory.dataSourceID = dashboardReport.report.dataFeedID;
+            viewFactory.dashboardID = dashboardEditorMetadata.dashboardID;
+            viewFactory.reportPaddingWidth = dashboardEditorMetadata.dashboard.reportHorizontalPadding;
+            viewFactory.spaceSides = false;
+            if (dashboardReport.showLabel) {
+                var blah:Box = new Box();
+                blah.height = 28;
+                blah.setStyle("backgroundColor", 0xDDDDDD);
+                blah.setStyle("borderThickness", 1);
+                blah.setStyle("borderStyle", "solid");
+                blah.percentWidth = 100;
+                blah.setStyle("horizontalAlign", "center");
+                var label:LinkButton = new LinkButton();
+                label.setStyle("fontSize", 14);
+                label.label = dashboardReport.report.name;
+                label.addEventListener(MouseEvent.CLICK, onLabelClick);
+                blah.addChild(label);
+                addChild(blah);
+                labelBox = blah;
+                addChild(viewFactory);
+            } else {
+                addChild(viewFactory);
+            }
+        } catch (e:Error) {
+            Alert.show("2");
+            return;
         }
 
-        viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onReportSetup);
-        viewFactory.addEventListener("export", onExport);
-        viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, onData);
-        viewFactory.addEventListener(SizeOverrideEvent.SIZE_OVERRIDE, sizeOverride);
-        viewFactory.setup();
-        if (dashboardEditorMetadata.fixedID) {
-            viewFactory.contextMenu = new EmbedReportContextMenuFactory().createReportContextMenu(dashboardReport.report, viewFactory, this);
-        } else {
-            viewFactory.contextMenu = PopupMenuFactory.reportFactory.createReportContextMenu(dashboardReport.report, viewFactory, this);
+        try {
+            viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onReportSetup);
+            viewFactory.addEventListener("export", onExport);
+            viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, onData);
+            viewFactory.addEventListener(SizeOverrideEvent.SIZE_OVERRIDE, sizeOverride);
+            viewFactory.setup();
+            if (dashboardEditorMetadata.fixedID) {
+                viewFactory.contextMenu = new EmbedReportContextMenuFactory().createReportContextMenu(dashboardReport.report, viewFactory, this);
+            } else {
+                viewFactory.contextMenu = PopupMenuFactory.reportFactory.createReportContextMenu(dashboardReport.report, viewFactory, this);
+            }
+        } catch (e:Error) {
+            Alert.show("3");
         }
 
     }
