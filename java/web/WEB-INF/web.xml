@@ -7,6 +7,10 @@
 
     <display-name>app</display-name>
     <description>Application</description>
+
+    <listener>
+        <listener-class>com.easyinsight.servlet.EIContextListener</listener-class>
+    </listener>
     
     <context-param>
         <param-name>loginPage</param-name>
@@ -351,6 +355,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>AddField</servlet-name>
+        <display-name>AddField</display-name>
+        <servlet-class>com.easyinsight.api.v3.AddFieldServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>UpdateRows</servlet-name>
         <display-name>UpdateRows</display-name>
         <servlet-class>com.easyinsight.api.v3.UpdateRowsServlet</servlet-class>
@@ -651,6 +661,7 @@
 
     <servlet-mapping>
         <servlet-name>WhiteLabelImage</servlet-name>
+
         <url-pattern>/whiteLabelImage</url-pattern>
     </servlet-mapping>
 
@@ -667,6 +678,11 @@
     <servlet-mapping>
         <servlet-name>ReplaceRows</servlet-name>
         <url-pattern>/xml/replaceRows</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AddField</servlet-name>
+        <url-pattern>/xml/addField</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
