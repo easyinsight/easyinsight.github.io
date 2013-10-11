@@ -500,6 +500,7 @@ public class DataStorage implements IDataStorage {
     }
 
     public void alter(Key key) throws SQLException {
+        System.out.println("Statement of alter = " + "ALTER TABLE " + getTableName() + " ADD " + key.toSQL() + " DOUBLE DEFAULT NULL");
         PreparedStatement stmt = storageConn.prepareStatement("ALTER TABLE " + getTableName() + " ADD " + key.toSQL() + " DOUBLE DEFAULT NULL");
         stmt.execute();
     }
