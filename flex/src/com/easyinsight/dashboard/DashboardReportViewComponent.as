@@ -205,7 +205,12 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             setStyle("borderColor", 0x00000);
         }*/
         try {
-            var controllerClass:Class = EmbeddedControllerLookup.controllerForType(dashboardReport.report.reportType);
+            try {
+                var controllerClass:Class = EmbeddedControllerLookup.controllerForType(dashboardReport.report.reportType);
+            } catch (e1:Error) {
+                Alert.show("4");
+                return;
+            }
             var controller:IEmbeddedReportController = new controllerClass();
             viewFactory = controller.createEmbeddedView();
             viewFactory.styleCanvas = false;
@@ -214,7 +219,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             //viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
             viewFactory.dataSourceID = dashboardReport.report.dataFeedID;
             viewFactory.dashboardID = dashboardEditorMetadata.dashboardID;
-            viewFactory.reportPaddingWidth = dashboardEditorMetadata.dashboard.reportHorizontalPadding;
+            //viewFactory.reportPaddingWidth = dashboardEditorMetadata.dashboard.reportHorizontalPadding;
             viewFactory.spaceSides = false;
             if (dashboardReport.showLabel) {
                 var blah:Box = new Box();
