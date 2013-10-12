@@ -25,7 +25,7 @@
         // overall csi score = q6
         ]]></mx:Script>
     <mx:ComboBox id="auditTypeBox" dataProvider="{auditTypes}"/>
-    <mx:DataGrid dataProvider="{audits}" wordWrap="true">
+    <mx:DataGrid dataProvider="{audits}" wordWrap="true" variableRowHeight="true">
         <mx:columns>
             <mx:DataGridColumn headerText="Event Type" dataField="auditType" width="150"/>
             <mx:DataGridColumn headerText="Event Label" dataField="eventLabel" width="400" wordWrap="true"/>
