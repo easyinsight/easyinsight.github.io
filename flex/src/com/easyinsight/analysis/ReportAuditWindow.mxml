@@ -28,7 +28,7 @@
     <mx:DataGrid dataProvider="{audits}" wordWrap="true">
         <mx:columns>
             <mx:DataGridColumn headerText="Event Type" dataField="auditType" width="150"/>
-            <mx:DataGridColumn headerText="Event Label" dataField="eventLabel" width="400"/>
+            <mx:DataGridColumn headerText="Event Label" dataField="eventLabel" width="400" wordWrap="true"/>
         </mx:columns>
     </mx:DataGrid>
     <util:SaveButton label="Close" click="PopUpManager.removePopUp(this)"/>
