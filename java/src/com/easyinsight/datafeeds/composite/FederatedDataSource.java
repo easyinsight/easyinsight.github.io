@@ -230,26 +230,30 @@ public class FederatedDataSource extends FeedDefinition {
         for (AnalysisItem analysisItem : getFields()) {
             existingMap.put(analysisItem.toDisplay(), analysisItem);
         }
-        FederationSource source = sources.get(0);
-        FeedDefinition child = new FeedStorage().getFeedDefinitionData(source.getDataSourceID(), conn);
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
-        for (AnalysisItem analysisItem : child.getFields()) {
-            // is this analysis item new...
-            AnalysisItem existing = existingMap.get(analysisItem.toDisplay());
-            if (existing == null) {
-                System.out.println("Couldn't find field " + analysisItem.toDisplay());
-                try {
-                    AnalysisItem clonedItem = analysisItem.clone();
-                    clonedItem.setAnalysisItemID(0);
-                    Key clonedKey = clonedItem.getKey().clone();
-                    clonedItem.setKey(clonedKey);
-                    getFields().add(clonedItem);
-                    replacementMap.put(analysisItem.getAnalysisItemID(), clonedItem);
-                } catch (CloneNotSupportedException e) {
-                    throw new RuntimeException(e);
+        for (FederationSource source : sources) {
+            FeedDefinition child = new FeedStorage().getFeedDefinitionData(source.getDataSourceID(), conn);
+
+            for (AnalysisItem analysisItem : child.getFields()) {
+                // is this analysis item new...
+                AnalysisItem existing = existingMap.get(analysisItem.toDisplay());
+                if (existing == null) {
+                    System.out.println("Couldn't find field " + analysisItem.toDisplay());
+                    try {
+                        AnalysisItem clonedItem = analysisItem.clone();
+                        clonedItem.setAnalysisItemID(0);
+                        Key clonedKey = clonedItem.getKey().clone();
+                        clonedItem.setKey(clonedKey);
+                        getFields().add(clonedItem);
+                        replacementMap.put(analysisItem.getAnalysisItemID(), clonedItem);
+                        existingMap.put(analysisItem.toDisplay(), clonedItem);
+                    } catch (CloneNotSupportedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }
+
         ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
         for (Map.Entry<Long, AnalysisItem> replEntry : replacementMap.entrySet()) {
             replEntry.getValue().updateIDs(replacements);
