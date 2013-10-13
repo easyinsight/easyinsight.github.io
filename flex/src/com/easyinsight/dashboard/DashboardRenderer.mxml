@@ -197,8 +197,11 @@
             for each (var visibleFilter:FilterDefinition in toUse) {
                 if (visibleFilter.showOnReportView) {
                     // retrieve and compare to version
-                    if (_retrievalState != null) {
-                        _retrievalState.forFilter(visibleFilter, "", _dashboard.overridenFilters);
+                    try {
+                        if (_retrievalState != null) {
+                            _retrievalState.forFilter(visibleFilter, "", _dashboard.overridenFilters);
+                        }
+                    } catch (e:Error) {
                     }
                     //visibleFilter.loadFromSharedObject(null, 0, dashboard.urlKey, dashboard.version);
                     visibleCount++;
