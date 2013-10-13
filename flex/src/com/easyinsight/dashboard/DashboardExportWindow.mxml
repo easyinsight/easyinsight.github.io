@@ -4,6 +4,7 @@
         import com.easyinsight.analysis.DashboardPDFCreator;
         import com.easyinsight.analysis.DashboardPDFWindow;
         import com.easyinsight.analysis.EmbedDashboardWindow;
+        import com.easyinsight.report.DashboardURLWindow;
         import com.easyinsight.report.URLWindow;
         import com.easyinsight.util.PopUpUtil;
 
@@ -17,12 +18,24 @@
         private var _dataSourceID:int;
         private var _dashboardName:String;
         private var _coreView:DisplayObject;
+        private var _rootView:IDashboardViewComponent;
+
+        private var _dashboardRenderer:DashboardRenderer;
 
         private var _dashboard:Dashboard;
+
+        public function set dashboardRenderer(value:DashboardRenderer):void {
+            _dashboardRenderer = value;
+        }
 
         protected override function commitProperties():void {
             super.commitProperties();
             _dashboardName = _dashboard.name;
+        }
+
+
+        public function set rootView(value:IDashboardViewComponent):void {
+            _rootView = value;
         }
 
         public function set coreView(value:DisplayObject):void {
@@ -50,12 +63,12 @@
         }
 
         private function url():void {
-            //var escapedName:String = _reportName.replace(/[ @\"&*#$%^~]/g, "-");
-            var url:String = "https://www.easy-insight.com/app/#dashboardID=" + _dashboard.urlKey;
-            var urlWindow:URLWindow = new URLWindow();
+            var urlWindow:DashboardURLWindow = new DashboardURLWindow();
+            urlWindow.dashboard = _dashboard;
+            urlWindow.rootView = _rootView;
+            urlWindow.dashboardRenderer = _dashboardRenderer;
             urlWindow.x = this.x;
             urlWindow.y = this.y;
-            urlWindow.url = url;
             PopUpManager.addPopUp(urlWindow, this, true);
             PopUpManager.removePopUp(this);
         }

@@ -8,31 +8,31 @@
         import mx.managers.PopUpManager;
 
         private function addPatternMatch():void {
-            var patternFilter:PatternFilter = new PatternFilter(_feedID, _item);
+            var patternFilter:PatternFilter = new PatternFilter(_feedID, _item, null, null);
             dispatchEvent(new FilterCreationEvent(patternFilter));
             PopUpManager.removePopUp(this);
         }
 
         private function addMultiValue():void {
-            var multiValFilter:MultiValueFilter = new MultiValueFilter(_feedID, _item, 0, 0);
+            var multiValFilter:MultiValueFilter = new MultiValueFilter(_feedID, _item, 0, null, null, null);
             dispatchEvent(new FilterCreationEvent(multiValFilter));
             PopUpManager.removePopUp(this);
         }
 
         private function addNewMultiValue():void {
-            var multiValFilter:NewMultiValueFilter = new NewMultiValueFilter(_feedID, _item, 0, 0, _report, null, null);
+            var multiValFilter:NewMultiValueFilter = new NewMultiValueFilter(_feedID, _item, 0, 0, _report, null, null, null, null);
             dispatchEvent(new FilterCreationEvent(multiValFilter));
             PopUpManager.removePopUp(this);
         }
 
         private function addComboBox():void {
-            var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, _item, 0, 0, _report, null, null);
+            var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, _item, 0, 0, _report, null, null, null, null);
             dispatchEvent(new FilterCreationEvent(comboBoxFilter));
             PopUpManager.removePopUp(this);
         }
 
         private function addAutoComplete():void {
-            var autoCompleteFilter:AutoCompleteFilter = new AutoCompleteFilter(_feedID, _item, 0, 0);
+            var autoCompleteFilter:AutoCompleteFilter = new AutoCompleteFilter(_feedID, _item, 0, 0, null, null);
             dispatchEvent(new FilterCreationEvent(autoCompleteFilter));
             PopUpManager.removePopUp(this);
         }

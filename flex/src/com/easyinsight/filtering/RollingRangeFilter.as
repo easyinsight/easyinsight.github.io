@@ -1,6 +1,7 @@
 package com.easyinsight.filtering
 {
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
@@ -33,7 +34,11 @@ public class RollingRangeFilter extends HBox implements IFilter
 
     private var rangeOptions:ArrayCollection;
 
-    public function RollingRangeFilter(feedID:int, analysisItem:AnalysisItem)
+    private var _retrievalState:IRetrievalState;
+
+    private var filterMetadata:FilterMetadata;
+
+    public function RollingRangeFilter(feedID:int, analysisItem:AnalysisItem, retrievalState:IRetrievalState, filterMetadata:FilterMetadata)
     {
         super();
         this._feedID = feedID;
@@ -55,6 +60,8 @@ public class RollingRangeFilter extends HBox implements IFilter
         rangeOptions.addItem(new RangeOption("Last Full Month", RollingDateRangeFilterDefinition.LAST_FULL_MONTH));
         rangeOptions.addItem(new RangeOption("Last Day of Data", RollingDateRangeFilterDefinition.LAST_DAY));        
         rangeOptions.addItem(new RangeOption("Custom", RollingDateRangeFilterDefinition.CUSTOM));
+        this.filterMetadata = filterMetadata;
+        _retrievalState = retrievalState;
         setStyle("verticalAlign", "middle");
     }
 
@@ -88,7 +95,7 @@ public class RollingRangeFilter extends HBox implements IFilter
 
     private function edit(event:MouseEvent):void {
         var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
-        window.detailClass = DateRangeDetailEditor;
+        window.detailClass = DateRangeDetail;
         window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
         window.analysisItems = _analysisItems;
         window.filterDefinition = rollingFilter;
@@ -239,6 +246,12 @@ public class RollingRangeFilter extends HBox implements IFilter
         var currentValue:int = rollingFilter.interval;
         if (newValue != currentValue) {
             rollingFilter.interval = newValue;
+            try {
+                if (_retrievalState != null) {
+                    _retrievalState.updateFilter(rollingFilter, filterMetadata);
+                }
+            } catch (e:Error) {
+            }
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, rollingFilter, null, this));
         }
     }

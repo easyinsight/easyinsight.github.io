@@ -15,7 +15,7 @@ public abstract class DataResults implements Cloneable {
     private FeedMetadata feedMetadata;
     private DataSourceInfo dataSourceInfo;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
-    private List<String> auditMessages;
+    private List<ReportAuditEvent> auditMessages;
     private ReportFault reportFault;
     private List<IntentionSuggestion> suggestions;
     private String reportLog;
@@ -75,11 +75,11 @@ public abstract class DataResults implements Cloneable {
         this.reportFault = reportFault;
     }
 
-    public List<String> getAuditMessages() {
+    public List<ReportAuditEvent> getAuditMessages() {
         return auditMessages;
     }
 
-    public void setAuditMessages(List<String> auditMessages) {
+    public void setAuditMessages(List<ReportAuditEvent> auditMessages) {
         this.auditMessages = auditMessages;
     }
 

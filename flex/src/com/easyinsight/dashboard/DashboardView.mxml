@@ -5,6 +5,7 @@
         width="100%" height="100%" verticalGap="0" verticalScrollPolicy="off" horizontalScrollPolicy="off">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.analysis.IRetrievalState;
         import com.easyinsight.analysis.list.SizeOverrideEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.quicksearch.EIDescriptor;
@@ -13,6 +14,7 @@
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.framework.User;
+
         import mx.controls.Button;
         import mx.core.Application;
 
@@ -30,8 +32,6 @@
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.report.ReportNavigationEvent;
         import com.easyinsight.util.ActionDashboardLog;
-
-        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
@@ -45,6 +45,19 @@
 
         public function set fixedID(value:Boolean):void {
             _fixedID = value;
+        }
+
+        private var _retrievalState:IRetrievalState;
+
+        [Bindable(event="retrievalStateChanged")]
+        public function get retrievalState():IRetrievalState {
+            return _retrievalState;
+        }
+
+        public function set retrievalState(value:IRetrievalState):void {
+            if (_retrievalState == value) return;
+            _retrievalState = value;
+            dispatchEvent(new Event("retrievalStateChanged"));
         }
 
         [Bindable]
@@ -90,7 +103,7 @@
             var contextMenu:ContextMenu = new ContextMenu();
             contextMenu.customItems = [ logoutItem ];
             this.contextMenu = contextMenu;
-            dashboardService.getDashboardView.send(_dashboardID);
+            dashboardService.getDashboardView.send(_dashboardID, dashboardStackPositions);
         }
 
         private function onNavigation(event:ReportNavigationEvent):void {
@@ -101,7 +114,7 @@
             dashboardDesc.id = _dashboardID;
             dashboardDesc.name = dashboard.name;
             var pos:DashboardStackPositions = new DashboardStackPositions();
-            rootView.stackPopulate(pos);
+            dashboardRenderer.positionsPopulate(pos);
             _breadCrumbs.push(new BreadCrumb(dashboardDesc, dashboardRenderer.getFilterDefinitions(), pos));
             if (event.descriptor is InsightDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, null, null, 0, _breadCrumbs)));
@@ -121,6 +134,12 @@
 
         public function set initialFilters(value:ArrayCollection):void {
             _initialFilters = value;
+        }
+
+        private var _forceDefault:Boolean = false;
+
+        public function set forceDefault(value:Boolean):void {
+            _forceDefault = value;
         }
 
         private var _breadCrumbs:Array;
@@ -158,9 +177,14 @@
             this.headerVisible = ApplicationSkin.instance().reportHeader;
             logoVisible = User.getInstance().reportLogo != null;
             dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
-            if (User.getInstance().refreshReports) {
-                /*EIGlobalTimer.instance().addEventListener(GlobalDataSourceEvent.GLOBAL_DATA_SOURCE, refreshEvent, false, 0, true);
-                 EIGlobalTimer.instance().dataSourceID = dashboard.dataSourceID;*/
+            if (!_forceDefault && dashboard.enableLocalStorage && exchangeItem == null) {
+                var delegate:DashboardStackPositionsRetrievalState = null;
+                if (dashboardStackPositions != null) {
+                    delegate = new DashboardStackPositionsRetrievalState(dashboardStackPositions);
+                }
+                retrievalState = new LocalStorageRetrievalState(dashboard.urlKey, dashboard.version, delegate);
+            } else if (dashboardStackPositions != null) {
+                retrievalState = new DashboardStackPositionsRetrievalState(dashboardStackPositions);
             }
             if (dashboard.borderThickness == 0 && exchangeItem == null) {
                 headerArea.includeInLayout = false;
@@ -212,7 +236,7 @@
                     } else {
                         dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:crumb.eiDescriptor.id,
                             initialFilters:crumb.filters, breadCrumbs:_breadCrumbs, exchangeItem:exchangeItem, reportList:reportList, reportIndex:reportIndex,
-                            originalExchangeItem:originalExchangeItem != null ? originalExchangeItem : desc, dashboardStackPositions: crumb.stackPositions })));
+                            originalExchangeItem:originalExchangeItem != null ? originalExchangeItem : desc, dashboardStackPositions:crumb.stackPositions })));
                     }
                 });
                 breadCrumbBox.addChild(backButton);
@@ -299,8 +323,10 @@
         public function exportDashboard(exportButton:Button):void {
             var window:DashboardExportWindow = new DashboardExportWindow();
             window.dashboard = dashboard;
+            window.dashboardRenderer = dashboardRenderer;
             window.headerArea = headerArea;
             window.coreView = dashboardRenderer;
+            window.rootView = rootView;
 
             PopUpManager.addPopUp(window, this, true);
             window.x = exportButton.x - 20;
@@ -362,8 +388,10 @@
                     feedFragmentObject.reportTemplateID = String(exchangeItem.descriptor.urlKey);
                 }
             }
-            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-            BrowserManager.getInstance().setFragment(feedFragmentString);
+            if (dashboardStackPositions == null || dashboardStackPositions.urlKey == null) {
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
+            }
             BrowserManager.getInstance().setTitle("Easy Insight - " + dashboardName);
         }
 
@@ -444,6 +472,11 @@
         private function onResize(event:Event):void {
             invalidateSize();
         }
+
+        public function resetFilters():void {
+            dashboardRenderer.resetState();
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboardID })));
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="getDashboardView" result="gotDashboard()"/>
@@ -470,6 +503,6 @@
         </mx:Box>
         <dashboard:DashboardRenderer id="dashboardRenderer" dashboard="{dashboard}" dashboardID="{_dashboardID}"
                 dataSourceID="{dataSourceID}" initialFilters="{_initialFilters}" filterIndex="{filterIndex}"
-                fixedID="{_fixedID}" dashboardStackPositions="{dashboardStackPositions}"/>
+                fixedID="{_fixedID}" dashboardStackPositions="{dashboardStackPositions}" retrievalState="{retrievalState}"/>
     </mx:VBox>
 </report:DataViewPage>

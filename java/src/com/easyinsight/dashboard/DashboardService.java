@@ -16,6 +16,7 @@ import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.util.RandomTextGenerator;
 import org.apache.jcs.JCS;
 import org.hibernate.Session;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.*;
 import java.util.*;
@@ -40,6 +41,49 @@ public class DashboardService {
     }
 
     private DashboardStorage dashboardStorage = new DashboardStorage();
+
+    public String saveDashboardLink(long dashboardID, DashboardStackPositions dashboardStackPositions) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            long id = dashboardStackPositions.save(conn, dashboardID, 0);
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO DASHBOARD_LINK (dashboard_state_id, url_key) VALUES (?, ?)");
+            saveStmt.setLong(1, id);
+            String urlKey = RandomTextGenerator.generateText(40);
+            saveStmt.setString(2, urlKey);
+            saveStmt.execute();
+            return urlKey;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public DashboardInfo retrieveFromDashboardLink(String urlKey) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_STATE.dashboard_state_id, dashboard_id FROM DASHBOARD_LINK, DASHBOARD_STATE WHERE URL_KEY = ? AND " +
+                    "DASHBOARD_LINK.dashboard_state_id = dashboard_state.dashboard_state_id");
+            queryStmt.setString(1, urlKey);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long dashboardStateID = rs.getLong(1);
+                DashboardStackPositions positions = new DashboardStackPositions();
+                positions.retrieve(conn, dashboardStateID);
+                DashboardInfo dashboardInfo = new DashboardInfo();
+                dashboardInfo.setDashboardStackPositions(positions);
+                dashboardInfo.setDashboardID(rs.getLong(2));
+                return dashboardInfo;
+            }
+            return null;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
 
     public NewDashboardMetadata getDashboardEditorMetadata(long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
@@ -371,46 +415,109 @@ public class DashboardService {
         }
     }
 
-    public Dashboard getDashboardView(long dashboardID) {
+    public Dashboard getDashboardView(long dashboardID, @Nullable DashboardStackPositions dashboardStackPositions) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            int role = SecurityUtil.authorizeDashboard(dashboardID);
-            long startTime = System.currentTimeMillis();
-            String cacheKey = SecurityUtil.getUserID(false) + "-" + dashboardID;
-            /*if (dashboardCache != null) {
-                Dashboard dashboard = (Dashboard) dashboardCache.get(cacheKey);
-                if (dashboard != null) {
-                    return dashboard;
-                }
-            }*/
-            Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
-            dashboard.setRole(role);
-            Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
-            List<FilterDefinition> dlsFilters = DataService.addDLSFilters(dashboard.getDataSourceID(), conn);
-            KeyDisplayMapper mapper = KeyDisplayMapper.create(feed.getFields());
-            Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
-            Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
-            if (dashboard.getMarmotScript() != null && !"".equals(dashboard.getMarmotScript().trim())) {
-                StringTokenizer toker = new StringTokenizer(dashboard.getMarmotScript(), "\r\n");
-                while (toker.hasMoreTokens()) {
-                    String line = toker.nextToken();
-                    new ReportCalculation(line).apply(dashboard, feed.getFields(), keyMap, displayMap, feed, conn, dlsFilters);
-                }
-            }
-            dashboard.visit(new AnalysisItemFilterVisitor(feed, dlsFilters, conn));
-            FilterVisitor filterVisitor = new FilterVisitor(dashboard.getDataSourceID(), dashboardID);
-            dashboard.visit(filterVisitor);
-            filterVisitor.done();
-            if (dashboardCache != null) {
-                dashboardCache.put(cacheKey, dashboard);
-            }
-            BenchmarkManager.recordBenchmarkForDashboard("DashboardView", System.currentTimeMillis() - startTime, SecurityUtil.getUserID(false), dashboardID);
-            return dashboard;
+            return getDashboardView(dashboardID, dashboardStackPositions, conn);
         } catch (Exception e) {
             LogClass.error("On retrieving dashboard " + dashboardID, e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
+        }
+    }
+
+    public Dashboard getDashboardView(long dashboardID, @Nullable DashboardStackPositions dashboardStackPositions, EIConnection conn) throws Exception {
+        int role = SecurityUtil.authorizeDashboard(dashboardID);
+        long startTime = System.currentTimeMillis();
+        String cacheKey = SecurityUtil.getUserID(false) + "-" + dashboardID;
+        /*if (dashboardCache != null) {
+            Dashboard dashboard = (Dashboard) dashboardCache.get(cacheKey);
+            if (dashboard != null) {
+                return dashboard;
+            }
+        }*/
+        Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
+        dashboard.setRole(role);
+        Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
+        List<FilterDefinition> dlsFilters = DataService.addDLSFilters(dashboard.getDataSourceID(), conn);
+        KeyDisplayMapper mapper = KeyDisplayMapper.create(feed.getFields());
+        Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
+        Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
+        if (dashboard.getMarmotScript() != null && !"".equals(dashboard.getMarmotScript().trim())) {
+            StringTokenizer toker = new StringTokenizer(dashboard.getMarmotScript(), "\r\n");
+            while (toker.hasMoreTokens()) {
+                String line = toker.nextToken();
+                new ReportCalculation(line).apply(dashboard, feed.getFields(), keyMap, displayMap, feed, conn, dlsFilters);
+            }
+        }
+        dashboard.visit(new AnalysisItemFilterVisitor(feed, dlsFilters, conn));
+        FilterVisitor filterVisitor = new FilterVisitor(dashboard.getDataSourceID(), dashboardID);
+        dashboard.visit(filterVisitor);
+        filterVisitor.done();
+        if (dashboardStackPositions != null) {
+            String key = "d";
+            Map<String, FilterDefinition> filters = dashboardStackPositions.getFilterMap().get(key);
+            // where do we actually perform the override?
+            if (filters != null) {
+                dashboard.setOverridenFilters(filters);
+            }
+            dashboard.visit(new StateVisitor(dashboardStackPositions));
+        }
+        if (dashboardCache != null) {
+            dashboardCache.put(cacheKey, dashboard);
+        }
+        BenchmarkManager.recordBenchmarkForDashboard("DashboardView", System.currentTimeMillis() - startTime, SecurityUtil.getUserID(false), dashboardID);
+        return dashboard;
+    }
+
+    public Dashboard getDashboardView(long dashboardID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            return getDashboardView(dashboardID, null, conn);
+        } catch (Exception e) {
+            LogClass.error("On retrieving dashboard " + dashboardID, e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    private static class StateVisitor implements IDashboardVisitor {
+
+        private DashboardStackPositions dashboardStackPositions;
+
+        private StateVisitor(DashboardStackPositions dashboardStackPositions) {
+            this.dashboardStackPositions = dashboardStackPositions;
+        }
+
+        public void accept(DashboardElement dashboardElement) {
+            if (dashboardElement instanceof DashboardStack) {
+                DashboardStack dashboardStack = (DashboardStack) dashboardElement;
+                Integer position = dashboardStackPositions.getPositions().get(dashboardStack.getUrlKey());
+                if (position != null) {
+                    dashboardStack.setDefaultIndex(position);
+                }
+                // set default position to position
+                String key = "s" + dashboardStack.getUrlKey();
+                Map<String, FilterDefinition> filters = dashboardStackPositions.getFilterMap().get(key);
+                if (filters != null) {
+                    dashboardStack.setOverridenFilters(filters);
+                }
+            }
+            if (dashboardElement instanceof DashboardReport) {
+                DashboardReport dashboardReport = (DashboardReport) dashboardElement;
+                // adjust filters, adjust reports...
+                String key = "r" + dashboardReport.getUrlKey();
+                Map<String, FilterDefinition> filters = dashboardStackPositions.getFilterMap().get(key);
+                if (filters != null) {
+                    dashboardReport.setOverridenFilters(filters);
+                }
+                InsightDescriptor report = dashboardStackPositions.getReports().get(dashboardReport.getUrlKey());
+                if (report != null) {
+                    dashboardReport.setReport(report);
+                }
+            }
         }
     }
 

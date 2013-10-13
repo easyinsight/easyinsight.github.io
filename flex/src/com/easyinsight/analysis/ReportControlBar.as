@@ -1,12 +1,14 @@
 package com.easyinsight.analysis {
 import flash.display.DisplayObject;
 import flash.events.Event;
+import flash.events.MouseEvent;
 
 import flexlib.containers.FlowBox;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Button;
 import mx.core.Container;
 import mx.core.UIComponent;
 import mx.events.FlexEvent;
@@ -14,6 +16,8 @@ import mx.events.FlexEvent;
 public class ReportControlBar extends FlowBox {
 
     private var _analysisItems:ArrayCollection;
+    private var _dataSourceFields:ArrayCollection;
+
     private var _dataSourceID:int;
 
     public function ReportControlBar() {
@@ -32,6 +36,29 @@ public class ReportControlBar extends FlowBox {
         this.percentWidth = 100;
     }
 
+    private var explainButton:Button;
+
+    public function createExplainButton():void {
+        if (explainButton == null) {
+            explainButton = new Button();
+            explainButton.label = "Explain";
+            explainButton.addEventListener(MouseEvent.CLICK, onExplain);
+            addChildAt(explainButton, 0);
+        }
+    }
+
+    public function deleteExplainButton():void {
+        if (explainButton != null) {
+            explainButton.removeEventListener(MouseEvent.CLICK, onExplain);
+            removeChild(explainButton);
+            explainButton = null;
+        }
+    }
+
+    private function onExplain(event:MouseEvent):void {
+        dispatchEvent(new Event("explainReport", true));
+    }
+
     public function set dataSourceID(dataSourceID:int):void {
         _dataSourceID = dataSourceID;
     }
@@ -39,6 +66,17 @@ public class ReportControlBar extends FlowBox {
 
     public function get dataSourceID():int {
         return _dataSourceID;
+    }
+
+    [Bindable(event="dataSourceFieldsChanged")]
+    public function get dataSourceFields():ArrayCollection {
+        return _dataSourceFields;
+    }
+
+    public function set dataSourceFields(value:ArrayCollection):void {
+        if (_dataSourceFields == value) return;
+        _dataSourceFields = value;
+        dispatchEvent(new Event("dataSourceFieldsChanged"));
     }
 
     protected function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
@@ -87,6 +125,7 @@ public class ReportControlBar extends FlowBox {
 
     protected function addDropAreaGrouping(grouping:ListDropAreaGrouping, parent:Container = null):void {
         BindingUtils.bindProperty(grouping, "analysisItems", this, "analysisItems");
+        //BindingUtils.bindProperty(grouping, "dataSourceFields", this, "dataSourceFields");
         grouping.dataSourceID = _dataSourceID;
         if (parent == null) {
             addChild(grouping);

@@ -6,9 +6,7 @@ import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.core.*;
-import com.easyinsight.dashboard.Dashboard;
-import com.easyinsight.dashboard.DashboardDescriptor;
-import com.easyinsight.dashboard.DashboardStorage;
+import com.easyinsight.dashboard.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
@@ -36,6 +34,7 @@ import com.easyinsight.storage.CachedCalculationTransform;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.DatabaseManager;
 import com.easyinsight.storage.IDataTransform;
+import com.easyinsight.util.RandomTextGenerator;
 import nu.xom.Builder;
 import nu.xom.Document;
 import org.antlr.runtime.ANTLRStringStream;
@@ -66,6 +65,57 @@ public class AnalysisService {
             throw new RuntimeException(e);
         }
     }*/
+
+    public String saveReportLink(long reportID, DashboardStackPositions dashboardStackPositions) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            long id = dashboardStackPositions.save(conn, 0, reportID);
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO DASHBOARD_LINK (dashboard_state_id, url_key) VALUES (?, ?)");
+            saveStmt.setLong(1, id);
+            String urlKey = RandomTextGenerator.generateText(40);
+            saveStmt.setString(2, urlKey);
+            saveStmt.execute();
+            return urlKey;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public DashboardInfo retrieveFromReportLink(String urlKey) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_STATE.dashboard_state_id, report_id, ANALYSIS.URL_KEY, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, " +
+                    "ANALYSIS.REPORT_TYPE FROM DASHBOARD_LINK, DASHBOARD_STATE, ANALYSIS WHERE " +
+                    "DASHBOARD_LINK.URL_KEY = ? AND " +
+                    "DASHBOARD_LINK.dashboard_state_id = dashboard_state.dashboard_state_id AND DASHBOARD_STATE.REPORT_ID = ANALYSIS.ANALYSIS_ID");
+            queryStmt.setString(1, urlKey);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long dashboardStateID = rs.getLong(1);
+                DashboardStackPositions positions = new DashboardStackPositions();
+                positions.retrieve(conn, dashboardStateID);
+                DashboardInfo dashboardInfo = new DashboardInfo();
+                dashboardInfo.setDashboardStackPositions(positions);
+                long reportID = rs.getLong(2);
+                String reportURLKey = rs.getString(3);
+                String title = rs.getString(4);
+                long dataSourceID = rs.getLong(5);
+                int reportType = rs.getInt(6);
+                InsightDescriptor report = new InsightDescriptor(reportID, title, dataSourceID, reportType, reportURLKey, Roles.OWNER, false);
+                dashboardInfo.setReport(report);
+                return dashboardInfo;
+            }
+            return null;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
 
     public void updateReportStylings(List<ReportProperty> reportProperties) {
         EIConnection conn = Database.instance().getConnection();
@@ -1360,6 +1410,15 @@ public class AnalysisService {
                     }
                 }
             }
+            /*AnalysisDefinition targetReport = analysisStorage.getPersistableReport(drillThrough.getReportID());
+
+            for (FilterDefinition filter : filters) {
+                if (filter.getField() != null) {
+                    AnalysisItem field = filter.getField();
+
+                }
+            }*/
+
             DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
             EIDescriptor descriptor;
             if (drillThrough.getReportID() != null && drillThrough.getReportID() != 0) {
@@ -1425,6 +1484,7 @@ public class AnalysisService {
             }
             filterDefinition = filterValueDefinition;
         }
+        filterDefinition.setDrillthrough(true);
         return filterDefinition;
     }
 

@@ -32,6 +32,8 @@ public class InsightRequestMetadata implements Serializable {
     private transient Map<AnalysisItem, Set<String>> pipelineAssignmentMap = new HashMap<AnalysisItem, Set<String>>();
     private transient Map<AnalysisItem, String> derivedFieldAssignmentMap = new HashMap<AnalysisItem, String>();
 
+    private transient Set<FilterDefinition> suppressedFilters = new HashSet<FilterDefinition>();
+
     private transient List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
 
     private transient String targetCurrency;
@@ -76,6 +78,14 @@ public class InsightRequestMetadata implements Serializable {
 
     public void setFilterOverrideMap(Map<String, Boolean> filterOverrideMap) {
         this.filterOverrideMap = filterOverrideMap;
+    }
+
+    public Set<FilterDefinition> getSuppressedFilters() {
+        return suppressedFilters;
+    }
+
+    public void setSuppressedFilters(Set<FilterDefinition> suppressedFilters) {
+        this.suppressedFilters = suppressedFilters;
     }
 
     private long databaseTime = 0;

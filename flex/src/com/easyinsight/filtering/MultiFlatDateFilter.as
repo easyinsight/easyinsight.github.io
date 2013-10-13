@@ -2,6 +2,7 @@ package com.easyinsight.filtering
 {
 
 	import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
@@ -34,17 +35,28 @@ import mx.managers.PopUpManager;
 
         private var _feedID:int;
 
+        private var _retrievalState:IRetrievalState;
+
+        private var filterMetadata:FilterMetadata;
 		
-		public function MultiFlatDateFilter(feedID:int, analysisItem:AnalysisItem) {
+		public function MultiFlatDateFilter(feedID:int, analysisItem:AnalysisItem, retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
 			super();
 			this.analysisItem = analysisItem;
             _feedID = feedID;
+            this.filterMetadata = filterMetadata;
+            _retrievalState = retrievalState;
             setStyle("verticalAlign", "middle");
 		}
 
         private function onChange(event:Event):void {
             var checkbox:CheckBox = event.currentTarget as CheckBox;
             _filterDefinition.enabled = checkbox.selected;
+            try {
+                if (_retrievalState != null) {
+                    _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+                }
+            } catch (e:Error) {
+            }
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
 
@@ -58,6 +70,12 @@ import mx.managers.PopUpManager;
 
         private function onWindowDone(event:Event):void {
             populateLabel();
+            try {
+                if (_retrievalState != null) {
+                    _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+                }
+            } catch (e:Error) {
+            }
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
 
@@ -68,6 +86,8 @@ import mx.managers.PopUpManager;
                 labelButton.label = _filterDefinition.createLabel();
             }
         }
+
+        private var filterLabel:Label;
 
         private var labelButton:LinkButton;
 
@@ -86,10 +106,10 @@ import mx.managers.PopUpManager;
 				_filterDefinition.field = analysisItem;
 			}
 
-            var label:Label = new Label();
-            label.styleName = "filterLabel";
-            label.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
-            addChild(label);
+            filterLabel = new Label();
+            filterLabel.styleName = "filterLabel";
+            filterLabel.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            addChild(filterLabel);
 
             var firstValue:int = 11;
             var lastValue:int = 0;
@@ -167,6 +187,9 @@ import mx.managers.PopUpManager;
 		private function onFilterEdit(event:FilterEditEvent):void {
             if (event.filterDefinition is FilterDateRangeDefinition) {
 
+            }
+            if (filterLabel != null) {
+                filterLabel.text = FilterDefinition.getLabel(event.filterDefinition, analysisItem);
             }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
 		}

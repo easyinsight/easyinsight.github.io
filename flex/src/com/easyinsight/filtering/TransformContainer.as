@@ -3,6 +3,7 @@ package com.easyinsight.filtering
 import com.easyinsight.analysis.AnalysisChangedEvent;
 import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.analysis.NamedKey;
 import com.easyinsight.commands.CommandEvent;
 import com.easyinsight.analysis.AnalysisItem;
@@ -57,6 +58,8 @@ public class TransformContainer extends HBox
 
     private var _filterDefinitions:ArrayCollection;
 
+    private var _retrievalState:IRetrievalState;
+
     private var showingFeedback:Boolean = false;
 
     public function TransformContainer() {
@@ -67,6 +70,11 @@ public class TransformContainer extends HBox
         this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);
         //setStyle("borderThickness", 1);
         //setStyle("borderStyle", "solid");
+    }
+
+
+    public function set retrievalState(value:IRetrievalState):void {
+        _retrievalState = value;
     }
 
     public function set report(value:AnalysisDefinition):void {
@@ -229,55 +237,64 @@ public class TransformContainer extends HBox
         _dashboard = value;
     }
 
+    private var _filterStorageKey:String;
+
+
+    public function set filterStorageKey(value:String):void {
+        _filterStorageKey = value;
+    }
+
     private function createFilter(filterDefinition:FilterDefinition):IFilter {
         var filter:IFilter;
+        var filterMetadata:FilterMetadata = new FilterMetadata();
+        filterMetadata.key = _filterStorageKey;
         if (filterDefinition.getType() == FilterDefinition.VALUE) {
             var filterValueDefinition:FilterValueDefinition = filterDefinition as FilterValueDefinition;
             if (filterValueDefinition.singleValue) {
                 if (filterValueDefinition.autoComplete) {
-                    filter = new AutoCompleteFilter(_feedID, filterDefinition.field, _reportID, _dashboardID);
+                    filter = new AutoCompleteFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _retrievalState, filterMetadata);
                 } else {
                     filter = new ComboBoxFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report,
                             _loadingFromReport ? ((_report != null && _report.filterDefinitions != null) ? _report.filterDefinitions : filterDefinitions) : filterDefinitions,
-                            _dashboard);
+                            _dashboard, _retrievalState, filterMetadata);
                 }
             } else {
                 if (filterValueDefinition.newType) {
                     filter = new NewMultiValueFilter(_feedID, filterDefinition.field, _reportID,  _dashboardID,  _report,
                                             _loadingFromReport ? ((_report != null && _report.filterDefinitions != null) ? _report.filterDefinitions : filterDefinitions) : filterDefinitions,
-                                            _dashboard);
+                                            _dashboard, _retrievalState, filterMetadata);
                 } else {
-                    filter = new MultiValueFilter(_feedID, filterDefinition.field, _reportID,  _dashboardID);
+                    filter = new MultiValueFilter(_feedID, filterDefinition.field, _reportID, _dashboard, _retrievalState, filterMetadata);
                 }
             }
         } else if (filterDefinition.getType() == FilterDefinition.DATE) {
-            filter = new SliderDateFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _report);
+            filter = new SliderDateFilter(_feedID, filterDefinition.field, _reportID, _dashboardID, _retrievalState, filterMetadata, _report);
         } else if (filterDefinition.getType() == FilterDefinition.RANGE) {
-            filter = new SliderMeasureFilter(_feedID, filterDefinition.field);
+            filter = new SliderMeasureFilter(_feedID, filterDefinition.field, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.ROLLING_DATE) {
-            filter = new RollingRangeFilter(_feedID, filterDefinition.field);
+            filter = new RollingRangeFilter(_feedID, filterDefinition.field, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.LAST_VALUE) {
-            filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.LAST_VALUE);
+            filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.LAST_VALUE, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.FIRST_VALUE) {
-            filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.FIRST_VALUE);
+            filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.FIRST_VALUE, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.NULL) {
-            filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.NULL_VALUE);
+            filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.NULL_VALUE, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.PATTERN) {
-            filter = new PatternFilter(_feedID, filterDefinition.field);
+            filter = new PatternFilter(_feedID, filterDefinition.field, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.OR) {
             filter = new OrFilterCanvas(_feedID);
             filter.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, passThrough);
         } else if (filterDefinition.getType() == FilterDefinition.NAMED_REF) {
-            filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.NAMED_REF);
+            filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.NAMED_REF, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.FLAT_DATE) {
             if(FlatDateFilterDefinition(filterDefinition).dateLevel == AnalysisItemTypes.MONTH_LEVEL)
-                filter = new FlatMonthDateFilter(_feedID,  filterDefinition.field,  _reportID,  _dashboardID);
+                filter = new FlatMonthDateFilter(_feedID,  filterDefinition.field,  _reportID,  _dashboardID, _retrievalState, filterMetadata);
             else
-                filter = new FlatDateFilter(_feedID,  filterDefinition.field, _reportID,  _dashboardID);
+                filter = new FlatDateFilter(_feedID,  filterDefinition.field, _reportID,  _dashboardID, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.ANALYSIS_ITEM) {
-            filter = new AnalysisItemFilter(_feedID, filterDefinition.field);
+            filter = new AnalysisItemFilter(_feedID, filterDefinition.field, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.MULTI_FLAT_DATE) {
-            filter = new MultiFlatDateFilter(_feedID,  filterDefinition.field);
+            filter = new MultiFlatDateFilter(_feedID,  filterDefinition.field, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.MONTH_CUTOFF) {
             filter = new MonthCutoffFilter(_feedID,  filterDefinition.field,  _reportID, _dashboardID);
         } else {
@@ -379,6 +396,7 @@ public class TransformContainer extends HBox
     }
 
     public function createNewFilter(analysisItem:AnalysisItem, stageX:int, stageY:int):void {
+        analysisItem = analysisItem.copy();
         if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
             var window:DateFilterWindow = new DateFilterWindow();
             window.report = _report;
@@ -396,7 +414,9 @@ public class TransformContainer extends HBox
                 window.y = stageY - 35;
             }
         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-            var sliderMeasureFilter:SliderMeasureFilter = new SliderMeasureFilter(_feedID, analysisItem);
+            var filterMetadata:FilterMetadata = new FilterMetadata();
+            filterMetadata.key = _filterStorageKey;
+            var sliderMeasureFilter:SliderMeasureFilter = new SliderMeasureFilter(_feedID, analysisItem, _retrievalState, filterMetadata);
             initializeFilter(sliderMeasureFilter, true);
         } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
             var dimWindow:GroupingFilterWindow = new GroupingFilterWindow();
@@ -434,6 +454,9 @@ public class TransformContainer extends HBox
             if (wrapper.isAnalysisItem()) {
                 analysisItem = wrapper.analysisItem;
             }
+        }
+        if (analysisItem != null) {
+            analysisItem = analysisItem.copy();
         }
         createNewFilter(analysisItem, event.stageX, event.stageY);
     }

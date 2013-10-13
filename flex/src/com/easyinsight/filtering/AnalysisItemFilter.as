@@ -1,5 +1,6 @@
 package com.easyinsight.filtering {
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.skin.ImageConstants;
 
 import com.easyinsight.util.SmartComboBox;
@@ -39,12 +40,16 @@ public class AnalysisItemFilter extends HBox implements IFilter {
         dispatchEvent(new Event("filterEnabledChanged"));
     }
 
+    private var _retrievalState:IRetrievalState;
 
+    private var filterMetadata:FilterMetadata;
 
-    public function AnalysisItemFilter(feedID:int, analysisItem:AnalysisItem) {
+    public function AnalysisItemFilter(feedID:int, analysisItem:AnalysisItem, retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
         super();
         this._feedID = feedID;
         this._analysisItem = analysisItem;
+        this._retrievalState = retrievalState;
+        this.filterMetadata = filterMetadata;
         setStyle("verticalAlign", "middle");
     }
 
@@ -71,6 +76,9 @@ public class AnalysisItemFilter extends HBox implements IFilter {
     }
 
     private function onFilterEdit(event:FilterEditEvent):void {
+        if (filterLabel != null) {
+            filterLabel.text =  FilterDefinition.getLabel(event.filterDefinition, _analysisItem);
+        }
         _analysisItem = event.filterDefinition.field;
         comboBox.dataProvider = _filterDefinition.availableItems;
         comboBox.rowCount = Math.min(_filterDefinition.availableItems.length, 15);
@@ -83,6 +91,8 @@ public class AnalysisItemFilter extends HBox implements IFilter {
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 
+    private var filterLabel:Label;
+
     override protected function createChildren():void {
         super.createChildren();
 
@@ -94,10 +104,10 @@ public class AnalysisItemFilter extends HBox implements IFilter {
             addChild(checkbox);
         }
 
-        var label:Label = new Label();
-        label.styleName = "filterLabel";
-        label.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
-        addChild(label);
+        filterLabel = new Label();
+        filterLabel.styleName = "filterLabel";
+        filterLabel.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
+        addChild(filterLabel);
         if (comboBox == null) {
             comboBox = new SmartComboBox();
             comboBox.labelField = "display";
@@ -176,6 +186,9 @@ public class AnalysisItemFilter extends HBox implements IFilter {
 
         if (newValue != _filterDefinition.targetItem) {
             _filterDefinition.targetItem = newValue;
+            if (_retrievalState != null) {
+                _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+            }
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
     }

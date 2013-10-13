@@ -10,6 +10,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.scorecard.Scorecard;
+import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,6 +38,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     public static final int TEXT = 6;
 
     private long elementID;
+    private String urlKey;
     private long elementServerID;
     private boolean forceScrollingOff;
     private String label;
@@ -60,6 +62,14 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     private int preferredHeight;
 
     private int htmlWidth;
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
 
     public List<DashboardFilterOverride> getDashboardFilterOverrides() {
         return dashboardFilterOverrides;
@@ -277,7 +287,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     public void loadElement(long elementID, EIConnection conn) throws SQLException {
         PreparedStatement loadStmt = conn.prepareStatement("SELECT LABEL, FILTER_BORDER_STYLE, FILTER_BORDER_COLOR, filter_background_color, filter_background_alpha," +
                 "padding_left, padding_right, padding_top, padding_bottom, header_image_id, user_image.image_name, header_background_color, header_background_alpha," +
-                "preferred_width, preferred_height, dashboard_element_id, force_scrolling_off, html_width from dashboard_element " +
+                "preferred_width, preferred_height, dashboard_element_id, force_scrolling_off, html_width, url_key from dashboard_element " +
                 "left join user_image on dashboard_element.header_image_id = user_image.user_image_id where " +
                 "dashboard_element_id = ?");
         loadStmt.setLong(1, elementID);
@@ -312,7 +322,11 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         setElementID(rs.getLong(i++));
         setElementServerID(getElementID());
         setForceScrollingOff(rs.getBoolean(i++));
-        setHtmlWidth(rs.getInt(i));
+        setHtmlWidth(rs.getInt(i++));
+        setUrlKey(rs.getString(i));
+        if (getUrlKey() == null || "".equals(getUrlKey())) {
+            setUrlKey(RandomTextGenerator.generateText(40));
+        }
         PreparedStatement filterStmt = conn.prepareStatement("SELECT FILTER_ID, HIDE_FILTER FROM dashboard_element_filter_setting WHERE DASHBOARD_ELEMENT_ID = ?");
         filterStmt.setLong(1, elementID);
         ResultSet filterRS = filterStmt.executeQuery();
@@ -330,8 +344,8 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     public long save(EIConnection conn) throws SQLException {
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_ELEMENT (ELEMENT_TYPE, LABEL, filter_border_style, filter_border_color," +
                 "filter_background_color, filter_background_alpha, padding_left, padding_right, padding_top, padding_bottom, header_image_id," +
-                "header_background_color, header_background_alpha, preferred_width, preferred_height, force_scrolling_off, html_width) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "header_background_color, header_background_alpha, preferred_width, preferred_height, force_scrolling_off, html_width, url_key) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertStmt.setInt(i++, getType());
@@ -354,7 +368,11 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         insertStmt.setInt(i++, preferredWidth);
         insertStmt.setInt(i++, preferredHeight);
         insertStmt.setBoolean(i++, forceScrollingOff);
-        insertStmt.setInt(i, htmlWidth);
+        insertStmt.setInt(i++, htmlWidth);
+        if (urlKey == null) {
+            urlKey = RandomTextGenerator.generateText(40);
+        }
+        insertStmt.setString(i, urlKey);
         insertStmt.execute();
         setElementID(Database.instance().getAutoGenKey(insertStmt));
         insertStmt.close();

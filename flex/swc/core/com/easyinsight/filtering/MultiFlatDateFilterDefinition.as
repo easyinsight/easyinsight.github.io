@@ -8,6 +8,7 @@
 package com.easyinsight.filtering {
 
 import mx.collections.ArrayCollection;
+import mx.utils.ObjectUtil;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.MultiFlatDateFilter")]
@@ -21,6 +22,23 @@ public class MultiFlatDateFilterDefinition extends FilterDefinition {
 
     override public function getType():int {
         return FilterDefinition.MULTI_FLAT_DATE;
+    }
+
+    override protected function subclassClone(filter:FilterDefinition):void {
+        var levels:ArrayCollection = new ArrayCollection();
+        for each (var wrapper:DateLevelWrapper in levels) {
+            var copiedWrapper:DateLevelWrapper = ObjectUtil.copy(wrapper) as DateLevelWrapper;
+            levels.addItem(copiedWrapper);
+        }
+        MultiFlatDateFilterDefinition(filter).levels = levels;
+    }
+
+    override public function getSaveValue():Object {
+        return levels;
+    }
+
+    override public function loadFromSharedObject(value:Object):void {
+        levels = value as ArrayCollection;
     }
 
     public function createLabel():String {

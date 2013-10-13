@@ -6,21 +6,35 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.dashboard {
-import mx.collections.ArrayCollection;
+import com.easyinsight.filtering.FilterDefinition;
+import com.easyinsight.solutions.InsightDescriptor;
 
+[Bindable]
+[RemoteClass(alias="com.easyinsight.dashboard.DashboardStackPositions")]
 public class DashboardStackPositions {
 
-    public var stackPositions:Object = new Object();
+    public var positions:Object = new Object();
+    public var filterMap:Object = new Object();
+    public var reports:Object = new Object();
+    public var urlKey:String;
 
     public function DashboardStackPositions() {
     }
 
-    public function saveStackPosition(dashboardStack:DashboardStack, selectedIndex:int):void {
-        stackPositions[String(dashboardStack.elementServerID)] = selectedIndex;
+    public function saveReport(urlKey:String, report:InsightDescriptor):void {
+        reports[urlKey] = report;
     }
 
-    public function getStackPosition(dashboardStack:DashboardStack):int {
-        return stackPositions[String(dashboardStack.elementServerID)];
+    public function getReport(urlKey:String):InsightDescriptor {
+        return reports[urlKey];
+    }
+
+    public function saveStackPosition(urlKey:String, selectedIndex:int):void {
+        positions[urlKey] = selectedIndex;
+    }
+
+    public function getStackPosition(urlKey:String):int {
+        return positions[urlKey];
     }
 }
 }

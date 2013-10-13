@@ -26,6 +26,15 @@ public class DashboardReport extends DashboardElement {
     private int labelPlacement;
     private boolean autoCalculateHeight;
     private boolean spaceSides;
+    private Map<String, FilterDefinition> overridenFilters = new HashMap<String, FilterDefinition>();
+
+    public Map<String, FilterDefinition> getOverridenFilters() {
+        return overridenFilters;
+    }
+
+    public void setOverridenFilters(Map<String, FilterDefinition> overridenFilters) {
+        this.overridenFilters = overridenFilters;
+    }
 
     public boolean isSpaceSides() {
         return spaceSides;
@@ -175,6 +184,15 @@ public class DashboardReport extends DashboardElement {
     @Override
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata, List<FilterDefinition> parentFilters) throws JSONException {
         WSAnalysisDefinition reportDefinition = new AnalysisService().openAnalysisDefinition(report.getId());
+        if (getOverridenFilters() != null) {
+            for (FilterDefinition filter : reportDefinition.getFilterDefinitions()) {
+                FilterDefinition overrideFilter = getOverridenFilters().get(String.valueOf(filter.getFilterID()));
+                if (overrideFilter != null) {
+                    filter.override(overrideFilter);
+                    filter.setEnabled(overrideFilter.isEnabled());
+                }
+            }
+        }
         JSONObject reportJSON = super.toJSON(filterHTMLMetadata, parentFilters);
         reportJSON.put("type", "report");
         reportJSON.put("id", "report" + getElementID());

@@ -19,6 +19,7 @@ import java.util.*;
 public class AnalysisBasedFeed extends Feed {
 
     private WSAnalysisDefinition analysisDefinition;
+    //private Map<String, String> parameters;
 
     public FeedType getDataFeedType() {
         return FeedType.ANALYSIS_BASED;
@@ -40,6 +41,7 @@ public class AnalysisBasedFeed extends Feed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
+        //analysisDefinition.updateFromParameters(parameters);
         InsightRequestMetadata localInsightRequestMetadata = new InsightRequestMetadata();
         localInsightRequestMetadata.setTargetCurrency(insightRequestMetadata.getTargetCurrency());
         localInsightRequestMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
@@ -51,24 +53,44 @@ public class AnalysisBasedFeed extends Feed {
         }
         List<AnalysisItem> fields = new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values());
         Map<Key, List<Key>> map = new HashMap<Key, List<Key>>();
-        Map<String, List<AnalysisItem>> map1 = new HashMap<String, List<AnalysisItem>>();
+        Map<String, List<AnalysisItem>> fieldsGroupedByOriginalDisplayName = new HashMap<String, List<AnalysisItem>>();
+        Map<Long, List<AnalysisItem>> fieldsGroupedByOriginalFieldID = new HashMap<Long, List<AnalysisItem>>();
         for (AnalysisItem analysisItem : analysisItems) {
-            List<AnalysisItem> items = map1.get(analysisItem.getOriginalDisplayName());
-            if (items == null) {
-                items = new ArrayList<AnalysisItem>();
-                map1.put(analysisItem.getOriginalDisplayName(), items);
+            if (analysisItem.getBasedOnReportField() != null && analysisItem.getBasedOnReportField() > 0) {
+                List<AnalysisItem> items = fieldsGroupedByOriginalFieldID.get(analysisItem.getBasedOnReportField());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>();
+                    fieldsGroupedByOriginalFieldID.put(analysisItem.getBasedOnReportField(), items);
+                }
+                items.add(analysisItem);
+            } else {
+                List<AnalysisItem> items = fieldsGroupedByOriginalDisplayName.get(analysisItem.getOriginalDisplayName());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>();
+                    fieldsGroupedByOriginalDisplayName.put(analysisItem.getOriginalDisplayName(), items);
+                }
+                items.add(analysisItem);
             }
-            items.add(analysisItem);
         }
         Map<FilterDefinition, AnalysisItem> filterMap = new HashMap<FilterDefinition, AnalysisItem>();
 
         for (FilterDefinition filter : filters) {
             if (filter.getField() != null) {
-                for (AnalysisItem analysisItem : fields) {
-                    if (analysisItem.toDisplay().equals(filter.getField().getOriginalDisplayName())) {
-                        filterMap.put(filter, filter.getField());
-                        filter.setField(analysisItem);
-                        break;
+                if (filter.getField().getBasedOnReportField() != null && filter.getField().getBasedOnReportField() > 0) {
+                    for (AnalysisItem analysisItem : fields) {
+                        if (analysisItem.getAnalysisItemID() == filter.getField().getBasedOnReportField()) {
+                            filterMap.put(filter, filter.getField());
+                            filter.setField(analysisItem);
+                            break;
+                        }
+                    }
+                } else {
+                    for (AnalysisItem analysisItem : fields) {
+                        if (analysisItem.toDisplay().equals(filter.getField().getOriginalDisplayName())) {
+                            filterMap.put(filter, filter.getField());
+                            filter.setField(analysisItem);
+                            break;
+                        }
                     }
                 }
                 if (filter.getFilterName() != null) {
@@ -89,7 +111,18 @@ public class AnalysisBasedFeed extends Feed {
             analysisDefinition.getFilterDefinitions().add(filter);
         }
         for (AnalysisItem analysisItem : fields) {
-            List<AnalysisItem> items = map1.get(analysisItem.toDisplay());
+            List<AnalysisItem> items = fieldsGroupedByOriginalFieldID.get(analysisItem.getAnalysisItemID());
+            if (items != null) {
+                for (AnalysisItem mapped : items) {
+                    List<Key> keys = map.get(analysisItem.createAggregateKey());
+                    if (keys == null) {
+                        keys = new ArrayList<Key>();
+                        map.put(analysisItem.createAggregateKey(), keys);
+                    }
+                    keys.add(mapped.createAggregateKey());
+                }
+            }
+            items = fieldsGroupedByOriginalDisplayName.get(analysisItem.toDisplay());
             if (items != null) {
                 for (AnalysisItem mapped : items) {
                     List<Key> keys = map.get(analysisItem.createAggregateKey());

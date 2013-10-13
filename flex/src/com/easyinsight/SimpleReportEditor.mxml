@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
-                      xmlns:analysis="com.easyinsight.analysis.*"
+                      xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
                       xmlns:suggestion="com.easyinsight.suggestion.*"
                       xmlns:report="com.easyinsight.report.*" xmlns:easyinsight="com.easyinsight.*"
                       creationComplete="initializeForWorksheet()" width="100%"
@@ -57,6 +57,7 @@
         import com.easyinsight.analysis.ImprovedSaveWindow;
         import com.easyinsight.analysis.JoinOverrideEvent;
         import com.easyinsight.analysis.PromptEvent;
+        import com.easyinsight.analysis.ReportAuditWindow;
         import com.easyinsight.analysis.ReportEditorFieldEvent;
         import com.easyinsight.analysis.ReportEditorHelp;
         import com.easyinsight.analysis.ReportJoinWindow;
@@ -220,6 +221,7 @@
                 this.dataSourceInfo = event.dataSource;
             }
             assignSuggestions(event.suggestions);
+            audits = event.reportAudit;
         }
 
         private var majorProblemBar:MajorProblemBar;
@@ -293,7 +295,9 @@
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, loadingEvent);
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, loadingEvent);
                 rightBox.removeChild(dataView);
-                viewWatcher.unwatch();
+                //if (!defaultManualRun) {
+                    viewWatcher.unwatch();
+                //}
             }
             if (analysisDefinition == null) {
                 this.analysisDefinition = dataViewFactory.createNewDefinition();
@@ -313,15 +317,22 @@
             for each (var filterDefinition:FilterDefinition in newFilters) {
                 transformContainer.addFilterDefinition(filterDefinition);
             }
-            dataViewFactory.adHocMode = true;
             dataView = dataViewFactory;
+            //dataView.adHocMode = !defaultManualRun;
+            dataView.adHocMode = true;
             dataView.dataSourceID = dataSourceID;
             dataView.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             dataView.addEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, loadingEvent);
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, loadingEvent);
             dataView.feedMetadata = feedMetadata;
-            viewWatcher = BindingUtils.bindProperty(dataViewFactory, "adHocMode", adHocButton, "adHoc");
+            //dataView.dataSourceFields = dataSourceFields;
+
+            //if (!defaultManualRun) {
+                viewWatcher = BindingUtils.bindProperty(dataViewFactory, "adHocMode", adHocButton, "adHoc");
+            /*} else {
+                dataView.overlayIndex = 5;
+            }*/
             rightBox.addChildAt(dataViewFactory, 1);
             dataViewFactory.refresh();
         }
@@ -462,6 +473,7 @@
                 availableFields.addItem(wrapper);
                 for each (var child:AnalysisItemNode in node.children) {
                     var fieldWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(child);
+                    //fieldWrapper.analysisItem.fieldListField = true;
                     fieldWrapper.addonReportID = node.addonReportID;
                     wrappers.addItem(fieldWrapper);
                 }
@@ -475,6 +487,7 @@
             availableFields.addItem(wrapper);
             for each (var child:AnalysisItemNode in node.children) {
                 var fieldWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(child);
+                //fieldWrapper.analysisItem.fieldListField = true;
                 fieldWrapper.addonReportID = node.addonReportID;
                 wrappers.addItem(fieldWrapper);
             }
@@ -498,19 +511,31 @@
             analysisDefinition.joinOverrides = joins;
         }
 
+        /*[Bindable]
+        private var defaultManualRun:Boolean;
+
+        private var dataSourceFields:ArrayCollection;*/
+
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
             try {
                 dataSourceID = feedMetadata.dataFeedID;
                 this.feedMetadata = feedMetadata;
                 dataSourceInfo = feedMetadata.dataSourceInfo;
                 this.exchangeSave = feedMetadata.exchangeSave;
+                //this.dataSourceFields = feedMetadata.dataSourceFields;
                 this.admin = feedMetadata.dataSourceAdmin;
                 var cFactory:ClassFactory = new ClassFactory(AvailableFieldRenderer);
                 cFactory.properties = { dataSourceID:dataSourceID, calcRefactor:feedMetadata.allowRefactor };
                 rendererFactory = cFactory;
                 dataSourceName = this.feedMetadata.dataSourceName;
                 joinsCustomizable = this.feedMetadata.customJoinsAllowed;
-
+                /*defaultManualRun = feedMetadata.defaultManualRun;
+                if (defaultManualRun) {
+                    adHocButton.parent.removeChild(adHocButton);
+                } else {
+                    runReportButton.parent.removeChild(runReportButton);
+                    runReportSpacer.parent.removeChild(runReportSpacer);
+                }*/
 
                 fieldsLabel = this.feedMetadata.dataSourceName + " Fields";
                 availableFields = new ArrayCollection();
@@ -524,6 +549,7 @@
                 for each (var listItem:AnalysisItem in feedMetadata.fields) {
                     var analysisNode:AnalysisItemNode = new AnalysisItemNode();
                     analysisNode.analysisItem = listItem;
+                    //listItem.fieldListField = true;
                     var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisNode);
                     wrappers.addItem(wrapper);
                 }
@@ -577,9 +603,7 @@
                         for each (var overrideFilter:FilterDefinition in filterOverrides) {
                             for each (var reportFilter:FilterDefinition in analysisDefinition.filterDefinitions) {
                                 if (reportFilter.filterID == overrideFilter.filterID) {
-                                    //overrideFilter.field = reportFilter.field;
                                     overrideFilter.updateFromReportView(reportFilter);
-                                    //overrideFilter.updateFromSaved(reportFilter);
                                     transformedFilters.addItem(overrideFilter);
                                 }
                             }
@@ -709,6 +733,7 @@
                 }
                 loading = true;
                 commandProcessor = new CommandProcessor();
+                addEventListener("explainReport", explain);
                 addEventListener(FieldEditorEvent.FIELD_EDITOR_OPENED, onFieldEditorOpen);
                 addEventListener(FieldEditorEvent.FIELD_EDITOR_CLOSED, onFieldEditorClose);
                 addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
@@ -1050,9 +1075,21 @@
             }
         }
 
+        /*private function getWrappers():ArrayCollection {
+            var ret:ArrayCollection = new ArrayCollection();
+            for each (var w:AnalysisItemWrapper in wrappers) {
+                var node:AnalysisItemNode = new AnalysisItemNode();
+                node.analysisItem = w.analysisItem.copy();
+                var copy:AnalysisItemWrapper = new AnalysisItemWrapper(node);
+                ret.addItem(copy);
+            }
+            return ret;
+        }*/
+
         private function getWrappers():ArrayCollection {
             return new ArrayCollection(wrappers.toArray());
         }
+
 
         private function editReportProperties(index:int = 0):void {
             var window:GenericDefinitionEditWindow = new GenericDefinitionEditWindow();
@@ -1247,8 +1284,11 @@
         private function filterFunction(item:Object):Boolean {
             var a:AnalysisItemWrapper = item as AnalysisItemWrapper;
             if (a == null) return false;
-
-            var children:ICollectionView = (fieldGrid.dataProvider as IHierarchicalCollectionView).getChildren(a);
+            if (a.displayName == null) return false;
+            var view:IHierarchicalCollectionView = fieldGrid.dataProvider as IHierarchicalCollectionView;
+            if (view == null) return false;
+            var children:ICollectionView = view.getChildren(a);
+            if (children == null) return false;
             if (a.analysisItem == null) {
                 children.filterFunction = filterFunction;
                 children.refresh();
@@ -1281,6 +1321,19 @@
             window.transformContainer = transformContainer;
             window.dataView = dataView;
             window.suggestions = quickActions;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function runReport():void {
+            dataView.forceRetrieve();
+        }
+
+        private var audits:ArrayCollection;
+
+        private function explain(event:Event):void {
+            var window:ReportAuditWindow = new ReportAuditWindow();
+            window.audits = audits;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -1391,9 +1444,12 @@
                     <mx:Spacer width="100%" includeInLayout="{reportName != null}"/>
                     <mx:HBox includeInLayout="{reportName != null}" visible="{reportName != null}">
                         <mx:Label text="Report Name:" includeInLayout="{reportName != null}" fontWeight="bold"/>
-                        <mx:Label text="{reportName}" includeInLayout="{reportName != null}" maxWidth="325"/>
+                        <mx:Label text="{reportName}" includeInLayout="{reportName != null}" maxWidth="275"/>
                     </mx:HBox>
                     <mx:Spacer width="100%"/>
+                    <!--<util:SaveButton label="Run Report" click="runReport()" fontSize="12" id="runReportButton"/>
+                    <mx:Spacer width="100%" id="runReportSpacer"/>-->
+
                     <mx:Label text="Report Type:" fontWeight="bold"/>
                     <analysis:AnalysisStatePopupButton analysisStateChange="onAnalysisStateChange(event)"
                                                        id="analysisState"

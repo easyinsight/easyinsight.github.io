@@ -39,7 +39,7 @@ public class AddFieldServlet extends APIServlet {
         AnalysisItem fieldToAdd = new AnalysisMeasure(key, AggregationTypes.SUM);
         fieldToAdd.setDisplayName(fieldToAddName);
         dataSource.getFields().add(fieldToAdd);
-        new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
+        new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
         DataStorage storage = DataStorage.writeConnection(dataSource, conn);
         storage.alter(fieldToAdd.getKey());
         storage.commit();

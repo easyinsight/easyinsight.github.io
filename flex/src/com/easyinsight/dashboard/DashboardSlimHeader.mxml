@@ -143,6 +143,12 @@
             }
         }
 
+        private function resetFilters():void {
+            if (_dashboardView != null) {
+                _dashboardView.resetFilters();
+            }
+        }
+
         ]]></mx:Script>
     <mx:Button click="_dashboardView.close()" styleName="grayButton" labelPlacement="right"
                id="backButton"
@@ -155,6 +161,8 @@
            id="exportButton" toolTip="Export the dashboard..." label="Export" icon="{exportToExcelIcon}"/>
     <mx:Button click="toggleFilters()" styleName="grayButton" labelPlacement="right"
                id="filterButton" label="Toggle Filters" icon="{filterIcon}"/>
+    <!--<mx:Button click="resetFilters()" styleName="grayButton" labelPlacement="right"
+               id="resetButton" label="Reset Filters" icon="{filterIcon}"/>-->
     <mx:Button click="viewInHTML()" styleName="grayButton" labelPlacement="right" id="viewInHTMLButton" label="View in HTML" icon="{htmlIcon}" visible="{viewInHTMLable}"/>
     <mx:Button click="dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { dashboardID: _dashboard.id})))" styleName="grayButton" labelPlacement="right"
                id="editButton" label="Edit the Dashboard" icon="{ImageConstants.EDIT_ICON}" visible="{editable}"/>

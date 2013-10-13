@@ -552,6 +552,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     }
                     clone.setOriginalDisplayName(item.toDisplay());
                     clone.setDisplayName(report.getName() + " - " + item.toDisplay());
+                    clone.setBasedOnReportField(item.getAnalysisItemID());
                     ReportKey reportKey = new ReportKey();
                     reportKey.setParentKey(item.getKey());
                     reportKey.setReportID(addonReport.getReportID());
@@ -931,6 +932,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         optimized = findBooleanProperty(properties, "optimized", false);
         fullJoins = findBooleanProperty(properties, "fullJoins", false);
         dataSourceFields = findBooleanProperty(properties, "dataSourceFields", false);
+        logReport = findBooleanProperty(properties, "logReport", false);
         headerImage = findImage(properties, "headerImage", null);
         lookupTableOptimization = findBooleanProperty(properties, "lookupTableOptimization", false);
         adHocExecution = findBooleanProperty(properties, "adHocExecution", false);
@@ -963,6 +965,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("adHocExecution", adHocExecution));
         properties.add(new ReportBooleanProperty("cacheable", cacheable));
         properties.add(new ReportBooleanProperty("manualButRunFirst", manualButRunFirst));
+        properties.add(new ReportBooleanProperty("logReport", logReport));
         properties.add(new ReportBooleanProperty("useCustomFontFamily", useCustomFontFamily));
         properties.add(new ReportNumericProperty("generalSizeLimit", generalSizeLimit));
         properties.add(new ReportNumericProperty("fetchSize", fetchSize));
@@ -1175,5 +1178,16 @@ public abstract class WSAnalysisDefinition implements Serializable {
         jo.put("filters", filters);
         jo.put("adhoc_execution", adHocExecution);
         return jo;
+    }
+
+    public void updateFromParameters(Map<String, String> parameters) {
+
+        // find the parameter set
+
+        /*for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            // find the field matching this key, replace it
+        }*/
     }
 }

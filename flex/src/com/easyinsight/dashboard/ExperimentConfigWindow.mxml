@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var reports:ArrayCollection;
+
+        public var dashboardReportViewComponent:DashboardReportViewComponent;
+
+        private function onCreation():void {
+            reportID = dashboardReportViewComponent.dashboardReport.report.id;
+            ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource);
+            analysisService.getInsightDescriptorsForDataSource.send(dashboardReportViewComponent.dashboardEditorMetadata.dataSourceID);
+        }
+
+        private function useThisReport():void {
+            dashboardReportViewComponent.onReportConfigure(InsightDescriptor(reportBox.selectedItem));
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var reportID:int;
+
+        private function gotReports():void {
+            reports = analysisService.getInsightDescriptorsForDataSource.lastResult as ArrayCollection;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="getInsightDescriptorsForDataSource" result="gotReports()"/>
+    </mx:RemoteObject>
+    <util:SmartComboBox dataProvider="{reports}" id="reportBox" selectedProperty="id" selectedValue="{reportID}" labelField="name"/>
+    <mx:HBox>
+        <util:SaveButton label="Use This Report" click="useThisReport()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

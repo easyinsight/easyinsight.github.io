@@ -24,6 +24,7 @@ public class Dashboard {
     public var authorName:String;
     public var creationDate:Date;
     public var updateDate:Date;
+    public var overridenFilters:Object;
 
     public var backgroundColor:uint = 0xCCCCCC;
     public var padding:int = 3;
@@ -47,12 +48,16 @@ public class Dashboard {
     public var stackFill2End:int = 0x343030;
     public var reportHorizontalPadding:int = 20;
 
+    public var enableLocalStorage:Boolean = true;
+
     public var headerImage:ImageDescriptor;
     public var headerTextColor:int;
     public var headerBackgroundColor:int;
     public var imageFullHeader:Boolean;
 
     public var defaultDrillthrough:Link;
+
+    public var version:int;
 
     public function Dashboard() {
     }

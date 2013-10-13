@@ -47,5 +47,21 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
         targetItem = aFilter.targetItem;
         availableItems = aFilter.availableItems;
     }
+
+    override public function getSaveValue():Object {
+        return targetItem.analysisItemID;
+    }
+
+    override public function loadFromSharedObject(value:Object):void {
+        var matchID:int = value as int;
+        if (matchID > 0) {
+            for each (var item:AnalysisItem in availableItems) {
+                if (item.analysisItemID == matchID) {
+                    targetItem = item;
+                    break;
+                }
+            }
+        }
+    }
 }
 }

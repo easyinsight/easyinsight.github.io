@@ -112,6 +112,7 @@ import mx.collections.ArrayCollection;
     public var customField1:String;
     public var customField2:String;
     public var newFieldModel:Boolean;
+    public var enableLocalStorage:Boolean;
 
 		public function AnalysisDefinition()
 		{

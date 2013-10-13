@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="createLink()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.dashboard.DashboardStackPositions;
+
+        import mx.managers.PopUpManager;
+
+        private var _url:String;
+
+
+        [Bindable(event="urlChanged")]
+        public function get url():String {
+            return _url;
+        }
+
+        public function set url(value:String):void {
+            if (_url == value) return;
+            _url = value;
+            dispatchEvent(new Event("urlChanged"));
+        }
+
+        private function createLink():void {
+            var pos:DashboardStackPositions = new DashboardStackPositions();
+            reportView.positionsPopulate(pos);
+            analysisService.saveReportLink.send(report.analysisID, pos);
+        }
+
+        public var report:AnalysisDefinition;
+        public var reportView:ReportView;
+
+        private function createdLink():void {
+            var key:String = analysisService.saveReportLink.lastResult as String;
+            url = "https://www.easy-insight.com/app/#savedReportID=" + key;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="saveReportLink" result="createdLink()"/>
+    </mx:RemoteObject>
+    <mx:VBox horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <mx:Text text="You can bookmark this link in your browser or send it to&#13;anyone else on your account with access to the report." fontSize="14"/>
+        <mx:TextArea text="{url}" selectable="true" editable="false" width="400" height="50" borderStyle="solid" borderThickness="1"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Copy to Clipboard" click="System.setClipboard(url)"/>
+            <util:CancelButton label="Close" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

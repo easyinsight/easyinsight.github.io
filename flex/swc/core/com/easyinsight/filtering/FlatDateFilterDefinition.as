@@ -23,5 +23,17 @@ public class FlatDateFilterDefinition extends FilterDefinition {
     override public function getType():int {
         return FilterDefinition.FLAT_DATE;
     }
+
+
+    override public function loadFromSharedObject(value:Object):void {
+        if (value != null) {
+            this.value = value as int;
+        }
+    }
+
+
+    override public function getSaveValue():Object {
+        return value;
+    }
 }
 }

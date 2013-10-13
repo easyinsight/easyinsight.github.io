@@ -64,11 +64,38 @@ public class Dashboard implements Cloneable, Serializable {
     private boolean fillStackHeaders;
     private int reportHorizontalPadding = 20;
     private Link defaultDrillthrough;
+    private Map<String, FilterDefinition> overridenFilters = new HashMap<String, FilterDefinition>();
 
     private ImageDescriptor headerImage;
     private boolean imageFullHeader;
     private int headerTextColor;
     private int headerBackgroundColor;
+    private int version;
+    private boolean enableLocalStorage;
+
+    public boolean isEnableLocalStorage() {
+        return enableLocalStorage;
+    }
+
+    public void setEnableLocalStorage(boolean enableLocalStorage) {
+        this.enableLocalStorage = enableLocalStorage;
+    }
+
+    public Map<String, FilterDefinition> getOverridenFilters() {
+        return overridenFilters;
+    }
+
+    public void setOverridenFilters(Map<String, FilterDefinition> overridenFilters) {
+        this.overridenFilters = overridenFilters;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
     public Link getDefaultDrillthrough() {
         return defaultDrillthrough;
@@ -386,6 +413,7 @@ public class Dashboard implements Cloneable, Serializable {
         if (changingDataSource) {
             // TODO: validate calculations and lookup tables--if necessary to create, should emit something with the report
             analysisItem.setLookupTableID(null);
+            analysisItem.setBasedOnReportField(null);
         }
     }
 
@@ -518,6 +546,15 @@ public class Dashboard implements Cloneable, Serializable {
     public JSONObject toJSON(FilterHTMLMetadata metadata) throws JSONException {
         JSONObject dashboard = new JSONObject();
         JSONArray filterArray = new JSONArray();
+        if (getOverridenFilters() != null) {
+            for (FilterDefinition filter : getFilters()) {
+                FilterDefinition overrideFilter = getOverridenFilters().get(String.valueOf(filter.getFilterID()));
+                if (overrideFilter != null) {
+                    filter.override(overrideFilter);
+                    filter.setEnabled(overrideFilter.isEnabled());
+                }
+            }
+        }
         for(FilterDefinition filter : filters) {
             filterArray.put(filter.toJSON(metadata));
         }
