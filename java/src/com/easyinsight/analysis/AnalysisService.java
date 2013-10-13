@@ -1157,6 +1157,7 @@ public class AnalysisService {
         forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*CA WC*\")").apply(pool));
         forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*MediCal*\")").apply(pool));
         forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*SPEECH*\")").apply(pool));
+        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*X39*\")").apply(pool));
         return forms;
     }
 
