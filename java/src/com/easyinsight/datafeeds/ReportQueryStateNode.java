@@ -27,7 +27,7 @@ class ReportQueryStateNode extends QueryStateNode {
     ReportQueryStateNode(long reportID, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata) {
         this.reportID = reportID;
         queryNodeKey = new ReportQueryNodeKey(reportID);
-        report = new AnalysisStorage().getAnalysisDefinition(reportID, conn, true);
+        report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
         queryData = new QueryData(queryNodeKey);
         this.conn = conn;
         dataSourceName = report.getName();
