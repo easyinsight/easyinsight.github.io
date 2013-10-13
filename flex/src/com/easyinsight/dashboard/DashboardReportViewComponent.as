@@ -396,10 +396,13 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                 }
                 myFilterColl.addItem(filterDefinition);
             }
-            for each (var valFilter:FilterDefinition in myFilterColl) {
-                if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null) {
-                    dashboardEditorMetadata.retrievalState.forFilter(valFilter, "r" + dashboardReport.urlKey, dashboardReport.overridenFilters);
+            try {
+                for each (var valFilter:FilterDefinition in myFilterColl) {
+                    if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null) {
+                        dashboardEditorMetadata.retrievalState.forFilter(valFilter, "r" + dashboardReport.urlKey, dashboardReport.overridenFilters);
+                    }
                 }
+            } catch (e:Error) {
             }
             var index:int = dashboardReport.showLabel ? 1 : 0;
             if (myFilterColl.length > 0) {
