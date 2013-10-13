@@ -130,9 +130,9 @@ public class HtmlServlet extends HttpServlet {
                                 if (filterValue != null) {
                                     rollingFilterDefinition.setInterval(filterValue);
                                     if (filterValue == MaterializedRollingFilterDefinition.CUSTOM) {
-                                        int direction = Integer.parseInt((String) curFilter.get("direction"));
-                                        int customValue = Integer.parseInt((String) curFilter.get("value"));
-                                        int interval = Integer.parseInt((String) curFilter.get("interval"));
+                                        int direction = getIntFromJSON(curFilter, "direction");
+                                        int customValue = getIntFromJSON(curFilter, "value");
+                                        int interval = getIntFromJSON(curFilter, "interval");
                                         rollingFilterDefinition.setCustomBeforeOrAfter(direction);
                                         rollingFilterDefinition.setCustomIntervalAmount(customValue);
                                         rollingFilterDefinition.setCustomIntervalType(interval);
@@ -370,6 +370,24 @@ public class HtmlServlet extends HttpServlet {
             }
         }
 
+    protected int getIntFromJSON(JSONObject jsonObject, String property) {
+        Object result = jsonObject.get(property);
+        if (result == null) {
+            return 0;
+        }
+        if (result instanceof String) {
+            String string = (String) result;
+            try {
+                return Integer.parseInt(string);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        } else if (result instanceof Number) {
+            Number number = (Number) result;
+            return number.intValue();
+        }
+        return 0;
+    }
 
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report) throws Exception { }

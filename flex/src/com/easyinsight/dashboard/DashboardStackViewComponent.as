@@ -586,8 +586,10 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                 stackFilterMap[filterDefinition.qualifiedName()] = filterToUse;
                 myFilterColl.addItem(filterToUse);
             }
-            for each (var valFilter:FilterDefinition in myFilterColl) {
-                dashboardEditorMetadata.retrievalState.forFilter(valFilter, "s" + dashboardStack.urlKey, dashboardStack.overridenFilters);
+            if (dashboardEditorMetadata.retrievalState != null) {
+                for each (var valFilter:FilterDefinition in myFilterColl) {
+                    dashboardEditorMetadata.retrievalState.forFilter(valFilter, "s" + dashboardStack.urlKey, dashboardStack.overridenFilters);
+                }
             }
             transformContainer.existingFilters = myFilterColl;
             filterMap[elementID] = myFilterColl;
