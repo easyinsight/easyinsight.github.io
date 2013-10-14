@@ -36,10 +36,32 @@
         <%= Filter.filters({ filter_values: filters }) %>
         <div class="container">
             <% if(show_label) { %>
-            <div class="row grid_header">
-                <div class="col-md-12">
+            <% var clickable_grid = _.any(grid, function(e, i, l) {
+                return _.any(e, function(f, i, l) {
+                return f["type"] == "report";
+            })
+            }); %>
+            <div>
+            <div class="row col-md-12 grid_header<% if(clickable_grid) { %> clickable_grid<% } %>">
                 <%- label %>
+            </div>
+            <% if(clickable_grid){%>
+            <div class="reportMenu">
+                <% _.each(grid, function(e, i, l) { %>
+                <div class="row">
+                <%
+                    var span_size = Math.floor(12.0 / e.length);
+                    _.each(e, function(f, i, l) { %>
+                    <div class="col-md-<%= span_size %>">
+                    <% if(f["type"] == "report") {
+                    %>
+                   <a href="#"><%- f.report.name %></a>
+                <% } %> </div>
+                <% }) %>
                 </div>
+                <% }) %>
+            </div>
+            <% } %>
             </div>
             <% } %>
             <% _.each(grid, function(e, i, l) { %>
@@ -55,11 +77,20 @@
     </script>
 
     <script type="text/template" id="report_template">
+        <div>
         <% if(show_label) { %>
         <div>
             <div class="dashboardReportHeader"><%- report.name %></div>
 
-            <div class="reportMenu"><a href="/app/html/report/<%= report.metadata.key %>">Navigate</a></div>
+            <div class="reportMenu"> <a href="/app/html/report/<%= report.metadata.key %>" class="btn btn-default">Navigate</a>
+                <div class="btn-group">
+                    <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Export <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/app/exportExcel?reportID=<%= report.metadata.key %>"><button class="btn btn-inverse">Export to Excel</button></a></li>
+                        <li><a href="#" class="emailReportButton" data-key="<%= report.metadata.key %>"><button class="btn btn-inverse">Email Report</button></a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
         <% } %>
         <%= Filter.filters({ filter_values: report.metadata.filters, parent_id: id }) %>
@@ -89,6 +120,7 @@
                     </div>
                 <% } %>
             </div>
+        </div>
         </div>
 </script>
 
@@ -311,6 +343,7 @@
 </script>
 
 <script type="text/template" id="dashboard_template">
+    <%= email_modal() %>
     <div class="container"><%= Filter.filters({ filter_values: filters}) %></div>
     <div class="container dashboard_base well" style="padding-top:10px">
 
@@ -329,6 +362,7 @@
     <% } %>
 </script>
 
+<!-- filter base -->
 <script type="text/template" id="filter_base">
 
     <% if(!data.checkbox) { %>
@@ -336,5 +370,58 @@
     <% } %>
     <%- data.label %>
 </script>
+
+        <script type="text/template" id="email_modal">
+            <div class="modal fade" id="emailReportWindow">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button class="close" data-dismiss="modal">X</button>
+                            <h3>Email Report</h3>
+                        </div>
+                        <div class="modal-body">
+                            <form class="form-horizontal">
+                                <div class="control-group">
+                                    <label class="control-label">Which format?</label>
+
+                                    <div class="controls">
+
+                                        <label class="radio" for="htmlRadio"><input type="radio" id="htmlRadio" name="emailGroup"
+                                                                                    value="4"/> HTML</label>
+                                        <label class="radio" for="excelRadio"><input type="radio" id="excelRadio" name="emailGroup"
+                                                                                     value="1"/> Excel</label>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label" for="input01">Who will this email go to?</label>
+
+                                    <div class="controls">
+                                        <input type="text" class="input-xlarge" id="input01">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label" for="input02">What should the subject of the email be?</label>
+
+                                    <div class="controls">
+                                        <input type="text" class="input-xlarge" id="input02">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label" for="textarea">Any message to include with the email?</label>
+
+                                    <div class="controls">
+                                        <textarea class="input-xlarge" id="textarea" rows="5"></textarea>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn email-send" data-dismiss="modal">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </script>
 </div>
 

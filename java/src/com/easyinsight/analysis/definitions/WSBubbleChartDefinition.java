@@ -134,7 +134,6 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
         String customHeight = htmlReportMetadata.createStyleProperties().toString();
         argh = "$.getJSON('/app/bubbleChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ",false," + customHeight + "))";
-        System.out.println(argh);
         return argh;
     }
 

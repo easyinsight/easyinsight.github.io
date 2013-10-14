@@ -105,7 +105,6 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
         String customHeight = htmlReportMetadata.createStyleProperties().toString();
         argh = "$.getJSON('/app/twoAxisChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true, " + customHeight + "))";
-        System.out.println(argh);
         return argh;
     }
 

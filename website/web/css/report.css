@@ -73,6 +73,10 @@
     cursor: pointer;
 }
 
+.clickable_grid {
+    cursor: pointer;
+}
+
 .filters {
     text-align: left;
     width: 100%;
@@ -173,4 +177,5 @@ nav.navbar_first {
 
 .reportMenu {
     display: none;
+    padding-bottom: 10px;
 }
