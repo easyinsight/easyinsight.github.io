@@ -173,11 +173,11 @@ public class DataViewFactory extends VBox implements IRetrievable {
         forceRetrieve();
     }
 
-    private var _dataSourceFields:ArrayCollection;
+    /*private var _dataSourceFields:ArrayCollection;
 
     public function set dataSourceFields(value:ArrayCollection):void {
         _dataSourceFields = value;
-    }
+    }*/
 
     override protected function createChildren():void {
         super.createChildren();
@@ -192,7 +192,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _controlBar = createReportControlBar();
         _controlBar["id"] = "_controlBar";
         _controlBar.analysisItems = _availableFields;
-        _controlBar.dataSourceFields = _dataSourceFields;
+        //_controlBar.dataSourceFields = _dataSourceFields;
         _controlBar.dataSourceID = _dataSourceID;
         _controlBar.addEventListener(ReportDataEvent.REQUEST_DATA, onDataRequest, false, 0, true);
         _controlBar.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromControlBar, false, 0, true);
@@ -229,12 +229,12 @@ public class DataViewFactory extends VBox implements IRetrievable {
         reportCanvas.y = 10;
         canvas.addChild(reportCanvas);
         addChild(canvas);
-        if (overlayIndex == 0) {
+        //if (overlayIndex == 0) {
             noData = new NoData();
             currentComponent = noData;
             reportCanvas.addChildAt(noData, 0);
 
-        }
+        //}
         notConfigured = new NotConfigured();
         //notConfigured.controlBar = _controlBar;
         loadReportRenderer();
@@ -264,12 +264,19 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
-        reportCanvas.width = canvas.width - 20;
-        reportCanvas.height = canvas.height - 20;
-        if (currentComponent != null && (currentComponent.height != reportCanvas.height || currentComponent.width != reportCanvas.width)) {
-            currentComponent.height = reportCanvas.height;
-            currentComponent.width = reportCanvas.width;
-            currentComponent.invalidateDisplayList();
+        if (reportCanvas != null && canvas != null && currentComponent != null) {
+            reportCanvas.width = canvas.width - 20;
+            reportCanvas.height = canvas.height - 20;
+            /*if (currentComponent != null && (currentComponent.height != reportCanvas.height || currentComponent.width != reportCanvas.width)) {
+                currentComponent.height = reportCanvas.height;
+                currentComponent.width = reportCanvas.width;
+                currentComponent.invalidateDisplayList();
+            }*/
+            if (currentComponent.height != reportCanvas.height || currentComponent.width != reportCanvas.width) {
+                currentComponent.height = reportCanvas.height;
+                currentComponent.width = reportCanvas.width;
+                currentComponent.invalidateDisplayList();
+            }
         }
 
     }

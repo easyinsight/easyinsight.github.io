@@ -932,6 +932,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         optimized = findBooleanProperty(properties, "optimized", false);
         fullJoins = findBooleanProperty(properties, "fullJoins", false);
         dataSourceFields = findBooleanProperty(properties, "dataSourceFields", false);
+        logReport = findBooleanProperty(properties, "logReport", false);
         headerImage = findImage(properties, "headerImage", null);
         lookupTableOptimization = findBooleanProperty(properties, "lookupTableOptimization", false);
         adHocExecution = findBooleanProperty(properties, "adHocExecution", false);
@@ -964,6 +965,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("adHocExecution", adHocExecution));
         properties.add(new ReportBooleanProperty("cacheable", cacheable));
         properties.add(new ReportBooleanProperty("manualButRunFirst", manualButRunFirst));
+        properties.add(new ReportBooleanProperty("logReport", logReport));
         properties.add(new ReportBooleanProperty("useCustomFontFamily", useCustomFontFamily));
         properties.add(new ReportNumericProperty("generalSizeLimit", generalSizeLimit));
         properties.add(new ReportNumericProperty("fetchSize", fetchSize));

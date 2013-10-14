@@ -221,20 +221,23 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             }
         }
 
-        if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null && viewStack != null) {
-            var index:int = dashboardEditorMetadata.retrievalState.getStackPosition(dashboardStack.urlKey);
-            if (index != -1) {
-                viewStack.selectedIndex = index;
-                if (dashboardHeaderButtons != null && index != -1 && dashboardHeaderButtons.length > index) {
-                    if (selectedButton != null) {
-                        selectedButton.selected = false;
-                    }
-                    if (dashboardHeaderButtons.getItemAt(index) is DashboardButton) {
-                        DashboardButton(dashboardHeaderButtons.getItemAt(index)).selected = true;
-                        selectedButton = DashboardButton(dashboardHeaderButtons.getItemAt(index));
+        try {
+            if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null && viewStack != null) {
+                var index:int = dashboardEditorMetadata.retrievalState.getStackPosition(dashboardStack.urlKey);
+                if (index != -1) {
+                    viewStack.selectedIndex = index;
+                    if (dashboardHeaderButtons != null && index != -1 && dashboardHeaderButtons.length > index) {
+                        if (selectedButton != null) {
+                            selectedButton.selected = false;
+                        }
+                        if (dashboardHeaderButtons.getItemAt(index) is DashboardButton) {
+                            DashboardButton(dashboardHeaderButtons.getItemAt(index)).selected = true;
+                            selectedButton = DashboardButton(dashboardHeaderButtons.getItemAt(index));
+                        }
                     }
                 }
             }
+        } catch (e:Error) {
         }
         /*if (positionAsIs == -1) {
             try {
@@ -586,8 +589,13 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                 stackFilterMap[filterDefinition.qualifiedName()] = filterToUse;
                 myFilterColl.addItem(filterToUse);
             }
-            for each (var valFilter:FilterDefinition in myFilterColl) {
-                dashboardEditorMetadata.retrievalState.forFilter(valFilter, "s" + dashboardStack.urlKey, dashboardStack.overridenFilters);
+            try {
+                if (dashboardEditorMetadata.retrievalState != null) {
+                    for each (var valFilter:FilterDefinition in myFilterColl) {
+                        dashboardEditorMetadata.retrievalState.forFilter(valFilter, "s" + dashboardStack.urlKey, dashboardStack.overridenFilters);
+                    }
+                }
+            } catch (e:Error) {
             }
             transformContainer.existingFilters = myFilterColl;
             filterMap[elementID] = myFilterColl;

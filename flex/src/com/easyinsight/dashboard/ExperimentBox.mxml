@@ -63,5 +63,5 @@
         ]]></mx:Script>
     <mx:Button label="Export Report" click="exportReport()" styleName="dashboardGrayButton" id="exportButton"/>
     <mx:Button label="Navigate to Report" click="navigateToReport()" styleName="dashboardGrayButton" id="navigateButton"/>
-    <mx:Button label="Configure" click="configure()" styleName="dashboardGrayButton" id="configureButton"/>
+    <!--<mx:Button label="Configure" click="configure()" styleName="dashboardGrayButton" id="configureButton"/>-->
 </mx:HBox>

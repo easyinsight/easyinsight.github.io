@@ -25,6 +25,7 @@ import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
+import mx.controls.Alert;
 import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.managers.PopUpManager;
@@ -186,23 +187,11 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             percentHeight = NaN;
         }
 
-        if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null) {
+        /*if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null) {
             var custom:InsightDescriptor = dashboardEditorMetadata.retrievalState.getReport(dashboardReport.urlKey);
             if (custom != null) {
                 dashboardReport.report = custom;
             }
-        }
-
-        /*try {
-            var so:SharedObject = SharedObject.getLocal("d" + dashboardEditorMetadata.dashboard.urlKey + dashboardEditorMetadata.dashboard.version);
-            if (so.size > 0) {
-                var customReport:InsightDescriptor = so.data["r" + dashboardReport.urlKey];
-                if (customReport != null) {
-                    dashboardReport.report = customReport;
-                }
-            }
-        } catch (e:Error) {
-
         }*/
 
         /*if (dashboardEditorMetadata.borderThickness > 0) {
@@ -219,7 +208,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         //viewFactory.dataSourceID = dashboardEditorMetadata.dataSourceID;
         viewFactory.dataSourceID = dashboardReport.report.dataFeedID;
         viewFactory.dashboardID = dashboardEditorMetadata.dashboardID;
-        viewFactory.reportPaddingWidth = dashboardEditorMetadata.dashboard.reportHorizontalPadding;
+        //viewFactory.reportPaddingWidth = dashboardEditorMetadata.dashboard.reportHorizontalPadding;
         viewFactory.spaceSides = false;
         if (dashboardReport.showLabel) {
             var blah:Box = new Box();
@@ -407,10 +396,13 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                 }
                 myFilterColl.addItem(filterDefinition);
             }
-            for each (var valFilter:FilterDefinition in myFilterColl) {
-                if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null) {
-                    dashboardEditorMetadata.retrievalState.forFilter(valFilter, "r" + dashboardReport.urlKey, dashboardReport.overridenFilters);
+            try {
+                for each (var valFilter:FilterDefinition in myFilterColl) {
+                    if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null) {
+                        dashboardEditorMetadata.retrievalState.forFilter(valFilter, "r" + dashboardReport.urlKey, dashboardReport.overridenFilters);
+                    }
                 }
+            } catch (e:Error) {
             }
             var index:int = dashboardReport.showLabel ? 1 : 0;
             if (myFilterColl.length > 0) {
