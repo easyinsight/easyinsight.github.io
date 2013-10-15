@@ -556,7 +556,9 @@ $(function () {
         });
 
         $(".clickable_grid").click(function (e) {
-            var f = $(".reportMenu", $(e.target).parent());
+            var g = $(e.target).parent()
+            var f = $(".reportMenu", g);
+            $(".gridReportMenu", g).hide();
             f.slideToggle({ complete: function () {
                 f.css("overflow", "visible");
             }});
