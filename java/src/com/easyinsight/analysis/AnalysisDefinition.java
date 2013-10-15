@@ -603,7 +603,7 @@ public class AnalysisDefinition implements Cloneable {
                 Key key = null;
                 Key deproxiedKey = (Key) Database.deproxy(analysisItem.getKey());
                 if (deproxiedKey instanceof ReportKey) {
-                    System.out.println("blah");
+
                 } else {
                     AnalysisItem dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
                     if (dataSourceItem != null) {

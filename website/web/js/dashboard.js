@@ -6,7 +6,10 @@ var reportTemplate;
 var gaugeTemplate;
 
 var dashboard;
+var email_modal;
 var short_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+var currentReport;
 
 var dashboardComponent = function (obj) {
     if (obj.type == "stack")
@@ -128,7 +131,9 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
         o.rendered = false;
         return;
     }
-    var curFilters = $.map(o.filters, function(e, i) { return toFilterString(e); });
+    var curFilters = $.map(o.filters, function (e, i) {
+        return toFilterString(e);
+    });
     var fullFilters = {};
     for (i = 0; i < curFilters.length; i++) {
         fullFilters[curFilters[i].id] = curFilters[i];
@@ -150,7 +155,7 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     else if (obj.metadata.type == "diagram") {
         $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
             window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, afterRefresh($("#" + id + " .loading")));
-        }) } ));
+        }) }));
     }
     else if (obj.metadata.type == "list") {
         $.ajax($.extend(postData, {
@@ -178,7 +183,8 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     } else if (obj.metadata.type == "stacked_column") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedColumnChart(id, w, obj.metadata.styles)) }));;
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedColumnChart(id, w, obj.metadata.styles)) }));
+        ;
     } else if (obj.metadata.type == "gauge") {
         $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: null }))
         var v = JSON.stringify(obj.metadata.properties).replace(/\"/g, "");
@@ -189,7 +195,8 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
             Utils.noData(data, function () {
                 $('#' + id + " .reportArea").html(data);
             }, null, id);
-        })}));;
+        })}));
+        ;
     }
     o.rendered = true;
 }
@@ -327,6 +334,7 @@ $(function () {
         reportTemplate = _.template($("#report_template", s).html());
         textTemplate = _.template($("#text_template", s).html());
         gaugeTemplate = _.template($("#gauge_template", s).html());
+        email_modal = _.template($("#email_modal", s).html());
 
         $("#base").append(dashboard(dashboardJSON));
 
@@ -540,9 +548,38 @@ $(function () {
             showFilters = !showFilters;
         })
 
-        $(".dashboardReportHeader").click(function(e) {
-            $(".reportMenu", $(e.target).parent()).slideToggle()
+        $(".dashboardReportHeader").click(function (e) {
+            var f = $(".reportMenu", $(e.target).parent());
+            f.slideToggle({ complete: function () {
+                f.css("overflow", "visible")
+            }});
         });
+
+        $(".clickable_grid").click(function (e) {
+            var f = $(".reportMenu", $(e.target).parent());
+            f.slideToggle({ complete: function () {
+                f.css("overflow", "visible");
+            }});
+        })
+
+        $(".emailReportButton").click(function (e) {
+            $("#emailReportWindow").modal(true, true, true);
+            var f = $(e.target).attr("data-key");
+            if (typeof(f) == "undefined")
+                f = $(e.target).parent().attr("data-key");
+            currentReport = f;
+        })
+
+        $(".email-send").click(function (e) {
+            var format = $('input:radio[name=emailGroup]:checked').val();
+            var recipient = $('#input01').val();
+            var subject = $('#input02').val();
+            var body = $('#textarea').val();
+            $.getJSON('/app/emailReport?reportID='  + currentReport + '&format=' + format + "&recipient=" + recipient + "&subject=" + subject + "&body=" + body, function (data) {
+                alert('Email sent.');
+            });
+
+        })
     })
 })
 
