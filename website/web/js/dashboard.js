@@ -391,7 +391,7 @@ $(function () {
 
         $(".multi_value_save").click(function (e) {
             var a = $(e.target || e.srcElement).parent().parent().parent().parent();
-            var f = filterMap[a.attr("id").split("_")[0]];
+            var f = filterMap[a.attr("id")];
             var selects = $("li input:checked", a);
             var selectVals = $.map(selects, function (e, i) {
                 return $(".cb_filter_value", $(e).parent()).html();
@@ -411,12 +411,12 @@ $(function () {
 
         $(".multi_flat_month_save").click(function (e) {
             var a = $(e.target).parent().parent().parent().parent();
-            var f = filterMap[a.attr("id").split("_")[0]];
+            var f = filterMap[a.attr("id")];
             var min = $(".multi_flat_month_start", a).val();
             var max = $(".multi_flat_month_end", a).val();
             f.filter.min = parseInt(min);
             f.filter.max = parseInt(max);
-            $("#" + a.attr("id").split("_")[0]).html(short_months[f.filter.min] + " to " + short_months[f.filter.max]);
+            $("#" + a.attr("id")).html(short_months[f.filter.min] + " to " + short_months[f.filter.max]);
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
@@ -425,9 +425,9 @@ $(function () {
         })
 
         $(".rolling_filter_type").change(function (e) {
-            var t = $(".custom", $(e.target || e.srcElement).parent());
-            var f = filterMap[$(e.target || e.srcElement).attr("id").split("_")[0]];
-            if ($(e.target || e.srcElement).val() == "18") {
+            var t = $(".custom", $(e.target).parent());
+            var f = filterMap[$(e.target).attr("id").replace(/_type$/g, "")];
+            if ($(e.target).val() == "18") {
                 t.show();
 
             } else {
@@ -442,8 +442,8 @@ $(function () {
         });
 
         $(".rolling_filter_direction").change(function (e) {
-            var f = filterMap[$(e.target || e.srcElement).attr("id").split("_")[0]];
-            f.filter.direction = $(e.target || e.srcElement).val();
+            var f = filterMap[$(e.target).attr("id").replace(/_custom_direction$/g, "")];
+            f.filter.direction = $(e.target).val();
 
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
@@ -453,8 +453,8 @@ $(function () {
         });
 
         $(".rolling_filter_value").change(function (e) {
-            var f = filterMap[$(e.target || e.srcElement).attr("id").split("_")[0]];
-            f.filter.value = parseInt($(e.target || e.srcElement).val());
+            var f = filterMap[$(e.target).attr("id").replace(/_custom_value$/g, "")];
+            f.filter.value = parseInt($(e.target).val());
 
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
@@ -464,8 +464,8 @@ $(function () {
         });
 
         $(".rolling_filter_interval").change(function (e) {
-            var f = filterMap[$(e.target || e.srcElement).attr("id").split("_")[0]];
-            f.filter.interval = $(e.target || e.srcElement).val();
+            var f = filterMap[$(e.target).attr("id").replace(/_custom_interval$/g, "")];
+            f.filter.interval = $(e.target).val();
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
@@ -474,7 +474,7 @@ $(function () {
         });
 
         $(".field_filter").change(function (e) {
-            var f = filterMap[$(e.target).attr("id").split("_")[0]];
+            var f = filterMap[$(e.target).attr("id")];
             f.filter.selected = $(e.target).val();
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
@@ -484,9 +484,9 @@ $(function () {
         });
 
         $(".filter_enabled").change(function (e) {
-            var f = filterMap[$(e.target || e.srcElement).attr("id").split("_")[0]];
+            var f = filterMap[$(e.target).attr("id").replace(/_enabled$/g, "")];
 
-            f.filter.enabled = $(e.target || e.srcElement).is(":checked");
+            f.filter.enabled = $(e.target).is(":checked");
 
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
@@ -497,7 +497,7 @@ $(function () {
 
         $(".start_date_filter").datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
             var z = $(e.target);
-            var f = filterMap[z.attr("id").split("_")[0]];
+            var f = filterMap[z.attr("id")];
             f.filter.start_date = z.val();
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
@@ -508,7 +508,7 @@ $(function () {
 
         $(".end_date_filter").datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
             var z = $(e.target);
-            var f = filterMap[z.attr("id").split("_")[0]];
+            var f = filterMap[z.attr("id")];
             f.filter.end_date = z.val();
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], dashboardJSON["drillthroughID"], true);
