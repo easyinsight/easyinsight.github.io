@@ -197,7 +197,7 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
         JSONArray available = new JSONArray();
         for(AnalysisItem analysisItem : getAvailableItems()) {
             JSONObject j = new JSONObject();
-            j.put("value", analysisItem.getAnalysisItemID());
+            j.put("value", String.valueOf(analysisItem.getAnalysisItemID()));
             j.put("label", analysisItem.toDisplay());
             available.put(j);
         }
