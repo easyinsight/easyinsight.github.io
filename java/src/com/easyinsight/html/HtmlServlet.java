@@ -5,6 +5,7 @@ import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -59,6 +60,8 @@ public class HtmlServlet extends HttpServlet {
                     EIConnection conn = Database.instance().getConnection();
                     try {
                         WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(reportID);
+
+                        boolean logReport = report.isLogReport();
 
                         // we aren't *just* iterating the report's filters, we're also iterating the dashboard containing the report
                         // and retrieving information thereof
@@ -187,6 +190,9 @@ public class HtmlServlet extends HttpServlet {
                             Boolean enabledParam = curFilter != null ? (Boolean) curFilter.get("enabled") : null;
                             if (enabledParam != null) {
                                 filter.setEnabled(enabledParam);
+                            }
+                            if (logReport) {
+                                LogClass.info("For report " + report.getName() + ", filter " + filter.getFilterID() + " has enabled = " + filter.isEnabled());
                             }
                         }
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
