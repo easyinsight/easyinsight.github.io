@@ -179,3 +179,16 @@ nav.navbar_first {
     display: none;
     padding-bottom: 10px;
 }
+
+.reportMenuBase {
+    position: relative;
+}
+
+.gridReportMenu {
+    display: none;
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    background-color: #FFFFFF;
+    padding-bottom: 10px;
+}

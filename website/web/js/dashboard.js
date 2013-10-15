@@ -580,6 +580,19 @@ $(function () {
             });
 
         })
+
+        $(".grid_report_link").click(function(e) {
+            var f = $(e.target).attr("data-ref");
+            $("#" + f).show({effect: "slide"});
+            e.preventDefault();
+        })
+
+        $(".grid_back_button").click(function(e) {
+            var f = $(e.target).parent()
+            if(!f.hasClass("gridReportMenu"))
+                f = f.parent();
+            f.hide({effect: "slide", direction: "left"})
+        })
     })
 })
 

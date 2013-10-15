@@ -46,6 +46,7 @@
                 <%- label %>
             </div>
             <% if(clickable_grid){%>
+                <div class="reportMenuBase">
             <div class="reportMenu">
                 <% _.each(grid, function(e, i, l) { %>
                 <div class="row">
@@ -55,11 +56,24 @@
                     <div class="col-md-<%= span_size %>">
                     <% if(f["type"] == "report") {
                     %>
-                   <a href="#"><%- f.report.name %></a>
+                   <a href="#" class="grid_report_link" data-ref="<%= id %>_<%= f.id %>"><%- f.report.name %></a>
                 <% } %> </div>
                 <% }) %>
                 </div>
                 <% }) %>
+            </div>
+                    <%
+                    _.each(grid, function(e, i, l) {
+                        _.each(e, function(f, i, l) {
+                        if(f["type"] == "report") {
+
+                        %>
+                        <div class="gridReportMenu" id="<%= id %>_<%= f.id %>"><%- f.report.name %><a class="grid_back_button" href="#"><button class="btn btn-inverse">Back</button></a></div>
+                    <%}
+
+                    })
+
+                    }) %>
             </div>
             <% } %>
             </div>
