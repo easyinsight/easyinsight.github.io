@@ -391,7 +391,7 @@ $(function () {
 
         $(".multi_value_save").click(function (e) {
             var a = $(e.target || e.srcElement).parent().parent().parent().parent();
-            var f = filterMap[a.attr("id")];
+            var f = filterMap[a.attr("id").replace(/_modal$/g, "")];
             var selects = $("li input:checked", a);
             var selectVals = $.map(selects, function (e, i) {
                 return $(".cb_filter_value", $(e).parent()).html();
@@ -411,12 +411,12 @@ $(function () {
 
         $(".multi_flat_month_save").click(function (e) {
             var a = $(e.target).parent().parent().parent().parent();
-            var f = filterMap[a.attr("id")];
+            var f = filterMap[a.attr("id").replace(/_modal$/g, "")];
             var min = $(".multi_flat_month_start", a).val();
             var max = $(".multi_flat_month_end", a).val();
             f.filter.min = parseInt(min);
             f.filter.max = parseInt(max);
-            $("#" + a.attr("id")).html(short_months[f.filter.min] + " to " + short_months[f.filter.max]);
+            $("#" + a.attr("id").replace(/_modal$/g, "")).html(short_months[f.filter.min] + " to " + short_months[f.filter.max]);
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
