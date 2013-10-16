@@ -251,6 +251,9 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
         if (!successful) {
             throw new RuntimeException("Zendesk could not be reached due to a large number of current users, please try again in a bit.");
         }
+        if(obj instanceof String) {
+            throw new RuntimeException((String) obj);
+        }
         return obj;
     }
 }

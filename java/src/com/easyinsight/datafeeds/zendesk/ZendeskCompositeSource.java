@@ -180,6 +180,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
             return url;
         }
         String basecampUrl = ((url.startsWith("http://") || url.startsWith("https://")) ? "" : "https://") + url;
+        basecampUrl = basecampUrl.replaceFirst("^http://", "https://");
         if(basecampUrl.endsWith("/")) {
             basecampUrl = basecampUrl.substring(0, basecampUrl.length() - 1);
         }
