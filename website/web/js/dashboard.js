@@ -558,7 +558,7 @@ $(function () {
         $(".clickable_grid").click(function (e) {
             var g = $(e.target).parent()
             var f = $(".reportMenu", g);
-            $(".gridReportMenu", g).hide();
+            $(".gridReportMenu", g).hide({effect: "slide", direction: "up"});
             f.slideToggle({ complete: function () {
                 f.css("overflow", "visible");
             }});
