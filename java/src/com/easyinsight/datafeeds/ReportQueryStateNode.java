@@ -5,11 +5,14 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.AltCompositeReportPipeline;
 import com.easyinsight.pipeline.CompositeReportPipeline;
 import com.easyinsight.pipeline.NamedPipeline;
 import com.easyinsight.pipeline.Pipeline;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.*;
 
 /**
@@ -23,6 +26,7 @@ class ReportQueryStateNode extends QueryStateNode {
     private String pipelineName;
     private Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
     private QueryNodeKey queryNodeKey;
+    private long dataSourceID;
 
     ReportQueryStateNode(long reportID, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata) {
         this.reportID = reportID;
@@ -34,6 +38,17 @@ class ReportQueryStateNode extends QueryStateNode {
         Feed sourceFeed = FeedRegistry.instance().getFeed(report.getDataFeedID());
         allFeedItems = sourceFeed.getFields();
         this.parentItems = parentItems;
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM cached_addon_report_source WHERE report_id = ?");
+            stmt.setLong(1, reportID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                dataSourceID = rs.getLong(1);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+
     }
 
     public QueryNodeKey queryNodeKey() {
@@ -87,8 +102,16 @@ class ReportQueryStateNode extends QueryStateNode {
     }
 
     public DataSet produceDataSet(InsightRequestMetadata insightRequestMetadata) throws ReportException {
-        AnalysisBasedFeed feed = new AnalysisBasedFeed();
-        feed.setAnalysisDefinition(report);
+        Feed feed;
+        if (dataSourceID > 0) {
+            CachedAnalysisBasedFeed cachedFeed = new CachedAnalysisBasedFeed();
+            cachedFeed.setAnalysisDefinition(report);
+            feed = cachedFeed;
+        } else {
+            AnalysisBasedFeed cachedFeed = new AnalysisBasedFeed();
+            cachedFeed.setAnalysisDefinition(report);
+            feed = cachedFeed;
+        }
         feed.setFields(allAnalysisItems);
         DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
 
