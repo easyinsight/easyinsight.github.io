@@ -50,14 +50,19 @@ public class CachedAnalysisBasedFeed extends Feed {
             long dataSourceID = rs.getLong(1);
             Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
 
-            Map<AnalysisItem, AnalysisItem> map = new HashMap<AnalysisItem, AnalysisItem>();
+            Map<AnalysisItem, Collection<AnalysisItem>> map = new HashMap<AnalysisItem, Collection<AnalysisItem>>();
             for (AnalysisItem item : analysisItems) {
                 System.out.println("Inspecting item " + item.toDisplay() + " based on = " + item.getBasedOnReportField());
                 boolean found = false;
                 for (AnalysisItem reportField : feed.getFields()) {
                     if (reportField.getBasedOnReportField().equals(item.getBasedOnReportField())) {
                         System.out.println("\tAssigning as match to " + reportField.getBasedOnReportField());
-                        map.put(reportField, item);
+                        Collection<AnalysisItem> items = map.get(reportField);
+                        if (items == null) {
+                            items = new ArrayList<AnalysisItem>();
+                            map.put(reportField, items);
+                        }
+                        items.add(item);
                         found = true;
                     }
                 }
@@ -85,9 +90,11 @@ public class CachedAnalysisBasedFeed extends Feed {
             DataSet dataSet = new DataSet();
             for (IRow reportRow : reportSet.getRows()) {
                 IRow row = dataSet.createRow();
-                for (Map.Entry<AnalysisItem, AnalysisItem> entry : map.entrySet()) {
+                for (Map.Entry<AnalysisItem, Collection<AnalysisItem>> entry : map.entrySet()) {
                     Value value = reportRow.getValue(entry.getKey().createAggregateKey());
-                    row.addValue(entry.getValue().createAggregateKey(), value);
+                    for (AnalysisItem item : entry.getValue()) {
+                        row.addValue(item.createAggregateKey(), value);
+                    }
                 }
             }
             for (Map.Entry<FilterDefinition, AnalysisItem> entry : filterBackMap.entrySet()) {
