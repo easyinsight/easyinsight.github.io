@@ -61,6 +61,7 @@ import mx.collections.ArrayCollection;
 		public var filterDefinitions:ArrayCollection = new ArrayCollection();
         public var filtersForDrillthrough:ArrayCollection;
     public var fieldsForDrillthrough:ArrayCollection;
+    public var persistedCache:Boolean;
 		public var dataScrubs:ArrayCollection = new ArrayCollection();
         public var logReport:Boolean;
         public var reportType:int;

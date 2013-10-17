@@ -75,6 +75,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int TEXT = 41;
 
     private String name;
+    private boolean persistedCache;
     private String authorName;
     private boolean logReport;
     private String urlKey;
@@ -516,6 +517,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return addedItems;
     }
 
+    public boolean isPersistedCache() {
+        return persistedCache;
+    }
+
+    public void setPersistedCache(boolean persistedCache) {
+        this.persistedCache = persistedCache;
+    }
+
     public List<AnalysisItem> allAddedItems(InsightRequestMetadata insightRequestMetadata) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         if (addedItems != null) {
@@ -932,6 +941,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         optimized = findBooleanProperty(properties, "optimized", false);
         fullJoins = findBooleanProperty(properties, "fullJoins", false);
         dataSourceFields = findBooleanProperty(properties, "dataSourceFields", false);
+        persistedCache = findBooleanProperty(properties, "persistedCache", false);
         logReport = findBooleanProperty(properties, "logReport", false);
         headerImage = findImage(properties, "headerImage", null);
         lookupTableOptimization = findBooleanProperty(properties, "lookupTableOptimization", false);
@@ -959,6 +969,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportNumericProperty("fixedWidth", fixedWidth));
         properties.add(new ReportNumericProperty("backgroundAlpha", backgroundAlpha));
         properties.add(new ReportBooleanProperty("optimized", optimized));
+        properties.add(new ReportBooleanProperty("persistedCache", persistedCache));
         properties.add(new ReportBooleanProperty("fullJoins", fullJoins));
         properties.add(new ReportBooleanProperty("dataSourceFields", dataSourceFields));
         properties.add(new ReportBooleanProperty("lookupTableOptimization", lookupTableOptimization));
