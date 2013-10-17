@@ -19,7 +19,6 @@ import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
-import com.easyinsight.cache.Cache;
 
 import java.io.ByteArrayInputStream;
 import java.sql.*;
@@ -32,8 +31,9 @@ import java.util.Date;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.storage.CachedCalculationTransform;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.storage.DatabaseManager;
 import com.easyinsight.storage.IDataTransform;
+import com.easyinsight.userupload.UploadPolicy;
+import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.util.RandomTextGenerator;
 import nu.xom.Builder;
 import nu.xom.Document;
@@ -46,7 +46,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.Session;
-import org.apache.jcs.access.exception.CacheException;
 
 /**
  * User: James Boe
@@ -1874,11 +1873,6 @@ public class AnalysisService {
         if (wsAnalysisDefinition.getAnalysisID() > 0) {
             SecurityUtil.authorizeInsight(wsAnalysisDefinition.getAnalysisID());
         }
-        try {
-            Cache.getCache(Cache.EMBEDDED_REPORTS).remove(wsAnalysisDefinition.getDataFeedID());
-        } catch (CacheException e) {
-            LogClass.error(e);
-        }
         long reportID;
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
@@ -1944,6 +1938,9 @@ public class AnalysisService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
+        if (wsAnalysisDefinition.isPersistedCache()) {
+            createCachedAddon(reportID, wsAnalysisDefinition.getName());
+        }
         session = Database.instance().createSession();
         try {
             session.beginTransaction();
@@ -1957,6 +1954,36 @@ public class AnalysisService {
             throw new RuntimeException(e);
         } finally {
             session.close();
+        }
+    }
+
+    private void createCachedAddon(long reportID, String name) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM cached_addon_report_source WHERE REPORT_ID = ?");
+            queryStmt.setLong(1, reportID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long existingID = rs.getLong(1);
+                new UserUploadService().deleteUserUpload(existingID);
+            }
+            CachedAddonDataSource cachedAddonDataSource = new CachedAddonDataSource();
+            cachedAddonDataSource.setFeedName("Cache of Addon " + name);
+            cachedAddonDataSource.setReportID(reportID);
+            cachedAddonDataSource.setVisible(false);
+            UploadPolicy policy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
+            cachedAddonDataSource.setUploadPolicy(policy);
+
+            long id = cachedAddonDataSource.create(conn, null, null);
+            PreparedStatement saveLoadStmt = conn.prepareStatement("INSERT INTO cache_to_rebuild (cache_time, data_source_id) values (?, ?)");
+            saveLoadStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+            saveLoadStmt.setLong(2, id);
+            saveLoadStmt.execute();
+            saveLoadStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
