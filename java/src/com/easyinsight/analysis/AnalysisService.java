@@ -1766,6 +1766,7 @@ public class AnalysisService {
             parser.setTreeAdaptor(new NodeFactory());
             Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+            Map<String, UniqueKey> map = new HashMap<String, UniqueKey>();
             try {
                 ret = parser.startExpr();
                 tree = (CalculationTreeNode) ret.getTree();
@@ -1975,14 +1976,16 @@ public class AnalysisService {
             cachedAddonDataSource.setUploadPolicy(policy);
 
             long id = cachedAddonDataSource.create(conn, null, null);
-            PreparedStatement saveLoadStmt = conn.prepareStatement("INSERT INTO cache_to_rebuild (cache_time, data_source_id) values (?, ?)");
+            CachedAddonDataSource.runReport(conn, id);
+            /*PreparedStatement saveLoadStmt = conn.prepareStatement("INSERT INTO cache_to_rebuild (cache_time, data_source_id) values (?, ?)");
             saveLoadStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
             saveLoadStmt.setLong(2, id);
             saveLoadStmt.execute();
-            saveLoadStmt.close();
+            saveLoadStmt.close();*/
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }

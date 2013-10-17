@@ -104,68 +104,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
         for (Long id : sources) {
             conn = Database.instance().getConnection();
             try {
-                conn.setAutoCommit(false);
-                FeedDefinition base = new FeedStorage().getFeedDefinitionData(id, conn);
-                if (!(base instanceof IServerDataSourceDefinition)) {
-                    return;
-                }
-                IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) base;
-                UserStub dataSourceUser = null;
-                List<FeedConsumer> owners = dataSource.getUploadPolicy().getOwners();
-                for (FeedConsumer owner : owners) {
-                    if (owner.type() == FeedConsumer.USER) {
-                        dataSourceUser = (UserStub) owner;
-                    }
-                }
-                if (dataSourceUser == null) {
-                    LogClass.info("No user for data data source refresh.");
-                } else {
-                    PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin, USER.guest_user," +
-                            "ACCOUNT.FIRST_DAY_OF_WEEK, USER.ANALYST, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
-                            "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
-                    queryStmt.setInt(1, Account.ACTIVE);
-                    queryStmt.setInt(2, Account.TRIAL);
-                    queryStmt.setLong(3, dataSourceUser.getUserID());
-                    ResultSet rs = queryStmt.executeQuery();
-                    if (rs.next()) {
-                        String userName = rs.getString(1);
-                        long userID = rs.getLong(2);
-                        long accountID = rs.getLong(3);
-                        int accountType = rs.getInt(4);
-                        boolean accountAdmin = rs.getBoolean(5);
-                        boolean guestUser = rs.getBoolean(6);
-                        int firstDayOfWeek = rs.getInt(7);
-                        boolean analyst = rs.getBoolean(8);
-                        boolean accountReports = rs.getBoolean(9);
-                        PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.persona_name FROM USER, PERSONA WHERE USER.PERSONA_ID = PERSONA.PERSONA_ID AND USER.USER_ID = ?");
-                        stmt.setLong(1, userID);
-                        ResultSet personaRS = stmt.executeQuery();
-
-                        String personaName = null;
-                        if (personaRS.next()) {
-                            personaName = personaRS.getString(1);
-                        }
-                        stmt.close();
-                        SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
-                        try {
-
-                            if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
-                                try {
-                                    new DataSourceScheduledTask.DataSourceFactory().createSource(conn, new ArrayList<ReportFault>(), new Date(), base, dataSource, null).invoke();
-                                    conn.commit();
-                                } finally {
-                                    DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
-                                }
-                            }
-
-                        } finally {
-                            SecurityUtil.clearThreadLocal();
-                        }
-                    }
-
-
-                }
-                conn.commit();
+                if (runReport(conn, id)) return;
             } catch (Exception e) {
                 if (!conn.getAutoCommit()) {
                     conn.rollback();
@@ -177,6 +116,72 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             }
         }
 
+    }
+
+    public static boolean runReport(EIConnection conn, Long id) throws Exception {
+        conn.setAutoCommit(false);
+        FeedDefinition base = new FeedStorage().getFeedDefinitionData(id, conn);
+        if (!(base instanceof IServerDataSourceDefinition)) {
+            return true;
+        }
+        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) base;
+        UserStub dataSourceUser = null;
+        List<FeedConsumer> owners = dataSource.getUploadPolicy().getOwners();
+        for (FeedConsumer owner : owners) {
+            if (owner.type() == FeedConsumer.USER) {
+                dataSourceUser = (UserStub) owner;
+            }
+        }
+        if (dataSourceUser == null) {
+            LogClass.info("No user for data data source refresh.");
+        } else {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin, USER.guest_user," +
+                    "ACCOUNT.FIRST_DAY_OF_WEEK, USER.ANALYST, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
+                    "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
+            queryStmt.setInt(1, Account.ACTIVE);
+            queryStmt.setInt(2, Account.TRIAL);
+            queryStmt.setLong(3, dataSourceUser.getUserID());
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                String userName = rs.getString(1);
+                long userID = rs.getLong(2);
+                long accountID = rs.getLong(3);
+                int accountType = rs.getInt(4);
+                boolean accountAdmin = rs.getBoolean(5);
+                boolean guestUser = rs.getBoolean(6);
+                int firstDayOfWeek = rs.getInt(7);
+                boolean analyst = rs.getBoolean(8);
+                boolean accountReports = rs.getBoolean(9);
+                PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.persona_name FROM USER, PERSONA WHERE USER.PERSONA_ID = PERSONA.PERSONA_ID AND USER.USER_ID = ?");
+                stmt.setLong(1, userID);
+                ResultSet personaRS = stmt.executeQuery();
+
+                String personaName = null;
+                if (personaRS.next()) {
+                    personaName = personaRS.getString(1);
+                }
+                stmt.close();
+                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+                try {
+
+                    if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
+                        try {
+                            new DataSourceScheduledTask.DataSourceFactory().createSource(conn, new ArrayList<ReportFault>(), new Date(), base, dataSource, null).invoke();
+                            conn.commit();
+                        } finally {
+                            DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
+                        }
+                    }
+
+                } finally {
+                    SecurityUtil.clearThreadLocal();
+                }
+            }
+
+
+        }
+        conn.commit();
+        return false;
     }
 
     @Override
