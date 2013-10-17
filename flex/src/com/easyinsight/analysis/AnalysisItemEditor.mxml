@@ -237,6 +237,7 @@
                     }
                     analysisItem.concrete = startingAnalysisItem.concrete;
                     analysisItem.lookupTableID = startingAnalysisItem.lookupTableID;
+                    analysisItem.basedOnReportField = startingAnalysisItem.basedOnReportField;
                     /*if (analysisItem.getType() == existingType) {
                      analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
                      }*/
