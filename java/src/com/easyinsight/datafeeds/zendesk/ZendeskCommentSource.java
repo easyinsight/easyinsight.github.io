@@ -135,7 +135,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
 
         int retryCount = 0;
 
-        String path = "/api/v2/search.json?query=updated>2013-1-1%20type:comment";
+        String path = "/api/v2/search.json?query=created>2010-1-1%20type:comment";
             do {
                 JSONObject jo = null;
                 retryCount = 0;
