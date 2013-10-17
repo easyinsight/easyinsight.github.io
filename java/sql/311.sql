@@ -1,0 +1,1 @@
+alter table zendesk add zendesk_api_key varchar(255);

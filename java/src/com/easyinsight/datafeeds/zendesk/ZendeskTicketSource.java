@@ -108,7 +108,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
             String nextPage = zendeskCompositeSource.getUrl() + "/api/v2/ticket_fields.json";
             do {
-                Map m = queryList(nextPage, zendeskCompositeSource, getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword()));
+                Map m = queryList(nextPage, zendeskCompositeSource, getHttpClient(zendeskCompositeSource));
                 JSONArray recordNodes = (JSONArray) m.get("ticket_fields");
                 for (int i = 0; i < recordNodes.size(); i++) {
                     JSONObject recordNode = (JSONObject) recordNodes.get(i);
@@ -142,7 +142,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
-            HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+            HttpClient httpClient = getHttpClient(zendeskCompositeSource);
             ZendeskUserCache zendeskUserCache = zendeskCompositeSource.getOrCreateUserCache(httpClient);
             //if (lastRefreshDate == null) {
             return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache, IDataStorage);
@@ -223,7 +223,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, ZendeskUserCache userCache, IDataStorage dataStorage) throws Exception {
         DataSet dataSet = new DataSet();
         DateFormat updateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+        HttpClient httpClient = getHttpClient(zendeskCompositeSource);
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.YEAR, -1);
         long time = cal.getTimeInMillis();

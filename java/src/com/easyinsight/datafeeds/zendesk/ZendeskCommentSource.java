@@ -72,7 +72,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
             if(!zendeskCompositeSource.isLoadComments())
                 return new DataSet();
-            HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+            HttpClient httpClient = getHttpClient(zendeskCompositeSource);
             ZendeskUserCache zendeskUserCache = zendeskCompositeSource.getOrCreateUserCache(httpClient);
             return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache, IDataStorage);
 
@@ -102,7 +102,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
     private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, IDataStorage IDataStorage,
                                    ZendeskUserCache zendeskUserCache) throws Exception {
 
-        HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+        HttpClient httpClient = getHttpClient(zendeskCompositeSource);
 
         DateFormat updateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();

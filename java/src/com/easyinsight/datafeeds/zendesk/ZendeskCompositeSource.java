@@ -35,6 +35,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     private String zdUserName;
     private String zdPassword;
     private boolean loadComments;
+    private String zdApiKey;
 
     public ZendeskCompositeSource() {
         setFeedName("Zendesk");
@@ -53,7 +54,9 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         try {
             HttpClient client = new HttpClient();
             client.getParams().setAuthenticationPreemptive(true);
-            Credentials defaultcreds = new UsernamePasswordCredentials(zdUserName, zdPassword);
+            String username = zdUserName + ((zdApiKey == null) ? "" : "/token");
+            String password = (zdApiKey == null) ? zdPassword : zdApiKey;
+            Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
             client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
             HttpMethod restMethod = new GetMethod(getUrl() + "/organizations.xml");
             client.executeMethod(restMethod);
@@ -118,17 +121,21 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ZENDESK (URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, DATA_SOURCE_ID, LOAD_COMMENTS) " +
-                "VALUES (?, ?, ?, ?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ZENDESK (URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, DATA_SOURCE_ID, LOAD_COMMENTS) " +
+                "VALUES (?, ?, ?, ?, ?, ?)");
         insertStmt.setString(1, url);
         insertStmt.setString(2, zdUserName);
-        if (zdPassword != null) {
+        if (zdPassword != null && (zdApiKey == null || zdApiKey.isEmpty())) {
             insertStmt.setString(3, PasswordStorage.encryptString(zdPassword));
         } else {
             insertStmt.setString(3, null);
         }
-        insertStmt.setLong(4, getDataFeedID());
-        insertStmt.setBoolean(5, isLoadComments());
+        if(zdApiKey == null || !zdApiKey.isEmpty())
+            insertStmt.setString(4, zdApiKey);
+        else
+            insertStmt.setString(4, null);
+        insertStmt.setLong(5, getDataFeedID());
+        insertStmt.setBoolean(6, isLoadComments());
         insertStmt.execute();
         insertStmt.close();
     }
@@ -136,14 +143,15 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, LOAD_COMMENTS FROM ZENDESK WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, LOAD_COMMENTS FROM ZENDESK WHERE DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             url = rs.getString(1);
             zdUserName = rs.getString(2);
             zdPassword = rs.getString(3);
-            loadComments = rs.getBoolean(4);
+            zdApiKey = rs.getString(4);
+            loadComments = rs.getBoolean(5);
             if (zdPassword != null) {
                 zdPassword = PasswordStorage.decryptString(zdPassword);
             }
@@ -216,5 +224,12 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
 
     public void setLoadComments(boolean loadComments) {
         this.loadComments = loadComments;
+    }
+
+    public String getZdApiKey() {
+        return zdApiKey;
+    }
+    public void setZdApiKey(String value) {
+        zdApiKey = value;
     }
 }
