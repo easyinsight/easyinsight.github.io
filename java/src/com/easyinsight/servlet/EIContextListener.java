@@ -7,12 +7,12 @@ import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.migration.Migrations;
+import com.easyinsight.datafeeds.CacheTimer;
 import com.easyinsight.datafeeds.DataSourceTypeRegistry;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.database.DatabaseListener;
 import com.easyinsight.datafeeds.migration.MigrationManager;
 import com.easyinsight.eventing.*;
-import com.easyinsight.export.HtmlResultCache;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.scheduler.Scheduler;
 import com.easyinsight.scorecard.LongKPIRefreshEvent;
@@ -21,12 +21,12 @@ import com.easyinsight.security.DefaultSecurityProvider;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DatabaseManager;
 import com.easyinsight.util.ServiceUtil;
-import org.apache.jcs.JCS;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import java.util.Arrays;
-import java.util.List;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.util.Enumeration;
 
 /**
  * User: jamesboe
@@ -63,7 +63,6 @@ public class EIContextListener implements ServletContextListener {
                 migrationManager.migrate();
                 FeedRegistry.initialize();
                 ReportCache.initialize();
-                HtmlResultCache.initialize();
                 if (ConfigLoader.instance().isTaskRunner()) {
                     Scheduler.initialize();
                     scheduler = Scheduler.instance();
@@ -86,6 +85,8 @@ public class EIContextListener implements ServletContextListener {
                 healthThread.setName("Health Listener");
                 healthThread.setDaemon(true);
                 healthThread.start();
+                CacheTimer.initialize();
+                CacheTimer.instance().start();
             }
             LogClass.info("Started the server.");
         } catch (Throwable e) {
@@ -98,15 +99,13 @@ public class EIContextListener implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         LogClass.info("Shutting down...");
 
-        List<String> caches = Arrays.asList("scorecardQueue", "servers", "embeddedReports", "feeds", "feedDefinitions", "apiKeys", "htmlcache");
-        for(String s : caches) {
-            try {
-                JCS cache = JCS.getInstance(s);
-                cache.dispose();
-            } catch(Exception e) {
-                // Do nothing for now, possibly intended behavior
-            }
+        CacheTimer.instance().stop();
+        try {
+            MemCachedManager.instance().shutdown();
+        } catch (Exception e) {
+            LogClass.error(e);
         }
+
         if (DatabaseListener.instance() != null) {
             DatabaseListener.instance().stop();
         }
@@ -126,10 +125,17 @@ public class EIContextListener implements ServletContextListener {
 
         DatabaseManager.instance().shutdown();
 
-        try {
-            MemCachedManager.instance().shutdown();
-        } catch (Exception e) {
-            LogClass.error(e);
+
+
+        Enumeration<Driver> drivers = DriverManager.getDrivers();
+        while (drivers.hasMoreElements()) {
+            Driver driver = drivers.nextElement();
+            try {
+                DriverManager.deregisterDriver(driver);
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
+
         }
 
         LogClass.info("Servlet shutdown complete...");
