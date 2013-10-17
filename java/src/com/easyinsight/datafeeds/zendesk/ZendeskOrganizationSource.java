@@ -59,7 +59,7 @@ public class ZendeskOrganizationSource extends ZendeskBaseSource {
         try {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
             DataSet dataSet = new DataSet();
-            HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+            HttpClient httpClient = getHttpClient(zendeskCompositeSource);
 
             String nextPage = zendeskCompositeSource.getUrl() +  "/api/v2/organizations.json";
             do {

@@ -60,7 +60,7 @@ public class ZendeskGroupToUserJoinSource extends ZendeskBaseSource {
         try {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
             DataSet dataSet = new DataSet();
-            HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+            HttpClient httpClient = getHttpClient(zendeskCompositeSource);
             Builder builder = new Builder();
             String nextPage = zendeskCompositeSource.getUrl() + "/api/v2/group_memberships.json";
             do {

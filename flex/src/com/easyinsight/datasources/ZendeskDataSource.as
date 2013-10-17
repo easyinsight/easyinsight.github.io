@@ -9,6 +9,7 @@ public class ZendeskDataSource extends CompositeServerDataSource {
     public var url:String;
     public var zdUserName:String;
     public var zdPassword:String;
+    public var zdApiKey:String;
     public var loadComments:Boolean;
 
     public function ZendeskDataSource() {
