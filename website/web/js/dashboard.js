@@ -11,6 +11,8 @@ var short_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep
 
 var currentReport;
 
+var storeSettings;
+
 var dashboardComponent = function (obj) {
     if (obj.type == "stack")
         return stack(obj);
@@ -497,24 +499,28 @@ $(function () {
 
         $(".start_date_filter").datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
             var z = $(e.target);
-            var f = filterMap[z.attr("id")];
+            var f = filterMap[z.attr("id").replace(/_date_start$/, "")];
             f.filter.start_date = z.val();
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
+            alert('saving...')
+            saveFilter(f);
         });
 
         $(".end_date_filter").datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
             var z = $(e.target);
-            var f = filterMap[z.attr("id")];
+            var f = filterMap[z.attr("id").replace(/_date_end$/, "")];
             f.filter.end_date = z.val();
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], dashboardJSON["drillthroughID"], true);
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], dashboardJSON["drillthroughID"], true);
             }
+            alert('saving...')
+            saveFilter(f);
         });
 
         $(".adhoc").click(function (e) {
@@ -595,6 +601,19 @@ $(function () {
                 f = f.parent();
             f.hide({effect: "slide", direction: "left"})
         })
+
+
+        function saveFilter(f) {
+            if(Modernizr.localstorage) {
+
+            }
+            else {
+                function saveFilter(f) { }
+            }
+        }
+
+
+
     })
 })
 
