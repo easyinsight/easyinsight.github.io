@@ -87,6 +87,8 @@ public class ReplacementMap {
         if (changingDataSource) {
             // TODO: validate calculations and lookup tables--if necessary to create, should emit something with the report
             analysisItem.setLookupTableID(null);
+            analysisItem.setParentItemID(null);
+            analysisItem.setBasedOnReportField(null);
         }
     }
 }
