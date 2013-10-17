@@ -7,7 +7,6 @@ import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
-import org.apache.jcs.access.exception.CacheException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -54,10 +53,16 @@ public class CachedAnalysisBasedFeed extends Feed {
             Map<AnalysisItem, AnalysisItem> map = new HashMap<AnalysisItem, AnalysisItem>();
             for (AnalysisItem item : analysisItems) {
 
+                boolean found = false;
                 for (AnalysisItem reportField : feed.getFields()) {
                     if (reportField.getBasedOnReportField().equals(item.getBasedOnReportField())) {
                         map.put(reportField, item);
+                        found = true;
                     }
+                }
+
+                if (!found) {
+                    System.out.println("Could not find field " + item.toDisplay() + " with based on = " + item.getBasedOnReportField());
                 }
             }
 
