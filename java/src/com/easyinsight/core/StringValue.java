@@ -2,6 +2,7 @@ package com.easyinsight.core;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.jetbrains.annotations.Nullable;
+import org.owasp.html.*;
 
 import java.io.Serializable;
 
@@ -15,12 +16,22 @@ public class StringValue extends Value implements Serializable {
     private String value;
     private static final long serialVersionUID = -3662307504638205531L;
 
+    private static PolicyFactory policy = new HtmlPolicyBuilder()
+            .allowElements("li")
+            .allowElements("ul")
+            .toFactory();
+
     public StringValue() {
     }
 
     @Override
     public String toHTMLString() {
-        return StringEscapeUtils.escapeHtml(value);
+
+
+// Sanitize your output.
+        return policy.sanitize(value);
+        /*HtmlSanitizer.sanitize(value);
+        return StringEscapeUtils.escapeHtml(value);*/
     }
 
     @Override
