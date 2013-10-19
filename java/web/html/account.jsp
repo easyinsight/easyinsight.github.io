@@ -106,12 +106,12 @@
                         <a href="../billing/index.jsp">View Invoices</a>
                     </div>
                 </div>--%>
-                <hr/>
+                <%--<hr/>
                 <div class="row">
                     <div class="col-md-offset-1 col-md10">
                         <h2>Don't need to use Easy Insight right now?</h2>
                     </div>
-                </div>
+                </div>--%>
             </div>
         </div>
 

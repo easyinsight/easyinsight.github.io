@@ -69,7 +69,7 @@
                         <label for="lastNameInput">Last name</label>
                         <input type="text" class="form-control" id="lastNameInput" value="<%= user.getName() %>">
                     </div>
-                    <button class="btn btn-inverse" type="submit" value="Update Profile">Update Profile</button>
+                    <%--<button class="btn btn-inverse" type="submit" value="Update Profile">Update Profile</button>--%>
                 </form>
             </div>
         </div>
