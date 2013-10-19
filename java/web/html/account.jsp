@@ -81,7 +81,7 @@
                 <% } else { %>
                 <div class="row">
                     <div class="col-md-offset-1 col-md10">
-                        You have <strong><%= accountStats.getUsedDesigners() %></strong> of <strong><%= accountStats.getCoreDesigners() + accountStats.getAddonDesigners()%></strong>, <strong><%= accountStats.getCurrentSmallBizConnections()%></strong> of <strong></strong> small business connections, and <strong></strong> of <strong></strong> custom data storage used.
+                        You have <strong><%= accountStats.getUsedDesigners() %></strong> of <strong><%= accountStats.getCoreDesigners() + accountStats.getAddonDesigners()%></strong>, <strong><%= accountStats.getCurrentSmallBizConnections()%></strong> of <strong><%= accountStats.getAddonSmallBizConnections() + accountStats.getCoreSmallBizConnections() %></strong> small business connections, and <strong><%= accountStats.getUsedSpaceString()%></strong> of <strong><%= accountStats.getMaxSpaceString()%></strong> custom data storage used.
                     </div>
                 </div>
                 <% } %>
