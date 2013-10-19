@@ -52,11 +52,9 @@ public class CachedAnalysisBasedFeed extends Feed {
 
             Map<AnalysisItem, Collection<AnalysisItem>> map = new HashMap<AnalysisItem, Collection<AnalysisItem>>();
             for (AnalysisItem item : analysisItems) {
-                System.out.println("Inspecting item " + item.toDisplay() + " based on = " + item.getBasedOnReportField());
                 boolean found = false;
                 for (AnalysisItem reportField : feed.getFields()) {
                     if (reportField.getBasedOnReportField().equals(item.getBasedOnReportField())) {
-                        System.out.println("\tAssigning as match to " + reportField.getBasedOnReportField());
                         Collection<AnalysisItem> items = map.get(reportField);
                         if (items == null) {
                             items = new ArrayList<AnalysisItem>();
