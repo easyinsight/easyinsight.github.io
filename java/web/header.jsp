@@ -22,7 +22,7 @@
             <li <%= headerActive == HtmlConstants.DATA_SOURCES_AND_REPORTS ? "class=\"active\"" : ""%>><a
                     href="/app/html">Data Sources and Reports</a></li>
             <li <%= headerActive == HtmlConstants.ACCOUNT ? "class=\"active\"" : ""%>><a
-                    href="/app/billing/accountType.jsp">Account</a></li>
+                    href="/app/html/account.jsp">Account</a></li>
             <li <%= headerActive == HtmlConstants.WHATS_NEW ? "class=\"active\"" : ""%>><a
                     href="/app/whatsnew.jsp">What's New</a></li>
         </ul>

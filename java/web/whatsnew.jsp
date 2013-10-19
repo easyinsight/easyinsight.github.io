@@ -14,12 +14,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>What's New with Easy Insight</title>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
-    <link href="/css/bootstrap.css" rel="stylesheet">
-    <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.js"></script>
+    <jsp:include page="html/bootstrapHeader.jsp"/>
 </head>
 <body>
 <%
@@ -36,7 +31,7 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.WHATS_NEW %>"/>
 </jsp:include>
-<div class="container">
+<div class="container corePageWell">
     <div class="row">
         <div class="col-md-12">
             <div class="col-md-6 col-md-offset-3">
@@ -124,7 +119,7 @@
             <div class="row" style="padding-top:10px">
                 <div class="col-md-12">
                     <div style="width:100%;text-align:center">
-                        <h3><%= newsEntry.getTitle() %> - <%= new SimpleDateFormat("yyyy-MM-dd").format(newsEntry.getDate()) %></h3>
+                        <h4><%= newsEntry.getTitle() %> - <%= new SimpleDateFormat("yyyy-MM-dd").format(newsEntry.getDate()) %></h4>
                     </div>
                 </div>
                 </div>
