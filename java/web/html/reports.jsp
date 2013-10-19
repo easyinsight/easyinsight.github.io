@@ -54,7 +54,7 @@
         </div>
     </div>
 </div>
-<div class="container">
+<div class="container corePageWell">
     <div class="row">
         <jsp:include page="../recent_actions.jsp"/>
         <div class="col-md-9">

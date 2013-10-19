@@ -21,6 +21,24 @@
         com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     }
     try {
+
+        /*
+
+        Dashboard dashboard;
+        if (savedDashboardIDString != null) {
+            DashboardInfo dashboardInfo = new DashboardService().retrieveFromDashboardLink(savedDashboardIDString);
+            DashboardStackPositions positions = dashboardInfo.getDashboardStackPositions();
+            long dashboardID = dashboardInfo.getDashboardID();
+            dashboard = new DashboardService().getDashboardView(dashboardID, positions);
+        } else {
+            String dashboardIDString = request.getParameter("dashboardID");
+            long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
+
+            dashboard = new DashboardService().getDashboard(dashboardID);
+        }
+         */
+        String savedDashboardIDString = request.getParameter("savedDashboardID");
+
         String drillthroughKey = request.getParameter("drillthroughKey");
         List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
         long dashboardID = -1;

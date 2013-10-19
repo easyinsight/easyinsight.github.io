@@ -26,10 +26,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Reports and Dashboards</title>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <link href="/css/bootstrap.css" rel="stylesheet">
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.js"></script>
+    <jsp:include page="bootstrapHeader.jsp"/>
 </head>
 <body>
 <%
@@ -87,7 +84,7 @@
         </ul>
     </div>
 </div>
-<div class="container">
+<div class="container corePageWell">
     <div class="row">
         <div class="col-md-3">
             <img src="/images/logo2.PNG"/>
