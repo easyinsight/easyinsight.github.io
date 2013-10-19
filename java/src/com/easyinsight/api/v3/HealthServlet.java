@@ -6,7 +6,6 @@ import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
-import org.apache.jcs.JCS;
 import org.json.JSONArray;
 
 import javax.servlet.ServletException;
@@ -41,11 +40,8 @@ public class HealthServlet extends HttpServlet {
 
                 String host = rs.getString(1);
                 Status status;
-                if (memcached != null) {
-                    status = (Status) MemCachedManager.get("servers" + host);
-                } else {
-                    status = (Status) JCS.getInstance("servers").get(host);
-                }
+                status = (Status) MemCachedManager.get("servers" + host);
+
 
                 if (status == null) {
                     status = new Status();
