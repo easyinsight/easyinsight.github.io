@@ -1,17 +1,10 @@
 package com.easyinsight.admin;
 
 import com.easyinsight.cache.MemCachedManager;
-import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DatabaseManager;
-import com.xerox.amazonws.sqs2.Message;
-import com.xerox.amazonws.sqs2.MessageQueue;
-import com.xerox.amazonws.sqs2.SQSUtils;
-import net.spy.memcached.MemcachedClient;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 
 import java.net.InetAddress;
 import java.sql.PreparedStatement;
@@ -29,24 +22,12 @@ public class HealthListener implements Runnable {
     public static final String SUCCESS = "Success";
     public static final String FAILURE = "Failure";
 
-    private JCS serverCache = getCache("servers");
-
-    private JCS getCache(String cacheName) {
-
-        try {
-            return JCS.getInstance(cacheName);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-        return null;
-    }
-
     private boolean running = true;
 
     public void run() {
         initialSetup();
 
-        while (running && serverCache != null) {
+        while (running) {
             try {
 
                 String response = "All Good";
@@ -84,15 +65,12 @@ public class HealthListener implements Runnable {
                 status.setCode(code);
                 status.setMessage(response);
                 status.setHealthInfo(new AdminService().getHealthInfo());
-                serverCache.put(InetAddress.getLocalHost().getHostName(), status);
                 MemCachedManager.add("servers" + InetAddress.getLocalHost().getHostName(), 120, status);
                 try {
                     Thread.sleep(60000);
                 } catch (InterruptedException e) {
                     // ignore
                 }
-            } catch (CacheException ce) {
-                // ignore
             } catch (Exception e) {
                 LogClass.error(e);
             }
