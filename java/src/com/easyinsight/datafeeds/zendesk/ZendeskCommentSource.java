@@ -128,6 +128,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
     }
 
     private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, ZendeskUserCache userCache, IDataStorage dataStorage) throws Exception {
+
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(zendeskCompositeSource);
         Builder builder = new Builder();
@@ -155,11 +156,10 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
                 } while(jo == null);
                 System.out.println(jo.toString());
                 for(Object o : (JSONArray) jo.get("results")) {
-                        JSONObject event = (JSONObject) o;
-                        if ("Comment".equals(event.get("type"))) {
-                            parseTicket(keys, userCache, dataSet, event, new JSONObject(), "1");
-                        }
-                    }
+                    JSONObject event = (JSONObject) o;
+                    parseTicket(keys, userCache, dataSet, event, new JSONObject(), "1");
+
+                }
                 dataStorage.insertData(dataSet);
                 dataSet = new DataSet();
                 path = (String) jo.get("next_page");
@@ -168,15 +168,16 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
     }
 
     private String parseTicket(Map<String, Key> keys, ZendeskUserCache userCache, DataSet dataSet, JSONObject event, JSONObject audit, String ticketID) throws ParseException, InterruptedException {
+        String thisIsSoStupid = "^https:\\/\\/.*\\.zendesk\\.com\\/api\\/v2\\/tickets\\/(\\d+)\\.json";
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         try {
-            Value author = queryUser(event.get("author_id").toString(), userCache);
+            String s = (String) ((JSONObject) ((JSONObject) ((JSONObject) event.get("via")).get("source")).get("from")).get("name");
             IRow row = dataSet.createRow();
-//            row.addValue(keys.get(COMMENT_TICKET_ID), ticketID);
-            row.addValue(keys.get(AUTHOR), author);
-//            String a = (String) audit.get("created_at");
-//            row.addValue(keys.get(COMMENT_CREATED_AT), df.parse(a));
-            row.addValue(keys.get(COMMENT_BODY), event.get("html_body").toString());
+            row.addValue(keys.get(COMMENT_TICKET_ID), ((String) event.get("url")).replaceAll(thisIsSoStupid, "$1"));
+            row.addValue(keys.get(AUTHOR), s);
+            String a = (String) event.get("created_at");
+            row.addValue(keys.get(COMMENT_CREATED_AT), df.parse(a));
+            row.addValue(keys.get(COMMENT_BODY), event.get("description").toString());
             row.addValue(keys.get(COUNT), 1);
             return ticketID;
         } catch (ReportException re) {
