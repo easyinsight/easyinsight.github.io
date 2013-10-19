@@ -143,7 +143,7 @@ public class HtmlServlet extends HttpServlet {
                                 }
                             } else if (filter instanceof AnalysisItemFilterDefinition) {
                                 AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
-                                Integer value = curFilter != null ? (Integer) curFilter.get("selected") : null;
+                                String value = curFilter != null ? (String) curFilter.get("selected") : null;
                                 if (value != null) {
                                     long fieldID = Long.valueOf(value);
                                     for (AnalysisItem item : analysisItemFilterDefinition.getAvailableItems()) {

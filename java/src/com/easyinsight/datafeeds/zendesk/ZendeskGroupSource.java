@@ -60,7 +60,7 @@ public class ZendeskGroupSource extends ZendeskBaseSource {
         try {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
             DataSet dataSet = new DataSet();
-            HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+            HttpClient httpClient = getHttpClient(zendeskCompositeSource);
             String nextPage = zendeskCompositeSource.getUrl() + "/api/v2/groups.json";
             do {
                 Map m = queryList(nextPage, zendeskCompositeSource, httpClient);

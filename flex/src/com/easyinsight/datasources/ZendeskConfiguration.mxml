@@ -12,16 +12,26 @@
         [Bindable]
         private var includeComments:Boolean;
 
+        [Bindable]
+        private var usernameInputText:String;
+
+        [Bindable]
+        private var apiKeyInputText:String;
+
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:ZendeskDataSource = feedDefinition as ZendeskDataSource;
             url = ds.url;
             includeComments = ds.loadComments;
+            usernameInputText = ds.zdUserName;
+            apiKeyInputText = ds.zdApiKey;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:ZendeskDataSource = feedDefinition as ZendeskDataSource;
             ds.url = urlInput.text;
             ds.loadComments = includeComments;
+            ds.zdUserName = userNameInput.text;
+            ds.zdApiKey = passwordInput.text;
         }
 
         public function validate():Boolean {
@@ -44,4 +54,12 @@
     </mx:Form>
     <mx:TextArea width="700" text="Your Zendesk URL is the browser URL you normally use to connect to Zendesk. For example, if you access Zendesk as yourcompanyname.zendesk.com, put yourcompanyname in as the Zendesk URL."
             editable="false" selectable="false" focusEnabled="false" fontSize="12"/>
+    <mx:HBox>
+        <mx:Label text="Zendesk Email:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}" width="350"/>
+    </mx:HBox>
+    <mx:HBox>
+        <mx:Label text="Zendesk API Key:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="passwordInput" text="{apiKeyInputText}" width="350"/>
+    </mx:HBox>
 </mx:VBox>

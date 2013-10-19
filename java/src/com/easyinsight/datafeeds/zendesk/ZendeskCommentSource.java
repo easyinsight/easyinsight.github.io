@@ -72,7 +72,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
             if(!zendeskCompositeSource.isLoadComments())
                 return new DataSet();
-            HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+            HttpClient httpClient = getHttpClient(zendeskCompositeSource);
             ZendeskUserCache zendeskUserCache = zendeskCompositeSource.getOrCreateUserCache(httpClient);
             return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache, IDataStorage);
 
@@ -102,7 +102,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
     private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, IDataStorage IDataStorage,
                                    ZendeskUserCache zendeskUserCache) throws Exception {
 
-        HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+        HttpClient httpClient = getHttpClient(zendeskCompositeSource);
 
         DateFormat updateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
@@ -125,103 +125,59 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
                 nextPage = null;
             }
         }
-        /*do {
-
-            path += "&page=" + page;
-            Document doc = runRestRequest(zendeskCompositeSource, httpClient, path, builder);
-            Nodes ticketNodes = doc.query("/records/record");
-            if (page == 1) {
-                Nodes countNodes = doc.query("/records/@count");
-                if (countNodes.size() == 1) {
-                    count = Integer.parseInt(countNodes.get(0).getValue());
-                } else {
-                    count = 0;
-                }
-            }
-            for (int i = 0; i < ticketNodes.size(); i++) {
-                DataSet dataSet = new DataSet();
-                Node ticketNode = ticketNodes.get(i);
-                String id = parseTicket(keys, zendeskUserCache, dataSet, ticketNode);
-                if (id != null) {
-                    StringWhere userWhere = new StringWhere(noteKey, id);
-                    IDataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
-                }
-            }
-            page++;
-            recordCount += 15;
-        } while (recordCount < count);*/
     }
 
     private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, ZendeskUserCache userCache, IDataStorage dataStorage) throws Exception {
+
         DataSet dataSet = new DataSet();
-        HttpClient httpClient = new HttpClient();
+        HttpClient httpClient = getHttpClient(zendeskCompositeSource);
         Builder builder = new Builder();
 
 
-        int page = 1;
-        int count = 0;
-        int recordCount = 0;
-        for (String ticketId : zendeskCompositeSource.ticketIdList()) {
-            String path = "/api/v2/tickets/" + ticketId + "/audits.json";
+        int retryCount = 0;
+
+        String path = "/api/v2/search.json?query=created>2010-1-1%20type:comment";
             do {
-                JSONObject jo = (JSONObject) runJSONRestRequest(zendeskCompositeSource, httpClient, path, builder);
-                //System.out.println(jo.toString());
-                JSONArray audits = (JSONArray) jo.get("audits");
-                for (Object o : audits) {
-                    JSONObject audit = (JSONObject) o;
-                    JSONArray events = (JSONArray) audit.get("events");
-                    for (Object oo : events) {
-                        JSONObject event = (JSONObject) oo;
-                        if ("Comment".equals(event.get("type"))) {
-                            parseTicket(keys, userCache, dataSet, event, audit, ticketId);
+                JSONObject jo = null;
+                retryCount = 0;
+                do {
+                    jo = (JSONObject) runJSONRestRequest(zendeskCompositeSource, httpClient, path, builder);
+                    System.out.println(jo);
+
+
+                    if(jo != null && "Sorry, we could not complete your search query. Please try again in a moment.".equals(jo.get("error"))) {
+                        if(retryCount > 10) {
+                            throw new RuntimeException("We are having problems retrieving comments from Zendesk at the moment.");
                         }
+                        retryCount++;
+                        jo = null;
+                        Thread.sleep(2000);
                     }
+                } while(jo == null);
+                System.out.println(jo.toString());
+                for(Object o : (JSONArray) jo.get("results")) {
+                    JSONObject event = (JSONObject) o;
+                    parseTicket(keys, userCache, dataSet, event, new JSONObject(), "1");
+
                 }
                 dataStorage.insertData(dataSet);
                 dataSet = new DataSet();
                 path = (String) jo.get("next_page");
             } while(path != null);
-
-        }
-//        do {
-//            String path = "/search.xml?query=type:comment";
-//            if (page > 1) {
-//                path += "&page=" + page;
-//            }
-//            Document doc = runRestRequest(zendeskCompositeSource, httpClient, path, builder);
-//            if (page == 1) {
-//                Nodes countNodes = doc.query("/records/@count");
-//                if (countNodes.size() == 1) {
-//                    count = Integer.parseInt(countNodes.get(0).getValue());
-//                } else {
-//                    count = 0;
-//                }
-//            }
-//            Nodes ticketNodes = doc.query("/records/record");
-//            for (int i = 0; i < ticketNodes.size(); i++) {
-//                Node ticketNode = ticketNodes.get(i);
-//                parseTicket(keys, userCache, dataSet, ticketNode);
-//            }
-//            page++;
-//            dataStorage.insertData(dataSet);
-//            dataSet = new DataSet();
-//            recordCount += 15;
-//        } while (recordCount < count);
         return null;
     }
 
     private String parseTicket(Map<String, Key> keys, ZendeskUserCache userCache, DataSet dataSet, JSONObject event, JSONObject audit, String ticketID) throws ParseException, InterruptedException {
+        String thisIsSoStupid = "^https:\\/\\/.*\\.zendesk\\.com\\/api\\/v2\\/tickets\\/(\\d+)\\.json";
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         try {
-            Value author = queryUser(event.get("author_id").toString(), userCache);
+            String s = (String) ((JSONObject) ((JSONObject) ((JSONObject) event.get("via")).get("source")).get("from")).get("name");
             IRow row = dataSet.createRow();
-            row.addValue(keys.get(COMMENT_TICKET_ID), ticketID);
-            row.addValue(keys.get(AUTHOR), author);
-            String a = (String) audit.get("created_at");
-            //System.out.println(a);
+            row.addValue(keys.get(COMMENT_TICKET_ID), ((String) event.get("url")).replaceAll(thisIsSoStupid, "$1"));
+            row.addValue(keys.get(AUTHOR), s);
+            String a = (String) event.get("created_at");
             row.addValue(keys.get(COMMENT_CREATED_AT), df.parse(a));
-            //System.out.println(audit.get("created_at"));
-            row.addValue(keys.get(COMMENT_BODY), event.get("html_body").toString());
+            row.addValue(keys.get(COMMENT_BODY), event.get("description").toString());
             row.addValue(keys.get(COUNT), 1);
             return ticketID;
         } catch (ReportException re) {

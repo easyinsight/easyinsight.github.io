@@ -193,7 +193,7 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
         JSONObject jo = super.toJSON(filterHTMLMetadata);
         jo.put("type", "field_filter");
-        jo.put("selected", targetItem.getAnalysisItemID());
+        jo.put("selected", String.valueOf(targetItem.getAnalysisItemID()));
         JSONArray available = new JSONArray();
         for(AnalysisItem analysisItem : getAvailableItems()) {
             JSONObject j = new JSONObject();

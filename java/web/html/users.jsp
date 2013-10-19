@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
-<%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
-<%@ page import="com.easyinsight.core.EIDescriptor" %>
-<%@ page import="java.util.Comparator" %>
-<%@ page import="java.util.Collections" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="org.hibernate.StatelessSession" %>
+<%@ page import="com.easyinsight.users.User" %>
+<%@ page import="com.easyinsight.users.UserAccountAdminService" %>
+<%@ page import="com.easyinsight.users.UserTransferObject" %>
+<%@ page import="java.util.List" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Easy Insight Data Sources</title>
+    <title>Easy Insight Account</title>
     <jsp:include page="bootstrapHeader.jsp"/>
 </head>
 <body>
@@ -21,42 +23,52 @@
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
 
-
+        if (!SecurityUtil.isAccountAdmin()) {
+            response.sendRedirect("nonAdminProfile.jsp");
+            return;
+        }
 %>
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
-    <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.ACCOUNT %>"/>
 </jsp:include>
-<div class="container corePageWell">
+<div class="container">
     <div class="row">
-        <jsp:include page="../recent_actions.jsp" />
-        <div class="col-md-9">
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th>Data Source Name</th>
-                    </tr>
-                </thead>
-
-            <%
-                java.util.List<DataSourceDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
-                Collections.sort(dataSources, new Comparator<EIDescriptor>() {
-
-                    public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
-                        String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName().toLowerCase() : "";
-                        String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName().toLowerCase() : "";
-                        return name1.compareTo(name2);
-                    }
-                });
-                for (DataSourceDescriptor dataSource : dataSources) {
-                    out.println("<tr><td><a href=\"reports/" + dataSource.getUrlKey() + "\">" + dataSource.getName() + "</a></td></tr>");
-                }
-                /*if (dataSources.size() == 0) {
-                    out.println("<li>You haven't defined any data sources yet.</li>");
-                }*/
-            %>
-            </table>
+        <div class="col-md12">
+            <div class="btn-toolbar pull-right topControlToolbar">
+                <div class="btn-group topControlBtnGroup">
+                    <a href="account.jsp">Account Administration</a>
+                </div>
+                <div class="btn-group topControlBtnGroup">
+                    <a href="#">Users</a>
+                </div>
+                <div class="btn-group topControlBtnGroup">
+                    <a href="profile.jsp">My Profile</a>
+                </div>
+            </div>
         </div>
+    </div>
+    <div class="row">
+        <div class="col-md12">
+            <div class="container corePageWell">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Email</th>
+                    </tr>
+                    </thead>
+                <%
+                    List<UserTransferObject> users = new UserAccountAdminService().getUsers();
+                    for (UserTransferObject user : users) {
+                        %>
+                    <tr><td><%= user.getEmail() %></td></tr>
+                        <%
+                    }
+                %>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
 </body>

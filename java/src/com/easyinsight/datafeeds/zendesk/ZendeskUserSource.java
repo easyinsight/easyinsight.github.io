@@ -63,7 +63,7 @@ public class ZendeskUserSource extends ZendeskBaseSource {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
 
             DataSet dataSet = new DataSet();
-            HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+            HttpClient httpClient = getHttpClient(zendeskCompositeSource);
             ZendeskUserCache zendeskUserCache = zendeskCompositeSource.getOrCreateUserCache(httpClient);
             for (ZendeskUser zendeskUser : zendeskUserCache.getUsers().values()) {
                 IRow row = dataSet.createRow();

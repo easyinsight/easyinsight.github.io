@@ -4,14 +4,29 @@
 <%@ page import="com.easyinsight.core.EIDescriptor" %>
 <%@ page import="java.util.Comparator" %>
 <%@ page import="java.util.Collections" %>
+<%@ page import="com.easyinsight.admin.AdminService" %>
+<%@ page import="com.easyinsight.audit.ActionLog" %>
+<%@ page import="java.util.Collection" %>
+<%@ page import="com.easyinsight.audit.ActionReportLog" %>
+<%@ page import="com.easyinsight.audit.ActionDashboardLog" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
+<%@ page import="com.easyinsight.userupload.UserUploadService" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.easyinsight.users.UserAccountAdminService" %>
+<%@ page import="com.easyinsight.users.AccountStats" %>
+<%@ page import="com.easyinsight.users.Account" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="org.hibernate.Session" %>
+<%@ page import="org.hibernate.StatelessSession" %>
+<%@ page import="com.easyinsight.users.User" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Easy Insight Data Sources</title>
+    <title>Easy Insight Account</title>
     <jsp:include page="bootstrapHeader.jsp"/>
 </head>
 <body>
@@ -20,43 +35,42 @@
     String userName = (String) session.getAttribute("userName");
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
+        User user;
+        StatelessSession hibernateSession = Database.instance().createStatelessSession();
+
+        try {
+            user = (User) hibernateSession.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+        } finally {
+            hibernateSession.close();
+        }
 
 
 %>
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
-    <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.ACCOUNT %>"/>
 </jsp:include>
-<div class="container corePageWell">
+<div class="container">
     <div class="row">
-        <jsp:include page="../recent_actions.jsp" />
-        <div class="col-md-9">
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th>Data Source Name</th>
-                    </tr>
-                </thead>
-
-            <%
-                java.util.List<DataSourceDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
-                Collections.sort(dataSources, new Comparator<EIDescriptor>() {
-
-                    public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
-                        String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName().toLowerCase() : "";
-                        String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName().toLowerCase() : "";
-                        return name1.compareTo(name2);
-                    }
-                });
-                for (DataSourceDescriptor dataSource : dataSources) {
-                    out.println("<tr><td><a href=\"reports/" + dataSource.getUrlKey() + "\">" + dataSource.getName() + "</a></td></tr>");
-                }
-                /*if (dataSources.size() == 0) {
-                    out.println("<li>You haven't defined any data sources yet.</li>");
-                }*/
-            %>
-            </table>
+        <div class="col-md12">
+            <div class="container corePageWell">
+                <form role="form">
+                    <div class="form-group">
+                        <label for="emailInput">Email address</label>
+                        <input type="email" class="form-control" id="emailInput" value="<%= user.getEmail() %>">
+                    </div>
+                    <div class="form-group">
+                        <label for="firstNameInput">First name</label>
+                        <input type="email" class="form-control" id="firstNameInput" value="<%= user.getFirstName() %>">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastNameInput">Last name</label>
+                        <input type="email" class="form-control" id="lastNameInput" value="<%= user.getName() %>">
+                    </div>
+                </form>
+            </div>
         </div>
+
     </div>
 </div>
 </body>

@@ -30,6 +30,8 @@
 
 <script type="text/javascript" src="/js/AquaGauge.js"></script>
 <script type="text/javascript" src="/js/visualizations/gauge.js"></script>
+<script type="text/javascript" src="/js/modernizr.js"></script>
+
 
 
 <link rel="stylesheet" type="text/css" href="/css/jquery.jqplot.css" />

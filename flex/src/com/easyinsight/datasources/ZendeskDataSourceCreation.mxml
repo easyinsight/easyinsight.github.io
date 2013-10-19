@@ -35,7 +35,7 @@
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:ZendeskDataSource = feedDefinition as ZendeskDataSource;
             ds.zdUserName = userNameInput.text;
-            ds.zdPassword = passwordInput.text;
+            ds.zdApiKey = passwordInput.text;
             ds.url = urlInput.text;
             ds.loadComments = includeComments;
         }
@@ -65,7 +65,7 @@
         <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}" width="350"/>
     </mx:HBox>
     <mx:HBox>
-        <mx:Label text="Zendesk Password:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
-        <mx:TextInput id="passwordInput" displayAsPassword="true" width="350"/>
+        <mx:Label text="Zendesk API Key:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="passwordInput" width="350"/>
     </mx:HBox>
 </mx:VBox>

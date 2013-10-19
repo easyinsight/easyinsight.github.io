@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
-<%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
-<%@ page import="com.easyinsight.core.EIDescriptor" %>
-<%@ page import="java.util.Comparator" %>
-<%@ page import="java.util.Collections" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="org.hibernate.StatelessSession" %>
+<%@ page import="com.easyinsight.users.User" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Easy Insight Data Sources</title>
+    <title>Easy Insight Account</title>
     <jsp:include page="bootstrapHeader.jsp"/>
 </head>
 <body>
@@ -20,43 +19,61 @@
     String userName = (String) session.getAttribute("userName");
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
+        User user;
+        StatelessSession hibernateSession = Database.instance().createStatelessSession();
 
+        try {
+            user = (User) hibernateSession.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+        } finally {
+            hibernateSession.close();
+        }
 
+        if (!SecurityUtil.isAccountAdmin()) {
+            response.sendRedirect("nonAdminProfile.jsp");
+            return;
+        }
 %>
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
-    <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.ACCOUNT %>"/>
 </jsp:include>
-<div class="container corePageWell">
+<div class="container">
     <div class="row">
-        <jsp:include page="../recent_actions.jsp" />
-        <div class="col-md-9">
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th>Data Source Name</th>
-                    </tr>
-                </thead>
-
-            <%
-                java.util.List<DataSourceDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
-                Collections.sort(dataSources, new Comparator<EIDescriptor>() {
-
-                    public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
-                        String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName().toLowerCase() : "";
-                        String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName().toLowerCase() : "";
-                        return name1.compareTo(name2);
-                    }
-                });
-                for (DataSourceDescriptor dataSource : dataSources) {
-                    out.println("<tr><td><a href=\"reports/" + dataSource.getUrlKey() + "\">" + dataSource.getName() + "</a></td></tr>");
-                }
-                /*if (dataSources.size() == 0) {
-                    out.println("<li>You haven't defined any data sources yet.</li>");
-                }*/
-            %>
-            </table>
+        <div class="col-md12">
+            <div class="btn-toolbar pull-right topControlToolbar">
+                <div class="btn-group topControlBtnGroup">
+                    <a href="account.jsp">Account Administration</a>
+                </div>
+                <div class="btn-group topControlBtnGroup">
+                    <a href="users.jsp">Users</a>
+                </div>
+                <div class="btn-group topControlBtnGroup">
+                    <a href="#">My Profile</a>
+                </div>
+            </div>
         </div>
+    </div>
+    <div class="row">
+        <div class="col-md12">
+            <div class="container corePageWell">
+                <form role="form" method="post" action="/app/html/updateProfile.jsp">
+                    <div class="form-group">
+                        <label for="emailInput">Email address</label>
+                        <input type="email" class="form-control" id="emailInput" value="<%= user.getEmail() %>">
+                    </div>
+                    <div class="form-group">
+                        <label for="firstNameInput">First name</label>
+                        <input type="text" class="form-control" id="firstNameInput" value="<%= user.getFirstName() %>">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastNameInput">Last name</label>
+                        <input type="text" class="form-control" id="lastNameInput" value="<%= user.getName() %>">
+                    </div>
+                    <button class="btn btn-inverse" type="submit" value="Update Profile">Update Profile</button>
+                </form>
+            </div>
+        </div>
+
     </div>
 </div>
 </body>
