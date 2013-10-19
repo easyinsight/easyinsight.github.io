@@ -326,6 +326,11 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         setUrlKey(rs.getString(i));
         if (getUrlKey() == null || "".equals(getUrlKey())) {
             setUrlKey(RandomTextGenerator.generateText(40));
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD_ELEMENT SET URL_KEY = ? WHERE DASHBOARD_ELEMENT_ID = ?");
+            updateStmt.setString(1, getUrlKey());
+            updateStmt.setLong(2, elementID);
+            updateStmt.executeUpdate();
+            updateStmt.close();
         }
         PreparedStatement filterStmt = conn.prepareStatement("SELECT FILTER_ID, HIDE_FILTER FROM dashboard_element_filter_setting WHERE DASHBOARD_ELEMENT_ID = ?");
         filterStmt.setLong(1, elementID);
