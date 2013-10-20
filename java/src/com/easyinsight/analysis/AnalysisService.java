@@ -1941,6 +1941,23 @@ public class AnalysisService {
         }
         if (wsAnalysisDefinition.isPersistedCache()) {
             createCachedAddon(reportID, wsAnalysisDefinition.getName());
+        } else {
+            conn = Database.instance().getConnection();
+            try {
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM cached_addon_report_source WHERE REPORT_ID = ?");
+                queryStmt.setLong(1, reportID);
+                ResultSet rs = queryStmt.executeQuery();
+                if (rs.next()) {
+                    long existingID = rs.getLong(1);
+                    new UserUploadService().deleteUserUpload(existingID);
+                }
+                queryStmt.close();
+            } catch (Exception e) {
+                LogClass.error(e);
+            } finally {
+                conn.setAutoCommit(true);
+                Database.closeConnection(conn);
+            }
         }
         session = Database.instance().createSession();
         try {

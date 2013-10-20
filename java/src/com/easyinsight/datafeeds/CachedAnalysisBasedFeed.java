@@ -115,7 +115,7 @@ public class CachedAnalysisBasedFeed extends Feed {
                         }
                     } else {
                         for (AnalysisItem analysisItem : feed.getFields()) {
-                            if (analysisItem.toDisplay().equals(filter.getField().getOriginalDisplayName())) {
+                            if (analysisItem.toOriginalDisplayName().equals(filter.getField().getOriginalDisplayName())) {
                                 filterBackMap.put(filter, filter.getField());
                                 filter.setField(analysisItem);
                                 break;
@@ -137,7 +137,7 @@ public class CachedAnalysisBasedFeed extends Feed {
                         keys.add(mapped);
                     }
                 }
-                items = fieldsGroupedByOriginalDisplayName.get(analysisItem.toDisplay());
+                items = fieldsGroupedByOriginalDisplayName.get(analysisItem.toOriginalDisplayName());
                 if (items != null) {
                     for (AnalysisItem mapped : items) {
                         List<AnalysisItem> keys = map.get(analysisItem);

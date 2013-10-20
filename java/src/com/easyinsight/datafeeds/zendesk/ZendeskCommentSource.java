@@ -142,7 +142,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
                 retryCount = 0;
                 do {
                     jo = (JSONObject) runJSONRestRequest(zendeskCompositeSource, httpClient, path, builder);
-                    System.out.println(jo);
+                    //System.out.println(jo);
 
 
                     if(jo != null && "Sorry, we could not complete your search query. Please try again in a moment.".equals(jo.get("description"))) {
