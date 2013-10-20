@@ -145,7 +145,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
                     System.out.println(jo);
 
 
-                    if(jo != null && "Sorry, we could not complete your search query. Please try again in a moment.".equals(jo.get("error"))) {
+                    if(jo != null && "Sorry, we could not complete your search query. Please try again in a moment.".equals(jo.get("description"))) {
                         if(retryCount > 10) {
                             throw new RuntimeException("We are having problems retrieving comments from Zendesk at the moment.");
                         }
@@ -154,7 +154,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
                         Thread.sleep(2000);
                     }
                 } while(jo == null);
-                System.out.println(jo.toString());
+                //System.out.println(jo.toString());
                 for(Object o : (JSONArray) jo.get("results")) {
                     JSONObject event = (JSONObject) o;
                     parseTicket(keys, userCache, dataSet, event, new JSONObject(), "1");
