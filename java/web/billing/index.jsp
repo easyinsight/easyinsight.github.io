@@ -6,7 +6,6 @@
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.users.AccountTypeChange" %>
 <%@ page import="java.text.NumberFormat" %>
 <%@ page import="com.easyinsight.billing.BrainTreeBlueBillingSystem" %>
@@ -20,11 +19,8 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Billing Configuration</title>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
-    <link href="/css/bootstrap.css" rel="stylesheet">
-    <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
 
+    <jsp:include page="../html/bootstrapHeader.jsp"/>
     <script language="javascript" type="text/javascript">
         function setCCexp() {
             document.getElementById("ccexp").value = document.getElementById("ccexpMonth").value + "/" + document.getElementById("ccexpYear").value;
@@ -38,9 +34,7 @@
         }
 
     </script>
-    <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.js"></script>
+
 </head>
 <%
 
