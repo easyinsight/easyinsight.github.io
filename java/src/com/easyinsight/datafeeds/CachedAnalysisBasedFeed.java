@@ -48,13 +48,14 @@ public class CachedAnalysisBasedFeed extends Feed {
             ResultSet rs = stmt.executeQuery();
             rs.next();
             long dataSourceID = rs.getLong(1);
+            stmt.close();
             Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
 
-            Map<AnalysisItem, Collection<AnalysisItem>> map = new HashMap<AnalysisItem, Collection<AnalysisItem>>();
+            /*Map<AnalysisItem, Collection<AnalysisItem>> map = new HashMap<AnalysisItem, Collection<AnalysisItem>>();
             for (AnalysisItem item : analysisItems) {
                 boolean found = false;
                 for (AnalysisItem reportField : feed.getFields()) {
-                    if (reportField.getBasedOnReportField().equals(item.getBasedOnReportField())) {
+                    if (reportField.getBasedOnReportField() != null && item.getBasedOnReportField() != null && reportField.getBasedOnReportField().equals(item.getBasedOnReportField())) {
                         Collection<AnalysisItem> items = map.get(reportField);
                         if (items == null) {
                             items = new ArrayList<AnalysisItem>();
@@ -64,21 +65,87 @@ public class CachedAnalysisBasedFeed extends Feed {
                         found = true;
                     }
                 }
+                if (!found) {
+                    for (AnalysisItem reportField : feed.getFields()) {
+
+                    }
+                    List<AnalysisItem> items = fieldsGroupedByOriginalDisplayName.get(analysisItem.getOriginalDisplayName());
+                    if (items == null) {
+                        items = new ArrayList<AnalysisItem>();
+                        fieldsGroupedByOriginalDisplayName.put(analysisItem.getOriginalDisplayName(), items);
+                    }
+                    items.add(analysisItem);
+                }
 
                 if (!found) {
                     System.out.println("\tCould not find field " + item.toDisplay() + " with based on = " + item.getBasedOnReportField());
+                }
+            }*/
+            Map<AnalysisItem, List<AnalysisItem>> map = new HashMap<AnalysisItem, List<AnalysisItem>>();
+            Map<String, List<AnalysisItem>> fieldsGroupedByOriginalDisplayName = new HashMap<String, List<AnalysisItem>>();
+            Map<Long, List<AnalysisItem>> fieldsGroupedByOriginalFieldID = new HashMap<Long, List<AnalysisItem>>();
+            for (AnalysisItem analysisItem : analysisItems) {
+                if (analysisItem.getBasedOnReportField() != null && analysisItem.getBasedOnReportField() > 0) {
+                    List<AnalysisItem> items = fieldsGroupedByOriginalFieldID.get(analysisItem.getBasedOnReportField());
+                    if (items == null) {
+                        items = new ArrayList<AnalysisItem>();
+                        fieldsGroupedByOriginalFieldID.put(analysisItem.getBasedOnReportField(), items);
+                    }
+                    items.add(analysisItem);
+                } else {
+                    List<AnalysisItem> items = fieldsGroupedByOriginalDisplayName.get(analysisItem.getOriginalDisplayName());
+                    if (items == null) {
+                        items = new ArrayList<AnalysisItem>();
+                        fieldsGroupedByOriginalDisplayName.put(analysisItem.getOriginalDisplayName(), items);
+                    }
+                    items.add(analysisItem);
                 }
             }
 
             Map<FilterDefinition, AnalysisItem> filterBackMap = new HashMap<FilterDefinition, AnalysisItem>();
             for (FilterDefinition filter : filters) {
                 if (filter.getField() != null) {
-                    for (AnalysisItem reportField : feed.getFields()) {
-                        if (filter.getField().getBasedOnReportField().equals(reportField.getBasedOnReportField())) {
-                            filterBackMap.put(filter, filter.getField());
-                            filter.setField(reportField);
-                            break;
+                    if (filter.getField().getBasedOnReportField() != null && filter.getField().getBasedOnReportField() > 0) {
+                        for (AnalysisItem analysisItem : feed.getFields()) {
+                            if (analysisItem.getBasedOnReportField() != null && analysisItem.getBasedOnReportField().equals(filter.getField().getBasedOnReportField())) {
+                                filterBackMap.put(filter, filter.getField());
+                                filter.setField(analysisItem);
+                                break;
+                            }
                         }
+                    } else {
+                        for (AnalysisItem analysisItem : feed.getFields()) {
+                            if (analysisItem.toDisplay().equals(filter.getField().getOriginalDisplayName())) {
+                                filterBackMap.put(filter, filter.getField());
+                                filter.setField(analysisItem);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (AnalysisItem analysisItem : feed.getFields()) {
+                List<AnalysisItem> items = fieldsGroupedByOriginalFieldID.get(analysisItem.getBasedOnReportField());
+                if (items != null) {
+                    for (AnalysisItem mapped : items) {
+                        List<AnalysisItem> keys = map.get(analysisItem);
+                        if (keys == null) {
+                            keys = new ArrayList<AnalysisItem>();
+                            map.put(analysisItem, keys);
+                        }
+                        keys.add(mapped);
+                    }
+                }
+                items = fieldsGroupedByOriginalDisplayName.get(analysisItem.toDisplay());
+                if (items != null) {
+                    for (AnalysisItem mapped : items) {
+                        List<AnalysisItem> keys = map.get(analysisItem);
+                        if (keys == null) {
+                            keys = new ArrayList<AnalysisItem>();
+                            map.put(analysisItem, keys);
+                        }
+                        keys.add(mapped);
                     }
                 }
             }
@@ -88,7 +155,7 @@ public class CachedAnalysisBasedFeed extends Feed {
             DataSet dataSet = new DataSet();
             for (IRow reportRow : reportSet.getRows()) {
                 IRow row = dataSet.createRow();
-                for (Map.Entry<AnalysisItem, Collection<AnalysisItem>> entry : map.entrySet()) {
+                for (Map.Entry<AnalysisItem, List<AnalysisItem>> entry : map.entrySet()) {
                     Value value = reportRow.getValue(entry.getKey().createAggregateKey());
                     for (AnalysisItem item : entry.getValue()) {
                         row.addValue(item.createAggregateKey(), value);
