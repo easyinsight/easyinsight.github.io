@@ -222,7 +222,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         }
 
         try {
-            if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null && viewStack != null) {
+            if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null && viewStack != null && dashboardStack.urlKey != null) {
                 var index:int = dashboardEditorMetadata.retrievalState.getStackPosition(dashboardStack.urlKey);
                 if (index != -1) {
                     viewStack.selectedIndex = index;
