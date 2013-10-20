@@ -192,3 +192,35 @@ nav.navbar_first {
     background-color: #FFFFFF;
     padding-bottom: 10px;
 }
+
+.reportArea {
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+}
+
+.multi_flat_month {
+    padding: 0 12px;
+}
+
+.fixed_dashboard_navbar {
+    min-height: 30px;
+}
+
+.fixed_dashboard_navbar_toggle > li > a {
+    padding-top: 3px;
+    padding-bottom: 0;
+}
+
+.reportControl {
+    color: #333333;
+}
+
+.reportControlToolbar {
+
+}
+
+.reportControlBtnGroup {
+    padding-top: 5px;
+    margin-right: 20px;
+}

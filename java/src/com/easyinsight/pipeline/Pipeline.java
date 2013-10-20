@@ -292,7 +292,7 @@ public abstract class Pipeline {
         for (IComponent component : components) {
             //System.out.println(component.getClass() + " - " + dataSet.getRows());
             dataSet = component.apply(dataSet, pipelineData);
-            if (pipelineData.getReport() != null && pipelineData.getReport().isLogReport()) {
+            /*if (pipelineData.getReport() != null && pipelineData.getReport().isLogReport()) {
                 String componentName;
                 if (component instanceof DescribableComponent) {
                     componentName = ((DescribableComponent) component).getDescription();
@@ -301,7 +301,7 @@ public abstract class Pipeline {
                 }
                 logger.append("<h1>" + componentName + "</h1>");
                 logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, null, pipelineData.getInsightRequestMetadata()));
-            }
+            }*/
         }
         return dataSet;
     }
