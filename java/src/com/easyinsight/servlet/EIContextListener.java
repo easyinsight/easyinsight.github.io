@@ -102,7 +102,9 @@ public class EIContextListener implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         LogClass.info("Shutting down...");
 
-        CacheTimer.instance().stop();
+        if (CacheTimer.instance() != null) {
+            CacheTimer.instance().stop();
+        }
         try {
             MemCachedManager.instance().shutdown();
         } catch (Exception e) {
