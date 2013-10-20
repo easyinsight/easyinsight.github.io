@@ -77,6 +77,7 @@ public class EIContextListener implements ServletContextListener {
                 }
                 try {
                     MemCachedManager.initialize();
+                    //MemCachedManager.flush();
                 } catch (Exception e) {
                     LogClass.error(e);
                 }
@@ -85,8 +86,10 @@ public class EIContextListener implements ServletContextListener {
                 healthThread.setName("Health Listener");
                 healthThread.setDaemon(true);
                 healthThread.start();
-                CacheTimer.initialize();
-                CacheTimer.instance().start();
+                if (ConfigLoader.instance().isDatabaseListener()) {
+                    CacheTimer.initialize();
+                    CacheTimer.instance().start();
+                }
             }
             LogClass.info("Started the server.");
         } catch (Throwable e) {

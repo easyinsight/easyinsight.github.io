@@ -104,7 +104,8 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
         for (Long id : sources) {
             conn = Database.instance().getConnection();
             try {
-                if (runReport(conn, id)) return;
+                System.out.println("Running report " + id);
+                runReport(conn, id);
             } catch (Exception e) {
                 if (!conn.getAutoCommit()) {
                     conn.rollback();

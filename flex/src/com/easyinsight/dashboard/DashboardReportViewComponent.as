@@ -25,7 +25,7 @@ import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
-import mx.controls.Alert;
+
 import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.managers.PopUpManager;
@@ -184,6 +184,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         } else if (!sizeInfo.autoCalcHeight) {
             percentHeight = 100;
         } else {
+            height = 400;
             percentHeight = NaN;
         }
 
@@ -398,7 +399,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             }
             try {
                 for each (var valFilter:FilterDefinition in myFilterColl) {
-                    if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null) {
+                    if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null && dashboardReport.urlKey != null) {
                         dashboardEditorMetadata.retrievalState.forFilter(valFilter, "r" + dashboardReport.urlKey, dashboardReport.overridenFilters);
                     }
                 }
