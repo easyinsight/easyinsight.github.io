@@ -21,6 +21,18 @@ public abstract class MaterializedFilterDefinition {
         return key;
     }
 
+    public boolean validate(IRow row, FilterDefinition filterDefinition) {
+        boolean rowValid = true;
+        Value value = row.getValue(key);
+        if (!allows(value)) {
+            rowValid = false;
+        }
+        if (filterDefinition.isNotCondition()) {
+            rowValid = !rowValid;
+        }
+        return rowValid;
+    }
+
     public DataSet processDataSet(DataSet dataSet, IFilterProcessor filterProcessor, FilterDefinition filterDefinition) {
         DataSet resultDataSet = new DataSet();
         for (IRow row : dataSet.getRows()) {

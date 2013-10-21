@@ -27,6 +27,21 @@ public class MaterializedOrFilter extends MaterializedFilterDefinition {
         this.originalFilters = originalFilters;
     }
 
+    public boolean validate(IRow row, FilterDefinition filterDefinition) {
+        boolean rowValid = false;
+        for (int i = 0; i < filters.size(); i++) {
+            MaterializedFilterDefinition filter = filters.get(i);
+            FilterDefinition original = originalFilters.get(i);
+            boolean allows = filter.validate(row, original);
+            if (!original.isNotCondition() && allows) {
+                rowValid = true;
+            } else if (original.isNotCondition() && !allows) {
+                rowValid = true;
+            }
+        }
+        return rowValid;
+    }
+
     public DataSet processDataSet(DataSet dataSet, IFilterProcessor filterProcessor, FilterDefinition filterDefinition) {
         DataSet resultDataSet = new DataSet();
         for (IRow row : dataSet.getRows()) {
