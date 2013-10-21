@@ -92,11 +92,19 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new TypeTransformComponent());
 
         if (report.getFilterDefinitions() != null) {
+            List<FilterDefinition> compFilters = new ArrayList<FilterDefinition>();
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                if (!insightRequestMetadata.isLookupTableAggregate() || !filterDefinition.validForQuery()) {
-                    components.addAll(filterDefinition.createComponents(Pipeline.BEFORE, new DefaultFilterProcessor(), null, false));
+                if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
+                    continue;
+                }
+
+                if ((!insightRequestMetadata.isLookupTableAggregate() || !filterDefinition.validForQuery()) &&
+                        filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
+                    compFilters.add(filterDefinition);
+                    //components.addAll(filterDefinition.createComponents(Pipeline.BEFORE, new DefaultFilterProcessor(), null, false));
                 }
             }
+            components.add(new BetterFilterComponent(compFilters));
         }
 
         FieldFilterComponent fieldFilterComponent = new FieldFilterComponent();
@@ -110,6 +118,9 @@ public class StandardReportPipeline extends Pipeline {
                     }
                 }
                 for (FilterDefinition filterDefinition : analysisItem.getFilters()) {
+                    if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
+                        continue;
+                    }
                     if (filterDefinition.getField() != null) {
                         fieldFilterComponent.addFilterPair(analysisItem, filterDefinition);
                     } else {
@@ -161,6 +172,7 @@ public class StandardReportPipeline extends Pipeline {
             components.add(new PipelinePlaceholderComponent("End of Pipeline " + name));
             /*components.add(new CleanupComponent(name, measureFilter));
             components.add(new AggregationComponent(AggregationComponent.OTHER));*/
+            /*components.add(new AggregationComponent(AggregationComponent.OTHER));*/
         }
 
 
@@ -190,9 +202,21 @@ public class StandardReportPipeline extends Pipeline {
 
             endComponent.add(new LinkDecorationComponent());
             if (report.getFilterDefinitions() != null) {
-                for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
+                /*for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                     endComponent.addAll(filterDefinition.createComponents(Pipeline.LAST_FILTERS, new DefaultFilterProcessor(), null, false));
+                }*/
+                List<FilterDefinition> compFilters = new ArrayList<FilterDefinition>();
+                for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
+                    if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
+                        continue;
+                    }
+
+                    if (filterDefinition.isEnabled() && Pipeline.LAST_FILTERS.equals(filterDefinition.getPipelineName())) {
+                        compFilters.add(filterDefinition);
+                        //components.addAll(filterDefinition.createComponents(Pipeline.BEFORE, new DefaultFilterProcessor(), null, false));
+                    }
                 }
+                components.add(new BetterFilterComponent(compFilters));
             }
             endComponent.add(new LimitsComponent());
             components.addAll(report.createComponents());
