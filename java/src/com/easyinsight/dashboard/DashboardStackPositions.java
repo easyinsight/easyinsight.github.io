@@ -19,7 +19,6 @@ import java.util.Map;
  */
 public class DashboardStackPositions {
     private Map<String, Integer> positions = new HashMap<String, Integer>();
-    private Map<Long, FilterDefinition> filters = new HashMap<Long, FilterDefinition>();
     private Map<String, Map<String, FilterDefinition>> filterMap = new HashMap<String, Map<String, FilterDefinition>>();
     private Map<String, InsightDescriptor> reports = new HashMap<String, InsightDescriptor>();
 
@@ -37,14 +36,6 @@ public class DashboardStackPositions {
 
     public void setPositions(Map<String, Integer> positions) {
         this.positions = positions;
-    }
-
-    public Map<Long, FilterDefinition> getFilters() {
-        return filters;
-    }
-
-    public void setFilters(Map<Long, FilterDefinition> filters) {
-        this.filters = filters;
     }
 
     public Map<String, InsightDescriptor> getReports() {
