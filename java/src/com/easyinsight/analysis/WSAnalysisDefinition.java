@@ -77,6 +77,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String name;
     private boolean persistedCache;
     private String authorName;
+    private String cachePartitionFilter;
     private boolean logReport;
     private String urlKey;
     private long analysisID;
@@ -139,6 +140,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String customField2;
 
     private List<FilterDefinition> filtersForDrillthrough;
+
+    public String getCachePartitionFilter() {
+        return cachePartitionFilter;
+    }
+
+    public void setCachePartitionFilter(String cachePartitionFilter) {
+        this.cachePartitionFilter = cachePartitionFilter;
+    }
 
     public List<AnalysisItem> getFieldsForDrillthrough() {
         return fieldsForDrillthrough;
@@ -956,6 +965,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         aggregateQueryIfPossible = findBooleanProperty(properties, "aggregateQueryIfPossible", true);
         customField1 = findStringProperty(properties, "customField1", "");
         customField2 = findStringProperty(properties, "customField2", "");
+        cachePartitionFilter = findStringProperty(properties, "cachePartitionFilter", "");
     }
 
     public List<ReportProperty> createProperties() {
@@ -984,6 +994,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("aggregateQueryIfPossible", aggregateQueryIfPossible));
         properties.add(new ReportStringProperty("customField1", customField1));
         properties.add(new ReportStringProperty("customField2", customField2));
+        properties.add(new ReportStringProperty("cachePartitionFilter", cachePartitionFilter));
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }
