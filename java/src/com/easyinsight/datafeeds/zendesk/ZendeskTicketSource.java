@@ -119,11 +119,13 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                         customKey = new NamedKey("zd" + id);
                     }
                     String type = String.valueOf(recordNode.get("type"));
-                    if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type) || "FieldTagger".equals(type)) {
+                    if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type) || "FieldTagger".equals(type) || "tagger".equals(type) ||
+                            "checkbox".equals(type) || "dropdown".equals(type)) {
                         items.add(new AnalysisDimension(customKey, title));
-                    } else if ("MultiLineField".equals(type) || "FieldTextarea".equals(type)) {
+                    } else if ("MultiLineField".equals(type) || "FieldTextarea".equals(type) || "textarea".equals(type)) {
                         items.add(new AnalysisText(customKey, title));
-                    } else if ("NumericField".equals(type) || "FieldDecimal".equals(type) || "FieldInteger".equals(type) || "FieldNumeric".equals(type)) {
+                    } else if ("NumericField".equals(type) || "FieldDecimal".equals(type) || "FieldInteger".equals(type) || "FieldNumeric".equals(type) ||
+                            "integer".equals(type) || "decimal".equals(type) || "numeric".equals(type)) {
                         items.add(new AnalysisMeasure(customKey, title, AggregationTypes.SUM));
                     }
                 }

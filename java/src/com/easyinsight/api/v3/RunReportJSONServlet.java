@@ -72,9 +72,6 @@ public class RunReportJSONServlet extends JSONServlet {
         }
         rows.endArray();
 
-        // zgcBLUnaFuJaRuwUrrDW
-
-        System.out.println(jsonStringer.toString());
         return new ResponseInfo(ResponseInfo.ALL_GOOD, jsonStringer.toString());
     }
 }

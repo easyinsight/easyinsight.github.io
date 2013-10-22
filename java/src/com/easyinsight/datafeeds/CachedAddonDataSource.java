@@ -12,7 +12,6 @@ import com.easyinsight.scheduler.DataSourceScheduledTask;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
-import com.easyinsight.userupload.UserUploadService;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
@@ -149,10 +148,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 long accountID = rs.getLong(3);
                 int accountType = rs.getInt(4);
                 boolean accountAdmin = rs.getBoolean(5);
-                boolean guestUser = rs.getBoolean(6);
                 int firstDayOfWeek = rs.getInt(7);
-                boolean analyst = rs.getBoolean(8);
-                boolean accountReports = rs.getBoolean(9);
                 PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.persona_name FROM USER, PERSONA WHERE USER.PERSONA_ID = PERSONA.PERSONA_ID AND USER.USER_ID = ?");
                 stmt.setLong(1, userID);
                 ResultSet personaRS = stmt.executeQuery();
@@ -254,7 +250,56 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
-        WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+        try {
+            WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            FilterDefinition partitionFilter = findPartitionFilter(report);
+            if (partitionFilter == null) {
+                blah(IDataStorage, conn, report);
+            } else {
+                Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID(), conn);
+                AnalysisItemResultMetadata metadata = feed.getMetadata(partitionFilter.getField(), new InsightRequestMetadata(), conn, report, new ArrayList<FilterDefinition>(), null);
+
+                AnalysisDateDimensionResultMetadata yearMetadata = (AnalysisDateDimensionResultMetadata) metadata;
+                FlatDateFilter flatDateFilter = (FlatDateFilter) partitionFilter;
+                Calendar endCal = Calendar.getInstance();
+                endCal.setTime(yearMetadata.getLatestDate());
+                int endYear = endCal.get(Calendar.YEAR);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(yearMetadata.getEarliestDate());
+                boolean keepGoing = true;
+                do {
+                    int year = cal.get(Calendar.YEAR);
+                    if (year > endYear) {
+                        keepGoing = false;
+                    } else {
+                        System.out.println("Generating report for " + year);
+                        flatDateFilter.setValue(year);
+                        blah(IDataStorage, conn, report);
+                        cal.add(Calendar.YEAR, 1);
+                    }
+                } while (keepGoing);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
+
+    private FilterDefinition findPartitionFilter(WSAnalysisDefinition report) {
+        String name = report.getCachePartitionFilter();
+        if (name == null || "".equals(name)) {
+            return null;
+        }
+        List<FilterDefinition> filters = report.getFilterDefinitions();
+        for (FilterDefinition filter : filters) {
+            if (name.equals(filter.getFilterName())) {
+                return filter;
+            }
+        }
+        return null;
+    }
+
+    private void blah(IDataStorage IDataStorage, EIConnection conn, WSAnalysisDefinition report) throws Exception {
         Map<AnalysisItem, AnalysisItem> map = new HashMap<AnalysisItem, AnalysisItem>();
         Map<String, AnalysisItem> structure = report.createStructure();
         for (AnalysisItem reportItem : structure.values()) {
@@ -275,7 +320,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 row.addValue(dataSourceItem.getKey(), reportRow.getValue(item.createAggregateKey()));
             }
         }
-        return dataSet;
+        IDataStorage.insertData(dataSet);
     }
 
     @NotNull

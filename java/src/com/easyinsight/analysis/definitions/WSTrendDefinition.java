@@ -98,7 +98,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
                     j.put("source", outcome.getMeasure().getAnalysisItemID());
                     clickEvent = "drillThroughParameterized(" + j.toString() + ")";
                 }
-                sb.append("<div style='width: 245px;height:100px;");
+                sb.append("<div style='width: 245px;");
                 if ("horizontal".equals(getDirection()))
                     sb.append("display:inline-block;");
                 sb.append("color:");
@@ -108,7 +108,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
                     sb.append(fontColor);
                 }
                 sb.append(";'>");
-                sb.append("<div style='padding: 16px;'>");
+                sb.append("<div style='padding: 0px;'>");
                 TrendReportFieldExtension extension = ((TrendReportFieldExtension) outcome.getMeasure().getReportFieldExtension());
 
 
