@@ -142,7 +142,7 @@
     </mx:RemoteObject>
     <mx:VBox width="800" height="400" id="primaryCanvas" paddingTop="10" paddingLeft="10" paddingRight="10"
              paddingBottom="10" horizontalAlign="center">
-            <mx:ToggleButtonBar id="buttonBar" itemClick="blah()">
+            <mx:ToggleButtonBar id="buttonBar" itemClick="blah()" buttonStyleName="grayButton">
                 <mx:dataProvider>
                     <mx:Array>
                         <mx:String>Data Sources and Reports</mx:String>
