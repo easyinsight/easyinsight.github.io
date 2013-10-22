@@ -264,8 +264,17 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 Calendar endCal = Calendar.getInstance();
                 endCal.setTime(yearMetadata.getLatestDate());
                 int endYear = endCal.get(Calendar.YEAR);
+                if (endYear > 2014) {
+                    endYear = 2014;
+                }
                 Calendar cal = Calendar.getInstance();
-                cal.setTime(yearMetadata.getEarliestDate());
+                Calendar ph = Calendar.getInstance();
+                ph.set(Calendar.YEAR, 1995);
+                if (ph.getTime().after(yearMetadata.getEarliestDate())) {
+                    cal.setTime(ph.getTime());
+                } else {
+                    cal.setTime(yearMetadata.getEarliestDate());
+                }
                 boolean keepGoing = true;
                 do {
                     int year = cal.get(Calendar.YEAR);
