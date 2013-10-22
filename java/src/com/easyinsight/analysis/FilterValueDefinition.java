@@ -497,7 +497,7 @@ public class FilterValueDefinition extends FilterDefinition {
             sb.append("</div>");
 
             sb.append("<div class=\"modal-footer\">\n" +
-                    "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiFilter('" + filterName + "','" + filterHTMLMetadata.getFilterKey() + "'," + filterHTMLMetadata.createOnChange() + ")\">˝Send</button>\n" +
+                    "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiFilter('" + filterName + "','" + filterHTMLMetadata.getFilterKey() + "'," + filterHTMLMetadata.createOnChange() + ")\">Save</button>\n" +
                     "        <button class=\"btn\" data-dismiss=\"modal\" type=\"button\">Cancel</button>\n" +
                     "    </div>");
             sb.append("</div>");
@@ -530,7 +530,19 @@ public class FilterValueDefinition extends FilterDefinition {
 
             List<String> stringList = new ArrayList<String>();
             for (Value value : dimensionMetadata.getValues()) {
-                stringList.add(value.toHTMLString());
+                String valueString;
+                if (value.type() == Value.NUMBER) {
+                    int intValue = value.toDouble().intValue();
+                    double doubleValue = value.toDouble().doubleValue();
+                    if (intValue == doubleValue) {
+                        valueString = String.valueOf(intValue);
+                    } else {
+                        valueString = value.toHTMLString();
+                    }
+                } else {
+                    valueString = value.toHTMLString();
+                }
+                stringList.add(valueString);
             }
             Collections.sort(stringList);
             if (isAllOption()) {
@@ -581,5 +593,10 @@ public class FilterValueDefinition extends FilterDefinition {
     @Override
     public boolean sameFilter(FilterDefinition targetDefinition) {
         return super.sameFilter(targetDefinition) && ((FilterValueDefinition) targetDefinition).isSingleValue() == isSingleValue();
+    }
+
+    public void override(FilterDefinition overrideFilter) {
+        FilterValueDefinition filterValueDefinition = (FilterValueDefinition) overrideFilter;
+        setFilteredValues(filterValueDefinition.getFilteredValues());
     }
 }
