@@ -45,6 +45,7 @@ class ReportQueryStateNode extends QueryStateNode {
             if (rs.next()) {
                 dataSourceID = rs.getLong(1);
             }
+            stmt.close();
         } catch (Exception e) {
             LogClass.error(e);
         }
