@@ -204,4 +204,11 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
         jo.put("values", available);
         return jo;
     }
+
+    @Override
+    public void override(FilterDefinition overrideFilter) {
+        AnalysisItemFilterDefinition f = (AnalysisItemFilterDefinition) overrideFilter;
+        setTargetItem(f.getTargetItem());
+        setAvailableItems(f.getAvailableItems());
+    }
 }

@@ -369,6 +369,7 @@ public class DashboardStack extends DashboardElement {
         JSONObject stack = super.toJSON(metadata, parentFilters);
         stack.put("id", getElementID());
         stack.put("type", "stack");
+        stack.put("selected", defaultIndex);
         if (getOverridenFilters() != null) {
             for (FilterDefinition filter : getFilters()) {
                 FilterDefinition overrideFilter = getOverridenFilters().get(String.valueOf(filter.getFilterID()));

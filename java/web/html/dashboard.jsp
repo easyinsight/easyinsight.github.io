@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-<%@ page import="com.easyinsight.dashboard.DashboardService" %>
-<%@ page import="com.easyinsight.dashboard.Dashboard" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
-<%@ page import="com.easyinsight.dashboard.DashboardUIProperties" %>
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <%@ page import="com.easyinsight.logging.LogClass" %>
 <%@ page import="com.easyinsight.analysis.*" %>
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.html.*" %>
 <%@ page import="org.json.JSONObject" %>
+<%@ page import="com.easyinsight.dashboard.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -22,8 +20,7 @@
     }
     try {
 
-        /*
-
+        String savedDashboardIDString = request.getParameter("savedDashboardID");
         Dashboard dashboard;
         if (savedDashboardIDString != null) {
             DashboardInfo dashboardInfo = new DashboardService().retrieveFromDashboardLink(savedDashboardIDString);
@@ -33,11 +30,9 @@
         } else {
             String dashboardIDString = request.getParameter("dashboardID");
             long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
-
             dashboard = new DashboardService().getDashboard(dashboardID);
         }
-         */
-        String savedDashboardIDString = request.getParameter("savedDashboardID");
+
 
         String drillthroughKey = request.getParameter("drillthroughKey");
         List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
@@ -52,7 +47,7 @@
             dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
         }
 
-        Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
+//        Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
         FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, false);
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
         UIData uiData = Utils.createUIData();

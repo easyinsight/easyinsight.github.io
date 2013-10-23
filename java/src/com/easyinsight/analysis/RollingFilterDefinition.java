@@ -290,6 +290,16 @@ public class RollingFilterDefinition extends FilterDefinition {
     }
 
     @Override
+    public void override(FilterDefinition overrideFilter) {
+        RollingFilterDefinition f = (RollingFilterDefinition) overrideFilter;
+        setInterval(f.getInterval());
+        setCustomBeforeOrAfter(f.getCustomBeforeOrAfter());
+        setCustomIntervalAmount(f.getCustomIntervalAmount());
+        setCustomIntervalType(f.getCustomIntervalType());
+        setIntervals(f.getIntervals());
+    }
+
+    @Override
     public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
         StringBuilder sb = new StringBuilder();
         String filterName = "filter" + getFilterID();

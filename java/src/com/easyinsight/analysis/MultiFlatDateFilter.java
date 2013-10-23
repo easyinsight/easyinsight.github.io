@@ -12,10 +12,7 @@ import org.json.JSONObject;
 import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -31,7 +28,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
     @JoinTable(name = "multi_date_filter_to_date_level_wrapper",
             joinColumns = @JoinColumn(name = "filter_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "date_level_wrapper_id", nullable = false))
-    private Collection<DateLevelWrapper> levels = new ArrayList<DateLevelWrapper>();
+    private List<DateLevelWrapper> levels = new ArrayList<DateLevelWrapper>();
 
     @Column(name = "end_date_property")
     private String endDateProperty;
@@ -74,18 +71,18 @@ public class MultiFlatDateFilter extends FilterDefinition {
         this.endDateProperty = endDateProperty;
     }
 
-    public Collection<DateLevelWrapper> getLevels() {
+    public List<DateLevelWrapper> getLevels() {
         return levels;
     }
 
-    public void setLevels(Collection<DateLevelWrapper> dateLevels) {
+    public void setLevels(List<DateLevelWrapper> dateLevels) {
         this.levels = dateLevels;
     }
 
     @Override
     public FilterDefinition clone() throws CloneNotSupportedException {
         MultiFlatDateFilter filter = (MultiFlatDateFilter) super.clone();
-        Collection<DateLevelWrapper> wrappers = new ArrayList<DateLevelWrapper>();
+        List<DateLevelWrapper> wrappers = new ArrayList<DateLevelWrapper>();
         for (DateLevelWrapper wrapper : getLevels()) {
             wrappers.add(wrapper.clone());
         }
@@ -101,7 +98,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
     @Override
     public void afterLoad() {
         super.afterLoad();
-        Collection<DateLevelWrapper> wrappers = new ArrayList<DateLevelWrapper>();
+        List<DateLevelWrapper> wrappers = new ArrayList<DateLevelWrapper>();
         for (DateLevelWrapper wrapper : getLevels()) {
             wrappers.add(wrapper);
         }
@@ -209,9 +206,15 @@ public class MultiFlatDateFilter extends FilterDefinition {
             maxLevel = Math.max(maxLevel, wrapper.getDateLevel());
         }
 
-        jo.put("min", minLevel);
-        jo.put("max", maxLevel);
+        jo.put("start", minLevel);
+        jo.put("end", maxLevel);
 
         return jo;
+    }
+
+    @Override
+    public void override(FilterDefinition overrideFilter) {
+        MultiFlatDateFilter f = (MultiFlatDateFilter) overrideFilter;
+        this.setLevels(f.getLevels());
     }
 }
