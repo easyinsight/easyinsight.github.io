@@ -58,6 +58,11 @@ public class DataSet implements Serializable, Cloneable {
         return additionalSets;
     }
 
+    public void copyState(DataSet dataSet) {
+        additionalSets = dataSet.getAdditionalSets();
+        audits = dataSet.getAudits();
+    }
+
     public DataSet clone() throws CloneNotSupportedException {
         DataSet clone = (DataSet) super.clone();
         DataSetKeys cloneKeys = dataSetKeys.clone();

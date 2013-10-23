@@ -47,6 +47,7 @@ public class MultiMeasureComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         try {
             DataSet targetSet = new DataSet();
+            targetSet.copyState(dataSet);
             for (IRow row : dataSet.getRows()) {
                 for (AnalysisItem measure : measures) {
                     IRow targetRow = row.clone();
