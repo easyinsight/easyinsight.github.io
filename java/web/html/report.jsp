@@ -162,7 +162,7 @@
                                    %>
                                    <li>
                                        <button class="btn btn-inverse" type="button" id="refreshDataSourceButton"
-                                               onclick="refreshDataSource()" style="padding:5px;margin:5px;width:150px">Refresh
+                                               onclick="refreshDataSource('<%= dataSourceDescriptor.getUrlKey() %>')" style="padding:5px;margin:5px;width:150px">Refresh
                                            Data
                                            Source
                                        </button>

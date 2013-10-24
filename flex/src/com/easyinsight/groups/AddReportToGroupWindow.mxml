@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
-	creationComplete="analysisService.getInsightDescriptors.send()">
+	creationComplete="analysisService.getInsightDescriptors.send()" backgroundColor="#FFFFFF">
 	<mx:Script>
 		<![CDATA[			
         import com.easyinsight.solutions.InsightDescriptor;
@@ -50,13 +50,13 @@
 	<mx:RemoteObject destination="analysisDefinition" id="analysisService">
 		<mx:method name="getInsightDescriptors" result="gotReports()"/>
 	</mx:RemoteObject>
-	<mx:Form styleName="TitleWindowContents">
+	<mx:Form>
 		<mx:FormItem label="Choose a Report:">
 			<mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name"/>		
 		</mx:FormItem>
 		<mx:FormItem label="" direction="horizontal">
-			<mx:Button label="OK" click="chose()"/>
-			<mx:Button label="Cancel" click="cancel()"/>			
+			<util:SaveButton label="OK" click="chose()"/>
+			<util:CancelButton label="Cancel" click="cancel()"/>
 		</mx:FormItem>
 	</mx:Form>
 </util:EITitleWindow>

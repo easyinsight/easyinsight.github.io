@@ -50,6 +50,7 @@ public class FirstValueComponent implements IComponent, DescribableComponent {
                 }
             }
             DataSet newSet = new DataSet();
+            newSet.copyState(dataSet);
             for (IRow row : dataSet.getRows()) {
                 Value value = row.getValue(sortKey);
                 if (value.type() == Value.DATE) {
@@ -84,6 +85,7 @@ public class FirstValueComponent implements IComponent, DescribableComponent {
             }
 
             DataSet resultSet = new DataSet();
+            resultSet.copyState(dataSet);
 
             for (List<IRow> rows : aggregationMap.values()) {
                 for (int i = 0; i < threshold; i++) {

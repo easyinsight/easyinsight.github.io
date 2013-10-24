@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
-	creationComplete="dashboardService.getDashboards.send()">
+	creationComplete="dashboardService.getDashboards.send()" backgroundColor="#FFFFFF">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.dashboard.DashboardDescriptor;
@@ -51,7 +51,7 @@
 	<mx:RemoteObject destination="dashboardService" id="dashboardService">
 		<mx:method name="getDashboards" result="gotDashboards()"/>
 	</mx:RemoteObject>
-	<mx:Form styleName="TitleWindowContents">
+	<mx:Form>
 		<mx:FormItem label="Choose a Dashboard:">
 			<mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name"/>		
 		</mx:FormItem>
