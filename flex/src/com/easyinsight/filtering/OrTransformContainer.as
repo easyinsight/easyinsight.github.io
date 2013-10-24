@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.filtering {
+import mx.controls.Alert;
 import mx.events.DragEvent;
 import mx.managers.DragManager;
 
@@ -53,15 +54,15 @@ public class OrTransformContainer extends TransformContainer {
 
     override protected function createChildren():void {
         super.createChildren();
+        var actualLoadingFromReport:Boolean = _loadingFromReport;
         _loadingFromReport = true;
         if (orFilter != null) {
             for each (var filter:FilterDefinition in orFilter.filters) {
                 addFilterDefinition(filter);
             }
         }
-        if (_loadingFromReport) {
-            _loadingFromReport = false;
-        } else {
+        _loadingFromReport = false;
+        if (!actualLoadingFromReport) {
             parentFilter.dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, orFilter, null, parentFilter));
         }
     }
