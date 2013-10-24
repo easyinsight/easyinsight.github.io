@@ -20,11 +20,12 @@ public class OrFilterCanvas extends HBox implements IFilter {
     private var orFilter:OrFilter;
     private var orContainer:OrTransformContainer;
 
-    public function OrFilterCanvas(feedID:int) {
+    private var _analysisItems:ArrayCollection;
+
+    public function OrFilterCanvas(feedID:int, analysisItems:ArrayCollection) {
         orContainer = new OrTransformContainer();
         orContainer.feedID = feedID;
-        orContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, updatedTransforms);
-        orContainer.parentFilter = this;
+        _analysisItems = analysisItems;
         setStyle("paddingLeft", 5);
         setStyle("paddingRight", 5);
         setStyle("paddingTop", 5);
@@ -45,6 +46,9 @@ public class OrFilterCanvas extends HBox implements IFilter {
 
     override protected function createChildren():void {
         super.createChildren();
+        orContainer.analysisItems = _analysisItems;
+        orContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, updatedTransforms);
+        orContainer.parentFilter = this;
         addChild(orContainer);
         if (_filterEditable) {
             var addButton:Button = new Button();
