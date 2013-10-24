@@ -53,9 +53,14 @@ public class OrTransformContainer extends TransformContainer {
 
     override protected function createChildren():void {
         super.createChildren();
+        var i:int = 0;
         if (orFilter != null) {
             for each (var filter:FilterDefinition in orFilter.filters) {
                 addFilterDefinition(filter);
+                i++;
+                if (i > 5) {
+                    break;
+                }
             }
         }
         if (_loadingFromReport) {
