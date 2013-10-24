@@ -25,6 +25,7 @@ public class BetterFilterComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         DataSet resultDataSet = new DataSet();
+        resultDataSet.copyState(dataSet);
         List<MaterializedFilterDefinition> materializedFilterDefinitionList = new ArrayList<MaterializedFilterDefinition>();
         for (FilterDefinition filter : filters) {
             MaterializedFilterDefinition materializedFilter = filter.materialize(pipelineData.getInsightRequestMetadata());
@@ -41,7 +42,8 @@ public class BetterFilterComponent implements IComponent {
                 i++;
             }
             if (valid) {
-                resultDataSet.addRow(row);
+                IRow newRow = resultDataSet.createRow();
+                newRow.addValues(row);
             }
         }
         return resultDataSet;
