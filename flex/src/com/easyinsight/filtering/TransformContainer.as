@@ -282,7 +282,7 @@ public class TransformContainer extends HBox
         } else if (filterDefinition.getType() == FilterDefinition.PATTERN) {
             filter = new PatternFilter(_feedID, filterDefinition.field, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.OR) {
-            filter = new OrFilterCanvas(_feedID);
+            filter = new OrFilterCanvas(_feedID, _analysisItems);
             filter.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, passThrough);
         } else if (filterDefinition.getType() == FilterDefinition.NAMED_REF) {
             filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.NAMED_REF, _retrievalState, filterMetadata);
