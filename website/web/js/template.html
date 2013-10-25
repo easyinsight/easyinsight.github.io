@@ -33,7 +33,7 @@
                 return typeof(f.preferredWidth) == "undefined";
             });
         }) %>
-        <%= Filter.filters({ filter_values: filters }) %>
+        <%= Filter.filters({ filter_values: filters, parent_id: id }) %>
         <div class="container">
             <% if(show_label) { %>
             <% var clickable_grid = _.any(grid, function(e, i, l) {
@@ -183,7 +183,7 @@
         <script type="text/template" id="or_filter_template">
             <div class="filter orFilterBox">
                 <% _.each(data.filters, function(e, i, l) { %>
-                <%= Filter.create(e) %>
+                <%= Filter.create(e, parent_id) %>
                 <% });%>
             </div>
         </script>
