@@ -62,6 +62,7 @@
         styleJSON.put("main_stack_start", "#FFFFFF");
         styleJSON.put("alternative_stack_start", "#FFFFFF");
         reportJSON.put("styles", styleJSON);
+        reportJSON.put("local_storage", report.isPersistState());
         JSONObject intermediate = new JSONObject();
         reportJSON.put("base", intermediate);
         intermediate.put("show_label", false);
