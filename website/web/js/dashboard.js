@@ -107,6 +107,8 @@ var toFilterString = function (f, store) {
         return $.extend(c, {start: f.start, end: f.end});
     } else if (f.type == "field_filter") {
         return $.extend(c, {selected: f.selected});
+    } else if (f.type == "pattern_filter") {
+        return $.extend(c, {pattern: f.pattern});
     } else
         return $.extend(c, {enabled: false})
 }
@@ -166,7 +168,6 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     else if (obj.metadata.type == "list") {
         $.ajax($.extend(postData, {
             dataType: "text",
-
             success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns))
         }));
     } else if (obj.metadata.type == "bar") {
@@ -190,7 +191,6 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedColumnChart(id, w, obj.metadata.styles)) }));
-        ;
     } else if (obj.metadata.type == "gauge") {
         $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: null }))
         var v = JSON.stringify(obj.metadata.properties).replace(/\"/g, "");
@@ -202,18 +202,29 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
                 $('#' + id + " .reportArea").html(data);
             }, null, id);
         })}));
-        ;
+
     }
     o.rendered = true;
 }
 
+function flattenFilters(filters) {
+    return _.flatten(_.map(filters, function(e, i, l) {
+        if(e.type == "or_filter") {
+            return e.filters;
+        } else {
+            return e;
+        }
+    }))
+}
+
 var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMap) {
     if (obj.type == "report") {
-        var fs3 = filterStack.concat(obj.report.metadata.filters);
+        var ff1 = flattenFilters(obj.report.metadata.filters);
+        var fs3 = filterStack.concat(ff1);
 
         var w = {"type": "report", "filters": fs3, "report": obj, "rendered": false, "id": obj.id };
         reportMap[obj.id] = w;
-        var t = _.reduce(obj.report.metadata.filters, function (m, i) {
+        var t = _.reduce(ff1, function (m, i) {
             m[w.id + "filter" + i.id] = {"filter": i, "parent": w };
             return m;
         }, {});
@@ -221,29 +232,30 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
         return w;
     } else if (obj.type == "grid") {
         var children = [];
-
-        var fs1 = filterStack.concat(obj.filters);
+        var ff2 = flattenFilters(obj.filters);
+        var fs1 = filterStack.concat(ff2);
         for (var i = 0; i < obj.grid.length; i++) {
             for (var j = 0; j < obj.grid[i].length; j++) {
                 children = _.flatten(children.concat(buildReportGraph(obj.grid[i][j], fs1, filterMap, stackMap, reportMap)));
             }
         }
         var x = {"type": "grid", "children": children };
-        var u = _.reduce(obj.filters, function (m, i) {
+        var u = _.reduce(ff2, function (m, i) {
             m[x.id + "filter" + i.id] = {"filter": i, "parent": x };
             return m;
         }, {});
         $.extend(filterMap, u)
         return x;
     } else if (obj.type == "stack") {
-        var fs2 = filterStack.concat(obj.filters);
+        var ff3 = flattenFilters(obj.filters);
+        var fs2 = filterStack.concat(ff3);
         var ch = [];
         for (var k = 0; k < obj.stack_items.length; k++) {
             ch = _.flatten(ch.concat(buildReportGraph(obj.stack_items[k].item, fs2, filterMap, stackMap, reportMap)))
         }
         var y = {"type": "stack", "children": ch, "id": obj.id, "selected": 0, "data": obj };
         stackMap[obj.id] = y;
-        var v = _.reduce(obj.filters, function (m, i) {
+        var v = _.reduce(ff3, function (m, i) {
             m[y.id + "filter" + i.id] = {"filter": i, "parent": y };
             return m;
         }, {});
@@ -321,6 +333,12 @@ $(function () {
                     return Filter.multi_flat_date_month({data: obj, parent_id: parent_id})
                 else if (obj.type == "field_filter")
                     return Filter.field_filter({data: obj, parent_id: parent_id});
+                else if(obj.type == "pattern_filter")
+                    return Filter.pattern_filter({data: obj, parent_id: parent_id });
+                else if(obj.type == "or_filter")
+                    return Filter.or_filter({data: obj, parent_id: parent_id });
+                else
+                    return Filter.generic_filter({data: obj, parent_id: parent_id});
             },
             multi_flat_date_month: _.template($("#multi_flat_date_filter", s).html()),
             flat_date_year: _.template($("#flat_date_year_filter", s).html()),
@@ -331,6 +349,9 @@ $(function () {
             date_range: _.template($("#absolute_date_filter_template", s).html()),
             base_filter: _.template($("#filter_base", s).html()),
             field_filter: _.template($("#field_filter_template", s).html()),
+            pattern_filter: _.template($("#pattern_filter_template", s).html()),
+            or_filter: _.template($("#or_filter_template", s).html()),
+            generic_filter: _.template($("#generic_filter", s).html()),
             filters: _.template($("#filters_template", s).html())
 
         };
@@ -342,16 +363,17 @@ $(function () {
         gaugeTemplate = _.template($("#gauge_template", s).html());
         email_modal = _.template($("#email_modal", s).html());
 
-        var filterMap = _.reduce(dashboardJSON["filters"], function (m, i) {
+        var filterMap = _.reduce(flattenFilters(dashboardJSON["filters"]), function (m, i) {
             m["filter" + i.id] = {"filter": i, "parent": null };
             return m;
         }, {});
         var stackMap = {};
         var reportMap = {};
-        var graph = buildReportGraph(dashboardJSON["base"], dashboardJSON["filters"], filterMap, stackMap, reportMap);
+        var graph = buildReportGraph(dashboardJSON["base"], flattenFilters(dashboardJSON["filters"]), filterMap, stackMap, reportMap);
         var key = (dashboardJSON["id"] != -1) ? ("dashboard " + dashboardJSON["id"]) : "";
         var saveFilter;
-        if(Modernizr.localstorage) {
+
+        if(Modernizr.localstorage && dashboardJSON["local_storage"] && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+$/)) {
             if(typeof(localStorage[key]) != "undefined") {
                 var cur;
                 var vals = JSON.parse(localStorage[key]);
@@ -374,6 +396,9 @@ $(function () {
                 report["filters"][key] = toFilterString(f.filter, true);
                 localStorage[reportKey] = JSON.stringify(report);
             }
+            $(".restore_default_config").click(function(e) {
+                delete localStorage[key];
+            })
         } else {
             savefilter = function(f, key, reportKey){ };
         }
@@ -381,8 +406,6 @@ $(function () {
 
         $(".dashboardStackNav").css("background-color", dashboardJSON["styles"]["alternative_stack_start"])
         $(".dashboard_base > .row > .col-md-12 > .tabbable > .nav-pills").css("background-color", dashboardJSON["styles"]["main_stack_start"])
-
-
 
         hideFilters(graph, filterMap);
         renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], false);
@@ -571,9 +594,9 @@ $(function () {
             var f = filterMap[k];
             f.filter.end = z.val();
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], dashboardJSON["drillthroughID"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], dashboardJSON["drillthroughID"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
             saveFilter(f, k, key);
         });
@@ -619,6 +642,22 @@ $(function () {
             showFilters = !showFilters;
         })
 
+        $(".pattern_input").blur(function (e) {
+            var k = $(e.target).attr("id");
+            var f = filterMap[k];
+            var p = $(e.target).val();
+            if(p != f.filter.pattern) {
+                f.filter.pattern = p;
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k, key);
+            }
+
+        })
+
         $(".dashboardReportHeader").click(function (e) {
             var f = $(".reportMenu", $(e.target).parent());
             f.slideToggle({ complete: function () {
@@ -629,7 +668,7 @@ $(function () {
         $(".clickable_grid").click(function (e) {
             var g = $(e.target).parent()
             var f = $(".reportMenu", g);
-            $(".gridReportMenu", g).hide({effect: "slide", direction: "up"});
+            $(".gridReportMenu:visible", g).hide({effect: "slide", direction: "up"});
             f.slideToggle({ complete: function () {
                 f.css("overflow", "visible");
             }});

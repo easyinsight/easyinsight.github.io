@@ -173,6 +173,21 @@
     </div>
 </script>
 
+<script type="text/template" id="pattern_filter_template">
+    <div class="filter filter<%= data.id %>">
+        <%= Filter.base_filter({data: data, parent_id: parent_id}) %>
+        <input id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="pattern_input" type="text" value="<%- data.pattern %>" />
+    </div>
+</script>
+
+        <script type="text/template" id="or_filter_template">
+            <div class="filter orFilterBox">
+                <% _.each(data.filters, function(e, i, l) { %>
+                <%= Filter.create(e) %>
+                <% });%>
+            </div>
+        </script>
+
 <script type="text/template" id="field_filter_template">
     <div class="filter filter<%= data.id %>">
         <%= Filter.base_filter({data: data, parent_id: parent_id}) %>
@@ -184,6 +199,12 @@
         </select>
     </div>
 </script>
+
+        <script type="text/template" id="generic_filter">
+            <div class="filter">
+                <%= Filter.base_filter({data: data, parent_id: parent_id, skip_colon: true }) %>
+            </div>
+        </script>
 
 <script type="text/template" id="multi_value_filter_template">
     <div class="filter filter<%= data.id %>">
@@ -392,8 +413,13 @@
     <% if(!data.checkbox) { %>
     <input id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%=data.id%>_enabled" class="filter_enabled" type="checkbox" <% if(data.enabled) { %>checked="checked" <%}%>/>
     <% } %>
-    <%- data.label %>
+    <% if(typeof(skip_colon) != "undefined" && skip_colon == true) { %>
+        <%- data.label.replace(/:$/g,"") %>
+    <% } else { %>
+        <%- data.label %>
+    <% } %>
 </script>
+
 
         <script type="text/template" id="email_modal">
             <div class="modal fade" id="emailReportWindow">

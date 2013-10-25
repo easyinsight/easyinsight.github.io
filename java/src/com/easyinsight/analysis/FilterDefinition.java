@@ -518,7 +518,7 @@ public class FilterDefinition implements Serializable, Cloneable {
     }
 
     public boolean sameFilter(FilterDefinition targetDefinition) {
-        return getField().qualifiedName().equals(targetDefinition.getField().qualifiedName()) && type() == targetDefinition.type();
+        return type() == targetDefinition.type() && getField().qualifiedName().equals(targetDefinition.getField().qualifiedName());
     }
 
     public void override(FilterDefinition overrideFilter) {

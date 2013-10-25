@@ -186,7 +186,13 @@ public class HtmlServlet extends HttpServlet {
                                 if (endDate != null) {
                                     filterDateRangeDefinition.setEndDate(dateFormat.parse(endDate));
                                 }
+                            } else if (filter instanceof FilterPatternDefinition) {
+                                FilterPatternDefinition filterPatternDefinition = (FilterPatternDefinition) filter;
+                                String pattern = curFilter != null ? (String) curFilter.get("pattern") : null;
+                                if(pattern != null)
+                                    filterPatternDefinition.setPattern(pattern);
                             }
+
                             Boolean enabledParam = curFilter != null ? (Boolean) curFilter.get("enabled") : null;
                             if (enabledParam != null) {
                                 filter.setEnabled(enabledParam);

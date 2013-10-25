@@ -94,7 +94,17 @@
             <div class="col-md-6">
                 <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
                     <div class="btn-group">
-
+                        <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                            Configurations
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/app/html/dashboard/<%= dashboard.getUrlKey() %>"><button style="padding:5px;margin:5px;width:150px" class="btn btn-inverse restore_default_config">Restore Default</button></a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="btn-group">
                         <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
                             Refresh Data
                             <span class="caret"></span>
