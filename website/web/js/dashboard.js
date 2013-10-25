@@ -370,13 +370,14 @@ $(function () {
         var stackMap = {};
         var reportMap = {};
         var graph = buildReportGraph(dashboardJSON["base"], flattenFilters(dashboardJSON["filters"]), filterMap, stackMap, reportMap);
-        var key = (dashboardJSON["id"] != -1) ? ("dashboard " + dashboardJSON["id"]) : "";
+        var dashboardKey = (dashboardJSON["id"] != -1) ? ("dashboard " + dashboardJSON["id"]) : ("report " + dashboardJSON["base"]["id"]);
         var saveFilter;
-
+        var saveStack;
+        console.log(filterMap);
         if(Modernizr.localstorage && dashboardJSON["local_storage"] && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+$/)) {
-            if(typeof(localStorage[key]) != "undefined") {
+            if(typeof(localStorage[dashboardKey]) != "undefined") {
                 var cur;
-                var vals = JSON.parse(localStorage[key]);
+                var vals = JSON.parse(localStorage[dashboardKey]);
                 var filters = vals["filters"];
                 for(cur in filters) {
                     if(typeof(filterMap[cur]) != "undefined" && typeof(filters[cur]) != "undefined")
@@ -385,22 +386,36 @@ $(function () {
                 if(typeof(vals["stacks"]) != "undefined")
                     $.extend(true, stackMap, vals["stacks"])
             }
-            saveFilter = function(f, key, reportKey) {
-                if(localStorage[reportKey] == null) {
-                    localStorage[reportKey] = JSON.stringify({});
+            saveFilter = function(f, key) {
+                if(localStorage[dashboardKey] == null) {
+                    localStorage[dashboardKey] = JSON.stringify({});
                 }
-                var report = JSON.parse(localStorage[reportKey]);
+                var report = JSON.parse(localStorage[dashboardKey]);
                 if(typeof(report["filters"]) == "undefined") {
                     report["filters"] = {};
                 }
                 report["filters"][key] = toFilterString(f.filter, true);
-                localStorage[reportKey] = JSON.stringify(report);
+                localStorage[dashboardKey] = JSON.stringify(report);
             }
             $(".restore_default_config").click(function(e) {
-                delete localStorage[key];
+                delete localStorage[dashboardKey];
             })
+            saveStack = function(k) {
+                var i = selectedIndex(k);
+                if(localStorage[dashboardKey] == null) {
+                    localStorage[dashboardKey] = JSON.stringify({});
+                }
+                var report = JSON.parse(localStorage[dashboardKey]);
+                if(typeof(report["stacks"]) == "undefined") {
+                    report["stacks"] = {};
+                }
+                report["stacks"][k] = {"data": { "selected": i } };
+                localStorage[dashboardKey] = JSON.stringify(report);
+            }
+
         } else {
-            savefilter = function(f, key, reportKey){ };
+            saveFilter = function(f, key){ };
+            saveStack = function(k) { };
         }
         $("#base").append(dashboard(dashboardJSON));
 
@@ -418,7 +433,7 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-            saveFilter(f, k, key);
+            saveFilter(f, k);
         });
 
         $(".month_select, .year_select").change(function (e) {
@@ -430,7 +445,7 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-            saveFilter(f, k, key);
+            saveFilter(f, k);
         })
 
         $(".cb_all_choice").click(function (e) {
@@ -471,7 +486,7 @@ $(function () {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
 
-            saveFilter(f, k, key);
+            saveFilter(f, k);
         });
 
         $(".multi_flat_month_save").click(function (e) {
@@ -488,7 +503,7 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-            saveFilter(f, k, key);
+            saveFilter(f, k);
         })
 
         $(".rolling_filter_type").change(function (e) {
@@ -507,7 +522,7 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-            saveFilter(f, k, key);
+            saveFilter(f, k);
         });
 
         $(".rolling_filter_direction").change(function (e) {
@@ -521,7 +536,7 @@ $(function () {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
 
-            saveFilter(f, k, key);
+            saveFilter(f, k);
         });
 
         $(".rolling_filter_value").change(function (e) {
@@ -534,7 +549,7 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-            saveFilter(f, k, key);
+            saveFilter(f, k);
         });
 
         $(".rolling_filter_interval").change(function (e) {
@@ -546,7 +561,7 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-            saveFilter(f, k, key);
+            saveFilter(f, k);
         });
 
         $(".field_filter").change(function (e) {
@@ -558,7 +573,7 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-            saveFilter(f, k, key);
+            saveFilter(f, k);
         });
 
         $(".filter_enabled").change(function (e) {
@@ -572,7 +587,7 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-            saveFilter(f, k, key);
+            saveFilter(f, k);
         });
 
         $(".start_date_filter").datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
@@ -585,7 +600,7 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-            saveFilter(f, k, key);
+            saveFilter(f, k);
         });
 
         $(".end_date_filter").datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
@@ -598,7 +613,7 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-            saveFilter(f, k, key);
+            saveFilter(f, k);
         });
 
         $(".adhoc").click(function (e) {
@@ -613,18 +628,7 @@ $(function () {
             var k = q.attr("id");
             var s = stackMap[k];
 
-            if(Modernizr.localstorage) {
-                var i = selectedIndex(k);
-                if(localStorage[key] == null) {
-                    localStorage[key] = JSON.stringify({});
-                }
-                var report = JSON.parse(localStorage[key]);
-                if(typeof(report["stacks"]) == "undefined") {
-                    report["stacks"] = {};
-                }
-                report["stacks"][k] = {"data": { "selected": i } };
-                localStorage[key] = JSON.stringify(report);
-            }
+            saveStack(k);
             for (var f in filterMap) {
                 filterMap[f].filter.override = false;
             }
@@ -653,7 +657,7 @@ $(function () {
                 } else {
                     renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
                 }
-                saveFilter(f, k, key);
+                saveFilter(f, k);
             }
 
         })

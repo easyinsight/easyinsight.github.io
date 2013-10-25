@@ -56,6 +56,7 @@
         JSONObject reportJSON = new JSONObject();
         reportJSON.put("name", report.getName());
         reportJSON.put("id", -1);
+        reportJSON.put("local_storage", true);
         reportJSON.put("filters", new JSONArray());
         JSONObject styleJSON = new JSONObject();
         styleJSON.put("main_stack_start", "#FFFFFF");
