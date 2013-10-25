@@ -63,7 +63,7 @@ public class UserThreadMutex {
         }
 
         if (!success) {
-            throw new ReportException(new GenericReportFault("STOP HURTING ME, CENDIE :("));
+            throw new ReportException(new GenericReportFault("Too many requests, wait a bit for this report to run."));
         }
 
         return success;
