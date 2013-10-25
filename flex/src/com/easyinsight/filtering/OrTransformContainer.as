@@ -56,9 +56,14 @@ public class OrTransformContainer extends TransformContainer {
         super.createChildren();
         var actualLoadingFromReport:Boolean = _loadingFromReport;
         _loadingFromReport = true;
+        var i:int = 0;
         if (orFilter != null) {
             for each (var filter:FilterDefinition in orFilter.filters) {
                 addFilterDefinition(filter);
+                i++;
+                if (i >= 10) {
+                    break;
+                }
             }
         }
         _loadingFromReport = false;
