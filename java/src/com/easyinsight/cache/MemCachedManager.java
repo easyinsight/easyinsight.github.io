@@ -31,9 +31,25 @@ public class MemCachedManager {
         return client;
     }
 
+    public static void flush() {
+        try {
+            client.flush();
+        } catch (Exception e) {
+        }
+    }
+
     public static void add(String key, int expiration, Object o) {
         try {
             client.add(key, expiration, o);
+        } catch (Exception e) {
+            //LogClass.error(e);
+        }
+    }
+
+    public static void addReport(long reportID, Object o) {
+        try {
+            String key = "report" + reportID;
+            client.add(key, 10000, o);
         } catch (Exception e) {
             //LogClass.error(e);
         }
@@ -50,8 +66,30 @@ public class MemCachedManager {
     }
 
     @Nullable
+    public static Object getReport(long reportID) {
+        try {
+            String key = "report" + reportID;
+            return client.get(key);
+        } catch (Exception e) {
+            //LogClass.error(e);
+            return null;
+        }
+    }
+
+    @Nullable
     public static OperationFuture<Boolean> delete(String key) {
         try {
+            return client.delete(key);
+        } catch (Exception e) {
+            //LogClass.error(e);
+            return null;
+        }
+    }
+
+    @Nullable
+    public static OperationFuture<Boolean> deleteReport(long reportID) {
+        try {
+            String key = "report" + reportID;
             return client.delete(key);
         } catch (Exception e) {
             //LogClass.error(e);

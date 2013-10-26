@@ -285,7 +285,11 @@ public class AnalysisStorage {
 
     public void clearCache(long reportID, long dataSourceID) {
         MemCachedManager.deleteReport(reportID);
-        ReportCache.instance().flushResults(dataSourceID);
+        try {
+            ReportCache.instance().flushResults(dataSourceID);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
     }
 
     public void saveAnalysis(AnalysisDefinition analysisDefinition, Session session) {
