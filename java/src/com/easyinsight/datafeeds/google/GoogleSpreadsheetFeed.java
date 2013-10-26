@@ -96,7 +96,6 @@ public class GoogleSpreadsheetFeed extends Feed {
             }
             return dataSet;
         } catch (AuthenticationException ae) {
-            LogClass.error(ae);
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
         } catch (OAuthException oe) {
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
