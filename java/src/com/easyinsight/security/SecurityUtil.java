@@ -37,7 +37,6 @@ public class SecurityUtil {
 
     public static void populateSession(HttpSession session, UserServiceResponse userServiceResponse) {
         session.setAttribute("userName", userServiceResponse.getUserName());
-        System.out.println("Setting user name to " + userServiceResponse.getUserName());
         session.setAttribute("userID", userServiceResponse.getUserID());
         session.setAttribute("accountID", userServiceResponse.getAccountID());
         session.setAttribute("accountAdmin", userServiceResponse.isAccountAdmin());
@@ -79,6 +78,14 @@ public class SecurityUtil {
             return Calendar.SUNDAY;
         }
         return userPrincipal.getFirstDayOfWeek();
+    }
+
+    public static boolean isAccountReports() {
+        /*UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
+        if(userPrincipal == null)
+            userPrincipal = threadLocal.get();
+        return userPrincipal.isAccountReports();*/
+        return true;
     }
 
     public static boolean isAccountAdmin() {
@@ -216,7 +223,7 @@ public class SecurityUtil {
                 boolean accountVisible = rs.getBoolean(3);
                 long accountID = rs.getLong(2);
                 if (scorecardUserID != userID) {
-                    if (accountVisible) {
+                    if (accountVisible || isAccountReports()) {
                         if (accountID != getAccountID()) {
                             throw new SecurityException();
                         }
@@ -268,7 +275,9 @@ public class SecurityUtil {
     }
 
     public static void changeAccountType(int accountType) {
-        securityProvider.getUserPrincipal().setAccountType(accountType);
+        if (securityProvider != null && securityProvider.getUserPrincipal() != null) {
+            securityProvider.getUserPrincipal().setAccountType(accountType);
+        }
     }
 
     public static int getAccountTier() {
@@ -425,6 +434,16 @@ public class SecurityUtil {
             if (rs.next()) {
                 return rs.getInt(1);
             } else {
+                if (isAccountAdmin()) {
+                    PreparedStatement baseGroupStmt = conn.prepareStatement("SELECT BINDING_TYPE FROM GROUP_TO_USER_JOIN, USER WHERE " +
+                            "GROUP_TO_USER_JOIN.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? AND GROUP_ID = ?");
+                    baseGroupStmt.setLong(1, getAccountID());
+                    baseGroupStmt.setLong(2, groupID);
+                    ResultSet groupRS = baseGroupStmt.executeQuery();
+                    if (groupRS.next()) {
+                        return Roles.OWNER;
+                    }
+                }
                 return Integer.MAX_VALUE;
             }
         } catch (SQLException e) {
@@ -491,7 +510,7 @@ public class SecurityUtil {
             }
         }
 
-        if (accountVisibility) {
+        if (accountVisibility || isAccountReports()) {
             conn = Database.instance().getConnection();
             try {
                 PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, USER_TO_ANALYSIS WHERE USER.USER_ID = " +
@@ -579,7 +598,7 @@ public class SecurityUtil {
                 long accountID = userRS.getLong(2);
                 if (userID == SecurityUtil.getUserID()) {
                     role = Math.min(Roles.OWNER, role);
-                } else if (accountVisible && accountID == SecurityUtil.getAccountID()) {
+                } else if ((accountVisible  || isAccountReports()) && accountID == SecurityUtil.getAccountID()) {
                     role = Math.min(Roles.SHARER, role);
                 }
             }
@@ -675,7 +694,7 @@ public class SecurityUtil {
             Database.closeConnection(conn);
         }
         if (!publiclyVisible) {
-            if (accountVisible) {
+            if (accountVisible || isAccountReports()) {
                 conn = Database.instance().getConnection();
                 try {
                     PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, UPLOAD_POLICY_USERS WHERE USER.USER_ID = " +
@@ -738,7 +757,7 @@ public class SecurityUtil {
             Database.closeConnection(conn);
         }
         if (!publiclyVisible) {
-            if (accountVisible) {
+            if (accountVisible || isAccountReports()) {
                 conn = Database.instance().getConnection();
                 try {
                     PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, UPLOAD_POLICY_USERS WHERE USER.USER_ID = " +

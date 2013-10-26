@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
@@ -7,9 +8,6 @@ import com.easyinsight.logging.LogClass;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
-
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 
 /**
  * User: jboe
@@ -20,18 +18,6 @@ public class FeedRegistry {
     private FeedStorage feedStorage = new FeedStorage();
     private static FeedRegistry instance;
 
-    private JCS cache = getCache();
-
-    private JCS getCache() {
-
-        try {
-            return JCS.getInstance("feeds");
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-        return null;
-    }
-
     public static void initialize() {
         instance = new FeedRegistry();
     }
@@ -41,19 +27,11 @@ public class FeedRegistry {
     }
 
     public void flushCache(long feedID) {
-        try {
-            if(cache != null)
-                cache.remove(feedID);
-        }
-        catch(CacheException ce) {
-            LogClass.error(ce);
-        }
+        MemCachedManager.delete("feed" + feedID);
     }
 
     public Feed getFeed(long identifier) {
-        Feed feed = null;
-        if(cache != null)
-            feed = (Feed) cache.get(identifier);
+        Feed feed = (Feed) MemCachedManager.get("feed" + identifier);
         EIConnection conn = Database.instance().getConnection();
         try {
             if (feed == null || !isLatestVersion(feed, identifier, conn)) {
@@ -62,13 +40,7 @@ public class FeedRegistry {
                 feedDefinition = feedStorage.getFeedDefinitionData(identifier, conn);
                 feed = feedDefinition.createFeed(conn);
                 feed.setVersion(getLatestVersion(identifier, conn));
-                try {
-                    if(cache != null)
-                        cache.put(identifier, feed);
-                }
-                catch(CacheException e) {
-                    LogClass.error(e);
-                }
+                MemCachedManager.add("feed" + identifier, 10000, feed);
             }
             else
                 LogClass.debug("Cache hit for feed id: " + identifier);
@@ -81,9 +53,7 @@ public class FeedRegistry {
     }
 
     public Feed getFeed(long identifier, EIConnection conn) {
-        Feed feed = null;
-        if(cache != null)
-            feed = (Feed) cache.get(identifier);
+        Feed feed = (Feed) MemCachedManager.get("feed" + identifier);
 
         try {
             if (feed == null || !isLatestVersion(feed, identifier, conn)) {
@@ -92,13 +62,7 @@ public class FeedRegistry {
                 feedDefinition = feedStorage.getFeedDefinitionData(identifier, conn);
                 feed = feedDefinition.createFeed(conn);
                 feed.setVersion(getLatestVersion(identifier, conn));
-                try {
-                    if(cache != null)
-                        cache.put(identifier, feed);
-                }
-                catch(CacheException e) {
-                    LogClass.error(e);
-                }
+                MemCachedManager.add("feed" + identifier, 10000, feed);
             }
             else
                 LogClass.debug("Cache hit for feed id: " + identifier);
