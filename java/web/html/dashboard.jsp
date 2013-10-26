@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-<%@ page import="com.easyinsight.dashboard.DashboardService" %>
-<%@ page import="com.easyinsight.dashboard.Dashboard" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
-<%@ page import="com.easyinsight.dashboard.DashboardUIProperties" %>
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <%@ page import="com.easyinsight.logging.LogClass" %>
 <%@ page import="com.easyinsight.analysis.*" %>
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.html.*" %>
 <%@ page import="org.json.JSONObject" %>
+<%@ page import="com.easyinsight.dashboard.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -22,8 +20,7 @@
     }
     try {
 
-        /*
-
+        String savedDashboardIDString = request.getParameter("savedDashboardID");
         Dashboard dashboard;
         if (savedDashboardIDString != null) {
             DashboardInfo dashboardInfo = new DashboardService().retrieveFromDashboardLink(savedDashboardIDString);
@@ -33,11 +30,9 @@
         } else {
             String dashboardIDString = request.getParameter("dashboardID");
             long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
-
             dashboard = new DashboardService().getDashboard(dashboardID);
         }
-         */
-        String savedDashboardIDString = request.getParameter("savedDashboardID");
+
 
         String drillthroughKey = request.getParameter("drillthroughKey");
         List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
@@ -52,7 +47,7 @@
             dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
         }
 
-        Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
+//        Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
         FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, false);
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
         UIData uiData = Utils.createUIData();
@@ -84,23 +79,24 @@
 </jsp:include>
 <div class="nav nav-pills reportNav">
         <div class="container">
-            <div class="col-md-6">
-                <ul class="breadcrumb reportBreadcrumb">
-
-                    <li><a href="/app/html/">Data Sources</a> <span class="divider"></span></li>
-                    <li>
-                        <a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
-                        </a><span class="divider"></span></li>
-                    <li class="active"><%= StringEscapeUtils.escapeHtml(dashboard.getName()) %>
-                    </li>
-
-                </ul>
+            <div class="col-md-6 reportBlah">
+                <a class="reportControl" href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
             </div>
-            <div class="col-md-6">
-                <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
-                    <div class="btn-group">
-
-                        <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+            <div class="col-md-6 reportControlToolbar">
+                <div class="btn-toolbar pull-right">
+                    <div class="btn-group reportControlBtnGroup">
+                        <a class="reportControl dropdown-toggle" data-toggle="dropdown" href="#">
+                            Configurations
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/app/html/dashboard/<%= dashboard.getUrlKey() %>"><button style="padding:5px;margin:5px;width:150px" class="btn btn-inverse restore_default_config">Restore Default</button></a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="btn-group reportControlBtnGroup">
+                        <a class="reportControl dropdown-toggle" data-toggle="dropdown" href="#">
                             Refresh Data
                             <span class="caret"></span>
                         </a>
@@ -118,8 +114,8 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="btn-group">
-                        <button class="btn btn-inverse toggle-filters">Toggle Filters</button>
+                    <div class="btn-group reportControlBtnGroup">
+                        <a class="reportControl toggle-filters">Toggle Filters</a>
                     </div>
                 </div>
             </div>
@@ -127,7 +123,7 @@
 </div>
 
 <div class="container">
-    <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>
+<%--    <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>--%>
     <jsp:include page="refreshingDataSource.jsp"/>
     <div id="base"/>
 </div>

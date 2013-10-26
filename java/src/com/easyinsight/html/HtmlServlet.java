@@ -98,7 +98,7 @@ public class HtmlServlet extends HttpServlet {
                             filters.addAll(dashboard.filtersForReport(reportID));
                         }
 
-                        for (FilterDefinition filter : filters) {
+                        for (FilterDefinition filter : flattenFilters(filters)) {
                             JSONObject curFilter = (JSONObject) filterObject.get(String.valueOf(filter.getFilterID()));
                             if (filter instanceof FilterValueDefinition) {
                                 FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
@@ -186,7 +186,13 @@ public class HtmlServlet extends HttpServlet {
                                 if (endDate != null) {
                                     filterDateRangeDefinition.setEndDate(dateFormat.parse(endDate));
                                 }
+                            } else if (filter instanceof FilterPatternDefinition) {
+                                FilterPatternDefinition filterPatternDefinition = (FilterPatternDefinition) filter;
+                                String pattern = curFilter != null ? (String) curFilter.get("pattern") : null;
+                                if(pattern != null)
+                                    filterPatternDefinition.setPattern(pattern);
                             }
+
                             Boolean enabledParam = curFilter != null ? (Boolean) curFilter.get("enabled") : null;
                             if (enabledParam != null) {
                                 filter.setEnabled(enabledParam);
@@ -271,7 +277,7 @@ public class HtmlServlet extends HttpServlet {
                         filters.addAll(dashboard.filtersForReport(reportID));
                     }
 
-                    for (FilterDefinition filter : filters) {
+                    for (FilterDefinition filter : flattenFilters(filters)) {
                         if (filter instanceof FilterValueDefinition) {
                             FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
                             String value = req.getParameter("filter" + filter.getFilterID());
@@ -393,6 +399,18 @@ public class HtmlServlet extends HttpServlet {
             return number.intValue();
         }
         return 0;
+    }
+
+    private List<FilterDefinition> flattenFilters(List<FilterDefinition> filters) {
+        List<FilterDefinition> newList = new ArrayList<FilterDefinition>();
+        for(FilterDefinition f : filters) {
+            if(f instanceof OrFilter) {
+                newList.addAll(((OrFilter) f).getFilters());
+            } else {
+                newList.add(f);
+            }
+        }
+        return newList;
     }
 
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,

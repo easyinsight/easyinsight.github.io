@@ -409,7 +409,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             if (myFilterColl.length > 0) {
 
                 hasFilters = true;
-                transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
+                transformContainer.feedID = dashboardReport.report.dataFeedID;
                 transformContainer.retrievalState = dashboardEditorMetadata.retrievalState;
                 transformContainer.dashboardID = dashboardEditorMetadata.dashboardID;
                 transformContainer.dashboard = dashboardEditorMetadata.dashboard;

@@ -149,4 +149,10 @@ public class FlatDateFilter extends FilterDefinition {
         }
         return jo;
     }
+
+    @Override
+    public void override(FilterDefinition overrideFilter) {
+        FlatDateFilter f = (FlatDateFilter) overrideFilter;
+        this.setValue(f.getValue());
+    }
 }

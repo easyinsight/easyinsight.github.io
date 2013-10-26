@@ -324,7 +324,7 @@ public class FeedService {
     }
 
     public static boolean testAccountVisible(EIConnection conn) throws SQLException {
-        /*PreparedStatement accountStmt = conn.prepareStatement("SELECT TEST_ACCOUNT_VISIBLE FROM USER WHERE USER_ID = ?");
+        PreparedStatement accountStmt = conn.prepareStatement("SELECT TEST_ACCOUNT_VISIBLE FROM USER WHERE USER_ID = ?");
         accountStmt.setLong(1, SecurityUtil.getUserID());
         ResultSet rs = accountStmt.executeQuery();
         boolean testAccountVisible = true;
@@ -332,8 +332,7 @@ public class FeedService {
             testAccountVisible = rs.getBoolean(1);
         }
         accountStmt.close();
-        return testAccountVisible;*/
-        return true;
+        return testAccountVisible;
     }
 
     public List<JoinSuggestion> suggestJoins(List<DataSourceDescriptor> scope) {

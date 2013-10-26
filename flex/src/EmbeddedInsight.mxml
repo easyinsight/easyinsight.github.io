@@ -1,30 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:framework="com.easyinsight.framework.*"
-                creationComplete="handleFlashVars()" xmlns:dashboard="com.easyinsight.dashboard.*"
-                paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
-                bottom="0" paddingBottom="0" backgroundColor="#FFFFFF">
+<easyinsight:EmbeddedBase xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="*">
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.account.Account;
-        import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.InsightResponse;
-        import com.easyinsight.analysis.PopupMenuFactory;
-        import com.easyinsight.framework.BasicInfo;
+        import com.easyinsight.dashboard.EmbeddedReportView;
 
-        import com.easyinsight.framework.Constants;
-        import com.easyinsight.framework.LoginEvent;
-        import com.easyinsight.framework.LoginObject;
-        import com.easyinsight.framework.LoginResponse;
-        import com.easyinsight.framework.TORegistry;
-
-        //import com.easyinsight.framework.TORegistry2;
-
-        //import com.easyinsight.framework.TORegistry;
-
-        import com.easyinsight.framework.User;
-        import com.easyinsight.framework.UserServiceResponse;
-        import com.easyinsight.report.EmbedReportContextMenuFactory;
-        import com.easyinsight.util.UserAudit;
+        import mx.core.UIComponent;
+        import mx.core.Application;
 
 
         [Bindable]
@@ -67,23 +49,8 @@
         [Bindable]
         private var showFilters:Boolean;
 
-        [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf", fontName="Lucida Grande", fontStyle="normal")]
-        private var myNormalLucida:Class;
-
-        [Embed(source="/com/easyinsight/skin/osx/opensans.swf", fontName="Open Sans", fontStyle="normal")]
-        private var openSans:Class;
-
-        [Embed(source="/com/easyinsight/skin/osx/opensansbold.swf", fontName="Open Sans Bold", fontWeight="bold")]
-        private var openSansBold:Class;
-
-        private function handleFlashVars():void {
-            Font.registerFont(myNormalLucida);
-            Font.registerFont(openSans);
-            Font.registerFont(openSansBold);
-            Constants.setup();
-            UserAudit.initialize();
-            PopupMenuFactory.menuFactory = new DefaultMenuFactory();
-            PopupMenuFactory.reportFactory = new EmbedReportContextMenuFactory();
+        override protected function childSetup():void {
+            super.childSetup();
             this.urlKey = String(Application.application.parameters.analysisID);
             this.reportType = int(Application.application.parameters.reportType);
             this.dataSourceID = int(Application.application.parameters.dataSourceID);
@@ -113,97 +80,35 @@
             menu.hideBuiltInItems();
             menu.customItems = [ showFiltersMenu, showToolbarMenu ];
             this.contextMenu = menu;
-            // session check
-            userService.getBuildPath.send();
         }
 
-        private function gotBuildPath():void {
-            var basicInfo:BasicInfo = userService.getBuildPath.lastResult as BasicInfo;
-            Constants.instance().buildPath = basicInfo.version;
-            Constants.instance().prefix = basicInfo.prefix;
-            userService.isSessionLoggedIn.send();
-        }
-
-        private function dependancies():void {
-            TORegistry.registerTypes();
-        }
-
-        [Bindable]
-        private var stackIndex:int = 0;
-
-        private var loginObject:LoginObject;
-
-        private function onLogin(event:LoginEvent):void {
-            var authResult:UserServiceResponse = event.authResponse;
-            if (authResult.accountState == Account.DELINQUENT || authResult.accountState == Account.BILLING_FAILED) {
-
-            } else {
-                quietLogin(authResult, false);
-            }
-        }
-
-        private function sessionCheck():void {
-            var loginResponse:LoginResponse = userService.isSessionLoggedIn.lastResult as LoginResponse;
-            if (loginResponse != null && loginResponse.token != null) {
-                loginObject = new LoginObject();
-                loginObject.addEventListener(LoginEvent.LOGIN, onLogin);
-                loginObject.authenticate(loginResponse.token, loginResponse.userIDString, loginResponse.userServiceResponse);
-            } else if (loginResponse != null) {
-                var authResult:UserServiceResponse = loginResponse.userServiceResponse;
-                if (authResult != null) {
-                    if (authResult.accountState == Account.DELINQUENT || authResult.accountState == Account.BILLING_FAILED) {
-                    } else {
-                        quietLogin(authResult, false);
-                    }
-                }
-            } else {
-                analysisService.openAnalysisIfPossible.send(urlKey);
-            }
+        override protected function go():void {
+            analysisService.openAnalysisIfPossible.send(urlKey);
         }
 
         private function gotReportInfo():void {
             var info:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
             if (info.status == InsightResponse.SUCCESS) {
-                stackIndex = 2;
+                toView();
             } else {
-                stackIndex = 1;
+                toLogin();
             }
         }
 
-        private function login(event:LoginEvent):void {
-            quietLogin(event.authResponse, true);
-        }
-
-        private function quietLogin(authResponse:UserServiceResponse, navigate:Boolean):void {
-            User.initializeUser(authResponse);
-            User.getInstance().userName = authResponse.userName;
-            stackIndex = 2;
-        }
-
-        private function setup():void {
-            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loginEvent);
-            User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
-        }
-
-        private function loginEvent(event:LoginEvent):void {
-            stackIndex = 2;
+        override protected function createView():UIComponent {
+            var view:EmbeddedReportView = new EmbeddedReportView();
+            view.urlKey = urlKey;
+            view.dataSourceID = dataSourceID;
+            view.reportType = reportType;
+            view.showToolbar = showToolbar;
+            view.showFilters = showFilters;
+            view.showHeader = showHeader;
+            return view;
         }
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="openAnalysisIfPossible" result="gotReportInfo()"/>
     </mx:RemoteObject>
-    <mx:RemoteObject id="userService" destination="login">
-        <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
-        <mx:method name="getBuildPath" result="gotBuildPath()"/>
-    </mx:RemoteObject>
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
-    <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
-        <mx:Box/>
-        <framework:LoginComponent loginEvent2="stackIndex = 2"/>
-        <dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}"
-                                      dataSourceID="{dataSourceID}" reportType="{reportType}"
-                                      showToolbar="{showToolbar}"
-                                        showFilters="{showFilters}" showHeader="{showHeader}"/>
-    </mx:ViewStack>
-</mx:Application>
+</easyinsight:EmbeddedBase>

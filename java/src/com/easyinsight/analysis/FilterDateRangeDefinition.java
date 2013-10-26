@@ -345,8 +345,15 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         JSONObject jo = super.toJSON(filterHTMLMetadata);
 
         jo.put("type", "date_range");
-        jo.put("start_date", df.format(getStartDate()));
-        jo.put("end_date", df.format(getEndDate()));
+        jo.put("start", df.format(getStartDate()));
+        jo.put("end", df.format(getEndDate()));
         return jo;
+    }
+
+    @Override
+    public void override(FilterDefinition overrideFilter) {
+        FilterDateRangeDefinition f = (FilterDateRangeDefinition) overrideFilter;
+        this.setStartDate(f.getStartDate());
+        f.setEndDate(f.getEndDate());
     }
 }

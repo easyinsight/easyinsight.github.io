@@ -6,6 +6,9 @@ import com.easyinsight.database.Database;
 import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.sql.PreparedStatement;
@@ -169,5 +172,17 @@ public class OrFilter extends FilterDefinition {
         }
         sb.append("</div>");
         return sb.toString();
+    }
+
+    @Override
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
+        JSONObject jo = super.toJSON(filterHTMLMetadata);
+        jo.put("type", "or_filter");
+        JSONArray ja = new JSONArray();
+        for(FilterDefinition f : filters) {
+            ja.put(f.toJSON(filterHTMLMetadata));
+        }
+        jo.put("filters", ja);
+        return jo;
     }
 }

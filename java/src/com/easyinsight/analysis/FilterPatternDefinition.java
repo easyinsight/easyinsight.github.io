@@ -6,6 +6,8 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -119,5 +121,19 @@ public class FilterPatternDefinition extends FilterDefinition {
 
     public void setCaseSensitive(boolean caseSensitive) {
         this.caseSensitive = caseSensitive;
+    }
+
+    @Override
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
+        JSONObject jo = super.toJSON(filterHTMLMetadata);
+        jo.put("type", "pattern_filter");
+        jo.put("pattern", pattern);
+        return jo;
+    }
+
+    @Override
+    public void override(FilterDefinition overrideFilter) {
+        FilterPatternDefinition f = (FilterPatternDefinition) overrideFilter;
+        setPattern(f.getPattern());
     }
 }

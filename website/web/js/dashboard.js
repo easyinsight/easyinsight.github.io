@@ -1,3 +1,5 @@
+$.holdReady(true);
+Modernizr.load({ complete: function() { $.holdReady(false); }});
 var stack;
 var grid;
 var textTemplate;
@@ -10,8 +12,6 @@ var email_modal;
 var short_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 var currentReport;
-
-var storeSettings;
 
 var dashboardComponent = function (obj) {
     if (obj.type == "stack")
@@ -74,19 +74,23 @@ function onDataSourceResult(data, callDataID) {
 var selectedIndex = function (id) {
     var v = $("#" + id);
     var s = $("#" + id + " > .active");
-    for (var i = 0; i < v.children().length; i++) {
-        if (v.children()[i] == s[0]) {
+    var c = v.children();
+    for (var i = 0; i < c.length; i++) {
+        if (c[i] == s[0]) {
             return i;
         }
     }
     return -1;
 }
 
-var toFilterString = function (f) {
+var toFilterString = function (f, store) {
     var c = {id: f["id"], enabled: f.enabled}
-    if (!f.enabled || f.override)
-        return $.extend(c, {enabled: false});
-    else if (f.type == "single")
+    if (!f.enabled || (!store && f.override)) {
+        $.extend(c, {enabled: false});
+        if(!store)
+            return cur;
+    }
+    if (f.type == "single")
         return $.extend(c, {selected: f["selected"]})
     else if (f.type == "multiple")
         return $.extend(c, {selected: f["selected"] });
@@ -96,13 +100,15 @@ var toFilterString = function (f) {
         else
             return $.extend(c, {interval_type: f.interval_type});
     } else if (f.type == "date_range") {
-        return $.extend(c, {start: f.start_date, end: f.end_date});
+        return $.extend(c, {start: f.start, end: f.end});
     } else if (f.type == "flat_date_month" || f.type == "flat_date_year") {
         return $.extend(c, {selected: f.selected});
     } else if (f.type == "multi_date") {
-        return $.extend(c, {start: f.min, end: f.max});
+        return $.extend(c, {start: f.start, end: f.end});
     } else if (f.type == "field_filter") {
         return $.extend(c, {selected: f.selected});
+    } else if (f.type == "pattern_filter") {
+        return $.extend(c, {pattern: f.pattern});
     } else
         return $.extend(c, {enabled: false})
 }
@@ -134,7 +140,7 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
         return;
     }
     var curFilters = $.map(o.filters, function (e, i) {
-        return toFilterString(e);
+        return toFilterString(e, false);
     });
     var fullFilters = {};
     for (i = 0; i < curFilters.length; i++) {
@@ -162,7 +168,6 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     else if (obj.metadata.type == "list") {
         $.ajax($.extend(postData, {
             dataType: "text",
-
             success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns))
         }));
     } else if (obj.metadata.type == "bar") {
@@ -186,7 +191,6 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedColumnChart(id, w, obj.metadata.styles)) }));
-        ;
     } else if (obj.metadata.type == "gauge") {
         $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: null }))
         var v = JSON.stringify(obj.metadata.properties).replace(/\"/g, "");
@@ -198,18 +202,29 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
                 $('#' + id + " .reportArea").html(data);
             }, null, id);
         })}));
-        ;
+
     }
     o.rendered = true;
 }
 
+function flattenFilters(filters) {
+    return _.flatten(_.map(filters, function(e, i, l) {
+        if(e.type == "or_filter") {
+            return e.filters;
+        } else {
+            return e;
+        }
+    }))
+}
+
 var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMap) {
     if (obj.type == "report") {
-        var fs3 = filterStack.concat(obj.report.metadata.filters);
+        var ff1 = flattenFilters(obj.report.metadata.filters);
+        var fs3 = filterStack.concat(ff1);
 
         var w = {"type": "report", "filters": fs3, "report": obj, "rendered": false, "id": obj.id };
         reportMap[obj.id] = w;
-        var t = _.reduce(obj.report.metadata.filters, function (m, i) {
+        var t = _.reduce(ff1, function (m, i) {
             m[w.id + "filter" + i.id] = {"filter": i, "parent": w };
             return m;
         }, {});
@@ -217,29 +232,30 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
         return w;
     } else if (obj.type == "grid") {
         var children = [];
-
-        var fs1 = filterStack.concat(obj.filters);
+        var ff2 = flattenFilters(obj.filters);
+        var fs1 = filterStack.concat(ff2);
         for (var i = 0; i < obj.grid.length; i++) {
             for (var j = 0; j < obj.grid[i].length; j++) {
                 children = _.flatten(children.concat(buildReportGraph(obj.grid[i][j], fs1, filterMap, stackMap, reportMap)));
             }
         }
         var x = {"type": "grid", "children": children };
-        var u = _.reduce(obj.filters, function (m, i) {
+        var u = _.reduce(ff2, function (m, i) {
             m[x.id + "filter" + i.id] = {"filter": i, "parent": x };
             return m;
         }, {});
         $.extend(filterMap, u)
         return x;
     } else if (obj.type == "stack") {
-        var fs2 = filterStack.concat(obj.filters);
+        var ff3 = flattenFilters(obj.filters);
+        var fs2 = filterStack.concat(ff3);
         var ch = [];
         for (var k = 0; k < obj.stack_items.length; k++) {
             ch = _.flatten(ch.concat(buildReportGraph(obj.stack_items[k].item, fs2, filterMap, stackMap, reportMap)))
         }
-        var y = {"type": "stack", "children": ch, "id": obj.id };
+        var y = {"type": "stack", "children": ch, "id": obj.id, "selected": 0, "data": obj };
         stackMap[obj.id] = y;
-        var v = _.reduce(obj.filters, function (m, i) {
+        var v = _.reduce(ff3, function (m, i) {
             m[y.id + "filter" + i.id] = {"filter": i, "parent": y };
             return m;
         }, {});
@@ -317,6 +333,12 @@ $(function () {
                     return Filter.multi_flat_date_month({data: obj, parent_id: parent_id})
                 else if (obj.type == "field_filter")
                     return Filter.field_filter({data: obj, parent_id: parent_id});
+                else if(obj.type == "pattern_filter")
+                    return Filter.pattern_filter({data: obj, parent_id: parent_id });
+                else if(obj.type == "or_filter")
+                    return Filter.or_filter({data: obj, parent_id: parent_id });
+                else
+                    return Filter.generic_filter({data: obj, parent_id: parent_id});
             },
             multi_flat_date_month: _.template($("#multi_flat_date_filter", s).html()),
             flat_date_year: _.template($("#flat_date_year_filter", s).html()),
@@ -327,6 +349,9 @@ $(function () {
             date_range: _.template($("#absolute_date_filter_template", s).html()),
             base_filter: _.template($("#filter_base", s).html()),
             field_filter: _.template($("#field_filter_template", s).html()),
+            pattern_filter: _.template($("#pattern_filter_template", s).html()),
+            or_filter: _.template($("#or_filter_template", s).html()),
+            generic_filter: _.template($("#generic_filter", s).html()),
             filters: _.template($("#filters_template", s).html())
 
         };
@@ -338,62 +363,113 @@ $(function () {
         gaugeTemplate = _.template($("#gauge_template", s).html());
         email_modal = _.template($("#email_modal", s).html());
 
-        $("#base").append(dashboard(dashboardJSON));
-
-        $(".dashboardStackNav").css("background-color", dashboardJSON["styles"]["alternative_stack_start"])
-        $(".dashboard_base > .row > .col-md-12 > .tabbable > .nav-pills").css("background-color", dashboardJSON["styles"]["main_stack_start"])
-
-        var filterMap = _.reduce(dashboardJSON["filters"], function (m, i) {
+        var filterMap = _.reduce(flattenFilters(dashboardJSON["filters"]), function (m, i) {
             m["filter" + i.id] = {"filter": i, "parent": null };
             return m;
         }, {});
         var stackMap = {};
         var reportMap = {};
-        var graph = buildReportGraph(dashboardJSON["base"], dashboardJSON["filters"], filterMap, stackMap, reportMap);
+        var graph = buildReportGraph(dashboardJSON["base"], flattenFilters(dashboardJSON["filters"]), filterMap, stackMap, reportMap);
+        var dashboardKey = (dashboardJSON["id"] != -1) ? ("dashboard " + dashboardJSON["id"]) : ("report " + dashboardJSON["base"]["id"]);
+        var saveFilter;
+        var saveStack;
+        console.log(filterMap);
+        if(Modernizr.localstorage && dashboardJSON["local_storage"] && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+$/)) {
+            if(typeof(localStorage[dashboardKey]) != "undefined") {
+                var cur;
+                var vals = JSON.parse(localStorage[dashboardKey]);
+                var filters = vals["filters"];
+                for(cur in filters) {
+                    if(typeof(filterMap[cur]) != "undefined" && typeof(filters[cur]) != "undefined")
+                        $.extend(filterMap[cur].filter, filters[cur]);
+                }
+                if(typeof(vals["stacks"]) != "undefined")
+                    $.extend(true, stackMap, vals["stacks"])
+            }
+            saveFilter = function(f, key) {
+                if(localStorage[dashboardKey] == null) {
+                    localStorage[dashboardKey] = JSON.stringify({});
+                }
+                var report = JSON.parse(localStorage[dashboardKey]);
+                if(typeof(report["filters"]) == "undefined") {
+                    report["filters"] = {};
+                }
+                report["filters"][key] = toFilterString(f.filter, true);
+                localStorage[dashboardKey] = JSON.stringify(report);
+            }
+            $(".restore_default_config").click(function(e) {
+                delete localStorage[dashboardKey];
+            })
+            saveStack = function(k) {
+                var i = selectedIndex(k);
+                if(localStorage[dashboardKey] == null) {
+                    localStorage[dashboardKey] = JSON.stringify({});
+                }
+                var report = JSON.parse(localStorage[dashboardKey]);
+                if(typeof(report["stacks"]) == "undefined") {
+                    report["stacks"] = {};
+                }
+                report["stacks"][k] = {"data": { "selected": i } };
+                localStorage[dashboardKey] = JSON.stringify(report);
+            }
+
+        } else {
+            saveFilter = function(f, key){ };
+            saveStack = function(k) { };
+        }
+        $("#base").append(dashboard(dashboardJSON));
+
+        $(".dashboardStackNav").css("background-color", dashboardJSON["styles"]["alternative_stack_start"])
+        $(".dashboard_base > .row > .col-md-12 > .tabbable > .nav-pills").css("background-color", dashboardJSON["styles"]["main_stack_start"])
 
         hideFilters(graph, filterMap);
         renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], false);
         $(".single_filter").change(function (e) {
-            var f = filterMap[$(e.target || e.srcElement).attr("id")]
-            f.filter.selected = $(e.target || e.srcElement).val();
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-        });
-
-        $(".month_select, .year_select").change(function (e) {
-            var f = filterMap[$(e.target).attr("id")];
+            var k = $(e.target).attr("id");
+            var f = filterMap[k];
             f.filter.selected = $(e.target).val();
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
+            saveFilter(f, k);
+        });
+
+        $(".month_select, .year_select").change(function (e) {
+            var k = $(e.target).attr("id");
+            var f = filterMap[k];
+            f.filter.selected = $(e.target).val();
+            if (f.parent == null) {
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+            } else {
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+            }
+            saveFilter(f, k);
         })
 
         $(".cb_all_choice").click(function (e) {
-            if ($(e.target || e.srcElement).is(":checked")) {
-                $("input", $(e.target || e.srcElement).parent().parent()).attr("checked", "checked");
+            if ($(e.target).is(":checked")) {
+                $("input", $(e.target).parent().parent()).attr("checked", "checked");
             } else {
-                $("input", $(e.target || e.srcElement).parent().parent()).removeAttr("checked");
+                $("input", $(e.target).parent().parent()).removeAttr("checked");
             }
         });
 
         $(".cb_filter_choice").click(function (e) {
-            if ($(e.target || e.srcElement).is(":checked")) {
-                if ($(".cb_filter_choice:not(:checked)", $(e.target || e.srcElement).parent().parent()).size() == 0) {
-                    $(".cb_all_choice", $(e.target || e.srcElement).parent().parent()).attr("checked", "checked");
+            if ($(e.target).is(":checked")) {
+                if ($(".cb_filter_choice:not(:checked)", $(e.target).parent().parent()).size() == 0) {
+                    $(".cb_all_choice", $(e.target).parent().parent()).attr("checked", "checked");
                 }
             } else {
-                $(".cb_all_choice", $(e.target || e.srcElement).parent().parent()).removeAttr("checked");
+                $(".cb_all_choice", $(e.target).parent().parent()).removeAttr("checked");
             }
         });
 
         $(".multi_value_save").click(function (e) {
-            var a = $(e.target || e.srcElement).parent().parent().parent().parent();
-            var f = filterMap[a.attr("id").replace(/_modal$/g, "")];
+            var a = $(e.target).parent().parent().parent().parent();
+            var k = a.attr("id").replace(/_modal$/g, "");
+            var f = filterMap[k];
             var selects = $("li input:checked", a);
             var selectVals = $.map(selects, function (e, i) {
                 return $(".cb_filter_value", $(e).parent()).html();
@@ -409,42 +485,49 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
+
+            saveFilter(f, k);
         });
 
         $(".multi_flat_month_save").click(function (e) {
             var a = $(e.target).parent().parent().parent().parent();
-            var f = filterMap[a.attr("id").replace(/_modal$/g, "")];
+            var k = a.attr("id").replace(/_modal$/g, "");
+            var f = filterMap[k];
             var min = $(".multi_flat_month_start", a).val();
             var max = $(".multi_flat_month_end", a).val();
-            f.filter.min = parseInt(min);
-            f.filter.max = parseInt(max);
-            $("#" + a.attr("id").replace(/_modal$/g, "")).html(short_months[f.filter.min] + " to " + short_months[f.filter.max]);
+            f.filter.start = parseInt(min);
+            f.filter.end = parseInt(max);
+            $("#" + a.attr("id").replace(/_modal$/g, "")).html(short_months[f.filter.start] + " to " + short_months[f.filter.end]);
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
+            saveFilter(f, k);
         })
 
         $(".rolling_filter_type").change(function (e) {
             var t = $(".custom", $(e.target).parent());
-            var f = filterMap[$(e.target).attr("id").replace(/_type$/g, "")];
+            var k = $(e.target).attr("id").replace(/_type$/g, "");
+            var f = filterMap[k];
             if ($(e.target).val() == "18") {
                 t.show();
 
             } else {
                 t.hide();
             }
-            f.filter.interval_type = $(e.target || e.srcElement).val();
+            f.filter.interval_type = $(e.target).val();
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
+            saveFilter(f, k);
         });
 
         $(".rolling_filter_direction").change(function (e) {
-            var f = filterMap[$(e.target).attr("id").replace(/_custom_direction$/g, "")];
+            var k = $(e.target).attr("id").replace(/_custom_direction$/g, "");
+            var f = filterMap[k];
             f.filter.direction = $(e.target).val();
 
             if (f.parent == null) {
@@ -452,10 +535,13 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
+
+            saveFilter(f, k);
         });
 
         $(".rolling_filter_value").change(function (e) {
-            var f = filterMap[$(e.target).attr("id").replace(/_custom_value$/g, "")];
+            var k = $(e.target).attr("id").replace(/_custom_value$/g, "")
+            var f = filterMap[k];
             f.filter.value = parseInt($(e.target).val());
 
             if (f.parent == null) {
@@ -463,30 +549,36 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
+            saveFilter(f, k);
         });
 
         $(".rolling_filter_interval").change(function (e) {
-            var f = filterMap[$(e.target).attr("id").replace(/_custom_interval$/g, "")];
+            var k = $(e.target).attr("id").replace(/_custom_interval$/g, "")
+            var f = filterMap[k];
             f.filter.interval = $(e.target).val();
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
+            saveFilter(f, k);
         });
 
         $(".field_filter").change(function (e) {
-            var f = filterMap[$(e.target).attr("id")];
+            var k = $(e.target).attr("id")
+            var f = filterMap[k];
             f.filter.selected = $(e.target).val();
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
+            saveFilter(f, k);
         });
 
         $(".filter_enabled").change(function (e) {
-            var f = filterMap[$(e.target).attr("id").replace(/_enabled$/g, "")];
+            var k = $(e.target).attr("id").replace(/_enabled$/g, "");
+            var f = filterMap[k];
 
             f.filter.enabled = $(e.target).is(":checked");
 
@@ -495,32 +587,33 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
+            saveFilter(f, k);
         });
 
         $(".start_date_filter").datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
             var z = $(e.target);
-            var f = filterMap[z.attr("id").replace(/_date_start$/, "")];
-            f.filter.start_date = z.val();
+            var k = z.attr("id").replace(/_date_start$/, "");
+            var f = filterMap[k];
+            f.filter.start = z.val();
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-            alert('saving...')
-            saveFilter(f);
+            saveFilter(f, k);
         });
 
         $(".end_date_filter").datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
             var z = $(e.target);
-            var f = filterMap[z.attr("id").replace(/_date_end$/, "")];
-            f.filter.end_date = z.val();
+            var k = z.attr("id").replace(/_date_end$/, "");
+            var f = filterMap[k];
+            f.filter.end = z.val();
             if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], dashboardJSON["drillthroughID"], true);
+                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], dashboardJSON["drillthroughID"], true);
+                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-            alert('saving...')
-            saveFilter(f);
+            saveFilter(f, k);
         });
 
         $(".adhoc").click(function (e) {
@@ -530,16 +623,15 @@ $(function () {
         })
 
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-
             $(".filter").removeClass("hideFilter");
             var q = $(e.target).parent().parent();
-            var s = stackMap[q.attr("id")];
-            var t = q.children();
-            var selected = -1;
+            var k = q.attr("id");
+            var s = stackMap[k];
+
+            saveStack(k);
             for (var f in filterMap) {
                 filterMap[f].filter.override = false;
             }
-
             hideFilters(graph, filterMap);
 
             renderReports(s, dashboardJSON["id"], dashboardJSON["drillthroughID"], false);
@@ -554,6 +646,22 @@ $(function () {
             showFilters = !showFilters;
         })
 
+        $(".pattern_input").blur(function (e) {
+            var k = $(e.target).attr("id");
+            var f = filterMap[k];
+            var p = $(e.target).val();
+            if(p != f.filter.pattern) {
+                f.filter.pattern = p;
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k);
+            }
+
+        })
+
         $(".dashboardReportHeader").click(function (e) {
             var f = $(".reportMenu", $(e.target).parent());
             f.slideToggle({ complete: function () {
@@ -564,7 +672,7 @@ $(function () {
         $(".clickable_grid").click(function (e) {
             var g = $(e.target).parent()
             var f = $(".reportMenu", g);
-            $(".gridReportMenu", g).hide({effect: "slide", direction: "up"});
+            $(".gridReportMenu:visible", g).hide({effect: "slide", direction: "up"});
             f.slideToggle({ complete: function () {
                 f.css("overflow", "visible");
             }});
@@ -601,18 +709,6 @@ $(function () {
                 f = f.parent();
             f.hide({effect: "slide", direction: "left"})
         })
-
-
-        function saveFilter(f) {
-            if(Modernizr.localstorage) {
-
-            }
-            else {
-                function saveFilter(f) { }
-            }
-        }
-
-
 
     })
 })

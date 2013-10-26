@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:framework="com.easyinsight.framework.*"
+                creationComplete="handleFlashVars()"
+                paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
+                bottom="0" paddingBottom="0" backgroundColor="#FFFFFF">
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.account.Account;
+        import com.easyinsight.analysis.DefaultMenuFactory;
+        import com.easyinsight.analysis.PopupMenuFactory;
+        import com.easyinsight.framework.BasicInfo;
+        import com.easyinsight.framework.Constants;
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.LoginObject;
+        import com.easyinsight.framework.LoginResponse;
+        import com.easyinsight.framework.TORegistry;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.report.EmbedReportContextMenuFactory;
+        import com.easyinsight.util.UserAudit;
+
+        import mx.core.UIComponent;
+
+        [Embed(source="/com/easyinsight/skin/osx/LucidaGrande.swf", fontName="Lucida Grande", fontStyle="normal")]
+        private var myNormalLucida:Class;
+
+        [Embed(source="/com/easyinsight/skin/osx/opensans.swf", fontName="Open Sans", fontStyle="normal")]
+        private var openSans:Class;
+
+        [Embed(source="/com/easyinsight/skin/osx/opensansbold.swf", fontName="Open Sans Bold", fontWeight="bold")]
+        private var openSansBold:Class;
+
+        protected function handleFlashVars():void {
+            Font.registerFont(myNormalLucida);
+            Font.registerFont(openSans);
+            Font.registerFont(openSansBold);
+            Constants.setup();
+            UserAudit.initialize();
+            PopupMenuFactory.menuFactory = new DefaultMenuFactory();
+            PopupMenuFactory.reportFactory = new EmbedReportContextMenuFactory();
+            // session check
+            childSetup();
+
+            userService.getBuildPath.send();
+        }
+
+        protected function createView():UIComponent {
+            return null;
+        }
+
+        protected function childSetup():void {
+
+        }
+
+        private function gotBuildPath():void {
+            var basicInfo:BasicInfo = userService.getBuildPath.lastResult as BasicInfo;
+            Constants.instance().buildPath = basicInfo.version;
+            Constants.instance().prefix = basicInfo.prefix;
+            userService.isSessionLoggedIn.send();
+        }
+
+        private function dependancies():void {
+            TORegistry.registerTypes();
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
+
+        private var loginObject:LoginObject;
+
+        private function onLogin(event:LoginEvent):void {
+            var authResult:UserServiceResponse = event.authResponse;
+            if (authResult.accountState == Account.DELINQUENT || authResult.accountState == Account.BILLING_FAILED) {
+
+            } else {
+                quietLogin(authResult, false);
+            }
+        }
+
+        private function sessionCheck():void {
+            var loginResponse:LoginResponse = userService.isSessionLoggedIn.lastResult as LoginResponse;
+            if (loginResponse != null && loginResponse.token != null) {
+                loginObject = new LoginObject();
+                loginObject.addEventListener(LoginEvent.LOGIN, onLogin);
+                loginObject.authenticate(loginResponse.token, loginResponse.userIDString, loginResponse.userServiceResponse);
+            } else if (loginResponse != null) {
+                var authResult:UserServiceResponse = loginResponse.userServiceResponse;
+                if (authResult != null) {
+                    if (authResult.accountState == Account.DELINQUENT || authResult.accountState == Account.BILLING_FAILED) {
+                    } else {
+                        quietLogin(authResult, false);
+                    }
+                }
+            } else {
+                go();
+            }
+        }
+
+        protected function go():void {
+
+        }
+
+        private function login(event:LoginEvent):void {
+            quietLogin(event.authResponse, true);
+        }
+
+        private function quietLogin(authResponse:UserServiceResponse, navigate:Boolean):void {
+            User.initializeUser(authResponse);
+            User.getInstance().userName = authResponse.userName;
+            toView();
+        }
+
+        private function setup():void {
+            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loginEvent);
+            User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
+        }
+
+        private function loginEvent(event:LoginEvent):void {
+            toView();
+        }
+
+        protected function toLogin():void {
+
+        }
+
+        protected function toView():void {
+            stackIndex = 2;
+        }
+        ]]>
+	</mx:Script>
+    <mx:RemoteObject id="userService" destination="login">
+        <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
+        <mx:method name="getBuildPath" result="gotBuildPath()"/>
+    </mx:RemoteObject>
+    <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
+    <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
+        <mx:Box/>
+        <framework:LoginComponent loginEvent2="toView()"/>
+    </mx:ViewStack>
+</mx:Application>
