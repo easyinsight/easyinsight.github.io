@@ -1,66 +1,27 @@
 <!DOCTYPE html>
-<%@ page import="com.easyinsight.dashboard.DashboardService" %>
-<%@ page import="com.easyinsight.dashboard.Dashboard" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
-<%@ page import="com.easyinsight.analysis.FilterHTMLMetadata" %>
-<%@ page import="com.easyinsight.dashboard.DashboardUIProperties" %>
-<%@ page import="com.easyinsight.html.RedirectUtil" %>
-<%@ page import="com.easyinsight.analysis.FilterDefinition" %>
-<%@ page import="com.easyinsight.html.UIData" %>
-<%@ page import="com.easyinsight.html.Utils" %>
-<%@ page import="com.easyinsight.html.DrillThroughData" %>
-<%@ page import="java.util.*" %>
+<%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
+<%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
+<%@ page import="com.easyinsight.analysis.*" %>
+<%@ page import="com.easyinsight.html.*" %>
+<%@ page import="com.easyinsight.dashboard.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
-    if (session.getAttribute("userID") != null) {
+
+
+    if(session.getAttribute("userName") != null) {
         com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     }
     try {
-        long dashboardID;
-        List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
-        String drillthroughArgh = request.getParameter("drillthroughKey");
-        if (drillthroughArgh != null) {
-            DrillThroughData drillThroughData = Utils.drillThroughFiltersForDashboard(drillthroughArgh);
-            drillthroughFilters = drillThroughData.getFilters();
-            dashboardID = drillThroughData.getDashboardID();
-            SecurityUtil.authorizeDashboard(dashboardID);
-        } else {
-            String dashboardIDString = request.getParameter("dashboardID");
-            dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
-            if (dashboardID == 0) {
-                throw new com.easyinsight.security.SecurityException();
-            } else if (dashboardID == -1) {
-                session.setAttribute("loginRedirect", RedirectUtil.getURL(request, request.getRequestURI() + "?" + request.getQueryString()));
-                response.sendRedirect(RedirectUtil.getURL(request, "/app/login.jsp"));
-                return;
-            }
-        }
 
-        Dashboard dashboard = new DashboardService().getDashboardView(dashboardID);
-        DashboardUIProperties dashboardUIProperties = dashboard.findHeaderImage();
+        String dashboardIDString = request.getParameter("dashboardID");
+        long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
 
-        Map<String, FilterDefinition> filterMap = new HashMap<String, FilterDefinition>();
-        for (FilterDefinition filterDefinition : dashboard.getFilters()) {
-            filterMap.put(filterDefinition.label(false), filterDefinition);
-        }
-        if (drillthroughFilters != null) {
-            for (FilterDefinition filterDefinition : drillthroughFilters) {
-                FilterDefinition replaced = filterMap.put(filterDefinition.label(false), filterDefinition);
-                if (replaced != null) {
-                    filterDefinition.setFilterID(replaced.getFilterID());
-                }
-            }
-        }
-        dashboard.setFilters(new ArrayList<FilterDefinition>(filterMap.values()));
+        Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
 
-
-
-        boolean includeHeader = request.getParameter("includeHeader") != null;
-        boolean includeFilters = request.getParameter("includeFilters") != null;
-        boolean includeToolbar = request.getParameter("includeToolbar") != null;
-
+        FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, false);
+        DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
         UIData uiData = Utils.createUIData();
 
 %>
@@ -68,77 +29,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Easy Insight &mdash; <%= StringEscapeUtils.escapeHtml(dashboard.getName()) %></title>
+    <title>Easy Insight</title>
     <jsp:include page="../html/bootstrapHeader.jsp"/>
     <jsp:include page="../html/reportDashboardHeader.jsp"/>
-
-
-    <%
-        Set<String> jsIncludes = new HashSet<String>(dashboard.getRootElement().jsIncludes());
-        for (String jsInclude : jsIncludes) {
-            %><%= "<script type=\"text/javascript\" src=\"" + jsInclude + "\"></script>"%><%
-        }
-        Set<String> cssIncludes = new HashSet<String>(dashboard.getRootElement().cssIncludes());
-        for (String cssInclude : cssIncludes) {
-            %><%= "<link rel=\"stylesheet\" type=\"text/css\" href=\""+cssInclude+"\" />"%><%
-        }
-    %>
     <script type="text/javascript">
+        var dashboardJSON = <%= dashboard.toJSON(filterHTMLMetadata) %>;
+        function afterRefresh() {
 
-        var initCount = 0;
-        var requiredCount = <%= dashboard.requiredInitCount() %>;
-
-        function updateInitCount(renderFunction) {
-            initCount++;
-            if (initCount == requiredCount) {
-                reportReady = true;
-                doneBuildingDashboard();
-            } else if (initCount > requiredCount) {
-                renderFunction();
-            }
-        }
-
-        function doneBuildingDashboard() {
-            refreshDashboard();
-        }
-
-        function refreshDashboard() {
-        <%= dashboard.getRootElement().refreshFunction() %>
         }
     </script>
+    <script type="text/javascript" src="/js/dashboard.js"></script>
 </head>
 <body>
-<%
-    if (includeHeader) {
-%>
-<%= uiData.createHeader(dashboard.getName()) %>
-<%
-    }
-%>
-<div class="container">
-<div class="row" id="filterRow">
-    <div class="col-md-12">
+<div class="nav nav-pills reportNav">
+    <div class="container">
+        <div class="col-md-6">
+            <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
+                <div class="btn-group">
 
-        <%
-            for (FilterDefinition filterDefinition : dashboard.getFilters()) {
-                if (filterDefinition.isShowOnReportView()) {
-                    FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, false);
-                    filterHTMLMetadata.setOnChange("refreshDashboard");
-                    out.println("<div class=\"filterDiv\">" + filterDefinition.toHTML(filterHTMLMetadata) + "</div>");
-                }
-            }
-        %>
-
-    </div>
-</div>
-<div class="container" style="padding-top:10px">
-    <jsp:include page="../html/refreshingDataSource.jsp"/>
-    <div class="row">
-        <div class="col-md-12">
-            <%= dashboard.getRootElement().toHTML(new FilterHTMLMetadata(dashboard, request, drillthroughArgh, true)) %>
+                    <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                        Refresh Data
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <button class="btn btn-inverse" type="button" onclick="refreshReport()"
+                                    style="padding:5px;margin:5px;width:150px">Refresh the Dashboard
+                            </button>
+                        </li>
+                        <li>
+                            <button class="btn btn-inverse" type="button" id="refreshDataSourceButton"
+                                    onclick="refreshDataSource('<%= dataSourceDescriptor.getUrlKey() %>')" style="padding:5px;margin:5px;width:150px">Refresh
+                                Data Source
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-inverse toggle-filters">Toggle Filters</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<div class="container">
+    <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>
+    <jsp:include page="../html/refreshingDataSource.jsp"/>
+    <div id="base"/>
+</div>
+
+
 </body>
 <%
     } finally {
