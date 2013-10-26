@@ -31,6 +31,7 @@
                             <mx:Button label="Force Trial Expire" click="forceTrialExpire()"/>
                             <mx:Button label="Synchronize Invoices" click="syncInvoices()"/>
                             <mx:Button label="Task Generators" click="taskGenerators()"/>
+                            <mx:Button label="Flush Cache" click="flushCache()"/>
                         </mx:HBox>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Connections">
@@ -93,6 +94,11 @@
         private function syncInvoices():void {
             ProgressAlert.alert(this, "Synchronizing invoices...", null, adminService.syncInvoices);
             adminService.syncInvoices.send();
+        }
+
+        private function flushCache():void {
+            ProgressAlert.alert(this, "Flushing cache...", null, adminService.flushCache);
+            adminService.flushCache.send();
         }
         
         private function sync():void {

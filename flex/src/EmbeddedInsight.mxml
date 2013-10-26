@@ -110,5 +110,4 @@
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="openAnalysisIfPossible" result="gotReportInfo()"/>
     </mx:RemoteObject>
-    <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
 </easyinsight:EmbeddedBase>
