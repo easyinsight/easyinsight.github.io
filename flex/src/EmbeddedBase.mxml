@@ -2,7 +2,7 @@
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:framework="com.easyinsight.framework.*"
                 creationComplete="handleFlashVars()"
                 paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
-                bottom="0" paddingBottom="0" backgroundColor="#FFFFFF">
+                bottom="0" paddingBottom="0" backgroundColor="#FFFFFF" preloader="com.easyinsight.preloader.EIPreloader">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
@@ -40,7 +40,6 @@
             PopupMenuFactory.reportFactory = new EmbedReportContextMenuFactory();
             // session check
             childSetup();
-
             userService.getBuildPath.send();
         }
 
@@ -107,7 +106,7 @@
         private function quietLogin(authResponse:UserServiceResponse, navigate:Boolean):void {
             User.initializeUser(authResponse);
             User.getInstance().userName = authResponse.userName;
-            toView();
+            go();
         }
 
         private function setup():void {
@@ -116,7 +115,7 @@
         }
 
         private function loginEvent(event:LoginEvent):void {
-            toView();
+            go();
         }
 
         protected function toLogin():void {
@@ -124,6 +123,7 @@
         }
 
         protected function toView():void {
+            stack.addChild(createView());
             stackIndex = 2;
         }
         ]]>
@@ -133,8 +133,8 @@
         <mx:method name="getBuildPath" result="gotBuildPath()"/>
     </mx:RemoteObject>
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
-    <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
+    <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%" id="stack">
         <mx:Box/>
-        <framework:LoginComponent loginEvent2="toView()"/>
+        <framework:LoginComponent loginEvent2="go()"/>
     </mx:ViewStack>
 </mx:Application>
