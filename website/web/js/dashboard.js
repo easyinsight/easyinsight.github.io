@@ -45,22 +45,27 @@ function refreshDataSource(dataSourceID) {
     $("#problemHTML").hide();
     $.getJSON('/app/refreshDataSource?urlKey=' + dataSourceID, function (data) {
         var callDataID = data["callDataID"];
-        again(callDataID);
+        again(callDataID, null);
     });
 }
 
-function again(callDataID) {
+function again(callDataID, message) {
+    if (message != null) {
+        $("#messageDiv").html(message);
+    }
     setTimeout(function () {
         $.getJSON('/app/refreshStatus?callDataID=' + callDataID, function (data) {
             onDataSourceResult(data, callDataID);
         });
     }, 5000);
 }
+
 function onDataSourceResult(data, callDataID) {
     var status = data["status"];
     if (status == 1) {
         // running
-        again(callDataID);
+        var message = data["statusMessage"];
+        again(callDataID, message);
     } else if (status == 2) {
         $("#refreshDiv").hide();
         refreshReport();
