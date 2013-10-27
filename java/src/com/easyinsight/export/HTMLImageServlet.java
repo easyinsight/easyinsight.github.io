@@ -22,7 +22,7 @@ import java.sql.ResultSet;
 public class HTMLImageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        EIConnection conn = Database.instance().getConnection();
+        /*EIConnection conn = Database.instance().getConnection();
         try {
             int width = Integer.parseInt(req.getParameter("width"));
             int height = Integer.parseInt(req.getParameter("height")) - 100;
@@ -48,6 +48,6 @@ public class HTMLImageServlet extends HttpServlet {
             LogClass.error(e);
         } finally {
             Database.closeConnection(conn);
-        }
+        }*/
     }
 }

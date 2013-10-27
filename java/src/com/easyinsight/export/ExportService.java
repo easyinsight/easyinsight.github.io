@@ -866,7 +866,7 @@ public class ExportService {
                 if (absoluteValue < 60000) {
                     int seconds = (int) (absoluteValue / 1000);
                     int milliseconds = (int) (absoluteValue % 1000);
-                    valueString = seconds + "s:" + milliseconds + "ms";
+                    valueString = seconds + "s:" + (analysisMeasure.getPrecision() > 0 ? (milliseconds + "ms") : "");
                 } else if (absoluteValue < (60000 * 60)) {
                     int minutes = (int) (absoluteValue / 60000);
                     int seconds = (int) (absoluteValue / 1000) % 60;
@@ -1439,6 +1439,16 @@ public class ExportService {
     public static String compareYearsToHTMLTable(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSCompareYearsDefinition verticalList = (WSCompareYearsDefinition) report;
+        if (verticalList.getFilterDefinitions() != null) {
+            List<FilterDefinition> filters = verticalList.getFilterDefinitions();
+            Iterator<FilterDefinition> iter = filters.iterator();
+            while (iter.hasNext()) {
+                FilterDefinition filter = iter.next();
+                if (filter instanceof FlatDateFilter) {
+                    iter.remove();
+                }
+            }
+        }
         ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
         YearStuff ytdStuff = YTDUtil.getYearStuff(verticalList, dataSet.getDataSet(), dataSet.getPipelineData(), dataSet.getReportItems());
 
@@ -1547,6 +1557,21 @@ public class ExportService {
         percentMeasure.getFormattingConfiguration().setFormattingType(FormattingConfiguration.PERCENTAGE);
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
+
+        int maxColumns = 0;
+        for (YTDValue ytdValue : ytdStuff.getValues()) {
+            if (ytdValue != null) {
+                if (ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
+                    int ctr = 0;
+                    for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
+                        ctr++;
+                    }
+                    ctr += 2;
+                    maxColumns = Math.max(ctr, maxColumns);
+                }
+            }
+        }
+
         for (YTDValue ytdValue : ytdStuff.getValues()) {
             if (ytdValue != null) {
                 String ytdTRStyle = "";
@@ -1598,7 +1623,7 @@ public class ExportService {
                         sb.append("<td style=\"").append(cellStyle).append("</td>");
                     }
                 } else if (alwaysShow) {
-                    for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
+                    for (int i = 0; i < maxColumns; i++) {
                         sb.append("<td style=\"").append(cellStyle).append("</td>");
                     }
                     if (hasBenchmark) {
