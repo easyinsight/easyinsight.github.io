@@ -4,6 +4,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.analysis.ReportException;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
@@ -12,8 +13,6 @@ import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -31,16 +30,6 @@ import java.util.Map;
  * Time: 9:23 AM
  */
 public class DatabaseConnection extends ServerDataSourceDefinition {
-
-    private JCS getCache(String cacheName) {
-
-        try {
-            return JCS.getInstance(cacheName);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-        return null;
-    }
 
     public String getRefreshKey() {
         return refreshKey;
@@ -101,12 +90,10 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
 
             System.out.println("Invoking " + refreshEndpoint);
 
-            try {
-                System.out.println("setting call data of " + callDataID + getDataFeedID());
-                getCache("dbConnectionCache").put(callDataID + getDataFeedID(), 1);
-            } catch (CacheException e) {
-                LogClass.error(e);
-            }
+
+            System.out.println("setting call data of " + callDataID + getDataFeedID());
+            MemCachedManager.add("dbConnectionCache" + callDataID + getDataFeedID(), 5000, 1);
+
 
             HttpMethod requestMethod = new GetMethod(refreshEndpoint);
             try {
@@ -121,7 +108,7 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
             int retries = 0;
             boolean gotData;
             do {
-                Integer val = (Integer) getCache("dbConnectionCache").get(callDataID + getDataFeedID());
+                Integer val = (Integer) MemCachedManager.instance().get("dbConnectionCache" + callDataID + getDataFeedID());
                 gotData = val == null || val == 2;
                 retries++;
                 try {
