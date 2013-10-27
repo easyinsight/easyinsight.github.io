@@ -179,7 +179,9 @@ public class DataService {
             }
             //clone.setParentItemID(item.getAnalysisItemID());
             clone.setOriginalDisplayName(item.toDisplay());
+            if (!addonReport.isUseNewNaming()) {
             clone.setDisplayName(report.getName() + " - " + item.toDisplay());
+            }
             clone.setBasedOnReportField(item.getAnalysisItemID());
             ReportKey reportKey = new ReportKey();
             reportKey.setParentKey(item.getKey());
@@ -486,7 +488,7 @@ public class DataService {
             analysisDefinition.setFilterDefinitions(customFilters);
             trendDataResults.setDefinition(analysisDefinition);
             if (cacheKey != null) {
-                ReportCache.instance().storeReport(dataSourceID, cacheKey, trendDataResults);
+                ReportCache.instance().storeReport(dataSourceID, cacheKey, trendDataResults, analysisDefinition.getCacheMinutes());
             }
             reportViewBenchmark(analysisDefinition, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
             return trendDataResults;
@@ -787,7 +789,7 @@ public class DataService {
             analysisDefinition.setDataFeedID(dataSourceID);
             EmbeddedResults results = getEmbeddedResultsForReport(analysisDefinition, customFilters, insightRequestMetadata, drillThroughFilters, conn);
             if (cacheKey != null) {
-                ReportCache.instance().storeReport(dataSourceID, cacheKey, results);
+                ReportCache.instance().storeReport(dataSourceID, cacheKey, results, analysisDefinition.getCacheMinutes());
             }
             boolean tooManyResults = false;
             if (results instanceof EmbeddedDataResults) {
@@ -1887,11 +1889,9 @@ public class DataService {
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
 
             for (AnalysisItem analysisItem : analysisItems) {
-
-                //if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
-                    validQueryItems.add(analysisItem);
-                //}
+                validQueryItems.add(analysisItem);
                 if (analysisItem.getFilters() != null) {
+                    analysisItem.populateNamedFilters(analysisDefinition.getFilterDefinitions());
                     for (FilterDefinition filterDefinition : analysisItem.getFilters()) {
                         filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
                     }
