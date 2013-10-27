@@ -45,7 +45,7 @@ public class ReportCache {
         } finally {
             Database.closeConnection(conn);
         }
-        MemCachedManager.add(cacheKeyString, cacheTime * 60, results);
+        MemCachedManager.add(cacheKeyString, cacheTime > 0 ? cacheTime * 60 : 10000, results);
     }
 
     @Nullable
@@ -68,7 +68,7 @@ public class ReportCache {
         } finally {
             Database.closeConnection(conn);
         }
-        MemCachedManager.add(cacheKeyString, cacheTime * 60, results);
+        MemCachedManager.add(cacheKeyString, cacheTime > 0 ? cacheTime * 60 : 10000, results);
     }
 
     public void flushResults(long dataSourceID) {
