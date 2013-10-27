@@ -32,7 +32,7 @@ public class ReportCache {
     }
 
     public void storeReport(long dataSourceID, CacheKey cacheKey, EmbeddedResults results, int cacheTime) {
-        String cacheKeyString = cacheKey.toString();
+        String cacheKeyString = "reportResults" + cacheKey.toString();
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement ps = conn.prepareStatement("INSERT INTO REPORT_CACHE (cache_key, data_source_id) VALUES (?, ?)");
@@ -54,7 +54,7 @@ public class ReportCache {
     }
 
     public void storeAddonReport(long dataSourceID, CacheKey cacheKey, DataSet results, int cacheTime) {
-        String cacheKeyString = cacheKey.toString();
+        String cacheKeyString = "addonResults" + cacheKey.toString();
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement ps = conn.prepareStatement("INSERT INTO REPORT_CACHE (cache_key, data_source_id, report_id) VALUES (?, ?, ?)");
