@@ -2,6 +2,7 @@ package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.benchmark.BenchmarkManager;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -14,10 +15,10 @@ import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.util.RandomTextGenerator;
-import org.apache.jcs.JCS;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.*;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -29,18 +30,116 @@ import java.util.Date;
  */
 public class DashboardService {
 
-    private JCS dashboardCache = getCache("dashboards");
+    private DashboardStorage dashboardStorage = new DashboardStorage();
 
-    private JCS getCache(String cacheName) {
+    public long saveConfigurationForDashboard(long dashboardID, DashboardStackPositions dashboardStackPositions) {
+        EIConnection conn = Database.instance().getConnection();
         try {
-            return JCS.getInstance(cacheName);
+            long id = dashboardStackPositions.save(conn, dashboardID, 0);
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO saved_configuration (dashboard_state_id, configuration_name) values (?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            stmt.setLong(1, id);
+            stmt.setString(2, "");
+            stmt.execute();
+            return Database.instance().getAutoGenKey(stmt);
         } catch (Exception e) {
             LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
-        return null;
     }
 
-    private DashboardStorage dashboardStorage = new DashboardStorage();
+    public long saveConfigurationForReport(long reportID, DashboardStackPositions dashboardStackPositions) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            long id = dashboardStackPositions.save(conn, 0, reportID);
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO saved_configuration (dashboard_state_id, configuration_name) values (?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            stmt.setLong(1, id);
+            stmt.setString(2, "");
+            stmt.execute();
+            return Database.instance().getAutoGenKey(stmt);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void deleteConfigurations(List<SavedConfiguration> configurations) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("DELETE FROM saved_configuration WHERE saved_configuration_id = ?");
+            for (SavedConfiguration configuration : configurations) {
+                stmt.setLong(1, configuration.getId());
+                stmt.executeUpdate();
+            }
+            stmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public List<SavedConfiguration> getConfigurationsForReport(long reportID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            List<SavedConfiguration> savedConfigurations = new ArrayList<SavedConfiguration>();
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT saved_configuration_id, configuration_name, SAVED_CONFIGURATION.dashboard_state_id FROM " +
+                    "DASHBOARD_STATE, SAVED_CONFIGURATION WHERE DASHBOARD_STATE.report_id = ? AND DASHBOARD_STATE.DASHBOARD_STATE_ID = SAVED_CONFIGURATION.dashboard_state_id");
+            queryStmt.setLong(1, reportID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long configurationID = rs.getLong(1);
+                String configurationName = rs.getString(2);
+                DashboardStackPositions positions = new DashboardStackPositions();
+                positions.retrieve(conn, rs.getLong(3));
+                SavedConfiguration savedConfiguration = new SavedConfiguration();
+                savedConfiguration.setName(configurationName);
+                savedConfiguration.setId(configurationID);
+                savedConfiguration.setDashboardStackPositions(positions);
+                savedConfigurations.add(savedConfiguration);
+            }
+            return savedConfigurations;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public List<SavedConfiguration> getConfigurationsForDashboard(long dashboardID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            List<SavedConfiguration> savedConfigurations = new ArrayList<SavedConfiguration>();
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT saved_configuration_id, configuration_name, SAVED_CONFIGURATION.dashboard_state_id FROM " +
+                    "DASHBOARD_STATE, SAVED_CONFIGURATION WHERE DASHBOARD_STATE.dashboard_id = ? AND DASHBOARD_STATE.DASHBOARD_STATE_ID = SAVED_CONFIGURATION.dashboard_state_id");
+            queryStmt.setLong(1, dashboardID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long configurationID = rs.getLong(1);
+                String configurationName = rs.getString(2);
+                DashboardStackPositions positions = new DashboardStackPositions();
+                positions.retrieve(conn, rs.getLong(3));
+                SavedConfiguration savedConfiguration = new SavedConfiguration();
+                savedConfiguration.setName(configurationName);
+                savedConfiguration.setId(configurationID);
+                savedConfiguration.setDashboardStackPositions(positions);
+                savedConfigurations.add(savedConfiguration);
+            }
+            return savedConfigurations;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
 
     public String saveDashboardLink(long dashboardID, DashboardStackPositions dashboardStackPositions) {
         EIConnection conn = Database.instance().getConnection();
@@ -257,9 +356,10 @@ public class DashboardService {
             }
             dashboardStorage.saveDashboard(dashboard);
             String cacheKey = SecurityUtil.getUserID(false) + "-" + dashboard.getId();
-            if (dashboardCache != null) {
+            /*if (dashboardCache != null) {
                 dashboardCache.remove(cacheKey);
-            }
+            }*/
+            MemCachedManager.delete("dashboard" + dashboard.getId());
 
             Set<Long> reportIDs = dashboard.containedReports();
             EIConnection conn = Database.instance().getConnection();
@@ -437,7 +537,20 @@ public class DashboardService {
                 return dashboard;
             }
         }*/
-        Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
+        Dashboard dashboard = null;
+        byte[] bytes = (byte[]) MemCachedManager.get("dashboard" + dashboardID);
+        if (bytes != null) {
+            try {
+                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+                dashboard = (Dashboard) ois.readObject();
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
+        }
+
+        if (dashboard == null) {
+            dashboard = dashboardStorage.getDashboard(dashboardID, conn);
+        }
         dashboard.setRole(role);
         Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
         List<FilterDefinition> dlsFilters = DataService.addDLSFilters(dashboard.getDataSourceID(), conn);
@@ -464,9 +577,14 @@ public class DashboardService {
             }
             dashboard.visit(new StateVisitor(dashboardStackPositions));
         }
-        if (dashboardCache != null) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(dashboard);
+        oos.flush();
+        MemCachedManager.add("dashboard" + dashboardID, 10000, baos.toByteArray());
+        /*if (dashboardCache != null) {
             dashboardCache.put(cacheKey, dashboard);
-        }
+        }*/
         BenchmarkManager.recordBenchmarkForDashboard("DashboardView", System.currentTimeMillis() - startTime, SecurityUtil.getUserID(false), dashboardID);
         return dashboard;
     }
@@ -636,6 +754,7 @@ public class DashboardService {
     public void deleteDashboard(long dashboardID) {
         SecurityUtil.authorizeDashboard(dashboardID);
         try {
+            MemCachedManager.delete("dashboard" + dashboardID);
             dashboardStorage.deleteDashboard(dashboardID);
         } catch (Exception e) {
             LogClass.error(e);
