@@ -38,6 +38,12 @@ public class DataService {
 
     private FeedRegistry feedRegistry = FeedRegistry.instance();
 
+    /*
+    SELECT SUM(k1085505),SUM(k1085533),month(k1085504) as monthk1085504, year(k1085504) as yeark1085504,SUM(k1085829),k1085503,SUM(k1085524),SUM(k1085523),SUM(k1085541),SUM(k1085550),SUM(k1085565),SUM(k1085529),SUM(k1085566),SUM(k1085526),SUM(k1085592),SUM(k1085551),SUM(k1085604),SUM(k1085830),SUM(k1085536),SUM(k1085875),SUM(k1085579) FROM df25271v1 GROUP BY monthk1085504, yeark1085504,binary(k1085503), yeark1085504;
+
+    SELECT SUM(k1085533),SUM(k1085505),month(k1085504) as monthk1085504, year(k1085504) as yeark1085504,SUM(k1085829),k1085503,SUM(k1085524),SUM(k1085523),SUM(k1085541),SUM(k1085529),SUM(k1085526),SUM(k1085604),SUM(k1085830),SUM(k1085875) FROM df25271v1 GROUP BY monthk1085504, yeark1085504,binary(k1085503)
+     */
+
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID) {
         return getAnalysisItemMetadata(feedID, analysisItem, utfOffset, reportID, dashboardID, null);
     }
@@ -179,9 +185,9 @@ public class DataService {
             }
             //clone.setParentItemID(item.getAnalysisItemID());
             clone.setOriginalDisplayName(item.toDisplay());
-            if (!addonReport.isUseNewNaming()) {
+            //if (!addonReport.isUseNewNaming()) {
             clone.setDisplayName(report.getName() + " - " + item.toDisplay());
-            }
+            //}
             clone.setBasedOnReportField(item.getAnalysisItemID());
             ReportKey reportKey = new ReportKey();
             reportKey.setParentKey(item.getKey());
