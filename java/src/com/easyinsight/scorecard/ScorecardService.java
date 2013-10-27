@@ -8,18 +8,15 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.kpi.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.HistoryRun;
-import com.easyinsight.security.Roles;
+
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
-import com.easyinsight.userupload.UserUploadService;
+
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 
 /**
  * User: jamesboe
@@ -28,17 +25,7 @@ import org.apache.jcs.access.exception.CacheException;
  */
 public class ScorecardService {
 
-    private static JCS cache = getCache("scorecardQueue");
 
-    private static JCS getCache(String cacheName) {
-
-        try {
-            return JCS.getInstance(cacheName);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-        return null;
-    }
     
     public InsightDescriptor generateTrendGridReport(long scorecardID) {
         SecurityUtil.authorizeScorecard(scorecardID);
@@ -358,14 +345,5 @@ public class ScorecardService {
                     kpiValue.getPercentChange(), kpiValue.isDirectional(), conn);*/
         }
         return outcomes;
-    }
-
-    public void storeScorecardForGoogle(long scorecardID) {
-        try {
-            cache.put(SecurityUtil.getUserID(), scorecardID);
-        } catch (CacheException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
     }
 }
