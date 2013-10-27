@@ -10,7 +10,6 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
-import org.apache.jcs.JCS;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
@@ -26,15 +25,6 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
 
     private String query;
     private int timeout = 5;
-
-    private JCS getCache(String cacheName) {
-        try {
-            return JCS.getInstance(cacheName);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-        return null;
-    }
 
     private boolean rebuildFields;
 

@@ -50,13 +50,17 @@ public class DatabaseListener implements Runnable {
         } catch (ClassNotFoundException e) {
             LogClass.error(e);
         }
-        Thread thread = new Thread(instance);
+        thread = new Thread(instance);
         thread.setName("Database Listener");
         thread.start();
     }
 
+    private static Thread thread;
+
     public void stop() {
         running = false;
+        thread.interrupt();
+
     }
 
     public void blah() throws Exception {
@@ -154,7 +158,7 @@ public class DatabaseListener implements Runnable {
                             }
                             try {
                                 MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-                                responseQueue.sendMessage(String.valueOf(sourceID) + "|true|" + changed);
+                                responseQueue.sendMessage(String.valueOf(sourceID) + "|true|" + changed + "| " + System.currentTimeMillis());
                             } catch (Exception e) {
                                 LogClass.error(e);
                             }
