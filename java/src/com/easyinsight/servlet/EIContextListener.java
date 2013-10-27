@@ -12,11 +12,8 @@ import com.easyinsight.datafeeds.DataSourceTypeRegistry;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.database.DatabaseListener;
 import com.easyinsight.datafeeds.migration.MigrationManager;
-import com.easyinsight.eventing.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.scheduler.Scheduler;
-import com.easyinsight.scorecard.LongKPIRefreshEvent;
-import com.easyinsight.scorecard.LongKPIRefreshListener;
 import com.easyinsight.security.DefaultSecurityProvider;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DatabaseManager;
@@ -67,17 +64,12 @@ public class EIContextListener implements ServletContextListener {
                     Scheduler.initialize();
                     scheduler = Scheduler.instance();
                 }
-                EventDispatcher.instance().start();
-                EventDispatcher.instance().registerListener(AsyncCreatedEvent.ASYNC_CREATED, new AsyncCreatedListener());
-                EventDispatcher.instance().registerListener(AsyncRunningEvent.ASYNC_RUNNING, new AsyncRunningListener());
-                EventDispatcher.instance().registerListener(AsyncCompletedEvent.ASYNC_COMPLETED, new AsyncCompletedListener());
-                EventDispatcher.instance().registerListener(LongKPIRefreshEvent.LONG_KPI_REFRESH_EVENT, LongKPIRefreshListener.instance());
                 if (ConfigLoader.instance().isTaskRunner()) {
                     scheduler.start();
                 }
                 try {
                     MemCachedManager.initialize();
-                    //MemCachedManager.flush();
+                    MemCachedManager.flush();
                 } catch (Exception e) {
                     LogClass.error(e);
                 }
@@ -123,8 +115,6 @@ public class EIContextListener implements ServletContextListener {
         } catch (Exception e) {
             LogClass.error(e);
         }
-        EventDispatcher.instance().setRunning(false);
-        EventDispatcher.instance().interrupt();
         SystemSettings.instance().stop();
         Database.instance().shutdown();
 

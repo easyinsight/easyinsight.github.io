@@ -1,6 +1,7 @@
 package com.easyinsight.html;
 
 import com.easyinsight.analysis.DataSourceConnectivityReportFault;
+import com.easyinsight.scorecard.DataSourceRefreshEvent;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.userupload.UserUploadService;
@@ -30,7 +31,12 @@ public class RefreshStatusServlet extends HttpServlet {
             CallData callData = new AsyncService().getCallData(callDataID);
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("status", callData.getStatus());
-            jsonObject.put("statusMessage", callData.getStatusMessage());
+            String message = callData.getStatusMessage();
+            if (message == null && callData.getResult() instanceof DataSourceRefreshEvent) {
+                DataSourceRefreshEvent event = (DataSourceRefreshEvent) callData.getResult();
+                message = event.getDataSourceName();
+            }
+            jsonObject.put("statusMessage", message);
             if (callData.getStatus() == ServiceUtil.FAILED) {
                 DataSourceConnectivityReportFault fault = (DataSourceConnectivityReportFault) callData.getResult();
                 jsonObject.put("problemHTML", fault.toHTML());

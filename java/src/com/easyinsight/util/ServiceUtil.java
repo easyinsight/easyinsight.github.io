@@ -1,12 +1,7 @@
 package com.easyinsight.util;
 
-import com.easyinsight.logging.LogClass;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.security.SecurityUtil;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * User: jamesboe
@@ -14,20 +9,6 @@ import java.util.Map;
  * Time: 9:04 AM
  */
 public class ServiceUtil {
-
-    //private Map<Long, Map<String, CallData>> callDataMap = new HashMap<Long, Map<String, CallData>>();
-
-    private JCS callDataMap = getCache("serviceUtil");
-
-    private JCS getCache(String cacheName) {
-
-        try {
-            return JCS.getInstance(cacheName);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-        return null;
-    }
 
     public static final int RUNNING = 1;
     public static final int DONE = 2;
@@ -45,48 +26,57 @@ public class ServiceUtil {
 
     public String longRunningCall(long itemID) {
         String callID = itemID + "-" + SecurityUtil.getUserID() + "-" + System.currentTimeMillis();
-        Map<String, CallData> callMap = (Map<String, CallData>) callDataMap.get(SecurityUtil.getUserID());
-        if (callMap == null) {
-            callMap = new HashMap<String, CallData>();
-            try {
-                callDataMap.put(SecurityUtil.getUserID(), callMap);
-            } catch (CacheException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        callMap.put(callID, new CallData());
+        MemCachedManager.add(callID, 10000, new CallData());
         return callID;
     }
 
-    private Map<String, CallData> get() {
-        return (Map<String, CallData>) callDataMap.get(SecurityUtil.getUserID());
-    }
-
     public void updateStatusMessage(String callDataID, String statusMessage) {
-        get().get(callDataID).setStatusMessage(statusMessage);
+        CallData callData = (CallData) MemCachedManager.instance().get(callDataID);
+        if (callData == null) {
+            callData = new CallData();
+        }
+        callData.setStatusMessage(statusMessage);
+        MemCachedManager.instance().delete(callDataID);
+        MemCachedManager.instance().add(callDataID, 10000, callData);
     }
 
     public void updateStatus(String callDataID, int status) {
-        get().get(callDataID).setStatus(status);
+        CallData callData = (CallData) MemCachedManager.instance().get(callDataID);
+        if (callData == null) {
+            callData = new CallData();
+        }
+        callData.setStatus(status);
+        MemCachedManager.instance().delete(callDataID);
+        MemCachedManager.instance().add(callDataID, 10000, callData);
+    }
+
+    public void updateResult(String callDataID, Object result) {
+        CallData callData = (CallData) MemCachedManager.instance().get(callDataID);
+        if (callData == null) {
+            callData = new CallData();
+        }
+        callData.setResult(result);
+        MemCachedManager.instance().delete(callDataID);
+        MemCachedManager.instance().add(callDataID, 10000, callData);
     }
 
     public void updateStatus(String callDataID, int status, Object result) {
-        get().get(callDataID).setResult(result);
-        get().get(callDataID).setStatus(status);
+        updateStatus(callDataID, status);
+        updateResult(callDataID, result);
     }
 
     public void updateStatus(String callDataID, int status, String message) {
-        get().get(callDataID).setStatusMessage(message);
-        get().get(callDataID).setStatus(status);
+        updateStatus(callDataID, status);
+        updateStatusMessage(callDataID, message);
     }
 
     public CallData getCallData(String callDataID) {
-        CallData callData = get().get(callDataID);
+        CallData callData = (CallData) MemCachedManager.instance().get(callDataID);
         if (callData == null) {
             return null;
         }
         if (callData.getStatus() == DONE || callData.getStatus() == FAILED) {
-            get().remove(callDataID);
+            MemCachedManager.instance().delete(callDataID);
         }
         return callData;
     }

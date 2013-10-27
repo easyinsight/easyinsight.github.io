@@ -17,6 +17,10 @@ public class CacheKey implements Serializable {
         this.customFilters = customFilters;
     }
 
+    public long getReportID() {
+        return reportID;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

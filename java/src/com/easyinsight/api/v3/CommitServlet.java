@@ -1,15 +1,14 @@
 package com.easyinsight.api.v3;
 
 import com.easyinsight.api.ServiceRuntimeException;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.util.ServiceUtil;
 import nu.xom.*;
-import org.apache.jcs.JCS;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
@@ -66,8 +65,7 @@ public class CommitServlet extends APIServlet {
             if (callDataID != null && !"null".equals(callDataID)) {
                 try {
                     System.out.println("marking " + callDataID + " done");
-                    JCS.getInstance("dbConnectionCache").put(callDataID + dataSource.getDataFeedID(), 2);
-                    //ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.DONE);
+                    MemCachedManager.add("dbConnectionCache" + callDataID + dataSource.getDataFeedID(), 5000, 2);
                 } catch (Exception e) {
                     LogClass.error(e);
                 }
