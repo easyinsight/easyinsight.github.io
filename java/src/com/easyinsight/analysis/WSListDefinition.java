@@ -38,6 +38,14 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private boolean rolloverIcon;
     private boolean multiLineHeaders;
 
+    public String getDefaultColumnAlignment() {
+        return defaultColumnAlignment;
+    }
+
+    public void setDefaultColumnAlignment(String defaultColumnAlignment) {
+        this.defaultColumnAlignment = defaultColumnAlignment;
+    }
+
     public boolean isMultiLineHeaders() {
         return multiLineHeaders;
     }
@@ -284,6 +292,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         summaryRowBackgroundColor = (int) findNumberProperty(properties, "summaryRowBackgroundColor", 0x6699ff);
         rolloverIcon = findBooleanProperty(properties, "rolloverIcon", false);
         multiLineHeaders = findBooleanProperty(properties, "multiLineHeaders", false);
+        defaultColumnAlignment = findStringProperty(properties, "defaultColumnAlignment", "left");
     }
 
     public JSONObject jsonProperties() {
@@ -314,6 +323,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("summaryRowBackgroundColor", summaryRowBackgroundColor));
         properties.add(new ReportBooleanProperty("rolloverIcon", rolloverIcon));
         properties.add(new ReportBooleanProperty("multiLineHeaders", multiLineHeaders));
+        properties.add(new ReportStringProperty("defaultColumnAlignment", defaultColumnAlignment));
         return properties;
     }
 
