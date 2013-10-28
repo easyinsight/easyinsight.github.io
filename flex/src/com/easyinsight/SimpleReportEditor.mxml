@@ -872,12 +872,16 @@
             PopUpUtil.centerPopUp(window);
         }
 
+
+
         private function saved(event:SavedAnalysisEvent):void {
             AnalysisUtil.updateReport(analysisDefinition, event.report);
-            var feedFragmentObject:Object = new Object();
-            feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
-            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-            BrowserManager.getInstance().setFragment(feedFragmentString);
+            if (!embedded) {
+                var feedFragmentObject:Object = new Object();
+                feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
+            }
             reportName = event.report.name;
             BrowserManager.getInstance().setTitle("Easy Insight - " + event.report.name);
 
@@ -885,6 +889,8 @@
             saveAsEnabled = true;
             invalidateDisplayList();
         }
+
+        public var reportURLKey:String;
 
         private function undo():void {
             commandProcessor.undo();
