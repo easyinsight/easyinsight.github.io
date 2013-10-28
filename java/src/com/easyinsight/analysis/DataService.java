@@ -38,12 +38,6 @@ public class DataService {
 
     private FeedRegistry feedRegistry = FeedRegistry.instance();
 
-    /*
-    SELECT SUM(k1085505),SUM(k1085533),month(k1085504) as monthk1085504, year(k1085504) as yeark1085504,SUM(k1085829),k1085503,SUM(k1085524),SUM(k1085523),SUM(k1085541),SUM(k1085550),SUM(k1085565),SUM(k1085529),SUM(k1085566),SUM(k1085526),SUM(k1085592),SUM(k1085551),SUM(k1085604),SUM(k1085830),SUM(k1085536),SUM(k1085875),SUM(k1085579) FROM df25271v1 GROUP BY monthk1085504, yeark1085504,binary(k1085503), yeark1085504;
-
-    SELECT SUM(k1085533),SUM(k1085505),month(k1085504) as monthk1085504, year(k1085504) as yeark1085504,SUM(k1085829),k1085503,SUM(k1085524),SUM(k1085523),SUM(k1085541),SUM(k1085529),SUM(k1085526),SUM(k1085604),SUM(k1085830),SUM(k1085875) FROM df25271v1 GROUP BY monthk1085504, yeark1085504,binary(k1085503)
-     */
-
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID) {
         return getAnalysisItemMetadata(feedID, analysisItem, utfOffset, reportID, dashboardID, null);
     }
@@ -56,6 +50,117 @@ public class DataService {
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
                                                               @Nullable WSAnalysisDefinition report, List<FilterDefinition> additionalFilters, FilterDefinition requester) {
         return getAnalysisItemMetadata(feedID, analysisItem, utfOffset, reportID, dashboardID, report, additionalFilters, requester, null);
+    }
+
+    public AnalysisItemResultMetadata getAnalysisItemMetadataForFilter(long filterID, int utcOffset) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            Long reportID = null;
+            Long dashboardID = null;
+            Long dashboardElementID = null;
+            FilterDefinition filter;
+            Session session = Database.instance().createSession(conn);
+            try {
+                filter = (FilterDefinition) session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list().get(0);
+                filter.afterLoad();
+            } finally {
+                session.close();
+            }
+            AnalysisItem analysisItem = filter.getField();
+            PreparedStatement ps = conn.prepareStatement("SELECT ANALYSIS_ID FROM analysis_to_filter_join WHERE filter_id = ?");
+            ps.setLong(1, filterID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                reportID = rs.getLong(1);
+            } else {
+                PreparedStatement dashboardPS = conn.prepareStatement("SELECT dashboard_id FROM dashboard_to_filter WHERE filter_id = ?");
+                dashboardPS.setLong(1, filterID);
+                ResultSet dashboardRS = dashboardPS.executeQuery();
+                if (dashboardRS.next()) {
+                    dashboardID = dashboardRS.getLong(1);
+                } else {
+                    PreparedStatement dashboardElementPS = conn.prepareStatement("SELECT dashboard_element.dashboard_element_id from " +
+                            "dashboard_element_to_filter, dashboard_element WHERE filter_id = ?");
+                    dashboardElementPS.setLong(1, filterID);
+                    ResultSet dashboardElementRS = dashboardElementPS.executeQuery();
+                    while (dashboardElementRS.next()) {
+                        dashboardElementID = dashboardElementRS.getLong(1);
+                    }
+                    dashboardElementPS.close();
+                }
+                dashboardPS.close();
+            }
+            ps.close();
+            WSAnalysisDefinition report = null;
+            long dataSourceID;
+            if (reportID != null) {
+                SecurityUtil.authorizeInsight(reportID);
+                report = new AnalysisStorage().getAnalysisDefinition(reportID);
+                dataSourceID = report.getDataFeedID();
+            } else if (dashboardID != null) {
+                SecurityUtil.authorizeDashboard(dashboardID);
+                PreparedStatement stmt = conn.prepareStatement("SELECT data_source_id FROM dashboard WHERE dashboard_id = ?");
+                stmt.setLong(1, dashboardID);
+                ResultSet dashboardRS = stmt.executeQuery();
+                dashboardRS.next();
+                dataSourceID = dashboardRS.getLong(1);
+                stmt.close();
+            } else if (dashboardElementID != null) {
+                PreparedStatement rootStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DATA_SOURCE_ID FROM DASHBOARD, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ELEMENT_ID = ? AND " +
+                        "DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ID = DASHBOARD.DASHBOARD_ID");
+                PreparedStatement findParentInGridStmt = conn.prepareStatement("SELECT DASHBOARD_GRID.DASHBOARD_ELEMENT_ID  FROM " +
+                        "DASHBOARD_GRID, DASHBOARD_GRID_ITEM WHERE DASHBOARD_GRID_ITEM.DASHBOARD_ELEMENT_ID = ? AND DASHBOARD_GRID_ITEM.DASHBOARD_GRID_ID = DASHBOARD_GRID.DASHBOARD_GRID_ID");
+                PreparedStatement findParentInStackStmt = conn.prepareStatement("SELECT DASHBOARD_STACK.DASHBOARD_ELEMENT_ID  FROM " +
+                        "DASHBOARD_STACK, DASHBOARD_STACK_ITEM WHERE DASHBOARD_STACK_ITEM.DASHBOARD_ELEMENT_ID = ? AND DASHBOARD_STACK_ITEM.DASHBOARD_STACK_ID = DASHBOARD_STACK.DASHBOARD_STACK_ID");
+                Blah blah = findDashboard(dashboardElementID, rootStmt, findParentInGridStmt, findParentInStackStmt);
+                if (blah == null) {
+                    throw new RuntimeException();
+                }
+                dataSourceID = blah.dataSourceID;
+                SecurityUtil.authorizeDashboard(blah.dashboardID);
+                rootStmt.close();
+                findParentInGridStmt.close();
+                findParentInStackStmt.close();
+            } else {
+                throw new RuntimeException();
+            }
+
+            return getMetadata(dataSourceID, analysisItem, utcOffset, report, new ArrayList<FilterDefinition>(), filter, null, conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    private Blah findDashboard(long dashboardElementID, PreparedStatement rootStmt, PreparedStatement findParentInGridStmt, PreparedStatement findParentInStackStmt) throws SQLException {
+        rootStmt.setLong(1, dashboardElementID);
+        ResultSet rootRS = rootStmt.executeQuery();
+        if (rootRS.next()) {
+            return new Blah(rootRS.getLong(1), rootRS.getLong(2));
+        }
+        findParentInGridStmt.setLong(1, dashboardElementID);
+        ResultSet gridRS = findParentInGridStmt.executeQuery();
+        if (gridRS.next()) {
+            return findDashboard(gridRS.getLong(1), rootStmt, findParentInGridStmt, findParentInStackStmt);
+        }
+        findParentInStackStmt.setLong(1, dashboardElementID);
+        ResultSet stackRS = findParentInStackStmt.executeQuery();
+        if (stackRS.next()) {
+            return findDashboard(stackRS.getLong(1), rootStmt, findParentInGridStmt, findParentInStackStmt);
+        }
+        return null;
+    }
+
+    private static class Blah {
+        long dashboardID;
+        long dataSourceID;
+
+        private Blah(long dashboardID, long dataSourceID) {
+            this.dashboardID = dashboardID;
+            this.dataSourceID = dataSourceID;
+        }
     }
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
@@ -82,39 +187,7 @@ public class DataService {
                 LogClass.error("Received null analysis item from feed " + feedID);
                 return null;
             }
-            Feed feed = feedRegistry.getFeed(feedID, conn);
-            InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-            insightRequestMetadata.setUtcOffset(utfOffset);
-            if (report != null) {
-                insightRequestMetadata.setJoinOverrides(report.getJoinOverrides());
-                insightRequestMetadata.setTraverseAllJoins(report.isFullJoins());
-                insightRequestMetadata.setAddonReports(report.getAddonReports());
-                insightRequestMetadata.setAggregateQuery(false);
-                insightRequestMetadata.getDistinctFieldMap().put(analysisItem, true);
-                insightRequestMetadata.setAdditionalAnalysisItems(report.getFieldsForDrillthrough());
-
-                if (requester != null && requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
-                    String label = requester.getFieldChoiceFilterLabel();
-                    for (FilterDefinition testFilter : report.getFilterDefinitions()) {
-                        if (label.equals(testFilter.getFilterName()) && testFilter.type() == FilterDefinition.ANALYSIS_ITEM) {
-                            AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) testFilter;
-                            analysisItem = analysisItemFilterDefinition.getTargetItem();
-                        }
-                    }
-                }
-            } else if (dashboard != null) {
-                if (requester != null && requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
-                    String label = requester.getFieldChoiceFilterLabel();
-                    for (FilterDefinition testFilter : dashboard.getFilters()) {
-                        if (label.equals(testFilter.getFilterName()) && testFilter.type() == FilterDefinition.ANALYSIS_ITEM) {
-                            AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) testFilter;
-                            analysisItem = analysisItemFilterDefinition.getTargetItem();
-                        }
-                    }
-                }
-            }
-            timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed, insightRequestMetadata);
-            return feed.getMetadata(analysisItem, insightRequestMetadata, conn, report, additionalFilters, requester);
+            return getMetadata(feedID, analysisItem, utfOffset, report, additionalFilters, requester, dashboard, conn);
         } catch (ReportException re) {
             AnalysisItemResultMetadata metadata = new AnalysisItemResultMetadata();
             metadata.setReportFault(re.getReportFault());
@@ -128,6 +201,42 @@ public class DataService {
             }
             Database.closeConnection(conn);
         }
+    }
+
+    private AnalysisItemResultMetadata getMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, WSAnalysisDefinition report, List<FilterDefinition> additionalFilters, FilterDefinition requester, Dashboard dashboard, EIConnection conn) {
+        Feed feed = feedRegistry.getFeed(feedID, conn);
+        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+        insightRequestMetadata.setUtcOffset(utfOffset);
+        if (report != null) {
+            insightRequestMetadata.setJoinOverrides(report.getJoinOverrides());
+            insightRequestMetadata.setTraverseAllJoins(report.isFullJoins());
+            insightRequestMetadata.setAddonReports(report.getAddonReports());
+            insightRequestMetadata.setAggregateQuery(false);
+            insightRequestMetadata.getDistinctFieldMap().put(analysisItem, true);
+            insightRequestMetadata.setAdditionalAnalysisItems(report.getFieldsForDrillthrough());
+
+            if (requester != null && requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
+                String label = requester.getFieldChoiceFilterLabel();
+                for (FilterDefinition testFilter : report.getFilterDefinitions()) {
+                    if (label.equals(testFilter.getFilterName()) && testFilter.type() == FilterDefinition.ANALYSIS_ITEM) {
+                        AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) testFilter;
+                        analysisItem = analysisItemFilterDefinition.getTargetItem();
+                    }
+                }
+            }
+        } else if (dashboard != null) {
+            if (requester != null && requester.getFieldChoiceFilterLabel() != null && !"".equals(requester.getFieldChoiceFilterLabel())) {
+                String label = requester.getFieldChoiceFilterLabel();
+                for (FilterDefinition testFilter : dashboard.getFilters()) {
+                    if (label.equals(testFilter.getFilterName()) && testFilter.type() == FilterDefinition.ANALYSIS_ITEM) {
+                        AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) testFilter;
+                        analysisItem = analysisItemFilterDefinition.getTargetItem();
+                    }
+                }
+            }
+        }
+        timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed, insightRequestMetadata);
+        return feed.getMetadata(analysisItem, insightRequestMetadata, conn, report, additionalFilters, requester);
     }
 
     public List<FeedNode> multiAddonFields(WSAnalysisDefinition report) {
