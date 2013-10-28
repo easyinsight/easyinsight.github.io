@@ -69,6 +69,13 @@ public class ListSummaryComponent implements IComponent {
 
     public void decorate(DataResults listDataResults) {
         for (Map.Entry<AnalysisMeasure, Value> entry : aggregationMap.entrySet()) {
+            ReportFieldExtension extension = entry.getKey().getReportFieldExtension();
+            if (extension != null && extension instanceof TextReportFieldExtension) {
+                TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) extension;
+                if (textReportFieldExtension.isIgnoreOnSummary()) {
+                    continue;
+                }
+            }
             listDataResults.getAdditionalProperties().put("summary" + entry.getKey().qualifiedName(), entry.getValue());
         }
     }

@@ -45,6 +45,10 @@
 
         private var dashboardChanged:Boolean;
 
+        public var embedded:Boolean = false;
+
+        public var urlKey:String;
+
         private function populateData():void {
             commandProcessor = new CommandProcessor();
             stage.addEventListener(Event.RESIZE, onResize);
@@ -174,10 +178,12 @@
             dataSource = _dashboard.dataSourceInfo;
             metadata.dataSourceID = dataSourceID;
             metadata.editor = true;
-            var feedFragmentObject:Object = new Object();
-            feedFragmentObject.dashboardAdminID = String(_dashboard.urlKey);
-            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-            BrowserManager.getInstance().setFragment(feedFragmentString);
+            if (!embedded) {
+                var feedFragmentObject:Object = new Object();
+                feedFragmentObject.dashboardAdminID = String(_dashboard.urlKey);
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
+            }
             var box:DashboardBox = new DashboardBox();
             rootView = box;
             metadata.dashboard = _dashboard;
@@ -219,10 +225,17 @@
         private function closeEditor():void {
             if (dashboardChanged) {
                 createPromptWindow("You have unsaved changes. Are you sure you want to exit?", function ():void {
-                    dispatchEvent(new AnalysisCloseEvent());
+                    dispatchEvent(new AnalysisCloseEvent(feedMetadata.urlKey));
                 });
             } else {
-                dispatchEvent(new AnalysisCloseEvent());
+                dispatchEvent(new AnalysisCloseEvent(feedMetadata.urlKey));
+            }
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (embedded) {
+                logonStatus.parent.removeChild(logonStatus);
             }
         }
 
@@ -276,13 +289,13 @@
                 Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
                         Alert.OK | Alert.CANCEL, null, viewListener, null, Alert.CANCEL);
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
             }
         }
 
         private function viewListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
             }
         }
 
@@ -309,11 +322,14 @@
 
         private function gotFeedMetadata():void {
             var feedMetadata:FeedMetadata = dataService.getFeedMetadata.lastResult as FeedMetadata;
+            this.feedMetadata = feedMetadata;
             if (_dashboard == null || _dashboard.id == 0) {
-                var feedFragmentObject:Object = new Object();
-                feedFragmentObject.newDashboardID = feedMetadata.urlKey;
-                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                BrowserManager.getInstance().setFragment(feedFragmentString);
+                if (!embedded) {
+                    var feedFragmentObject:Object = new Object();
+                    feedFragmentObject.newDashboardID = feedMetadata.urlKey;
+                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                    BrowserManager.getInstance().setFragment(feedFragmentString);
+                }
             }
             exchangeSave = feedMetadata.exchangeSave;
             allFields = new ArrayCollection();
@@ -372,20 +388,20 @@
         private function newReport():void {
             if (dashboardChanged) {
                 createPromptWindow("You have unsaved changes to this dashboard.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID)));
+                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID, feedMetadata.urlKey)));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID)));
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID, feedMetadata.urlKey)));
             }
         }
 
         private function newDashboard():void {
             if (dashboardChanged) {
                 createPromptWindow("You have unsaved changes to this dashboard.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID, urlKey:feedMetadata.urlKey})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID, urlKey:feedMetadata.urlKey})));
             }
         }
 
@@ -421,24 +437,24 @@
         private function goReport():void {
             if (_dashboard.id == 0) {
                 createRequiredPromptWindow("You need to save this dashboard first.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
                 });
             } else if (dashboardChanged) {
                 createRequiredPromptWindow("You have unsaved changes to this dashboard.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
             }
         }
 
         private function goAdmin():void {
             if (dashboardChanged) {
                 createPromptWindow("You have unsaved changes to this dashboard.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID, urlKey:feedMetadata.urlKey})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID, urlKey:feedMetadata.urlKey})));
             }
         }
 
@@ -563,7 +579,7 @@
                 />
         <mx:Button styleName="grayButton" id="toggleButton" label="Hide Editor Controls" click="toggleEditorControls()"/>
         <mx:Spacer width="100%"/>
-        <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
+        <easyinsight:LoggedOnStatus textColor="#FFFFFF" id="logonStatus"/>
     </mx:HBox>
     <mx:HBox width="100%" height="100%" paddingLeft="10" paddingRight="10" verticalScrollPolicy="off"
              horizontalScrollPolicy="off" id="coreHBox">
