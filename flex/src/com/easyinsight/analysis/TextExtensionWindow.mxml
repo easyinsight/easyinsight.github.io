@@ -15,6 +15,7 @@
             ext.align = alignComboBox.selectedItem as String;
             ext.wordWrap = wordWrapCheckbox.selected;
             ext.sortable = sortableCheckbox.selected;
+            ext.ignoreOnSummary = ignoreSummaryCheckBox.selected;
             analysisItem.reportFieldExtension = ext;
         }
 
@@ -27,6 +28,7 @@
                 wordWrap = ext.wordWrap;
                 fixedWidth = String(ext.fixedWidth);
                 sortable = ext.sortable;
+                ignoreOnSummary = ext.ignoreOnSummary;
             }
         }
 
@@ -44,6 +46,9 @@
 
         [Bindable]
         private var customFontSize:String;
+
+        [Bindable]
+        private var ignoreOnSummary:Boolean;
         
         [Bindable]
         private var sortable:Boolean = true;
@@ -71,6 +76,9 @@
         </mx:FormItem>
         <mx:FormItem label="Sortable:">
             <mx:CheckBox id="sortableCheckbox" selected="{sortable}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Ignore on Summary:">
+            <mx:CheckBox id="ignoreSummaryCheckBox" selected="{ignoreOnSummary}"/>
         </mx:FormItem>
     </mx:Form>
 </mx:VBox>

@@ -417,8 +417,8 @@
 
     <target name="modules4" depends="report.treemap, app.embeddeddashboard, app.seleniumdashboard"/>
     <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail, perspective.spreadsheetupdatewizard"/>
-    <target name="modules7" depends="perspective.kpiwindow,perspective.datasourceadmin"/>
-    <target name="modules8" depends="report.heatmap, report.gantt, report.form"/>
+    <target name="modules7" depends="perspective.kpiwindow,perspective.datasourceadmin, app.embeddedconfiguredatasource, app.embeddedreporteditor"/>
+    <target name="modules8" depends="report.heatmap, report.gantt, report.form, app.embeddeddashboardeditor"/>
     <target name="apps" depends="compileFlexOptimized, app.embeddedreport, app.selenium, app.admin, app.font"/>
 
     <target name="compileFlexOptimized">
@@ -439,6 +439,18 @@
 
     <target name="app.selenium">
         <buildSWF mainMXML="SeleniumReportView.mxml" swfName="SeleniumReportView" buildFile="selenium-report.xml"/>
+    </target>
+
+    <target name="app.embeddedreporteditor">
+        <buildSWF mainMXML="EmbeddedReportEditor.mxml" swfName="EmbeddedReportEditor" buildFile="embedded-report-editor.xml"/>
+    </target>
+
+    <target name="app.embeddeddashboardeditor">
+        <buildSWF mainMXML="EmbeddedDashboardEditor.mxml" swfName="EmbeddedDashboardEditor" buildFile="embedded-dashboard-editor.xml"/>
+    </target>
+
+    <target name="app.embeddedconfiguredatasource">
+        <buildSWF mainMXML="EmbeddedConfigureDataSource.mxml" swfName="EmbeddedConfigureDataSource" buildFile="embedded-configure-datasource.xml"/>
     </target>
 
     <target name="app.seleniumdashboard">

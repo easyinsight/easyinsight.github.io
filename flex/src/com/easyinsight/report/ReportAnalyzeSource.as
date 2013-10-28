@@ -19,6 +19,7 @@ public class ReportAnalyzeSource extends PerspectiveInfo {
         super(PerspectiveInfo.REPORT_VIEW);
         var properties:Object = new Object();
         properties.reportID = insightDescriptor.id;
+        properties.urlKey = insightDescriptor.urlKey;
         properties.reportType = insightDescriptor.reportType;
         properties.dataSourceID = insightDescriptor.dataFeedID;
         properties.parameterFilters = filters;

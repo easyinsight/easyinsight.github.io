@@ -31,6 +31,9 @@ public class TextReportFieldExtension extends ReportFieldExtension {
     @Column(name="sortable")
     private boolean sortable = true;
 
+    @Column(name="ignore_on_summary")
+    private boolean ignoreOnSummary = false;
+
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
         Element element = new Element("fieldExtension");
@@ -51,6 +54,14 @@ public class TextReportFieldExtension extends ReportFieldExtension {
         setFixedWidth(Integer.parseInt(extensionElement.getAttribute("fixedWidth").getValue()));
         setWordWrap(Boolean.parseBoolean(extensionElement.getAttribute("wordWrap").getValue()));
         setSortable(Boolean.parseBoolean(extensionElement.getAttribute("sortable").getValue()));
+    }
+
+    public boolean isIgnoreOnSummary() {
+        return ignoreOnSummary;
+    }
+
+    public void setIgnoreOnSummary(boolean ignoreOnSummary) {
+        this.ignoreOnSummary = ignoreOnSummary;
     }
 
     public boolean isSortable() {

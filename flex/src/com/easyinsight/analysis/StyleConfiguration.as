@@ -105,6 +105,7 @@ public class StyleConfiguration {
         }
         if (dashboardElement is DashboardReport) {
             items.addItem(new CheckBoxReportFormItem("Show Label", "showLabel", DashboardReport(dashboardElement).showLabel, dashboardElement));
+            items.addItem(new TextReportFormItem("Preferred Tag", "recommendedTag", DashboardReport(dashboardElement).recommendedTag, dashboardElement));
             items.addItem(new DashboardFilterFormItem("Filter Overrides", "dashboardFilterOverrides", dashboardElement.dashboardFilterOverrides, dashboardElement, filterDefinitions));
             items.addItem(new CheckBoxReportFormItem("Auto Calculate Height", "autoCalculateHeight", DashboardReport(dashboardElement).autoCalculateHeight, dashboardElement, null,
                     false, function(dashboardReport:DashboardReport):Boolean {
@@ -167,6 +168,7 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
             items.addItem(new NumericReportFormItem("Max Rows To Display", "generalSizeLimit", report.generalSizeLimit, report, 0, 10000000));
+            items.addItem(new ComboBoxReportFormItem("Default Alignment", "defaultColumnAlignment", ListDefinition(report).defaultColumnAlignment, report, ["left", "center", "right"]));
         }
         if (report is CrosstabDefinition) {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));

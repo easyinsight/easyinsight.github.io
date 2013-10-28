@@ -104,6 +104,18 @@
         <buildSWF mainMXML="com/easyinsight/kpi/KPIModule.mxml" swfName="KPIModule" buildFile="perspectives/kpi-window-module.xml"/>
     </target>
 
+    <target name="app.embeddedreporteditor">
+        <buildSWF mainMXML="EmbeddedReportEditor.mxml" swfName="EmbeddedReportEditor" buildFile="embedded-report-editor.xml"/>
+    </target>
+
+    <target name="app.embeddeddashboardeditor">
+        <buildSWF mainMXML="EmbeddedDashboardEditor.mxml" swfName="EmbeddedDashboardEditor" buildFile="embedded-dashboard-editor.xml"/>
+    </target>
+
+    <target name="app.embeddedconfiguredatasource">
+        <buildSWF mainMXML="EmbeddedConfigureDataSource.mxml" swfName="EmbeddedConfigureDataSource" buildFile="embedded-configure-datasource.xml"/>
+    </target>
+
     <target name="perspective.kpitreeview">
         <buildSWF mainMXML="com/easyinsight/goals/GoalTreeViewContainer.mxml" swfName="KPITreeView" buildFile="perspectives/kpitree-view-module.xml"/>
     </target>

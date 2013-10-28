@@ -15,6 +15,7 @@ public class TextReportFieldExtension extends ReportFieldExtension {
     public var fixedWidth:int = 150;
     public var wordWrap:Boolean;
     public var sortable:Boolean = true;
+    public var ignoreOnSummary:Boolean = false;
 
     public function TextReportFieldExtension() {
     }

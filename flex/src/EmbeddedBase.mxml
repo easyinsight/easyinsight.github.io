@@ -6,6 +6,7 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
+        import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.framework.BasicInfo;
@@ -13,9 +14,11 @@
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.LoginObject;
         import com.easyinsight.framework.LoginResponse;
+        import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.TORegistry;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.report.EmbedReportContextMenuFactory;
         import com.easyinsight.util.UserAudit;
 
@@ -29,6 +32,36 @@
 
         [Embed(source="/com/easyinsight/skin/osx/opensansbold.swf", fontName="Open Sans Bold", fontWeight="bold")]
         private var openSansBold:Class;
+
+        protected function onClose(event:AnalysisCloseEvent):void {
+            navigateToURL(new URLRequest("/app/html/reports/" + event.urlKey), "_self");
+        }
+
+        protected function onAnalyzeEvent(event:AnalyzeEvent):void {
+            var info:PerspectiveInfo = event.perspectiveInfo;
+            switch (info.perspectiveType) {
+                case PerspectiveInfo.REPORT_VIEW:
+                    var urlKey:String = info.properties["urlKey"];
+                    navigateToURL(new URLRequest("/app/html/report/" + urlKey), "_self");
+                    break;
+                case PerspectiveInfo.DASHBOARD_VIEW:
+                    var urlKey:String = info.properties["urlKey"];
+                    navigateToURL(new URLRequest("/app/html/dashboard/" + urlKey), "_self");
+                    break;
+                case PerspectiveInfo.REPORT_EDITOR:
+                    var urlKey:String = info.properties["urlKey"];
+                    navigateToURL(new URLRequest("/app/embeddedReportEditor.jsp?dataSourceID=" + urlKey), "_self");
+                    break;
+                case PerspectiveInfo.DASHBOARD_EDITOR:
+                    var urlKey:String = info.properties["urlKey"];
+                    navigateToURL(new URLRequest("/app/embeddedDashboardEditor.jsp?dataSourceID=" + urlKey), "_self");
+                    break;
+                case PerspectiveInfo.DATA_SOURCE_ADMIN:
+                    var urlKey:String = info.properties["urlKey"];
+                    navigateToURL(new URLRequest("/app/embeddedConfigureDataSource.jsp?dataSourceID=" + urlKey), "_self");
+                    break;
+            }
+        }
 
         protected function handleFlashVars():void {
             Font.registerFont(myNormalLucida);
