@@ -65,7 +65,10 @@ public class CommitServlet extends APIServlet {
             if (callDataID != null && !"null".equals(callDataID)) {
                 try {
                     System.out.println("marking " + callDataID + " done");
-                    MemCachedManager.add("dbConnectionCache" + callDataID + dataSource.getDataFeedID(), 5000, 2);
+                    PreparedStatement ps = conn.prepareStatement("UPDATE db_connection_cache SET status = ? WHERE call_data_id = ?");
+                    ps.setString(1, callDataID);
+                    ps.executeUpdate();
+                    ps.close();
                 } catch (Exception e) {
                     LogClass.error(e);
                 }
