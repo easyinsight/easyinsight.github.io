@@ -47,21 +47,49 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                     "analysis.analysis_id = cached_addon_report_source.report_id");
             PreparedStatement nodeStmt = conn.prepareStatement("SELECT composite_feed.data_feed_id from composite_node, composite_feed where " +
                     "composite_node.data_feed_id = ? and composite_node.composite_feed_id = composite_feed.composite_feed_id");
+            PreparedStatement fedStmt = conn.prepareStatement("SELECT FEDERATED_DATA_SOURCE.DATA_SOURCE_ID FROM FEDERATED_DATA_SOURCE_TO_DATA_SOURCE, FEDERATED_DATA_SOURCE " +
+                    "WHERE FEDERATED_DATA_SOURCE_TO_DATA_SOURCE.DATA_SOURCE_ID = ? AND " +
+                    "FEDERATED_DATA_SOURCE_TO_DATA_SOURCE.FEDERATED_DATA_SOURCE_ID = FEDERATED_DATA_SOURCE.FEDERATED_DATA_SOURCE_ID");
+
             queryStmt.setLong(1, dataSourceID);
             ResultSet rs = queryStmt.executeQuery();
             Set<Long> ids = new HashSet<Long>();
+
             while (rs.next()) {
                 ids.add(rs.getLong(1));
             }
             nodeStmt.setLong(1, dataSourceID);
+            Set<Long> nextIDs = new HashSet<Long>();
             ResultSet nodeRS = nodeStmt.executeQuery();
             while (nodeRS.next()) {
-                queryStmt.setLong(1, nodeRS.getLong(1));
+                long nodeID = nodeRS.getLong(1);
+                queryStmt.setLong(1, nodeID);
                 ResultSet detailRS = queryStmt.executeQuery();
                 while (detailRS.next()) {
                     ids.add(detailRS.getLong(1));
                 }
             }
+            fedStmt.setLong(1, dataSourceID);
+            ResultSet fedRS = fedStmt.executeQuery();
+            while (fedRS.next()) {
+                long fedID = fedRS.getLong(1);
+                nextIDs.add(fedID);
+            }
+            for (Long id : nextIDs) {
+                nodeStmt.setLong(1, id);
+                nodeRS = nodeStmt.executeQuery();
+                while (nodeRS.next()) {
+                    long nodeID = nodeRS.getLong(1);
+                    queryStmt.setLong(1, nodeID);
+                    ResultSet detailRS = queryStmt.executeQuery();
+                    while (detailRS.next()) {
+                        ids.add(detailRS.getLong(1));
+                    }
+                }
+            }
+            fedStmt.close();
+            queryStmt.close();
+            nodeStmt.close();
             long interval = System.currentTimeMillis() + (1000 * 60 * 15);
             for (Long id : ids) {
                 PreparedStatement saveLoadStmt = conn.prepareStatement("INSERT INTO cache_to_rebuild (cache_time, data_source_id) values (?, ?)");
@@ -81,6 +109,8 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
         Set<Long> sources = new HashSet<Long>();
         EIConnection conn = Database.instance().getConnection();
         try {
+            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM cache_to_rebuild WHERE data_source_id = ?");
+
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT data_source_id FROM cache_to_rebuild WHERE cache_time < ?");
             long time = System.currentTimeMillis();
             queryStmt.setTimestamp(1, new Timestamp(time));
@@ -89,12 +119,12 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             while (rs.next()) {
                 long dataSourceID = rs.getLong(1);
                 sources.add(dataSourceID);
+                clearStmt.setLong(1, dataSourceID);
+                clearStmt.executeUpdate();
             }
             queryStmt.close();
-            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM cache_to_rebuild WHERE cache_time < ?");
-            clearStmt.setTimestamp(1, new Timestamp(time));
-            clearStmt.executeUpdate();
             clearStmt.close();
+
         } finally {
             Database.closeConnection(conn);
         }
@@ -255,7 +285,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             FilterDefinition partitionFilter = findPartitionFilter(report);
             if (partitionFilter == null) {
                 blah(IDataStorage, conn, report);
-            } else {
+            } else if (partitionFilter instanceof FlatDateFilter) {
                 Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID(), conn);
                 AnalysisItemResultMetadata metadata = feed.getMetadata(partitionFilter.getField(), new InsightRequestMetadata(), conn, report, new ArrayList<FilterDefinition>(), null);
 
@@ -287,6 +317,8 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                         cal.add(Calendar.YEAR, 1);
                     }
                 } while (keepGoing);
+            } else if (partitionFilter instanceof FilterValueDefinition) {
+
             }
         } catch (Exception e) {
             LogClass.error(e);

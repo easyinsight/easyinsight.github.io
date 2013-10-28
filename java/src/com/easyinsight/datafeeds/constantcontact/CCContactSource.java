@@ -291,7 +291,7 @@ public class CCContactSource extends ConstantContactBaseSource {
                     row.addValue(CONTACT_CREATED_ON, new DateValue(DATE_FORMAT.parse(node.get("created_date").toString())));
                     row.addValue(CONTACT_UPDATED_ON, new DateValue(DATE_FORMAT.parse(node.get("created_date").toString())));
                 } catch (Exception e) {
-                    LogClass.error(e);
+                    LogClass.info(e.getMessage());
                 }
                 size++;
                 if (size == 250) {

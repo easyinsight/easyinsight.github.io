@@ -32,6 +32,7 @@
 
 .filters select {
     width: auto;
+    max-width: 300px;
 }
 
 .dashboard_grid {
@@ -212,15 +213,23 @@ nav.navbar_first {
     padding-bottom: 0;
 }
 
-.reportControl {
-    color: #333333;
+.reportControlBtnGroup > a,
+.reportControlBtnGroup > a:hover {
+}
+
+.reportControlToolbar > a,
+.reportControlToolbar > a:hover {
 }
 
 .reportControlToolbar {
+    margin-top: 7px;
+    margin-bottom: 10px;
+}
 
+.reportBlah {
+    margin-top: 7px;
 }
 
 .reportControlBtnGroup {
-    padding-top: 5px;
     margin-right: 20px;
 }

@@ -78,14 +78,16 @@ public class NamedFilterReference extends FilterDefinition {
     }
 
     public void populateNamedFilters(Collection<FilterDefinition> filters) {
-        for (FilterDefinition filter : filters) {
-            if (referenceName.equals(filter.getFilterName())) {
-                this.filter = filter;
-                break;
-            }
-        }
         if (this.filter == null) {
-            throw new ReportException(new GenericReportFault("Could not find a filter named " + referenceName + " as referenced in a named filter reference you defined."));
+            for (FilterDefinition filter : filters) {
+                if (referenceName.equals(filter.getFilterName())) {
+                    this.filter = filter;
+                    break;
+                }
+            }
+            if (this.filter == null) {
+                throw new ReportException(new GenericReportFault("Could not find a filter named " + referenceName + " as referenced in a named filter reference you defined."));
+            }
         }
     }
 }

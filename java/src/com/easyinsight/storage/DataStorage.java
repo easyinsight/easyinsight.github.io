@@ -10,7 +10,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.*;
-import com.easyinsight.cache.Cache;
 import com.easyinsight.servlet.SystemSettings;
 import com.easyinsight.users.Account;
 
@@ -20,7 +19,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 import java.sql.*;
@@ -29,8 +27,6 @@ import com.easyinsight.users.DataSourceStats;
 import com.easyinsight.users.UserAccountAdminService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 import org.jets3t.service.S3ServiceException;
 
 /**
@@ -54,8 +50,6 @@ public class DataStorage implements IDataStorage {
     private List<IDataTransform> transforms = new ArrayList<IDataTransform>();
     private ReportFault warning;
     private int connectionBillingType;
-
-    private JCS reportCache = Cache.getCache(Cache.EMBEDDED_REPORTS);
 
     public ReportFault getWarning() {
         return warning;
@@ -406,11 +400,7 @@ public class DataStorage implements IDataStorage {
             validateSpace(coreDBConn);
         }
         storageConn.commit();
-        try {
-            if (reportCache != null) reportCache.remove(feedID);
-        } catch (CacheException e) {
-            LogClass.error(e);
-        }
+        ReportCache.instance().flushResults(feedID);
         committed = true;
     }
 
@@ -1030,6 +1020,13 @@ public class DataStorage implements IDataStorage {
                             cal.set(Calendar.MONTH, month - 1);
                             cal.set(Calendar.YEAR, year);
                             row.addValue(aggregateKey, new DateValue(cal.getTime()));
+                        } else if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL)) {
+                            int year = dataRS.getInt(i++);
+                            Calendar cal = Calendar.getInstance();
+                            cal.set(Calendar.DAY_OF_MONTH, 2);
+                            cal.set(Calendar.MONTH, Calendar.JANUARY);
+                            cal.set(Calendar.YEAR, year);
+                            row.addValue(aggregateKey, new DateValue(cal.getTime()));
                         } else {
                             try {
                                 Timestamp time = dataRS.getTimestamp(i++);
@@ -1206,6 +1203,9 @@ public class DataStorage implements IDataStorage {
                 if (optimized && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL)) {
                     selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
                     groupByBuilder.append("month" + columnName + ", year" + columnName + ",");
+                } else if (optimized && (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL)) {
+                    selectBuilder.append("year(" + columnName + ") as year" + columnName + ",");
+                    groupByBuilder.append("year" + columnName + ",");
                 } else {
                     selectBuilder.append(columnName);
                     selectBuilder.append(",");

@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -21,8 +22,6 @@ import java.io.Serializable;
 import flex.messaging.FlexContext;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -33,24 +32,12 @@ import org.hibernate.proxy.HibernateProxy;
  */
 public class FeedStorage {
 
-    private JCS feedCache = getCache("feedDefinitions");
-    private JCS apiKeyCache = getCache("apiKeys");
-
     private DataSourceTypeRegistry registry = new DataSourceTypeRegistry();
-
-    private JCS getCache(String cacheName) {
-
-        try {
-            return JCS.getInstance(cacheName);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-        return null;
-    }
 
     public void removeFeed(long feedId) {
         try {
-            feedCache.remove(feedId);
+            MemCachedManager.delete("ds" + feedId);
+            //feedCache.remove(feedId);
             ReportCache.instance().flushResults(feedId);
         } catch (Exception e) {
             LogClass.error(e);
@@ -708,19 +695,14 @@ public class FeedStorage {
     static long time = 0;
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws Exception {
-        try {
-            if (feedCache != null) {
-                ReportCache.instance().flushResults(feedDefinition.getDataFeedID());
-                feedCache.remove(feedDefinition.getDataFeedID());
-                if (FeedRegistry.instance() != null) {
-                    FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
-                }
-                LogClass.debug("Removed " + feedDefinition.getDataFeedID() + " from feed cache.");
-            }
-
-        } catch (CacheException e) {
-            LogClass.error(e);
+        ReportCache.instance().flushResults(feedDefinition.getDataFeedID());
+        //feedCache.remove(feedDefinition.getDataFeedID());
+        MemCachedManager.delete("ds" + feedDefinition.getDataFeedID());
+        if (FeedRegistry.instance() != null) {
+            FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
         }
+        LogClass.debug("Removed " + feedDefinition.getDataFeedID() + " from feed cache.");
+
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, " +
                 "FEED_SIZE = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
                 "API_KEY = ?, unchecked_api_enabled = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ?," +
@@ -804,8 +786,8 @@ public class FeedStorage {
 
     public FeedDefinition getFeedDefinitionData(long identifier, Connection conn, boolean cache) throws SQLException {
         FeedDefinition feedDefinition = null;
-        if (feedCache != null && cache)
-            feedDefinition = (FeedDefinition) feedCache.get(identifier);
+        if (cache)
+            feedDefinition = (FeedDefinition) MemCachedManager.get("ds" + identifier);
         if (feedDefinition != null) {
             LogClass.debug("Cache hit for data source definition id: " + identifier);
             return feedDefinition;
@@ -861,7 +843,6 @@ public class FeedStorage {
             feedDefinition.setRefreshMarmotScript(rs.getString(i++));
             feedDefinition.setKpiSource(rs.getBoolean(i));
             feedDefinition.setAddonReports(getAddonReports(identifier, (EIConnection) conn));
-            long folderStartTime = System.currentTimeMillis();
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
             feedDefinition.setDataSourceBehavior(feedDefinition.getDataSourceType());
             feedDefinition.customLoad(conn);
@@ -870,13 +851,7 @@ public class FeedStorage {
         }
         queryFeedStmt.close();
 
-
-        try {
-            if (feedCache != null)
-                feedCache.put(identifier, feedDefinition);
-        } catch (CacheException e) {
-            LogClass.error(e);
-        }
+        MemCachedManager.add("ds" + identifier, 10000, feedDefinition);
 
         return feedDefinition;
     }
@@ -1292,15 +1267,15 @@ public class FeedStorage {
         return uploadPolicy;
     }
 
-    public long getFeedForAPIKey(long userID, String apiKey) throws CacheException, SQLException {
+    public long getFeedForAPIKey(long userID, String apiKey) throws SQLException {
         Connection conn = Database.instance().getConnection();
         Long feedID = null;
-        if (apiKeyCache != null)
-            feedID = (Long) apiKeyCache.get(new FeedApiKey(apiKey, userID));
-        if (feedID != null) {
+        /*if (apiKeyCache != null)
+            feedID = (Long) apiKeyCache.get(new FeedApiKey(apiKey, userID));*/
+        /*if (feedID != null) {
             LogClass.debug("Cache hit for API key: " + apiKey + " & User id: " + userID);
             return feedID;
-        }
+        }*/
         try {
             LogClass.debug("Cache miss for API key: " + apiKey + " & User id: " + userID);
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID" +
@@ -1311,8 +1286,8 @@ public class FeedStorage {
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
                 feedID = rs.getLong(1);
-                if (apiKeyCache != null)
-                    apiKeyCache.put(new FeedApiKey(apiKey, userID), feedID);
+                /*if (apiKeyCache != null)
+                    apiKeyCache.put(new FeedApiKey(apiKey, userID), feedID);*/
                 return feedID;
             }
         } finally {

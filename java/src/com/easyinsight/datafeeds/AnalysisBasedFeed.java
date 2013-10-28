@@ -6,8 +6,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.logging.LogClass;
-import org.apache.jcs.access.exception.CacheException;
 
 import java.util.*;
 
@@ -177,11 +175,7 @@ public class AnalysisBasedFeed extends Feed {
             entry.getKey().setField(entry.getValue());
         }
         if (cacheKey != null) {
-            try {
-                ReportCache.instance().storeAddonReport(analysisDefinition.getDataFeedID(), cacheKey, dataSet);
-            } catch (CacheException e) {
-                LogClass.debug(e.getMessage());
-            }
+            ReportCache.instance().storeAddonReport(analysisDefinition.getDataFeedID(), cacheKey, dataSet, analysisDefinition.getCacheMinutes());
         }
         return dataSet;
     }

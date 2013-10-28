@@ -78,6 +78,7 @@
             this.autoRefresh = userTransferObject.autoRefreshReports;
             this.invoiceRecipient = userTransferObject.invoiceRecipient;
             this.lastLoginDate = userTransferObject.lastLoginDate;
+            this.reportVisibility = userTransferObject.testAccountVisible;
             createLabel = "Update User";
         }
 
@@ -154,6 +155,7 @@
                 user.name = fullNameInput.text;
                 user.firstName = firstNameInput.text;
                 user.fixedDashboardID = singleViewComboBox.selectedItem.id;
+                user.testAccountVisible = reportVisibilityCheckbox.selected;
                 if (showPersonaOption) {
                     var persona:Object = personaComboBox.selectedItem;
                     if (persona != Persona.EMPTY_PERSONA) {
@@ -274,6 +276,9 @@
 
         [Bindable]
         private var resendLabel:String = "Resend Invitation";
+
+        [Bindable]
+        private var reportVisibility:Boolean;
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
@@ -299,6 +304,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="Email Address:" direction="horizontal" labelWidth="180">
                     <mx:TextInput id="emailInput" text="{email}" width="400"/>
+                </mx:FormItem>
+                <mx:FormItem label="User Can See All Reports and Dashboards:" labelWidth="260">
+                    <mx:CheckBox id="reportVisibilityCheckbox" selected="{reportVisibility}"/>
                 </mx:FormItem>
                 <mx:FormItem label="Send Newsletter to User:" labelWidth="180">
                     <mx:CheckBox id="newsletterCheckbox" selected="{newsletterSelected}"/>

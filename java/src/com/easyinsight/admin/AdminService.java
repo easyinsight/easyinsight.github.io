@@ -2,6 +2,7 @@ package com.easyinsight.admin;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.audit.*;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.DashboardDescriptor;
@@ -70,6 +71,23 @@ public class AdminService {
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public void flushCache() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        MemCachedManager.flush();
+    }
+
+    public void applyLocks() {
+
+    }
+
+    public void resetLocks() {
+
+    }
+
+    public void lockStatus() {
+
     }
 
     public void fixTrialAccounts() {

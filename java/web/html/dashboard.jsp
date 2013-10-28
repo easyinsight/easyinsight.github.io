@@ -79,22 +79,13 @@
 </jsp:include>
 <div class="nav nav-pills reportNav">
         <div class="container">
-            <div class="col-md-6">
-                <ul class="breadcrumb reportBreadcrumb">
-
-                    <li><a href="/app/html/">Data Sources</a> <span class="divider"></span></li>
-                    <li>
-                        <a href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
-                        </a><span class="divider"></span></li>
-                    <li class="active"><%= StringEscapeUtils.escapeHtml(dashboard.getName()) %>
-                    </li>
-
-                </ul>
+            <div class="col-md-6 reportBlah">
+                <a class="reportControl" href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
             </div>
-            <div class="col-md-6">
-                <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
-                    <div class="btn-group">
-                        <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+            <div class="col-md-6 reportControlToolbar">
+                <div class="btn-toolbar pull-right">
+                    <div class="btn-group reportControlBtnGroup">
+                        <a class="reportControl dropdown-toggle" data-toggle="dropdown" href="#">
                             Configurations
                             <span class="caret"></span>
                         </a>
@@ -104,8 +95,8 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="btn-group">
-                        <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                    <div class="btn-group reportControlBtnGroup">
+                        <a class="reportControl dropdown-toggle" data-toggle="dropdown" href="#">
                             Refresh Data
                             <span class="caret"></span>
                         </a>
@@ -123,8 +114,8 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="btn-group">
-                        <button class="btn btn-inverse toggle-filters">Toggle Filters</button>
+                    <div class="btn-group reportControlBtnGroup">
+                        <a class="reportControl toggle-filters">Toggle Filters</a>
                     </div>
                 </div>
             </div>
@@ -132,7 +123,7 @@
 </div>
 
 <div class="container">
-    <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>
+<%--    <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>--%>
     <jsp:include page="refreshingDataSource.jsp"/>
     <div id="base"/>
 </div>

@@ -63,7 +63,7 @@ public class UIData {
             }
             sb.append("                    </div>\n" +
                     "                </div>\n");
-            if(properties != null && !properties.isImageFullHeader()) {
+            if(properties == null || !properties.isImageFullHeader()) {
                 sb.append("<div style=\"").append(headerTextStyle).append("\">");
                 sb.append(StringEscapeUtils.escapeHtml(name));
                 sb.append("</div>\n");

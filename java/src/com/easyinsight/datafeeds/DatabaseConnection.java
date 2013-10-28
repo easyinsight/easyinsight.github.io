@@ -12,8 +12,6 @@ import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -31,16 +29,6 @@ import java.util.Map;
  * Time: 9:23 AM
  */
 public class DatabaseConnection extends ServerDataSourceDefinition {
-
-    private JCS getCache(String cacheName) {
-
-        try {
-            return JCS.getInstance(cacheName);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-        return null;
-    }
 
     public String getRefreshKey() {
         return refreshKey;
@@ -101,12 +89,20 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
 
             System.out.println("Invoking " + refreshEndpoint);
 
+
+            System.out.println("setting call data of " + callDataID + getDataFeedID());
             try {
-                System.out.println("setting call data of " + callDataID + getDataFeedID());
-                getCache("dbConnectionCache").put(callDataID + getDataFeedID(), 1);
-            } catch (CacheException e) {
+                PreparedStatement ps = conn.prepareStatement("INSERT INTO db_connection_cache (status, call_data_id, data_source_id) values (?, ?, ?)");
+                ps.setInt(1, 1);
+                ps.setString(2, callDataID);
+                ps.setLong(3, getDataFeedID());
+                ps.execute();
+                ps.close();
+            } catch (SQLException e) {
                 LogClass.error(e);
             }
+            //MemCachedManager.add("dbConnectionCache" + callDataID + getDataFeedID(), 5000, 1);
+
 
             HttpMethod requestMethod = new GetMethod(refreshEndpoint);
             try {
@@ -121,7 +117,17 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
             int retries = 0;
             boolean gotData;
             do {
-                Integer val = (Integer) getCache("dbConnectionCache").get(callDataID + getDataFeedID());
+                Integer val = null;
+                try {
+                    PreparedStatement ps = conn.prepareStatement("SELECT STATUS FROM db_connection_cache where call_data_id = ?");
+                    ps.setString(1, callDataID);
+                    ResultSet rs = ps.executeQuery();
+                    val = rs.getInt(1);
+                    ps.close();
+                } catch (SQLException e) {
+                    LogClass.error(e);
+                }
+                //Integer val = (Integer) MemCachedManager.instance().get("dbConnectionCache" + callDataID + getDataFeedID());
                 gotData = val == null || val == 2;
                 retries++;
                 try {

@@ -45,7 +45,7 @@ public class Utils {
             hibernateSession.close();
         }
         ImageDescriptor headerImageDescriptor = null;
-        String headerTextStyle = "width: 100%;text-align: center;font-size: 18px;padding-top:10px;";
+        String headerTextStyle = "width: 100%;text-align: center;font-size: 18px;padding-top:15px;font-weight:bold;";
         if (applicationSkin != null && applicationSkin.isReportHeader()) {
             headerImageDescriptor = applicationSkin.getReportHeaderImage();
             int reportBackgroundColor = applicationSkin.getReportBackgroundColor();

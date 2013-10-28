@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Date;
  * Date: 11/12/12
  * Time: 3:24 PM
  */
-public class DataSourceRefreshResult {
+public class DataSourceRefreshResult implements Serializable {
     private Date date;
     private ReportFault warning;
     private boolean newFields;
