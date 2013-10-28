@@ -464,7 +464,7 @@
         }
 
         private function boltOnFields(addonReport:AddonReport):void {
-            coreDataService.addonFields.send(addonReport);
+            coreDataService.addonFields.send(addonReport.reportID);
         }
 
         private function multiBolt():void {
