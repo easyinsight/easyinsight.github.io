@@ -72,7 +72,7 @@ public class ServiceUtil {
             PreparedStatement insertStmt = conn.prepareStatement("UPDATE refresh_connection_cache set status = ? where call_data_id = ?");
             insertStmt.setInt(1, status);
             insertStmt.setString(2, callDataID);
-            insertStmt.execute();
+            insertStmt.executeUpdate();
             insertStmt.close();
         } catch (Exception e) {
             LogClass.error(e);
@@ -91,7 +91,7 @@ public class ServiceUtil {
             oos.flush();
             insertStmt.setBytes(1, baos.toByteArray());
             insertStmt.setString(2, callDataID);
-            insertStmt.execute();
+            insertStmt.executeUpdate();
             insertStmt.close();
         } catch (Exception e) {
             LogClass.error(e);
