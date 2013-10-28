@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<easyinsight:EmbeddedBase xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="*">
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.administration.feed.FeedAdministrationContainer;
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.analysis.FeedResponse;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.core.UIComponent;
+        import mx.core.Application;
+
+        [Bindable]
+        private var urlKey:String;
+
+        private var dataSourceURLKey:String;
+
+        [Bindable]
+        private var dataSourceID:int;
+
+        override protected function childSetup():void {
+            super.childSetup();
+            this.dataSourceURLKey = String(Application.application.parameters.dataSourceURLKey);
+        }
+
+        override protected function go():void {
+            ProgressAlert.alert(this, "Retrieving...", null, feedService.openFeedIfPossible);
+            feedService.openFeedIfPossible.send(dataSourceURLKey);
+        }
+
+        private function gotDataSourceInfo():void {
+            var info:FeedResponse = feedService.openFeedIfPossible.lastResult as FeedResponse;
+            if (info.status == FeedResponse.SUCCESS) {
+                dataSourceDescriptor = info.feedDescriptor;
+                dataSourceID = info.feedDescriptor.id;
+                dataSourceURL = info.feedDescriptor.urlKey;
+                toView();
+            } else {
+                toLogin();
+            }
+        }
+
+        private var insightDescriptor:InsightDescriptor;
+        private var dataSourceDescriptor:DataSourceDescriptor;
+
+        private var dataSourceURL:String;
+
+        override protected function createView():UIComponent {
+            var simpleReportEditor:FeedAdministrationContainer = new FeedAdministrationContainer();
+            simpleReportEditor.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, onClose);
+            simpleReportEditor.addEventListener(AnalyzeEvent.ANALYZE, onAnalyzeEvent);
+            simpleReportEditor.embedded = true;
+            if (dataSourceDescriptor != null) {
+                simpleReportEditor.feedID = dataSourceDescriptor.id;
+            }
+
+            return simpleReportEditor;
+        }
+        ]]>
+	</mx:Script>
+    <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="openFeedIfPossible" result="gotDataSourceInfo()"/>
+    </mx:RemoteObject>
+</easyinsight:EmbeddedBase>

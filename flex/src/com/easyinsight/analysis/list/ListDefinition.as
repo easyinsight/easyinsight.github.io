@@ -25,6 +25,7 @@ import mx.collections.ArrayCollection;
         public var verticalGridLines:Boolean = false;
         public var borderStyle:String = "none";
         public var multiLineHeaders:Boolean = false;
+        public var defaultColumnAlignment:String = "left";
 
 		public function ListDefinition()
 		{

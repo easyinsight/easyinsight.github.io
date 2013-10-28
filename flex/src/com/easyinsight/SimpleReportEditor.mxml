@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
-                      xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
+                      xmlns:analysis="com.easyinsight.analysis.*"
                       xmlns:suggestion="com.easyinsight.suggestion.*"
                       xmlns:report="com.easyinsight.report.*" xmlns:easyinsight="com.easyinsight.*"
                       creationComplete="initializeForWorksheet()" width="100%"
@@ -116,6 +116,8 @@
         import mx.managers.PopUpManager;
         import mx.utils.ObjectUtil;
         import mx.utils.URLUtil;
+
+        public var urlKey:String;
 
         [Bindable]
         public var dataService:DataService;
@@ -462,7 +464,7 @@
         }
 
         private function boltOnFields(addonReport:AddonReport):void {
-            coreDataService.addonFields.send(addonReport.reportID);
+            coreDataService.addonFields.send(addonReport);
         }
 
         private function multiBolt():void {
@@ -511,6 +513,8 @@
             analysisDefinition.joinOverrides = joins;
         }
 
+        public var embedded:Boolean;
+
         /*[Bindable]
         private var defaultManualRun:Boolean;
 
@@ -557,16 +561,20 @@
                 if (analysisDefinition == null || analysisDefinition.analysisID == 0) {
                     var fragmentObject:Object = new Object();
                     fragmentObject.feedID = String(feedMetadata.urlKey);
-                    var fragmentString:String = URLUtil.objectToString(fragmentObject);
-                    BrowserManager.getInstance().setTitle("Easy Insight - " + dataSourceName);
-                    BrowserManager.getInstance().setFragment(fragmentString);
+                    if (!embedded) {
+                        var fragmentString:String = URLUtil.objectToString(fragmentObject);
+                        BrowserManager.getInstance().setTitle("Easy Insight - " + dataSourceName);
+                        BrowserManager.getInstance().setFragment(fragmentString);
+                    }
                     UserAudit.instance().log(new ActionDataSourceLog(ActionDataSourceLog.NEW_REPORT, dataSourceID));
                 } else {
                     var feedFragmentObject:Object = new Object();
                     feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
-                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                    BrowserManager.getInstance().setTitle("Easy Insight - " + analysisDefinition.name);
-                    BrowserManager.getInstance().setFragment(feedFragmentString);
+                    if (!embedded) {
+                        var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                        BrowserManager.getInstance().setTitle("Easy Insight - " + analysisDefinition.name);
+                        BrowserManager.getInstance().setFragment(feedFragmentString);
+                    }
                     UserAudit.instance().log(new ActionReportLog(ActionReportLog.EDIT, analysisDefinition.analysisID));
                 }
 
@@ -905,10 +913,10 @@
         private function close():void {
             if (analysisChanged) {
                 createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    dispatchEvent(new AnalysisCloseEvent());
+                    dispatchEvent(new AnalysisCloseEvent(feedMetadata.urlKey));
                 });
             } else {
-                dispatchEvent(new AnalysisCloseEvent());
+                dispatchEvent(new AnalysisCloseEvent(feedMetadata.urlKey));
             }
         }
 
@@ -1037,26 +1045,27 @@
             report.id = analysisDefinition.analysisID;
             report.name = analysisDefinition.name;
             report.reportType = analysisDefinition.reportType;
+            report.urlKey = analysisDefinition.urlKey;
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(report)));
         }
 
         private function newReport():void {
             if (analysisChanged) {
                 createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID)));
+                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID, feedMetadata.urlKey)));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID)));
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID, feedMetadata.urlKey)));
             }
         }
 
         private function newDashboard():void {
             if (analysisChanged) {
                 createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID, urlKey: feedMetadata.urlKey})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID, urlKey: feedMetadata.urlKey})));
             }
         }
 
@@ -1248,10 +1257,10 @@
         private function goAdmin():void {
             if (analysisChanged) {
                 createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID , urlKey: feedMetadata.urlKey})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID , urlKey: feedMetadata.urlKey})));
             }
         }
 

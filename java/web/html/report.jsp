@@ -41,6 +41,7 @@
         }
         boolean phone = Utils.isPhone(request);
         boolean iPad = Utils.isTablet(request);
+        boolean designer = Utils.isDesigner();
         ReportInfo reportInfo = new AnalysisService().getReportInfo(reportID);
         boolean editable = reportInfo.isAdmin();
         WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID);
@@ -185,10 +186,12 @@
                     <%
                         }
                     %>
+                    <% if (designer && !iPad && !phone) { %>
                     <div class="btn-group">
-                        <a href="<%= RedirectUtil.getURL(request, "/app/#analysisID=" + report.getUrlKey())%>"
+                        <a href="<%= RedirectUtil.getURL(request, "/app/embeddedReportEditor.jsp?reportID=" + report.getUrlKey())%>"
                            class="reportControl">Edit Report</a>
                     </div>
+                    <% } %>
                 </div>
             </div>
         </div>

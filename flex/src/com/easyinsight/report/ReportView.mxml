@@ -95,6 +95,8 @@
 
         private var _forceDefault:Boolean = false;
 
+        public var urlKey:String;
+
         private function exportExcel():void {
             viewFactory.updateExportMetadata();
             var window:ReportExportWindow = new ReportExportWindow();
@@ -850,11 +852,24 @@
 
         [Bindable]
         private var logoVisible:Boolean = false;
+
+        private function onConfigurationClick():void {
+            var data:Object = configurationBox.selectedItem.data;
+            if (data == 1) {
+                var so:SharedObject = SharedObject.getLocal("r");
+                so.clear();
+                so.flush();
+            }
+        }
+
+        [Bindable]
+        private var options:ArrayCollection = new ArrayCollection([ {label: "[ Configuration Options ]", data: 0}, {label: "Reset to Default", data: 1},
+            {label: "Save a New Configuration...", data: 2}]);
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="setupAddRow" result="setupAddRow()"/>
     </mx:RemoteObject>
-    <mx:HBox width="100%" id="leftButtonBar" styleName="topButtonBar">
+    <mx:HBox width="100%" id="leftButtonBar" styleName="topButtonBar" verticalAlign="middle">
         <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="right" id="backButton"
                    toolTip="Close the report" label="Close Report" styleName="grayButton"/>
         <report:RefreshButton icon="{refreshIcon}" labelPlacement="right"
@@ -869,6 +884,7 @@
                    labelPlacement="right" id="editReportButton"
                    toolTip="Open this report in the report editor..." label="Edit Report" styleName="grayButton"/>
         <mx:Button labelPlacement="right" label="View in HTML" styleName="grayButton" click="viewInHTML()" icon="{htmlIcon}"/>
+        <mx:ComboBox styleName="grayButton" dataProvider="{options}" labelField="label" change="onConfigurationClick()" id="configurationBox"/>
         <mx:Button labelPlacement="right" label="Add Row..." styleName="grayButton" click="addRow()" visible="{showAddRow}"/>
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
