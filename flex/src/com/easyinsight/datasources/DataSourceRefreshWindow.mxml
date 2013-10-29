@@ -107,6 +107,9 @@
             if (callData.status == CallData.DONE) {
                 timer.stop();
                 var refreshResult:DataSourceRefreshResult = callData.result as DataSourceRefreshResult;
+                if (refreshResult == null) {
+                    PopUpManager.removePopUp(this);
+                }
                 var newDate:Date = refreshResult.date;
                 dispatchEvent(new DataSourceRefreshEvent(newDate, refreshResult.newFields));
 
