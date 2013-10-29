@@ -32,16 +32,27 @@ public class DashboardService {
 
     private DashboardStorage dashboardStorage = new DashboardStorage();
 
-    public long saveConfigurationForDashboard(long dashboardID, DashboardStackPositions dashboardStackPositions) {
+    public SavedConfiguration saveConfigurationForDashboard(SavedConfiguration savedConfiguration, long dashboardID) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            long id = dashboardStackPositions.save(conn, dashboardID, 0);
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO saved_configuration (dashboard_state_id, configuration_name) values (?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
-            stmt.setLong(1, id);
-            stmt.setString(2, "");
-            stmt.execute();
-            return Database.instance().getAutoGenKey(stmt);
+            long id = savedConfiguration.getDashboardStackPositions().save(conn, dashboardID, 0);
+            if (savedConfiguration.getId() == 0) {
+                PreparedStatement stmt = conn.prepareStatement("INSERT INTO saved_configuration (dashboard_state_id, configuration_name) values (?, ?)",
+                        Statement.RETURN_GENERATED_KEYS);
+                stmt.setLong(1, id);
+                stmt.setString(2, savedConfiguration.getName());
+                stmt.execute();
+                savedConfiguration.setId(Database.instance().getAutoGenKey(stmt));
+                stmt.close();
+            } else {
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE saved_configuration SET dashboard_state_id = ?, configuration_name = ? WHERE saved_configuration_id = ?");
+                updateStmt.setLong(1, id);
+                updateStmt.setString(2, savedConfiguration.getName());
+                updateStmt.setLong(3, savedConfiguration.getId());
+                updateStmt.executeUpdate();
+            }
+
+            return savedConfiguration;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -50,16 +61,27 @@ public class DashboardService {
         }
     }
 
-    public long saveConfigurationForReport(long reportID, DashboardStackPositions dashboardStackPositions) {
+    public SavedConfiguration saveConfigurationForReport(SavedConfiguration savedConfiguration, long reportID) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            long id = dashboardStackPositions.save(conn, 0, reportID);
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO saved_configuration (dashboard_state_id, configuration_name) values (?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
-            stmt.setLong(1, id);
-            stmt.setString(2, "");
-            stmt.execute();
-            return Database.instance().getAutoGenKey(stmt);
+            long id = savedConfiguration.getDashboardStackPositions().save(conn, 0, reportID);
+            if (savedConfiguration.getId() == 0) {
+                PreparedStatement stmt = conn.prepareStatement("INSERT INTO saved_configuration (dashboard_state_id, configuration_name) values (?, ?)",
+                        Statement.RETURN_GENERATED_KEYS);
+                stmt.setLong(1, id);
+                stmt.setString(2, savedConfiguration.getName());
+                stmt.execute();
+                savedConfiguration.setId(Database.instance().getAutoGenKey(stmt));
+                stmt.close();
+            } else {
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE saved_configuration SET dashboard_state_id = ?, configuration_name = ? WHERE saved_configuration_id = ?");
+                updateStmt.setLong(1, id);
+                updateStmt.setString(2, savedConfiguration.getName());
+                updateStmt.setLong(3, savedConfiguration.getId());
+                updateStmt.executeUpdate();
+            }
+
+            return savedConfiguration;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -359,7 +381,7 @@ public class DashboardService {
             /*if (dashboardCache != null) {
                 dashboardCache.remove(cacheKey);
             }*/
-            MemCachedManager.delete("dashboard" + dashboard.getId());
+            //MemCachedManager.delete("dashboard" + dashboard.getId());
 
             Set<Long> reportIDs = dashboard.containedReports();
             EIConnection conn = Database.instance().getConnection();
@@ -538,7 +560,7 @@ public class DashboardService {
             }
         }*/
         Dashboard dashboard = null;
-        byte[] bytes = (byte[]) MemCachedManager.get("dashboard" + dashboardID);
+        /*byte[] bytes = (byte[]) MemCachedManager.get("dashboard" + dashboardID);
         if (bytes != null) {
             try {
                 ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
@@ -546,7 +568,7 @@ public class DashboardService {
             } catch (Exception e) {
                 LogClass.error(e);
             }
-        }
+        }*/
 
         if (dashboard == null) {
             dashboard = dashboardStorage.getDashboard(dashboardID, conn);
@@ -581,7 +603,7 @@ public class DashboardService {
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(dashboard);
         oos.flush();
-        MemCachedManager.add("dashboard" + dashboardID, 10000, baos.toByteArray());
+        //MemCachedManager.add("dashboard" + dashboardID, 10000, baos.toByteArray());
         /*if (dashboardCache != null) {
             dashboardCache.put(cacheKey, dashboard);
         }*/
@@ -754,7 +776,7 @@ public class DashboardService {
     public void deleteDashboard(long dashboardID) {
         SecurityUtil.authorizeDashboard(dashboardID);
         try {
-            MemCachedManager.delete("dashboard" + dashboardID);
+            //MemCachedManager.delete("dashboard" + dashboardID);
             dashboardStorage.deleteDashboard(dashboardID);
         } catch (Exception e) {
             LogClass.error(e);
