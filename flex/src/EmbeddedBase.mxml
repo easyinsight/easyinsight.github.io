@@ -50,7 +50,12 @@
                     break;
                 case PerspectiveInfo.REPORT_EDITOR:
                     var urlKey:String = info.properties["urlKey"];
-                    navigateToURL(new URLRequest("/app/embeddedReportEditor.jsp?dataSourceID=" + urlKey), "_self");
+                    if (urlKey != null) {
+                        navigateToURL(new URLRequest("/app/embeddedReportEditor.jsp?dataSourceID=" + urlKey), "_self");
+                    } else {
+                        var reportURLKey:String = info.properties["reportURLKey"];
+                        navigateToURL(new URLRequest("/app/embeddedReportEditor.jsp?reportID=" + reportURLKey), "_self");
+                    }
                     break;
                 case PerspectiveInfo.DASHBOARD_EDITOR:
                     var urlKey:String = info.properties["urlKey"];
