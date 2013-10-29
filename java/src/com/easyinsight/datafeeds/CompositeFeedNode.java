@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.ReportQueryNodeKey;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -11,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -108,9 +110,9 @@ public class CompositeFeedNode implements Serializable {
 
     }
 
-    public QueryStateNode createQueryStateNode(EIConnection conn, List<AnalysisItem> analysisItems, InsightRequestMetadata insightRequestMetadata) {
+    public QueryStateNode createQueryStateNode(EIConnection conn, List<AnalysisItem> analysisItems, InsightRequestMetadata insightRequestMetadata, Collection<FilterDefinition> reportFilters) {
         if (reportID > 0) {
-            return new ReportQueryStateNode(reportID, conn, analysisItems, insightRequestMetadata);
+            return new ReportQueryStateNode(reportID, conn, analysisItems, insightRequestMetadata, reportFilters);
         } else {
             return new QueryStateNode(getDataFeedID(), FeedRegistry.instance().getFeed(getDataFeedID(), conn), conn, analysisItems, insightRequestMetadata);
         }

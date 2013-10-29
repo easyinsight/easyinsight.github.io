@@ -27,9 +27,11 @@ class ReportQueryStateNode extends QueryStateNode {
     private Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
     private QueryNodeKey queryNodeKey;
     private long dataSourceID;
+    private Collection<FilterDefinition> parentFilters;
 
-    ReportQueryStateNode(long reportID, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata) {
+    ReportQueryStateNode(long reportID, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata, Collection<FilterDefinition> parentFilters) {
         this.reportID = reportID;
+        this.parentFilters = parentFilters;
         queryNodeKey = new ReportQueryNodeKey(reportID);
         report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
         queryData = new QueryData(queryNodeKey);
@@ -107,6 +109,7 @@ class ReportQueryStateNode extends QueryStateNode {
         if (dataSourceID > 0) {
             CachedAnalysisBasedFeed cachedFeed = new CachedAnalysisBasedFeed();
             cachedFeed.setAnalysisDefinition(report);
+            cachedFeed.setReportFilters(parentFilters);
             feed = cachedFeed;
         } else {
             AnalysisBasedFeed cachedFeed = new AnalysisBasedFeed();
