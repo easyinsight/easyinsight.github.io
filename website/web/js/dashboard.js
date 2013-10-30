@@ -732,14 +732,12 @@ $(function () {
         })
 
         function filterText(e) {
-            console.log("asdfasdfa")
             var p = $(e.target).parent();
             while (!p.hasClass("input-group")) p = p.parent();
             var val = $(".value-search-input", p).val();
             var modalParent = p.parent().parent().parent().parent().parent();
             var f = filterMap[modalParent.attr("id").replace(/_modal$/g, "")];
             $.getJSON("/app/html/filterValue?filterID=" + f.filter.id + "&q=" + encodeURIComponent(val), function (d) {
-                console.log("asdf");
                 $(".multi-value-list", modalParent).html(multi_value_results({ data: f.filter, results: d }));
                 $(".cb_all_choice", modalParent).click(allCheck);
                 $(".cb_filter_choice", modalParent).click(choiceAllCheck);
