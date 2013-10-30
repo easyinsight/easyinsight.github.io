@@ -21,6 +21,13 @@ import java.util.*;
 public class YTDUtil {
 
     public static YearStuff getYearStuff(WSCompareYearsDefinition yearsDefinition, DataSet nowSet, PipelineData pipelineData, Set<AnalysisItem> reportItems) {
+        if (yearsDefinition.isLogReport()) {
+            for (FilterDefinition filter : yearsDefinition.getFilterDefinitions()) {
+                if (filter.getField() != null) {
+                    System.out.println("Filter " + filter.getClass().getName() + " on " + filter.getField().toDisplay());
+                }
+            }
+        }
         AnalysisItem timeDimension = yearsDefinition.getTimeDimension();
         Collection<AnalysisMeasure> measures = new ArrayList<AnalysisMeasure>();
         Collection<AnalysisMeasure> realMeasures = new ArrayList<AnalysisMeasure>();
@@ -44,6 +51,9 @@ public class YTDUtil {
                 DateValue dateValue = (DateValue) year;
                 cal.setTime(dateValue.getDate());
                 int yearVal = cal.get(Calendar.YEAR);
+                if (yearsDefinition.isLogReport()) {
+                    System.out.println("\tYear = " + yearVal);
+                }
                 if (yearVal < 2008) {
                     continue;
                 }
