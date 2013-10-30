@@ -110,6 +110,7 @@ public class CachedAnalysisBasedFeed extends Feed {
                             if (reportFilter.getField() != null && reportFilter.getField().equals(filter.getField()) &&
                                     reportFilter.getClass().getName().equals(filter.getClass().getName()) &&
                                     reportFilter.isNotCondition() == filter.isNotCondition()) {
+                                System.out.println("Including filter on " + reportFilter.getField().toDisplay());
                                 includeFilters.add(filter);
                             }
                         }
