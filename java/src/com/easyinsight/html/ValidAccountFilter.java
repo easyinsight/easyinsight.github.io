@@ -25,40 +25,41 @@ public class ValidAccountFilter implements Filter {
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
-        if(req.getAttribute("public") != null && ((Boolean) req.getAttribute("public")) == true) {
-            filterChain.doFilter(servletRequest, servletResponse);
-        }
-        String alternateDestination = null;
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            HttpSession session = ((HttpServletRequest) servletRequest).getSession(false);
-            PreparedStatement ps = conn.prepareStatement("SELECT account_state FROM ACCOUNT WHERE account_id = ?");
-            ps.setLong(1, (Long) session.getAttribute("accountID"));
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            int accountState = rs.getInt(1);
-            if (accountState == Account.CLOSED) {
-                alternateDestination = "/app/billing/billingSetupAction.jsp";
-            } else if (accountState == Account.DELINQUENT) {
-                alternateDestination = "/app/billing/billingSetupAction.jsp";
-            } else if (accountState == Account.BILLING_FAILED) {
-                alternateDestination = "/app/billing/billingSetupAction.jsp";
-            } else if (accountState == Account.INACTIVE) {
-                alternateDestination = "/app/html/reactivate.jsp";
-            } else if (accountState == Account.REACTIVATION_POSSIBLE) {
-                alternateDestination = "/app/reactivate/index.jsp";
-            }
-            ps.close();
-        } catch (SQLException se) {
-            throw new RuntimeException(se);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        if (alternateDestination == null) {
+        if (req.getAttribute("public") != null && ((Boolean) req.getAttribute("public")) == true) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
-            HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-            httpServletResponse.sendRedirect(alternateDestination);
+            String alternateDestination = null;
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                HttpSession session = ((HttpServletRequest) servletRequest).getSession(false);
+                PreparedStatement ps = conn.prepareStatement("SELECT account_state FROM ACCOUNT WHERE account_id = ?");
+                ps.setLong(1, (Long) session.getAttribute("accountID"));
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                int accountState = rs.getInt(1);
+                if (accountState == Account.CLOSED) {
+                    alternateDestination = "/app/billing/billingSetupAction.jsp";
+                } else if (accountState == Account.DELINQUENT) {
+                    alternateDestination = "/app/billing/billingSetupAction.jsp";
+                } else if (accountState == Account.BILLING_FAILED) {
+                    alternateDestination = "/app/billing/billingSetupAction.jsp";
+                } else if (accountState == Account.INACTIVE) {
+                    alternateDestination = "/app/html/reactivate.jsp";
+                } else if (accountState == Account.REACTIVATION_POSSIBLE) {
+                    alternateDestination = "/app/reactivate/index.jsp";
+                }
+                ps.close();
+            } catch (SQLException se) {
+                throw new RuntimeException(se);
+            } finally {
+                Database.closeConnection(conn);
+            }
+            if (alternateDestination == null) {
+                filterChain.doFilter(servletRequest, servletResponse);
+            } else {
+                HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
+                httpServletResponse.sendRedirect(alternateDestination);
+            }
         }
     }
 

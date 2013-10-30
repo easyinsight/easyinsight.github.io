@@ -590,6 +590,16 @@
         </init-param>
     </servlet>
 
+    <servlet>
+        <servlet-name>FilterValueServlet</servlet-name>
+        <servlet-class>com.easyinsight.html.FilterValueServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>FilterValueServlet</servlet-name>
+        <url-pattern>/html/filterValue</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>OpenIDServlet</servlet-name>
         <url-pattern>/openid</url-pattern>

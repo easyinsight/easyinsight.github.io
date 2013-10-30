@@ -47,8 +47,7 @@
             dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
         }
 
-//        Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
-        FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, false);
+        FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, drillthroughKey, false);
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
         UIData uiData = Utils.createUIData();
         dashboard.getFilters().addAll(drillthroughFilters);
