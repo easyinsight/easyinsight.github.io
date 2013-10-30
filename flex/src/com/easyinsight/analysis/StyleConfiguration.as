@@ -372,6 +372,7 @@ public class StyleConfiguration {
         items.addItem(new TextReportFormItem("Cache Partition Filter", "cachePartitionFilter", report.cachePartitionFilter, report));
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
         items.addItem(new CheckBoxReportFormItem("Cache Persistence", "persistedCache", report.persistedCache, report));
+        items.addItem(new CheckBoxReportFormItem("Cache Filters", "cacheFilters", report.cacheFilters, report));
         items.addItem(new CheckBoxReportFormItem("Aggregate Query if Possible", "aggregateQueryIfPossible", report.aggregateQueryIfPossible, report));
         items.addItem(new CheckBoxReportFormItem("No Data on No Join", "noDataOnNoJoin", report.noDataOnNoJoin, report));
         items.addItem(new CheckBoxReportFormItem("Filter Optimization", "lookupTableOptimization", report.lookupTableOptimization, report));

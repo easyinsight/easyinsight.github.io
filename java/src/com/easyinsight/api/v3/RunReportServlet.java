@@ -11,6 +11,8 @@ import nu.xom.Document;
 import nu.xom.Element;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,7 +41,7 @@ public class RunReportServlet extends APIServlet {
         populateFiltersFromRequest(request, report);
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setNoLogging(true);
-        ListDataResults results = (ListDataResults) new DataService().list(report, insightRequestMetadata);
+        ListDataResults results = (ListDataResults) new DataService().list(report, insightRequestMetadata, true);
         StringBuilder result = new StringBuilder();
 
         java.util.List<AnalysisItem> items = new java.util.ArrayList<AnalysisItem>(report.getAllAnalysisItems());

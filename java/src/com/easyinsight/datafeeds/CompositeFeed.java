@@ -197,7 +197,7 @@ public class CompositeFeed extends Feed {
         // match each field with its appropriate ad hoc source
 
         for (CompositeFeedNode node : compositeFeedNodes) {
-            QueryStateNode queryStateNode = node.createQueryStateNode(conn, getFields(), insightRequestMetadata);
+            QueryStateNode queryStateNode = node.createQueryStateNode(conn, getFields(), insightRequestMetadata, filters);
             QueryNodeKey queryNodeKey = node.createQueryNodeKey();
             queryNodeMap.put(queryNodeKey, queryStateNode);
             graph.addVertex(queryStateNode);

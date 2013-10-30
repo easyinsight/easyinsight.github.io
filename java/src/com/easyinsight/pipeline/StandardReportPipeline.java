@@ -92,19 +92,42 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new TypeTransformComponent());
 
         if (report.getFilterDefinitions() != null) {
-            List<FilterDefinition> compFilters = new ArrayList<FilterDefinition>();
+
+            boolean combine = true;
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
                     continue;
                 }
-
-                if ((!insightRequestMetadata.isLookupTableAggregate() || !filterDefinition.validForQuery()) &&
-                        filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
-                    compFilters.add(filterDefinition);
-                    //components.addAll(filterDefinition.createComponents(Pipeline.BEFORE, new DefaultFilterProcessor(), null, false));
+                if (filterDefinition instanceof LastValueFilter || filterDefinition instanceof FirstValueFilter ||
+                        filterDefinition instanceof NamedFilterReference) {
+                    combine = false;
                 }
             }
-            components.add(new BetterFilterComponent(compFilters));
+            if (combine) {
+                List<FilterDefinition> compFilters = new ArrayList<FilterDefinition>();
+                for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
+                    if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
+                        continue;
+                    }
+                    if ((!insightRequestMetadata.isLookupTableAggregate() || !filterDefinition.validForQuery()) &&
+                            filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
+                        compFilters.add(filterDefinition);
+                    }
+                }
+                if (compFilters.size() > 0) {
+                    components.add(new BetterFilterComponent(compFilters));
+                }
+            } else {
+                for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
+                    if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
+                        continue;
+                    }
+                    if ((!insightRequestMetadata.isLookupTableAggregate() || !filterDefinition.validForQuery()) &&
+                            filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
+                        components.addAll(filterDefinition.createComponents(Pipeline.BEFORE, new DefaultFilterProcessor(), null, false));
+                    }
+                }
+            }
         }
 
         FieldFilterComponent fieldFilterComponent = new FieldFilterComponent();
@@ -202,21 +225,35 @@ public class StandardReportPipeline extends Pipeline {
 
             endComponent.add(new LinkDecorationComponent());
             if (report.getFilterDefinitions() != null) {
-                /*for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                    endComponent.addAll(filterDefinition.createComponents(Pipeline.LAST_FILTERS, new DefaultFilterProcessor(), null, false));
-                }*/
-                List<FilterDefinition> compFilters = new ArrayList<FilterDefinition>();
+                boolean combine = true;
                 for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                     if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
                         continue;
                     }
-
-                    if (filterDefinition.isEnabled() && Pipeline.LAST_FILTERS.equals(filterDefinition.getPipelineName())) {
-                        compFilters.add(filterDefinition);
-                        //components.addAll(filterDefinition.createComponents(Pipeline.BEFORE, new DefaultFilterProcessor(), null, false));
+                    if (filterDefinition instanceof LastValueFilter || filterDefinition instanceof FirstValueFilter ||
+                            filterDefinition instanceof NamedFilterReference) {
+                        combine = false;
                     }
                 }
-                components.add(new BetterFilterComponent(compFilters));
+                if (combine) {
+                    List<FilterDefinition> compFilters = new ArrayList<FilterDefinition>();
+                    for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
+                        if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
+                            continue;
+                        }
+
+                        if (filterDefinition.isEnabled() && Pipeline.LAST_FILTERS.equals(filterDefinition.getPipelineName())) {
+                            compFilters.add(filterDefinition);
+                        }
+                    }
+                    if (compFilters.size() > 0) {
+                        components.add(new BetterFilterComponent(compFilters));
+                    }
+                } else {
+                    for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
+                        components.addAll(filterDefinition.createComponents(Pipeline.LAST_FILTERS, new DefaultFilterProcessor(), null, false));
+                    }
+                }
             }
             endComponent.add(new LimitsComponent());
             components.addAll(report.createComponents());

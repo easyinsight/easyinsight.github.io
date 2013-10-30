@@ -2,7 +2,7 @@
 <report:DataViewPage xmlns:mx="http://www.adobe.com/2006/mxml"
                      xmlns:filtering="com.easyinsight.filtering.*"
                      xmlns:report="com.easyinsight.report.*"
-                     xmlns:easyinsight="com.easyinsight.*"
+                     xmlns:easyinsight="com.easyinsight.*" xmlns:listing="com.easyinsight.listing.*"
                      width="100%" height="100%"
                      creationComplete="onCreation()"
                      implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
@@ -49,6 +49,7 @@
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.core.Container;
+        import mx.events.MenuEvent;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.states.RemoveChild;
@@ -617,6 +618,11 @@
             headerFontSize = report.headerFontSize;
             maxHeaderWidth = report.maxHeaderWidth;
 
+            /*var configurations:ArrayCollection = event.reportInfo.configurations;
+            for each (var savedConfiguration:SavedConfiguration in configurations) {
+                options.addItem({ label: savedConfiguration.name, data: savedConfiguration });
+            }*/
+
             if (!_forceDefault && report.enableLocalStorage && exchangeItem == null) {
 
                 /*var delegate:DashboardStackPositionsRetrievalState = null;
@@ -853,22 +859,40 @@
         [Bindable]
         private var logoVisible:Boolean = false;
 
-        private function onConfigurationClick():void {
-            var data:Object = configurationBox.selectedItem.data;
+        private function onConfigurationClick(event:MenuEvent):void {
+            var data:Object = event.item.data;
             if (data == 1) {
                 var so:SharedObject = SharedObject.getLocal("r");
                 so.clear();
                 so.flush();
+                var desc:InsightDescriptor = new InsightDescriptor();
+                desc.id = report.analysisID;
+                desc.name = report.name;
+                desc.dataFeedID = report.dataFeedID;
+                desc.reportType = report.reportType;
+                desc.urlKey = report.urlKey;
+                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(desc)));
             }
         }
 
         [Bindable]
-        private var options:ArrayCollection = new ArrayCollection([ {label: "[ Configuration Options ]", data: 0}, {label: "Reset to Default", data: 1},
+        private var options:ArrayCollection = new ArrayCollection([ {label: "Reset to Default", data: 1},
             {label: "Save a New Configuration...", data: 2}]);
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="setupAddRow" result="setupAddRow()"/>
     </mx:RemoteObject>
+    <mx:Style>
+        .myCustomPopUpStyleName {
+            fontSize: 12;
+            fontFamily: "Lucida Grande";
+            textAlign: left;
+            dropShadowEnabled: false;
+            borderStyle: solid;
+            borderThickness: 1;
+            cornerRadius: 8;
+        }
+    </mx:Style>
     <mx:HBox width="100%" id="leftButtonBar" styleName="topButtonBar" verticalAlign="middle">
         <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="right" id="backButton"
                    toolTip="Close the report" label="Close Report" styleName="grayButton"/>
@@ -884,7 +908,9 @@
                    labelPlacement="right" id="editReportButton"
                    toolTip="Open this report in the report editor..." label="Edit Report" styleName="grayButton"/>
         <mx:Button labelPlacement="right" label="View in HTML" styleName="grayButton" click="viewInHTML()" icon="{htmlIcon}"/>
-        <mx:ComboBox styleName="grayButton" dataProvider="{options}" labelField="label" change="onConfigurationClick()" id="configurationBox"/>
+        <!--<listing:ArghButton label="Configurations" styleName="grayButton" itemClick="onConfigurationClick(event)" width="160" id="newButton"
+                            dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>-->
+        <!--<mx:ComboBox styleName="grayButton" dataProvider="{options}" labelField="label" change="onConfigurationClick()" id="configurationBox"/>-->
         <mx:Button labelPlacement="right" label="Add Row..." styleName="grayButton" click="addRow()" visible="{showAddRow}"/>
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>

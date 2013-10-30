@@ -86,6 +86,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private long reportStateID;
     private List<FilterDefinition> filterDefinitions;
     private int policy;
+    private boolean cacheFilters;
     private List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
     private boolean canSaveDirectly;
     private boolean publiclyVisible;
@@ -141,6 +142,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String customField2;
 
     private List<FilterDefinition> filtersForDrillthrough;
+
+    public boolean isCacheFilters() {
+        return cacheFilters;
+    }
+
+    public void setCacheFilters(boolean cacheFilters) {
+        this.cacheFilters = cacheFilters;
+    }
 
     public String getCachePartitionFilter() {
         return cachePartitionFilter;
@@ -972,6 +981,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         fetchSize = (int) findNumberProperty(properties, "fetchSize", 0);
         noDataOnNoJoin = findBooleanProperty(properties, "noDataOnNoJoin", false);
         aggregateQueryIfPossible = findBooleanProperty(properties, "aggregateQueryIfPossible", true);
+        cacheFilters = findBooleanProperty(properties, "cacheFilters", false);
         customField1 = findStringProperty(properties, "customField1", "");
         customField2 = findStringProperty(properties, "customField2", "");
         cachePartitionFilter = findStringProperty(properties, "cachePartitionFilter", "");
@@ -1005,6 +1015,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportStringProperty("customField1", customField1));
         properties.add(new ReportStringProperty("customField2", customField2));
         properties.add(new ReportStringProperty("cachePartitionFilter", cachePartitionFilter));
+        properties.add(new ReportBooleanProperty("cacheFilters", cacheFilters));
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }

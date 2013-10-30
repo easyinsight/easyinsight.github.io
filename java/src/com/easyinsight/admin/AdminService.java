@@ -47,6 +47,31 @@ public class AdminService {
         UserThreadMutex.release();
     }
 
+    public void argh() {
+        SecurityUtil.authorizeAccountAdmin();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement getDataSourcesStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM.ITEM_KEY_ID, ANALYSIS_DATE.date_time_field, ANALYSIS_ITEM.display_name, DATA_FEED.feed_name FROM ANALYSIS_ITEM, ANALYSIS_DATE, FEED_TO_ANALYSIS_ITEM, DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE USER.ACCOUNT_ID = ? AND USER.USER_ID = UPLOAD_POLICY_USERS.USER_ID AND UPLOAD_POLICY_USERS.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_ANALYSIS_ITEM.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_ANALYSIS_ITEM.ANALYSIS_ITEM_ID = ANALYSIS_ITEM.ANALYSIS_ITEM_ID AND ANALYSIS_ITEM.ANALYSIS_ITEM_ID = ANALYSIS_DATE.ANALYSIS_ITEM_ID");
+            getDataSourcesStmt.setLong(1, 4913);
+            ResultSet rs = getDataSourcesStmt.executeQuery();
+            while (rs.next()) {
+                long keyID = rs.getLong(1);
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS_DATE SET date_time_field = ? WHERE analysis_date.analysis_item_id in (SELECT analysis_item.analysis_item_id FROM analysis_item WHERE analysis_item.item_key_id = ?)");
+                updateStmt.setBoolean(1, true);
+                updateStmt.setLong(2, keyID);
+                updateStmt.executeUpdate();
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
     public void disableGenerators() {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();

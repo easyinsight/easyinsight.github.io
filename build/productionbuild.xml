@@ -417,7 +417,7 @@
 
     <target name="modules4" depends="report.treemap, app.embeddeddashboard, app.seleniumdashboard"/>
     <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail, perspective.spreadsheetupdatewizard"/>
-    <target name="modules7" depends="perspective.kpiwindow,perspective.datasourceadmin, app.embeddedconfiguredatasource, app.embeddeddashboardeditor"/>
+    <target name="modules7" depends="perspective.kpiwindow,perspective.datasourceadmin, app.embeddedconfiguredatasource, app.embeddedreporteditor"/>
     <target name="modules8" depends="report.heatmap, report.gantt, report.form, app.embeddeddashboardeditor"/>
     <target name="apps" depends="compileFlexOptimized, app.embeddedreport, app.selenium, app.admin, app.font"/>
 

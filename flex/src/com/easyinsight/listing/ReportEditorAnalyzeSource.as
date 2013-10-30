@@ -10,6 +10,7 @@ import com.easyinsight.framework.PerspectiveInfo;
 		public function ReportEditorAnalyzeSource(report:AnalysisDefinition, selectedTabIndex:int = 0, feedMetadata:FeedMetadata = null, openState:Object = null) {
             super(PerspectiveInfo.REPORT_EDITOR, new Object());
 			properties.analysisDefinition = report;
+            properties.reportURLKey = report.urlKey;
 			properties.dataSourceID = report.dataFeedID;
             properties.selectedTabIndex = selectedTabIndex;
             properties.feedMetadata = feedMetadata;

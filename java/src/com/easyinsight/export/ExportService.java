@@ -1444,11 +1444,14 @@ public class ExportService {
             Iterator<FilterDefinition> iter = filters.iterator();
             while (iter.hasNext()) {
                 FilterDefinition filter = iter.next();
+                System.out.println("Testing filter of type " + filter.getClass().getName());
                 if (filter instanceof FlatDateFilter) {
+                    System.out.println("Hiding year filter");
                     iter.remove();
                 }
             }
         }
+
         ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
         YearStuff ytdStuff = YTDUtil.getYearStuff(verticalList, dataSet.getDataSet(), dataSet.getPipelineData(), dataSet.getReportItems());
 

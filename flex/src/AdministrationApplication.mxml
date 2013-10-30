@@ -32,6 +32,7 @@
                             <mx:Button label="Synchronize Invoices" click="syncInvoices()"/>
                             <mx:Button label="Task Generators" click="taskGenerators()"/>
                             <mx:Button label="Flush Cache" click="flushCache()"/>
+                            <mx:Button label="Argh" click="argh()"/>
                         </mx:HBox>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Connections">
@@ -89,6 +90,11 @@
         private function forceTrialExpire():void {
             ProgressAlert.alert(this, "Forcing trials to expire...", null, adminService.forceTrialExpire);
             adminService.forceTrialExpire.send();
+        }
+
+        private function argh():void {
+            ProgressAlert.alert(this, "Forcing trials to expire...", null, adminService.argh);
+            adminService.argh.send();
         }
 
         private function syncInvoices():void {
@@ -253,6 +259,7 @@
     </mx:RemoteObject>
     <mx:RemoteObject id="adminService" destination="admin">
         <mx:method name="threadDump"/>
+        <mx:method name="argh"/>
         <mx:method name="applyDays"/>
         <mx:method name="constantContactSync"/>
         <mx:method name="clearOrphanData"/>
