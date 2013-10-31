@@ -45,7 +45,8 @@ public class FilterValueServlet extends HttpServlet {
                     AnalysisDimensionResultMetadata dimensionMetadata = (AnalysisDimensionResultMetadata) result;
                     JSONArray ja = new JSONArray();
                     for(Value v : dimensionMetadata.getValues()) {
-                        if(v != null && v.toString().contains(query))
+//                        if(v != null && v.toString().contains(query))
+                        if(v != null)
                             ja.add(v.toString());
                     }
                             JSONObject jo = new JSONObject();

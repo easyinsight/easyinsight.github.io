@@ -213,12 +213,12 @@
                     checked="checked"<% } %> />
                     <span class="cb_filter_value">All</span>
                 </li>
-                <% _.each(results.values, function(e,i,l) { %>
+                <% if(typeof(results.error) == "undefined") { _.each(results.values, function(e,i,l) { %>
                 <li><input class="cb_filter_choice" type="checkbox"<% if(data.selected[e] ||
                     data.selected["All"] )
                     { %> checked="checked"<%}%> /> <span class="cb_filter_value"><%- e == "" ? "[ No Value ]" : e %></span>
                 </li>
-                <% }) %>
+                <% }) } %>
             </ul>
             <% if(results.error) { %>
                 <div><%- results.error %></div>

@@ -499,13 +499,28 @@ $(function () {
 
         $('.multi_value_modal').on('show.bs.modal', function (e) {
             var f = filterMap[$(e.target).attr("id").replace(/_modal$/g, "")].filter;
-            var m = _.reduce(f.values, function(m, e) {
-                m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
-                return m;
-            }, {});
-            if(f.error) {
 
+            if(f.error) {
+                $(".loading-bar", e.target).show();
+                $.getJSON("/app/html/filterValue?filterID=" + f.id, function(d) {
+                    $(".loading-bar", e.target).hide();
+                    f.values = d.values;
+                    var m = _.reduce(f.values, function(m, e) {
+                        m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
+                        return m;
+                    }, {});
+                    selectionMap = $.extend({}, m, f.selected);
+                    if(d.values.length > 100) {
+                        d.error = "Too many values, please refine your search."
+                    }
+                    $(".multi-value-list", $(e.target)).html(multi_value_results({ data: { selected: selectionMap }, results: d }));
+                    delete f.error;
+                })
             } else {
+                var m = _.reduce(f.values, function(m, e) {
+                                m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
+                                return m;
+                            }, {});
                 selectionMap = $.extend({}, m, f.selected);
             }
         })
@@ -771,6 +786,9 @@ $(function () {
 
             var d = {values: _.filter(f.filter.values, function(e, i, l) {
                 return e.toLowerCase().match(val.toLowerCase()); })}
+            if(d.values.length > 100) {
+                d["error"] = "Too many values, please refine your search."
+            }
 //            $.getJSON("/app/html/filterValue?filterID=" + f.filter.id + "&q=" + encodeURIComponent(val), function (d) {
                 $(".multi-value-list", modalParent).html(multi_value_results({ data: { selected: selectionMap }, results: d }));
                 $(".cb_all_choice", modalParent).click(allCheck);
