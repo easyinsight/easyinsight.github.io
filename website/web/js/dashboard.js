@@ -31,6 +31,14 @@ var dashboardComponent = function (obj) {
     }
 }
 
+function toSelectedArray(selection) {
+    var m = _.map(selection, function(e, i, l) { return { n: i, s: e }; })
+       var n = _.select(m, function(e, i, l) { return e.s });
+        var o = _.map(n, function(e, i, l) { return e.n });
+
+    return o;
+}
+
 var Filter;
 
 var afterRefresh = function (selector) {
@@ -460,23 +468,47 @@ $(function () {
             }
             saveFilter(f, k);
         })
+
+        var selectionMap = {};
+
         var allCheck = function (e) {
             if ($(e.target).is(":checked")) {
                 $("input", $(e.target).parent().parent()).attr("checked", "checked");
+                for(i in selectionMap)
+                    selectionMap[i] = true;
             } else {
                 $("input", $(e.target).parent().parent()).removeAttr("checked");
+                for(i in selectionMap)
+                    selectionMap[i] = false;
             }
         }
 
         var choiceAllCheck = function (e) {
-            if ($(e.target).is(":checked")) {
-                if ($(".cb_filter_choice:not(:checked)", $(e.target).parent().parent()).size() == 0) {
-                    $(".cb_all_choice", $(e.target).parent().parent()).attr("checked", "checked");
-                }
+            var checked = $(e.target).is(":checked");
+            selectionMap[$(".cb_filter_value", $(e.target).parent()).html()] = checked;
+            if (checked && _.all(selectionMap, function(e, i, l) { return (i == "All") || e; })) {
+                $(".cb_all_choice", $(e.target).parent().parent()).attr("checked", "checked");
+                selectionMap["All"] = true;
             } else {
                 $(".cb_all_choice", $(e.target).parent().parent()).removeAttr("checked");
+                selectionMap["All"] = false;
             }
+
+
         };
+
+        $('.multi_value_modal').on('show.bs.modal', function (e) {
+            var f = filterMap[$(e.target).attr("id").replace(/_modal$/g, "")].filter;
+            var m = _.reduce(f.values, function(m, e) {
+                m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
+                return m;
+            }, {});
+            if(f.error) {
+
+            } else {
+                selectionMap = $.extend({}, m, f.selected);
+            }
+        })
 
         $(".cb_all_choice").click(allCheck);
 
@@ -486,23 +518,22 @@ $(function () {
             var a = $(e.target).parent().parent().parent().parent();
             var k = a.attr("id").replace(/_modal$/g, "");
             var f = filterMap[k];
-            var selects = $("li input:checked", a);
-            var selectVals = $.map(selects, function (e, i) {
-                return $(".cb_filter_value", $(e).parent()).html();
-            });
-            if (selectVals.indexOf("All") != -1) {
-                selectVals = ["All"];
+            f.filter.selected = selectionMap;
+            var selectVals = toSelectedArray(selectionMap);
+            var label;
+            if(selectionMap["All"]) {
+                label = "All";
+            } else {
+                label = selectVals.length == 1 ? selectVals[0] : selectVals.length + " Items";
             }
-            f.filter.selected = selectVals;
-            $(".multi_filter", $(a).parent()).html(selectVals.length == 1 ? selectVals[0] : selectVals.length + " Items");
+            $(".multi_filter", $(a).parent()).html(label);
 
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-
-            saveFilter(f, k);
+//            saveFilter(f, k);
         });
 
         $(".multi_flat_month_save").click(function (e) {
@@ -737,11 +768,14 @@ $(function () {
             var val = $(".value-search-input", p).val();
             var modalParent = p.parent().parent().parent().parent().parent();
             var f = filterMap[modalParent.attr("id").replace(/_modal$/g, "")];
-            $.getJSON("/app/html/filterValue?filterID=" + f.filter.id + "&q=" + encodeURIComponent(val), function (d) {
-                $(".multi-value-list", modalParent).html(multi_value_results({ data: f.filter, results: d }));
+
+            var d = {values: _.filter(f.filter.values, function(e, i, l) {
+                return e.toLowerCase().match(val.toLowerCase()); })}
+//            $.getJSON("/app/html/filterValue?filterID=" + f.filter.id + "&q=" + encodeURIComponent(val), function (d) {
+                $(".multi-value-list", modalParent).html(multi_value_results({ data: { selected: selectionMap }, results: d }));
                 $(".cb_all_choice", modalParent).click(allCheck);
                 $(".cb_filter_choice", modalParent).click(choiceAllCheck);
-            });
+//            });
         }
 
         $(".value-search-btn").click(filterText)

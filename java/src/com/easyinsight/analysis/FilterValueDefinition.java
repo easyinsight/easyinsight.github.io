@@ -575,7 +575,7 @@ public class FilterValueDefinition extends FilterDefinition {
             if (isExcludeEmpty()) {
                 stringList.remove("");
             }
-            List<String> existingChoices = new ArrayList<String>();
+            JSONObject existingChoices = new JSONObject();
             if(stringList.size() > 100) {
                 jo.put("values", new JSONArray());
                 jo.put("error", "Too many values, please refine your search.");
@@ -586,11 +586,11 @@ public class FilterValueDefinition extends FilterDefinition {
 
             for(Object obj : getFilteredValues()) {
                 if (obj != null) {
-                    existingChoices.add(obj.toString());
+                    existingChoices.put(obj.toString(), true);
                 }
             }
 
-            jo.put("selected", new JSONArray(existingChoices));
+            jo.put("selected", existingChoices);
 
 
         }

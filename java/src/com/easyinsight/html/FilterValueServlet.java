@@ -49,10 +49,10 @@ public class FilterValueServlet extends HttpServlet {
                             ja.add(v.toString());
                     }
                             JSONObject jo = new JSONObject();
-                    if(ja.size() > 100) {
-                        ja = new JSONArray();
-                        jo.put("error", "Too many values, please refine your search.");
-                    }
+//                    if(ja.size() > 100) {
+//                        ja = new JSONArray();
+//                        jo.put("error", "Too many values, please refine your search.");
+//                    }
                     jo.put("values", ja);
                     resp.setContentType("application/json");
                     resp.getOutputStream().write(jo.toString().getBytes());

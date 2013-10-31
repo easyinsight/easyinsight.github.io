@@ -106,10 +106,11 @@ public class HtmlServlet extends HttpServlet {
                             if (filterValueDefinition.isSingleValue()) {
                                 filterValueDefinition.setFilteredValues(Arrays.asList((Object) value));
                             } else {
-                                JSONArray arr = (JSONArray) value;
+                                JSONObject arr = (JSONObject) value;
                                 List<Object> valueList = new ArrayList<Object>();
-                                for (Object o : arr) {
-                                    valueList.add(o);
+                                for (Object o : arr.keySet()) {
+                                    if((Boolean) arr.get(o))
+                                        valueList.add(o);
                                 }
                                 filterValueDefinition.setFilteredValues(valueList);
                             }
