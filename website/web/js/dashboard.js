@@ -800,14 +800,13 @@ $(function () {
         $(".value-search-input").change(filterText)
 
         saveConfiguration = function () {
-            console.log(JSON.stringify(_.map(filterMap, function (e, k) {
-                return toFilterString(e.filter, true);
-            })));
+            var c = {"filters": _.map(filterMap, function (e, k) {
+                            return toFilterString(e.filter, true);
+                        }), "stacks": stackMap }
+            console.log(c);
             $.ajax({ url: "/app/html/dashboard/" + dashboardJSON["key"] + "/config",
                 contentType: "application/json; charset=UTF-8",
-                data: JSON.stringify(_.map(filterMap, function (e, k) {
-                    return toFilterString(e.filter, true);
-                })),
+                data: JSON.stringify(c),
                 type: "POST"
             })
         }
