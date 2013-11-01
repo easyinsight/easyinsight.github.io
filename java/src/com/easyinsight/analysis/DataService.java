@@ -1884,18 +1884,27 @@ public class DataService {
                 }
                 if (filter instanceof AnalysisItemFilterDefinition) {
                     AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
+                    if (analysisItemFilterDefinition.isEnabled()) {
 
-                    Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
-                    Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);
-                    for (Map.Entry<String, AnalysisItem> entry : structureCopy.entrySet()) {
-                        if (entry.getValue().toDisplay().equals(filter.getField().toDisplay())) {
-                            if (!fieldsReplaced.contains(entry.getValue())) {
-                                structure.put(entry.getKey(), analysisItemFilterDefinition.getTargetItem());
-                                fieldsReplaced.add(entry.getValue());
+                        if (insightRequestMetadata.isLogReport()) {
+                            System.out.println("Trying to replace " + filter.getField().toDisplay() + " with " + analysisItemFilterDefinition.getTargetItem().toDisplay());
+                        }
+                        Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
+                        Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);
+                        for (Map.Entry<String, AnalysisItem> entry : structureCopy.entrySet()) {
+                            if (insightRequestMetadata.isLogReport()) {
+                                System.out.println("\tTesting " + entry.getValue().toDisplay());
+                            }
+                            if (entry.getValue().toDisplay().equals(filter.getField().toDisplay())) {
+                                if (!fieldsReplaced.contains(entry.getValue())) {
+                                    System.out.println("\tMatched and replacing");
+                                    structure.put(entry.getKey(), analysisItemFilterDefinition.getTargetItem());
+                                    fieldsReplaced.add(entry.getValue());
+                                }
                             }
                         }
+                        analysisDefinition.populateFromReportStructure(structure);
                     }
-                    analysisDefinition.populateFromReportStructure(structure);
                 }
             }
 
