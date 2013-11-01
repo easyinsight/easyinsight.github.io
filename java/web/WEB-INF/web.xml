@@ -83,6 +83,10 @@
     <filter>
          <filter-name>UrlRewriteFilter</filter-name>
          <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+         <init-param>
+            <param-name>logLevel</param-name>
+            <param-value>DEBUG</param-value>
+         </init-param>
      </filter>
 
 
@@ -201,6 +205,12 @@
         <display-name>Benchmark</display-name>
         <servlet-class>com.easyinsight.benchmark.BenchmarkServlet</servlet-class>
         <load-on-startup>2</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>CreateConfiguration</servlet-name>
+        <display-name>CreateConfiguration</display-name>
+        <servlet-class>com.easyinsight.html.CreateConfigurationServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -594,6 +604,11 @@
         <servlet-name>FilterValueServlet</servlet-name>
         <servlet-class>com.easyinsight.html.FilterValueServlet</servlet-class>
     </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CreateConfiguration</servlet-name>
+        <url-pattern>/html/createConfiguration</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>FilterValueServlet</servlet-name>

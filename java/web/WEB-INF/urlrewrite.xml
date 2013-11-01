@@ -75,13 +75,14 @@
         <to>/embed/embeddedReport.jsp?reportID=$1</to>
     </rule>
 
+
     <rule>
         <from>/html/dashboard/([A-Za-z0-9]+)/config/([A-Za-z0-9]+)</from>
         <to>/html/dashboard.jsp?dashboardID=$1&amp;savedDashboardID=$2</to>
     </rule>
 
     <rule>
-        <from>/html/dashboard/([A-Za-z0-9]+)</from>
+        <from>/html/dashboard/([A-Za-z0-9]+)$</from>
         <to>/html/dashboard.jsp?dashboardID=$1</to>
     </rule>
 
@@ -98,6 +99,16 @@
     <rule>
         <from>/embed/drillThroughDashboard/([A-Za-z0-9]+)</from>
         <to>/embed/embeddedDashboard.jsp?drillthroughKey=$1</to>
+    </rule>
+
+
+    <rule>
+        <from>/html/dashboard/([A-Za-z0-9]+)/config$</from>
+        <to>/html/createConfiguration?dashboardID=$1</to>
+    </rule>
+    <rule>
+        <from>/html/report/([A-Za-z0-9]+)/config</from>
+        <to>/html/createConfiguration?reportID=$1</to>
     </rule>
 
     <rule>
