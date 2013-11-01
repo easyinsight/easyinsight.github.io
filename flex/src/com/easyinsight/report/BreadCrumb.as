@@ -16,12 +16,14 @@ public class BreadCrumb {
     public var eiDescriptor:EIDescriptor;
     public var filters:ArrayCollection;
     public var stackPositions:DashboardStackPositions;
+    public var savedConfiguration:SavedConfiguration;
 
     public function BreadCrumb(insightDescriptor:EIDescriptor,
-            filters:ArrayCollection, stackPositions:DashboardStackPositions = null) {
+            filters:ArrayCollection, stackPositions:DashboardStackPositions = null, savedConfiguration:SavedConfiguration = null) {
         this.eiDescriptor = insightDescriptor;
         this.filters = filters;
         this.stackPositions = stackPositions;
+        this.savedConfiguration = savedConfiguration;
     }
 }
 }

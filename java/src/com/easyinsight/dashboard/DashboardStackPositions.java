@@ -7,6 +7,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.Roles;
 import org.hibernate.Session;
 
+import java.io.Serializable;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
@@ -17,10 +18,19 @@ import java.util.Map;
  * Date: 9/26/13
  * Time: 10:36 AM
  */
-public class DashboardStackPositions {
+public class DashboardStackPositions implements Serializable {
     private Map<String, Integer> positions = new HashMap<String, Integer>();
     private Map<String, Map<String, FilterDefinition>> filterMap = new HashMap<String, Map<String, FilterDefinition>>();
     private Map<String, InsightDescriptor> reports = new HashMap<String, InsightDescriptor>();
+    private long id;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public Map<String, Map<String, FilterDefinition>> getFilterMap() {
         return filterMap;

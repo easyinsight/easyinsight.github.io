@@ -49,6 +49,8 @@
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.core.Container;
+        import mx.core.UIComponent;
+        import mx.events.CloseEvent;
         import mx.events.MenuEvent;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
@@ -416,7 +418,7 @@
                 for each (var filter:FilterDefinition in transformContainer.getFilterDefinitions()) {
                     map[filter.filterID] = filter;
                 }
-                _breadCrumbs.push(new BreadCrumb(desc, transformContainer.getFilterDefinitions(), positions));
+                _breadCrumbs.push(new BreadCrumb(desc, transformContainer.getFilterDefinitions(), positions, selectedConfiguration));
                 if (event.descriptor is InsightDescriptor) {
                     dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, exchangeItem, reportList, reportIndex, _breadCrumbs,
                             originalExchangeItem != null ? originalExchangeItem : desc, event.additionalItems)));
@@ -569,7 +571,8 @@
                     backButton.addEventListener(MouseEvent.CLICK, function (event:MouseEvent):void {
                         _breadCrumbs.pop();
                         if (crumb.eiDescriptor is InsightDescriptor) {
-                            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), null, null, null, 0, _breadCrumbs, null, null, crumb.stackPositions)));
+                            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), null, null, null, 0, _breadCrumbs, null, null, crumb.stackPositions,
+                                crumb.savedConfiguration)));
                         } else {
                             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:crumb.eiDescriptor.id,
                                 initialFilters:crumb.filters,
@@ -618,12 +621,22 @@
             headerFontSize = report.headerFontSize;
             maxHeaderWidth = report.maxHeaderWidth;
 
-            /*var configurations:ArrayCollection = event.reportInfo.configurations;
-            for each (var savedConfiguration:SavedConfiguration in configurations) {
-                options.addItem({ label: savedConfiguration.name, data: savedConfiguration });
-            }*/
+            var configurations:ArrayCollection = event.reportInfo.configurations;
+            if (selectedConfiguration == null) {
+                options = new ArrayCollection([ {label: "Reset to Default", data: 1},
+                    {label: "Save a New Configuration...", data: 2}]);
+            } else {
+                configLabel = selectedConfiguration.name;
+                options = new ArrayCollection();
+                options.addItem({label: "Update " + selectedConfiguration.name, data: 2});
+                options.addItem({label: "Delete " + selectedConfiguration.name, data: 3});
+                options.addItem({label: "Reset to Default", data: 1});
+            }
+            for each (var sc:SavedConfiguration in configurations) {
+                options.addItem({ label: sc.name, data: sc });
+            }
 
-            if (!_forceDefault && report.enableLocalStorage && exchangeItem == null) {
+            if (!_forceDefault && report.enableLocalStorage && exchangeItem == null && selectedConfiguration == null) {
 
                 /*var delegate:DashboardStackPositionsRetrievalState = null;
                  if (dashboardStackPositions != null) {
@@ -791,8 +804,13 @@
             }
             box.visible = true;
             if (!_showAddBar) {
-                var feedFragmentObject:Object = new Object();
-                if (stackPositions == null) {
+                if (selectedConfiguration != null) {
+                    var feedFragmentObject:Object = new Object();
+                    feedFragmentObject.reportConfigurationID = selectedConfiguration.urlKey;
+                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                    BrowserManager.getInstance().setFragment(feedFragmentString);
+                } else if (stackPositions == null) {
+                    var feedFragmentObject:Object = new Object();
                     feedFragmentObject.reportID = report.urlKey;
                     var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                     BrowserManager.getInstance().setFragment(feedFragmentString);
@@ -862,9 +880,11 @@
         private function onConfigurationClick(event:MenuEvent):void {
             var data:Object = event.item.data;
             if (data == 1) {
-                var so:SharedObject = SharedObject.getLocal("r");
-                so.clear();
-                so.flush();
+                if (stackPositions == null && selectedConfiguration == null) {
+                    var so:SharedObject = SharedObject.getLocal("r");
+                    so.clear();
+                    so.flush();
+                }
                 var desc:InsightDescriptor = new InsightDescriptor();
                 desc.id = report.analysisID;
                 desc.name = report.name;
@@ -872,15 +892,83 @@
                 desc.reportType = report.reportType;
                 desc.urlKey = report.urlKey;
                 dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(desc)));
+            } else if (data == 2) {
+                var pos:DashboardStackPositions = new DashboardStackPositions();
+                positionsPopulate(pos);
+                var c:SavedConfiguration;
+                var window:SaveConfigurationWindow = new SaveConfigurationWindow();
+                if (selectedConfiguration == null) {
+                    var config:SavedConfiguration = new SavedConfiguration();
+                    config.dashboardStackPositions = pos;
+                    c = config;
+                    window.addEventListener(SavedConfigurationEvent.CONFIGURATION_ADD, onConfigAdd, false, 0, true);
+                } else {
+                    c = selectedConfiguration;
+                    window.addEventListener(SavedConfigurationEvent.CONFIGURATION_UPDATE, onConfigUpdate, false, 0, true);
+                }
+
+                window.reportID = report.analysisID;
+                window.savedConfiguration = c;
+
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            } else if (data is SavedConfiguration) {
+                var desc:InsightDescriptor = new InsightDescriptor();
+                desc.id = report.analysisID;
+                desc.name = report.name;
+                desc.dataFeedID = report.dataFeedID;
+                desc.reportType = report.reportType;
+                desc.urlKey = report.urlKey;
+                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(desc, null, null, null, 0, null, null, null, SavedConfiguration(data).dashboardStackPositions,
+                    SavedConfiguration(data))));
+            } else if (data == 3) {
+                var thisObj:UIComponent = this;
+                Alert.show("Are you sure you want to delete the selected configuration?", "Alert", Alert.OK | Alert.CANCEL, this,
+                        function(closeEvent:CloseEvent):void {
+                            if (closeEvent.detail == Alert.OK) {
+                                ProgressAlert.alert(thisObj, "Deleting configuration...", null, dashboardService.deleteConfiguration);
+                                dashboardService.deleteConfiguration.send(selectedConfiguration);
+                            }
+                        });
             }
         }
 
+        private function deletedConfiguration():void {
+            var desc:InsightDescriptor = new InsightDescriptor();
+            desc.id = report.analysisID;
+            desc.name = report.name;
+            desc.dataFeedID = report.dataFeedID;
+            desc.reportType = report.reportType;
+            desc.urlKey = report.urlKey;
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(desc)));
+        }
+
+        public var selectedConfiguration:SavedConfiguration;
+
+        private function onConfigAdd(event:SavedConfigurationEvent):void {
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.reportConfigurationID = event.configuration.urlKey;
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            configLabel = event.configuration.name;
+            options.addItem({label: event.configuration.name, data: event.configuration});
+        }
+
+        private function onConfigUpdate(event:SavedConfigurationEvent):void {
+
+        }
+
         [Bindable]
-        private var options:ArrayCollection = new ArrayCollection([ {label: "Reset to Default", data: 1},
-            {label: "Save a New Configuration...", data: 2}]);
+        private var configLabel:String = "Configurations";
+
+        [Bindable]
+        private var options:ArrayCollection;
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="setupAddRow" result="setupAddRow()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="dashboardService" id="dashboardService">
+        <mx:method name="deleteConfiguration" result="deletedConfiguration()"/>
     </mx:RemoteObject>
     <mx:Style>
         .myCustomPopUpStyleName {
@@ -908,9 +996,8 @@
                    labelPlacement="right" id="editReportButton"
                    toolTip="Open this report in the report editor..." label="Edit Report" styleName="grayButton"/>
         <mx:Button labelPlacement="right" label="View in HTML" styleName="grayButton" click="viewInHTML()" icon="{htmlIcon}"/>
-        <!--<listing:ArghButton label="Configurations" styleName="grayButton" itemClick="onConfigurationClick(event)" width="160" id="newButton"
-                            dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>-->
-        <!--<mx:ComboBox styleName="grayButton" dataProvider="{options}" labelField="label" change="onConfigurationClick()" id="configurationBox"/>-->
+        <listing:ArghButton label="{configLabel}" styleName="grayButton" itemClick="onConfigurationClick(event)" width="160" id="newButton"
+                            dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
         <mx:Button labelPlacement="right" label="Add Row..." styleName="grayButton" click="addRow()" visible="{showAddRow}"/>
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>

@@ -1,14 +1,25 @@
 package com.easyinsight.dashboard;
 
+import java.io.Serializable;
+
 /**
  * User: jamesboe
  * Date: 10/22/13
  * Time: 6:34 PM
  */
-public class SavedConfiguration {
+public class SavedConfiguration implements Serializable {
     private String name;
+    private String urlKey;
     private long id;
     private DashboardStackPositions dashboardStackPositions;
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
 
     public String getName() {
         return name;
