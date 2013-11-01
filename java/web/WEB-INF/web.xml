@@ -204,6 +204,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>CreateConfiguration</servlet-name>
+        <display-name>CreateConfiguration</display-name>
+        <servlet-class>com.easyinsight.html.CreateConfigurationServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>TokenRedirect</servlet-name>
         <display-name>TokenRedirect</display-name>
         <servlet-class>com.easyinsight.users.TokenRedirectServlet</servlet-class>
@@ -589,6 +595,21 @@
             <param-value>https://www.easy-insight.com/</param-value>
         </init-param>
     </servlet>
+
+    <servlet>
+        <servlet-name>FilterValueServlet</servlet-name>
+        <servlet-class>com.easyinsight.html.FilterValueServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CreateConfiguration</servlet-name>
+        <url-pattern>/html/createConfiguration</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>FilterValueServlet</servlet-name>
+        <url-pattern>/html/filterValue</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>OpenIDServlet</servlet-name>

@@ -233,3 +233,11 @@ nav.navbar_first {
 .reportControlBtnGroup {
     margin-right: 20px;
 }
+
+.toggle-filters {
+    cursor: pointer;
+}
+
+.filters .modal-dialog button, .filters .modal-dialog input {
+    font-size: 14px;
+}

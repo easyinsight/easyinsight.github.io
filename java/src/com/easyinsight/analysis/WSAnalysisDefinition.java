@@ -120,6 +120,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean useCustomFontFamily;
     private int generalSizeLimit;
     private boolean passThroughFilters;
+    private boolean persistState;
 
     private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
@@ -541,6 +542,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setPersistedCache(boolean persistedCache) {
         this.persistedCache = persistedCache;
+    }
+
+    public boolean isPersistState() {
+        return persistState;
+    }
+
+    public void setPersistState(boolean persistState) {
+        this.persistState = persistState;
     }
 
     public List<AnalysisItem> allAddedItems(InsightRequestMetadata insightRequestMetadata) {
@@ -976,6 +985,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         customField1 = findStringProperty(properties, "customField1", "");
         customField2 = findStringProperty(properties, "customField2", "");
         cachePartitionFilter = findStringProperty(properties, "cachePartitionFilter", "");
+        persistState = findBooleanProperty(properties, "persistState", true);
     }
 
     public List<ReportProperty> createProperties() {
@@ -1009,6 +1019,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }
+        properties.add(new ReportBooleanProperty("persistState", persistState));
         return properties;
     }
 
@@ -1210,6 +1221,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         jo.put("filters", filters);
         jo.put("adhoc_execution", adHocExecution);
+        jo.put("local_storage", persistState);
         return jo;
     }
 

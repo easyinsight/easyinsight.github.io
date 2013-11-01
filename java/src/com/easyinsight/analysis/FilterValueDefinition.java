@@ -526,8 +526,6 @@ public class FilterValueDefinition extends FilterDefinition {
         AnalysisDimensionResultMetadata dimensionMetadata = (AnalysisDimensionResultMetadata) metadata;
         if (singleValue) {
             jo.put("type", "single");
-
-
             List<String> stringList = new ArrayList<String>();
             for (Value value : dimensionMetadata.getValues()) {
                 String valueString;
@@ -564,6 +562,7 @@ public class FilterValueDefinition extends FilterDefinition {
             jo.put("values", arr);
         } else {
             jo.put("type", "multiple");
+            jo.put("count", dimensionMetadata.getValues().size());
 
             List<String> stringList = new ArrayList<String>();
             for (Value value : dimensionMetadata.getValues()) {
@@ -576,16 +575,24 @@ public class FilterValueDefinition extends FilterDefinition {
             if (isExcludeEmpty()) {
                 stringList.remove("");
             }
-            List<String> existingChoices = new ArrayList<String>();
+            JSONObject existingChoices = new JSONObject();
+            if(stringList.size() > 100) {
+                jo.put("values", new JSONArray());
+                jo.put("error", "Too many values, please refine your search.");
+            } else {
+                JSONArray arr = new JSONArray(stringList);
+                jo.put("values", arr);
+            }
+
             for(Object obj : getFilteredValues()) {
                 if (obj != null) {
-                    existingChoices.add(obj.toString());
+                    existingChoices.put(obj.toString(), true);
                 }
             }
 
-            JSONArray arr = new JSONArray(stringList);
-            jo.put("selected", new JSONArray(existingChoices));
-            jo.put("values", arr);
+            jo.put("selected", existingChoices);
+
+
         }
         return jo;
     }

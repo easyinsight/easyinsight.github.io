@@ -365,9 +365,6 @@ public class FilterDefinition implements Serializable, Cloneable {
                 components.add(new FilterComponent(this, filterProcessor));
             }
         }
-        /*if (beforeAggregation == isApplyBeforeAggregation()) {
-            components.add(new FilterPipelineCleanupComponent(this));
-        }*/
         return components;
     }
 

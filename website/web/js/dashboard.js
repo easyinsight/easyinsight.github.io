@@ -1,5 +1,7 @@
 $.holdReady(true);
-Modernizr.load({ complete: function() { $.holdReady(false); }});
+Modernizr.load({ complete: function () {
+    $.holdReady(false);
+}});
 var stack;
 var grid;
 var textTemplate;
@@ -13,6 +15,10 @@ var short_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep
 
 var currentReport;
 
+var multi_value_results;
+
+var saveConfiguration;
+
 var dashboardComponent = function (obj) {
     if (obj.type == "stack")
         return stack(obj);
@@ -23,6 +29,14 @@ var dashboardComponent = function (obj) {
     } else if (obj.type == "report") {
         return reportTemplate(obj);
     }
+}
+
+function toSelectedArray(selection) {
+    var m = _.map(selection, function(e, i, l) { return { n: i, s: e }; })
+       var n = _.select(m, function(e, i, l) { return e.s });
+        var o = _.map(n, function(e, i, l) { return e.n });
+
+    return o;
 }
 
 var Filter;
@@ -92,8 +106,8 @@ var toFilterString = function (f, store) {
     var c = {id: f["id"], enabled: f.enabled}
     if (!f.enabled || (!store && f.override)) {
         $.extend(c, {enabled: false});
-        if(!store)
-            return cur;
+        if (!store)
+            return c;
     }
     if (f.type == "single")
         return $.extend(c, {selected: f["selected"]})
@@ -213,8 +227,8 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
 }
 
 function flattenFilters(filters) {
-    return _.flatten(_.map(filters, function(e, i, l) {
-        if(e.type == "or_filter") {
+    return _.flatten(_.map(filters, function (e, i, l) {
+        if (e.type == "or_filter") {
             return e.filters;
         } else {
             return e;
@@ -338,9 +352,9 @@ $(function () {
                     return Filter.multi_flat_date_month({data: obj, parent_id: parent_id})
                 else if (obj.type == "field_filter")
                     return Filter.field_filter({data: obj, parent_id: parent_id});
-                else if(obj.type == "pattern_filter")
+                else if (obj.type == "pattern_filter")
                     return Filter.pattern_filter({data: obj, parent_id: parent_id });
-                else if(obj.type == "or_filter")
+                else if (obj.type == "or_filter")
                     return Filter.or_filter({data: obj, parent_id: parent_id });
                 else
                     return Filter.generic_filter({data: obj, parent_id: parent_id});
@@ -367,6 +381,7 @@ $(function () {
         textTemplate = _.template($("#text_template", s).html());
         gaugeTemplate = _.template($("#gauge_template", s).html());
         email_modal = _.template($("#email_modal", s).html());
+        multi_value_results = _.template($("#multi_value_results_template", s).html());
 
         var filterMap = _.reduce(flattenFilters(dashboardJSON["filters"]), function (m, i) {
             m["filter" + i.id] = {"filter": i, "parent": null };
@@ -378,40 +393,39 @@ $(function () {
         var dashboardKey = (dashboardJSON["id"] != -1) ? ("dashboard " + dashboardJSON["id"]) : ("report " + dashboardJSON["base"]["id"]);
         var saveFilter;
         var saveStack;
-        console.log(filterMap);
-        if(Modernizr.localstorage && dashboardJSON["local_storage"] && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+$/)) {
-            if(typeof(localStorage[dashboardKey]) != "undefined") {
+        if (Modernizr.localstorage && dashboardJSON["local_storage"] && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+$/)) {
+            if (typeof(localStorage[dashboardKey]) != "undefined") {
                 var cur;
                 var vals = JSON.parse(localStorage[dashboardKey]);
                 var filters = vals["filters"];
-                for(cur in filters) {
-                    if(typeof(filterMap[cur]) != "undefined" && typeof(filters[cur]) != "undefined")
+                for (cur in filters) {
+                    if (typeof(filterMap[cur]) != "undefined" && typeof(filters[cur]) != "undefined")
                         $.extend(filterMap[cur].filter, filters[cur]);
                 }
-                if(typeof(vals["stacks"]) != "undefined")
+                if (typeof(vals["stacks"]) != "undefined")
                     $.extend(true, stackMap, vals["stacks"])
             }
-            saveFilter = function(f, key) {
-                if(localStorage[dashboardKey] == null) {
+            saveFilter = function (f, key) {
+                if (localStorage[dashboardKey] == null) {
                     localStorage[dashboardKey] = JSON.stringify({});
                 }
                 var report = JSON.parse(localStorage[dashboardKey]);
-                if(typeof(report["filters"]) == "undefined") {
+                if (typeof(report["filters"]) == "undefined") {
                     report["filters"] = {};
                 }
                 report["filters"][key] = toFilterString(f.filter, true);
                 localStorage[dashboardKey] = JSON.stringify(report);
             }
-            $(".restore_default_config").click(function(e) {
+            $(".restore_default_config").click(function (e) {
                 delete localStorage[dashboardKey];
             })
-            saveStack = function(k) {
+            saveStack = function (k) {
                 var i = selectedIndex(k);
-                if(localStorage[dashboardKey] == null) {
+                if (localStorage[dashboardKey] == null) {
                     localStorage[dashboardKey] = JSON.stringify({});
                 }
                 var report = JSON.parse(localStorage[dashboardKey]);
-                if(typeof(report["stacks"]) == "undefined") {
+                if (typeof(report["stacks"]) == "undefined") {
                     report["stacks"] = {};
                 }
                 report["stacks"][k] = {"data": { "selected": i } };
@@ -419,8 +433,10 @@ $(function () {
             }
 
         } else {
-            saveFilter = function(f, key){ };
-            saveStack = function(k) { };
+            saveFilter = function (f, key) {
+            };
+            saveStack = function (k) {
+            };
         }
         $("#base").append(dashboard(dashboardJSON));
 
@@ -453,45 +469,86 @@ $(function () {
             saveFilter(f, k);
         })
 
-        $(".cb_all_choice").click(function (e) {
+        var selectionMap = {};
+
+        var allCheck = function (e) {
             if ($(e.target).is(":checked")) {
                 $("input", $(e.target).parent().parent()).attr("checked", "checked");
+                for(i in selectionMap)
+                    selectionMap[i] = true;
             } else {
                 $("input", $(e.target).parent().parent()).removeAttr("checked");
+                for(i in selectionMap)
+                    selectionMap[i] = false;
             }
-        });
+        }
 
-        $(".cb_filter_choice").click(function (e) {
-            if ($(e.target).is(":checked")) {
-                if ($(".cb_filter_choice:not(:checked)", $(e.target).parent().parent()).size() == 0) {
-                    $(".cb_all_choice", $(e.target).parent().parent()).attr("checked", "checked");
-                }
+        var choiceAllCheck = function (e) {
+            var checked = $(e.target).is(":checked");
+            selectionMap[$(".cb_filter_value", $(e.target).parent()).html()] = checked;
+            if (checked && _.all(selectionMap, function(e, i, l) { return (i == "All") || e; })) {
+                $(".cb_all_choice", $(e.target).parent().parent()).attr("checked", "checked");
+                selectionMap["All"] = true;
             } else {
                 $(".cb_all_choice", $(e.target).parent().parent()).removeAttr("checked");
+                selectionMap["All"] = false;
             }
-        });
+
+
+        };
+
+        $('.multi_value_modal').on('show.bs.modal', function (e) {
+            var f = filterMap[$(e.target).attr("id").replace(/_modal$/g, "")].filter;
+
+            if(f.error) {
+                $(".loading-bar", e.target).show();
+                $.getJSON("/app/html/filterValue?filterID=" + f.id, function(d) {
+                    $(".loading-bar", e.target).hide();
+                    f.values = d.values;
+                    var m = _.reduce(f.values, function(m, e) {
+                        m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
+                        return m;
+                    }, {});
+                    selectionMap = $.extend({}, m, f.selected);
+                    if(d.values.length > 100) {
+                        d.error = "Too many values, please refine your search."
+                    }
+                    $(".multi-value-list", $(e.target)).html(multi_value_results({ data: { selected: selectionMap }, results: d }));
+                    delete f.error;
+                })
+            } else {
+                var m = _.reduce(f.values, function(m, e) {
+                                m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
+                                return m;
+                            }, {});
+                selectionMap = $.extend({}, m, f.selected);
+            }
+        })
+
+        $(".cb_all_choice").click(allCheck);
+
+        $(".cb_filter_choice").click(choiceAllCheck);
 
         $(".multi_value_save").click(function (e) {
             var a = $(e.target).parent().parent().parent().parent();
             var k = a.attr("id").replace(/_modal$/g, "");
             var f = filterMap[k];
-            var selects = $("li input:checked", a);
-            var selectVals = $.map(selects, function (e, i) {
-                return $(".cb_filter_value", $(e).parent()).html();
-            });
-            if (selectVals.indexOf("All") != -1) {
-                selectVals = ["All"];
+            f.filter.selected = selectionMap;
+            var selectVals = toSelectedArray(selectionMap);
+            var label;
+            if(selectionMap["All"]) {
+                label = "All";
+            } else {
+                label = selectVals.length == 1 ? selectVals[0] : selectVals.length + " Items";
             }
-            f.filter.selected = selectVals;
-            $(".multi_filter", $(a).parent()).html(selectVals.length == 1 ? selectVals[0] : selectVals.length + " Items");
+            $(".multi_filter", $(a).parent()).html(label);
 
             if (f.parent == null) {
                 renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-
-            saveFilter(f, k);
+//            saveFilter(f, k);
         });
 
         $(".multi_flat_month_save").click(function (e) {
@@ -655,7 +712,7 @@ $(function () {
             var k = $(e.target).attr("id");
             var f = filterMap[k];
             var p = $(e.target).val();
-            if(p != f.filter.pattern) {
+            if (p != f.filter.pattern) {
                 f.filter.pattern = p;
                 if (f.parent == null) {
                     renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
@@ -696,24 +753,63 @@ $(function () {
             var recipient = $('#input01').val();
             var subject = $('#input02').val();
             var body = $('#textarea').val();
-            $.getJSON('/app/emailReport?reportID='  + currentReport + '&format=' + format + "&recipient=" + recipient + "&subject=" + subject + "&body=" + body, function (data) {
+            $.getJSON('/app/emailReport?reportID=' + currentReport + '&format=' + format + "&recipient=" + recipient + "&subject=" + subject + "&body=" + body, function (data) {
                 alert('Email sent.');
             });
 
         })
 
-        $(".grid_report_link").click(function(e) {
+        $(".grid_report_link").click(function (e) {
             var f = $(e.target).attr("data-ref");
             $("#" + f).show({effect: "slide"});
             e.preventDefault();
         })
 
-        $(".grid_back_button").click(function(e) {
+        $(".report-emailReportButton").click(function (e) {
+            $("#emailReportWindow").modal(true, true, true);
+            e.preventDefault();
+        })
+
+        $(".grid_back_button").click(function (e) {
             var f = $(e.target).parent()
-            if(!f.hasClass("gridReportMenu"))
+            if (!f.hasClass("gridReportMenu"))
                 f = f.parent();
             f.hide({effect: "slide", direction: "left"})
         })
+
+        function filterText(e) {
+            var p = $(e.target).parent();
+            while (!p.hasClass("input-group")) p = p.parent();
+            var val = $(".value-search-input", p).val();
+            var modalParent = p.parent().parent().parent().parent().parent();
+            var f = filterMap[modalParent.attr("id").replace(/_modal$/g, "")];
+
+            var d = {values: _.filter(f.filter.values, function(e, i, l) {
+                return e.toLowerCase().match(val.toLowerCase()); })}
+            if(d.values.length > 100) {
+                d["error"] = "Too many values, please refine your search."
+            }
+//            $.getJSON("/app/html/filterValue?filterID=" + f.filter.id + "&q=" + encodeURIComponent(val), function (d) {
+                $(".multi-value-list", modalParent).html(multi_value_results({ data: { selected: selectionMap }, results: d }));
+                $(".cb_all_choice", modalParent).click(allCheck);
+                $(".cb_filter_choice", modalParent).click(choiceAllCheck);
+//            });
+        }
+
+        $(".value-search-btn").click(filterText)
+        $(".value-search-input").change(filterText)
+
+        saveConfiguration = function () {
+            var c = {"filters": _.map(filterMap, function (e, k) {
+                            return toFilterString(e.filter, true);
+                        }), "stacks": stackMap }
+            console.log(c);
+            $.ajax({ url: "/app/html/dashboard/" + dashboardJSON["key"] + "/config",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify(c),
+                type: "POST"
+            })
+        }
 
     })
 })

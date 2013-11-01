@@ -63,6 +63,7 @@
         styleJSON.put("main_stack_start", "#FFFFFF");
         styleJSON.put("alternative_stack_start", "#FFFFFF");
         reportJSON.put("styles", styleJSON);
+        reportJSON.put("local_storage", report.isPersistState());
         JSONObject intermediate = new JSONObject();
         reportJSON.put("base", intermediate);
         intermediate.put("show_label", false);
@@ -124,22 +125,25 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <button class="btn btn-inverse" type="button"
-                                        onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'"
-                                        style="padding:5px;margin:5px;width:150px">Export to Excel
-                                </button>
+                                <a href="/app/exportExcel?reportID=<%= report.getUrlKey() %>">
+                                    <button class="btn btn-inverse" type="button"
+                                            style="padding:5px;margin:5px;width:150px">Export to Excel
+                                    </button>
+                                </a>
                             </li>
                             <li>
-                                <button class="btn btn-inverse" type="button"
-                                        onclick="$('#emailReportWindow').modal(true, true, true)"
-                                        style="padding:5px;margin:5px;width:150px">Email the Report
-                                </button>
+                                <a href="#" class="report-emailReportButton">
+                                    <button class="btn btn-inverse" type="button"
+                                            style="padding:5px;margin:5px;width:150px">Email the Report
+                                    </button>
+                                </a>
                             </li>
                             <li>
-                                <button class="btn btn-inverse" type="button"
-                                   onclick="window.open('/app/html/embeddedReport/<%= report.getUrlKey() %>', '_blank')"
-                                        style="padding:5px;margin:5px;width:150px">Printable View
-                                </button>
+                                <a href="/app/html/embeddedReport/<%= report.getUrlKey() %>" target="_blank">
+                                    <button class="btn btn-inverse" type="button"
+                                            style="padding:5px;margin:5px;width:150px">Printable View
+                                    </button>
+                                </a>
                             </li>
                         </ul>
                     </div>
@@ -210,7 +214,6 @@
     </jsp:include>
     <jsp:include page="emailReportWindow.jsp"/>
     <jsp:include page="refreshingDataSource.jsp"/>
-    <%--<%= uiData.createHeader(report.getName()) %>--%>
     <div id="base"/>
 </div>
 </body>
