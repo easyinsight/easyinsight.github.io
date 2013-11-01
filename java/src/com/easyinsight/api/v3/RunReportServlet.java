@@ -109,6 +109,12 @@ public class RunReportServlet extends APIServlet {
                     if (endParam != null) {
                         filterDateRangeDefinition.setEndDate(dateFormat.parse(endParam));
                     }
+                } else if (filter instanceof FilterPatternDefinition) {
+                    FilterPatternDefinition filterPatternDefinition = (FilterPatternDefinition) filter;
+                    String param = request.getParameter(filter.getFilterName());
+                    if (param != null) {
+                        filterPatternDefinition.setPattern(param);
+                    }
                 }
             }
         }
