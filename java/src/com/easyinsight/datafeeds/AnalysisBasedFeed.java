@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.core.Key;
+import com.easyinsight.core.Value;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
@@ -168,6 +169,17 @@ public class AnalysisBasedFeed extends Feed {
         for (Map.Entry<Key, List<Key>> entry : map.entrySet()) {
             for (Key key : entry.getValue()) {
                 dataSet.replaceKey(entry.getKey(), key);
+            }
+        }
+        for (IRow row : dataSet.getRows()) {
+            for (AnalysisItem item : fields) {
+                if (item.hasType(AnalysisItemTypes.MEASURE)) {
+                    Value value = row.getValue(item.createAggregateKey(true));
+                    Value existing = row.getValue(item.createAggregateKey(false));
+                    if (existing.type() == Value.EMPTY) {
+                        row.addValue(item.createAggregateKey(false), value);
+                    }
+                }
             }
         }
         analysisDefinition.setFilterDefinitions(reportFilters);
