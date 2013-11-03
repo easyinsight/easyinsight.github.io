@@ -23,7 +23,7 @@
             }
         }
 
-        override public function save(analysisItem:AnalysisItem):void {
+        override public function save(analysisItem:AnalysisItem, aggregation:String = null):void {
             super.save(analysisItem);
             var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
             date.dateLevel = dateBox.selectedItem.data;

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
-         xmlns:report="com.easyinsight.report.*"
+         xmlns:report="com.easyinsight.report.*" xmlns:listing="com.easyinsight.listing.*"
          width="100%" styleName="topButtonBar">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.IRetrievable;
@@ -10,6 +10,8 @@
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.genredata.ExchangeItem;
         import com.easyinsight.skin.ImageConstants;
+
+        import mx.collections.ArrayCollection;
 
         import mx.controls.Alert;
 
@@ -149,6 +151,12 @@
             }
         }
 
+        [Bindable]
+        public var configLabel:String;
+
+        [Bindable]
+        public var options:ArrayCollection;
+
         ]]></mx:Script>
     <mx:Button click="_dashboardView.close()" styleName="grayButton" labelPlacement="right"
                id="backButton"
@@ -164,6 +172,8 @@
     <!--<mx:Button click="resetFilters()" styleName="grayButton" labelPlacement="right"
                id="resetButton" label="Reset Filters" icon="{filterIcon}"/>-->
     <mx:Button click="viewInHTML()" styleName="grayButton" labelPlacement="right" id="viewInHTMLButton" label="View in HTML" icon="{htmlIcon}" visible="{viewInHTMLable}"/>
+    <!--<listing:ArghButton label="{configLabel}" styleName="grayButton" itemClick="_dashboardView.onConfigurationClick(event)" width="160" id="newButton"
+                        dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>-->
     <mx:Button click="dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { dashboardID: _dashboard.id})))" styleName="grayButton" labelPlacement="right"
                id="editButton" label="Edit the Dashboard" icon="{ImageConstants.EDIT_ICON}" visible="{editable}"/>
     <mx:Spacer width="100%"/>

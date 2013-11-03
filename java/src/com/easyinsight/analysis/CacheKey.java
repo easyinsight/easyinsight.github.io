@@ -22,6 +22,17 @@ public class CacheKey implements Serializable {
     }
 
     @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(reportID);
+        sb.append("-");
+        for (String filter : customFilters) {
+            sb.append(filter);
+        }
+        return sb.toString();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

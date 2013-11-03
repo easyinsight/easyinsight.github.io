@@ -55,6 +55,8 @@ public class Dashboard {
     public var headerBackgroundColor:int;
     public var imageFullHeader:Boolean;
 
+    public var configurations:ArrayCollection;
+
     public var defaultDrillthrough:Link;
 
     public var version:int;

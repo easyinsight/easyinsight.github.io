@@ -10,13 +10,23 @@
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.report.BreadCrumb;
+        import com.easyinsight.report.SaveConfigurationWindow;
+        import com.easyinsight.report.SavedConfiguration;
+        import com.easyinsight.report.SavedConfigurationEvent;
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.framework.User;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.controls.Alert;
 
         import mx.controls.Button;
         import mx.core.Application;
+        import mx.core.UIComponent;
+        import mx.events.CloseEvent;
+        import mx.events.MenuEvent;
 
         import mx.messaging.config.ServerConfig;
 
@@ -177,7 +187,23 @@
             this.headerVisible = ApplicationSkin.instance().reportHeader;
             logoVisible = User.getInstance().reportLogo != null;
             dashboard = dashboardService.getDashboardView.lastResult as Dashboard;
-            if (!_forceDefault && dashboard.enableLocalStorage && exchangeItem == null) {
+
+            var configurations:ArrayCollection = dashboard.configurations;
+            if (selectedConfiguration == null) {
+                options = new ArrayCollection([ {label: "Reset to Default", data: 1},
+                    {label: "Save a New Configuration...", data: 2}]);
+            } else {
+                configLabel = selectedConfiguration.name;
+                options = new ArrayCollection();
+                options.addItem({label: "Update " + selectedConfiguration.name, data: 2});
+                options.addItem({label: "Delete " + selectedConfiguration.name, data: 3});
+                options.addItem({label: "Reset to Default", data: 1});
+            }
+            for each (var sc:SavedConfiguration in configurations) {
+                options.addItem({ label: sc.name, data: sc });
+            }
+
+            if (!_forceDefault && dashboard.enableLocalStorage && exchangeItem == null && selectedConfiguration == null) {
                 var delegate:DashboardStackPositionsRetrievalState = null;
                 if (dashboardStackPositions != null) {
                     delegate = new DashboardStackPositionsRetrievalState(dashboardStackPositions);
@@ -185,6 +211,12 @@
                 retrievalState = new LocalStorageRetrievalState(dashboard.urlKey, dashboard.version, delegate);
             } else if (dashboardStackPositions != null) {
                 retrievalState = new DashboardStackPositionsRetrievalState(dashboardStackPositions);
+            }
+            if (selectedConfiguration != null) {
+                var feedFragmentObject:Object = new Object();
+                feedFragmentObject.dashboardConfigurationID = selectedConfiguration.urlKey;
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
             }
             if (dashboard.borderThickness == 0 && exchangeItem == null) {
                 headerArea.includeInLayout = false;
@@ -388,9 +420,11 @@
                     feedFragmentObject.reportTemplateID = String(exchangeItem.descriptor.urlKey);
                 }
             }
-            if (dashboardStackPositions == null || dashboardStackPositions.urlKey == null) {
-                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                BrowserManager.getInstance().setFragment(feedFragmentString);
+            if (selectedConfiguration == null) {
+                if (dashboardStackPositions == null || dashboardStackPositions.urlKey == null) {
+                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                    BrowserManager.getInstance().setFragment(feedFragmentString);
+                }
             }
             BrowserManager.getInstance().setTitle("Easy Insight - " + dashboardName);
         }
@@ -477,11 +511,92 @@
             dashboardRenderer.resetState();
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboardID })));
         }
+
+        private function deletedConfiguration():void {
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboardID })));
+        }
+
+        public var selectedConfiguration:SavedConfiguration;
+
+        public function onConfigurationClick(event:MenuEvent):void {
+            var data:Object = event.item.data;
+            if (data == 1) {
+                if (selectedConfiguration == null) {
+                    dashboardRenderer.resetState();
+                }
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboardID })));
+            } else if (data == 2) {
+                var pos:DashboardStackPositions = new DashboardStackPositions();
+                dashboardRenderer.positionsPopulate(pos);
+                var c:SavedConfiguration;
+                var window:SaveConfigurationWindow = new SaveConfigurationWindow();
+                if (selectedConfiguration == null) {
+                    var config:SavedConfiguration = new SavedConfiguration();
+                    config.dashboardStackPositions = pos;
+                    c = config;
+                    window.addEventListener(SavedConfigurationEvent.CONFIGURATION_ADD, onConfigAdd, false, 0, true);
+                } else {
+                    c = selectedConfiguration;
+                    window.addEventListener(SavedConfigurationEvent.CONFIGURATION_UPDATE, onConfigUpdate, false, 0, true);
+                    // Tier (1/2/3/Reassignment)
+                }
+
+                window.dashboardID = _dashboardID;
+                window.savedConfiguration = c;
+
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            } else if (data is SavedConfiguration) {
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboardID, dashboardStackPositions: SavedConfiguration(data).dashboardStackPositions,
+                    selectedConfiguration:data })));
+            } else if (data == 3) {
+                var thisObj:UIComponent = this;
+                Alert.show("Are you sure you want to delete the selected configuration?", "Alert", Alert.OK | Alert.CANCEL, this,
+                        function(closeEvent:CloseEvent):void {
+                            if (closeEvent.detail == Alert.OK) {
+                                ProgressAlert.alert(thisObj, "Deleting configuration...", null, dashboardService.deleteConfiguration);
+                                dashboardService.deleteConfiguration.send(selectedConfiguration);
+                            }
+                        });
+            }
+        }
+
+        [Bindable]
+        private var configLabel:String = "Configurations";
+
+        [Bindable]
+        private var options:ArrayCollection;
+
+        private function onConfigAdd(event:SavedConfigurationEvent):void {
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.dashboardConfigurationID = event.configuration.urlKey;
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            configLabel = event.configuration.name;
+            options.addItem({label: event.configuration.name, data: event.configuration});
+        }
+
+        private function onConfigUpdate(event:SavedConfigurationEvent):void {
+
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="getDashboardView" result="gotDashboard()"/>
+        <mx:method name="deleteConfiguration" result="deletedConfiguration()"/>
     </mx:RemoteObject>
-    <dashboard:DashboardSlimHeader id="dashboardHeader" dataSource="{dataSource}" viewFactory="{rootView}" includeInLayout="false" visible="false"/>
+    <mx:Style>
+        .myCustomPopUpStyleName {
+            fontSize: 12;
+            fontFamily: "Lucida Grande";
+            textAlign: left;
+            dropShadowEnabled: false;
+            borderStyle: solid;
+            borderThickness: 1;
+            cornerRadius: 8;
+        }
+    </mx:Style>
+    <dashboard:DashboardSlimHeader id="dashboardHeader" dataSource="{dataSource}" viewFactory="{rootView}" includeInLayout="false" visible="false"
+            options="{options}" configLabel="{configLabel}"/>
     <mx:VBox id="vbox" verticalScrollPolicy="auto" verticalGap="0">
         <mx:HBox width="100%" id="headerArea" paddingTop="5" paddingBottom="5" paddingLeft="10" verticalAlign="middle">
             <mx:Box backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" borderColor="#FFFFFF" borderThickness="1" cornerRadius="5"

@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
+
+        public var reportID:int;
+        public var dashboardID:int;
+
+        public var savedConfiguration:SavedConfiguration;
+
+        private var newConfig:Boolean;
+
+        [Bindable]
+        private var configName:String;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            configName = savedConfiguration.name;
+            newConfig = savedConfiguration.id == 0;
+        }
+
+        private function save():void {
+            if (Validator.validateAll([nameValidator]).length != 0) {
+                nameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            savedConfiguration.name = nameInput.text;
+            if (reportID > 0) {
+                dashboardService.saveConfigurationForReport.send(savedConfiguration, reportID);
+            } else if (dashboardID > 0) {
+                dashboardService.saveConfigurationForDashboard.send(savedConfiguration, dashboardID);
+            }
+        }
+
+        private function savedForDashboard():void {
+            var config:SavedConfiguration = dashboardService.saveConfigurationForDashboard.lastResult as SavedConfiguration;
+            if (newConfig) {
+                dispatchEvent(new SavedConfigurationEvent(SavedConfigurationEvent.CONFIGURATION_ADD, config));
+            } else {
+                dispatchEvent(new SavedConfigurationEvent(SavedConfigurationEvent.CONFIGURATION_UPDATE, config));
+            }
+            PopUpManager.removePopUp(this);
+        }
+
+        private function savedForReport():void {
+            var config:SavedConfiguration = dashboardService.saveConfigurationForReport.lastResult as SavedConfiguration;
+            if (newConfig) {
+                dispatchEvent(new SavedConfigurationEvent(SavedConfigurationEvent.CONFIGURATION_ADD, config));
+            } else {
+                dispatchEvent(new SavedConfigurationEvent(SavedConfigurationEvent.CONFIGURATION_UPDATE, config));
+            }
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="dashboardService" destination="dashboardService">
+        <mx:method name="saveConfigurationForDashboard" result="savedForDashboard()"/>
+        <mx:method name="saveConfigurationForReport" result="savedForReport()"/>
+    </mx:RemoteObject>
+    <mx:Form>
+        <mx:FormItem label="Name:">
+            <mx:TextInput id="nameInput" text="{configName}"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+    <mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="1"/>
+</util:EISlimWindow>

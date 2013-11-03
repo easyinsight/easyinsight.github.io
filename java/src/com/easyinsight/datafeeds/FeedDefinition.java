@@ -436,7 +436,11 @@ public class FeedDefinition implements Cloneable, Serializable {
                     AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
                     AnalysisMeasure measure = new AnalysisMeasure();
                     measure.setFormattingConfiguration(item.getFormattingConfiguration());
-                    measure.setAggregation(baseMeasure.getAggregation());
+                    if (report.isPersistedCache()) {
+                        measure.setAggregation(AggregationTypes.SUM);
+                    } else {
+                        measure.setAggregation(baseMeasure.getAggregation());
+                    }
                     measure.setPrecision(baseMeasure.getPrecision());
                     measure.setMinPrecision(baseMeasure.getMinPrecision());
                     clone = measure;

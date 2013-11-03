@@ -27,7 +27,7 @@
         [Bindable]
         private var dateLevel:int;
 
-        override public function save(analysisItem:AnalysisItem):void {
+        override public function save(analysisItem:AnalysisItem, aggregation:String = null):void {
             super.save(analysisItem);
             var step:AnalysisStep = analysisItem as AnalysisStep;
             step.dateLevel = int(dateBox.selectedItem.data);

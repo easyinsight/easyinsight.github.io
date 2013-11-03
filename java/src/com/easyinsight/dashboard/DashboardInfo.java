@@ -10,7 +10,16 @@ import com.easyinsight.core.InsightDescriptor;
 public class DashboardInfo {
     private long dashboardID;
     private DashboardStackPositions dashboardStackPositions;
+    private SavedConfiguration savedConfiguration;
     private InsightDescriptor report;
+
+    public SavedConfiguration getSavedConfiguration() {
+        return savedConfiguration;
+    }
+
+    public void setSavedConfiguration(SavedConfiguration savedConfiguration) {
+        this.savedConfiguration = savedConfiguration;
+    }
 
     public InsightDescriptor getReport() {
         return report;

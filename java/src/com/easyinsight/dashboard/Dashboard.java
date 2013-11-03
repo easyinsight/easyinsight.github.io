@@ -72,6 +72,33 @@ public class Dashboard implements Cloneable, Serializable {
     private int headerBackgroundColor;
     private int version;
     private boolean enableLocalStorage;
+    private DashboardDescriptor tabletVersion;
+    private DashboardDescriptor phoneVersion;
+    private List<SavedConfiguration> configurations;
+
+    public List<SavedConfiguration> getConfigurations() {
+        return configurations;
+    }
+
+    public void setConfigurations(List<SavedConfiguration> configurations) {
+        this.configurations = configurations;
+    }
+
+    public DashboardDescriptor getTabletVersion() {
+        return tabletVersion;
+    }
+
+    public void setTabletVersion(DashboardDescriptor tabletVersion) {
+        this.tabletVersion = tabletVersion;
+    }
+
+    public DashboardDescriptor getPhoneVersion() {
+        return phoneVersion;
+    }
+
+    public void setPhoneVersion(DashboardDescriptor phoneVersion) {
+        this.phoneVersion = phoneVersion;
+    }
 
     public boolean isEnableLocalStorage() {
         return enableLocalStorage;

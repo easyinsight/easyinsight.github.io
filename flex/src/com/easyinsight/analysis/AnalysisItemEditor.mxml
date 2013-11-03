@@ -246,7 +246,7 @@
                     analysisItem.key = key;
                     analysisItem.hidden = hiddenCheckbox.selected;
                     //analysisItem.reloadFromDataSource = reloadCheckbox.selected;
-                    detailEditor.save(analysisItem);
+                    detailEditor.save(analysisItem, aggregationBox.selectedItem as String);
                     dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
                 }
             }

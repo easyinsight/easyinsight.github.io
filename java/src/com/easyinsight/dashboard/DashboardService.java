@@ -32,15 +32,99 @@ public class DashboardService {
 
     private DashboardStorage dashboardStorage = new DashboardStorage();
 
+    public void deleteConfiguration(SavedConfiguration savedConfiguration) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("DELETE FROM saved_configuration WHERE saved_configuration_id = ?");
+            stmt.setLong(1, savedConfiguration.getId());
+            stmt.executeUpdate();
+            stmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public DashboardInfo getConfigurationForDashboard(String urlKey) {
+        DashboardInfo dashboardInfo = new DashboardInfo();
+
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT saved_configuration.saved_configuration_id, saved_configuration.configuration_name," +
+                    "saved_configuration.dashboard_state_id, dashboard_state.dashboard_id FROM " +
+                    "saved_configuration, dashboard_state WHERE saved_configuration.url_key = ? AND saved_configuration.dashboard_state_id = dashboard_State.dashboard_state_id");
+            ps.setString(1, urlKey);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            SavedConfiguration savedConfiguration = new SavedConfiguration();
+            savedConfiguration.setUrlKey(urlKey);
+            savedConfiguration.setId(rs.getLong(1));
+            savedConfiguration.setName(rs.getString(2));
+            long stateID = rs.getLong(3);
+            long dashboardID = rs.getLong(4);
+            dashboardInfo.setDashboardID(dashboardID);
+            DashboardStackPositions dashboardStackPositions = new DashboardStackPositions();
+            dashboardStackPositions.retrieve(conn, stateID);
+            savedConfiguration.setDashboardStackPositions(dashboardStackPositions);
+            dashboardInfo.setSavedConfiguration(savedConfiguration);
+            return dashboardInfo;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public DashboardInfo getConfigurationForReport(String urlKey) {
+        DashboardInfo dashboardInfo = new DashboardInfo();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT saved_configuration.saved_configuration_id, saved_configuration.configuration_name, " +
+                    "saved_configuration.dashboard_state_id, dashboard_state.report_id, analysis.title, analysis.url_key, analysis.report_type, analysis.data_feed_id FROM " +
+                    "saved_configuration, dashboard_state, analysis WHERE saved_configuration.url_key = ? AND saved_configuration.dashboard_state_id = dashboard_state.dashboard_state_id AND " +
+                    "dashboard_state.report_id = analysis.analysis_id");
+            ps.setString(1, urlKey);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            SavedConfiguration savedConfiguration = new SavedConfiguration();
+            savedConfiguration.setId(rs.getLong(1));
+            savedConfiguration.setName(rs.getString(2));
+            savedConfiguration.setUrlKey(urlKey);
+            long stateID = rs.getLong(3);
+            long reportID = rs.getLong(4);
+            String reportName = rs.getString(5);
+            String reportURLKey = rs.getString(6);
+            int reportType = rs.getInt(7);
+            long dataSourceID = rs.getLong(8);
+            dashboardInfo.setReport(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, reportURLKey, 0, false));
+            DashboardStackPositions positions = new DashboardStackPositions();
+            positions.retrieve(conn, stateID);
+            savedConfiguration.setDashboardStackPositions(positions);
+            dashboardInfo.setSavedConfiguration(savedConfiguration);
+            return dashboardInfo;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public SavedConfiguration saveConfigurationForDashboard(SavedConfiguration savedConfiguration, long dashboardID) {
         EIConnection conn = Database.instance().getConnection();
         try {
             long id = savedConfiguration.getDashboardStackPositions().save(conn, dashboardID, 0);
             if (savedConfiguration.getId() == 0) {
-                PreparedStatement stmt = conn.prepareStatement("INSERT INTO saved_configuration (dashboard_state_id, configuration_name) values (?, ?)",
+                PreparedStatement stmt = conn.prepareStatement("INSERT INTO saved_configuration (dashboard_state_id, configuration_name, url_key) values (?, ?, ?)",
                         Statement.RETURN_GENERATED_KEYS);
                 stmt.setLong(1, id);
                 stmt.setString(2, savedConfiguration.getName());
+                String urlKey = RandomTextGenerator.generateText(30);
+                savedConfiguration.setUrlKey(urlKey);
+                stmt.setString(3, urlKey);
                 stmt.execute();
                 savedConfiguration.setId(Database.instance().getAutoGenKey(stmt));
                 stmt.close();
@@ -50,6 +134,7 @@ public class DashboardService {
                 updateStmt.setString(2, savedConfiguration.getName());
                 updateStmt.setLong(3, savedConfiguration.getId());
                 updateStmt.executeUpdate();
+                updateStmt.close();
             }
 
             return savedConfiguration;
@@ -66,10 +151,13 @@ public class DashboardService {
         try {
             long id = savedConfiguration.getDashboardStackPositions().save(conn, 0, reportID);
             if (savedConfiguration.getId() == 0) {
-                PreparedStatement stmt = conn.prepareStatement("INSERT INTO saved_configuration (dashboard_state_id, configuration_name) values (?, ?)",
+                PreparedStatement stmt = conn.prepareStatement("INSERT INTO saved_configuration (dashboard_state_id, configuration_name, url_key) values (?, ?, ?)",
                         Statement.RETURN_GENERATED_KEYS);
                 stmt.setLong(1, id);
                 stmt.setString(2, savedConfiguration.getName());
+                String urlKey = RandomTextGenerator.generateText(30);
+                savedConfiguration.setUrlKey(urlKey);
+                stmt.setString(3, urlKey);
                 stmt.execute();
                 savedConfiguration.setId(Database.instance().getAutoGenKey(stmt));
                 stmt.close();
@@ -79,6 +167,7 @@ public class DashboardService {
                 updateStmt.setString(2, savedConfiguration.getName());
                 updateStmt.setLong(3, savedConfiguration.getId());
                 updateStmt.executeUpdate();
+                updateStmt.close();
             }
 
             return savedConfiguration;
@@ -111,7 +200,7 @@ public class DashboardService {
         EIConnection conn = Database.instance().getConnection();
         try {
             List<SavedConfiguration> savedConfigurations = new ArrayList<SavedConfiguration>();
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT saved_configuration_id, configuration_name, SAVED_CONFIGURATION.dashboard_state_id FROM " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT saved_configuration_id, configuration_name, SAVED_CONFIGURATION.dashboard_state_id, saved_configuration.url_key FROM " +
                     "DASHBOARD_STATE, SAVED_CONFIGURATION WHERE DASHBOARD_STATE.report_id = ? AND DASHBOARD_STATE.DASHBOARD_STATE_ID = SAVED_CONFIGURATION.dashboard_state_id");
             queryStmt.setLong(1, reportID);
             ResultSet rs = queryStmt.executeQuery();
@@ -123,6 +212,7 @@ public class DashboardService {
                 SavedConfiguration savedConfiguration = new SavedConfiguration();
                 savedConfiguration.setName(configurationName);
                 savedConfiguration.setId(configurationID);
+                savedConfiguration.setUrlKey(rs.getString(4));
                 savedConfiguration.setDashboardStackPositions(positions);
                 savedConfigurations.add(savedConfiguration);
             }
@@ -139,7 +229,7 @@ public class DashboardService {
         EIConnection conn = Database.instance().getConnection();
         try {
             List<SavedConfiguration> savedConfigurations = new ArrayList<SavedConfiguration>();
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT saved_configuration_id, configuration_name, SAVED_CONFIGURATION.dashboard_state_id FROM " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT saved_configuration_id, configuration_name, SAVED_CONFIGURATION.dashboard_state_id, saved_configuration.url_key FROM " +
                     "DASHBOARD_STATE, SAVED_CONFIGURATION WHERE DASHBOARD_STATE.dashboard_id = ? AND DASHBOARD_STATE.DASHBOARD_STATE_ID = SAVED_CONFIGURATION.dashboard_state_id");
             queryStmt.setLong(1, dashboardID);
             ResultSet rs = queryStmt.executeQuery();
@@ -151,6 +241,7 @@ public class DashboardService {
                 SavedConfiguration savedConfiguration = new SavedConfiguration();
                 savedConfiguration.setName(configurationName);
                 savedConfiguration.setId(configurationID);
+                savedConfiguration.setUrlKey(rs.getString(4));
                 savedConfiguration.setDashboardStackPositions(positions);
                 savedConfigurations.add(savedConfiguration);
             }
@@ -574,6 +665,7 @@ public class DashboardService {
             dashboard = dashboardStorage.getDashboard(dashboardID, conn);
         }
         dashboard.setRole(role);
+        dashboard.setConfigurations(getConfigurationsForDashboard(dashboardID));
         Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
         List<FilterDefinition> dlsFilters = DataService.addDLSFilters(dashboard.getDataSourceID(), conn);
         KeyDisplayMapper mapper = KeyDisplayMapper.create(feed.getFields());

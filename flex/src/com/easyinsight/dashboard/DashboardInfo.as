@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.dashboard {
+import com.easyinsight.report.SavedConfiguration;
 import com.easyinsight.solutions.InsightDescriptor;
 
 [Bindable]
@@ -14,6 +15,7 @@ public class DashboardInfo {
 
     public var dashboardID:int;
     public var dashboardStackPositions:DashboardStackPositions;
+    public var savedConfiguration:SavedConfiguration;
     public var report:InsightDescriptor;
 
     public function DashboardInfo() {

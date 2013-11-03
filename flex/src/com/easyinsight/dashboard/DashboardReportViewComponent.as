@@ -367,7 +367,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
     private var hasFilters:Boolean = false;
 
-
+    private var hiddenFilters:ArrayCollection = new ArrayCollection();
 
     private function onReportSetup(event:ReportSetupEvent):void {
         viewFactory.registerPostProcessor(new ReportDashboardPostProcessor(dashboardEditorMetadata));
@@ -494,5 +494,10 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         reports.addItem(report);
         return reports;
     }
+
+    public function allFiltersVisible(visible:Boolean):void {
+
+    }
+
 }
 }

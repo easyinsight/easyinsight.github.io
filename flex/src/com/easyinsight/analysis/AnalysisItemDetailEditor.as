@@ -72,7 +72,7 @@ public class AnalysisItemDetailEditor extends Form {
         return _analysisItem;
     }
 
-    public function save(analysisItem:AnalysisItem):void {
+    public function save(analysisItem:AnalysisItem, aggregation:String = null):void {
     }
 
     public function validate():Boolean {

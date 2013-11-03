@@ -45,7 +45,7 @@
             }
         }
 
-        override public function save(analysisItem:AnalysisItem):void {
+        override public function save(analysisItem:AnalysisItem, aggregation:String = null):void {
             super.save(analysisItem);
             var measure:ReaggregateAnalysisMeasure = analysisItem as ReaggregateAnalysisMeasure;
             measure.wrappedMeasure = measureComboBox.selectedItem as AnalysisItem;

@@ -5,8 +5,10 @@ import com.easyinsight.analysis.DelayedFeedAdminLink;
 import com.easyinsight.analysis.DelayedFeedLink;
 import com.easyinsight.analysis.DelayedNewDashboardLink;
 import com.easyinsight.analysis.DelayedReportLink;
+import com.easyinsight.dashboard.DelayedDashboardConfigurationLink;
 import com.easyinsight.dashboard.DelayedDashboardSaveLink;
 import com.easyinsight.dashboard.DelayedDashboardViewLink;
+import com.easyinsight.dashboard.DelayedReportConfigurationLink;
 import com.easyinsight.dashboard.DelayedReportSaveLink;
 import com.easyinsight.etl.DelayedLookupTableLink;
 import com.easyinsight.genredata.AnalyzeEvent;
@@ -85,6 +87,16 @@ public class FragmentParser {
             }),
             new FragmentTester("savedReportID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 var delayedDashboardAdminLink:DelayedReportSaveLink = new DelayedReportSaveLink(key);
+                delayedDashboardAdminLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
+                delayedDashboardAdminLink.execute();
+            }),
+            new FragmentTester("reportConfigurationID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
+                var delayedDashboardAdminLink:DelayedReportConfigurationLink = new DelayedReportConfigurationLink(key);
+                delayedDashboardAdminLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
+                delayedDashboardAdminLink.execute();
+            }),
+            new FragmentTester("dashboardConfigurationID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
+                var delayedDashboardAdminLink:DelayedDashboardConfigurationLink = new DelayedDashboardConfigurationLink(key);
                 delayedDashboardAdminLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 delayedDashboardAdminLink.execute();
             }),

@@ -24,7 +24,7 @@
             }
         }
 
-        override public function save(analysisItem:AnalysisItem):void {
+        override public function save(analysisItem:AnalysisItem, aggregation:String = null):void {
             var analysisRange:AnalysisRangeDimension = analysisItem as AnalysisRangeDimension;
             rangeBox.save();
             analysisRange.explicitOptions = ranges;
