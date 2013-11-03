@@ -34,6 +34,9 @@ public class TypeTransformComponent implements IComponent {
             //IRow targetRow = targetSet.createRow();
             for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
                 Value value = row.getValue(analysisItem.createAggregateKey());
+                if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && value.type() == Value.EMPTY) {
+                    value = row.getValue(analysisItem.createAggregateKey(false));
+                }
                 boolean shift = false;
                 if (timeShift) {
                     if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
