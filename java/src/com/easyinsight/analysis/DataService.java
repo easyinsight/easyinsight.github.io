@@ -285,7 +285,11 @@ public class DataService {
                 AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
                 AnalysisMeasure measure = new AnalysisMeasure();
                 measure.setFormattingConfiguration(item.getFormattingConfiguration());
-                measure.setAggregation(baseMeasure.getAggregation());
+                if (report.isPersistedCache()) {
+                    measure.setAggregation(AggregationTypes.SUM);
+                } else {
+                    measure.setAggregation(baseMeasure.getAggregation());
+                }
                 measure.setPrecision(baseMeasure.getPrecision());
                 measure.setMinPrecision(baseMeasure.getMinPrecision());
                 clone = measure;
@@ -295,7 +299,7 @@ public class DataService {
             //clone.setParentItemID(item.getAnalysisItemID());
             clone.setOriginalDisplayName(item.toDisplay());
             //if (!addonReport.isUseNewNaming()) {
-            clone.setDisplayName(report.getName() + " - " + item.toDisplay());
+                clone.setDisplayName(report.getName() + " - " + item.toDisplay());
             //}
             clone.setBasedOnReportField(item.getAnalysisItemID());
             ReportKey reportKey = new ReportKey();
