@@ -58,8 +58,40 @@
         [Bindable]
         private var minPrecision:int;
 
-        override public function save(analysisItem:AnalysisItem):void {
+        override public function save(analysisItem:AnalysisItem, aggregation:String = null):void {
             var analysisMeasure:AnalysisMeasure = analysisItem as AnalysisMeasure;
+            switch (aggregation) {
+                case "Sum":
+                    analysisMeasure.aggregation = AggregationTypes.SUM;
+                    break;
+                case "Average":
+                    analysisMeasure.aggregation = AggregationTypes.AVERAGE;
+                    break;
+                case "Max":
+                    analysisMeasure.aggregation = AggregationTypes.MAX;
+                    break;
+                case "Min":
+                    analysisMeasure.aggregation = AggregationTypes.MIN;
+                    break;
+                case "Count":
+                    analysisMeasure.aggregation = AggregationTypes.COUNT;
+                    break;
+                case "Median":
+                    analysisMeasure.aggregation = AggregationTypes.MEDIAN;
+                    break;
+                case "Variance":
+                    analysisMeasure.aggregation = AggregationTypes.VARIANCE;
+                    break;
+                case "Ranking":
+                    analysisMeasure.aggregation = AggregationTypes.RANK;
+                    break;
+                case "Percent of Total":
+                    analysisMeasure.aggregation = AggregationTypes.PERCENT_OF_TOTAL;
+                    break;
+                case "Count Distinct":
+                    analysisMeasure.aggregation = AggregationTypes.COUNT_DISTINCT;
+                    break;
+            }
             analysisMeasure.formattingConfiguration = formattingSetup.formattingConfiguration;
             analysisMeasure.precision = precisionInput.value;
             analysisMeasure.underline = underlineCheckbox.selected;

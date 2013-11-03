@@ -15,15 +15,23 @@
             if (val is AnalysisList) {
                 var list:AnalysisList = val as AnalysisList;
                 expanded = list.expanded;
+                delimiter = list.delimiter;
             }
         }
+        
+        [Bindable]
+        private var delimiter:String = ",";
 
-        override public function save(analysisItem:AnalysisItem):void {
+        override public function save(analysisItem:AnalysisItem, aggregation:String = null):void {
             super.save(analysisItem);
             var list:AnalysisList = analysisItem as AnalysisList;
             list.expanded = expandedBox.selected;
+            list.delimiter = delimiterInput.text;
         }]]></mx:Script>
     <mx:FormItem label="Expanded:">
         <mx:CheckBox selected="{expanded}" id="expandedBox"/>
+    </mx:FormItem>
+    <mx:FormItem label="Delimiter:">
+        <mx:TextInput text="{delimiter}" id="delimiterInput"/>
     </mx:FormItem>
 </analysis:AnalysisItemDetailEditor>

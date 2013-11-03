@@ -11,7 +11,7 @@
             super.analysisItem = val;            
         }
 
-        override public function save(analysisItem:AnalysisItem):void {
+        override public function save(analysisItem:AnalysisItem, aggregation:String = null):void {
             super.save(analysisItem);
         }]]></mx:Script>
 </analysis:AnalysisItemDetailEditor>
