@@ -32,7 +32,7 @@ public abstract class InsightlyBaseSource extends ServerDataSourceDefinition {
     }
 
     public List runJSONRequest(String path, InsightlyCompositeSource insightlyCompositeSource, HttpClient client) {
-        String url = "https://api.insight.ly/v1/" + path;
+        String url = "https://api.insight.ly/v2/" + path;
         HttpMethod restMethod = new GetMethod(url);
         System.out.println(url);
         restMethod.setRequestHeader("Accept", "application/json");
