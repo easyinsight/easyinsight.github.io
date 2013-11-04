@@ -623,13 +623,18 @@
 
             var configurations:ArrayCollection = event.reportInfo.configurations;
             if (selectedConfiguration == null) {
-                options = new ArrayCollection([ {label: "Reset to Default", data: 1},
-                    {label: "Save a New Configuration...", data: 2}]);
+                options = new ArrayCollection();
+                options.addItem({label: "Reset to Default", data: 1});
+                if (User.getInstance().analyst) {
+                    options.addItem({label: "Save a New Configuration...", data: 2});
+                }
             } else {
                 configLabel = selectedConfiguration.name;
                 options = new ArrayCollection();
-                options.addItem({label: "Update " + selectedConfiguration.name, data: 2});
-                options.addItem({label: "Delete " + selectedConfiguration.name, data: 3});
+                if (User.getInstance().analyst) {
+                    options.addItem({label: "Update " + selectedConfiguration.name, data: 2});
+                    options.addItem({label: "Delete " + selectedConfiguration.name, data: 3});
+                }
                 options.addItem({label: "Reset to Default", data: 1});
             }
             for each (var sc:SavedConfiguration in configurations) {
@@ -913,14 +918,7 @@
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
             } else if (data is SavedConfiguration) {
-                var desc:InsightDescriptor = new InsightDescriptor();
-                desc.id = report.analysisID;
-                desc.name = report.name;
-                desc.dataFeedID = report.dataFeedID;
-                desc.reportType = report.reportType;
-                desc.urlKey = report.urlKey;
-                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(desc, null, null, null, 0, null, null, null, SavedConfiguration(data).dashboardStackPositions,
-                    SavedConfiguration(data))));
+                dashboardService.getConfiguration.send(SavedConfiguration(data).urlKey);
             } else if (data == 3) {
                 var thisObj:UIComponent = this;
                 Alert.show("Are you sure you want to delete the selected configuration?", "Alert", Alert.OK | Alert.CANCEL, this,
@@ -963,12 +961,25 @@
 
         [Bindable]
         private var options:ArrayCollection;
+
+        private function gotConfiguration():void {
+            var config:SavedConfiguration = dashboardService.getConfiguration.lastResult as SavedConfiguration;
+            var desc:InsightDescriptor = new InsightDescriptor();
+            desc.id = report.analysisID;
+            desc.name = report.name;
+            desc.dataFeedID = report.dataFeedID;
+            desc.reportType = report.reportType;
+            desc.urlKey = report.urlKey;
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(desc, null, null, null, 0, null, null, null, config.dashboardStackPositions,
+                    config)));
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="setupAddRow" result="setupAddRow()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="deleteConfiguration" result="deletedConfiguration()"/>
+        <mx:method name="getConfiguration" result="gotConfiguration()"/>
     </mx:RemoteObject>
     <mx:Style>
         .myCustomPopUpStyleName {
@@ -996,8 +1007,8 @@
                    labelPlacement="right" id="editReportButton"
                    toolTip="Open this report in the report editor..." label="Edit Report" styleName="grayButton"/>
         <mx:Button labelPlacement="right" label="View in HTML" styleName="grayButton" click="viewInHTML()" icon="{htmlIcon}"/>
-        <!--<listing:ArghButton label="{configLabel}" styleName="grayButton" itemClick="onConfigurationClick(event)" width="160" id="newButton"
-                            dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>-->
+        <listing:ArghButton label="{configLabel}" styleName="grayButton" itemClick="onConfigurationClick(event)" width="160" id="newButton"
+                            dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
         <mx:Button labelPlacement="right" label="Add Row..." styleName="grayButton" click="addRow()" visible="{showAddRow}"/>
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>

@@ -190,13 +190,18 @@
 
             var configurations:ArrayCollection = dashboard.configurations;
             if (selectedConfiguration == null) {
-                options = new ArrayCollection([ {label: "Reset to Default", data: 1},
-                    {label: "Save a New Configuration...", data: 2}]);
+                options = new ArrayCollection();
+                options.addItem( {label: "Reset to Default", data: 1});
+                if (User.getInstance().analyst) {
+                    options.addItem({label: "Save a New Configuration...", data: 2});
+                }
             } else {
                 configLabel = selectedConfiguration.name;
                 options = new ArrayCollection();
-                options.addItem({label: "Update " + selectedConfiguration.name, data: 2});
-                options.addItem({label: "Delete " + selectedConfiguration.name, data: 3});
+                if (User.getInstance().analyst) {
+                    options.addItem({label: "Update " + selectedConfiguration.name, data: 2});
+                    options.addItem({label: "Delete " + selectedConfiguration.name, data: 3});
+                }
                 options.addItem({label: "Reset to Default", data: 1});
             }
             for each (var sc:SavedConfiguration in configurations) {
@@ -547,8 +552,7 @@
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
             } else if (data is SavedConfiguration) {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboardID, dashboardStackPositions: SavedConfiguration(data).dashboardStackPositions,
-                    selectedConfiguration:data })));
+                dashboardService.getConfiguration.send(SavedConfiguration(data).urlKey);
             } else if (data == 3) {
                 var thisObj:UIComponent = this;
                 Alert.show("Are you sure you want to delete the selected configuration?", "Alert", Alert.OK | Alert.CANCEL, this,
@@ -559,6 +563,12 @@
                             }
                         });
             }
+        }
+
+        private function gotConfiguration():void {
+            var config:SavedConfiguration = dashboardService.getConfiguration.lastResult as SavedConfiguration;
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboardID, dashboardStackPositions: config.dashboardStackPositions,
+                selectedConfiguration:config })));
         }
 
         [Bindable]
@@ -583,6 +593,7 @@
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="getDashboardView" result="gotDashboard()"/>
         <mx:method name="deleteConfiguration" result="deletedConfiguration()"/>
+        <mx:method name="getConfiguration" result="gotConfiguration()"/>
     </mx:RemoteObject>
     <mx:Style>
         .myCustomPopUpStyleName {

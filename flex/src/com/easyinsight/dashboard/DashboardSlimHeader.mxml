@@ -158,6 +158,17 @@
         public var options:ArrayCollection;
 
         ]]></mx:Script>
+    <mx:Style>
+        .myCustomPopUpStyleName {
+            fontSize: 12;
+            fontFamily: "Lucida Grande";
+            textAlign: left;
+            dropShadowEnabled: false;
+            borderStyle: solid;
+            borderThickness: 1;
+            cornerRadius: 8;
+        }
+    </mx:Style>
     <mx:Button click="_dashboardView.close()" styleName="grayButton" labelPlacement="right"
                id="backButton"
                toolTip="Close the report view" label="Close Dashboard" icon="{closeIcon}"/>
@@ -172,8 +183,8 @@
     <!--<mx:Button click="resetFilters()" styleName="grayButton" labelPlacement="right"
                id="resetButton" label="Reset Filters" icon="{filterIcon}"/>-->
     <mx:Button click="viewInHTML()" styleName="grayButton" labelPlacement="right" id="viewInHTMLButton" label="View in HTML" icon="{htmlIcon}" visible="{viewInHTMLable}"/>
-    <!--<listing:ArghButton label="{configLabel}" styleName="grayButton" itemClick="_dashboardView.onConfigurationClick(event)" width="160" id="newButton"
-                        dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>-->
+    <listing:ArghButton label="{configLabel}" styleName="grayButton" itemClick="_dashboardView.onConfigurationClick(event)" width="160" id="newButton"
+                        dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
     <mx:Button click="dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { dashboardID: _dashboard.id})))" styleName="grayButton" labelPlacement="right"
                id="editButton" label="Edit the Dashboard" icon="{ImageConstants.EDIT_ICON}" visible="{editable}"/>
     <mx:Spacer width="100%"/>

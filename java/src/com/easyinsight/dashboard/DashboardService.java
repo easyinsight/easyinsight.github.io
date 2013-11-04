@@ -32,13 +32,59 @@ public class DashboardService {
 
     private DashboardStorage dashboardStorage = new DashboardStorage();
 
+    private void authorizeConfig(String urlKey, EIConnection conn) throws SQLException {
+        PreparedStatement getStmt = conn.prepareStatement("SELECT report_id, dashboard_id FROM dashboard_state, saved_configuration WHERE " +
+                "saved_configuration.dashboard_state_id = dashboard_state.dashboard_state_id AND saved_configuration.url_key = ?");
+        getStmt.setString(1, urlKey);
+        ResultSet rs = getStmt.executeQuery();
+        rs.next();
+        long reportID = rs.getLong(1);
+        if (rs.wasNull()) {
+            long dashboardID = rs.getLong(2);
+            SecurityUtil.authorizeDashboard(dashboardID);
+        } else {
+            SecurityUtil.authorizeInsight(reportID);
+        }
+        getStmt.close();
+    }
+
     public void deleteConfiguration(SavedConfiguration savedConfiguration) {
         EIConnection conn = Database.instance().getConnection();
         try {
+            authorizeConfig(savedConfiguration.getUrlKey(), conn);
             PreparedStatement stmt = conn.prepareStatement("DELETE FROM saved_configuration WHERE saved_configuration_id = ?");
             stmt.setLong(1, savedConfiguration.getId());
             stmt.executeUpdate();
             stmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public SavedConfiguration getConfiguration(String urlKey) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            authorizeConfig(urlKey, conn);
+            PreparedStatement stmt = conn.prepareStatement("SELECT dashboard_state_id, saved_configuration_id, configuration_name FROM " +
+                    "saved_configuration WHERE saved_configuration.url_key = ?");
+            stmt.setString(1, urlKey);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            long stateID = rs.getLong(1);
+            long configurationID = rs.getLong(2);
+            String configurationName = rs.getString(3);
+            DashboardStackPositions positions = new DashboardStackPositions();
+            positions.retrieve(conn, stateID);
+            stmt.close();
+            SavedConfiguration configuration = new SavedConfiguration();
+            configuration.setUrlKey(urlKey);
+            configuration.setDashboardStackPositions(positions);
+            configuration.setId(configurationID);
+            configuration.setName(configurationName);
+            return configuration;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -52,6 +98,7 @@ public class DashboardService {
 
         EIConnection conn = Database.instance().getConnection();
         try {
+            authorizeConfig(urlKey, conn);
             PreparedStatement ps = conn.prepareStatement("SELECT saved_configuration.saved_configuration_id, saved_configuration.configuration_name," +
                     "saved_configuration.dashboard_state_id, dashboard_state.dashboard_id FROM " +
                     "saved_configuration, dashboard_state WHERE saved_configuration.url_key = ? AND saved_configuration.dashboard_state_id = dashboard_State.dashboard_state_id");
@@ -207,13 +254,10 @@ public class DashboardService {
             while (rs.next()) {
                 long configurationID = rs.getLong(1);
                 String configurationName = rs.getString(2);
-                DashboardStackPositions positions = new DashboardStackPositions();
-                positions.retrieve(conn, rs.getLong(3));
                 SavedConfiguration savedConfiguration = new SavedConfiguration();
                 savedConfiguration.setName(configurationName);
                 savedConfiguration.setId(configurationID);
                 savedConfiguration.setUrlKey(rs.getString(4));
-                savedConfiguration.setDashboardStackPositions(positions);
                 savedConfigurations.add(savedConfiguration);
             }
             return savedConfigurations;
@@ -236,13 +280,10 @@ public class DashboardService {
             while (rs.next()) {
                 long configurationID = rs.getLong(1);
                 String configurationName = rs.getString(2);
-                DashboardStackPositions positions = new DashboardStackPositions();
-                positions.retrieve(conn, rs.getLong(3));
                 SavedConfiguration savedConfiguration = new SavedConfiguration();
                 savedConfiguration.setName(configurationName);
                 savedConfiguration.setId(configurationID);
                 savedConfiguration.setUrlKey(rs.getString(4));
-                savedConfiguration.setDashboardStackPositions(positions);
                 savedConfigurations.add(savedConfiguration);
             }
             return savedConfigurations;
@@ -651,7 +692,7 @@ public class DashboardService {
             }
         }*/
         Dashboard dashboard = null;
-        /*byte[] bytes = (byte[]) MemCachedManager.get("dashboard" + dashboardID);
+        byte[] bytes = (byte[]) MemCachedManager.get("dashboard" + dashboardID);
         if (bytes != null) {
             try {
                 ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
@@ -659,11 +700,16 @@ public class DashboardService {
             } catch (Exception e) {
                 LogClass.error(e);
             }
-        }*/
+        }
 
         if (dashboard == null) {
             dashboard = dashboardStorage.getDashboard(dashboardID, conn);
         }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(dashboard);
+        oos.flush();
+        MemCachedManager.add("dashboard" + dashboardID, 10000, baos.toByteArray());
         dashboard.setRole(role);
         dashboard.setConfigurations(getConfigurationsForDashboard(dashboardID));
         Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
@@ -691,11 +737,6 @@ public class DashboardService {
             }
             dashboard.visit(new StateVisitor(dashboardStackPositions));
         }
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(dashboard);
-        oos.flush();
-        //MemCachedManager.add("dashboard" + dashboardID, 10000, baos.toByteArray());
         /*if (dashboardCache != null) {
             dashboardCache.put(cacheKey, dashboard);
         }*/
@@ -868,7 +909,7 @@ public class DashboardService {
     public void deleteDashboard(long dashboardID) {
         SecurityUtil.authorizeDashboard(dashboardID);
         try {
-            //MemCachedManager.delete("dashboard" + dashboardID);
+            MemCachedManager.delete("dashboard" + dashboardID);
             dashboardStorage.deleteDashboard(dashboardID);
         } catch (Exception e) {
             LogClass.error(e);

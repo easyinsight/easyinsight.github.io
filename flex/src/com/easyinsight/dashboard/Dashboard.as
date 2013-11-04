@@ -48,7 +48,7 @@ public class Dashboard {
     public var stackFill2End:int = 0x343030;
     public var reportHorizontalPadding:int = 20;
 
-    public var enableLocalStorage:Boolean = true;
+    public var enableLocalStorage:Boolean = false;
 
     public var headerImage:ImageDescriptor;
     public var headerTextColor:int;
