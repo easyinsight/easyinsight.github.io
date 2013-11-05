@@ -152,11 +152,11 @@
         ]]>
 	</mx:Script>
 	<mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-        <mx:Label text="Do you want to embed the report as Flash or pure HTML?"/>
+        <mx:Label text="Do you want to embed the report as Flash or HTML5?"/>
         <mx:RadioButtonGroup id="embedTypeGroup" selectedValue="{showAsFlash}" change="showAsFlash = String(embedTypeGroup.selectedValue)"/>
         <mx:HBox>
             <mx:RadioButton label="Flash" value="flash" groupName="embedTypeGroup"/>
-            <mx:RadioButton label="Pure HTML (beta)" value="html" groupName="embedTypeGroup"/>
+            <mx:RadioButton label="HTML5" value="html" groupName="embedTypeGroup"/>
         </mx:HBox>
         <mx:Form paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
             <mx:FormItem label="Report Width:">
