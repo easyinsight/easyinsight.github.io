@@ -6,6 +6,8 @@ import com.easyinsight.dashboard.DashboardService;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,7 +24,9 @@ public class ReportFilter implements Filter {
         if (req instanceof HttpServletRequest) {
             HttpServletRequest request = (HttpServletRequest) req;
             String path = request.getServletPath();
-            String reportID = path.substring(path.lastIndexOf("/") + 1);
+            Pattern p = Pattern.compile("^/html/report/([a-zA-z0-9]+)/?.*$");
+            Matcher m = p.matcher(path);
+            String reportID = m.replaceAll("$1");
             request.setAttribute("public", new AnalysisService().isReportPublic(reportID));
         }
         chain.doFilter(req, resp);
