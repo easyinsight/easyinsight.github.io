@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class Utils {
 
-    public boolean isPublic(long filterID) {
+    public static boolean isPublic(long filterID) {
         EIConnection conn = Database.instance().getConnection();
         try {
             Long reportID = null;
@@ -103,7 +103,7 @@ public class Utils {
         }
     }
 
-    private Blah findDashboard(long dashboardElementID, PreparedStatement rootStmt, PreparedStatement findParentInGridStmt, PreparedStatement findParentInStackStmt) throws SQLException {
+    private static Blah findDashboard(long dashboardElementID, PreparedStatement rootStmt, PreparedStatement findParentInGridStmt, PreparedStatement findParentInStackStmt) throws SQLException {
         rootStmt.setLong(1, dashboardElementID);
         ResultSet rootRS = rootStmt.executeQuery();
         if (rootRS.next()) {
@@ -143,9 +143,9 @@ public class Utils {
         boolean designer;
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYST FROM USER WHERE USER_ID = ?");
-            queryStmt.setLong(1, SecurityUtil.getUserID());
+            queryStmt.setLong(1, SecurityUtil.getUserID(false));
             ResultSet rs = queryStmt.executeQuery();
-            rs.next();
+            if(!rs.next()) return false;
             designer = rs.getBoolean(1);
             queryStmt.close();
             return designer;

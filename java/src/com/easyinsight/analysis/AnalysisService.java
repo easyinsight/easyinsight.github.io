@@ -83,6 +83,27 @@ public class AnalysisService {
         }
     }
 
+    public boolean isReportPublic(String urlKey) {
+            boolean isPublic = false;
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                PreparedStatement stmt = conn.prepareStatement("SELECT publicly_visible FROM ANALYSIS WHERE URL_KEY = ?");
+                stmt.setString(1, urlKey);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    isPublic = rs.getBoolean(1);
+                }
+            } catch (SQLException se) {
+                LogClass.error(se);
+                throw new RuntimeException(se);
+            } finally {
+                Database.closeConnection(conn);
+            }
+
+            return isPublic;
+
+        }
+
     public DashboardInfo retrieveFromReportLink(String urlKey) {
         EIConnection conn = Database.instance().getConnection();
         try {

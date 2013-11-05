@@ -14,8 +14,11 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
-    String userName = (String) session.getAttribute("userName");
-    com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+    String userName = null;
+    if(session.getAttribute("userName") != null) {
+        userName = (String) session.getAttribute("userName");
+        com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+    }
     try {
         long reportID;
         List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
@@ -159,6 +162,7 @@
                                 </button>
                             </li>
                             <%
+                                if(userName != null) {
                                 FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
                                 if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
                             %>
@@ -171,6 +175,8 @@
                             </li>
                             <%
                                 }
+                                }
+
                             %>
                         </ul>
                     </div>
