@@ -32,8 +32,8 @@ public class DelayedDashboardConfigurationLink extends EventDispatcher
         private function gotGoalTree(event:ResultEvent):void {
             var result:DashboardInfo = reportService.getConfigurationForDashboard.lastResult as DashboardInfo;
             if (result != null) {
-                /*result.savedConfiguration..urlKey = reportID;*/
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, { dashboardID: result.dashboardID, selectedConfiguration: result.savedConfiguration })));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, { dashboardID: result.dashboardID, dashboardStackPositions: result.savedConfiguration.dashboardStackPositions,
+                    selectedConfiguration: result.savedConfiguration })));
             }
         }
 	}

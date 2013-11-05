@@ -53,8 +53,8 @@ function AquaGauge(target) {
             cvs.ctx.font = props.dialSubScaleFont;
             cvs.ctx.fillStyle = props.dialSubScaleTextColor;
         }
-        cvs.ctx.shadowOffsetX = 0.5;
-        cvs.ctx.shadowOffsetY = 0.5;        
+        /*cvs.ctx.shadowOffsetX = 0.5;
+        cvs.ctx.shadowOffsetY = 0.5;*/
         var adj = cvs.ctx.measureText(value).width / 2;
         cvs.ctx.fillText(value, -adj, 0);
         cvs.ctx.restore();
@@ -394,14 +394,14 @@ function CanvasHelper(cvs) {
 function GaugeParams(cvs) {
     //Dial
     this.backgroundColor = "white";
-    this.dialColor = "rgba(158, 166, 222, 1)";
-    this.dialGradientColor = "rgba(209, 211, 227, 0.5)";
-    this.dialValueTextFont = getRelVal(cvs, 27) + "px Arial Black";
-    this.dialValueTextColor = "#717599";
-    this.dialTitleTextFont = "bold " + getRelVal(cvs, 18) + "px Trebuchet MS";
+    this.dialColor = "rgba(15, 15, 40, 1)";
+    this.dialGradientColor = "rgba(39, 41, 47, 0.5)";
+    this.dialValueTextFont = getRelVal(cvs, 27) + "px Helvetica Neue";
+    this.dialValueTextColor = "#EFEFEF";
+    this.dialTitleTextFont = "bold " + getRelVal(cvs, 18) + "px Helvetica Neue";
     this.dialTitleTextColor = "#454545";
     this.dialTitle = "AQUA GAUGE";
-    this.dialSubTitleTextFont = getRelVal(cvs, 15) + "px Trebuchet MS";
+    this.dialSubTitleTextFont = getRelVal(cvs, 15) + "px Helvetica Neue";
     this.dialSubTitleTextColor = "#757575";    
     this.dialSubTitle = "By Ambalavanar";
     this.showGlossiness = true;
@@ -424,10 +424,10 @@ function GaugeParams(cvs) {
                           { start: 75, end: 100, color: "red"}];
 
     //Scale - Text
-    this.dialScaleFont = "bold " + getRelVal(cvs, 17) + "px Trebuchet MS";
-    this.dialSubScaleFont = "bold " + getRelVal(cvs, 12) + "px Trebuchet MS";    
+    this.dialScaleFont = "bold " + getRelVal(cvs, 17) + "px Helvetica Neue";
+    this.dialSubScaleFont = "bold " + getRelVal(cvs, 12) + "px Helvetica Neue";
     this.dialScaleTextShadowColor = "#f1f1f1";
-    this.dialScaleTextColor = "#252525";
+    this.dialScaleTextColor = "#EFEFEF";
     this.dialSubScaleTextColor = "#555555";
     this.showMinorScaleValue = false;
 

@@ -39,7 +39,7 @@
             </div>
         </div>
         <div class="col-md-6 col-md-offset-3">
-            <div class="well" style="text-align:center">
+            <div class="well" style="text-align:center;background-color: #FFFFFF">
                 <h3>Server Error</h3>
                 <p>We're sorry, but an internal server occurred in trying to load the requested page. We've logged the error for our engineers to examine.</p>
             </div>

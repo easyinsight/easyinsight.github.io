@@ -1,21 +1,20 @@
 package com.easyinsight.html;
 
+import com.easyinsight.analysis.AnalysisService;
 import com.easyinsight.dashboard.DashboardService;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
  * User: Alan
- * Date: 9/3/13
- * Time: 1:21 PM
+ * Date: 11/4/13
+ * Time: 11:49 AM
  * To change this template use File | Settings | File Templates.
  */
-public class DashboardFilter implements Filter {
+public class ReportFilter implements Filter {
     public void destroy() {
     }
 
@@ -23,11 +22,8 @@ public class DashboardFilter implements Filter {
         if (req instanceof HttpServletRequest) {
             HttpServletRequest request = (HttpServletRequest) req;
             String path = request.getServletPath();
-            Pattern p = Pattern.compile("^/html/dashboard/([a-zA-z0-9]+)/?.*$");
-            Matcher m = p.matcher(path);
-            System.out.println(m.replaceAll("$1"));
-            String dashboardID = m.replaceAll("$1");
-            request.setAttribute("public", new DashboardService().isDashboardPublic(dashboardID));
+            String reportID = path.substring(path.lastIndexOf("/") + 1);
+            request.setAttribute("public", new AnalysisService().isReportPublic(reportID));
         }
         chain.doFilter(req, resp);
     }

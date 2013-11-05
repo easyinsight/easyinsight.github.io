@@ -158,6 +158,17 @@
         public var options:ArrayCollection;
 
         ]]></mx:Script>
+    <mx:Style>
+        .myCustomPopUpStyleName {
+            fontSize: 12;
+            fontFamily: "Lucida Grande";
+            textAlign: left;
+            dropShadowEnabled: false;
+            borderStyle: solid;
+            borderThickness: 1;
+            cornerRadius: 8;
+        }
+    </mx:Style>
     <mx:Button click="_dashboardView.close()" styleName="grayButton" labelPlacement="right"
                id="backButton"
                toolTip="Close the report view" label="Close Dashboard" icon="{closeIcon}"/>
