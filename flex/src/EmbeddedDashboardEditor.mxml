@@ -5,6 +5,8 @@
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.FeedResponse;
         import com.easyinsight.dashboard.DashboardEditor;
+        import com.easyinsight.framework.PerspectiveFactory;
+        import com.easyinsight.framework.PerspectiveFactoryHolder;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
@@ -54,6 +56,7 @@
 
         override protected function childSetup():void {
             super.childSetup();
+            PerspectiveFactoryHolder.factory = new PerspectiveFactory();
             this.urlKey = String(Application.application.parameters.analysisID);
             this.dataSourceURLKey = String(Application.application.parameters.dataSourceURLKey);
         }
