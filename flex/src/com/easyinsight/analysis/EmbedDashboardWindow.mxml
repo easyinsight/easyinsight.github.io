@@ -42,15 +42,41 @@
             updateURL();
         }
 
+
+        [Bindable(event="showAsFlashChanged")]
+        public function get showAsFlash():String {
+            return _showAsFlash;
+        }
+
+        public function set showAsFlash(value:String):void {
+            if (_showAsFlash == value) return;
+            _showAsFlash = value;
+            dispatchEvent(new Event("showAsFlashChanged"));
+            updateURL();
+        }
+
         private function updateURL():void {
-            url = "<iframe width=\""+_reportWidth+"\" height=\"" + _reportHeight +"\" src=\"https://www.easy-insight.com/app/dashboard.jsp?width=" + _reportWidth + "&height=" + _reportHeight + "&id=" + _urlKey+"\"></iframe>";
+            if (showAsFlash == "html") {
+                url = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\"https://www.easy-insight.com/app/embeddedDashboard/" + _urlKey + "\"></iframe>";
+            } else {
+                url = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\"https://www.easy-insight.com/app/dashboard.jsp?width=" + _reportWidth + "&height=" + _reportHeight + "&id=" + _urlKey + "\"></iframe>";
+            }
+
         }
 
         private function copyToClipboard():void {
             System.setClipboard(url);
         }
-		]]>
+
+        private var _showAsFlash:String = "flash";
+        ]]>
 	</mx:Script>
+    <mx:Label text="Do you want to embed the report as Flash or HTML5?"/>
+    <mx:RadioButtonGroup id="embedTypeGroup" selectedValue="{showAsFlash}" change="showAsFlash = String(embedTypeGroup.selectedValue)"/>
+    <mx:HBox>
+        <mx:RadioButton label="Flash" value="flash" groupName="embedTypeGroup"/>
+        <mx:RadioButton label="HTML5" value="html" groupName="embedTypeGroup"/>
+    </mx:HBox>
 	<mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:Form paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
             <mx:FormItem label="Dashboard Width:">
