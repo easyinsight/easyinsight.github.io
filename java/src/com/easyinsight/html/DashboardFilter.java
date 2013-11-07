@@ -25,7 +25,6 @@ public class DashboardFilter implements Filter {
             String path = request.getServletPath();
             Pattern p = Pattern.compile("^/html/dashboard/([a-zA-z0-9]+)/?.*$");
             Matcher m = p.matcher(path);
-            System.out.println(m.replaceAll("$1"));
             String dashboardID = m.replaceAll("$1");
             request.setAttribute("public", new DashboardService().isDashboardPublic(dashboardID));
         }

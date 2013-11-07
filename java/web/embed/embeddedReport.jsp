@@ -15,11 +15,19 @@
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
         long reportID;
+        List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
+        String drillthroughArgh = request.getParameter("drillthroughKey");
 
-        String reportIDString = request.getParameter("reportID");
-        InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
-        String showToolbarString = request.getParameter("showToolbar");
-        boolean showToolbar = showToolbarString != null && "1".equals(showToolbarString);
+        InsightResponse insightResponse = null;
+        if (drillthroughArgh != null) {
+            DrillThroughData drillThroughData = Utils.drillThroughFiltersForReport(drillthroughArgh);
+            drillthroughFilters = drillThroughData.getFilters();
+            reportID = drillThroughData.getReportID();
+            insightResponse = new AnalysisService().openAnalysisIfPossibleByID(reportID);
+        } else {
+            String reportIDString = request.getParameter("reportID");
+            insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
+        }
 
         if (insightResponse.getStatus() == InsightResponse.SUCCESS) {
             reportID = insightResponse.getInsightDescriptor().getId();
@@ -28,6 +36,10 @@
         } else {
             throw new com.easyinsight.analysis.ReportNotFoundException("The report does not exist.");
         }
+
+        String showToolbarString = request.getParameter("showToolbar");
+        boolean showToolbar = showToolbarString != null && "1".equals(showToolbarString);
+
         boolean phone = Utils.isPhone(request);
         boolean iPad = Utils.isTablet(request);
         ReportInfo reportInfo = new AnalysisService().getReportInfo(reportID);
@@ -35,6 +47,9 @@
         WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID);
         if (report == null) {
             throw new com.easyinsight.analysis.ReportNotFoundException("Attempt made to load report " + reportID + " which doesn't exist.");
+        }
+        if (drillthroughFilters != null) {
+            report.getFilterDefinitions().addAll(drillthroughFilters);
         }
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(report.getDataFeedID());
 
@@ -57,7 +72,9 @@
         JSONObject jj = new JSONObject();
         jj.put("name", report.getName());
         jj.put("id", report.getUrlKey());
-        jj.put("metadata", report.toJSON(new HTMLReportMetadata(), new ArrayList<FilterDefinition>()));
+        HTMLReportMetadata md = new HTMLReportMetadata();
+        md.setEmbedded(true);
+        jj.put("metadata", report.toJSON(md, new ArrayList<FilterDefinition>()));
         intermediate.put("report", jj);
 %>
 
