@@ -62,13 +62,11 @@ public class Utils {
                 dashboardPS.close();
             }
             ps.close();
-            boolean publicVisibility = false;
+            boolean publicVisibility;
             if (reportID != null) {
-                SecurityUtil.authorizeInsight(reportID);
                 WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID);
                 publicVisibility = report.isPubliclyVisible();
             } else if (dashboardID != null) {
-                SecurityUtil.authorizeDashboard(dashboardID);
                 PreparedStatement stmt = conn.prepareStatement("SELECT public_visible FROM dashboard WHERE dashboard_id = ?");
                 stmt.setLong(1, dashboardID);
                 ResultSet dashboardRS = stmt.executeQuery();
@@ -87,7 +85,6 @@ public class Utils {
                     throw new RuntimeException();
                 }
                 publicVisibility = blah.publiclyVisible;
-                SecurityUtil.authorizeDashboard(blah.dashboardID);
                 rootStmt.close();
                 findParentInGridStmt.close();
                 findParentInStackStmt.close();
