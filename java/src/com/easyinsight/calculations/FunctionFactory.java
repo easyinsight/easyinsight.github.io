@@ -275,6 +275,8 @@ public class FunctionFactory {
             return new OverrideFilter();
         } else if (s.equals("find")) {
             return new FindRecord();
+        } else if (s.equals("accumuluate")) {
+            return new Accumulate();
         }else {
             return null;
         }
