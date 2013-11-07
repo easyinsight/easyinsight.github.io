@@ -11,8 +11,11 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.scheduler.DataSourceScheduledTask;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.IDataStorage;
+import com.easyinsight.storage.IWhere;
+import com.easyinsight.storage.StringWhere;
 import com.easyinsight.users.Account;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.*;
 import java.util.*;
@@ -41,6 +44,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
     }
 
     public static void triggerUpdates(long dataSourceID) {
+        System.out.println("Triggering updates for " + dataSourceID);
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT data_source_id from cached_addon_report_source, analysis where analysis.data_feed_id = ? and " +
@@ -234,6 +238,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
         if (rs.next()) {
             reportID = rs.getLong(1);
         }
+        getStmt.close();
     }
 
     @Override
@@ -275,7 +280,25 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             clone.setKey(key);
             items.add(clone);
         }
+        if (report.getCachePartitionFilter() != null && !"".equals(report.getCachePartitionFilter())) {
+
+            for (FilterDefinition filter : report.getFilterDefinitions()) {
+                if (report.getCachePartitionFilter().equals(filter.getFilterName())) {
+                    String name = filter.getFilterName() + "cache";
+                    AnalysisItem clone = new AnalysisDimension();
+                    clone.setDisplayName(name);
+                    Key key = new NamedKey(clone.toDisplay());
+                    clone.setKey(key);
+                    items.add(clone);
+                }
+            }
+        }
         return items;
+    }
+
+    protected boolean clearsData(FeedDefinition parentSource) {
+        WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID);
+        return !(report.getCachePartitionFilter() != null && !"".equals(report.getCachePartitionFilter()));
     }
 
     @Override
@@ -284,7 +307,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             FilterDefinition partitionFilter = findPartitionFilter(report);
             if (partitionFilter == null) {
-                blah(IDataStorage, conn, report);
+                blah(IDataStorage, conn, report, null, null, false);
             } else if (partitionFilter instanceof FlatDateFilter) {
                 Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID(), conn);
                 AnalysisItemResultMetadata metadata = feed.getMetadata(partitionFilter.getField(), new InsightRequestMetadata(), conn, report, new ArrayList<FilterDefinition>(), null);
@@ -299,7 +322,13 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 }
                 Calendar cal = Calendar.getInstance();
                 Calendar ph = Calendar.getInstance();
-                ph.set(Calendar.YEAR, 2008);
+
+                if (lastRefreshDate != null && lastRefreshDate.getTime() > 10000) {
+                    ph.add(Calendar.YEAR, -1);
+                } else {
+                    ph.set(Calendar.YEAR, 2008);
+                }
+
                 if (ph.getTime().after(yearMetadata.getEarliestDate())) {
                     cal.setTime(ph.getTime());
                 } else {
@@ -313,7 +342,8 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                     } else {
                         System.out.println("Generating report for " + year);
                         flatDateFilter.setValue(year);
-                        blah(IDataStorage, conn, report);
+                        Key key = new NamedKey(flatDateFilter.getFilterName() + "cache");
+                        blah(IDataStorage, conn, report, key, String.valueOf(year), lastRefreshDate != null && lastRefreshDate.after(new Date(1000)));
                         cal.add(Calendar.YEAR, 1);
                     }
                 } while (keepGoing);
@@ -340,7 +370,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
         return null;
     }
 
-    private void blah(IDataStorage IDataStorage, EIConnection conn, WSAnalysisDefinition report) throws Exception {
+    private void blah(IDataStorage IDataStorage, EIConnection conn, WSAnalysisDefinition report, @Nullable Key partitionKey, @Nullable String partitionValue, boolean update) throws Exception {
         Map<AnalysisItem, AnalysisItem> map = new HashMap<AnalysisItem, AnalysisItem>();
         Map<String, AnalysisItem> structure = report.createStructure();
         for (AnalysisItem reportItem : structure.values()) {
@@ -360,8 +390,26 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 AnalysisItem dataSourceItem = map.get(item);
                 row.addValue(dataSourceItem.getKey(), reportRow.getValue(item.createAggregateKey()));
             }
+            if (partitionKey != null) {
+                System.out.println("partition value = " + partitionValue);
+                row.addValue(partitionKey, partitionValue);
+            }
         }
-        IDataStorage.insertData(dataSet);
+        if (partitionKey != null && partitionValue != null && update) {
+            System.out.println("updating for " + partitionValue);
+            IDataStorage.updateData(dataSet, Arrays.asList((IWhere) new StringWhere(partitionKey, partitionValue)));
+        } else {
+            IDataStorage.insertData(dataSet);
+        }
+    }
+
+    @Override
+    protected String getUpdateKeyName() {
+        WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID);
+        if (report.getCachePartitionFilter() != null && !"".equals(report.getCachePartitionFilter())) {
+            return report.getCachePartitionFilter() + "cache";
+        }
+        return null;
     }
 
     @NotNull
