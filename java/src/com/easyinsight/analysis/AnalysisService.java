@@ -1996,36 +1996,48 @@ public class AnalysisService {
         }
     }
 
-    private void createCachedAddon(long reportID, String name) {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM cached_addon_report_source WHERE REPORT_ID = ?");
-            queryStmt.setLong(1, reportID);
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                long existingID = rs.getLong(1);
-                new UserUploadService().deleteUserUpload(existingID);
-            }
-            CachedAddonDataSource cachedAddonDataSource = new CachedAddonDataSource();
-            cachedAddonDataSource.setFeedName("Cache of Addon " + name);
-            cachedAddonDataSource.setReportID(reportID);
-            cachedAddonDataSource.setVisible(false);
-            UploadPolicy policy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
-            cachedAddonDataSource.setUploadPolicy(policy);
+    private void createCachedAddon(final long reportID, final String name) {
+        final String userName = SecurityUtil.getUserName();
+        final long userID = SecurityUtil.getUserID();
+        final long accountID = SecurityUtil.getAccountID();
+        final int accountType = SecurityUtil.getAccountTier();
+        final boolean accountAdmin = SecurityUtil.isAccountAdmin();
+        new Thread(new Runnable() {
 
-            long id = cachedAddonDataSource.create(conn, null, null);
-            CachedAddonDataSource.runReport(conn, id);
-            /*PreparedStatement saveLoadStmt = conn.prepareStatement("INSERT INTO cache_to_rebuild (cache_time, data_source_id) values (?, ?)");
-            saveLoadStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-            saveLoadStmt.setLong(2, id);
-            saveLoadStmt.execute();
-            saveLoadStmt.close();*/
-        } catch (Exception e) {
-            LogClass.error(e);
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
+            public void run() {
+                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, 0, null);
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM cached_addon_report_source WHERE REPORT_ID = ?");
+                    queryStmt.setLong(1, reportID);
+                    ResultSet rs = queryStmt.executeQuery();
+                    if (rs.next()) {
+                        long existingID = rs.getLong(1);
+                        new UserUploadService().deleteUserUpload(existingID);
+                    }
+                    queryStmt.close();
+                    CachedAddonDataSource cachedAddonDataSource = new CachedAddonDataSource();
+                    cachedAddonDataSource.setFeedName("Cache of Addon " + name);
+                    cachedAddonDataSource.setReportID(reportID);
+                    cachedAddonDataSource.setVisible(false);
+                    UploadPolicy policy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
+                    cachedAddonDataSource.setUploadPolicy(policy);
+
+                    long id = cachedAddonDataSource.create(conn, null, null);
+                    CachedAddonDataSource.runReport(conn, id);
+                    /*PreparedStatement saveLoadStmt = conn.prepareStatement("INSERT INTO cache_to_rebuild (cache_time, data_source_id) values (?, ?)");
+                    saveLoadStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                    saveLoadStmt.setLong(2, id);
+                    saveLoadStmt.execute();
+                    saveLoadStmt.close();*/
+                } catch (Exception e) {
+                    LogClass.error(e);
+                } finally {
+                    conn.setAutoCommit(true);
+                    Database.closeConnection(conn);
+                }
+            }
+        }).start();
     }
 
     public void deleteAnalysisDefinition(long reportID) {
