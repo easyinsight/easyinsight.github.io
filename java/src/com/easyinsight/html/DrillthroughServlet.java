@@ -94,9 +94,9 @@ public class DrillthroughServlet extends HtmlServlet {
                 saveStmt.execute();
             }
             if (embedded) {
-                result.put("url", "/app/embed/drillThroughReport/" + urlKey);
+                result.put("url", "/app/html/report/drillthrough/" + urlKey + "/embed");
             } else {
-                result.put("url", "/app/html/drillThroughReport/" + urlKey);
+                result.put("url", "/app/html/report/drillthrough/" + urlKey);
             }
         } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
             DashboardDescriptor dashboardDescriptor = (DashboardDescriptor) descriptor;
@@ -120,9 +120,9 @@ public class DrillthroughServlet extends HtmlServlet {
                 saveStmt.execute();
             }
             if (embedded) {
-                result.put("url", "/app/embed/drillThroughDashboard/" + urlKey);
+                result.put("url", "/app/html/dashboard/drillthrough/" + urlKey + "/embed");
             } else {
-                result.put("url", "/app/html/drillThroughDashboard/" + urlKey);
+                result.put("url", "/app/html/dashboard/drillthrough/" + urlKey);
             }
         }
         response.setContentType("application/json");
