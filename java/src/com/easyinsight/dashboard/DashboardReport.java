@@ -199,7 +199,9 @@ public class DashboardReport extends DashboardElement {
         JSONObject reportDataJSON = new JSONObject();
         reportDataJSON.put("name", report.getName());
         reportDataJSON.put("id", report.getUrlKey());
-        reportDataJSON.put("metadata", reportDefinition.toJSON(new HTMLReportMetadata(), parentFilters));
+        HTMLReportMetadata md = new HTMLReportMetadata();
+        md.setEmbedded(filterHTMLMetadata.isEmbedded());
+        reportDataJSON.put("metadata", reportDefinition.toJSON(md, parentFilters));
         reportJSON.put("report", reportDataJSON);
         reportJSON.put("show_label", isShowLabel());
 

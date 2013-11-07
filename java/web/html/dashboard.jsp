@@ -20,32 +20,29 @@
     }
     try {
 
+        String drillthroughKey = request.getParameter("drillthroughKey");
+        List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
+        long dashboardID = -1;
         String savedDashboardIDString = request.getParameter("savedDashboardID");
         Dashboard dashboard;
         if (savedDashboardIDString != null) {
             DashboardInfo dashboardInfo = new DashboardService().retrieveFromDashboardLink(savedDashboardIDString);
             DashboardStackPositions positions = dashboardInfo.getDashboardStackPositions();
-            long dashboardID = dashboardInfo.getDashboardID();
+            dashboardID = dashboardInfo.getDashboardID();
             dashboard = new DashboardService().getDashboardView(dashboardID, positions);
-        } else {
-            String dashboardIDString = request.getParameter("dashboardID");
-            long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
-            dashboard = new DashboardService().getDashboard(dashboardID);
-        }
-
-
-        String drillthroughKey = request.getParameter("drillthroughKey");
-        List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
-        long dashboardID = -1;
-        if(drillthroughKey != null) {
+        } else if(drillthroughKey != null) {
             DrillThroughData drillThroughData = Utils.drillThroughFiltersForDashboard(drillthroughKey);
             drillthroughFilters = drillThroughData.getFilters();
             dashboardID = drillThroughData.getDashboardID();
             SecurityUtil.authorizeDashboard(dashboardID);
+            dashboard = new DashboardService().getDashboard(dashboardID);
         } else {
             String dashboardIDString = request.getParameter("dashboardID");
             dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
+            dashboard = new DashboardService().getDashboard(dashboardID);
         }
+
+
 
         FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, drillthroughKey, false);
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());

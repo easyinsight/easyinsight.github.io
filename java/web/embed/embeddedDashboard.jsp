@@ -5,6 +5,9 @@
 <%@ page import="com.easyinsight.analysis.*" %>
 <%@ page import="com.easyinsight.html.*" %>
 <%@ page import="com.easyinsight.dashboard.*" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -15,15 +18,37 @@
     }
     try {
 
-        String dashboardIDString = request.getParameter("dashboardID");
-        long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
 
-        Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
-
-        FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, false);
+        String drillthroughKey = request.getParameter("drillthroughKey");
+        List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
+        long dashboardID = -1;
+        String savedDashboardIDString = request.getParameter("savedDashboardID");
+        Dashboard dashboard;
+        if (savedDashboardIDString != null) {
+            DashboardInfo dashboardInfo = new DashboardService().retrieveFromDashboardLink(savedDashboardIDString);
+            DashboardStackPositions positions = dashboardInfo.getDashboardStackPositions();
+            dashboardID = dashboardInfo.getDashboardID();
+            dashboard = new DashboardService().getDashboardView(dashboardID, positions);
+        } else if(drillthroughKey != null) {
+            DrillThroughData drillThroughData = Utils.drillThroughFiltersForDashboard(drillthroughKey);
+            drillthroughFilters = drillThroughData.getFilters();
+            dashboardID = drillThroughData.getDashboardID();
+            SecurityUtil.authorizeDashboard(dashboardID);
+            dashboard = new DashboardService().getDashboard(dashboardID);
+        } else {
+            String dashboardIDString = request.getParameter("dashboardID");
+            dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
+            dashboard = new DashboardService().getDashboard(dashboardID);
+        }
+        dashboard.getFilters().addAll(drillthroughFilters);
+        FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, true);
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
         UIData uiData = Utils.createUIData();
 
+        JSONObject jo = dashboard.toJSON(filterHTMLMetadata);
+        if(drillthroughKey != null) {
+            jo.put("drillthroughID", drillthroughKey);
+        }
 %>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,7 +58,7 @@
     <jsp:include page="../html/bootstrapHeader.jsp"/>
     <jsp:include page="../html/reportDashboardHeader.jsp"/>
     <script type="text/javascript">
-        var dashboardJSON = <%= dashboard.toJSON(filterHTMLMetadata) %>;
+        var dashboardJSON = <%= jo %>;
         function afterRefresh() {
 
         }
