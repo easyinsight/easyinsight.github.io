@@ -686,6 +686,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         if (rollingFilterDefinition.getInterval() == MaterializedRollingFilterDefinition.ALL) {
                             continue;
                         }
+                    } else if (filter instanceof FlatDateFilter) {
+                        FlatDateFilter flatDateFilter = (FlatDateFilter) filter;
+                        if (flatDateFilter.getValue() == 0) {
+                            continue;
+                        }
                     }
                     if (filter.isTrendFilter()) {
                         if (!(this instanceof WSKPIDefinition)) {
@@ -1238,5 +1243,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
             String value = entry.getValue();
             // find the field matching this key, replace it
         }*/
+    }
+
+    public void multiField(MultiFieldFilterDefinition multiFieldFilterDefinition) {
     }
 }
