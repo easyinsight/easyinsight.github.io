@@ -24,8 +24,19 @@ public class FlatDateFilter extends FilterDefinition {
     @Column(name = "selected_value")
     private int value;
 
+    @Column(name="all_option")
+    private boolean allOption;
+
     @Transient
     private AnalysisItemResultMetadata cachedValues;
+
+    public boolean isAllOption() {
+        return allOption;
+    }
+
+    public void setAllOption(boolean allOption) {
+        this.allOption = allOption;
+    }
 
     public int getDateLevel() {
         return dateLevel;
