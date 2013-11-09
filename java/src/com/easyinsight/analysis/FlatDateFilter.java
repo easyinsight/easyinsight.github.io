@@ -17,7 +17,7 @@ import java.util.*;
 @Entity
 @Table(name = "flat_date_filter")
 @PrimaryKeyJoinColumn(name = "filter_id")
-public class flat date filter all optionFlatDateFilter extends FilterDefinition {
+public class FlatDateFilter extends FilterDefinition {
     @Column(name = "date_level")
     private int dateLevel;
 
