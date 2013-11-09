@@ -5,6 +5,7 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRetrievalState;
+import com.easyinsight.filtering.FlatDateFilterEditor;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
@@ -228,6 +229,7 @@ import mx.rpc.events.ResultEvent;
 		
 		private function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
+            window.detailClass = FlatDateFilterEditor;
 			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;
