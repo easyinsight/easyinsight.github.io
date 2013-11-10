@@ -326,7 +326,10 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 if (lastRefreshDate != null && lastRefreshDate.getTime() > 10000) {
                     ph.add(Calendar.YEAR, -1);
                 } else {
-                    ph.set(Calendar.YEAR, 2008);
+
+                    // bracket things at 1990 at the moment
+
+                    ph.set(Calendar.YEAR, 1990);
                 }
 
                 if (ph.getTime().after(yearMetadata.getEarliestDate())) {
@@ -334,6 +337,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 } else {
                     cal.setTime(yearMetadata.getEarliestDate());
                 }
+
                 boolean keepGoing = true;
                 do {
                     int year = cal.get(Calendar.YEAR);
@@ -391,12 +395,10 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 row.addValue(dataSourceItem.getKey(), reportRow.getValue(item.createAggregateKey()));
             }
             if (partitionKey != null) {
-                System.out.println("partition value = " + partitionValue);
                 row.addValue(partitionKey, partitionValue);
             }
         }
         if (partitionKey != null && partitionValue != null && update) {
-            System.out.println("updating for " + partitionValue);
             IDataStorage.updateData(dataSet, Arrays.asList((IWhere) new StringWhere(partitionKey, partitionValue)));
         } else {
             IDataStorage.insertData(dataSet);
