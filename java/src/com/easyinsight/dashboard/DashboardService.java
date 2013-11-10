@@ -371,7 +371,7 @@ public class DashboardService {
     public NewDashboardMetadata getDashboardEditorMetadata(long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            List<InsightDescriptor> reports = new AnalysisStorage().getInsightDescriptorsForDataSource(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), dataSourceID, conn);
+            List<InsightDescriptor> reports = new AnalysisStorage().getInsightDescriptorsForDataSource(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), dataSourceID, conn, true);
             NewDashboardMetadata dashboardEditorMetadata = new NewDashboardMetadata();
             dashboardEditorMetadata.setAvailableReports(reports);
             Feed feed = FeedRegistry.instance().getFeed(dataSourceID, conn);
@@ -755,9 +755,9 @@ public class DashboardService {
             }
         }
         dashboard.visit(new AnalysisItemFilterVisitor(feed, dlsFilters, conn));
-        /*FilterVisitor filterVisitor = new FilterVisitor(dashboard.getDataSourceID(), dashboardID);
+        FilterVisitor filterVisitor = new FilterVisitor(dashboard.getDataSourceID(), dashboardID);
         dashboard.visit(filterVisitor);
-        filterVisitor.done();*/
+        filterVisitor.done();
         if (dashboardStackPositions != null) {
             String key = "d";
             Map<String, FilterDefinition> filters = dashboardStackPositions.getFilterMap().get(key);
@@ -838,12 +838,12 @@ public class DashboardService {
         }
 
         public void done() {
-            for (Map.Entry<AnalysisItem, List<FilterValueDefinition>> entry : valueFilters.entrySet()) {
+            /*for (Map.Entry<AnalysisItem, List<FilterValueDefinition>> entry : valueFilters.entrySet()) {
                 AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(dataSourceID, entry.getKey(), 0, 0, dashboardID);
                 for (FilterValueDefinition filterDefinition : entry.getValue()) {
                     filterDefinition.setCachedValues(metadata);
                 }
-            }
+            }*/
             for (Map.Entry<AnalysisItem, List<FlatDateFilter>> entry : flatDateFilters.entrySet()) {
                 AnalysisDateDimensionResultMetadata metadata = (AnalysisDateDimensionResultMetadata) new DataService().getAnalysisItemMetadata(dataSourceID, entry.getKey(), 0, 0, dashboardID);
                 metadata.setLatestDate(new Date());
@@ -857,14 +857,15 @@ public class DashboardService {
             if (dashboardElement instanceof DashboardStack) {
                 DashboardStack dashboardStack = (DashboardStack) dashboardElement;
                 for (FilterDefinition filter : dashboardStack.getFilters()) {
-                    if (filter instanceof FilterValueDefinition) {
+                    /*if (filter instanceof FilterValueDefinition) {
                         List<FilterValueDefinition> filters = valueFilters.get(filter.getField());
                         if (filters == null) {
                             filters = new ArrayList<FilterValueDefinition>();
                             valueFilters.put(filter.getField(), filters);
                         }
                         filters.add((FilterValueDefinition) filter);
-                    } else if (filter instanceof FlatDateFilter) {
+                    } else*/
+                    if (filter instanceof FlatDateFilter) {
                         List<FlatDateFilter> filters = flatDateFilters.get(filter.getField());
                         if (filters == null) {
                             filters = new ArrayList<FlatDateFilter>();
