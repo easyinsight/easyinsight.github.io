@@ -267,7 +267,7 @@ public class NewMultiValueFilter extends HBox implements IFilter {
             selectedValue = filterObj as String;
         }
         var existingState:String = comboBox.selectedItem as String;*/
-        var str:String = tt = (!_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
+        var str:String = (!_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
             if (a == "") return "[ No Value ]";
 
             return a.toString();
