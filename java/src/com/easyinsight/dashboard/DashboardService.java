@@ -126,38 +126,68 @@ public class DashboardService {
     }
 
     public DashboardInfo getConfigurationForReport(String urlKey) {
-        DashboardInfo dashboardInfo = new DashboardInfo();
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement ps = conn.prepareStatement("SELECT saved_configuration.saved_configuration_id, saved_configuration.configuration_name, " +
-                    "saved_configuration.dashboard_state_id, dashboard_state.report_id, analysis.title, analysis.url_key, analysis.report_type, analysis.data_feed_id FROM " +
-                    "saved_configuration, dashboard_state, analysis WHERE saved_configuration.url_key = ? AND saved_configuration.dashboard_state_id = dashboard_state.dashboard_state_id AND " +
-                    "dashboard_state.report_id = analysis.analysis_id");
-            ps.setString(1, urlKey);
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            SavedConfiguration savedConfiguration = new SavedConfiguration();
-            savedConfiguration.setId(rs.getLong(1));
-            savedConfiguration.setName(rs.getString(2));
-            savedConfiguration.setUrlKey(urlKey);
-            long stateID = rs.getLong(3);
-            long reportID = rs.getLong(4);
-            String reportName = rs.getString(5);
-            String reportURLKey = rs.getString(6);
-            int reportType = rs.getInt(7);
-            long dataSourceID = rs.getLong(8);
-            dashboardInfo.setReport(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, reportURLKey, 0, false));
-            DashboardStackPositions positions = new DashboardStackPositions();
-            positions.retrieve(conn, stateID);
-            savedConfiguration.setDashboardStackPositions(positions);
-            dashboardInfo.setSavedConfiguration(savedConfiguration);
-            return dashboardInfo;
+            return getConfigurationForReport(urlKey, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public DashboardInfo getConfigurationForReport(long configurationID, EIConnection conn) throws SQLException {
+        DashboardInfo dashboardInfo = new DashboardInfo();
+        PreparedStatement ps = conn.prepareStatement("SELECT saved_configuration.saved_configuration_id, saved_configuration.configuration_name, " +
+                "saved_configuration.dashboard_state_id, dashboard_state.report_id, analysis.title, analysis.url_key, analysis.report_type, analysis.data_feed_id FROM " +
+                "saved_configuration, dashboard_state, analysis WHERE saved_configuration.saved_configuration_id = ? AND saved_configuration.dashboard_state_id = dashboard_state.dashboard_state_id AND " +
+                "dashboard_state.report_id = analysis.analysis_id");
+        ps.setLong(1, configurationID);
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        SavedConfiguration savedConfiguration = new SavedConfiguration();
+        savedConfiguration.setId(rs.getLong(1));
+        savedConfiguration.setName(rs.getString(2));
+        long stateID = rs.getLong(3);
+        long reportID = rs.getLong(4);
+        String reportName = rs.getString(5);
+        String reportURLKey = rs.getString(6);
+        int reportType = rs.getInt(7);
+        long dataSourceID = rs.getLong(8);
+        dashboardInfo.setReport(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, reportURLKey, 0, false));
+        DashboardStackPositions positions = new DashboardStackPositions();
+        positions.retrieve(conn, stateID);
+        savedConfiguration.setDashboardStackPositions(positions);
+        dashboardInfo.setSavedConfiguration(savedConfiguration);
+        return dashboardInfo;
+    }
+
+    public DashboardInfo getConfigurationForReport(String urlKey, EIConnection conn) throws SQLException {
+        DashboardInfo dashboardInfo = new DashboardInfo();
+        PreparedStatement ps = conn.prepareStatement("SELECT saved_configuration.saved_configuration_id, saved_configuration.configuration_name, " +
+                "saved_configuration.dashboard_state_id, dashboard_state.report_id, analysis.title, analysis.url_key, analysis.report_type, analysis.data_feed_id FROM " +
+                "saved_configuration, dashboard_state, analysis WHERE saved_configuration.url_key = ? AND saved_configuration.dashboard_state_id = dashboard_state.dashboard_state_id AND " +
+                "dashboard_state.report_id = analysis.analysis_id");
+        ps.setString(1, urlKey);
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        SavedConfiguration savedConfiguration = new SavedConfiguration();
+        savedConfiguration.setId(rs.getLong(1));
+        savedConfiguration.setName(rs.getString(2));
+        savedConfiguration.setUrlKey(urlKey);
+        long stateID = rs.getLong(3);
+        long reportID = rs.getLong(4);
+        String reportName = rs.getString(5);
+        String reportURLKey = rs.getString(6);
+        int reportType = rs.getInt(7);
+        long dataSourceID = rs.getLong(8);
+        dashboardInfo.setReport(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, reportURLKey, 0, false));
+        DashboardStackPositions positions = new DashboardStackPositions();
+        positions.retrieve(conn, stateID);
+        savedConfiguration.setDashboardStackPositions(positions);
+        dashboardInfo.setSavedConfiguration(savedConfiguration);
+        return dashboardInfo;
     }
 
     public SavedConfiguration saveConfigurationForDashboard(SavedConfiguration savedConfiguration, long dashboardID) {
@@ -513,7 +543,7 @@ public class DashboardService {
             /*if (dashboardCache != null) {
                 dashboardCache.remove(cacheKey);
             }*/
-            //MemCachedManager.delete("dashboard" + dashboard.getId());
+            MemCachedManager.delete("dashboard" + dashboard.getId());
 
             Set<Long> reportIDs = dashboard.containedReports();
             EIConnection conn = Database.instance().getConnection();
@@ -725,9 +755,9 @@ public class DashboardService {
             }
         }
         dashboard.visit(new AnalysisItemFilterVisitor(feed, dlsFilters, conn));
-        FilterVisitor filterVisitor = new FilterVisitor(dashboard.getDataSourceID(), dashboardID);
+        /*FilterVisitor filterVisitor = new FilterVisitor(dashboard.getDataSourceID(), dashboardID);
         dashboard.visit(filterVisitor);
-        filterVisitor.done();
+        filterVisitor.done();*/
         if (dashboardStackPositions != null) {
             String key = "d";
             Map<String, FilterDefinition> filters = dashboardStackPositions.getFilterMap().get(key);

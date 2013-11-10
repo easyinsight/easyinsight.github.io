@@ -297,6 +297,8 @@ public class TransformContainer extends HBox
             filter = new MultiFlatDateFilter(_feedID,  filterDefinition.field, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.MONTH_CUTOFF) {
             filter = new MonthCutoffFilter(_feedID,  filterDefinition.field,  _reportID, _dashboardID);
+        /*} else if (filterDefinition.getType() == FilterDefinition.MULTI_FIELD) {
+            filter = new MultiFieldFilter(_feedID, _reportID, _dashboardID, _report, _dashboard, _retrievalState, filterMetadata);*/
         } else {
             Alert.show("unknown filter type = " + filterDefinition.getType());
         }
@@ -392,7 +394,13 @@ public class TransformContainer extends HBox
             analysisFilter.availableItems.addItem(event.analysisItem);
             analysisFilter.toggleEnabled = true;
             addFilterDefinition(analysisFilter);
-        }
+        } /*else if (event.filterType == NewFilterEvent.MULTI_FIELD_CHOICE_FILTER) {
+            var multiFieldFilter:MultiFieldFilterDefinition = new MultiFieldFilterDefinition();
+            multiFieldFilter.field = event.analysisItem;
+            multiFieldFilter.availableItems = new ArrayCollection();
+            multiFieldFilter.toggleEnabled = true;
+            addFilterDefinition(multiFieldFilter);
+        }*/
     }
 
     public function createNewFilter(analysisItem:AnalysisItem, stageX:int, stageY:int):void {
@@ -553,6 +561,23 @@ public class TransformContainer extends HBox
         }
     }
 
+    private var hiddenButAvailableFilters:ArrayCollection = new ArrayCollection();
+
+    private var showingHidden:Boolean = false;
+
+    public function toggleHiddenButAvailableFilters():void {
+        if (showingHidden) {
+            for each (var filter:IFilter in hiddenButAvailableFilters) {
+                filterTile.removeChild(filter as DisplayObject);
+            }
+        } else {
+            for each (var filter:IFilter in hiddenButAvailableFilters) {
+                filterTile.addChild(filter as DisplayObject);
+            }
+        }
+        showingHidden = !showingHidden;
+    }
+
     public function commandFilterAdd(filter:IFilter):void {
         if (noFilters) {
             noFilters = false;
@@ -563,6 +588,8 @@ public class TransformContainer extends HBox
         filter.addEventListener(FilterUpdatedEvent.FILTER_UPDATED, filterUpdated);
         filter.addEventListener(FilterDeletionEvent.DELETED_FILTER, filterDeleted);
         var roleVisible:Boolean = _role == 0 || _role <= filter.filterDefinition.minimumRole;
+
+        // http://www.carrier-data.net/GPSWeb/Modules/Account/SmartelLogin.aspx
         if (!_reportView || (filter.filterDefinition.showOnReportView && roleVisible)) {
             if (_reportView && filter.filterDefinition != null && filter.filterDefinition.section != 0) {
                 var section:VBox = sectionMap[String(filter.filterDefinition.section)];
@@ -574,6 +601,10 @@ public class TransformContainer extends HBox
                 section.addChild(filter as DisplayObject)
             } else {
                 filterTile.addChild(filter as DisplayObject);
+            }
+        } else {
+            if (!filter.filterDefinition.showOnReportView && roleVisible) {
+                hiddenButAvailableFilters.addItem(filter);
             }
         }
         if (_loadingFromReport) {
@@ -700,6 +731,8 @@ public class TransformContainer extends HBox
                     changed = FlatDateFilter(filter).updateState() || changed;
                 } else if (filter is MultiFlatDateFilter) {
                     changed = MultiFlatDateFilter(filter).updateState() || changed;
+                } else if (filter is NewMultiValueFilter) {
+                    changed = NewMultiValueFilter(filter).updateState() || changed;
                 }
             }
         }
