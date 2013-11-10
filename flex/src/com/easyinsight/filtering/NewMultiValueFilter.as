@@ -217,11 +217,16 @@ public class NewMultiValueFilter extends HBox implements IFilter {
         } else {
             filterValues.label = ""
         }
-        filterValues.toolTip = !_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
+        tt = (!_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
             if (a == "") return "[ No Value ]";
+
             return a.toString();
-        }).sort().join(", ");
+        }).sort().join(", "));
+
+        filterValues.toolTip = tt;
     }
+
+    private var tt:String;
 
     public function toInclusive(filterValues:ArrayCollection):void {
         _filterDefinition.inclusive = true;
@@ -250,6 +255,32 @@ public class NewMultiValueFilter extends HBox implements IFilter {
             _filterDefinition.filteredValues = new ArrayCollection();
         }
         _filterDefinition.filteredValues.addItem(value);
+    }
+
+    public function updateState():Boolean {
+        /*var selectedValue:String;
+
+        var filterObj:Object = _filterDefinition.filteredValues.getItemAt(0);
+        if (filterObj is Value) {
+            selectedValue = String(filterObj.getValue());
+        } else {
+            selectedValue = filterObj as String;
+        }
+        var existingState:String = comboBox.selectedItem as String;*/
+        var str:String = tt = (!_filterDefinition || !_filterDefinition.filteredValues ? "" : _filterDefinition.filteredValues.toArray().map(function (a:Object, b:int, c:int):String {
+            if (a == "") return "[ No Value ]";
+
+            return a.toString();
+        }).sort().join(", "));
+        var changed:Boolean = false;
+        if (tt != str) {
+            changed = true;
+            updateFilterLabel();
+        }
+
+        //return existingState != selectedValue;
+
+        return changed;
     }
 
     public function get inclusive():Boolean {
