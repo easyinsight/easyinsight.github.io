@@ -68,6 +68,21 @@
             filterFields = availables;
         }
 
+        private function configureExplicitFields():void {
+            var window:MultiFieldPickWindow = new MultiFieldPickWindow();
+            window.selectedItems = filterFields;
+            window.analysisItems = allFields;
+            window.addEventListener(MultiFieldEvent.MULTI_FIELD_UPDATE, onMultiFieldUpdate, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+
+
+        private function onMultiFieldUpdate(event:MultiFieldEvent):void {
+            filterFields = event.fields;
+        }
+
         public function set feedID(feedID:int):void {
         }
 
@@ -79,33 +94,14 @@
                 allFields.addItem(wrapper.analysisItem);
             }
         }
-
-        /*private function bulkAddFields():void {
-         var map:Object = new Object();
-         for each (var existing:AnalysisItem in analysisItemFilter.availableItems) {
-         map[existing.qualifiedName()] = existing;
-         }
-         for each (var field:AnalysisItem in allFields) {
-         if (analysisItemFilter.targetItem.hasType(AnalysisItemTypes.MEASURE)) {
-         if (field.hasType(AnalysisItemTypes.MEASURE) && map[field.qualifiedName()] == null) {
-         filterFields.addItem(field);
-         }
-         } else {
-         if ((field.hasType(AnalysisItemTypes.DIMENSION) || field.hasType(AnalysisItemTypes.DATE)) && map[field.qualifiedName()] == null) {
-         filterFields.addItem(field);
-         }
-         }
-         }
-         }*/
         ]]></mx:Script>
+
     <mx:HBox>
-        <mx:Button label="Add Field..." click="addField()"/>
-        <!--<mx:Button label="Bulk Add Fields..." click="bulkAddFields()"/>-->
+        <mx:Button label="Configure Fields..." click="configureExplicitFields()" styleName="grayButton"/>
     </mx:HBox>
-    <mx:DataGrid dataProvider="{filterFields}" dragEnabled="true" dropEnabled="true" dragMoveEnabled="true">
+    <mx:DataGrid dataProvider="{filterFields}">
         <mx:columns>
             <util:EIDataGridColumn headerText="Field" dataField="display" width="400"/>
-            <util:EIDataGridColumn headerText="" itemRenderer="com.easyinsight.filtering.AnalysisItemFilterControls" width="50"/>
         </mx:columns>
     </mx:DataGrid>
 </mx:VBox>
