@@ -17,6 +17,8 @@ import com.easyinsight.users.Account;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.logging.SecurityLogger;
 import org.hibernate.Session;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -248,6 +250,28 @@ public class SecurityUtil {
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public static JSONObject getUserJSON(Connection conn) throws JSONException {
+        long userID = getUserID(false);
+        JSONObject jo = new JSONObject();
+        if(userID > 0) {
+            Session session = Database.instance().createSession(conn);
+
+            try {
+                User u = (User) session.createQuery("from User where user_id = ?").setLong(0, userID).list().get(0);
+                jo.put("name", u.getUserName());
+                jo.put("designer", u.isAnalyst());
+            } finally {
+                session.close();
+            }
+
+        } else {
+            jo.put("name", (Object) null);
+            jo.put("designer", false);
+        }
+
+        return jo;
     }
 
     public static void authorizeKPI(long kpiID) {

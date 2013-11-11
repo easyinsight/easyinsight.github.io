@@ -397,7 +397,7 @@ $(function () {
         var saveStack;
 
 
-        $("#configuration-dropdown").html(configurationDropdownTemplate(dashboardJSON))
+        $("#configuration-dropdown").html(configurationDropdownTemplate({"dashboard": dashboardJSON, "user": userJSON}))
 
         if (Modernizr.localstorage && dashboardJSON["local_storage"] && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+$/)) {
             if (typeof(localStorage[dashboardKey]) != "undefined") {
