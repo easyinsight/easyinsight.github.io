@@ -592,6 +592,11 @@ public class Dashboard implements Cloneable, Serializable {
         dashboard.put("key", getUrlKey());
         dashboard.put("local_storage", enableLocalStorage);
 
+        JSONArray configurations = new JSONArray();
+        for(SavedConfiguration sc : getConfigurations()) {
+            configurations.put(sc.toJSON());
+        }
+        dashboard.put("configurations", configurations);
         JSONObject styles = new JSONObject();
         styles.put("main_stack_start", String.format("#%06X", stackFill1Start & 0xFFFFFF));
         styles.put("alternative_stack_start", String.format("#%06X", stackFill2Start & 0xFFFFFF));

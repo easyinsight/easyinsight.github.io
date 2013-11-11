@@ -8,6 +8,7 @@ var textTemplate;
 var reportTemplate;
 
 var gaugeTemplate;
+var configurationDropdownTemplate;
 
 var dashboard;
 var email_modal;
@@ -382,6 +383,7 @@ $(function () {
         gaugeTemplate = _.template($("#gauge_template", s).html());
         email_modal = _.template($("#email_modal", s).html());
         multi_value_results = _.template($("#multi_value_results_template", s).html());
+        configurationDropdownTemplate = _.template($("#configuration_dropdown_template", s).html());
 
         var filterMap = _.reduce(flattenFilters(dashboardJSON["filters"]), function (m, i) {
             m["filter" + i.id] = {"filter": i, "parent": null };
@@ -393,6 +395,10 @@ $(function () {
         var dashboardKey = (dashboardJSON["id"] != -1) ? ("dashboard " + dashboardJSON["id"]) : ("report " + dashboardJSON["base"]["id"]);
         var saveFilter;
         var saveStack;
+
+
+        $("#configuration-dropdown").html(configurationDropdownTemplate(dashboardJSON))
+
         if (Modernizr.localstorage && dashboardJSON["local_storage"] && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+$/)) {
             if (typeof(localStorage[dashboardKey]) != "undefined") {
                 var cur;
@@ -438,6 +444,8 @@ $(function () {
             saveStack = function (k) {
             };
         }
+
+
         $("#base").append(dashboard(dashboardJSON));
 
         $(".dashboardStackNav").css("background-color", dashboardJSON["styles"]["alternative_stack_start"])
@@ -796,8 +804,13 @@ $(function () {
 //            });
         }
 
-        $(".value-search-btn").click(filterText)
-        $(".value-search-input").change(filterText)
+        $(".value-search-btn").click(filterText);
+        $(".value-search-input").change(filterText);
+
+        $(".delete-config").click(function(e) {
+            e.preventDefault();
+            window.location.href = $(e.target).parent().attr("href") + "/delete";
+        })
 
         saveConfiguration = function () {
             var c = {"filters": _.map(filterMap, function (e, k) {
