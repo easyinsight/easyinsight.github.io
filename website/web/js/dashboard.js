@@ -697,7 +697,7 @@ $(function () {
             var q = $(e.target).parent().parent();
             var k = q.attr("id");
             var s = stackMap[k];
-
+            s.selected = selectedIndex(k);
             saveStack(k);
             for (var f in filterMap) {
                 filterMap[f].filter.override = false;
@@ -812,10 +812,14 @@ $(function () {
             window.location.href = $(e.target).parent().attr("href") + "/delete";
         })
 
-        saveConfiguration = function () {
+        saveConfiguration = function (name) {
+            console.log(stackMap)
             var c = {"filters": _.map(filterMap, function (e, k) {
                             return toFilterString(e.filter, true);
-                        }), "stacks": stackMap }
+                        }), "stacks": _.reduce(stackMap, function(m, e, i) {
+                m[i] = e.selected;
+                return m;
+            }, {}), "name": name }
             console.log(c);
             $.ajax({ url: "/app/html/dashboard/" + dashboardJSON["key"] + "/config",
                 contentType: "application/json; charset=UTF-8",

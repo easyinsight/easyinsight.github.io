@@ -35,7 +35,7 @@ public class DeleteConfigurationServlet extends HttpServlet {
                 e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
         }
-        Pattern p = Pattern.compile("^.*/html/dashboard/([A-Za-z0-9]+)/config/([A-Za-z0-9]+)/delete$");
+        Pattern p = Pattern.compile("^.*/html/dashboard/([A-Za-z0-9]+)/config/([A-Za-z0-9]+)$");
         String referer = request.getHeader("Referer");
         String redirect = null;
         Matcher m = p.matcher(referer);
