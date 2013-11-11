@@ -42,6 +42,7 @@
         <mapping class="com.easyinsight.sequence.Sequence"/>
         <mapping class="com.easyinsight.sequence.DateSequence"/>
         <mapping class="com.easyinsight.analysis.AnalysisItem"/>
+        <mapping class="com.easyinsight.analysis.AnalysisItemHandle"/>
         <mapping class="com.easyinsight.analysis.AnalysisDimension"/>
         <mapping class="com.easyinsight.analysis.AnalysisRangeDimension"/>
         <mapping class="com.easyinsight.analysis.AnalysisCoordinate"/>
@@ -91,6 +92,7 @@
         <mapping class="com.easyinsight.analysis.OrFilter"/>
         <mapping class="com.easyinsight.analysis.CustomRollingInterval"/>
         <mapping class="com.easyinsight.analysis.AnalysisItemFilterDefinition"/>
+        <mapping class="com.easyinsight.analysis.MultiFieldFilterDefinition"/>
         <mapping class="com.easyinsight.analysis.MultiFlatDateFilter"/>
         <mapping class="com.easyinsight.analysis.DateLevelWrapper"/>
         <mapping class="com.easyinsight.analysis.OrderedFilterDefinition"/>

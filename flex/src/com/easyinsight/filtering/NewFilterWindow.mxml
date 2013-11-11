@@ -7,6 +7,7 @@
                 <mx:HBox creationComplete="PopUpUtil.centerPopUp(this)">
                     <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
                     <mx:RadioButton label="Create a Field Choice Filter" groupName="typeGroup" value="fieldChoiceFilter"/>
+                    <mx:RadioButton label="Create a Multi Field Choice Filter" groupName="typeGroup" value="multiFieldChoiceFilter"/>
                 </mx:HBox>
             </mx:AddChild>
         </mx:State>
@@ -78,16 +79,26 @@
             }
         }
 
+        private function newMultipleFieldChoiceFilter():void {
+            /*var f:AnalysisItemWrapper = aFieldBox.selectedItem as AnalysisItemWrapper;
+            if (f != null) {*/
+                dispatchEvent(new NewFilterEvent(NewFilterEvent.MULTI_FIELD_CHOICE_FILTER));
+                this.close();
+            //}
+        }
+
         [Bindable]
         private var stackIndex:int = 0;
 
         private function updateStack():void {
             if (typeGroup.selectedValue == "fieldFilter") {
                 stackIndex = 0;
-            } else if (typeGroup.selectedValue == "namedRef") {
+            } else if (typeGroup.selectedValue == "multiFieldChoiceFilter") {
                 stackIndex = 3;
-            } else if (typeGroup.selectedValue == "trendFilter") {
+            } else if (typeGroup.selectedValue == "namedRef") {
                 stackIndex = 4;
+            } else if (typeGroup.selectedValue == "trendFilter") {
+                stackIndex = 5;
             } else if (typeGroup.selectedValue == "fieldChoiceFilter") {
                 stackIndex = 2;
             } else {
@@ -129,7 +140,13 @@
                 <mx:Label text="Choose a field for the filter:"/>
                 <util:TextInputWithArrow id="aFieldBox" width="300" dataProvider="{availableFields}"/>
                 <mx:HBox>
-                    <util:SaveButton label="Create a new Field Choice Filter" click="newFieldChoiceFilter()"/>
+                    <util:SaveButton label="Create a new Single Field Choice Filter" click="newFieldChoiceFilter()"/>
+                    <util:CancelButton label="Cancel" click="this.close()"/>
+                </mx:HBox>
+            </mx:VBox>
+            <mx:VBox id="multiFieldChoiceFilterbox">
+                <mx:HBox>
+                    <util:SaveButton label="Create a new Multiple Field Choice Filter" click="newMultipleFieldChoiceFilter()"/>
                     <util:CancelButton label="Cancel" click="this.close()"/>
                 </mx:HBox>
             </mx:VBox>
