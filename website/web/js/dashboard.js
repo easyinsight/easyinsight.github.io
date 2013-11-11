@@ -8,6 +8,7 @@ var textTemplate;
 var reportTemplate;
 
 var gaugeTemplate;
+var configurationDropdownTemplate;
 
 var dashboard;
 var email_modal;
@@ -382,6 +383,7 @@ $(function () {
         gaugeTemplate = _.template($("#gauge_template", s).html());
         email_modal = _.template($("#email_modal", s).html());
         multi_value_results = _.template($("#multi_value_results_template", s).html());
+        configurationDropdownTemplate = _.template($("#configuration_dropdown_template", s).html());
 
         var filterMap = _.reduce(flattenFilters(dashboardJSON["filters"]), function (m, i) {
             m["filter" + i.id] = {"filter": i, "parent": null };
@@ -393,6 +395,10 @@ $(function () {
         var dashboardKey = (dashboardJSON["id"] != -1) ? ("dashboard " + dashboardJSON["id"]) : ("report " + dashboardJSON["base"]["id"]);
         var saveFilter;
         var saveStack;
+
+
+        $("#configuration-dropdown").html(configurationDropdownTemplate(dashboardJSON))
+
         if (Modernizr.localstorage && dashboardJSON["local_storage"] && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+$/)) {
             if (typeof(localStorage[dashboardKey]) != "undefined") {
                 var cur;
@@ -438,6 +444,8 @@ $(function () {
             saveStack = function (k) {
             };
         }
+
+
         $("#base").append(dashboard(dashboardJSON));
 
         $(".dashboardStackNav").css("background-color", dashboardJSON["styles"]["alternative_stack_start"])
@@ -689,7 +697,7 @@ $(function () {
             var q = $(e.target).parent().parent();
             var k = q.attr("id");
             var s = stackMap[k];
-
+            s.selected = selectedIndex(k);
             saveStack(k);
             for (var f in filterMap) {
                 filterMap[f].filter.override = false;
@@ -796,13 +804,22 @@ $(function () {
 //            });
         }
 
-        $(".value-search-btn").click(filterText)
-        $(".value-search-input").change(filterText)
+        $(".value-search-btn").click(filterText);
+        $(".value-search-input").change(filterText);
 
-        saveConfiguration = function () {
+        $(".delete-config").click(function(e) {
+            e.preventDefault();
+            window.location.href = $(e.target).parent().attr("href") + "/delete";
+        })
+
+        saveConfiguration = function (name) {
+            console.log(stackMap)
             var c = {"filters": _.map(filterMap, function (e, k) {
                             return toFilterString(e.filter, true);
-                        }), "stacks": stackMap }
+                        }), "stacks": _.reduce(stackMap, function(m, e, i) {
+                m[i] = e.selected;
+                return m;
+            }, {}), "name": name }
             console.log(c);
             $.ajax({ url: "/app/html/dashboard/" + dashboardJSON["key"] + "/config",
                 contentType: "application/json; charset=UTF-8",

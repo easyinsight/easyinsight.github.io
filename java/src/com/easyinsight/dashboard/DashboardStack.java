@@ -367,7 +367,7 @@ public class DashboardStack extends DashboardElement {
 
     public JSONObject toJSON(FilterHTMLMetadata metadata, List<FilterDefinition> parentFilters) throws JSONException {
         JSONObject stack = super.toJSON(metadata, parentFilters);
-        stack.put("id", getElementID());
+        stack.put("id", getUrlKey());
         stack.put("type", "stack");
         stack.put("selected", defaultIndex);
         if (getOverridenFilters() != null) {
