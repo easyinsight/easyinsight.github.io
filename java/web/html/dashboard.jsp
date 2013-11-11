@@ -9,6 +9,9 @@
 <%@ page import="com.easyinsight.html.*" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="com.easyinsight.dashboard.*" %>
+<%@ page import="java.sql.Connection" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -66,6 +69,14 @@
         }
         jo.put("configuration_name", selectedConfiguration);
         jo.put("configuration_key", configurationKey);
+        EIConnection c = Database.instance().getConnection();
+        JSONObject userObject = new JSONObject();
+        try {
+            userObject = SecurityUtil.getUserJSON(c);
+        } finally {
+            c.close();
+        }
+
 %>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,6 +87,7 @@
     <jsp:include page="reportDashboardHeader.jsp"/>
     <script type="text/javascript">
         var dashboardJSON = <%= jo %>;
+        var userJSON = <%= userObject %>;
         function afterRefresh() {
 
         }

@@ -2,18 +2,18 @@
 
     <script type="text/template" id="configuration_dropdown_template">
         <a class="reportControl dropdown-toggle" data-toggle="dropdown" href="#">
-            <% if(typeof(configuration_name) != "undefined") { %> <%- configuration_name %> <% } else { %>Configurations <% } %>
+            <% if(typeof(dashboard.configuration_name) != "undefined") { %> <%- dashboard.configuration_name %> <% } else { %>Configurations <% } %>
             <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
 
-            <% _.each(configurations, function(e, i, l) { %>
+            <% _.each(dashboard.configurations, function(e, i, l) { %>
                 <li>
-                    <a href="/app/html/dashboard/<%- key %>/config/<%- e.url %>"><span class="glyphicon<% if(typeof(configuration_key) != "undefined" && configuration_key == e.url) { %> glyphicon-ok<% } %>"></span> <%- e.name %> <span style="float:right;" class="delete-config glyphicon glyphicon-remove"></span></a></div>
+                    <a href="/app/html/dashboard/<%- dashboard.key %>/config/<%- e.url %>"><span class="glyphicon<% if(typeof(dashboard.configuration_key) != "undefined" && dashboard.configuration_key == e.url) { %> glyphicon-ok<% } %>"></span> <%- e.name %> <% if(typeof(user.designer) != "undefined" && user.designer) { %><span style="float:right;" class="delete-config glyphicon glyphicon-remove"></span> <% } %></a></div>
                 </li>
             <% }); %>
             <li>
-                <a class="restore_default_config" href="/app/html/dashboard/<%- key %>">Restore Default</a>
+                <a class="restore_default_config" href="/app/html/dashboard/<%- dashboard.key %>">Restore Default</a>
             </li>
         </ul>
     </script>
