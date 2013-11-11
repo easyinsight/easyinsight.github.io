@@ -126,38 +126,68 @@ public class DashboardService {
     }
 
     public DashboardInfo getConfigurationForReport(String urlKey) {
-        DashboardInfo dashboardInfo = new DashboardInfo();
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement ps = conn.prepareStatement("SELECT saved_configuration.saved_configuration_id, saved_configuration.configuration_name, " +
-                    "saved_configuration.dashboard_state_id, dashboard_state.report_id, analysis.title, analysis.url_key, analysis.report_type, analysis.data_feed_id FROM " +
-                    "saved_configuration, dashboard_state, analysis WHERE saved_configuration.url_key = ? AND saved_configuration.dashboard_state_id = dashboard_state.dashboard_state_id AND " +
-                    "dashboard_state.report_id = analysis.analysis_id");
-            ps.setString(1, urlKey);
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            SavedConfiguration savedConfiguration = new SavedConfiguration();
-            savedConfiguration.setId(rs.getLong(1));
-            savedConfiguration.setName(rs.getString(2));
-            savedConfiguration.setUrlKey(urlKey);
-            long stateID = rs.getLong(3);
-            long reportID = rs.getLong(4);
-            String reportName = rs.getString(5);
-            String reportURLKey = rs.getString(6);
-            int reportType = rs.getInt(7);
-            long dataSourceID = rs.getLong(8);
-            dashboardInfo.setReport(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, reportURLKey, 0, false));
-            DashboardStackPositions positions = new DashboardStackPositions();
-            positions.retrieve(conn, stateID);
-            savedConfiguration.setDashboardStackPositions(positions);
-            dashboardInfo.setSavedConfiguration(savedConfiguration);
-            return dashboardInfo;
+            return getConfigurationForReport(urlKey, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public DashboardInfo getConfigurationForReport(long configurationID, EIConnection conn) throws SQLException {
+        DashboardInfo dashboardInfo = new DashboardInfo();
+        PreparedStatement ps = conn.prepareStatement("SELECT saved_configuration.saved_configuration_id, saved_configuration.configuration_name, " +
+                "saved_configuration.dashboard_state_id, dashboard_state.report_id, analysis.title, analysis.url_key, analysis.report_type, analysis.data_feed_id FROM " +
+                "saved_configuration, dashboard_state, analysis WHERE saved_configuration.saved_configuration_id = ? AND saved_configuration.dashboard_state_id = dashboard_state.dashboard_state_id AND " +
+                "dashboard_state.report_id = analysis.analysis_id");
+        ps.setLong(1, configurationID);
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        SavedConfiguration savedConfiguration = new SavedConfiguration();
+        savedConfiguration.setId(rs.getLong(1));
+        savedConfiguration.setName(rs.getString(2));
+        long stateID = rs.getLong(3);
+        long reportID = rs.getLong(4);
+        String reportName = rs.getString(5);
+        String reportURLKey = rs.getString(6);
+        int reportType = rs.getInt(7);
+        long dataSourceID = rs.getLong(8);
+        dashboardInfo.setReport(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, reportURLKey, 0, false));
+        DashboardStackPositions positions = new DashboardStackPositions();
+        positions.retrieve(conn, stateID);
+        savedConfiguration.setDashboardStackPositions(positions);
+        dashboardInfo.setSavedConfiguration(savedConfiguration);
+        return dashboardInfo;
+    }
+
+    public DashboardInfo getConfigurationForReport(String urlKey, EIConnection conn) throws SQLException {
+        DashboardInfo dashboardInfo = new DashboardInfo();
+        PreparedStatement ps = conn.prepareStatement("SELECT saved_configuration.saved_configuration_id, saved_configuration.configuration_name, " +
+                "saved_configuration.dashboard_state_id, dashboard_state.report_id, analysis.title, analysis.url_key, analysis.report_type, analysis.data_feed_id FROM " +
+                "saved_configuration, dashboard_state, analysis WHERE saved_configuration.url_key = ? AND saved_configuration.dashboard_state_id = dashboard_state.dashboard_state_id AND " +
+                "dashboard_state.report_id = analysis.analysis_id");
+        ps.setString(1, urlKey);
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        SavedConfiguration savedConfiguration = new SavedConfiguration();
+        savedConfiguration.setId(rs.getLong(1));
+        savedConfiguration.setName(rs.getString(2));
+        savedConfiguration.setUrlKey(urlKey);
+        long stateID = rs.getLong(3);
+        long reportID = rs.getLong(4);
+        String reportName = rs.getString(5);
+        String reportURLKey = rs.getString(6);
+        int reportType = rs.getInt(7);
+        long dataSourceID = rs.getLong(8);
+        dashboardInfo.setReport(new InsightDescriptor(reportID, reportName, dataSourceID, reportType, reportURLKey, 0, false));
+        DashboardStackPositions positions = new DashboardStackPositions();
+        positions.retrieve(conn, stateID);
+        savedConfiguration.setDashboardStackPositions(positions);
+        dashboardInfo.setSavedConfiguration(savedConfiguration);
+        return dashboardInfo;
     }
 
     public SavedConfiguration saveConfigurationForDashboard(SavedConfiguration savedConfiguration, long dashboardID) {
@@ -513,7 +543,7 @@ public class DashboardService {
             /*if (dashboardCache != null) {
                 dashboardCache.remove(cacheKey);
             }*/
-            //MemCachedManager.delete("dashboard" + dashboard.getId());
+            MemCachedManager.delete("dashboard" + dashboard.getId());
 
             Set<Long> reportIDs = dashboard.containedReports();
             EIConnection conn = Database.instance().getConnection();
@@ -808,12 +838,12 @@ public class DashboardService {
         }
 
         public void done() {
-            for (Map.Entry<AnalysisItem, List<FilterValueDefinition>> entry : valueFilters.entrySet()) {
+            /*for (Map.Entry<AnalysisItem, List<FilterValueDefinition>> entry : valueFilters.entrySet()) {
                 AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(dataSourceID, entry.getKey(), 0, 0, dashboardID);
                 for (FilterValueDefinition filterDefinition : entry.getValue()) {
                     filterDefinition.setCachedValues(metadata);
                 }
-            }
+            }*/
             for (Map.Entry<AnalysisItem, List<FlatDateFilter>> entry : flatDateFilters.entrySet()) {
                 AnalysisDateDimensionResultMetadata metadata = (AnalysisDateDimensionResultMetadata) new DataService().getAnalysisItemMetadata(dataSourceID, entry.getKey(), 0, 0, dashboardID);
                 metadata.setLatestDate(new Date());
@@ -827,14 +857,15 @@ public class DashboardService {
             if (dashboardElement instanceof DashboardStack) {
                 DashboardStack dashboardStack = (DashboardStack) dashboardElement;
                 for (FilterDefinition filter : dashboardStack.getFilters()) {
-                    if (filter instanceof FilterValueDefinition) {
+                    /*if (filter instanceof FilterValueDefinition) {
                         List<FilterValueDefinition> filters = valueFilters.get(filter.getField());
                         if (filters == null) {
                             filters = new ArrayList<FilterValueDefinition>();
                             valueFilters.put(filter.getField(), filters);
                         }
                         filters.add((FilterValueDefinition) filter);
-                    } else if (filter instanceof FlatDateFilter) {
+                    } else*/
+                    if (filter instanceof FlatDateFilter) {
                         List<FlatDateFilter> filters = flatDateFilters.get(filter.getField());
                         if (filters == null) {
                             filters = new ArrayList<FlatDateFilter>();

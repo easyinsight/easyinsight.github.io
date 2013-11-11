@@ -247,6 +247,11 @@ public abstract class Feed implements Serializable {
                     if (rollingFilterDefinition.getInterval() == MaterializedRollingFilterDefinition.ALL) {
                         iter.remove();
                     }
+                } else if (filter instanceof FlatDateFilter) {
+                    FlatDateFilter flatDateFilter = (FlatDateFilter) filter;
+                    if (flatDateFilter.getValue() == 0) {
+                        iter.remove();
+                    }
                 }
             }
         }

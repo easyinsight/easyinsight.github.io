@@ -5,6 +5,7 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRetrievalState;
+import com.easyinsight.filtering.FlatDateFilterEditor;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
@@ -79,7 +80,11 @@ import mx.rpc.events.ResultEvent;
         }
 
         private function onDataChange(event:Event):void {
-            _filterDefinition.value = parseInt(comboBox.selectedItem as String);
+            if (comboBox.selectedItem == "All") {
+                _filterDefinition.value = 0;
+            } else {
+                _filterDefinition.value = parseInt(comboBox.selectedItem as String);
+            }
             if (_retrievalState != null) {
                 _retrievalState.updateFilter(_filterDefinition, filterMetadata);
             }
@@ -168,11 +173,18 @@ import mx.rpc.events.ResultEvent;
             if (!dp.contains(latestYear)) {
                 dp.addItem(latestYear);
             }
+            if (_filterDefinition.allOption) {
+                dp.addItemAt("All", 0);
+            }
             comboBox.dataProvider = dp;
             if (dp.getItemIndex(String(_filterDefinition.value)) != -1) {
                 comboBox.selectedItem = String(_filterDefinition.value);
             } else {
-                _filterDefinition.value = int(dp.getItemAt(0));
+                if (_filterDefinition.allOption) {
+                    _filterDefinition.value = 0;
+                } else {
+                    _filterDefinition.value = int(dp.getItemAt(0));
+                }
             }
 
             if (_filterEditable) {
@@ -217,6 +229,7 @@ import mx.rpc.events.ResultEvent;
 		
 		private function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
+            window.detailClass = FlatDateFilterEditor;
 			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;

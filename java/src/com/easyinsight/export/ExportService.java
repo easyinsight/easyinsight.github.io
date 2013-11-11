@@ -915,51 +915,8 @@ public class ExportService {
             }
         } else if (headerItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && value.type() == Value.DATE) {
             AnalysisDateDimension dateDim = (AnalysisDateDimension) headerItem;
-            DateFormat sdf = null;
-            if (explicitDateFormat != null) {
-                sdf = new SimpleDateFormat(explicitDateFormat);
-            } else {
-                if (dateDim.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
-                    sdf = new SimpleDateFormat("yyyy");
-                } else if (dateDim.getDateLevel() == AnalysisDateDimension.MONTH_FLAT) {
-                    sdf = new SimpleDateFormat("MMMM");
-                } else if (dateDim.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
-                    if (dateFormat == 0 || dateFormat == 3) {
-                        sdf = new SimpleDateFormat("MM/yyyy");
-                    } else if (dateFormat == 1) {
-                        sdf = new SimpleDateFormat("yyyy-MM");
-                    } else if (dateFormat == 2) {
-                        sdf = new SimpleDateFormat("MM-yyyy");
-                    } else if (dateFormat == 4) {
-                        sdf = new SimpleDateFormat("MM.yyyy");
-                    }
-                } else if (dateDim.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL ||
-                        dateDim.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
-                    if (dateFormat == 0) {
-                        sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm");
-                    } else if (dateFormat == 1) {
-                        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                    } else if (dateFormat == 2) {
-                        sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-                    } else if (dateFormat == 3) {
-                        sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                    } else if (dateFormat == 4) {
-                        sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-                    }
-                } else {
-                    if (dateFormat == 0) {
-                        sdf = new SimpleDateFormat("MM/dd/yyyy");
-                    } else if (dateFormat == 1) {
-                        sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    } else if (dateFormat == 2) {
-                        sdf = new SimpleDateFormat("dd-MM-yyyy");
-                    } else if (dateFormat == 3) {
-                        sdf = new SimpleDateFormat("dd/MM/yyyy");
-                    } else if (dateFormat == 4) {
-                        sdf = new SimpleDateFormat("dd.MM.yyyy");
-                    }
-                }
-            }
+            DateFormat sdf = getDateFormatForAccount(dateDim.getDateLevel(), dateDim.getOutputDateFormat(), dateFormat);
+
             if (sdf == null) {
                 throw new RuntimeException("No date format found.");
             }
@@ -995,6 +952,74 @@ public class ExportService {
             }
         }
         return valueString;
+    }
+
+    public @Nullable static DateFormat getDateFormat(int dateLevel, @Nullable String explicitDateFormat) {
+        long accountID = SecurityUtil.getAccountID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            ps.setLong(1, accountID);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            int format = rs.getInt(1);
+            ps.close();
+            return getDateFormatForAccount(dateLevel, explicitDateFormat, format);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static @Nullable DateFormat getDateFormatForAccount(int dateLevel, @Nullable String explicitDateFormat, int dateFormat) {
+        DateFormat sdf = null;
+        if (explicitDateFormat != null) {
+            sdf = new SimpleDateFormat(explicitDateFormat);
+        } else {
+            if (dateLevel == AnalysisDateDimension.YEAR_LEVEL) {
+                sdf = new SimpleDateFormat("yyyy");
+            } else if (dateLevel == AnalysisDateDimension.MONTH_FLAT) {
+                sdf = new SimpleDateFormat("MMMM");
+            } else if (dateLevel == AnalysisDateDimension.MONTH_LEVEL) {
+                if (dateFormat == 0 || dateFormat == 3) {
+                    sdf = new SimpleDateFormat("MM/yyyy");
+                } else if (dateFormat == 1) {
+                    sdf = new SimpleDateFormat("yyyy-MM");
+                } else if (dateFormat == 2) {
+                    sdf = new SimpleDateFormat("MM-yyyy");
+                } else if (dateFormat == 4) {
+                    sdf = new SimpleDateFormat("MM.yyyy");
+                }
+            } else if (dateLevel == AnalysisDateDimension.HOUR_LEVEL ||
+                    dateLevel == AnalysisDateDimension.MINUTE_LEVEL) {
+                if (dateFormat == 0) {
+                    sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+                } else if (dateFormat == 1) {
+                    sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                } else if (dateFormat == 2) {
+                    sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+                } else if (dateFormat == 3) {
+                    sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                } else if (dateFormat == 4) {
+                    sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+                }
+            } else {
+                if (dateFormat == 0) {
+                    sdf = new SimpleDateFormat("MM/dd/yyyy");
+                } else if (dateFormat == 1) {
+                    sdf = new SimpleDateFormat("yyyy-MM-dd");
+                } else if (dateFormat == 2) {
+                    sdf = new SimpleDateFormat("dd-MM-yyyy");
+                } else if (dateFormat == 3) {
+                    sdf = new SimpleDateFormat("dd/MM/yyyy");
+                } else if (dateFormat == 4) {
+                    sdf = new SimpleDateFormat("dd.MM.yyyy");
+                }
+            }
+        }
+        return sdf;
     }
 
     public ExcelResponse exportToExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
@@ -1832,33 +1857,6 @@ public class ExportService {
         return dataSet.getRows().size() > 0;
     }
 
-    private void listCombinedList(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, HSSFSheet sheet, HSSFWorkbook workbook,
-                                  InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
-        WSCombinedVerticalListDefinition verticalList = (WSCombinedVerticalListDefinition) report;
-        List<DataSet> dataSets = DataService.getEmbeddedVerticalDataSets(verticalList, insightRequestMetadata, conn);
-        VListInfo vListInfo = getCombinedVListInfo(verticalList, dataSets);
-        HSSFRow headerRow = sheet.createRow(0);
-        for (int i = 0; i < vListInfo.columns.size(); i++) {
-            sheet.setColumnWidth(i, 5000);
-            SortInfo sortInfo = vListInfo.columns.get(i);
-            HSSFCell cell = headerRow.createCell(i + 1);
-            cell.setCellValue(sortInfo.label);
-        }
-        int j = 1;
-        for (Map<String, Object> map : vListInfo.dColl) {
-            HSSFRow row = sheet.createRow(j++);
-            AnalysisMeasure baseMeasure = (AnalysisMeasure) map.get("baseMeasure");
-            HSSFCell rowHeaderCell = row.createCell(0);
-            rowHeaderCell.setCellValue(baseMeasure.toDisplay());
-            for (int i = 0; i < vListInfo.columns.size(); i++) {
-                SortInfo sortInfo = vListInfo.columns.get(i);
-                Value value = (Value) map.get(sortInfo.label);
-                Style style = getStyle(styleMap, baseMeasure, workbook, exportMetadata, value);
-                style.format(row, i + 1, value, baseMeasure, exportMetadata.cal);
-            }
-        }
-    }
-
     private static Value createPercentValue(Value value) {
         if (value.toDouble() == null) {
             return new EmptyValue();
@@ -2068,7 +2066,7 @@ public class ExportService {
             }
             int width;
             if (textReportFieldExtension != null && textReportFieldExtension.getFixedWidth() > 0) {
-                width = Math.max(textReportFieldExtension.getFixedWidth() / 15 * 256, 5000);
+                width = textReportFieldExtension.getFixedWidth() / 15 * 256;
             } else if (analysisItem.getWidth() > 0) {
                 width = Math.max((analysisItem.getWidth() / 15 * 256), 5000);
             } else {
@@ -2658,7 +2656,14 @@ public class ExportService {
                                         String encodedValue;
                                         if (dataItem == dataHeaderItem) {
                                             try {
-                                                encodedValue = StringEscapeUtils.escapeHtml(URLEncoder.encode(listRow.getValues()[k].toString(), "UTF-8"));
+                                                Value drillthroughValue = listRow.getValues()[k];
+                                                String drillthroughValueString;
+                                                if (drillthroughValue.type() == Value.NUMBER) {
+                                                    drillthroughValueString = String.valueOf(drillthroughValue.toDouble().intValue());
+                                                } else {
+                                                    drillthroughValueString = drillthroughValue.toString();
+                                                }
+                                                encodedValue = StringEscapeUtils.escapeHtml(URLEncoder.encode(drillthroughValueString, "UTF-8"));
                                             } catch (UnsupportedEncodingException e) {
                                                 throw new RuntimeException(e);
                                             }

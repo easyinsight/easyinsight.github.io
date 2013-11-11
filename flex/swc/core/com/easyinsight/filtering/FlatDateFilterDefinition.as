@@ -16,6 +16,7 @@ public class FlatDateFilterDefinition extends FilterDefinition {
     public var value:int;
     public var dateLevel:int = AnalysisItemTypes.YEAR_LEVEL;
     public var cachedValues:AnalysisItemResultMetadata;
+    public var allOption:Boolean = true;
 
     public function FlatDateFilterDefinition() {
     }
