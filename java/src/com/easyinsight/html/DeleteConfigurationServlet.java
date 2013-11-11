@@ -2,6 +2,7 @@ package com.easyinsight.html;
 
 import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dashboard.SavedConfiguration;
+import com.easyinsight.logging.LogClass;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,11 +30,7 @@ public class DeleteConfigurationServlet extends HttpServlet {
             new DashboardService().deleteConfiguration(config);
             jo.put("result", "Success!");
         } catch(Exception e) {
-            try {
-                jo.put("result", "There was an error.");
-            } catch (JSONException e1) {
-                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
+            LogClass.error(e);
         }
         Pattern p = Pattern.compile("^.*/html/dashboard/([A-Za-z0-9]+)/config/([A-Za-z0-9]+)$");
         String referer = request.getHeader("Referer");
@@ -48,6 +45,9 @@ public class DeleteConfigurationServlet extends HttpServlet {
         }
         if(redirect == null) {
             redirect = referer;
+        }
+        if(redirect == null) {
+            redirect = RedirectUtil.getURL(request, "/app/html/dashboard/" + request.getParameter("dashboardID"));
         }
         response.sendRedirect(redirect);
     }
