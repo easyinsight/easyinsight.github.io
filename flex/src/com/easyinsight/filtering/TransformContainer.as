@@ -297,8 +297,8 @@ public class TransformContainer extends HBox
             filter = new MultiFlatDateFilter(_feedID,  filterDefinition.field, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.MONTH_CUTOFF) {
             filter = new MonthCutoffFilter(_feedID,  filterDefinition.field,  _reportID, _dashboardID);
-        /*} else if (filterDefinition.getType() == FilterDefinition.MULTI_FIELD) {
-            filter = new MultiFieldFilter(_feedID, _reportID, _dashboardID, _report, _dashboard, _retrievalState, filterMetadata);*/
+        } else if (filterDefinition.getType() == FilterDefinition.MULTI_FIELD) {
+            filter = new MultiFieldFilter(_feedID, _reportID, _dashboardID, _report, _dashboard, _retrievalState, filterMetadata);
         } else {
             Alert.show("unknown filter type = " + filterDefinition.getType());
         }
@@ -394,13 +394,13 @@ public class TransformContainer extends HBox
             analysisFilter.availableItems.addItem(event.analysisItem);
             analysisFilter.toggleEnabled = true;
             addFilterDefinition(analysisFilter);
-        } /*else if (event.filterType == NewFilterEvent.MULTI_FIELD_CHOICE_FILTER) {
+        } else if (event.filterType == NewFilterEvent.MULTI_FIELD_CHOICE_FILTER) {
             var multiFieldFilter:MultiFieldFilterDefinition = new MultiFieldFilterDefinition();
             multiFieldFilter.field = event.analysisItem;
             multiFieldFilter.availableItems = new ArrayCollection();
             multiFieldFilter.toggleEnabled = true;
             addFilterDefinition(multiFieldFilter);
-        }*/
+        }
     }
 
     public function createNewFilter(analysisItem:AnalysisItem, stageX:int, stageY:int):void {

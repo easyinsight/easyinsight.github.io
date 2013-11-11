@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="setup()" implements="com.easyinsight.filtering.IFilterDetailEditor">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemHandle;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var filterFields:ArrayCollection;
+
+        private function setup():void {
+            addEventListener(FieldFilterEvent.REMOVE_FIELD, onRemoveField);
+        }
+
+        private function onRemoveField(event:FieldFilterEvent):void {
+            filterFields.removeItemAt(filterFields.getItemIndex(event.analysisItem));
+        }
+
+        private function addField():void {
+            var window:AnalysisItemPickWindow = new AnalysisItemPickWindow();
+            window.fields = allFields;
+            window.addEventListener(FieldFilterEvent.ADD_FIELD, onAddField, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onAddField(event:FieldFilterEvent):void {
+            filterFields.addItem(event.analysisItem);
+        }
+
+        private var analysisItemFilter:MultiFieldFilterDefinition;
+
+        public function makeUpdates():FilterDefinition {
+            var handles:ArrayCollection = new ArrayCollection();
+            for each (var v:AnalysisItem in filterFields) {
+                var handle:AnalysisItemHandle = new AnalysisItemHandle();
+                handle.analysisItemID = v.analysisItemID;
+                handle.name = v.display;
+                handles.addItem(handle);
+            }
+            analysisItemFilter.availableItems = handles;
+            return analysisItemFilter;
+        }
+
+        public function set filterDefinition(filterDefinition:FilterDefinition):void {
+            analysisItemFilter = filterDefinition as MultiFieldFilterDefinition;
+
+            //filterFields = analysisItemFilter.availableItems;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            var byAnalysisItemName:Object = new Object();
+            for each (var available:AnalysisItem in allFields) {
+                byAnalysisItemName[available.display] = available;
+            }
+            var availables:ArrayCollection = new ArrayCollection();
+            for each (var handle:AnalysisItemHandle in analysisItemFilter.availableItems) {
+                var item:AnalysisItem = byAnalysisItemName[handle.name];
+                availables.addItem(item);
+            }
+            filterFields = availables;
+        }
+
+        public function set feedID(feedID:int):void {
+        }
+
+        private var allFields:ArrayCollection;
+
+        public function set fields(value:ArrayCollection):void {
+            allFields = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in value) {
+                allFields.addItem(wrapper.analysisItem);
+            }
+        }
+
+        /*private function bulkAddFields():void {
+         var map:Object = new Object();
+         for each (var existing:AnalysisItem in analysisItemFilter.availableItems) {
+         map[existing.qualifiedName()] = existing;
+         }
+         for each (var field:AnalysisItem in allFields) {
+         if (analysisItemFilter.targetItem.hasType(AnalysisItemTypes.MEASURE)) {
+         if (field.hasType(AnalysisItemTypes.MEASURE) && map[field.qualifiedName()] == null) {
+         filterFields.addItem(field);
+         }
+         } else {
+         if ((field.hasType(AnalysisItemTypes.DIMENSION) || field.hasType(AnalysisItemTypes.DATE)) && map[field.qualifiedName()] == null) {
+         filterFields.addItem(field);
+         }
+         }
+         }
+         }*/
+        ]]></mx:Script>
+    <mx:HBox>
+        <mx:Button label="Add Field..." click="addField()"/>
+        <!--<mx:Button label="Bulk Add Fields..." click="bulkAddFields()"/>-->
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{filterFields}" dragEnabled="true" dropEnabled="true" dragMoveEnabled="true">
+        <mx:columns>
+            <util:EIDataGridColumn headerText="Field" dataField="display" width="400"/>
+            <util:EIDataGridColumn headerText="" itemRenderer="com.easyinsight.filtering.AnalysisItemFilterControls" width="50"/>
+        </mx:columns>
+    </mx:DataGrid>
+</mx:VBox>

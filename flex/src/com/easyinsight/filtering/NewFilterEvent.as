@@ -19,6 +19,7 @@ public class NewFilterEvent extends Event {
     public static const NAMED_REF_FILTER:int = 3;
     public static const FIELD_CHOICE_FILTER:int = 4;
     public static const TREND_FILTER:int = 5;
+    public static const MULTI_FIELD_CHOICE_FILTER:int = 6;
 
     public var analysisItem:AnalysisItem;
 
