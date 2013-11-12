@@ -192,6 +192,9 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
                 existingChoices.put(selection.getAnalysisItem().toDisplay(), true);
             }
         }
+        if (isAll()) {
+            existingChoices.put("All", true);
+        }
         Collections.sort(stringList);
 
         JSONArray arr = new JSONArray(stringList);
