@@ -149,7 +149,7 @@
                     There is no data available for the combination of filters you have selected.
                 </div>
                 <div class="loading" <% if(report.metadata.adhoc_execution) { %>style="display:none"<% } %>>
-                    <div>
+                    <div class="loadingText">
                         Loading the report...
                     </div>
                     <div class="progress progress-striped active">
@@ -246,48 +246,48 @@
 
 <script type="text/template" id="multi_value_filter_template">
     <div class="filter filter<%= data.id %>">
-        <% var o = toSelectedArray(data.selected);
-        %>
+        <% var o = toSelectedArray(data.selected); %>
 
-        <%= Filter.base_filter({data: data, parent_id: parent_id}) %> <a href="#<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" data-toggle="modal">
+        <%= Filter.base_filter({data: data, parent_id: parent_id}) %>
+        <a href="#<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" data-toggle="modal">
         <button id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>" class="btn btn-default multi_filter"><% if(data.selected["All"]) { %> All <% } else if(o.length == 1) { %><%-
             o[0] %><% } else { %><%- o.length %> Items<% } %>
         </button>
-    </a>
+        </a>
 
-        <div id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" class="modal multi_value_modal">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <div class="input-group">
-                            <input type="Search" placeholder="Search..." class="form-control value-search-input" />
-                            <div class="input-group-btn">
-                                <button class="btn btn-info value-search-btn">
-                                    <span class="glyphicon glyphicon-search"></span>
-                                </button>
+        <div id="<%= typeof(parent_id) == 'undefined' ? '' : parent_id %>filter<%= data.id %>_modal" class="modal <% if (data.type == "multiple") { %> multi_value_modal <% } else { %> multi_field_value_modal <% } %>">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input type="Search" placeholder="Search..." class="form-control value-search-input" />
+                                <div class="input-group-btn">
+                                    <button class="btn btn-info value-search-btn">
+                                        <span class="glyphicon glyphicon-search"></span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="loading-bar" style="display:none;">
-                        <div>
-                            Loading the filter...
+                        <div class="loading-bar" style="display:none;">
+                            <div>
+                                Loading the filter...
+                            </div>
+                            <div class="progress progress-striped active">
+                              <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
+                            </div>
                         </div>
-                        <div class="progress progress-striped active">
-                          <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
+                        <div class="form-group multi-value-list">
+                            <%= multi_value_results({data: data, results: data}) %>
                         </div>
                     </div>
-                    <div class="form-group multi-value-list">
-                        <%= multi_value_results({data: data, results: data}) %>
+                    <div class="modal-footer">
+                        <button class="btn btn-default multi_value_save" data-dismiss="modal">Save</button>
+                        <button class="btn btn-default" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button class="btn btn-default multi_value_save" data-dismiss="modal">Save</button>
-                    <button class="btn btn-default" data-dismiss="modal">Cancel</button>
-                </div>
-                    </div>
             </div>
-                </div>
+        </div>
     </div>
 
 

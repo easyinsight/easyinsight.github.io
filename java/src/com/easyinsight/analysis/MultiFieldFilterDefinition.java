@@ -1,15 +1,14 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.database.Database;
 import org.hibernate.Session;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -174,5 +173,31 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
             analysisItems.addAll(selectedItems);*/
         }
         return analysisItems;
+    }
+
+    @Override
+    public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
+        JSONObject jo = super.toJSON(filterHTMLMetadata);
+        WSAnalysisDefinition report = filterHTMLMetadata.getReport();
+        List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, report);
+
+        jo.put("type", "multi_field_filter");
+        jo.put("count", itemsAvailable.size());
+
+        List<String> stringList = new ArrayList<String>();
+        JSONObject existingChoices = new JSONObject();
+        for (AnalysisItemSelection selection : itemsAvailable) {
+            stringList.add(selection.getAnalysisItem().toDisplay());
+            if (selection.isSelected()) {
+                existingChoices.put(selection.getAnalysisItem().toDisplay(), true);
+            }
+        }
+        Collections.sort(stringList);
+
+        JSONArray arr = new JSONArray(stringList);
+        jo.put("values", arr);
+
+        jo.put("selected", existingChoices);
+        return jo;
     }
 }
