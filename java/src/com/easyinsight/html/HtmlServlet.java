@@ -27,10 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -191,9 +188,37 @@ public class HtmlServlet extends HttpServlet {
                         String pattern = curFilter != null ? (String) curFilter.get("pattern") : null;
                         if (pattern != null)
                             filterPatternDefinition.setPattern(pattern);
+                    } else if (filter instanceof MultiFieldFilterDefinition) {
+                        MultiFieldFilterDefinition multiFieldFilterDefinition = (MultiFieldFilterDefinition) filter;
+                        Object value = curFilter != null ? curFilter.get("selected") : null;
+                        if (value != null) {
+                            JSONObject arr = (JSONObject) value;
+                            //List<AnalysisItemSelection> items = new DataService().possibleFields(multiFieldFilterDefinition, report);
+                            /*Map<String, AnalysisItemSelection> map = new HashMap<String, AnalysisItemSelection>();
+                            for (AnalysisItemSelection handle : items) {
+                                map.put(handle.getAnalysisItem().toDisplay(), handle);
+                            }*/
+                            List<AnalysisItemHandle> selections = new ArrayList<AnalysisItemHandle>();
+                            for (Object o : arr.keySet()) {
+                                if ("All".equals(o)) {
+                                    if ((Boolean) arr.get(o)) {
+                                        multiFieldFilterDefinition.setAll(true);
+                                    } else {
+                                        multiFieldFilterDefinition.setAll(false);
+                                    }
+                                } else {
+                                    AnalysisItemHandle h = new AnalysisItemHandle();
+                                    h.setSelected((Boolean) arr.get(o));
+                                    h.setName((String) o);
+                                    selections.add(h);
+                                }
+                            }
+                            multiFieldFilterDefinition.setSelectedItems(selections);
+                        }
                     }
 
-                    Boolean enabledParam = curFilter != null ? (Boolean) curFilter.get("enabled") : null;
+
+                        Boolean enabledParam = curFilter != null ? (Boolean) curFilter.get("enabled") : null;
                     if (enabledParam != null) {
                         filter.setEnabled(enabledParam);
                     }
