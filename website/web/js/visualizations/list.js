@@ -39,14 +39,16 @@ List = {
                 var j;
                 var report = $('#' + targetDiv + ' .reportArea');
                 report.html(data);
-                var l = $("th", report).length
+                var l = $("th", report).length;
                 for(j = 0;j < l;j++) {
                     array.push({"sType": "sortValue"})
                 }
 
+                var paging = properties["paging"] != null;
+
                 List.createClasses(properties, targetDiv);
 
-                List.availableDataTables[targetDiv] = $('#' + targetDiv + ' .reportArea table').dataTable({bFilter:false, bPaginate:false, bInfo:false, aaSorting: a, aoColumns: array })
+                List.availableDataTables[targetDiv] = $('#' + targetDiv + ' .reportArea table').dataTable({bFilter:false, bPaginate:paging, sPaginationType: "full_numbers", bInfo:false, aaSorting: a, aoColumns: array })
             }, null, targetDiv);
         }
     },
