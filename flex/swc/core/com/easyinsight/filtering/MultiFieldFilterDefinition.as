@@ -16,7 +16,7 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
 
     public var selectedItems:ArrayCollection = new ArrayCollection();
     public var availableItems:ArrayCollection = new ArrayCollection();
-    public var all:Boolean;
+    public var all:Boolean = true;
 
     public function MultiFieldFilterDefinition() {
     }
