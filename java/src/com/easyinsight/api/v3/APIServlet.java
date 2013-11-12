@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -160,6 +161,15 @@ public abstract class APIServlet extends HttpServlet {
             resp.getOutputStream().flush();
         } else {
             try {
+
+                String string = null;
+                if (userResponse.getAccountID() == 5595) {
+                    byte[] cbuf = new byte[req.getContentLength()];
+                    req.getInputStream().read(cbuf);
+                    string = new String(cbuf);
+                    System.out.println(string);
+                }
+
                 SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
                         userResponse.getAccountType(), userResponse.isAccountAdmin(), userResponse.getFirstDayOfWeek(), userResponse.getPersonaName());
                 UserThreadMutex.mutex().acquire(userResponse.getUserID());
@@ -167,8 +177,14 @@ public abstract class APIServlet extends HttpServlet {
                 ResponseInfo responseInfo;
                 try {
                     conn.setAutoCommit(false);
+                    Document doc;
+                    if (string == null) {
+                        doc = new Builder().build(req.getInputStream());
+                    } else {
+                        ByteArrayInputStream bais = new ByteArrayInputStream(string.getBytes());
+                        doc = new Builder().build(bais);
+                    }
 
-                    Document doc = new Builder().build(req.getInputStream());
                     responseInfo = processXML(doc, conn, req);
                     conn.commit();
                 } catch (ServiceRuntimeException sre) {
@@ -177,6 +193,7 @@ public abstract class APIServlet extends HttpServlet {
                     responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>" + sre.getMessage() + "</message>");
                 } catch (ParsingException spe) {
                     conn.rollback();
+                    LogClass.error(spe);
                     responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>" + spe.getMessage() + "</message>");
                 } catch (Exception e) {
                     conn.rollback();
