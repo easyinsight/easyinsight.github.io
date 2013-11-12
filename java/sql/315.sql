@@ -5,13 +5,11 @@ create index report_cache_idx1 on report_cache (report_id, cache_key(255));
 
 
 
-
+drop table if exists multi_analysis_item_filter;
 CREATE TABLE multi_analysis_item_filter (
   multi_analysis_item_filter_id bigint(20) NOT NULL AUTO_INCREMENT,
   filter_id bigint(20) NOT NULL,
   show_all tinyint(4) NOT NULL default 1,
-  selected tinyint(4) not null default 0,
-  position integer not null default 0,
   PRIMARY KEY (multi_analysis_item_filter_id),
   CONSTRAINT multi_analysis_item_filter_ibfk1 FOREIGN KEY (filter_id) REFERENCES filter (filter_id) ON DELETE CASCADE
 );
@@ -20,6 +18,8 @@ drop table if exists analysis_item_handle;
 create table analysis_item_handle (
   analysis_item_handle_id bigint(20) not null auto_increment,
   analysis_item_id bigint(20) default null,
+  selected tinyint(4) not null default 0,
+  position integer not null default 0,
   name varchar(255) default null,
   primary key (analysis_item_handle_id),
   constraint analysis_item_handle_ibfk1 foreign key (analysis_item_id) references analysis_item (analysis_item_id) on delete cascade
