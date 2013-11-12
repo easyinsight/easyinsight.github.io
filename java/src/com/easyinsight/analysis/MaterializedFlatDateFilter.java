@@ -23,6 +23,9 @@ public class MaterializedFlatDateFilter extends MaterializedFilterDefinition {
 
     @Override
     public boolean allows(Value value) {
+        if (this.value == 0) {
+            return true;
+        }
         if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
             Calendar cal = Calendar.getInstance();

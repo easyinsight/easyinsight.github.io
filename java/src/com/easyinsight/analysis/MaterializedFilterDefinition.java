@@ -23,12 +23,14 @@ public abstract class MaterializedFilterDefinition {
 
     public boolean validate(IRow row, FilterDefinition filterDefinition) {
         boolean rowValid = true;
-        Value value = row.getValue(key);
-        if (!allows(value)) {
-            rowValid = false;
-        }
-        if (filterDefinition.isNotCondition()) {
-            rowValid = !rowValid;
+        if (key != null) {
+            Value value = row.getValue(key);
+            if (!allows(value)) {
+                rowValid = false;
+            }
+            if (filterDefinition.isNotCondition()) {
+                rowValid = !rowValid;
+            }
         }
         return rowValid;
     }

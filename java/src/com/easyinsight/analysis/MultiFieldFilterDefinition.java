@@ -167,12 +167,13 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
 
     @Override
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
-        List<AnalysisItem> analysisItems = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
+        /*List<AnalysisItem> analysisItems = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
         if (getEverything) {
-            /*analysisItems.addAll(availableItems);
-            analysisItems.addAll(selectedItems);*/
+            analysisItems.addAll(availableItems);
+            analysisItems.addAll(selectedItems);
         }
-        return analysisItems;
+        return analysisItems;*/
+        return new ArrayList<AnalysisItem>();
     }
 
     @Override
