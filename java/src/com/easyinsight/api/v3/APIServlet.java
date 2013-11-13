@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.Connection;
@@ -164,9 +165,19 @@ public abstract class APIServlet extends HttpServlet {
 
                 String string = null;
                 if (userResponse.getAccountID() == 5595) {
-                    byte[] cbuf = new byte[req.getContentLength()];
+                    StringBuilder jb = new StringBuilder();
+                    String line;
+                    try {
+                        BufferedReader reader = req.getReader();
+                        while ((line = reader.readLine()) != null)
+                            jb.append(line);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    string = jb.toString();
+                    /*byte[] cbuf = new byte[req.getContentLength()];
                     req.getInputStream().read(cbuf);
-                    string = new String(cbuf);
+                    string = new String(cbuf);*/
                     System.out.println(string);
                 }
 
