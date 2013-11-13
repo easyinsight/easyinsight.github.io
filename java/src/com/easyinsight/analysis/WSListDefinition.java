@@ -276,9 +276,6 @@ public class WSListDefinition extends WSAnalysisDefinition {
         list.put("properties", jsonProperties());
         list.put("sorting", getAnalysisItemMap());
         list.put("columns", columns.size());
-        if (getGeneralSizeLimit() > 0) {
-            list.put("paging", true);
-        }
         return list;
     }
 
