@@ -847,9 +847,10 @@ $(function () {
         })
 
         saveConfiguration = function (name, key) {
-            var c = {"filters": _.map(filterMap, function (e, k) {
-                            return toFilterString(e.filter, true);
-                        }), "stacks": _.reduce(stackMap, function(m, e, i) {
+            var c = {"filters": _.reduce(filterMap, function (m, e, i) {
+                            m[e.filter.id] = toFilterString(e.filter, true);
+                return m;
+                        }, {}), "stacks": _.reduce(stackMap, function(m, e, i) {
                 m[i] = e.selected;
                 return m;
             }, {}), "name": name, "key": key }
