@@ -170,10 +170,11 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
         fullFilters[curFilters[i].id] = curFilters[i];
     }
     beforeRefresh($("#" + id + " .loading"))();
+    var embedComponent = typeof(userJSON.embedKey) != "undefined" ? ("&embedKey=" + userJSON.embedKey) : "";
     var dashboardComponent = dashboardID == -1 ? "" : ("&dashboardID=" + dashboardID);
     var drillthroughComponent = typeof(drillthroughID) != "undefined" ? ("&drillThroughKey=" + drillthroughID) : "";
     var postData = {
-        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent + drillthroughComponent,
+        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent + drillthroughComponent + embedComponent,
         contentType: "application/json; charset=UTF-8",
         data: JSON.stringify(fullFilters),
         type: "POST"

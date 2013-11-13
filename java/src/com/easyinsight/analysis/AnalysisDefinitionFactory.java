@@ -188,6 +188,7 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setAccountVisible(wsAnalysisDefinition.isAccountVisible());
         analysisDefinition.setFolder(wsAnalysisDefinition.getFolder());
         analysisDefinition.setDateCreated(wsAnalysisDefinition.getDateCreated());
+        analysisDefinition.setPublicWithKey(wsAnalysisDefinition.isPublicWithKey());
         analysisDefinition.setDateUpdated(wsAnalysisDefinition.getDateUpdated());
         analysisDefinition.setReportType(wsAnalysisDefinition.getReportType());
         analysisDefinition.setReportStructure(wsAnalysisDefinition.createStructure());

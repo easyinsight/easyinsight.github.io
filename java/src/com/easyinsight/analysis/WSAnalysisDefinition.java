@@ -4,6 +4,8 @@ import com.easyinsight.analysis.definitions.WSKPIDefinition;
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.intention.Intention;
@@ -122,6 +124,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean passThroughFilters;
     private boolean persistState;
 
+    private boolean publicWithKey;
+
     private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
     private int fontSize = 12;
@@ -142,6 +146,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String customField2;
 
     private List<FilterDefinition> filtersForDrillthrough;
+
+    public boolean isPublicWithKey() {
+        return publicWithKey;
+    }
+
+    public void setPublicWithKey(boolean publicWithKey) {
+        this.publicWithKey = publicWithKey;
+    }
 
     public boolean isCacheFilters() {
         return cacheFilters;
@@ -1245,6 +1257,97 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }*/
     }
 
+    protected boolean supportsMultiField() {
+        return false;
+    }
+
+    protected List<AnalysisItem> reportFieldsForMultiField() {
+        return null;
+    }
+
+    protected void assignResults(List<AnalysisItem> fields) {
+
+    }
+
     public void multiField(MultiFieldFilterDefinition multiFieldFilterDefinition) throws SQLException {
+        if (!supportsMultiField()) {
+            return;
+        }
+        List<AnalysisItem> columns = reportFieldsForMultiField();
+        long id = getDataFeedID();
+        FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(id);
+        Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
+        Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
+        for (AnalysisItem field : dataSource.getFields()) {
+            map.put(field.getAnalysisItemID(), field);
+            mapByName.put(field.toDisplay(), field);
+        }
+        if (getAddedItems() != null) {
+            for (AnalysisItem item : getAddedItems()) {
+                if (item.getAnalysisItemID() != 0) {
+                    map.put(item.getAnalysisItemID(), item);
+
+                }
+                mapByName.put(item.toDisplay(), item);
+            }
+        }
+        for (AnalysisItem column : columns) {
+            map.put(column.getAnalysisItemID(), column);
+        }
+        List<AnalysisItem> fields;
+        Set<AnalysisItem> set = new HashSet<AnalysisItem>();
+        final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
+        if (multiFieldFilterDefinition.isAll()) {
+            int i = 0;
+            for (AnalysisItem column : columns) {
+                set.add(column);
+                positions.put(column, i++);
+            }
+            for (AnalysisItemHandle field : multiFieldFilterDefinition.getAvailableItems()) {
+                AnalysisItem item = map.get(field.getAnalysisItemID());
+                if (item != null) {
+                    set.add(item);
+                    positions.put(item, i++);
+                } else {
+                    item = mapByName.get(field.getName());
+                    if (item != null) {
+                        set.add(item);
+                        positions.put(item, i++);
+                    }
+                }
+            }
+
+            fields = new ArrayList<AnalysisItem>(set);
+        } else {
+            int i = 0;
+            for (AnalysisItemHandle field : multiFieldFilterDefinition.getSelectedItems()) {
+                if (field.isSelected()) {
+                    AnalysisItem item = map.get(field.getAnalysisItemID());
+                    if (item != null) {
+                        set.add(item);
+                        positions.put(item, i++);
+                    } else {
+                        item = mapByName.get(field.getName());
+                        if (item != null) {
+                            set.add(item);
+                            positions.put(item, i++);
+                        }
+                    }
+                }
+            }
+            fields = new ArrayList<AnalysisItem>(set);
+        }
+        Collections.sort(fields, new Comparator<AnalysisItem>() {
+
+            public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                Integer p1 = positions.get(analysisItem);
+                Integer p2 = positions.get(analysisItem1);
+                return p1.compareTo(p2);
+            }
+        });
+
+        if (set.size() > 0) {
+            assignResults(fields);
+        }
     }
 }

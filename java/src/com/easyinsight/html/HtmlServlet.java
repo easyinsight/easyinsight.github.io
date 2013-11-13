@@ -40,7 +40,14 @@ public class HtmlServlet extends HttpServlet {
         String reportIDString = req.getParameter("reportID");
         if (req.getSession().getAttribute("userID") != null) {
             SecurityUtil.populateThreadLocalFromSession(req);
+        } else if (req.getParameter("embedKey") != null) {
+            SecurityUtil.populateThreadLocalFromSession(req);
         }
+        /*
+        select RemitId, [XManager].[dbo].[Vendor].VendorId from [XManager].[dbo].[Remit], [XManager].[dbo].[Vendor] where [XManager].[dbo].[Remit].VendorId = [XManager].[dbo].[Vendor].VendorId
+
+
+         */
         try {
 
             InputStream is = req.getInputStream();

@@ -27,7 +27,8 @@ public class ReportFilter implements Filter {
             Pattern p = Pattern.compile("^/html/report/([a-zA-z0-9]+)/?.*$");
             Matcher m = p.matcher(path);
             String reportID = m.replaceAll("$1");
-            request.setAttribute("public", new AnalysisService().isReportPublic(reportID));
+            String embedKey = request.getParameter("embedKey");
+            request.setAttribute("public", new AnalysisService().isReportPublic(reportID) || (embedKey != null && new AnalysisService().isReportEmbedKeyVisible(reportID)));
         }
         chain.doFilter(req, resp);
     }

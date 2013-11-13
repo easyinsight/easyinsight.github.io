@@ -8,6 +8,8 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="org.json.JSONObject" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -49,6 +51,13 @@
         if(drillthroughKey != null) {
             jo.put("drillthroughID", drillthroughKey);
         }
+        EIConnection c = Database.instance().getConnection();
+        JSONObject userObject = new JSONObject();
+        try {
+            userObject = SecurityUtil.getUserJSON(c, request);
+        } finally {
+            c.close();
+        }
 %>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,6 +68,7 @@
     <jsp:include page="../html/reportDashboardHeader.jsp"/>
     <script type="text/javascript">
         var dashboardJSON = <%= jo %>;
+        var userJSON = <%= userObject %>;
         function afterRefresh() {
 
         }
