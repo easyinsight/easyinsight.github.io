@@ -607,6 +607,26 @@ public class AnalysisService {
         return analysisItem;
     }
 
+    public boolean isReportEmbedKeyVisible(String urlKey) {
+        boolean isPublic = false;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT public_with_key FROM ANALYSIS WHERE URL_KEY = ?");
+            stmt.setString(1, urlKey);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                isPublic = rs.getBoolean(1);
+            }
+        } catch (SQLException se) {
+            LogClass.error(se);
+            throw new RuntimeException(se);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+        return isPublic;
+    }
+
     public static final class ImportKey {
         private String providerID;
         private Date date;
