@@ -44,7 +44,7 @@ List = {
                     array.push({"sType": "sortValue"})
                 }
 
-                var paging = properties["paging"] != null;
+                var paging = properties["generalSizeLimit"] > 0;
 
                 List.createClasses(properties, targetDiv);
 
