@@ -17,6 +17,7 @@ import com.easyinsight.userupload.UploadPolicy;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.ParsingException;
+import org.apache.commons.io.IOUtils;
 import sun.misc.BASE64Decoder;
 
 import javax.servlet.ServletException;
@@ -165,19 +166,25 @@ public abstract class APIServlet extends HttpServlet {
 
                 String string = null;
                 if (userResponse.getAccountID() == 5595) {
-                    StringBuilder jb = new StringBuilder();
-                    String line;
+                    //StringBuilder jb = new StringBuilder();
+                    //String line;
                     try {
-                        BufferedReader reader = req.getReader();
+                        byte[] bytes = IOUtils.toByteArray(req.getInputStream());
+                        System.out.println("Read " + bytes.length + " bytes");
+                        string = new String(bytes);
+                        /*BufferedReader reader = req.getReader();
                         while ((line = reader.readLine()) != null)
-                            jb.append(line);
+                            jb.append(line);*/
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                    string = jb.toString();
+                    //string = jb.toString();
                     /*byte[] cbuf = new byte[req.getContentLength()];
                     req.getInputStream().read(cbuf);
                     string = new String(cbuf);*/
+                    /*
+                    select Id, AccountId, Name, Number, NumberFormated, CostCenter, PlanId from [CarrierData].[dbo].[Line]
+                     */
                     System.out.println(string);
                 }
 
@@ -221,6 +228,7 @@ public abstract class APIServlet extends HttpServlet {
                 resp.getOutputStream().write(responseInfo.toResponse().getBytes());
                 resp.getOutputStream().flush();
             } catch (Exception e) {
+                LogClass.error(e);
                 resp.setContentType("text/xml");
                 resp.setStatus(400);
                 resp.getOutputStream().write("<response><code>400</code><message>Your XML was malformed.</message></response>".getBytes());
