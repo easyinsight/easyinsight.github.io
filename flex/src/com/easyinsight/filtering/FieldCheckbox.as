@@ -10,20 +10,10 @@ import com.easyinsight.util.GridCheckbox;
 
 import flash.events.Event;
 
-import mx.binding.utils.BindingUtils;
-import mx.containers.Canvas;
-
-import mx.containers.HBox;
-import mx.controls.Alert;
-
-import mx.controls.CheckBox;
-import mx.controls.listClasses.IListItemRenderer;
-import mx.core.UIComponent;
-
-public class FilterStringCheckbox extends GridCheckbox {
+public class FieldCheckbox extends GridCheckbox {
 
 
-    public function FilterStringCheckbox() {
+    public function FieldCheckbox() {
         super();
         this.width = 290;
         this.cbWidth = 290;
@@ -54,10 +44,8 @@ public class FilterStringCheckbox extends GridCheckbox {
         if(this.data)
             this.data.removeEventListener("selectedChanged", onSelectedChanged);
         super.data = val;
-        if (val != null && checkbox != null) {
-            this.data.addEventListener("selectedChanged", onSelectedChanged, false, 0, true);
-            checkbox.label = val.label;
-        }
+        this.data.addEventListener("selectedChanged", onSelectedChanged, false, 0, true);
+        checkbox.label = val.display;
     }
 
     private function onSelectedChanged(event:Event):void {

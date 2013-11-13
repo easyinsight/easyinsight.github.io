@@ -1,5 +1,8 @@
 package com.easyinsight.dashboard;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -43,5 +46,12 @@ public class SavedConfiguration implements Serializable {
 
     public void setDashboardStackPositions(DashboardStackPositions dashboardStackPositions) {
         this.dashboardStackPositions = dashboardStackPositions;
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("name", name);
+        jo.put("url", urlKey);
+        return jo;
     }
 }

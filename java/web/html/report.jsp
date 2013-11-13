@@ -11,6 +11,8 @@
 <%@ page import="com.easyinsight.html.*" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.json.JSONArray" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -82,6 +84,14 @@
         if (drillthroughArgh != null) {
             reportJSON.put("drillthroughID", drillthroughArgh);
         }
+
+        EIConnection c = Database.instance().getConnection();
+        JSONObject userObject = new JSONObject();
+        try {
+            userObject = SecurityUtil.getUserJSON(c);
+        } finally {
+            c.close();
+        }
 %>
 
 <head>
@@ -106,6 +116,7 @@
     <script type="text/javascript" src="/js/dashboard.js"></script>
     <script type="text/javascript" language="JavaScript">
         var dashboardJSON = <%= reportJSON %>;
+        var userJSON = <%= userObject %>;
     </script>
 </head>
 <body>

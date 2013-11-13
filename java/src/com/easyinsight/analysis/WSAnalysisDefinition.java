@@ -1245,6 +1245,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }*/
     }
 
-    /*public void multiField(MultiFieldFilterDefinition multiFieldFilterDefinition) throws SQLException {
-    }*/
+    public void multiField(MultiFieldFilterDefinition multiFieldFilterDefinition) throws SQLException {
+    }
 }

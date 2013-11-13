@@ -13,6 +13,7 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +48,7 @@ public class FilterDefinition implements Serializable, Cloneable {
     public static final int ANALYSIS_ITEM = 13;
     public static final int MULTI_FLAT_DATE = 14;
     public static final int MONTH_CUTOFF = 15;
+    public static final int MULTI_FIELD = 16;
 
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "analysis_item_id")
@@ -358,7 +360,7 @@ public class FilterDefinition implements Serializable, Cloneable {
         }
     }
 
-    public List<IComponent> createComponents(String pipelineName, IFilterProcessor filterProcessor, AnalysisItem sourceItem, boolean columnLevel) {
+    public List<IComponent> createComponents(String pipelineName, IFilterProcessor filterProcessor, @Nullable AnalysisItem sourceItem, boolean columnLevel) {
         List<IComponent> components = new ArrayList<IComponent>();
         if (isEnabled() && pipelineName.equals(getPipelineName())) {
             if (!isTemplateFilter() || columnLevel) {

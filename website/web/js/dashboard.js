@@ -8,6 +8,7 @@ var textTemplate;
 var reportTemplate;
 
 var gaugeTemplate;
+var configurationDropdownTemplate;
 
 var dashboard;
 var email_modal;
@@ -16,6 +17,7 @@ var short_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep
 var currentReport;
 
 var multi_value_results;
+var multi_field_value_results;
 
 var saveConfiguration;
 
@@ -125,6 +127,8 @@ var toFilterString = function (f, store) {
     } else if (f.type == "multi_date") {
         return $.extend(c, {start: f.start, end: f.end});
     } else if (f.type == "field_filter") {
+        return $.extend(c, {selected: f.selected});
+    } else if (f.type == "multi_field_filter") {
         return $.extend(c, {selected: f.selected});
     } else if (f.type == "pattern_filter") {
         return $.extend(c, {pattern: f.pattern});
@@ -349,9 +353,11 @@ $(function () {
                 else if (obj.type == "flat_date_year")
                     return Filter.flat_date_year({data: obj, parent_id: parent_id});
                 else if (obj.type == "multi_date")
-                    return Filter.multi_flat_date_month({data: obj, parent_id: parent_id})
+                    return Filter.multi_flat_date_month({data: obj, parent_id: parent_id});
                 else if (obj.type == "field_filter")
                     return Filter.field_filter({data: obj, parent_id: parent_id});
+                else if (obj.type == "multi_field_filter")
+                    return Filter.multiple({data: obj, parent_id: parent_id});
                 else if (obj.type == "pattern_filter")
                     return Filter.pattern_filter({data: obj, parent_id: parent_id });
                 else if (obj.type == "or_filter")
@@ -368,6 +374,7 @@ $(function () {
             date_range: _.template($("#absolute_date_filter_template", s).html()),
             base_filter: _.template($("#filter_base", s).html()),
             field_filter: _.template($("#field_filter_template", s).html()),
+            //multi_field_filter:_.template($("#multi_value_filter_template", s).html()),
             pattern_filter: _.template($("#pattern_filter_template", s).html()),
             or_filter: _.template($("#or_filter_template", s).html()),
             generic_filter: _.template($("#generic_filter", s).html()),
@@ -382,6 +389,8 @@ $(function () {
         gaugeTemplate = _.template($("#gauge_template", s).html());
         email_modal = _.template($("#email_modal", s).html());
         multi_value_results = _.template($("#multi_value_results_template", s).html());
+        multi_field_value_results = _.template($("#multi_value_results_template", s).html());
+        configurationDropdownTemplate = _.template($("#configuration_dropdown_template", s).html());
 
         var filterMap = _.reduce(flattenFilters(dashboardJSON["filters"]), function (m, i) {
             m["filter" + i.id] = {"filter": i, "parent": null };
@@ -393,6 +402,10 @@ $(function () {
         var dashboardKey = (dashboardJSON["id"] != -1) ? ("dashboard " + dashboardJSON["id"]) : ("report " + dashboardJSON["base"]["id"]);
         var saveFilter;
         var saveStack;
+
+
+        //$("#configuration-dropdown").html(configurationDropdownTemplate({"dashboard": dashboardJSON, "user": userJSON}))
+
         if (Modernizr.localstorage && dashboardJSON["local_storage"] && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+$/)) {
             if (typeof(localStorage[dashboardKey]) != "undefined") {
                 var cur;
@@ -438,6 +451,8 @@ $(function () {
             saveStack = function (k) {
             };
         }
+
+
         $("#base").append(dashboard(dashboardJSON));
 
         $(".dashboardStackNav").css("background-color", dashboardJSON["styles"]["alternative_stack_start"])
@@ -523,7 +538,17 @@ $(function () {
                             }, {});
                 selectionMap = $.extend({}, m, f.selected);
             }
-        })
+        });
+
+        $('.multi_field_value_modal').on('show.bs.modal', function (e) {
+            var f = filterMap[$(e.target).attr("id").replace(/_modal$/g, "")].filter;
+
+            var m = _.reduce(f.values, function(m, e) {
+                m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
+                return m;
+            }, {});
+            selectionMap = $.extend({}, m, f.selected);
+        });
 
         $(".cb_all_choice").click(allCheck);
 
@@ -689,7 +714,7 @@ $(function () {
             var q = $(e.target).parent().parent();
             var k = q.attr("id");
             var s = stackMap[k];
-
+            s.selected = selectedIndex(k);
             saveStack(k);
             for (var f in filterMap) {
                 filterMap[f].filter.override = false;
@@ -796,13 +821,22 @@ $(function () {
 //            });
         }
 
-        $(".value-search-btn").click(filterText)
-        $(".value-search-input").change(filterText)
+        $(".value-search-btn").click(filterText);
+        $(".value-search-input").change(filterText);
 
-        saveConfiguration = function () {
+        $(".delete-config").click(function(e) {
+            e.preventDefault();
+            window.location.href = $(e.target).parent().attr("href") + "/delete";
+        })
+
+        saveConfiguration = function (name) {
+            console.log(stackMap)
             var c = {"filters": _.map(filterMap, function (e, k) {
                             return toFilterString(e.filter, true);
-                        }), "stacks": stackMap }
+                        }), "stacks": _.reduce(stackMap, function(m, e, i) {
+                m[i] = e.selected;
+                return m;
+            }, {}), "name": name }
             console.log(c);
             $.ajax({ url: "/app/html/dashboard/" + dashboardJSON["key"] + "/config",
                 contentType: "application/json; charset=UTF-8",

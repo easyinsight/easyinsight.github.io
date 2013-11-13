@@ -9,6 +9,9 @@
 <%@ page import="com.easyinsight.html.*" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="com.easyinsight.dashboard.*" %>
+<%@ page import="java.sql.Connection" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -24,23 +27,35 @@
         List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
         long dashboardID = -1;
         String savedDashboardIDString = request.getParameter("savedDashboardID");
+        String configurationIDString = request.getParameter("dashboardConfig");
+        String selectedConfiguration = null;
+        String configurationKey = null;
+        DashboardStackPositions positions = null;
         Dashboard dashboard;
         if (savedDashboardIDString != null) {
             DashboardInfo dashboardInfo = new DashboardService().retrieveFromDashboardLink(savedDashboardIDString);
-            DashboardStackPositions positions = dashboardInfo.getDashboardStackPositions();
+            positions = dashboardInfo.getDashboardStackPositions();
             dashboardID = dashboardInfo.getDashboardID();
-            dashboard = new DashboardService().getDashboardView(dashboardID, positions);
-        } else if(drillthroughKey != null) {
+        } else if(configurationIDString != null) {
+            DashboardInfo dashboardInfo = new DashboardService().getConfigurationForDashboard(configurationIDString);
+            positions = dashboardInfo.getSavedConfiguration().getDashboardStackPositions();
+            configurationKey = dashboardInfo.getSavedConfiguration().getUrlKey();
+            selectedConfiguration = dashboardInfo.getSavedConfiguration().getName();
+            dashboardID = dashboardInfo.getDashboardID();
+        }
+
+        if(drillthroughKey != null) {
             DrillThroughData drillThroughData = Utils.drillThroughFiltersForDashboard(drillthroughKey);
             drillthroughFilters = drillThroughData.getFilters();
             dashboardID = drillThroughData.getDashboardID();
             SecurityUtil.authorizeDashboard(dashboardID);
-            dashboard = new DashboardService().getDashboard(dashboardID);
-        } else {
+
+        } else if(request.getParameter("dashboardID") != null) {
             String dashboardIDString = request.getParameter("dashboardID");
             dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
-            dashboard = new DashboardService().getDashboard(dashboardID);
         }
+
+        dashboard = new DashboardService().getDashboardView(dashboardID, positions);
 
 
 
@@ -52,6 +67,16 @@
         if(drillthroughKey != null) {
             jo.put("drillthroughID", drillthroughKey);
         }
+        jo.put("configuration_name", selectedConfiguration);
+        jo.put("configuration_key", configurationKey);
+        EIConnection c = Database.instance().getConnection();
+        JSONObject userObject = new JSONObject();
+        try {
+            userObject = SecurityUtil.getUserJSON(c);
+        } finally {
+            c.close();
+        }
+
 %>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -62,6 +87,7 @@
     <jsp:include page="reportDashboardHeader.jsp"/>
     <script type="text/javascript">
         var dashboardJSON = <%= jo %>;
+        var userJSON = <%= userObject %>;
         function afterRefresh() {
 
         }
@@ -76,20 +102,13 @@
 <div class="nav nav-pills reportNav">
         <div class="container">
             <div class="col-md-6 reportBlah">
-                <a class="reportControl" href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
+                <a class="reportControl" href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
             </div>
             <div class="col-md-6 reportControlToolbar">
                 <div class="btn-toolbar pull-right">
-                    <div class="btn-group reportControlBtnGroup">
-                        <a class="reportControl dropdown-toggle" data-toggle="dropdown" href="#">
-                            Configurations
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a href="/app/html/dashboard/<%= dashboard.getUrlKey() %>"><button style="padding:5px;margin:5px;width:150px" class="btn btn-inverse restore_default_config">Restore Default</button></a>
-                            </li>
-                        </ul>
+                    <div id="configuration-dropdown" class="btn-group reportControlBtnGroup">
+
+
                     </div>
                     <div class="btn-group reportControlBtnGroup">
                         <a class="reportControl dropdown-toggle" data-toggle="dropdown" href="#">

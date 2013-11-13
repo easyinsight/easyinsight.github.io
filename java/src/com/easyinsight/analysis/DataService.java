@@ -38,6 +38,89 @@ public class DataService {
 
     private FeedRegistry feedRegistry = FeedRegistry.instance();
 
+    public List<AnalysisItemSelection> possibleFields(MultiFieldFilterDefinition filter, WSAnalysisDefinition report) {
+        try {
+            long id = report.getDataFeedID();
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(id);
+            Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
+            Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
+            final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
+            for (AnalysisItem field : dataSource.getFields()) {
+                map.put(field.getAnalysisItemID(), field);
+                mapByName.put(field.toDisplay(), field);
+            }
+            if (report.getAddedItems() != null) {
+                for (AnalysisItem item : report.getAddedItems()) {
+                    mapByName.put(item.toDisplay(), item);
+                    if (item.getAnalysisItemID() != 0) {
+                        map.put(item.getAnalysisItemID(), item);
+                    }
+                }
+            }
+            Map<AnalysisItem, AnalysisItemHandle> selectedMap = new HashMap<AnalysisItem, AnalysisItemHandle>();
+
+
+
+            Set<AnalysisItem> set = new HashSet<AnalysisItem>();
+            int i = 0;
+            if (report instanceof WSListDefinition) {
+                WSListDefinition list = (WSListDefinition) report;
+                set.addAll(list.getColumns());
+                for (AnalysisItem item : list.getColumns()) {
+                    positions.put(item, i++);
+                }
+            }
+            for (AnalysisItemHandle field : filter.getAvailableItems()) {
+                AnalysisItem item = map.get(field.getAnalysisItemID());
+                if (item != null) {
+                    set.add(item);
+                    positions.put(item, i++);
+                } else {
+                    item = mapByName.get(field.getName());
+                    if (item != null) {
+                        set.add(item);
+                        positions.put(item, i++);
+                    }
+                }
+            }
+
+            i = 0;
+            for (AnalysisItemHandle handle : filter.getSelectedItems()) {
+                AnalysisItem item = mapByName.get(handle.getName());
+                if (item != null) {
+                    positions.put(item, i++);
+                    selectedMap.put(item, handle);
+                }
+            }
+
+
+            List<AnalysisItemSelection> items = new ArrayList<AnalysisItemSelection>();
+
+            for (AnalysisItem item : set) {
+                AnalysisItemSelection selection = new AnalysisItemSelection();
+                selection.setAnalysisItem(item);
+                AnalysisItemHandle handle = selectedMap.get(item);
+                if (handle != null) {
+                    selection.setSelected(handle.isSelected());
+                }
+                items.add(selection);
+            }
+
+            Collections.sort(items, new Comparator<AnalysisItemSelection>() {
+
+                public int compare(AnalysisItemSelection analysisItem, AnalysisItemSelection analysisItem1) {
+                Integer p1 = positions.get(analysisItem.getAnalysisItem());
+                Integer p2 = positions.get(analysisItem1.getAnalysisItem());
+                return p1.compareTo(p2);
+                }
+            });
+            return items;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID) {
         return getAnalysisItemMetadata(feedID, analysisItem, utfOffset, reportID, dashboardID, null);
     }
@@ -1908,6 +1991,11 @@ public class DataService {
                             }
                         }
                         analysisDefinition.populateFromReportStructure(structure);
+                    }
+                } else if (filter instanceof MultiFieldFilterDefinition) {
+                    MultiFieldFilterDefinition multiFieldFilterDefinition = (MultiFieldFilterDefinition) filter;
+                    if (multiFieldFilterDefinition.isEnabled()) {
+                        analysisDefinition.multiField(multiFieldFilterDefinition);
                     }
                 }
             }

@@ -24,6 +24,10 @@ List = {
     getCallback:function (targetDiv, properties, sorting, numColumns) {
         return function (data) {
             Utils.noData(data, function () {
+                if(typeof(List.availableDataTables[targetDiv]) != "undefined" && List.availableDataTables[targetDiv] != null) {
+                    List.availableDataTables[targetDiv].fnDestroy();
+                    List.availableDataTables[targetDiv] = null;
+                }
                 var i = 1;
                 var a = [];
                 while(sorting[i.toString()]) {
@@ -33,13 +37,18 @@ List = {
 
                 var array = [];
                 var j;
-                for(j = 0;j < numColumns;j++) {
+                var report = $('#' + targetDiv + ' .reportArea');
+                report.html(data);
+                var l = $("th", report).length;
+                for(j = 0;j < l;j++) {
                     array.push({"sType": "sortValue"})
                 }
 
+                var paging = properties["generalSizeLimit"] > 0;
+
                 List.createClasses(properties, targetDiv);
-                $('#' + targetDiv + ' .reportArea').html(data);
-                $('#' + targetDiv + ' .reportArea table').dataTable({bFilter:false, bPaginate:false, bInfo:false, aaSorting: a, aoColumns: array })
+
+                List.availableDataTables[targetDiv] = $('#' + targetDiv + ' .reportArea table').dataTable({bFilter:false, bPaginate:paging, sPaginationType: "full_numbers", bInfo:false, aaSorting: a, aoColumns: array })
             }, null, targetDiv);
         }
     },
@@ -75,5 +84,6 @@ List = {
             }
         }
         return curStyleSheet;
-    }
+    },
+    availableDataTables: {}
 }

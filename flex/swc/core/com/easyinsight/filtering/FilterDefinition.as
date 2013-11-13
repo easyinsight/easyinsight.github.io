@@ -26,6 +26,7 @@ import mx.utils.ObjectUtil;
         public static const ANALYSIS_ITEM:int = 13;
         public static const MULTI_FLAT_DATE:int = 14;
         public static const MONTH_CUTOFF:int = 15;
+        public static const MULTI_FIELD:int = 16;
 
     public static var flexIDCtr:int = 0;
 
