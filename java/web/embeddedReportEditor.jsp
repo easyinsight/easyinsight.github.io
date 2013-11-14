@@ -49,14 +49,10 @@
 
     <script src="AC_OETags.js" language="javascript"></script>
 
-    <!--  BEGIN Browser History required section -->
-    <script src="history/history.js" language="javascript"></script>
-    <!--  END Browser History required section -->
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Easy Insight Reports and Dashboards</title>
+    <title><%= insightResponse.getInsightDescriptor().getName() %></title>
     <jsp:include page="html/bootstrapHeader.jsp"/>
 
     <style type="text/css">
