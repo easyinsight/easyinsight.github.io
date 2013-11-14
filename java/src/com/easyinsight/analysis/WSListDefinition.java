@@ -349,81 +349,15 @@ public class WSListDefinition extends WSAnalysisDefinition {
         }
     }
 
-    public void multiField(MultiFieldFilterDefinition multiFieldFilterDefinition) throws SQLException {
-        long id = getDataFeedID();
-        FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(id);
-        Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
-        Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
-        for (AnalysisItem field : dataSource.getFields()) {
-            map.put(field.getAnalysisItemID(), field);
-            mapByName.put(field.toDisplay(), field);
-        }
-        if (getAddedItems() != null) {
-            for (AnalysisItem item : getAddedItems()) {
-                if (item.getAnalysisItemID() != 0) {
-                    map.put(item.getAnalysisItemID(), item);
+    protected boolean supportsMultiField() {
+        return true;
+    }
 
-                }
-                mapByName.put(item.toDisplay(), item);
-            }
-        }
-        for (AnalysisItem column : columns) {
-            map.put(column.getAnalysisItemID(), column);
-        }
-        List<AnalysisItem> fields;
-        Set<AnalysisItem> set = new HashSet<AnalysisItem>();
-        final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
-        if (multiFieldFilterDefinition.isAll()) {
-            int i = 0;
-            for (AnalysisItem column : columns) {
-                set.add(column);
-                positions.put(column, i++);
-            }
-            for (AnalysisItemHandle field : multiFieldFilterDefinition.getAvailableItems()) {
-                AnalysisItem item = map.get(field.getAnalysisItemID());
-                if (item != null) {
-                    set.add(item);
-                    positions.put(item, i++);
-                } else {
-                    item = mapByName.get(field.getName());
-                    if (item != null) {
-                        set.add(item);
-                        positions.put(item, i++);
-                    }
-                }
-            }
+    protected List<AnalysisItem> reportFieldsForMultiField() {
+        return columns;
+    }
 
-            fields = new ArrayList<AnalysisItem>(set);
-        } else {
-            int i = 0;
-            for (AnalysisItemHandle field : multiFieldFilterDefinition.getSelectedItems()) {
-                if (field.isSelected()) {
-                    AnalysisItem item = map.get(field.getAnalysisItemID());
-                    if (item != null) {
-                        set.add(item);
-                        positions.put(item, i++);
-                    } else {
-                        item = mapByName.get(field.getName());
-                        if (item != null) {
-                            set.add(item);
-                            positions.put(item, i++);
-                        }
-                    }
-                }
-            }
-            fields = new ArrayList<AnalysisItem>(set);
-        }
-        Collections.sort(fields, new Comparator<AnalysisItem>() {
-
-            public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
-                Integer p1 = positions.get(analysisItem);
-                Integer p2 = positions.get(analysisItem1);
-                return p1.compareTo(p2);
-            }
-        });
-
-        if (set.size() > 0) {
-            setColumns(fields);
-        }
+    protected void assignResults(List<AnalysisItem> fields) {
+        setColumns(fields);
     }
 }

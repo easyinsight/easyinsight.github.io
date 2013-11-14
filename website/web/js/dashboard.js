@@ -170,10 +170,11 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
         fullFilters[curFilters[i].id] = curFilters[i];
     }
     beforeRefresh($("#" + id + " .loading"))();
+    var embedComponent = typeof(userJSON.embedKey) != "undefined" ? ("&embedKey=" + userJSON.embedKey) : "";
     var dashboardComponent = dashboardID == -1 ? "" : ("&dashboardID=" + dashboardID);
     var drillthroughComponent = typeof(drillthroughID) != "undefined" ? ("&drillThroughKey=" + drillthroughID) : "";
     var postData = {
-        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent + drillthroughComponent,
+        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent + drillthroughComponent + embedComponent,
         contentType: "application/json; charset=UTF-8",
         data: JSON.stringify(fullFilters),
         type: "POST"
@@ -404,7 +405,7 @@ $(function () {
         var saveStack;
 
 
-        //$("#configuration-dropdown").html(configurationDropdownTemplate({"dashboard": dashboardJSON, "user": userJSON}))
+        $("#configuration-dropdown").html(configurationDropdownTemplate({"dashboard": dashboardJSON, "user": userJSON}))
 
         if (Modernizr.localstorage && dashboardJSON["local_storage"] && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+$/)) {
             if (typeof(localStorage[dashboardKey]) != "undefined") {
@@ -573,8 +574,24 @@ $(function () {
             } else {
                 renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
             }
-//            saveFilter(f, k);
+            saveFilter(f, k);
         });
+
+        $(".save-as-config-btn").click(function(e) {
+            var v = $("#save-as-config-name").val();
+            if(v == "") {
+
+            } else {
+                saveConfiguration(v);
+                $("#save-as-modal").modal('hide');
+            }
+
+        })
+
+        $(".save-current-configuration").click(function(e) {
+            saveConfiguration(dashboardJSON["configuration_name"], dashboardJSON["configuration_key"]);
+            e.preventDefault();
+        })
 
         $(".multi_flat_month_save").click(function (e) {
             var a = $(e.target).parent().parent().parent().parent();
@@ -829,14 +846,14 @@ $(function () {
             window.location.href = $(e.target).parent().attr("href") + "/delete";
         })
 
-        saveConfiguration = function (name) {
-            console.log(stackMap)
-            var c = {"filters": _.map(filterMap, function (e, k) {
-                            return toFilterString(e.filter, true);
-                        }), "stacks": _.reduce(stackMap, function(m, e, i) {
+        saveConfiguration = function (name, key) {
+            var c = {"filters": _.reduce(filterMap, function (m, e, i) {
+                            m[e.filter.id] = toFilterString(e.filter, true);
+                return m;
+                        }, {}), "stacks": _.reduce(stackMap, function(m, e, i) {
                 m[i] = e.selected;
                 return m;
-            }, {}), "name": name }
+            }, {}), "name": name, "key": key }
             console.log(c);
             $.ajax({ url: "/app/html/dashboard/" + dashboardJSON["key"] + "/config",
                 contentType: "application/json; charset=UTF-8",

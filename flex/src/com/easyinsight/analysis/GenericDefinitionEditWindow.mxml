@@ -26,6 +26,7 @@
             accountVisible = _definition.accountVisible;
             exchangeVisible = _definition.solutionVisible;
             publiclyVisible = _definition.publiclyVisible;
+            publicWithKey = _definition.publicWithKey;
         }
 
         private var _startIndex:int;
@@ -108,6 +109,7 @@
             _definition.accountVisible = accountVisibleCheckbox.selected;
             _definition.solutionVisible = exchangeVisibleCheckbox.selected;
             _definition.publiclyVisible = publiclyVisibleCheckbox.selected;
+            _definition.publicWithKey = publicWithKeyCheckbox.selected;
             dispatchEvent(new ReportPreferencesEvent(refreshNecessary));
             PopUpManager.removePopUp(this);
         }
@@ -126,6 +128,9 @@
 
         [Bindable]
         private var publiclyVisible:Boolean;
+
+        [Bindable]
+        private var publicWithKey:Boolean;
 
         public function cancel():void {
             PopUpManager.removePopUp(this);
@@ -152,6 +157,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="Exchange Visible:">
                     <mx:CheckBox id="exchangeVisibleCheckbox" selected="{exchangeVisible}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Public with Key:">
+                    <mx:CheckBox id="publicWithKeyCheckbox" selected="{publicWithKey}"/>
                 </mx:FormItem>
             </mx:Form>
         </mx:Box>

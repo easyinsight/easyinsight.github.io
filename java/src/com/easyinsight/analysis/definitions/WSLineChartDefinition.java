@@ -582,4 +582,16 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         pie.put("url", "/app/twoAxisChart");
         return pie;
     }
+
+    protected boolean supportsMultiField() {
+        return isMultiMeasure();
+    }
+
+    protected List<AnalysisItem> reportFieldsForMultiField() {
+        return getMeasures();
+    }
+
+    protected void assignResults(List<AnalysisItem> fields) {
+        setMeasures(fields);
+    }
 }

@@ -24,10 +24,18 @@ public class ReportFilter implements Filter {
         if (req instanceof HttpServletRequest) {
             HttpServletRequest request = (HttpServletRequest) req;
             String path = request.getServletPath();
-            Pattern p = Pattern.compile("^/html/report/([a-zA-z0-9]+)/?.*$");
+            Pattern p = Pattern.compile("^/html/report/([a-zA-Z0-9]+)/?.*$");
             Matcher m = p.matcher(path);
-            String reportID = m.replaceAll("$1");
-            request.setAttribute("public", new AnalysisService().isReportPublic(reportID));
+            String reportID = null;
+            if(m.matches()) {
+                reportID = m.replaceAll("$1");
+            } else {
+                Pattern pp = Pattern.compile("^/app/(html/)?embeddedReport/([a-zA-Z0-9]+)/?.*$");
+                m = pp.matcher(path);
+                reportID = m.replaceAll("$2");
+            }
+            String embedKey = request.getParameter("embedKey");
+            request.setAttribute("public", new AnalysisService().isReportPublic(reportID) || (embedKey != null && new AnalysisService().isReportEmbedKeyVisible(reportID)));
         }
         chain.doFilter(req, resp);
     }

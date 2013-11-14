@@ -105,6 +105,7 @@ import mx.collections.ArrayCollection;
         public var cacheMinutes:int;
         public var manualButRunFirst:Boolean;
         public var customFontFamily:String;
+    public var publicWithKey:Boolean;
         public var useCustomFontFamily:Boolean;
     public var generalSizeLimit:int;
     public var fetchSize:int;

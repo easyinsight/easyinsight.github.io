@@ -699,6 +699,17 @@ public class DashboardService {
         }
     }
 
+    public Map<Long, FilterDefinition> getFiltersForDashboard(String urlKey) {
+        Dashboard d = getDashboardView(retrieveFromDashboardLink(urlKey).getDashboardID(), null);
+        ListFiltersVisitor listFiltersVisitor = new ListFiltersVisitor();
+        d.visit(listFiltersVisitor);
+        Map<Long, FilterDefinition> list = listFiltersVisitor.getFilters();
+        for(FilterDefinition f : d.getFilters()) {
+            list.put(f.getFilterID(), f);
+        }
+        return list;
+    }
+
     public Dashboard getDashboardView(long dashboardID, @Nullable DashboardStackPositions dashboardStackPositions) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -823,6 +834,28 @@ public class DashboardService {
             }
         }
     }
+
+    private static class ListFiltersVisitor implements IDashboardVisitor {
+        private Map<Long, FilterDefinition> filters = new HashMap<Long, FilterDefinition>();
+
+        private Map<Long, FilterDefinition> getFilters() {
+            return filters;
+        }
+
+        public void accept(DashboardElement dashboardElement) {
+            if(dashboardElement instanceof DashboardReport) {
+                InsightDescriptor id = ((DashboardReport) dashboardElement).getReport();
+                WSAnalysisDefinition ad = new AnalysisService().openAnalysisDefinition(id.getId());
+                for(FilterDefinition f : ad.getFilterDefinitions()) {
+                    filters.put(f.getFilterID(), f);
+                }
+            }
+            for(FilterDefinition f : dashboardElement.getFilters()) {
+                filters.put(f.getFilterID(), f);
+            }
+        }
+    }
+
 
     private static class FilterVisitor implements IDashboardVisitor {
 

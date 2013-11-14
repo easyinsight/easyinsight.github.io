@@ -17,6 +17,7 @@ import com.easyinsight.userupload.UploadPolicy;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.ParsingException;
+import org.apache.commons.io.IOUtils;
 import sun.misc.BASE64Decoder;
 
 import javax.servlet.ServletException;
@@ -26,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -164,21 +166,9 @@ public abstract class APIServlet extends HttpServlet {
             try {
 
                 String string = null;
-                if (userResponse.getAccountID() == 5595) {
-                    StringBuilder jb = new StringBuilder();
-                    String line;
-                    try {
-                        BufferedReader reader = req.getReader();
-                        while ((line = reader.readLine()) != null)
-                            jb.append(line);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    string = jb.toString();
-                    /*byte[] cbuf = new byte[req.getContentLength()];
-                    req.getInputStream().read(cbuf);
-                    string = new String(cbuf);*/
-                    System.out.println(string);
+                if (userResponse.getAccountID() == 5595 || userResponse.getAccountID() == 4913) {
+                    byte[] bytes = IOUtils.toByteArray(req.getInputStream());
+                    string = new String(bytes, Charset.forName("UTF-8"));
                 }
 
                 SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
@@ -221,6 +211,7 @@ public abstract class APIServlet extends HttpServlet {
                 resp.getOutputStream().write(responseInfo.toResponse().getBytes());
                 resp.getOutputStream().flush();
             } catch (Exception e) {
+                LogClass.error(e);
                 resp.setContentType("text/xml");
                 resp.setStatus(400);
                 resp.getOutputStream().write("<response><code>400</code><message>Your XML was malformed.</message></response>".getBytes());

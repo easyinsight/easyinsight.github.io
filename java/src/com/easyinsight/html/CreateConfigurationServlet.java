@@ -32,7 +32,17 @@ public class CreateConfigurationServlet extends HttpServlet {
             JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
             JSONObject jo = (JSONObject) parser.parse(is);
             System.out.println(jo);
-            DashboardStackPositions positions = new DashboardStackPositions();
+            DashboardStackPositions positions = null;
+            SavedConfiguration configuration = null;
+            String key = (String) jo.get("key");
+            if(key != null) {
+                configuration = ds.getConfiguration(key);
+                positions = configuration.getDashboardStackPositions();
+            } else {
+                configuration = new SavedConfiguration();
+                positions = new DashboardStackPositions();
+            }
+
             Map<String, Integer> stackPositions = new HashMap<String, Integer>();
             JSONObject stacks = (JSONObject) jo.get("stacks");
             for(Map.Entry<String, Object> e : stacks.entrySet()) {
@@ -40,7 +50,7 @@ public class CreateConfigurationServlet extends HttpServlet {
             }
 
             positions.setPositions(stackPositions);
-            SavedConfiguration configuration = new SavedConfiguration();
+
             configuration.setName((String) jo.get("name"));
             configuration.setDashboardStackPositions(positions);
             new DashboardService().saveConfigurationForDashboard(configuration, dashboardID);

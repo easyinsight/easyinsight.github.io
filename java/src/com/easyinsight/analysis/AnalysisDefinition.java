@@ -95,6 +95,9 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "create_date")
     private Date dateCreated;
 
+    @Column(name="public_with_key")
+    private boolean publicWithKey;
+
     @Column(name = "update_date")
     private Date dateUpdated;
 
@@ -181,6 +184,14 @@ public class AnalysisDefinition implements Cloneable {
                 }
             }
         }
+    }
+
+    public boolean isPublicWithKey() {
+        return publicWithKey;
+    }
+
+    public void setPublicWithKey(boolean publicWithKey) {
+        this.publicWithKey = publicWithKey;
     }
 
     public List<ReportStub> getReportStubs() {
@@ -599,6 +610,11 @@ public class AnalysisDefinition implements Cloneable {
             }
         }*/
 
+        Map<String, AnalysisItem> nameMap = new HashMap<String, AnalysisItem>();
+        for (AnalysisItem item : allFields) {
+            nameMap.put(item.toDisplay(), item);
+        }
+
         Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
 
         if (target != null) {
@@ -729,6 +745,7 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setSolutionVisible(solutionVisible);
         analysisDefinition.setAccountVisible(accountVisible);
         analysisDefinition.setMarmotScript(marmotScript);
+        analysisDefinition.setPublicWithKey(publicWithKey);
         analysisDefinition.setReportRunMarmotScript(reportRunMarmotScript);
         analysisDefinition.setRecommendedExchange(recommendedExchange);
         analysisDefinition.setAutoSetupDelivery(autoSetupDelivery);

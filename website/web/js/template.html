@@ -6,7 +6,13 @@
             <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
-
+            <% if(typeof(user.designer) != "undefined") {
+                    if(typeof(dashboard.configuration_key) != "undefined") { %>
+                    <li><a href="#" class="save-current-configuration">Save Configuration</a></li>
+                    <li><a href="#save-as-modal" data-toggle="modal">Save As...</a></li>
+            <% } else { %>
+                <li><a href="#save-as-modal" data-toggle="modal" class="save-as-configuration">Save Configuration</a></li>
+            <% } } %>
             <% _.each(dashboard.configurations, function(e, i, l) { %>
                 <li>
                     <a href="/app/html/dashboard/<%- dashboard.key %>/config/<%- e.url %>"><span class="glyphicon<% if(typeof(dashboard.configuration_key) != "undefined" && dashboard.configuration_key == e.url) { %> glyphicon-ok<% } %>"></span> <%- e.name %> <% if(typeof(user.designer) != "undefined" && user.designer) { %><span style="float:right;" class="delete-config glyphicon glyphicon-remove"></span> <% } %></a></div>
@@ -16,6 +22,28 @@
                 <a class="restore_default_config" href="/app/html/dashboard/<%- dashboard.key %>">Restore Default</a>
             </li>
         </ul>
+        <div id="save-as-modal" class="modal save-as-modal-dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        Save as...
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input id="save-as-config-name" type="text" placeholder="Name..." class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                                <button class="btn btn-inverse save-as-config-btn">
+                                    Save
+                                </button>
+                                <button class="btn btn-inverse" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
     </script>
 
     <script type="text/template" id="stack">

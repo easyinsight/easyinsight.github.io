@@ -10,6 +10,8 @@
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.json.JSONArray" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
@@ -18,7 +20,7 @@
         List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
         String drillthroughArgh = request.getParameter("drillthroughKey");
 
-        InsightResponse insightResponse = null;
+        InsightResponse insightResponse;
         if (drillthroughArgh != null) {
             DrillThroughData drillThroughData = Utils.drillThroughFiltersForReport(drillthroughArgh);
             drillthroughFilters = drillThroughData.getFilters();
@@ -42,8 +44,6 @@
 
         boolean phone = Utils.isPhone(request);
         boolean iPad = Utils.isTablet(request);
-        ReportInfo reportInfo = new AnalysisService().getReportInfo(reportID);
-        boolean editable = reportInfo.isAdmin();
         WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID);
         if (report == null) {
             throw new com.easyinsight.analysis.ReportNotFoundException("Attempt made to load report " + reportID + " which doesn't exist.");
@@ -76,6 +76,14 @@
         md.setEmbedded(true);
         jj.put("metadata", report.toJSON(md, new ArrayList<FilterDefinition>()));
         intermediate.put("report", jj);
+
+        EIConnection c = Database.instance().getConnection();
+        JSONObject userObject = new JSONObject();
+        try {
+            userObject = SecurityUtil.getUserJSON(c, request);
+        } finally {
+            c.close();
+        }
 %>
 
 <head>
@@ -100,6 +108,7 @@
     <script type="text/javascript" src="/js/dashboard.js"></script>
     <script type="text/javascript" language="JavaScript">
         var dashboardJSON = <%= reportJSON %>;
+        var userJSON = <%= userObject %>;
     </script>
 </head>
 <body>
