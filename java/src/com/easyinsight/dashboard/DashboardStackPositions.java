@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public class DashboardStackPositions implements Serializable {
     private Map<String, Integer> positions = new HashMap<String, Integer>();
-    private Map<String, Map<String, FilterDefinition>> filterMap = new HashMap<String, Map<String, FilterDefinition>>();
+    private Map<FilterPositionKey, FilterDefinition> filterMap = new HashMap<FilterPositionKey, FilterDefinition>();
     private Map<String, InsightDescriptor> reports = new HashMap<String, InsightDescriptor>();
     private long id;
 
@@ -32,11 +32,11 @@ public class DashboardStackPositions implements Serializable {
         this.id = id;
     }
 
-    public Map<String, Map<String, FilterDefinition>> getFilterMap() {
+    public Map<FilterPositionKey, FilterDefinition> getFilterMap() {
         return filterMap;
     }
 
-    public void setFilterMap(Map<String, Map<String, FilterDefinition>> filterMap) {
+    public void setFilterMap(Map<FilterPositionKey, FilterDefinition> filterMap) {
         this.filterMap = filterMap;
     }
 
@@ -82,25 +82,23 @@ public class DashboardStackPositions implements Serializable {
         savePositionStmt.close();
         PreparedStatement saveFilterStmt = conn.prepareStatement("INSERT INTO dashboard_state_to_filter (dashboard_state_id, source_filter_id, filter_key, filter_id) values (?, ?, ?, ?)");
         Session session = Database.instance().createSession(conn);
-        for (Map.Entry<String, Map<String, FilterDefinition>> entry : filterMap.entrySet()) {
-            String key = entry.getKey();
-            for (Map.Entry<String, FilterDefinition> filterEntry : entry.getValue().entrySet()) {
-                long sourceFilterID = Long.parseLong(filterEntry.getKey());
-                FilterDefinition overridenFilter = filterEntry.getValue();
-                try {
-                    overridenFilter = overridenFilter.clone();
-                } catch (CloneNotSupportedException e) {
-                    throw new RuntimeException(e);
-                }
-                overridenFilter.beforeSave(session);
-                session.saveOrUpdate(overridenFilter);
-                session.flush();
-                saveFilterStmt.setLong(1, id);
-                saveFilterStmt.setLong(2, sourceFilterID);
-                saveFilterStmt.setString(3, key);
-                saveFilterStmt.setLong(4, overridenFilter.getFilterID());
-                saveFilterStmt.execute();
+        for (Map.Entry<FilterPositionKey, FilterDefinition> entry : filterMap.entrySet()) {
+            FilterPositionKey key = entry.getKey();
+            FilterDefinition overridenFilter = entry.getValue();
+            long sourceFilterID = key.getFilterID();
+            try {
+                overridenFilter = overridenFilter.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
             }
+            overridenFilter.beforeSave(session);
+            session.saveOrUpdate(overridenFilter);
+            session.flush();
+            saveFilterStmt.setLong(1, id);
+            saveFilterStmt.setLong(2, sourceFilterID);
+            saveFilterStmt.setString(3, key.createURLKey());
+            saveFilterStmt.setLong(4, overridenFilter.getFilterID());
+            saveFilterStmt.execute();
         }
 
         session.close();
@@ -131,21 +129,16 @@ public class DashboardStackPositions implements Serializable {
         queryFilterStmt.setLong(1, dashboardStateID);
         ResultSet filterRS = queryFilterStmt.executeQuery();
         Session session = Database.instance().createSession(conn);
-        Map<String, Map<String, FilterDefinition>> filters = new HashMap<String, Map<String, FilterDefinition>>();
+        Map<FilterPositionKey, FilterDefinition> filters = new HashMap<FilterPositionKey, FilterDefinition>();
         while (filterRS.next()) {
-            long sourceFilterID = filterRS.getLong(1);
             String filterKey = filterRS.getString(2);
             long filterID = filterRS.getLong(3);
             List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
             if (results.size() > 0) {
                 FilterDefinition filterDefinition = (FilterDefinition) results.get(0);
                 filterDefinition.afterLoad();
-                Map<String, FilterDefinition> map = filters.get(filterKey);
-                if (map == null) {
-                    map = new HashMap<String, FilterDefinition>();
-                    filters.put(filterKey, map);
-                }
-                map.put(String.valueOf(sourceFilterID), filterDefinition);
+                FilterPositionKey filterPositionKey = FilterPositionKey.fromString(filterKey);
+                filters.put(filterPositionKey, filterDefinition);
             }
         }
         session.close();
