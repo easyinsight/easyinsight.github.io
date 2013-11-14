@@ -49,19 +49,36 @@ public class SecurityUtil {
     }
 
     public static void populateThreadLocalFromSession(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        String userName = (String) session.getAttribute("userName");
-        Long userID = (Long) session.getAttribute("userID");
-        Long accountID = (Long) session.getAttribute("accountID");
-        Integer accountType = (Integer) session.getAttribute("accountType");
-        Integer dayOfWeek = (Integer) session.getAttribute("dayOfWeek");
-        String persona = (String) session.getAttribute("persona");
-        Boolean accountAdmin = (Boolean) session.getAttribute("accountAdmin");
-        if (dayOfWeek == null) {
-            dayOfWeek = 1;
+
+        String embedKey = request.getParameter("embedKey");
+        boolean usingEmbed = false;
+        if (embedKey != null) {
+            Session session = Database.instance().createSession();
+            List results = session.createQuery("from User where userKey = ?").setString(0, embedKey).list();
+            if (results.size() > 0) {
+                User user = (User) results.get(0);
+                populateThreadLocal(user.getUserName(), user.getUserID(), user.getAccount().getAccountID(), user.getAccount().getAccountType(),
+                        user.isAccountAdmin(), user.getAccount().getFirstDayOfWeek(), null);
+                usingEmbed = true;
+            }
         }
-        com.easyinsight.security.SecurityUtil.populateThreadLocal(userName, userID,
-                accountID, accountType, accountAdmin, dayOfWeek, persona);
+
+        if (!usingEmbed) {
+            HttpSession session = request.getSession();
+            String userName = (String) session.getAttribute("userName");
+            Long userID = (Long) session.getAttribute("userID");
+            Long accountID = (Long) session.getAttribute("accountID");
+            Integer accountType = (Integer) session.getAttribute("accountType");
+            Integer dayOfWeek = (Integer) session.getAttribute("dayOfWeek");
+            String persona = (String) session.getAttribute("persona");
+            Boolean accountAdmin = (Boolean) session.getAttribute("accountAdmin");
+            if (dayOfWeek == null) {
+                dayOfWeek = 1;
+            }
+            com.easyinsight.security.SecurityUtil.populateThreadLocal(userName, userID,
+                    accountID, accountType, accountAdmin, dayOfWeek, persona);
+        }
+
     }
 
     public static void setSecurityProvider(ISecurityProvider securityProvider) {
@@ -252,8 +269,9 @@ public class SecurityUtil {
         }
     }
 
-    public static JSONObject getUserJSON(Connection conn) throws JSONException {
+    public static JSONObject getUserJSON(Connection conn, HttpServletRequest request) throws JSONException {
         long userID = getUserID(false);
+        String embedKey = request.getParameter("embedKey");
         JSONObject jo = new JSONObject();
         if(userID > 0) {
             Session session = Database.instance().createSession(conn);
@@ -261,7 +279,7 @@ public class SecurityUtil {
             try {
                 User u = (User) session.createQuery("from User where user_id = ?").setLong(0, userID).list().get(0);
                 jo.put("name", u.getUserName());
-                jo.put("designer", u.isAnalyst());
+                jo.put("designer", embedKey != null && u.isAnalyst());
             } finally {
                 session.close();
             }
@@ -270,6 +288,7 @@ public class SecurityUtil {
             jo.put("name", (Object) null);
             jo.put("designer", false);
         }
+        jo.put("embedKey", embedKey);
 
         return jo;
     }
@@ -469,25 +488,6 @@ public class SecurityUtil {
                     }
                 }
                 return Integer.MAX_VALUE;
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
-    private static long getKPITreeForKey(String urlKey) {
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE_ID FROM GOAL_TREE WHERE URL_KEY = ?");
-            queryStmt.setString(1, urlKey);
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                return rs.getLong(1);
-            } else {
-                throw new SecurityException();
             }
         } catch (SQLException e) {
             LogClass.error(e);
