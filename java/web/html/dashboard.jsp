@@ -72,7 +72,7 @@
         EIConnection c = Database.instance().getConnection();
         JSONObject userObject = new JSONObject();
         try {
-            userObject = SecurityUtil.getUserJSON(c);
+            userObject = SecurityUtil.getUserJSON(c, request);
         } finally {
             c.close();
         }
