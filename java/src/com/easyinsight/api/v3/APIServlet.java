@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -165,27 +166,9 @@ public abstract class APIServlet extends HttpServlet {
             try {
 
                 String string = null;
-                if (userResponse.getAccountID() == 5595) {
-                    //StringBuilder jb = new StringBuilder();
-                    //String line;
-                    try {
-                        byte[] bytes = IOUtils.toByteArray(req.getInputStream());
-                        System.out.println("Read " + bytes.length + " bytes");
-                        string = new String(bytes);
-                        /*BufferedReader reader = req.getReader();
-                        while ((line = reader.readLine()) != null)
-                            jb.append(line);*/
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    //string = jb.toString();
-                    /*byte[] cbuf = new byte[req.getContentLength()];
-                    req.getInputStream().read(cbuf);
-                    string = new String(cbuf);*/
-                    /*
-                    select Id, AccountId, Name, Number, NumberFormated, CostCenter, PlanId from [CarrierData].[dbo].[Line]
-                     */
-                    System.out.println(string);
+                if (userResponse.getAccountID() == 5595 || userResponse.getAccountID() == 4913) {
+                    byte[] bytes = IOUtils.toByteArray(req.getInputStream());
+                    string = new String(bytes, Charset.forName("UTF-8"));
                 }
 
                 SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
