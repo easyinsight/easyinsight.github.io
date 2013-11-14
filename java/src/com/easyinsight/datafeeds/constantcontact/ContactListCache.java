@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.constantcontact;
 
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.logging.LogClass;
 import nu.xom.*;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
@@ -8,6 +9,7 @@ import oauth.signpost.exception.OAuthMessageSignerException;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,13 +33,53 @@ public class ContactListCache extends ConstantContactBaseSource {
 
 
             for (Object obj : campaigns) {
-                Map node = (Map) obj;
-                String id = node.get("id").toString();
-                String name = node.get("name").toString();
-                contactLists.add(new ContactList(id, name, name));
+                try {
+                    Map node = (Map) obj;
+                    String id = node.get("id").toString();
+                    String name = node.get("name").toString();
+                    ContactList contactList = new ContactList(id, name, name);
+                    contactLists.add(contactList);
+                    Map result = query("https://api.constantcontact.com/v2/lists/" + id + "/contacts?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                    Map meta = (Map) result.get("meta");
+                    String nextLink = null;
+                    if (meta != null) {
+                        Map pagination = (Map) meta.get("pagination");
+                        if (pagination != null) {
+                            Object nextLinkObject = pagination.get("next_link");
+                            if (nextLinkObject != null) {
+                                nextLink = "https://api.constantcontact.com" + nextLinkObject.toString() + "&api_key=" + ConstantContactCompositeSource.KEY;
+                            }
+                        }
+                    }
+                    boolean hasMoreData;
+                    do {
+                        List results = (List) result.get("results");
+                        hasMoreData = false;
+                        for (Object contactObj : results) {
+                            Map contactMap = (Map) contactObj;
+                            String contactID = contactMap.get("id").toString();
+                            contactList.getUsers().add(contactID);
+                        }
+                        if (nextLink != null) {
+                            result = query(nextLink, ccSource, client);
+                            meta = (Map) result.get("meta");
+                            nextLink = null;
+                            if (meta != null) {
+                                Map pagination = (Map) meta.get("pagination");
+                                if (pagination != null) {
+                                    Object nextLinkObject = pagination.get("next_link");
+                                    if (nextLinkObject != null) {
+                                        nextLink = "https://api.constantcontact.com" + nextLinkObject.toString() + "&api_key=" + ConstantContactCompositeSource.KEY;
+                                    }
+                                }
+                            }
+                            hasMoreData = true;
+                        }
+                    } while (hasMoreData);
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
             }
-
-            //contacts = new ContactRetrieval().retrieve(ccSource, contactLists);
         }
         return contactLists;
     }
