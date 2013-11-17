@@ -32,8 +32,9 @@ public class FilterPositionKey {
         if (tokens.length == 2) {
             filterID = Long.parseLong(tokens[1]);
         } else {
-            urlKey = tokens[1];
-            filterID = Long.parseLong(tokens[2]);
+            filterID = Long.parseLong(tokens[1]);
+            urlKey = tokens[2];
+
         }
         return new FilterPositionKey(scope, filterID, urlKey);
     }
@@ -44,7 +45,7 @@ public class FilterPositionKey {
         } else if (scope == DASHBOARD) {
             return scope + "|" + filterID;
         } else {
-            return scope + "|" + scopeURLKey + "|" + filterID;
+            return scope + "|" + filterID + "|" + scopeURLKey;
         }
     }
 

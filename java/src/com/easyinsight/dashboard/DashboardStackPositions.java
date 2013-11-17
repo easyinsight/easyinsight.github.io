@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public class DashboardStackPositions implements Serializable {
     private Map<String, Integer> positions = new HashMap<String, Integer>();
-    private Map<FilterPositionKey, FilterDefinition> filterMap = new HashMap<FilterPositionKey, FilterDefinition>();
+    private Map<String, FilterDefinition> filterMap = new HashMap<String, FilterDefinition>();
     private Map<String, InsightDescriptor> reports = new HashMap<String, InsightDescriptor>();
     private long id;
 
@@ -32,11 +32,11 @@ public class DashboardStackPositions implements Serializable {
         this.id = id;
     }
 
-    public Map<FilterPositionKey, FilterDefinition> getFilterMap() {
+    public Map<String, FilterDefinition> getFilterMap() {
         return filterMap;
     }
 
-    public void setFilterMap(Map<FilterPositionKey, FilterDefinition> filterMap) {
+    public void setFilterMap(Map<String, FilterDefinition> filterMap) {
         this.filterMap = filterMap;
     }
 
@@ -82,8 +82,9 @@ public class DashboardStackPositions implements Serializable {
         savePositionStmt.close();
         PreparedStatement saveFilterStmt = conn.prepareStatement("INSERT INTO dashboard_state_to_filter (dashboard_state_id, source_filter_id, filter_key, filter_id) values (?, ?, ?, ?)");
         Session session = Database.instance().createSession(conn);
-        for (Map.Entry<FilterPositionKey, FilterDefinition> entry : filterMap.entrySet()) {
-            FilterPositionKey key = entry.getKey();
+        for (Map.Entry<String, FilterDefinition> entry : filterMap.entrySet()) {
+            String keyString = entry.getKey();
+            FilterPositionKey key = FilterPositionKey.fromString(keyString);
             FilterDefinition overridenFilter = entry.getValue();
             long sourceFilterID = key.getFilterID();
             try {
@@ -129,7 +130,7 @@ public class DashboardStackPositions implements Serializable {
         queryFilterStmt.setLong(1, dashboardStateID);
         ResultSet filterRS = queryFilterStmt.executeQuery();
         Session session = Database.instance().createSession(conn);
-        Map<FilterPositionKey, FilterDefinition> filters = new HashMap<FilterPositionKey, FilterDefinition>();
+        Map<String, FilterDefinition> filters = new HashMap<String, FilterDefinition>();
         while (filterRS.next()) {
             String filterKey = filterRS.getString(2);
             long filterID = filterRS.getLong(3);
@@ -137,8 +138,7 @@ public class DashboardStackPositions implements Serializable {
             if (results.size() > 0) {
                 FilterDefinition filterDefinition = (FilterDefinition) results.get(0);
                 filterDefinition.afterLoad();
-                FilterPositionKey filterPositionKey = FilterPositionKey.fromString(filterKey);
-                filters.put(filterPositionKey, filterDefinition);
+                filters.put(filterKey, filterDefinition);
             }
         }
         session.close();
