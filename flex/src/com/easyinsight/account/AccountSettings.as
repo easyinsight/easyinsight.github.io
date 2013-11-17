@@ -13,6 +13,7 @@ public class AccountSettings {
     public var firstDayOfWeek:int;
     public var maxResults:int;
     public var sendEmail:Boolean;
+    public var htmlView:Boolean;
     
     public function AccountSettings() {
     }

@@ -278,7 +278,7 @@
         private var resendLabel:String = "Resend Invitation";
 
         [Bindable]
-        private var reportVisibility:Boolean;
+        private var reportVisibility:Boolean = true;
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">

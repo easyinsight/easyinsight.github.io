@@ -65,12 +65,8 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         }
         if (transformContainer != null) {
             for each (var filterDefinition:FilterDefinition in transformContainer.getFilterDefinitions()) {
-                var map:Object = positions.filterMap["s" + dashboardStack.urlKey];
-                if (map == null) {
-                    map = new Object();
-                    positions.filterMap["s" + dashboardStack.urlKey] = map;
-                }
-                map[filterDefinition.filterID] = filterDefinition;
+                var str:String = FilterPositionKey.createString(FilterPositionKey.DASHBOARD_STACK, filterDefinition.filterID, dashboardStack.urlKey);
+                positions.filterMap[str] = filterDefinition;
             }
         }
     }

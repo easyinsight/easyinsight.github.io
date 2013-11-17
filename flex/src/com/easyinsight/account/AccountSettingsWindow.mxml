@@ -39,6 +39,7 @@
             firstDayOfWeek = accountSettings.firstDayOfWeek;
             defaultMaxResults = String(accountSettings.maxResults);
             sendEmail = accountSettings.sendEmail;
+            htmlView = accountSettings.htmlView;
         }
 
         private function save():void {
@@ -49,6 +50,7 @@
             accountSettings.firstDayOfWeek = dayBox.selectedItem.data;
             accountSettings.maxResults = int(defaultMaxResultsInput.text);
             accountSettings.sendEmail = emailSetupCheckbox.selected;
+            accountSettings.htmlView = htmlViewCheckbox.selected;
             ProgressAlert.alert(this, "Saving settings...", null, userService.saveAccountSettings);
             User.getInstance().dateFormat = accountSettings.dateFormat;
             userService.saveAccountSettings.send(accountSettings);
@@ -74,6 +76,9 @@
 
         [Bindable]
         private var sendEmail:Boolean;
+
+        [Bindable]
+        private var htmlView:Boolean;
         ]]></mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
         <mx:method name="getAccountSettings" result="gotSettings()"/>
@@ -123,6 +128,9 @@
             </mx:FormItem>
             <mx:FormItem label="Send Email to New Users:">
                 <mx:CheckBox id="emailSetupCheckbox" selected="{sendEmail}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Default to HTML View:">
+                <mx:CheckBox id="htmlViewCheckbox" selected="{htmlView}"/>
             </mx:FormItem>
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">

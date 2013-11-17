@@ -512,7 +512,7 @@ public class UserAccountAdminService {
             if (subdomainEnabled) {
                 loginURL = "https://therapyworks.easy-insight.com/";
             } else {
-                loginURL = "https://www.easy-insight.com/app";
+                loginURL = "https://www.easy-insight.com/";
             }
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM new_user_link WHERE user_id = ?");
             deleteStmt.setLong(1, userID);
@@ -1213,6 +1213,7 @@ public class UserAccountAdminService {
             account.setCurrencySymbol(accountSettings.getCurrencySymbol());
             account.setMaxRecords(accountSettings.getMaxResults());
             account.setSendEmailsToNewUsers(accountSettings.isSendEmail());
+            account.setUseHTMLVersion(accountSettings.isHtmlView());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -1243,6 +1244,7 @@ public class UserAccountAdminService {
             accountSettings.setCurrencySymbol(account.getCurrencySymbol());
             accountSettings.setMaxResults(account.getMaxRecords());
             accountSettings.setSendEmail(account.isSendEmailsToNewUsers());
+            accountSettings.setHtmlView(account.isUseHTMLVersion());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);

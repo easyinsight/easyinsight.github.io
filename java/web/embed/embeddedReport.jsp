@@ -14,7 +14,9 @@
 <%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%
-    com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+    if(session.getAttribute("userName") != null) {
+        com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+    }
     try {
         long reportID;
         List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();

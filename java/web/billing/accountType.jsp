@@ -211,7 +211,7 @@
                             </div>
                             <div class="col-md-2" style="text-align: center">
                                 <div>
-                                    <h3 id="designerCost">$<%= account.getAddonDesigners() * 25 %></h3>
+                                    <h3 id="designerCost">$<%= account.getAddonDesigners() * 50 %></h3>
                                     <h5>Cost</h5>
                                 </div>
                             </div>

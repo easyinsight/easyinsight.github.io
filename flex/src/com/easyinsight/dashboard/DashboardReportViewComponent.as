@@ -53,12 +53,8 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             positions.saveReport(dashboardReport.urlKey, dashboardReport.report);
             if (transformContainer != null) {
                 for each (var filterDefinition:FilterDefinition in transformContainer.getFilterDefinitions()) {
-                    var map:Object = positions.filterMap["r" + dashboardReport.urlKey];
-                    if (map == null) {
-                        map = new Object();
-                        positions.filterMap["r" + dashboardReport.urlKey] = map;
-                    }
-                    map[filterDefinition.filterID] = filterDefinition;
+                    var str:String = FilterPositionKey.createString(FilterPositionKey.DASHBOARD_REPORT, filterDefinition.filterID, dashboardReport.urlKey);
+                    positions.filterMap[str] = filterDefinition;
                 }
             }
         }
@@ -282,6 +278,10 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         }
     }
 
+    public function toggleAllFilters():void {
+        transformContainer.toggleHiddenButAvailableFilters();
+    }
+
     private function onExport(event:Event):void {
         viewFactory.updateExportMetadata();
         var window:EmbeddedReportExportWindow = new EmbeddedReportExportWindow();
@@ -367,7 +367,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
     private var hasFilters:Boolean = false;
 
-    private var hiddenFilters:ArrayCollection = new ArrayCollection();
+
 
     private function onReportSetup(event:ReportSetupEvent):void {
         viewFactory.registerPostProcessor(new ReportDashboardPostProcessor(dashboardEditorMetadata));

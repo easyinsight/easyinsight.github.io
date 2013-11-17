@@ -539,7 +539,7 @@ public class DashboardService {
                 dashboard.setAdministrators(Arrays.asList((FeedConsumer) userStub));
             }
             dashboardStorage.saveDashboard(dashboard);
-            String cacheKey = SecurityUtil.getUserID(false) + "-" + dashboard.getId();
+
             /*if (dashboardCache != null) {
                 dashboardCache.remove(cacheKey);
             }*/
@@ -725,7 +725,7 @@ public class DashboardService {
     public Dashboard getDashboardView(long dashboardID, @Nullable DashboardStackPositions dashboardStackPositions, EIConnection conn) throws Exception {
         int role = SecurityUtil.authorizeDashboard(dashboardID);
         long startTime = System.currentTimeMillis();
-        String cacheKey = SecurityUtil.getUserID(false) + "-" + dashboardID;
+
         /*if (dashboardCache != null) {
             Dashboard dashboard = (Dashboard) dashboardCache.get(cacheKey);
             if (dashboard != null) {
@@ -770,12 +770,15 @@ public class DashboardService {
         dashboard.visit(filterVisitor);
         filterVisitor.done();
         if (dashboardStackPositions != null) {
-            String key = "d";
-            Map<String, FilterDefinition> filters = dashboardStackPositions.getFilterMap().get(key);
-            // where do we actually perform the override?
-            if (filters != null) {
-                dashboard.setOverridenFilters(filters);
+            Map<String, FilterDefinition> overriddenFilters = new HashMap<String, FilterDefinition>();
+            for (FilterDefinition filter : dashboard.getFilters()) {
+                FilterPositionKey filterPositionKey = new FilterPositionKey(FilterPositionKey.DASHBOARD, filter.getFilterID(), null);
+                FilterDefinition overriddenFilter = dashboardStackPositions.getFilterMap().get(filterPositionKey.createURLKey());
+                if (overriddenFilter != null) {
+                    overriddenFilters.put(String.valueOf(filter.getFilterID()), overriddenFilter);
+                }
             }
+            dashboard.setOverridenFilters(overriddenFilters);
             dashboard.visit(new StateVisitor(dashboardStackPositions));
         }
         /*if (dashboardCache != null) {
@@ -812,21 +815,29 @@ public class DashboardService {
                 if (position != null) {
                     dashboardStack.setDefaultIndex(position);
                 }
-                // set default position to position
-                String key = "s" + dashboardStack.getUrlKey();
-                Map<String, FilterDefinition> filters = dashboardStackPositions.getFilterMap().get(key);
-                if (filters != null) {
-                    dashboardStack.setOverridenFilters(filters);
+                Map<String, FilterDefinition> filters = new HashMap<String, FilterDefinition>();
+                for (FilterDefinition filter : dashboardStack.getFilters()) {
+                    FilterPositionKey filterPositionKey = new FilterPositionKey(FilterPositionKey.DASHBOARD_STACK, filter.getFilterID(), dashboardStack.getUrlKey());
+                    FilterDefinition overriddenFilter = dashboardStackPositions.getFilterMap().get(filterPositionKey.createURLKey());
+                    if (overriddenFilter != null) {
+                        filters.put(String.valueOf(filterPositionKey.getFilterID()), overriddenFilter);
+                    }
                 }
+                dashboardStack.setOverridenFilters(filters);
             }
             if (dashboardElement instanceof DashboardReport) {
                 DashboardReport dashboardReport = (DashboardReport) dashboardElement;
                 // adjust filters, adjust reports...
-                String key = "r" + dashboardReport.getUrlKey();
-                Map<String, FilterDefinition> filters = dashboardStackPositions.getFilterMap().get(key);
-                if (filters != null) {
-                    dashboardReport.setOverridenFilters(filters);
+                WSAnalysisDefinition reportDefinition = new AnalysisStorage().getAnalysisDefinition(dashboardReport.getReport().getId());
+                Map<String, FilterDefinition> filters = new HashMap<String, FilterDefinition>();
+                for (FilterDefinition filter : reportDefinition.getFilterDefinitions()) {
+                    FilterPositionKey filterPositionKey = new FilterPositionKey(FilterPositionKey.DASHBOARD_REPORT, filter.getFilterID(), dashboardReport.getUrlKey());
+                    FilterDefinition overriddenFilter = dashboardStackPositions.getFilterMap().get(filterPositionKey.createURLKey());
+                    if (overriddenFilter != null) {
+                        filters.put(String.valueOf(filterPositionKey.getFilterID()), overriddenFilter);
+                    }
                 }
+                dashboardReport.setOverridenFilters(filters);
                 InsightDescriptor report = dashboardStackPositions.getReports().get(dashboardReport.getUrlKey());
                 if (report != null) {
                     dashboardReport.setReport(report);
@@ -859,7 +870,6 @@ public class DashboardService {
 
     private static class FilterVisitor implements IDashboardVisitor {
 
-        private Map<AnalysisItem, List<FilterValueDefinition>> valueFilters = new HashMap<AnalysisItem, List<FilterValueDefinition>>();
         private Map<AnalysisItem, List<FlatDateFilter>> flatDateFilters = new HashMap<AnalysisItem, List<FlatDateFilter>>();
 
         private long dataSourceID;

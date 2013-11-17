@@ -20,6 +20,7 @@
         import com.easyinsight.customupload.ProblemDataEvent;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.dashboard.DashboardStackPositions;
+        import com.easyinsight.dashboard.FilterPositionKey;
         import com.easyinsight.dashboard.LocalStorageRetrievalState;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.AnalysisItemFilterDefinition;
@@ -410,13 +411,9 @@
                 desc.reportType = report.reportType;
                 desc.urlKey = report.urlKey;
                 var positions:DashboardStackPositions = new DashboardStackPositions();
-                var map:Object = positions.filterMap["r"];
-                if (map == null) {
-                    map = new Object();
-                    positions.filterMap["r"] = map;
-                }
                 for each (var filter:FilterDefinition in transformContainer.getFilterDefinitions()) {
-                    map[filter.filterID] = filter;
+                    var str:String = FilterPositionKey.createString(FilterPositionKey.REPORT, filter.filterID);
+                    positions.filterMap[str] = filter;
                 }
                 _breadCrumbs.push(new BreadCrumb(desc, transformContainer.getFilterDefinitions(), positions, selectedConfiguration));
                 if (event.descriptor is InsightDescriptor) {
@@ -520,9 +517,10 @@
         public function positionsPopulate(positions:DashboardStackPositions):void {
             if (transformContainer != null) {
                 var map:Object = new Object();
-                positions.filterMap["r"] = map;
+
                 for each (var filterDefinition:FilterDefinition in transformContainer.getFilterDefinitions()) {
-                    map[filterDefinition.filterID] = filterDefinition;
+                    var str:String = FilterPositionKey.createString(FilterPositionKey.REPORT, filterDefinition.filterID);
+                    positions.filterMap[str] = filterDefinition;
                 }
             }
         }
@@ -583,13 +581,11 @@
                     breadCrumbBox.addChild(backButton);
                 }
                 if (stackPositions != null) {
-                    var o:Object = stackPositions.filterMap["r"];
-                    if (o != null) {
+                    if (stackPositions.filterMap != null) {
                         var f:ArrayCollection = new ArrayCollection();
-                        for each (var filter:FilterDefinition in o) {
+                        for each (var filter:FilterDefinition in stackPositions.filterMap) {
                             f.addItem(filter);
                         }
-                        parameterFilters = f;
                     }
                 }
                 viewFactory.setup();

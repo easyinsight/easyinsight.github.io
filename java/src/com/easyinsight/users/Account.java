@@ -267,6 +267,17 @@ public class Account {
     @Column(name="send_emails_to_new_users")
     private boolean sendEmailsToNewUsers = true;
 
+    @Column(name="use_html_version")
+    private boolean useHTMLVersion = false;
+
+    public boolean isUseHTMLVersion() {
+        return useHTMLVersion;
+    }
+
+    public void setUseHTMLVersion(boolean useHTMLVersion) {
+        this.useHTMLVersion = useHTMLVersion;
+    }
+
     public boolean isSendEmailsToNewUsers() {
         return sendEmailsToNewUsers;
     }
@@ -1026,6 +1037,8 @@ public class Account {
             return "Professional Plan";
         } else if (getAccountType() == Account.ENTERPRISE) {
             return "Enterprise Plan";
+        } else if (getAccountType() == Account.ADMINISTRATOR) {
+            return "Administrator";
         }
         throw new UnsupportedOperationException();
     }
