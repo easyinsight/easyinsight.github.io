@@ -878,6 +878,7 @@ public class UserService {
         try {
             conn.setAutoCommit(false);
             Account account = accountTransferObject.toAccount();
+            account.setNewPricingModelInvoice(true);
             account.setCreationDate(new Date());
             account.setAccountSource(accountSource);
             account.setPricingModel(1);
