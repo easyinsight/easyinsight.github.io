@@ -16,8 +16,17 @@ public class AccountSettings {
     private int firstDayOfWeek;
     private int maxResults;
     private boolean sendEmail;
+    private boolean htmlView;
 
     public AccountSettings() {
+    }
+
+    public boolean isHtmlView() {
+        return htmlView;
+    }
+
+    public void setHtmlView(boolean htmlView) {
+        this.htmlView = htmlView;
     }
 
     public boolean isSendEmail() {
