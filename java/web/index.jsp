@@ -66,13 +66,12 @@
     EIConnection conn = Database.instance().getConnection();
     long accountID = 0;
     try {
-        PreparedStatement ps = conn.prepareStatement("SELECT html_or_flex, account_state, user.account_id FROM USER, ACCOUNT WHERE user_id = ? and user.account_id = account.account_id");
+        PreparedStatement ps = conn.prepareStatement("SELECT account_state, user.account_id FROM USER, ACCOUNT WHERE user_id = ? and user.account_id = account.account_id");
         ps.setLong(1, userID);
         ResultSet rs = ps.executeQuery();
         rs.next();
-        boolean htmlOrFlex = rs.getBoolean(1);
-        int accountState = rs.getInt(2);
-        accountID = rs.getLong(3);
+        int accountState = rs.getInt(1);
+        accountID = rs.getLong(2);
         ps.close();
         if (accountState == Account.CLOSED) {
             response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/index.jsp"));
@@ -85,10 +84,6 @@
             return;
         } else if (accountState == Account.INACTIVE) {
             response.sendRedirect(RedirectUtil.getURL(request, "/app/activation/reactivate.jsp"));
-            return;
-        }
-        if (htmlOrFlex) {
-            response.sendRedirect(RedirectUtil.getURL(request, "/app/html"));
             return;
         }
     } finally {
