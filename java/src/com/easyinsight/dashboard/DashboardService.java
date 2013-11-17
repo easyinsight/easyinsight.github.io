@@ -539,7 +539,7 @@ public class DashboardService {
                 dashboard.setAdministrators(Arrays.asList((FeedConsumer) userStub));
             }
             dashboardStorage.saveDashboard(dashboard);
-            String cacheKey = SecurityUtil.getUserID(false) + "-" + dashboard.getId();
+
             /*if (dashboardCache != null) {
                 dashboardCache.remove(cacheKey);
             }*/
@@ -725,7 +725,7 @@ public class DashboardService {
     public Dashboard getDashboardView(long dashboardID, @Nullable DashboardStackPositions dashboardStackPositions, EIConnection conn) throws Exception {
         int role = SecurityUtil.authorizeDashboard(dashboardID);
         long startTime = System.currentTimeMillis();
-        String cacheKey = SecurityUtil.getUserID(false) + "-" + dashboardID;
+
         /*if (dashboardCache != null) {
             Dashboard dashboard = (Dashboard) dashboardCache.get(cacheKey);
             if (dashboard != null) {
@@ -773,7 +773,7 @@ public class DashboardService {
             Map<String, FilterDefinition> overriddenFilters = new HashMap<String, FilterDefinition>();
             for (FilterDefinition filter : dashboard.getFilters()) {
                 FilterPositionKey filterPositionKey = new FilterPositionKey(FilterPositionKey.DASHBOARD, filter.getFilterID(), null);
-                FilterDefinition overriddenFilter = dashboardStackPositions.getFilterMap().get(filterPositionKey);
+                FilterDefinition overriddenFilter = dashboardStackPositions.getFilterMap().get(filterPositionKey.createURLKey());
                 if (overriddenFilter != null) {
                     overriddenFilters.put(String.valueOf(filter.getFilterID()), overriddenFilter);
                 }
@@ -817,8 +817,8 @@ public class DashboardService {
                 }
                 Map<String, FilterDefinition> filters = new HashMap<String, FilterDefinition>();
                 for (FilterDefinition filter : dashboardStack.getFilters()) {
-                    FilterPositionKey filterPositionKey = new FilterPositionKey(FilterPositionKey.DASHBOARD, filter.getFilterID(), null);
-                    FilterDefinition overriddenFilter = dashboardStackPositions.getFilterMap().get(filterPositionKey);
+                    FilterPositionKey filterPositionKey = new FilterPositionKey(FilterPositionKey.DASHBOARD_STACK, filter.getFilterID(), dashboardStack.getUrlKey());
+                    FilterDefinition overriddenFilter = dashboardStackPositions.getFilterMap().get(filterPositionKey.createURLKey());
                     if (overriddenFilter != null) {
                         filters.put(String.valueOf(filterPositionKey.getFilterID()), overriddenFilter);
                     }
@@ -831,8 +831,8 @@ public class DashboardService {
                 WSAnalysisDefinition reportDefinition = new AnalysisStorage().getAnalysisDefinition(dashboardReport.getReport().getId());
                 Map<String, FilterDefinition> filters = new HashMap<String, FilterDefinition>();
                 for (FilterDefinition filter : reportDefinition.getFilterDefinitions()) {
-                    FilterPositionKey filterPositionKey = new FilterPositionKey(FilterPositionKey.DASHBOARD, filter.getFilterID(), null);
-                    FilterDefinition overriddenFilter = dashboardStackPositions.getFilterMap().get(filterPositionKey);
+                    FilterPositionKey filterPositionKey = new FilterPositionKey(FilterPositionKey.DASHBOARD_REPORT, filter.getFilterID(), dashboardReport.getUrlKey());
+                    FilterDefinition overriddenFilter = dashboardStackPositions.getFilterMap().get(filterPositionKey.createURLKey());
                     if (overriddenFilter != null) {
                         filters.put(String.valueOf(filterPositionKey.getFilterID()), overriddenFilter);
                     }
@@ -870,7 +870,6 @@ public class DashboardService {
 
     private static class FilterVisitor implements IDashboardVisitor {
 
-        private Map<AnalysisItem, List<FilterValueDefinition>> valueFilters = new HashMap<AnalysisItem, List<FilterValueDefinition>>();
         private Map<AnalysisItem, List<FlatDateFilter>> flatDateFilters = new HashMap<AnalysisItem, List<FlatDateFilter>>();
 
         private long dataSourceID;
