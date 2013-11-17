@@ -61,11 +61,14 @@ public class NewUserServlet extends HttpServlet {
                     req.getSession().invalidate();
                     HttpSession session  = req.getSession(true);
                     SecurityUtil.populateSession(session, userServiceResponse);
-                    PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM NEW_USER_LINK where TOKEN = ?");
+                    /*PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM NEW_USER_LINK where TOKEN = ?");
                     clearStmt.setString(1, token);
                     clearStmt.executeUpdate();
-                    clearStmt.close();
+                    clearStmt.close();*/
                     UserService.checkAccountStateOnLogin(session, userServiceResponse, req, resp, "/app");
+                } else {
+                    resp.getWriter().write("This invite key is no longer valid. Please contact your system administrator to request a new invite.");
+                    resp.getWriter().flush();
                 }
             } finally {
                 Database.closeConnection(conn);
