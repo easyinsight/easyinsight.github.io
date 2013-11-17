@@ -355,7 +355,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         }
                         latch.countDown();
                     } catch (ReportException re) {
-                        LogClass.error(re.getReportFault().toString(), re);
+                        LogClass.userError(re.getReportFault().toString(), re);
                         latch.countDown();
                     } catch (Exception e) {
                         LogClass.error(e);
