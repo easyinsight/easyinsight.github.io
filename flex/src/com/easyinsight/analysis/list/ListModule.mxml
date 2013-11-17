@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
-         xmlns:util="com.easyinsight.util.*" implements="com.easyinsight.analysis.IReportRenderer"
+         implements="com.easyinsight.analysis.IReportRenderer"
          width="100%" height="100%" creationComplete="globalListeners()" horizontalScrollPolicy="off"
          verticalScrollPolicy="off">
    <mx:states>
@@ -231,6 +231,7 @@
             dataGrid.setStyle("headerColors", [ def.headerColor1, def.headerColor2 ]);
             if (def.fixedWidth > 0) {
                 dataGrid.width = def.fixedWidth;
+                this.horizontalScrollPolicy = "on";
             } else {
                 dataGrid.width = 0;
                 dataGrid.percentWidth = 100;
@@ -245,8 +246,14 @@
                     for each (var defItem:AnalysisItem in def.columns) {
                         if (defItem.hasType(AnalysisItemTypes.MEASURE)) {
                             var value:Value = additionalProperties["summary" + defItem.qualifiedName()];
-                            value.summary = true;
-                            summaryRow[defItem.qualifiedName()] = value;
+                            if (value != null) {
+                                value.summary = true;
+                                summaryRow[defItem.qualifiedName()] = value;
+                            } else {
+                                var emptyValue:EmptyValue = new EmptyValue();
+                                emptyValue.summary = true;
+                                summaryRow[defItem.qualifiedName()] = emptyValue;
+                            }
                         } else {
                             var emptyValue:EmptyValue = new EmptyValue();
                             emptyValue.summary = true;
