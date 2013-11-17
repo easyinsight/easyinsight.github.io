@@ -178,7 +178,7 @@
 %>
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
-    <jsp:param name="headerActive" value="<%= HtmlConstants.ACCOUNT %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.NONE %>"/>
 </jsp:include>
 <div class="container">
     <div class="row">
@@ -214,7 +214,7 @@
                     }
                 %></label></p>
                 <% } %>
-                <form method="post" action="<%= new BrainTreeBlueBillingSystem().getTargetUrl() %>" onsubmit="setCCexp()" class="well form-horizontal">
+                <form method="post" action="<%= new BrainTreeBlueBillingSystem().getTargetUrl() %>" onsubmit="setCCexp()" class="well form-horizontal" style="background-color: #FFFFFF">
                     <fieldset>
                         <input id="ccexp" type="hidden" value="" name="customer[credit_card][expiration_date]"/>
                         <input id="customer_vault_id" type="hidden" value="<%= account.getAccountID() %>" name="customer_vault_id" />

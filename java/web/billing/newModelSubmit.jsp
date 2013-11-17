@@ -172,13 +172,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Billing Configuration</title>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
-    <link href="/css/bootstrap.css" rel="stylesheet">
-    <link href="/css/smoothness/jquery-ui-1.8.20.custom.css" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.js"></script>
+    <jsp:include page="../html/bootstrapHeader.jsp" />
 </head>
 <%
 
@@ -187,7 +181,7 @@
 <body>
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= user.getName() %>"/>
-    <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.ACCOUNT %>"/>
 </jsp:include>
 <div class="container">
     <div class="row">
