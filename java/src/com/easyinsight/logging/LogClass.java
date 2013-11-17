@@ -39,7 +39,7 @@ public class LogClass {
                     username = SecurityUtil.getUserName();
                 } catch(Exception e) {
                 }
-                new SendGridEmail().sendEmail("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + message, message , "donotreply@easy-insight.com", false, "Easy Insight");
+                new SendGridEmail().sendEmail("errors@easy-insight.com", "[System Error] " + (username != null ? username : "Unknown") + ": " + message, message , "donotreply@easy-insight.com", false, "Easy Insight");
             }
             catch(Exception ex) {
                 // do nothing, wtf do you do at this point?
@@ -49,23 +49,27 @@ public class LogClass {
         log.error(message);
     }
 
-    public static void userError(String message) {
+    public static void userError(String message, Throwable e) {
 
         if(ConfigLoader.instance().isProduction()) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintStream writer = new PrintStream(baos);
+            e.printStackTrace(writer);
             try {
                 String username = null;
                 try {
                     username = SecurityUtil.getUserName();
-                } catch(Exception e) {
+                } catch(Exception se) {
                 }
-                new SendGridEmail().sendEmail("errors@easy-insight.com", "[User Configuration Error] Error! " + (username != null ? username : "Unknown") + ": " + message, message , "donotreply@easy-insight.com", false, "Easy Insight");
+                String msg = new String(baos.toByteArray());
+                new SendGridEmail().sendEmail("errors@easy-insight.com", "[User Configuration Error] " + (username != null ? username : "Unknown") + ": " + message, msg , "donotreply@easy-insight.com", false, "Easy Insight");
             }
             catch(Exception ex) {
                 // do nothing, wtf do you do at this point?
                 ex.printStackTrace();
             }
         }
-        log.error(message);
+        log.error(message, e);
     }
 
     public static void error(String message, Throwable e) {
@@ -81,7 +85,7 @@ public class LogClass {
                 } catch(Exception se) {
                 }
                 String msg = new String(baos.toByteArray());
-                new SendGridEmail().sendEmail("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + message, msg , "donotreply@easy-insight.com", false, "Easy Insight");
+                new SendGridEmail().sendEmail("errors@easy-insight.com", "[System Error] " + (username != null ? username : "Unknown") + ": " + message, msg , "donotreply@easy-insight.com", false, "Easy Insight");
             }
             catch(Exception ex) {
                 // do nothing, wtf do you do at this point?
