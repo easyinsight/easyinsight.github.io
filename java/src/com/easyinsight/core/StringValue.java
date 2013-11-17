@@ -29,9 +29,9 @@ public class StringValue extends Value implements Serializable {
 
 
 // Sanitize your output.
-        return policy.sanitize(value);
-        /*HtmlSanitizer.sanitize(value);
-        return StringEscapeUtils.escapeHtml(value);*/
+        //return policy.sanitize(value);
+        /*HtmlSanitizer.sanitize(value);*/
+        return StringEscapeUtils.escapeHtml(value);
     }
 
     @Override
