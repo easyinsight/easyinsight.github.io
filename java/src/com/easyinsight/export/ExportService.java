@@ -439,7 +439,7 @@ public class ExportService {
         EIConnection conn = Database.instance().getConnection();
         try {
             if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
+                    analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB || analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
                 analysisDefinition.updateMetadata();
                 toListPDFInDatabase(analysisDefinition, conn, insightRequestMetadata);
             } else {
