@@ -1,6 +1,9 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.dashboard.SavedConfiguration;
 import com.easyinsight.preferences.ImageDescriptor;
+
+import java.util.List;
 
 /**
  * User: James Boe
@@ -14,6 +17,15 @@ public class ReportInfo {
     private ImageDescriptor headerImage;
     private int backgroundColor;
     private int textColor;
+    private List<SavedConfiguration> configurations;
+
+    public List<SavedConfiguration> getConfigurations() {
+        return configurations;
+    }
+
+    public void setConfigurations(List<SavedConfiguration> configurations) {
+        this.configurations = configurations;
+    }
 
     public ImageDescriptor getHeaderImage() {
         return headerImage;
