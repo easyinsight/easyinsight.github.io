@@ -8,6 +8,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.email.UserStub;
+import com.easyinsight.html.FilterUtils;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.ApplicationSkinSettings;
@@ -699,13 +700,14 @@ public class DashboardService {
         }
     }
 
-    public Map<Long, FilterDefinition> getFiltersForDashboard(String urlKey) {
-        Dashboard d = getDashboardView(retrieveFromDashboardLink(urlKey).getDashboardID(), null);
+    public Map<FilterPositionKey, FilterDefinition> getFiltersForDashboard(String urlKey) {
+        Dashboard d = getDashboardView(canAccessDashboard(urlKey), null);
         ListFiltersVisitor listFiltersVisitor = new ListFiltersVisitor();
         d.visit(listFiltersVisitor);
-        Map<Long, FilterDefinition> list = listFiltersVisitor.getFilters();
-        for(FilterDefinition f : d.getFilters()) {
-            list.put(f.getFilterID(), f);
+        Map<FilterPositionKey, FilterDefinition> list = listFiltersVisitor.getFilters();
+        for(FilterDefinition f : FilterUtils.flattenFilters(d.getFilters())) {
+            FilterPositionKey fk = new FilterPositionKey(FilterPositionKey.DASHBOARD, f.getFilterID(), null);
+            list.put(fk, f);
         }
         return list;
     }
@@ -847,9 +849,9 @@ public class DashboardService {
     }
 
     private static class ListFiltersVisitor implements IDashboardVisitor {
-        private Map<Long, FilterDefinition> filters = new HashMap<Long, FilterDefinition>();
+        private Map<FilterPositionKey, FilterDefinition> filters = new HashMap<FilterPositionKey, FilterDefinition>();
 
-        private Map<Long, FilterDefinition> getFilters() {
+        private Map<FilterPositionKey, FilterDefinition> getFilters() {
             return filters;
         }
 
@@ -857,12 +859,20 @@ public class DashboardService {
             if(dashboardElement instanceof DashboardReport) {
                 InsightDescriptor id = ((DashboardReport) dashboardElement).getReport();
                 WSAnalysisDefinition ad = new AnalysisService().openAnalysisDefinition(id.getId());
-                for(FilterDefinition f : ad.getFilterDefinitions()) {
-                    filters.put(f.getFilterID(), f);
+                for(FilterDefinition f : FilterUtils.flattenFilters(ad.getFilterDefinitions())) {
+                    FilterPositionKey fk = new FilterPositionKey(FilterPositionKey.DASHBOARD_REPORT, f.getFilterID(), dashboardElement.getUrlKey());
+                    filters.put(fk, f);
                 }
             }
-            for(FilterDefinition f : dashboardElement.getFilters()) {
-                filters.put(f.getFilterID(), f);
+            int scope = 0;
+            if(dashboardElement instanceof DashboardStack) {
+                scope = FilterPositionKey.DASHBOARD_STACK;
+            } else if(dashboardElement instanceof DashboardReport) {
+                scope = FilterPositionKey.DASHBOARD_REPORT;
+            }
+            for(FilterDefinition f : FilterUtils.flattenFilters(dashboardElement.getFilters())) {
+                FilterPositionKey fk = new FilterPositionKey(scope, f.getFilterID(), dashboardElement.getUrlKey());
+                filters.put(fk, f);
             }
         }
     }

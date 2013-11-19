@@ -81,6 +81,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
 
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata, List<FilterDefinition> parentFilters) throws JSONException {
         JSONObject jo = new JSONObject();
+        jo.put("id", getUrlKey());
         if(getPreferredWidth() > 0)
             jo.put("preferredWidth", getPreferredWidth());
         else if (getHtmlWidth() > 0)
