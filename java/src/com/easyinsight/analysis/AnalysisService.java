@@ -264,6 +264,8 @@ public class AnalysisService {
 
             reportInfo.setAdmin(dataSourceAccessible);
             reportInfo.setReport(report);
+            List<SavedConfiguration> configurations = new DashboardService().getConfigurationsForReport(reportID);
+            reportInfo.setConfigurations(configurations);
             return reportInfo;
         } catch (Exception e) {
             LogClass.error(e);
