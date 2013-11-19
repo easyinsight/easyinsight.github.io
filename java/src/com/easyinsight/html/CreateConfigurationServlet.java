@@ -2,6 +2,7 @@ package com.easyinsight.html;
 
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.dashboard.*;
+import com.easyinsight.security.SecurityUtil;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 
@@ -25,6 +26,7 @@ import java.util.Map;
  */
 public class CreateConfigurationServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        SecurityUtil.populateThreadLocalFromSession(request);
         try {
             DashboardService ds = new DashboardService();
             String dashboardIDString = request.getParameter("dashboardID");
@@ -80,6 +82,8 @@ public class CreateConfigurationServlet extends HttpServlet {
             response.getOutputStream().flush();
         } catch(Exception e) {
             e.printStackTrace();
+        } finally {
+            SecurityUtil.clearThreadLocal();
         }
     }
 

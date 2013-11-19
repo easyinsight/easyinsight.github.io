@@ -32,6 +32,7 @@ public class FilterUtils {
             FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
             Object value = curFilter != null ? curFilter.get("selected") : null;
             if (value != null) {
+                filterValueDefinition.setPersistedValues(null);
                 if (filterValueDefinition.isSingleValue()) {
                     filterValueDefinition.setFilteredValues(Arrays.asList((Object) value));
                 } else {
