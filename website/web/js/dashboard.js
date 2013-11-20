@@ -2,6 +2,7 @@ $.holdReady(true);
 Modernizr.load({ complete: function () {
     $.holdReady(false);
 }});
+
 var stack;
 var grid;
 var textTemplate;
@@ -277,7 +278,7 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
         for (var k = 0; k < obj.stack_items.length; k++) {
             ch = _.flatten(ch.concat(buildReportGraph(obj.stack_items[k].item, fs2, filterMap, stackMap, reportMap)))
         }
-        var y = {"type": "stack", "children": ch, "id": obj.id, "selected": 0, "data": obj };
+        var y = {"type": "stack", "children": ch, "id": obj.id, "data": obj };
         stackMap[obj.id] = y;
         var v = _.reduce(ff3, function (m, i) {
             m[y.id + "_stack_filter_" + i.id] = {"filter": i, "parent": y };
@@ -735,7 +736,7 @@ $(function () {
             var q = $(e.target).parent().parent();
             var k = q.attr("id");
             var s = stackMap[k];
-            s.selected = selectedIndex(k);
+            s.data.selected = selectedIndex(k);
             saveStack(k);
             for (var f in filterMap) {
                 filterMap[f].filter.override = false;
@@ -855,10 +856,10 @@ $(function () {
                             m[i] = toFilterString(e.filter, true);
                 return m;
                         }, {}), "stacks": _.reduce(stackMap, function(m, e, i) {
-                m[i] = e.selected;
+                m[i] = e.data.selected;
                 return m;
             }, {}), "name": name, "key": key }
-            $.ajax({ url: "/app/html/dashboard/" + dashboardJSON["key"] + "/config",
+            $.ajax({ url: "/app/html/" + ((dashboardJSON["id"] != -1) ? "dashboard" : "report")  + "/" + dashboardJSON["key"] + "/config",
                 contentType: "application/json; charset=UTF-8",
                 data: JSON.stringify(c),
                 type: "POST",
@@ -868,7 +869,7 @@ $(function () {
                 }
             })
         }
-
     })
+
 })
 

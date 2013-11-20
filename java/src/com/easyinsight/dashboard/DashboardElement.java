@@ -56,6 +56,8 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     private double headerBackgroundAlpha;
     private List<DashboardFilterOverride> dashboardFilterOverrides = new ArrayList<DashboardFilterOverride>();
 
+    private Map<String, FilterDefinition> overridenFilters;
+
     private DashboardElement parentElement;
 
     private int preferredWidth;
@@ -79,6 +81,14 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         this.dashboardFilterOverrides = dashboardFilterOverrides;
     }
 
+    public Map<String, FilterDefinition> getOverridenFilters() {
+        return overridenFilters;
+    }
+
+    public void setOverridenFilters(Map<String, FilterDefinition> overridenFilters) {
+        this.overridenFilters = overridenFilters;
+    }
+
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata, List<FilterDefinition> parentFilters) throws JSONException {
         JSONObject jo = new JSONObject();
         jo.put("id", getUrlKey());
@@ -90,6 +100,16 @@ public abstract class DashboardElement implements Cloneable, Serializable {
             jo.put("preferredHeight", getPreferredHeight());
 
         JSONArray filters = new JSONArray();
+
+        if (getOverridenFilters() != null) {
+            for (FilterDefinition filter : getFilters()) {
+                FilterDefinition overrideFilter = getOverridenFilters().get(String.valueOf(filter.getFilterID()));
+                if (overrideFilter != null) {
+                    filter.override(overrideFilter);
+                    filter.setEnabled(overrideFilter.isEnabled());
+                }
+            }
+        }
         for(FilterDefinition f : getFilters()) {
             boolean found = false;
             for(FilterDefinition ff : parentFilters) {

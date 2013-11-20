@@ -118,4 +118,14 @@ public class FilterPositionKey {
         result = 31 * result + (scopeURLKey != null ? scopeURLKey.hashCode() : 0);
         return result;
     }
+
+    public static FilterPositionKey parseReportKey(String key) {
+        Pattern p = Pattern.compile("^([A-Za-z0-9]*)_container_(report|dashboard|grid|stack)_filter_([0-9]+)$");
+        Matcher m = p.matcher(key);
+        if(!m.matches())
+            throw new RuntimeException("Doesn't match.");
+        int curScope = REPORT;
+        long filterID = Long.parseLong(m.replaceAll("$3"));
+        return new FilterPositionKey(curScope, filterID, null);
+    }
 }

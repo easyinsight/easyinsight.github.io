@@ -13,6 +13,10 @@
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="com.easyinsight.dashboard.SavedConfiguration" %>
+<%@ page import="com.easyinsight.dashboard.DashboardService" %>
+<%@ page import="com.easyinsight.dashboard.DashboardInfo" %>
+<%@ page import="com.easyinsight.dashboard.DashboardStackPositions" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -37,6 +41,17 @@
             insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
         }
 
+        String configID = request.getParameter("reportConfig");
+        DashboardInfo positions = null;
+        String selectedConfiguration = null;
+        String configurationKey = null;
+        if(configID != null) {
+            DashboardInfo di = new DashboardService().getConfigurationForReport(configID);
+            positions = di;
+            selectedConfiguration = di.getSavedConfiguration().getName();
+            configurationKey = di.getSavedConfiguration().getUrlKey();
+        }
+
         if (insightResponse.getStatus() == InsightResponse.SUCCESS) {
             reportID = insightResponse.getInsightDescriptor().getId();
         } else if (insightResponse.getStatus() == InsightResponse.PRIVATE_ACCESS) {
@@ -58,12 +73,15 @@
         }
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(report.getDataFeedID());
 
+        FilterUtils.adjustReport(report, positions);
+
         UIData uiData = Utils.createUIData();
         JSONObject reportJSON = new JSONObject();
         reportJSON.put("name", report.getName());
         reportJSON.put("id", -1);
         reportJSON.put("local_storage", true);
         reportJSON.put("filters", new JSONArray());
+        reportJSON.put("key", report.getUrlKey());
         JSONObject styleJSON = new JSONObject();
         styleJSON.put("main_stack_start", "#FFFFFF");
         styleJSON.put("alternative_stack_start", "#FFFFFF");
@@ -84,6 +102,14 @@
         if (drillthroughArgh != null) {
             reportJSON.put("drillthroughID", drillthroughArgh);
         }
+        JSONArray ja = new JSONArray();
+        for(SavedConfiguration sc : reportInfo.getConfigurations()) {
+            ja.put(sc.toJSON());
+        }
+
+        reportJSON.put("configurations", ja);
+        reportJSON.put("configuration_name", selectedConfiguration);
+        reportJSON.put("configuration_key", configurationKey);
 
         EIConnection c = Database.instance().getConnection();
         JSONObject userObject = new JSONObject();
@@ -127,11 +153,14 @@
 <div class="nav navbar-pills reportNav" style="margin-bottom: 0">
     <div class="container">
         <div class="row">
-            <div class="col-md-6 reportBlah">
-                <a class="reportControl" href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
+            <div class="col-md-4 reportBlah">
+                <a class="reportControl" href="/app/html/reports/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
             </div>
-            <div class="col-md-6 reportControlToolbar">
+            <div class="col-md-8 reportControlToolbar">
                 <div class="btn-toolbar pull-right">
+                    <div id="configuration-dropdown" class="btn-group reportControlBtnGroup">
+
+                    </div>
                     <div class="btn-group reportControlBtnGroup">
                         <a class="reportControl" data-toggle="dropdown" href="#">
                             Export the Report
