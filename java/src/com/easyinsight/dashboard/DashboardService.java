@@ -372,7 +372,7 @@ public class DashboardService {
     public NewDashboardMetadata getDashboardEditorMetadata(long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            List<InsightDescriptor> reports = new AnalysisStorage().getInsightDescriptorsForDataSource(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), dataSourceID, conn);
+            List<InsightDescriptor> reports = new AnalysisStorage().getInsightDescriptorsForDataSource(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), dataSourceID, conn, true);
             NewDashboardMetadata dashboardEditorMetadata = new NewDashboardMetadata();
             dashboardEditorMetadata.setAvailableReports(reports);
             Feed feed = FeedRegistry.instance().getFeed(dataSourceID, conn);
