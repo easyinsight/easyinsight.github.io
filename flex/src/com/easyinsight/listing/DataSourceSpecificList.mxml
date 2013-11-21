@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:datasources="com.easyinsight.datasources.*"
          xmlns:listing="com.easyinsight.listing.*" xmlns:util="com.easyinsight.util.*" width="100%"
-         height="100%"
+         height="100%" xmlns:containers="flexlib.containers.*"
          creationComplete="addEventListener(ChangeFolderEvent.CHANGE_FOLDER, onChangeFolder);
          addEventListener(AnalyzeEvent.ANALYZE, onAnalyze2); onCreation()"
          doubleClickEnabled="true" implements="com.easyinsight.listing.IDataSourceSpecificList">
@@ -10,14 +10,20 @@
         [Event(name="refresh", type="flash.events.Event")]
         [Event(name="deleteDataSource", type="com.easyinsight.listing.DeleteDataSourceEvent")]
     </mx:Metadata>
+    <mx:states>
+        <mx:State name="noTags">
+            <mx:RemoveChild target="{tagUpperRule}"/>
+            <mx:RemoveChild target="{tagLowerRule}"/>
+        </mx:State>
+    </mx:states>
     <mx:Script><![CDATA[
+        import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.datasources.DataSourceBehavior;
         import com.easyinsight.etl.LookupTableDescriptor;
         import com.easyinsight.etl.LookupTableSource;
         import com.easyinsight.etl.NewLookupTableWindow;
         import com.easyinsight.framework.DataFolder;
-        import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -34,7 +40,6 @@
         import com.easyinsight.util.Callout;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
-        import com.easyinsight.util.RolloverLabel;
         import com.easyinsight.util.RolloverLabelEvent;
 
         import mx.collections.ArrayCollection;
@@ -44,12 +49,10 @@
         import mx.collections.Sort;
 
         import mx.controls.Alert;
-        import mx.controls.CheckBox;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.core.UIComponent;
         import mx.events.CloseEvent;
-        import mx.events.ItemClickEvent;
-        import mx.events.ListEvent;
+        import mx.events.FlexEvent;
         import mx.events.MenuEvent;
         import mx.formatters.DateFormatter;
         import mx.managers.PopUpManager;
@@ -63,7 +66,8 @@
         private var dataSourceName:String;
 
         private function onCreation():void {
-
+            addEventListener(TagEvent.TAG_SELECTED, onTag);
+            addEventListener(TagEvent.TAG_UNSELECTED, onUnTag);
             addEventListener(RolloverLabelEvent.ROLLOVER_LABEL, onRolloverLabelEvent);
             addEventListener("startedDragging", onStartedDragging);
             switch (User.getInstance().dateFormat) {
@@ -106,6 +110,50 @@
             if (_showBack == value) return;
             _showBack = value;
             dispatchEvent(new Event("showBackChanged"));
+        }
+
+        protected static function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
+        {
+            // resize the FlowBox manually, as the internal calculation doesn't work
+
+            var fb:FlowBox = event.target as FlowBox;
+
+            if (fb != null)
+            {
+                if (fb.numChildren > 0)
+                {
+                    // default the needed height to the top view metric
+
+                    var maxBottom:int = fb.viewMetrics.top;
+
+                    // Iterate over the children of the FlowBox to find the bottom-most bottom, so
+                    // we can determine how big / small we can make the FlowBox.
+                    // If it's a UIComponent, include it if the includeInLayout property is true.
+                    // If it's not a UIComponent, include it if the visible property is true.
+
+                    for (var idx:int = 0; idx < fb.numChildren; idx++)
+                    {
+                        var displayObject:DisplayObject = fb.getChildAt(idx);
+
+                        if ((displayObject is UIComponent && (displayObject as
+                                UIComponent).includeInLayout) ||
+                                (!(displayObject is UIComponent) && displayObject.visible))
+                        {
+                            var thisBottom:int = fb.getChildAt(idx).y + fb.getChildAt(idx).height;
+
+                            if (thisBottom > maxBottom)
+                                maxBottom = thisBottom;
+                        }
+                    }
+
+                    fb.height = maxBottom + fb.viewMetrics.bottom +
+                            fb.getStyle("paddingBottom") + 1;
+                }
+                else
+                {
+                    fb.height = fb.viewMetrics.top + fb.viewMetrics.bottom;
+                }
+            }
         }
 
         [Bindable]
@@ -232,56 +280,60 @@
                 if (!currentlyShowing && showScorecard) {
                     createOptions.addItemAt({label: "New Scorecard", data: "newScorecard"}, 2);
                 }
-                var dataSourceChildren:ArrayCollection = _dataSourceDescriptor.children;
-                mainViewsFolder = new DataFolder("Main Views", 1);
-                var mainViewsChildren:ArrayCollection = new ArrayCollection();
-                mainViewsFolder.children = mainViewsChildren;
-                var otherViewsFolder:DataFolder = new DataFolder("Additional Views", 2);
-                var otherViewsChildren:ArrayCollection = new ArrayCollection();
-                otherViewsFolder.children = otherViewsChildren;
-                var lookupTablesFolder:DataFolder = new DataFolder("Lookup Tables", 3);
-                var lookupTablesChildren:ArrayCollection = new ArrayCollection();
-                lookupTablesFolder.children = lookupTablesChildren;
-                var folderMap:Object = new Object();
-                for each (var customFolder:CustomFolder in _dataSourceDescriptor.customFolders) {
-                    var customViewFolder:DataFolder = new DataFolder(customFolder.name, customFolder.id);
-                    customViewFolder.children = new ArrayCollection();
-                    folderMap[customFolder.id] = customViewFolder;
-                }
-                for each (var desc:EIDescriptor in dataSourceChildren) {
-                    if (desc.getType() == EIDescriptor.LOOKUP_TABLE) {
-                        lookupTablesChildren.addItem(desc);
-                    } else {
-                        var targetFolder:DataFolder = folderMap[desc.folder] as DataFolder;
-                        if (targetFolder == null) {
-                            if (desc.folder == EIDescriptor.OTHER_VIEWS_FOLDER) {
-                                otherViewsChildren.addItem(desc);
-                            } else {
-                                mainViewsChildren.addItem(desc);
-                            }
+                if (selectedTags == null || selectedTags.length == 0) {
+                    var dataSourceChildren:ArrayCollection = _dataSourceDescriptor.children;
+                    mainViewsFolder = new DataFolder("Main Views", 1);
+                    var mainViewsChildren:ArrayCollection = new ArrayCollection();
+                    mainViewsFolder.children = mainViewsChildren;
+                    var otherViewsFolder:DataFolder = new DataFolder("Additional Views", 2);
+                    var otherViewsChildren:ArrayCollection = new ArrayCollection();
+                    otherViewsFolder.children = otherViewsChildren;
+                    var lookupTablesFolder:DataFolder = new DataFolder("Lookup Tables", 3);
+                    var lookupTablesChildren:ArrayCollection = new ArrayCollection();
+                    lookupTablesFolder.children = lookupTablesChildren;
+                    var folderMap:Object = new Object();
+                    for each (var customFolder:CustomFolder in _dataSourceDescriptor.customFolders) {
+                        var customViewFolder:DataFolder = new DataFolder(customFolder.name, customFolder.id);
+                        customViewFolder.children = new ArrayCollection();
+                        folderMap[customFolder.id] = customViewFolder;
+                    }
+                    for each (var desc:EIDescriptor in dataSourceChildren) {
+                        if (desc.getType() == EIDescriptor.LOOKUP_TABLE) {
+                            lookupTablesChildren.addItem(desc);
                         } else {
-                            targetFolder.children.addItem(desc);
+                            var targetFolder:DataFolder = folderMap[desc.folder] as DataFolder;
+                            if (targetFolder == null) {
+                                if (desc.folder == EIDescriptor.OTHER_VIEWS_FOLDER) {
+                                    otherViewsChildren.addItem(desc);
+                                } else {
+                                    mainViewsChildren.addItem(desc);
+                                }
+                            } else {
+                                targetFolder.children.addItem(desc);
+                            }
                         }
                     }
-                }
-                var folders:ArrayCollection = new ArrayCollection();
-                folders.addItem(mainViewsFolder);
-                for each (var cFolder:DataFolder in folderMap) {
-                    folders.addItem(cFolder);
-                }
-                folders.addItem(otherViewsFolder);
-                if (lookupTablesChildren.length > 0) {
-                    folders.addItem(lookupTablesFolder);
-                }
-                nameColumnFactory = new ClassFactory(ReportRolloverLabel);
-                nameColumnFactory.properties = {folders: folders };
-                displayTreeData = folders;
+                    var folders:ArrayCollection = new ArrayCollection();
+                    folders.addItem(mainViewsFolder);
+                    for each (var cFolder:DataFolder in folderMap) {
+                        folders.addItem(cFolder);
+                    }
+                    folders.addItem(otherViewsFolder);
+                    if (lookupTablesChildren.length > 0) {
+                        folders.addItem(lookupTablesFolder);
+                    }
+                    nameColumnFactory = new ClassFactory(ReportRolloverLabel);
+                    nameColumnFactory.properties = {folders: folders };
+                    displayTreeData = folders;
 
-                this.hierarchicalData = new HierarchicalData();
-                hierarchicalData.source = folders;
+                    this.hierarchicalData = new HierarchicalData();
+                    hierarchicalData.source = folders;
 
-                dataSourceInvalidate = false;
-                dataChanged = true;
+                    dataSourceInvalidate = false;
+                    dataChanged = true;
+                }
+
+
 
                 updateUI();
             }
@@ -431,28 +483,72 @@
                 columns.push(controlsColumn);
                 uploadGrid.columns = columns;
                 columnsInvalid = false;
+                populateTags(tags);
             }
-            if (dataChanged) {
+
+            if (dataChanged || tagChanged) {
                 uploadGrid.clearRenderers();
-                uploadGrid.dataProvider = hierarchicalData;
-                existingData = displayTreeData;
-                if (!dataSourceChanged) {
-                    displayTreeData.sort = sort;
-                }
-                displayTreeData.refresh();
-                if (!dataSourceChanged) {
-                    fromLastState();
+                displayTreeData.filterFunction = filterOnTag;
+                if (selectedTags == null || selectedTags.length == 0) {
+                    uploadGrid.dataProvider = hierarchicalData;
+                    existingData = displayTreeData;
+                    if (!dataSourceChanged) {
+                        displayTreeData.sort = sort;
+                    }
+                    displayTreeData.refresh();
+                    if (!dataSourceChanged) {
+                        fromLastState();
+                    } else {
+                        uploadGrid.validateNow();
+                        uploadGrid.expandItem(mainViewsFolder, true);
+                        uploadGrid.validateNow();
+                    }
                 } else {
-                    uploadGrid.validateNow();
-                    uploadGrid.expandItem(mainViewsFolder, true);
-                    uploadGrid.validateNow();
+                    var descriptors:ArrayCollection = _dataSourceDescriptor.children;
+                    uploadGrid.dataProvider = descriptors;
+                    uploadGrid.dataProvider.filterFunction = filterOnTag;
+                    uploadGrid.dataProvider.refresh();
                 }
             }
             if (dataChanged) {
                 dataChanged = false;
             }
+            if (tagChanged) {
+                tagChanged = false;
+            }
             if (dataSourceChanged) {
                 dataSourceChanged = false;
+            }
+        }
+
+        private function filterOnTag(obj:Object):Boolean {
+            if (selectedTags != null && selectedTags.length > 0) {
+                var eiDescriptor:EIDescriptor = obj as EIDescriptor;
+                if (eiDescriptor is InsightDescriptor) {
+                    var insightDescriptor:InsightDescriptor = eiDescriptor as InsightDescriptor;
+                    if (insightDescriptor.tags != null) {
+                        for each (var tag:Tag in insightDescriptor.tags) {
+                            for each (var dsTag:Tag in selectedTags) {
+                                if (dsTag.id == tag.id) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+                /*var dsd:DataSourceDescriptor = obj as DataSourceDescriptor;
+                if (dsd.tags != null) {
+                    for each (var tag:Tag in dsd.tags) {
+                        for each (var dsTag:Tag in selectedTags) {
+                            if (dsTag.id == tag.id) {
+                                return true;
+                            }
+                        }
+                    }
+                }*/
+                return false;
+            } else {
+                return true;
             }
         }
 
@@ -750,6 +846,172 @@
             }
         }
 
+        private var _tags:ArrayCollection;
+
+        [Bindable(event="tagsChanged")]
+        public function get tags():ArrayCollection {
+            return _tags;
+        }
+
+        public function set tags(value:ArrayCollection):void {
+            if (_tags == value) return;
+            allTags = value;
+            var validTags:ArrayCollection = new ArrayCollection();
+            for each (var tag:Tag in value) {
+                if (tag.report) {
+                    validTags.addItem(tag);
+                }
+            }
+            _tags = validTags;
+            if (tagUpperRule != null) {
+                populateTags(validTags);
+            }
+            dispatchEvent(new Event("tagsChanged"));
+        }
+
+        private var selectedTags:ArrayCollection = new ArrayCollection();
+
+        private var tagChanged:Boolean = false;
+
+        private function onTag(event:TagEvent):void {
+            selectedTags.addItem(event.tag);
+            if (selectedTags.length == 1) {
+                tagChanged = true;
+                invalidateDisplayList();
+            } else {
+                uploadGrid.dataProvider.refresh();
+            }
+        }
+
+        private function onUnTag(event:TagEvent):void {
+            var index:int = 0;
+            var i:int = 0;
+            for each (var tag:Tag in selectedTags) {
+                if (tag.id == event.tag.id) {
+                    index = i;
+                    break;
+                }
+                i++;
+            }
+            selectedTags.removeItemAt(index);
+            if (selectedTags.length == 0) {
+                tagChanged = true;
+                invalidateDisplayList();
+            }
+            uploadGrid.dataProvider.refresh();
+        }
+
+        private var allTags:ArrayCollection;
+
+        private function onTagItemClick(event:MenuEvent):void {
+            var op:String = event.item.op;
+            if (op == "manageTags") {
+                var window:ManageTagWindow = new ManageTagWindow();
+                window.existingTags = allTags;
+                window.addEventListener(TagMetadataEvent.REFRESH_TAGS, onRefreshTags);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            } else if (op == "add") {
+                var addTag:Tag = event.item.data as Tag;
+                applyTag(addTag);
+            } else if (op == "remove") {
+                var removeTag:Tag = event.item.data as Tag;
+                dropTag(removeTag);
+            }
+        }
+
+        private function onRefreshTags(event:TagMetadataEvent):void {
+            selectedTags = new ArrayCollection();
+            this.tags = event.tags;
+            uploadGrid.dataProvider.refresh();
+        }
+
+        private function applyTag(addTag:Tag):void {
+            var selected:ArrayCollection = new ArrayCollection();
+
+            for each (var activity:EIDescriptor in hierarchicalData.source) {
+                if (activity is DataFolder) {
+                    var folder:DataFolder = activity as DataFolder;
+                    for each (var desc:EIDescriptor in folder.children) {
+                        if (desc.selected) {
+                            selected.addItem(desc);
+                        }
+                    }
+                }
+            }
+            if (selected.length == 0) {
+                Alert.show("You must select at least one report to tag.");
+            } else {
+                ProgressAlert.alert(this, "Tagging...", null, uploadService.tagReportsAndDashboards);
+                uploadService.tagReportsAndDashboards.send(selected, addTag);
+            }
+        }
+
+        private function dropTag(addTag:Tag):void {
+            var selected:ArrayCollection = new ArrayCollection();
+            for each (var activity:EIDescriptor in hierarchicalData.source) {
+                if (activity is DataFolder) {
+                    var folder:DataFolder = activity as DataFolder;
+                    for each (var desc:EIDescriptor in folder.children) {
+                        if (desc.selected) {
+                            selected.addItem(desc);
+                        }
+                    }
+                }
+            }
+            if (selected.length == 0) {
+                Alert.show("You must select at least one report to untag.");
+            } else {
+                ProgressAlert.alert(this, "Tagging...", null, uploadService.untagReportsAndDashboards);
+                uploadService.untagReportsAndDashboards.send(selected, addTag);
+            }
+        }
+
+        private function populateTags(tags:ArrayCollection):void {
+            if (tagBox != null) {
+                tagBox.removeAllChildren();
+            }
+            for each (var tag:Tag in tags) {
+                var tagButton:TagButton = new TagButton();
+                tagButton.data = tag;
+                if (selectedTags != null) {
+                    for each (var selectedTag:Tag in selectedTags) {
+                        if (selectedTag.id == tag.id) {
+                            tagButton.selectionState = true;
+                            break;
+                        }
+                    }
+                }
+                if (tagBox != null) {
+                    tagBox.addChild(tagButton);
+                }
+            }
+            var tagOptions:ArrayCollection = new ArrayCollection();
+            if (tags != null) {
+                tagOptions.addItem({ label: "Manage Tags...", op: "manageTags" });
+                for each (var opTag:Tag in tags) {
+                    tagOptions.addItem({label: "Add tag - " + opTag.name + " - to selected", data: opTag, op: "add"});
+                    tagOptions.addItem({label: "Remove tag - " + opTag.name + " - from selected", data: opTag, op: "remove"});
+                }
+            }
+            if (tags.length == 0) {
+                if (tagUpperRule.parent) {
+                    tagUpperRule.parent.removeChild(tagUpperRule);
+                }
+                if (tagLowerRule.parent) {
+                    tagLowerRule.parent.removeChild(tagLowerRule);
+                }
+            } else {
+                if (!tagUpperRule.parent) {
+                    blah.addChildAt(tagUpperRule, 1);
+                }
+                if (!tagLowerRule.parent) {
+                    blah.addChildAt(tagLowerRule, 3);
+                }
+            }
+            this.tagOptions = tagOptions;
+        }
+
         private var callout:Callout;
 
         private function onClose(event:NoteEvent):void {
@@ -767,6 +1029,13 @@
         private var customizeOptions:ArrayCollection = new ArrayCollection([ {label: "Organize Folders", data: "organizeFolders"},
             {label: "Page Settings", data: "tableColumns"}
         ]);
+
+        [Bindable]
+        private var tagOptions:ArrayCollection;
+
+        private function tagChanges():void {
+            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
+        }
         ]]></mx:Script>
     <mx:Style>
         .myCustomPopUpStyleName {
@@ -782,6 +1051,8 @@
     <mx:RemoteObject id="uploadService" destination="userUpload">
         <mx:method name="move" result="moved()"/>
         <mx:method name="deleteReports" result="deleted()"/>
+        <mx:method name="tagReportsAndDashboards" result="tagChanges()"/>
+        <mx:method name="untagReportsAndDashboards" result="tagChanges()"/>
     </mx:RemoteObject>
     <mx:VBox
          horizontalGap="20"
@@ -804,15 +1075,20 @@
     <mx:VBox paddingLeft="10" paddingRight="10"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
          horizontalGap="20"
-         backgroundColor="#FFFFFF" paddingTop="5" paddingBottom="5" width="100%" height="100%">
+         backgroundColor="#FFFFFF" paddingTop="5" paddingBottom="5" width="100%" height="100%" id="blah">
         <mx:HBox width="100%">
             <listing:ArghButton label="Create" styleName="grayButton" itemClick="onItemClick(event)" visible="{realDataSource}" width="160" id="newButton"
                     dataProvider="{createOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
             <listing:ArghButton label="Customize View" styleName="grayButton" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" width="140"
                     dataProvider="{customizeOptions}" itemClick="onItemClick(event)"/>
+            <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onTagItemClick(event)" width="160" id="tagButton"
+                                dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
             <mx:Button label="Delete Selected" styleName="grayButton" click="deleteSelected()" width="140"/>
             <mx:Spacer width="100%"/>
         </mx:HBox>
+        <mx:HRule id="tagUpperRule" width="100%" strokeColor="#CCCCCC"/>
+        <containers:FlowBox id="tagBox" width="100%" updateComplete="adapterFlowBoxUpdateCompleteHandler(event)"/>
+        <mx:HRule id="tagLowerRule" width="100%" strokeColor="#CCCCCC"/>
         <util:PatchedAdvancedDataGrid id="uploadGrid" selectable="false"
                                              fontSize="12"
                                              headerStyleName="BlueHeader"

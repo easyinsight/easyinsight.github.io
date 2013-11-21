@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<containers:FlowBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:containers="flexlib.containers.*" updateComplete="adapterFlowBoxUpdateCompleteHandler(event)"
+        creationComplete="onCreation()">
+    <mx:Metadata>
+        [Event(name="onTagSelect", type="com.easyinsight.util.TagSelectionEvent")]
+    </mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.listing.Tag;
+        import com.easyinsight.listing.TagButton;
+        import com.easyinsight.listing.TagEvent;
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.core.UIComponent;
+        import mx.events.FlexEvent;
+
+        private var selectedTags:ArrayCollection = new ArrayCollection();
+
+        private function onCreation():void {
+            addEventListener(TagEvent.TAG_SELECTED, onTag);
+            addEventListener(TagEvent.TAG_UNSELECTED, onUnTag);
+        }
+
+        private function onTag(event:TagEvent):void {
+            selectedTags.addItem(event.tag);
+            dispatchEvent(new TagSelectionEvent(TagSelectionEvent.TAG_SELECT));
+        }
+
+        private function onUnTag(event:TagEvent):void {
+            selectedTags.removeItemAt(selectedTags.getItemIndex(event.tag));
+            dispatchEvent(new TagSelectionEvent(TagSelectionEvent.TAG_SELECT));
+        }
+
+        public function filterReport(insightDescriptor:InsightDescriptor):Boolean {
+            if (selectedTags != null && selectedTags.length > 0) {
+                if (insightDescriptor.tags != null) {
+                    for each (var tag:Tag in insightDescriptor.tags) {
+                        for each (var dsTag:Tag in selectedTags) {
+                            if (dsTag.id == tag.id) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        public function set tags(tags:ArrayCollection):void {
+            for each (var tag:Tag in tags) {
+                var tagButton:TagButton = new TagButton();
+                tagButton.data = tag;
+                if (selectedTags != null) {
+                    for each (var selectedTag:Tag in selectedTags) {
+                        if (selectedTag.id == tag.id) {
+                            tagButton.selectionState = true;
+                            break;
+                        }
+                    }
+                }
+                addChild(tagButton);
+            }
+        }
+
+        protected static function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
+        {
+            // resize the FlowBox manually, as the internal calculation doesn't work
+
+            var fb:FlowBox = event.target as FlowBox;
+
+            if (fb != null)
+            {
+                if (fb.numChildren > 0)
+                {
+                    // default the needed height to the top view metric
+
+                    var maxBottom:int = fb.viewMetrics.top;
+
+                    // Iterate over the children of the FlowBox to find the bottom-most bottom, so
+                    // we can determine how big / small we can make the FlowBox.
+                    // If it's a UIComponent, include it if the includeInLayout property is true.
+                    // If it's not a UIComponent, include it if the visible property is true.
+
+                    for (var idx:int = 0; idx < fb.numChildren; idx++)
+                    {
+                        var displayObject:DisplayObject = fb.getChildAt(idx);
+
+                        if ((displayObject is UIComponent && (displayObject as
+                                UIComponent).includeInLayout) ||
+                                (!(displayObject is UIComponent) && displayObject.visible))
+                        {
+                            var thisBottom:int = fb.getChildAt(idx).y + fb.getChildAt(idx).height;
+
+                            if (thisBottom > maxBottom)
+                                maxBottom = thisBottom;
+                        }
+                    }
+
+                    fb.height = maxBottom + fb.viewMetrics.bottom +
+                            fb.getStyle("paddingBottom") + 1;
+                }
+                else
+                {
+                    fb.height = fb.viewMetrics.top + fb.viewMetrics.bottom;
+                }
+            }
+        }
+        ]]></mx:Script>
+</containers:FlowBox>

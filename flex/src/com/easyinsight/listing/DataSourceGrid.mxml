@@ -91,10 +91,19 @@
             return _tags;
         }
 
+        private var allTags:ArrayCollection;
+
         public function set tags(value:ArrayCollection):void {
             if (_tags == value) return;
-            _tags = value;
-            populateTags(value);
+            allTags = value;
+            var validTags:ArrayCollection = new ArrayCollection();
+            for each (var tag:Tag in value) {
+                if (tag.dataSource) {
+                    validTags.addItem(tag);
+                }
+            }
+            _tags = validTags;
+            populateTags(_tags);
             dispatchEvent(new Event("tagsChanged"));
         }
 
@@ -102,7 +111,7 @@
             var op:String = event.item.op;
             if (op == "manageTags") {
                 var window:ManageTagWindow = new ManageTagWindow();
-                window.existingTags = tags;
+                window.existingTags = allTags;
                 window.addEventListener(TagMetadataEvent.REFRESH_TAGS, onRefreshTags);
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
@@ -178,9 +187,9 @@
                 }
             }
             var tagOptions:ArrayCollection = new ArrayCollection();
-            if (_tags != null) {
+            if (tags != null) {
                 tagOptions.addItem({ label: "Manage Tags...", op: "manageTags" });
-                for each (var opTag:Tag in _tags) {
+                for each (var opTag:Tag in tags) {
                     tagOptions.addItem({label: "Add tag - " + opTag.name + " - to selected", data: opTag, op: "add"});
                     tagOptions.addItem({label: "Remove tag - " + opTag.name + " - from selected", data: opTag, op: "remove"});
                 }
@@ -229,10 +238,10 @@
             }
             customizeVisible = User.getInstance().accountAdmin;
 
-            if (!User.getInstance().tagsAndCopyEnabled) {
+            /*if (!User.getInstance().tagsAndCopyEnabled) {
                 currentState = "noTags";
                 actionButton.dataProvider = noTagActions;
-            } else {
+            } else {*/
                 currentState = "";
                 var newColumns:Array = [];
                 for each (var o:Object in dataSourceGrid.columns) {
@@ -247,7 +256,7 @@
                 newColumns.push(tagColumn);
                 dataSourceGrid.columns = newColumns;
                 actionButton.dataProvider = actions;
-            }
+            //}
             for each (var tag:Tag in tags) {
                 var tagButton:TagButton = new TagButton();
                 tagButton.data = tag;

@@ -26,7 +26,11 @@ public class EIDescriptorCheckbox extends GridCheckbox  {
     }
 
     override protected function isSelected():Boolean {
-        return EIDescriptor(data).selected;
+        if (data is EIDescriptor) {
+            return EIDescriptor(data).selected;
+        } else {
+            return false;
+        }
     }
 }
 }

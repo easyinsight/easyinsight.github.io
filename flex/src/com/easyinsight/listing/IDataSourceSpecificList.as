@@ -10,10 +10,13 @@ import com.easyinsight.solutions.DataSourceDescriptor;
 
 import flash.events.Event;
 
+import mx.collections.ArrayCollection;
+
 public interface IDataSourceSpecificList {
     function get dataSourceDescriptor():DataSourceDescriptor;
     function set dataSourceDescriptor(value:DataSourceDescriptor):void;
     function set showBack(back:Boolean):void;
     function updateUI(event:Event = null):void;
+    function set tags(values:ArrayCollection):void;
 }
 }

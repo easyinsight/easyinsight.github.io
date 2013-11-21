@@ -253,6 +253,7 @@
 
             IDataSourceSpecificList(dsList).showBack = masterDataSources.length > 1;
             dsList.data = dataSourceDescriptor;
+            IDataSourceSpecificList(dsList).tags = tags;
             dsList.addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
             dsList.addEventListener("refresh", onRefresh);
             dsList.addEventListener("backToDataSources", backToSources);

@@ -13,6 +13,9 @@ public class Tag {
 
     public var name:String;
     public var id:int;
+    public var dataSource:Boolean;
+    public var report:Boolean;
+    public var field:Boolean;
     public var selected:Boolean;
 
     public function Tag() {
