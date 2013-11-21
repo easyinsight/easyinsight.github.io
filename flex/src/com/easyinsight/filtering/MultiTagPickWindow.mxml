@@ -7,9 +7,7 @@
     </mx:Metadata>
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.analysis.AnalysisDefinition;
-        import com.easyinsight.analysis.AnalysisItem;
-        import com.easyinsight.dashboard.Dashboard;
+        import com.easyinsight.listing.Tag;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.binding.utils.BindingUtils;
@@ -20,7 +18,7 @@
 
         private var strings:ArrayCollection;
 
-        public var analysisItems:ArrayCollection;
+        public var tags:ArrayCollection;
 
         private var filterTileList:List;
 
@@ -30,25 +28,9 @@
         private var _targetValues:ArrayCollection;
 
         private var _reportID:int;
-        private var _report:AnalysisDefinition;
 
-        private var _dashboardID:int;
-
-        private var _dashboard:Dashboard;
 
         private var realValues:ArrayCollection;
-
-
-        [Bindable(event="dashboardChanged")]
-        public function get dashboard():Dashboard {
-            return _dashboard;
-        }
-
-        public function set dashboard(value:Dashboard):void {
-            if (_dashboard == value) return;
-            _dashboard = value;
-            dispatchEvent(new Event("dashboardChanged"));
-        }
 
         [Bindable(event="targetValuesChanged")]
         public function get targetValues():ArrayCollection {
@@ -61,12 +43,7 @@
             dispatchEvent(new Event("targetValuesChanged"));
         }
 
-        public var selectedItems:ArrayCollection;
-
-        override protected function commitProperties():void {
-            super.commitProperties();
-
-        }
+        public var selectedTags:ArrayCollection;
 
         private function sourceChange():void {
             sourceValues.refresh();
@@ -74,26 +51,6 @@
 
         private function includedChange():void {
             targetValues.refresh();
-        }
-
-        private var _includedKeyword:String;
-
-        public function get includedKeyword():String {
-            return _includedKeyword;
-        }
-
-        public function set includedKeyword(value:String):void {
-            _includedKeyword = value;
-        }
-
-        private var _keyword:String;
-
-        public function get keyword():String {
-            return _keyword;
-        }
-
-        public function set keyword(value:String):void {
-            _keyword = value;
         }
 
         private function addAll():void {
@@ -112,9 +69,6 @@
             targetValues.removeAll();
         }
 
-        [Bindable]
-        private var stackIndex:int = 0;
-
         private var _typeChangeAllowed:Boolean = true;
 
         [Bindable(event="typeChangeAllowedChanged")]
@@ -128,23 +82,12 @@
             dispatchEvent(new Event("typeChangeAllowedChanged"));
         }
 
-        private var filterString:String = "";
-
-        private var selectedFilter:Boolean;
-
-        private function valuesFilterFunction(o:Object):Boolean {
-            var result:Boolean = true;
-            if (selectedFilter) {
-                result = (o.selected as Boolean);
-            }
-            return result && (o.label as String).toLowerCase().indexOf(filterString.toLowerCase()) != -1;
-        }
-
         private function onCreation(event:FlexEvent):void {
             PopUpUtil.centerPopUp(this);
         }
 
-        private function creationCompleteHandler(event:FlexEvent):void {
+        private function gotTags():void {
+            tags = feedService.getFieldTags.lastResult as ArrayCollection;
             filterTileList = new List();
             filterTileList.id = "solutionGrid";
             filterTileList.itemRenderer = new ClassFactory(FilterStringCheckbox);
@@ -160,92 +103,53 @@
 
             strings = new ArrayCollection();
             var o:Object = new Object();
-            for each (var selectedItem:AnalysisItem in selectedItems) {
-                o[selectedItem.display] = true;
+            for each (var selectedItem:HibernateTag in selectedTags) {
+                o[String(selectedItem.tagID)] = true;
             }
-            for each (var analysisItem:AnalysisItem in analysisItems) {
+            for each (var analysisItem:Tag in tags) {
                 strings.addItem(analysisItem);
             }
-            strings.filterFunction = filterFunction;
-            strings.refresh();
+
             sourceValues = strings;
             loadedValuesBox.addChild(filterTileList);
 
             var a:Array = strings.toArray().map(function (obj:Object, a:*, b:*):Object {
-                var m:BatchFieldOption = new BatchFieldOption(obj as AnalysisItem, o[obj.display]);
+                var m:BatchTagOption = new BatchTagOption(obj as Tag, o[String(Tag(obj).id)]);
                 return m;
             });
 
             realValues = new ArrayCollection(a);
             targetValues = new ArrayCollection(a);
-            targetValues.filterFunction = valuesFilterFunction;
-            stackIndex = 1;
         }
 
-        private function addLoadedBox(event:FlexEvent):void {
-            loadedValuesBox.addChild(filterTileList);
+        private function creationCompleteHandler(event:FlexEvent):void {
+            feedService.getFieldTags.send();
         }
 
         private function save():void {
             var a:Array = realValues.toArray().concat();
-
             a = a.filter(function (obj:Object, a:*, b:*):Boolean {
                 return obj.selected;
             });
 
 
             var selected:ArrayCollection = new ArrayCollection(a.map(function (obj:Object, a:*, b:*):Object {
-                return obj.analysisItem;
+                var hTag:HibernateTag = new HibernateTag();
+                hTag.tagID = Tag(obj.tag).id;
+                return hTag;
             }));
 
             dispatchEvent(new MultiFieldEvent(selected));
             PopUpManager.removePopUp(this);
         }
-
-        private function filterFunction(item:Object):Boolean {
-            if (keyword != null) {
-                var string:String = item as String;
-                return string.toLowerCase().indexOf(keyword) != -1;
-            }
-            return true;
-        }
-
-        private function targetFilterFunction(item:Object):Boolean {
-            if (includedKeyword != null) {
-                var string:String = item as String;
-                return string.toLowerCase().indexOf(includedKeyword) != -1;
-            }
-            return true;
-        }
-
-        private function filterBox_changeHandler(event:Event):void {
-            filterString = filterBox.text;
-            filterTileList.dataProvider.refresh();
-        }
-
-        private function selectedFilterEvent(event:Event):void {
-            selectedFilter = selectedFilterCheckBox.selected;
-            filterTileList.dataProvider.refresh();
-        }
         ]]>
 	</mx:Script>
-    <mx:HBox width="100%">
-        <mx:Image source="@Embed('../../../../assets/icon-search-black.png')"/>
-        <mx:TextInput id="filterBox" width="100%" change="filterBox_changeHandler(event)"/>
-    </mx:HBox>
-    <mx:HBox>
-        <mx:CheckBox id="selectedFilterCheckBox" change="selectedFilterEvent(event)" label="Show only selected values"/>
-    </mx:HBox>
-    <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}" width="100%">
-        <mx:Box>
-            <mx:ProgressBar label="Loading the available values..." indeterminate="true"/>
-        </mx:Box>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="getFieldTags" result="gotTags()"/>
+    </mx:RemoteObject>
+    <mx:VBox id="loadedValuesBox">
 
-        <mx:VBox id="loadedValuesBox" creationComplete="addLoadedBox(event)">
-
-        </mx:VBox>
-
-    </mx:ViewStack>
+    </mx:VBox>
     <mx:HBox>
         <util:SaveButton label="Save" click="save()"/>
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
