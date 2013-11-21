@@ -84,6 +84,50 @@ public class DataService {
                 }
             }
 
+            Map<Long, AnalysisItem> dataSourceFieldMap = new HashMap<Long, AnalysisItem>();
+            for (AnalysisItem field : dataSource.getFields()) {
+                dataSourceFieldMap.put(field.getAnalysisItemID(), field);
+            }
+
+            List<WeNeedToReplaceHibernateTag> tags = filter.getAvailableTags();
+
+            EIConnection conn = Database.instance().getConnection();
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.analysis_item_id FROM field_to_tag, feed_to_analysis_item WHERE account_tag_id = ? AND feed_to_analysis_item.feed_id = ? AND " +
+                    "field_to_tag.analysis_item_id = feed_to_analysis_item.analysis_item_id");
+            try {
+                for (WeNeedToReplaceHibernateTag tag : tags) {
+                    queryStmt.setLong(1, tag.getTagID());
+                    queryStmt.setLong(2, report.getDataFeedID());
+                    ResultSet rs = queryStmt.executeQuery();
+                    while (rs.next()) {
+                        long fieldID = rs.getLong(1);
+                        AnalysisItem analysisItem = dataSourceFieldMap.get(fieldID);
+                        positions.put(analysisItem, i++);
+                        set.add(analysisItem);
+                        PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
+                                "extension_type = ?");
+                        extStmt.setLong(1, fieldID);
+                        extStmt.setInt(2, report.extensionType());
+                        ResultSet extRS = extStmt.executeQuery();
+                        if (extRS.next()) {
+                            long extID = extRS.getLong(1);
+                            Session session = Database.instance().createSession(conn);
+                            try {
+                                ReportFieldExtension ext = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, extID).list().get(0);
+                                ext.afterLoad();
+                                analysisItem.setReportFieldExtension(ext);
+                            } finally {
+                                session.close();
+                            }
+                        }
+                        extStmt.close();
+                    }
+                }
+            } finally {
+                Database.closeConnection(conn);
+            }
+
+
             i = 0;
             for (AnalysisItemHandle handle : filter.getSelectedItems()) {
                 AnalysisItem item = mapByName.get(handle.getName());
@@ -106,12 +150,38 @@ public class DataService {
                 items.add(selection);
             }
 
+            final Map<String, Integer> fieldOrderingMap = new HashMap<String, Integer>();
+            if (filter.getFieldOrdering() != null && filter.getFieldOrdering().size() > 0) {
+                int j = 0;
+                for (AnalysisItemHandle handle : filter.getFieldOrdering()) {
+                    fieldOrderingMap.put(handle.getName(), j++);
+                }
+            }
+
             Collections.sort(items, new Comparator<AnalysisItemSelection>() {
 
                 public int compare(AnalysisItemSelection analysisItem, AnalysisItemSelection analysisItem1) {
-                Integer p1 = positions.get(analysisItem.getAnalysisItem());
-                Integer p2 = positions.get(analysisItem1.getAnalysisItem());
-                return p1.compareTo(p2);
+                    if (fieldOrderingMap.isEmpty()) {
+                        Integer p1 = positions.get(analysisItem.getAnalysisItem());
+                        Integer p2 = positions.get(analysisItem1.getAnalysisItem());
+                        return p1.compareTo(p2);
+                    } else {
+                        Integer p1 = fieldOrderingMap.get(analysisItem.getAnalysisItem().toDisplay());
+                        Integer p2 = fieldOrderingMap.get(analysisItem1.getAnalysisItem().toDisplay());
+                        if (p1 == null && p2 != null) {
+                            return 1;
+                        }
+                        if (p2 == null && p1 != null) {
+                            return -1;
+                        }
+                        if (p1 == null && p2 == null) {
+                            p1 = positions.get(analysisItem.getAnalysisItem());
+                            p2 = positions.get(analysisItem1.getAnalysisItem());
+                            return p1.compareTo(p2);
+                        }
+                        return p1.compareTo(p2);
+                    }
+
                 }
             });
             return items;
@@ -327,7 +397,7 @@ public class DataService {
         try {
             List<FeedNode> nodes = new ArrayList<FeedNode>();
             for (AddonReport addonReport : report.getAddonReports()) {
-                nodes.add(addonFields(addonReport.getReportID(), conn));
+                nodes.add(addonFields(addonReport, conn));
             }
             return nodes;
         } catch (Exception e) {
@@ -338,10 +408,10 @@ public class DataService {
         }
     }
 
-    public FeedNode addonFields(long addonReportID) {
+    public FeedNode addonFields(AddonReport addonReport) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            return addonFields(addonReportID, conn);
+            return addonFields(addonReport, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -350,10 +420,10 @@ public class DataService {
         }
     }
 
-    private FeedNode addonFields(long addonReportID, EIConnection conn) throws CloneNotSupportedException {
+    private FeedNode addonFields(AddonReport addonReport, EIConnection conn) throws CloneNotSupportedException {
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-        WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(addonReportID, conn);
+        WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(addonReport.getReportID(), conn);
         Map<String, AnalysisItem> structure = report.createStructure();
         for (AnalysisItem item : structure.values()) {
             AnalysisItem clone;
@@ -381,13 +451,13 @@ public class DataService {
             }
             //clone.setParentItemID(item.getAnalysisItemID());
             clone.setOriginalDisplayName(item.toDisplay());
-            //if (!addonReport.isUseNewNaming()) {
+            if (!addonReport.isUseNewNaming()) {
                 clone.setDisplayName(report.getName() + " - " + item.toDisplay());
-            //}
+            }
             clone.setBasedOnReportField(item.getAnalysisItemID());
             ReportKey reportKey = new ReportKey();
             reportKey.setParentKey(item.getKey());
-            reportKey.setReportID(addonReportID);
+            reportKey.setReportID(addonReport.getReportID());
             clone.setKey(reportKey);
             replacementMap.put(item.getAnalysisItemID(), clone);
             fields.add(clone);
@@ -398,7 +468,7 @@ public class DataService {
         }
         FolderNode folderNode = new FolderNode();
         folderNode.setAddonReportDescriptor(new InsightDescriptor(report.getAnalysisID(), report.getName(), report.getDataFeedID(), report.getReportType(), report.getUrlKey(), 0, false));
-        folderNode.setAddonReportID(addonReportID);
+        folderNode.setAddonReportID(addonReport.getReportID());
         FeedFolder feedFolder = new FeedFolder();
         feedFolder.setName(report.getName());
         folderNode.setFolder(feedFolder);
@@ -1780,6 +1850,7 @@ public class DataService {
             if (!insightRequestMetadata.isNoLogging()) {
                 reportEditorBenchmark(analysisDefinition, processingTime, insightRequestMetadata.getDatabaseTime(), conn);
             }
+            results.setReport(analysisDefinition);
 
             return results;
         } catch (ReportException dae) {
