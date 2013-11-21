@@ -57,6 +57,7 @@ public class DataSourceType {
     public static const SERVER_POSTGRES:int = 170;
     public static const TRELLO:int = 171;
     public static const INFUSIONSOFT:int = 177;
+    public static const DISTINCT_CACHED:int = 193;
 
 
 
