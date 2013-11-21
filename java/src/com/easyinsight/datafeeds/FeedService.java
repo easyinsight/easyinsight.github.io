@@ -59,6 +59,131 @@ public class FeedService {
         // this goes into a different data provider        
     }
 
+    public List<Tag> getFieldTags() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            List<Tag> tags = new ArrayList<Tag>();
+            PreparedStatement ps = conn.prepareStatement("SELECT account_tag.account_tag_id, account_tag.tag_name FROM account_tag WHERE " +
+                    "account_tag.account_id = ? and account_tag.field_tag = ?");
+            ps.setLong(1, SecurityUtil.getAccountID());
+            ps.setBoolean(2, true);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                long tagID = rs.getLong(1);
+                String tagName = rs.getString(2);
+                tags.add(new Tag(tagID, tagName, false, false, false));
+            }
+            ps.close();
+            return tags;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public List<AnalysisItemConfiguration> getAnalysisItemConfigurations(long dataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            FeedDefinition dataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+            List<AnalysisItemConfiguration> configurations = new ArrayList<AnalysisItemConfiguration>();
+            PreparedStatement ps = conn.prepareStatement("SELECT field_to_tag.account_tag_id, account_tag.tag_name FROM field_to_tag, account_tag WHERE analysis_item_id = ? AND " +
+                    "field_to_tag.account_tag_id = account_tag.account_tag_id");
+            PreparedStatement loadFormatting = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ?");
+
+            for (AnalysisItem field : dataSource.getFields()) {
+                AnalysisItemConfiguration configuration = new AnalysisItemConfiguration();
+                configuration.setAnalysisItem(field);
+                ps.setLong(1, field.getAnalysisItemID());
+                ResultSet rs = ps.executeQuery();
+                List<Tag> tags = new ArrayList<Tag>();
+                while (rs.next()) {
+                    long tagID = rs.getLong(1);
+                    String tagName = rs.getString(2);
+                    tags.add(new Tag(tagID, tagName, false, false, false));
+                }
+                configuration.setTags(tags);
+                loadFormatting.setLong(1, field.getAnalysisItemID());
+                ResultSet formattingRS = loadFormatting.executeQuery();
+                while (formattingRS.next()) {
+                    long formattingID = formattingRS.getLong(1);
+                    Session session = Database.instance().createSession(conn);
+                    try {
+                        ReportFieldExtension extension = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, formattingID).list().get(0);
+                        extension.afterLoad();
+                        if (extension instanceof TextReportFieldExtension) {
+                            configuration.setTextExtension((TextReportFieldExtension) extension);
+                        } else if (extension instanceof YTDReportFieldExtension) {
+                            configuration.setYtdExtension((YTDReportFieldExtension) extension);
+                        }
+                    } finally {
+                        session.close();
+                    }
+                }
+                configurations.add(configuration);
+            }
+            ps.close();
+            loadFormatting.close();
+            return configurations;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void updateAnalysisItemConfigurations(List<AnalysisItemConfiguration> configurations) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM field_to_tag WHERE analysis_item_id = ?");
+            PreparedStatement clearExtStmt = conn.prepareStatement("DELETE FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ?");
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO field_to_tag (account_tag_id, analysis_item_id) values (?, ?)");
+            PreparedStatement saveExtStmt = conn.prepareStatement("INSERT INTO analysis_item_to_report_field_extension (report_field_extension_id, " +
+                    "analysis_item_id, extension_type) values (?, ?, ?)");
+            for (AnalysisItemConfiguration configuration : configurations) {
+                clearStmt.setLong(1, configuration.getAnalysisItem().getAnalysisItemID());
+                clearStmt.executeUpdate();
+                clearExtStmt.setLong(1, configuration.getAnalysisItem().getAnalysisItemID());
+                clearExtStmt.executeUpdate();
+                for (Tag tag : configuration.getTags()) {
+                    saveStmt.setLong(1, tag.getId());
+                    saveStmt.setLong(2, configuration.getAnalysisItem().getAnalysisItemID());
+                    saveStmt.execute();
+                }
+                saveExtension(conn, saveExtStmt, configuration, configuration.getTextExtension(), ReportFieldExtension.TEXT);
+                saveExtension(conn, saveExtStmt, configuration, configuration.getYtdExtension(), ReportFieldExtension.YTD);
+            }
+            clearStmt.close();
+            clearExtStmt.close();
+            saveStmt.close();
+            saveExtStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    private void saveExtension(EIConnection conn, PreparedStatement saveExtStmt, AnalysisItemConfiguration configuration, ReportFieldExtension extension, int type) throws SQLException {
+        Session session = Database.instance().createSession(conn);
+        try {
+            if (extension != null) {
+                extension.reportSave(session);
+                session.saveOrUpdate(extension);
+                saveExtStmt.setLong(1, extension.getReportFieldExtensionID());
+                saveExtStmt.setLong(2, configuration.getAnalysisItem().getAnalysisItemID());
+                saveExtStmt.setInt(3, type);
+                saveExtStmt.execute();
+            }
+            session.flush();
+        } finally {
+            session.close();
+        }
+    }
+
     public void generateTemplate(long dataSourceID) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         try {
@@ -196,7 +321,7 @@ public class FeedService {
                     }
                 }
                 List<InsightDescriptor> reports = new AnalysisStorage().getInsightDescriptorsForDataSource(SecurityUtil.getUserID(),
-                        SecurityUtil.getAccountID(), source.getDataFeedID(), conn);
+                        SecurityUtil.getAccountID(), source.getDataFeedID(), conn, true);
                 Session session = Database.instance().createSession(conn);
                 for (InsightDescriptor report : reports) {
                     AnalysisDefinition analysisDefinition = new AnalysisStorage().getPersistableReport(report.getId(), session);
@@ -521,8 +646,8 @@ public class FeedService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            descriptorList.addAll(analysisStorage.getInsightDescriptorsForDataSource(userID, accountID, dataSourceID, conn));
-            descriptorList.addAll(new DashboardStorage().getDashboardsForDataSource(userID, accountID, conn, dataSourceID).values());
+            descriptorList.addAll(analysisStorage.getInsightDescriptorsForDataSource(userID, accountID, dataSourceID, conn, true));
+            descriptorList.addAll(new DashboardStorage().getDashboardsForDataSource(userID, accountID, conn, dataSourceID, true).values());
             Map<String, Integer> countMap = new HashMap<String, Integer>();
             Set<String> dupeNames = new HashSet<String>();
             Set<String> allNames = new HashSet<String>();
@@ -652,7 +777,9 @@ public class FeedService {
                 compositeResponse.setFirstName(first.getFeedName());
             } else {
                 List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-                List<FeedNode> children = new DataService().addonFields(firstID.getId()).getChildren();
+                AddonReport addonReport = new AddonReport();
+                addonReport.setReportID(firstID.getId());
+                List<FeedNode> children = new DataService().addonFields(addonReport).getChildren();
                 for (FeedNode child : children) {
                     AnalysisItemNode analysisItemNode = (AnalysisItemNode) child;
                     fields.add(analysisItemNode.getAnalysisItem());
@@ -669,7 +796,9 @@ public class FeedService {
                 compositeResponse.setSecondName(second.getFeedName());
             } else {
                 List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-                List<FeedNode> children = new DataService().addonFields(secondID.getId()).getChildren();
+                AddonReport addonReport = new AddonReport();
+                addonReport.setReportID(secondID.getId());
+                List<FeedNode> children = new DataService().addonFields(addonReport).getChildren();
                 for (FeedNode child : children) {
                     AnalysisItemNode analysisItemNode = (AnalysisItemNode) child;
                     fields.add(analysisItemNode.getAnalysisItem());
@@ -690,7 +819,7 @@ public class FeedService {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
         try {
-            List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(userID, SecurityUtil.getAccountID(), conn, true);
+            List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(userID, SecurityUtil.getAccountID(), conn, testAccountVisible(conn));
             Collections.sort(dataSources, new Comparator<DataSourceDescriptor>() {
 
                 public int compare(DataSourceDescriptor dataSourceDescriptor, DataSourceDescriptor dataSourceDescriptor1) {
@@ -698,14 +827,14 @@ public class FeedService {
                 }
             });
 
-            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
             PreparedStatement getTagsToDataSourcesStmt = conn.prepareStatement("SELECT DATA_SOURCE_TO_TAG.ACCOUNT_TAG_ID, DATA_SOURCE_ID FROM data_source_to_tag, account_tag WHERE " +
                     "account_tag.account_tag_id = data_source_to_tag.account_tag_id and account_tag.account_id = ?");
             getTagsStmt.setLong(1, SecurityUtil.getAccountID());
             ResultSet tagRS = getTagsStmt.executeQuery();
             Map<Long, Tag> tags = new HashMap<Long, Tag>();
             while (tagRS.next()) {
-                tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2)));
+                tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5)));
             }
 
             getTagsToDataSourcesStmt.setLong(1, SecurityUtil.getAccountID());
