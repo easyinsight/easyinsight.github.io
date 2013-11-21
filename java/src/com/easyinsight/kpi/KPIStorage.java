@@ -186,7 +186,7 @@ public class KPIStorage {
         kpi.setFilters(getFilters(kpiID, conn));
         kpi.setProblemConditions(getProblemFilters(kpiID, conn));
         kpi.setTemporary(temporary);
-        kpi.setReports(new AnalysisStorage().getInsightDescriptorsForDataSource(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), dataFeedID, conn));
+        kpi.setReports(new AnalysisStorage().getInsightDescriptorsForDataSource(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), dataFeedID, conn, true));
         kpi.setDayWindow(dayWindow);
         kpi.setThreshold(threshold);
         kpi.setDateDimension(date);
