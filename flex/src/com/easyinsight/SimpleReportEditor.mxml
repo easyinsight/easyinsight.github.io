@@ -464,7 +464,7 @@
         }
 
         private function boltOnFields(addonReport:AddonReport):void {
-            coreDataService.addonFields.send(addonReport.reportID);
+            coreDataService.addonFields.send(addonReport);
         }
 
         private function multiBolt():void {
@@ -881,9 +881,10 @@
                 feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
                 var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                 BrowserManager.getInstance().setFragment(feedFragmentString);
+                BrowserManager.getInstance().setTitle("Easy Insight - " + event.report.name);
             }
             reportName = event.report.name;
-            BrowserManager.getInstance().setTitle("Easy Insight - " + event.report.name);
+
 
             this.analysisChanged = false;
             saveAsEnabled = true;
