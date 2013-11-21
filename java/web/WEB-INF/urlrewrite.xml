@@ -72,6 +72,21 @@
     </rule>
 
     <rule>
+        <from>^/html/report/([A-Za-z0-9]+)/config$</from>
+        <to>/html/createConfiguration?reportID=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/html/report/([A-Za-z0-9]+)/config/([A-Za-z0-9]+)$</from>
+        <to>/html/report.jsp?reportID=$1&amp;reportConfig=$2</to>
+    </rule>
+
+    <rule>
+        <from>^/html/report/([A-Za-z0-9]+)/config/([A-Za-z0-9]+)/delete$</from>
+        <to>/html/deleteConfiguration?dashboardID=$1&amp;dashboardConfig=$2</to>
+    </rule>
+
+    <rule>
         <from>^/html/dashboard/drillthrough/([A-Za-z0-9]+)/embed$</from>
         <to>/embed/embeddedDashboard.jsp?drillthroughKey=$1</to>
     </rule>

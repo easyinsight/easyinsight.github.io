@@ -1,16 +1,16 @@
 package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.dashboard.DashboardInfo;
+import com.easyinsight.dashboard.FilterPositionKey;
+import com.easyinsight.dashboard.SavedConfiguration;
 import com.easyinsight.logging.LogClass;
 import net.minidev.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -189,5 +189,21 @@ public class FilterUtils {
             return number.intValue();
         }
         return 0;
+    }
+
+    public static void adjustReport(WSAnalysisDefinition report, DashboardInfo positions) throws ReportNotFoundException {
+        if(positions == null)
+            return;
+        if(positions.getReport() != null && positions.getReport().getUrlKey().equals(report.getUrlKey())) {
+            Map<String, FilterDefinition> map = positions.getSavedConfiguration().getDashboardStackPositions().getFilterMap();
+            for(FilterDefinition f : report.getFilterDefinitions()) {
+                FilterPositionKey k = new FilterPositionKey(FilterPositionKey.REPORT, f.getFilterID(), null);
+                if(map.containsKey(k.createURLKey())) {
+                    f.override(map.get(k.createURLKey()));
+                }
+            }
+        } else {
+            throw new ReportNotFoundException("Report not found.");
+        }
     }
 }
