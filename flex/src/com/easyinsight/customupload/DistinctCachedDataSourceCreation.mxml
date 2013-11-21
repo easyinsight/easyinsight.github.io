@@ -1,0 +1,104 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
+         implements="com.easyinsight.customupload.IServerDataSourceCreation" creationComplete="onCreation()">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.ConstantContactDataSource;
+        import com.easyinsight.datasources.DistinctCachedSource;
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.ReportResults;
+        import com.easyinsight.util.TagSelectionEvent;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.controls.Alert;
+        import mx.controls.Button;
+        import mx.validators.Validator;
+
+        private function onCreation():void {
+            ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getReportsWithTags);
+            analysisService.getReportsWithTags.send();
+        }
+
+        private var def:DistinctCachedSource;
+
+        private var installButton:Button;
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var source:DistinctCachedSource = new DistinctCachedSource();
+            source.feedName = nameInput.text;
+            source.reportID = reportBox.selectedItem.id;
+            return source;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:DistinctCachedSource = feedDefinition as DistinctCachedSource;
+            this.def = ds;
+        }
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:DistinctCachedSource = feedDefinition as DistinctCachedSource;
+            ds.feedName = nameInput.text;
+            ds.reportID = reportBox.selectedItem.id;
+        }
+
+        public function validate():Boolean {
+            if (Validator.validateAll([nameValidator]).length > 0) {
+                nameInput.setFocus();
+                nameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            }
+            if (reportBox.selectedItem == null) {
+                return false;
+            }
+            return true;
+        }
+
+        [Bindable]
+        private var validReports:ArrayCollection;
+
+        [Bindable]
+        private var selectedID:int;
+
+        private function gotReports():void {
+            var results:ReportResults = analysisService.getReportsWithTags.lastResult as ReportResults;
+            validReports = results.reports;
+            tags = results.reportTags;
+            validReports.filterFunction = filterFunction;
+        }
+
+        [Bindable]
+        private var tags:ArrayCollection;
+
+        private function filterFunction(object:Object):Boolean {
+            var report:InsightDescriptor = object as InsightDescriptor;
+            return tagBox.filterReport(report);
+        }
+
+        private function onTagSelect(event:TagSelectionEvent):void {
+            validReports.refresh();
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="getReportsWithTags" result="gotReports()"/>
+    </mx:RemoteObject>
+    <mx:Form>
+        <mx:FormItem label="Data Source" width="400">
+            <util:TagBox tags="{tags}" onTagSelect="onTagSelect(event)" id="tagBox" width="100%"/>
+            <mx:TextInput id="nameInput"/>
+        </mx:FormItem>
+        <mx:FormItem label="Source Report:">
+            <util:SmartComboBox dataProvider="{validReports}" labelField="name" selectedProperty="id" selectedValue="{selectedID}" id="reportBox"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:StringValidator id="nameValidator" source="{nameInput}" minLength="1" property="text"/>
+</mx:VBox>
