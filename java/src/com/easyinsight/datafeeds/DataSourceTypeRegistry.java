@@ -315,6 +315,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.INFUSIONSOFT_RECURRING_ORDERS, InfusionsoftRecurringOrderSource.class);
         registerType(FeedType.INFUSIONSOFT_ORDER_ITEM, InfusionsoftOrderItemSource.class);
         registerType(FeedType.CACHED_ADDON, CachedAddonDataSource.class);
+        registerType(FeedType.DISTINCT_CACHED_ADDON, DistinctCachedSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
