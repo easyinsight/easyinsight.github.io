@@ -354,7 +354,7 @@
         private var openState:Object = new Object();
 
         private function preserveOpenState():void {
-            if (existingData != null) {
+            if (existingData != null && (selectedTags == null || selectedTags.length == 0)) {
                 openState = new Object();
                 for each (var obj:Object in existingData) {
                     openState[String(obj.id)] = uploadGrid.isItemOpen(obj);
