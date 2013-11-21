@@ -123,21 +123,27 @@ public class UserUploadService {
         }
     }
 
+
+
     public List<Tag> saveTags(List<Tag> tags) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG_NAME, ACCOUNT_TAG_ID FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG_NAME, ACCOUNT_TAG_ID, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
             getTagsStmt.setLong(1, SecurityUtil.getAccountID());
             ResultSet rs = getTagsStmt.executeQuery();
             List<Tag> existingTags = new ArrayList<Tag>();
             while (rs.next()) {
                 String tagName = rs.getString(1);
                 long tagID = rs.getLong(2);
-                existingTags.add(new Tag(tagID, tagName));
+                boolean dataSourceTag = rs.getBoolean(3);
+                boolean reportTag = rs.getBoolean(4);
+                boolean fieldTag = rs.getBoolean(5);
+                existingTags.add(new Tag(tagID, tagName, dataSourceTag, reportTag, fieldTag));
             }
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM ACCOUNT_TAG WHERE ACCOUNT_TAG_ID = ?");
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID, tag_index) VALUES (?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TAG SET TAG_NAME = ?, tag_index = ? WHERE ACCOUNT_TAG_ID = ?");
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID, tag_index, data_source_tag, report_tag, field_tag) " +
+                    "VALUES (?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TAG SET TAG_NAME = ?, tag_index = ?, data_source_tag = ?, report_tag = ?, field_tag = ? WHERE ACCOUNT_TAG_ID = ?");
 
             for (Tag existingTag : existingTags) {
                 if (!tags.contains(existingTag)) {
@@ -152,13 +158,19 @@ public class UserUploadService {
                     insertStmt.setString(1, tag.getName());
                     insertStmt.setLong(2, SecurityUtil.getAccountID());
                     insertStmt.setInt(3, i);
+                    insertStmt.setBoolean(4, tag.isDataSource());
+                    insertStmt.setBoolean(5, tag.isReport());
+                    insertStmt.setBoolean(6, tag.isField());
                     insertStmt.execute();
                     long id = Database.instance().getAutoGenKey(insertStmt);
                     tag.setId(id);
                 } else {
                     updateStmt.setString(1, tag.getName());
                     updateStmt.setInt(2, i);
-                    updateStmt.setLong(3, tag.getId());
+                    updateStmt.setBoolean(3, tag.isDataSource());
+                    updateStmt.setBoolean(4, tag.isReport());
+                    updateStmt.setLong(5, tag.getId());
+                    updateStmt.setBoolean(6, tag.isField());
                     updateStmt.executeUpdate();
                 }
                 i++;
@@ -167,6 +179,78 @@ public class UserUploadService {
             insertStmt.close();
             updateStmt.close();
             return tags;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void tagReportsAndDashboards(List<EIDescriptor> descriptors, Tag tag) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement existingReportStmt = conn.prepareStatement("SELECT tag_id FROM report_to_tag WHERE report_id = ?");
+            PreparedStatement existingDashboardStmt = conn.prepareStatement("SELECT tag_id FROM dashboard_to_tag WHERE dashboard_id = ?");
+            PreparedStatement saveReportStmt = conn.prepareStatement("INSERT INTO report_to_tag (tag_id, report_id) values (?, ?)");
+            PreparedStatement saveDashboardStmt = conn.prepareStatement("INSERT INTO dashboard_to_tag (tag_id, dashboard_id) values (?, ?)");
+            for (EIDescriptor dsd : descriptors) {
+                if (dsd.getType() == EIDescriptor.REPORT) {
+                    Set<Long> existingIDs = new HashSet<Long>();
+                    existingReportStmt.setLong(1, dsd.getId());
+                    ResultSet rs = existingReportStmt.executeQuery();
+                    while (rs.next()) {
+                        existingIDs.add(rs.getLong(1));
+                    }
+                    if (!existingIDs.contains(tag.getId())) {
+                        saveReportStmt.setLong(1, tag.getId());
+                        saveReportStmt.setLong(2, dsd.getId());
+                        saveReportStmt.execute();
+                    }
+                } else if (dsd.getType() == EIDescriptor.DASHBOARD) {
+                    Set<Long> existingIDs = new HashSet<Long>();
+                    existingDashboardStmt.setLong(1, dsd.getId());
+                    ResultSet rs = existingDashboardStmt.executeQuery();
+                    while (rs.next()) {
+                        existingIDs.add(rs.getLong(1));
+                    }
+                    if (!existingIDs.contains(tag.getId())) {
+                        saveDashboardStmt.setLong(1, tag.getId());
+                        saveDashboardStmt.setLong(2, dsd.getId());
+                        saveDashboardStmt.execute();
+                    }
+                }
+            }
+            existingReportStmt.close();
+            existingDashboardStmt.close();
+            saveReportStmt.close();
+            saveDashboardStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void untagReportsAndDashboards(List<EIDescriptor> descriptors, Tag tag) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteReportStmt = conn.prepareStatement("DELETE FROM report_to_tag WHERE tag_id = ? AND report_id = ?");
+            PreparedStatement deleteDashboardStmt = conn.prepareStatement("DELETE FROM dashboard_to_tag WHERE tag_id = ? AND dashboard_id = ?");
+            for (EIDescriptor dsd : descriptors) {
+                if (dsd.getType() == EIDescriptor.REPORT) {
+                    deleteReportStmt.setLong(1, tag.getId());
+                    deleteReportStmt.setLong(2, dsd.getId());
+                    deleteReportStmt.executeUpdate();
+                } else if (dsd.getType() == EIDescriptor.DASHBOARD) {
+                    deleteDashboardStmt.setLong(1, tag.getId());
+                    deleteDashboardStmt.setLong(2, dsd.getId());
+                    deleteDashboardStmt.executeUpdate();
+                }
+            }
+            deleteReportStmt.close();
+            deleteDashboardStmt.close();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -435,8 +519,8 @@ public class UserUploadService {
 
             AnalysisStorage analysisStorage = new AnalysisStorage();
 
-            objects.addAll(new DashboardStorage().getDashboardsForDataSource(userID, accountID, conn, dataSourceDescriptor.getId()).values());
-            objects.addAll(analysisStorage.getInsightDescriptorsForDataSource(userID, accountID, dataSourceDescriptor.getId(), conn));
+            objects.addAll(new DashboardStorage().getDashboardsForDataSource(userID, accountID, conn, dataSourceDescriptor.getId(), testAccountVisible).values());
+            objects.addAll(analysisStorage.getInsightDescriptorsForDataSource(userID, accountID, dataSourceDescriptor.getId(), conn, testAccountVisible));
             objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn, testAccountVisible).values());
 
             Iterator<EIDescriptor> iter = objects.iterator();
@@ -580,16 +664,16 @@ public class UserUploadService {
                 dataSources = feedStorage.getDataSourcesForGroup(userID, groupID, conn);
             }
 
-            long dsTime = System.currentTimeMillis();
-
-            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? ORDER BY TAG_INDEX");
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? ORDER BY TAG_INDEX");
             PreparedStatement getTagsToDataSourcesStmt = conn.prepareStatement("SELECT DATA_SOURCE_TO_TAG.ACCOUNT_TAG_ID, DATA_SOURCE_ID FROM data_source_to_tag, account_tag WHERE " +
                     "account_tag.account_tag_id = data_source_to_tag.account_tag_id and account_tag.account_id = ?");
+            PreparedStatement getTagsToReportsStmt = conn.prepareStatement("SELECT REPORT_TO_TAG.TAG_ID, REPORT_ID FROM report_to_tag, account_tag WHERE " +
+                    "account_tag.account_tag_id = report_to_tag.tag_id and account_tag.account_id = ?");
             getTagsStmt.setLong(1, SecurityUtil.getAccountID());
             ResultSet tagRS = getTagsStmt.executeQuery();
             Map<Long, Tag> tags = new LinkedHashMap<Long, Tag>();
             while (tagRS.next()) {
-                tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2)));
+                tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5)));
             }
 
             getTagsToDataSourcesStmt.setLong(1, SecurityUtil.getAccountID());
@@ -608,6 +692,22 @@ public class UserUploadService {
             }
             getTagsStmt.close();
             getTagsToDataSourcesStmt.close();
+
+            getTagsToReportsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet reportTagRS = getTagsToReportsStmt.executeQuery();
+            Map<Long, List<Tag>> reportToTagMap = new HashMap<Long, List<Tag>>();
+            while (reportTagRS.next()) {
+                long dataSourceID = reportTagRS.getLong(2);
+                long tagID = reportTagRS.getLong(1);
+                Tag tag = tags.get(tagID);
+                List<Tag> t = reportToTagMap.get(dataSourceID);
+                if (t == null) {
+                    t = new ArrayList<Tag>();
+                    reportToTagMap.put(dataSourceID, t);
+                }
+                t.add(tag);
+            }
+            getTagsToReportsStmt.close();
 
 
             Iterator<DataSourceDescriptor> dataSourceIter = dataSources.iterator();
@@ -631,7 +731,11 @@ public class UserUploadService {
             if (groupID == 0) {
                 objects.addAll(new DashboardStorage().getDashboards(userID, accountID, conn, testAccountVisible).values());
                 dashboardTime = System.currentTimeMillis();
-                objects.addAll(analysisStorage.getReports(userID, accountID, conn, testAccountVisible).values());
+                List<InsightDescriptor> reports = analysisStorage.getReports(userID, accountID, conn, testAccountVisible).values();
+                for (InsightDescriptor report : reports) {
+                    report.setTags(reportToTagMap.get(report.getId()));
+                }
+                objects.addAll(reports);
                 reportTime = System.currentTimeMillis();
                 objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn, testAccountVisible).values());
                 scorecardTime = System.currentTimeMillis();
@@ -1891,6 +1995,7 @@ public class UserUploadService {
                     String body = message.getMessageBody();
                     String[] parts = body.split("\\|");
                     long sourceID = Long.parseLong(parts[0]);
+                    //long time = Long.parseLong(parts[3]);
                     System.out.println("got response with id = " + sourceID);
                     if (sourceID == dataSourceID) {
                         success = true;
@@ -1904,7 +2009,10 @@ public class UserUploadService {
                             String error = parts[2];
                             throw new ReportException(new DataSourceConnectivityReportFault(error, dataSource));
                         }
-                    }
+                    } /*else if (time < (System.currentTimeMillis() - 1000 * 60 * 60)) {
+                        System.out.println("Dropping old message");
+                        responseQueue.deleteMessage(message);
+                    }*/
                 }
             }
             if (!success) {
