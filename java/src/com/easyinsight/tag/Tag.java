@@ -1,20 +1,52 @@
 package com.easyinsight.tag;
 
+import java.io.Serializable;
+
 /**
  * User: jamesboe
  * Date: 7/25/13
  * Time: 3:51 PM
  */
-public class Tag {
+public class Tag implements Serializable {
     private long id;
     private String name;
+    private boolean dataSource;
+    private boolean report;
+    private boolean field;
 
     public Tag() {
     }
 
-    public Tag(long id, String name) {
+    public Tag(long id, String name, boolean dataSource, boolean report, boolean field) {
         this.id = id;
         this.name = name;
+        this.dataSource = dataSource;
+        this.report = report;
+        this.field = field;
+    }
+
+    public boolean isField() {
+        return field;
+    }
+
+    public void setField(boolean field) {
+        this.field = field;
+    }
+
+    public boolean isDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(boolean dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public boolean isReport() {
+        return report;
+    }
+
+    public void setReport(boolean report) {
+        this.report = report;
     }
 
     public long getId() {
