@@ -21,6 +21,10 @@ import java.util.List;
 @Table(name="report_field_extension")
 @Inheritance(strategy= InheritanceType.JOINED)
 public class ReportFieldExtension implements Cloneable, Serializable {
+
+    public static final int TEXT = 1;
+    public static final int YTD = 2;
+
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="report_field_extension_id")
     private long reportFieldExtensionID;
