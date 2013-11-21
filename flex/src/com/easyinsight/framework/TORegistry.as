@@ -9,6 +9,7 @@ import com.easyinsight.analysis.AddonReport;
 import com.easyinsight.analysis.AnalysisCalculation;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItemFault;
+import com.easyinsight.analysis.AnalysisItemHandle;
 import com.easyinsight.analysis.AnalysisLatitude;
 import com.easyinsight.analysis.AnalysisList;
 import com.easyinsight.analysis.AnalysisLongitude;
@@ -86,6 +87,7 @@ import com.easyinsight.datasources.BatchbookDataSource;
 import com.easyinsight.datasources.CloudWatchDataSource;
 import com.easyinsight.datasources.ConstantContactDataSource;
 import com.easyinsight.datasources.DatabaseConnection;
+import com.easyinsight.datasources.DistinctCachedSource;
 import com.easyinsight.datasources.FreshbooksDataSource;
 import com.easyinsight.datasources.HarvestDataSource;
 import com.easyinsight.datasources.HighRiseDataSource;
@@ -99,6 +101,7 @@ import com.easyinsight.datasources.OracleDatabaseConnection;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.PostgresDatabaseConnection;
 import com.easyinsight.datasources.TrelloCompositeSource;
+import com.easyinsight.filtering.MultiFieldFilterDefinition;
 
 //import com.easyinsight.datasources.ReportDataSourceDefinition;
 import com.easyinsight.datasources.SQLServerDatabaseConnection;
@@ -200,6 +203,7 @@ public class TORegistry {
         var filter8:NullValueFilterDefinition;
         var filter9:NamedFilterReference;
         var filter10:FlatDateFilterDefinition;
+        var filter11:MultiFieldFilterDefinition;
         var icon:Icon;
         var addonReport:AddonReport;
         var scorecard:Scorecard;
@@ -253,6 +257,7 @@ public class TORegistry {
         var kpiUser:KPIUser;
         var userStub:UserStub;
         var info:FieldUploadInfo;
+        var handle:AnalysisItemHandle;
         var response:UploadResponse;
         var spreadsheet:Spreadsheet;
         var worksheet:Worksheet;
@@ -314,6 +319,7 @@ public class TORegistry {
         var postgres:PostgresDatabaseConnection;
         var trello:TrelloCompositeSource;
         var infusion:InfusionsoftCompositeSource;
+        var distinct:DistinctCachedSource;
     }
 }
 }
