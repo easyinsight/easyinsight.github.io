@@ -92,12 +92,14 @@
         <mx:method name="getReportsWithTags" result="gotReports()"/>
     </mx:RemoteObject>
     <mx:Form>
-        <mx:FormItem label="Data Source" width="400">
+        <mx:FormItem label="Tags:" width="400">
             <util:TagBox tags="{tags}" onTagSelect="onTagSelect(event)" id="tagBox" width="100%"/>
-            <mx:TextInput id="nameInput"/>
         </mx:FormItem>
         <mx:FormItem label="Source Report:">
             <util:SmartComboBox dataProvider="{validReports}" labelField="name" selectedProperty="id" selectedValue="{selectedID}" id="reportBox"/>
+        </mx:FormItem>
+        <mx:FormItem label="Data Source Name:">
+            <mx:TextInput id="nameInput" width="300"/>
         </mx:FormItem>
     </mx:Form>
     <mx:StringValidator id="nameValidator" source="{nameInput}" minLength="1" property="text"/>
