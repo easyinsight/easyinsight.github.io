@@ -516,8 +516,6 @@
 
         public function positionsPopulate(positions:DashboardStackPositions):void {
             if (transformContainer != null) {
-                var map:Object = new Object();
-
                 for each (var filterDefinition:FilterDefinition in transformContainer.getFilterDefinitions()) {
                     var str:String = FilterPositionKey.createString(FilterPositionKey.REPORT, filterDefinition.filterID);
                     positions.filterMap[str] = filterDefinition;

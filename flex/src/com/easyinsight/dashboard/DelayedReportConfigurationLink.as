@@ -35,7 +35,8 @@ public class DelayedReportConfigurationLink extends EventDispatcher
             var result:DashboardInfo = reportService.getConfigurationForReport.lastResult as DashboardInfo;
             if (result != null) {
                 /*result.savedConfiguration..urlKey = reportID;*/
-                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(result.report), null, null, null, 0, null, null, null, null, result.savedConfiguration)));
+                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(result.report), null, null, null, 0, null, null, null,
+                        result.savedConfiguration.dashboardStackPositions, result.savedConfiguration)));
             }
         }
 	}
