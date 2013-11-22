@@ -586,6 +586,7 @@
                         for each (var filter:FilterDefinition in stackPositions.filterMap) {
                             f.addItem(filter);
                         }
+                        parameterFilters = f;
                     }
                 }
                 viewFactory.setup();
