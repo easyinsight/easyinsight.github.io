@@ -7,6 +7,8 @@
         [Bindable]
         private var url:String;
 
+        private var _report:AnalysisDefinition;
+
         private var _urlKey:String;
 
         private var _reportType:int;
@@ -26,6 +28,10 @@
         private var _insecureEmbed:Boolean;
 
         private var _showHeader:Boolean;
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
 
         [Bindable(event="showHeaderChanged")]
         public function get showHeader():Boolean {
@@ -130,7 +136,7 @@
                         _urlKey + "&reportType=" + _reportType + "&reportName=" + escape(_reportName) + "&dataSourceID=" + _dataSourceID;
                 sym = "&";
             } else {
-                str = "https://www.easy-insight.com/app/html/embeddedReport/" + _urlKey;
+                str = "https://www.easy-insight.com/app/html/report/" + _urlKey + "/embed";
                 sym = "?";
             }
             if (_showToolbar) {
@@ -144,11 +150,21 @@
                 str += sym + "showHeader=1";
             }
             url = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\"" + str + "\"></iframe>";
+            if (_report.publiclyVisible) {
+                visibilityExplanation = "Anyone viewing the page containing this report will be able to see it without needing to log in via Easy Insight credentials.";
+            } else if (_report.publicWithKey) {
+                visibilityExplanation = "Anyone viewing the page containing this report will be able to see it without needing to log in via Easy Insight credentials.";
+            } else {
+                visibilityExplanation = "This report will require users to be logged in.";
+            }
         }
 
         private function copyToClipboard():void {
             System.setClipboard(url);
         }
+
+        [Bindable]
+        private var visibilityExplanation:String;
         ]]>
 	</mx:Script>
 	<mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
@@ -175,6 +191,7 @@
                 <mx:CheckBox id="headerCheckbox" change="showHeader = headerCheckbox.selected"/>
             </mx:FormItem>
         </mx:Form>
+        <mx:Text width="400" text="{visibilityExplanation}"/>
         <mx:Label text="You can paste this HTML into any web page to embed the report into the page." fontSize="14"/>
 		<mx:HBox id="quickBox" verticalAlign="middle">
 			<mx:TextArea editable="false" text="{url}" width="400" height="200" wordWrap="true" id="firstTextArea" borderStyle="solid" borderThickness="1"/>
