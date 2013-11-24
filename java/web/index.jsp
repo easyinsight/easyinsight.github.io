@@ -69,7 +69,10 @@
         PreparedStatement ps = conn.prepareStatement("SELECT account_state, user.account_id FROM USER, ACCOUNT WHERE user_id = ? and user.account_id = account.account_id");
         ps.setLong(1, userID);
         ResultSet rs = ps.executeQuery();
-        rs.next();
+        if (!rs.next()) {
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/login.jsp"));
+            return;
+        }
         int accountState = rs.getInt(1);
         accountID = rs.getLong(2);
         ps.close();
