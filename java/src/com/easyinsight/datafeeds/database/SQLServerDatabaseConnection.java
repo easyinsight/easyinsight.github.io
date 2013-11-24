@@ -152,7 +152,7 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
             statement.close();
             IDataStorage.insertData(dataSet);
         } catch (Exception e) {
-            LogClass.error(e);
+            LogClass.userError(e.getMessage(), e);
         }
         return null;
     }
