@@ -49,6 +49,7 @@
         import mx.collections.Sort;
 
         import mx.controls.Alert;
+        import mx.controls.Text;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.core.UIComponent;
         import mx.events.CloseEvent;
@@ -1008,6 +1009,11 @@
                 if (!tagLowerRule.parent) {
                     blah.addChildAt(tagLowerRule, 3);
                 }
+                var text:Text = new Text();
+                text.styleName = "fallThroughFonts";
+                text.setStyle("fontWeight", "bold");
+                text.text = "Browse by Tag";
+                tagBox.addChildAt(text, 0);
             }
             this.tagOptions = tagOptions;
         }
@@ -1087,7 +1093,9 @@
             <mx:Spacer width="100%"/>
         </mx:HBox>
         <mx:HRule id="tagUpperRule" width="100%" strokeColor="#CCCCCC"/>
-        <containers:FlowBox id="tagBox" width="100%" updateComplete="adapterFlowBoxUpdateCompleteHandler(event)"/>
+        <containers:FlowBox id="tagBox" width="100%" updateComplete="adapterFlowBoxUpdateCompleteHandler(event)" verticalAlign="middle">
+
+        </containers:FlowBox>
         <mx:HRule id="tagLowerRule" width="100%" strokeColor="#CCCCCC"/>
         <util:PatchedAdvancedDataGrid id="uploadGrid" selectable="false"
                                              fontSize="12"

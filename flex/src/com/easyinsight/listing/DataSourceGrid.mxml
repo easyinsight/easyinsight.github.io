@@ -2,14 +2,6 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*" xmlns:containers="flexlib.containers.*"
          width="100%"
          height="100%" horizontalAlign="center" initialize="onCreation()">
-    <mx:states>
-        <mx:State name="noTags">
-            <mx:RemoveChild target="{newButton}"/>
-            <mx:RemoveChild target="{tagUpperRule}"/>
-            <mx:RemoveChild target="{tagLowerRule}"/>
-            <mx:RemoveChild target="{tagBox}"/>
-        </mx:State>
-    </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.datasources.CopyDataSourceWindow;
@@ -17,6 +9,7 @@
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
+        import mx.controls.Text;
         import mx.core.UIComponent;
         import mx.events.CollectionEvent;
         import mx.events.CollectionEventKind;
@@ -170,6 +163,13 @@
 
             if (tagBox != null) {
                 tagBox.removeAllChildren();
+                if (tags.length > 0) {
+                    var text:Text = new Text();
+                    text.styleName = "fallThroughFonts";
+                    text.setStyle("fontWeight", "bold");
+                    text.text = "Browse by Tag";
+                    tagBox.addChildAt(text, 0);
+                }
             }
             for each (var tag:Tag in tags) {
                 var tagButton:TagButton = new TagButton();
@@ -192,6 +192,23 @@
                 for each (var opTag:Tag in tags) {
                     tagOptions.addItem({label: "Add tag - " + opTag.name + " - to selected", data: opTag, op: "add"});
                     tagOptions.addItem({label: "Remove tag - " + opTag.name + " - from selected", data: opTag, op: "remove"});
+                }
+            }
+            if (tagBox != null) {
+                if (tags.length == 0) {
+                    if (tagUpperRule != null && tagUpperRule.parent) {
+                        tagUpperRule.parent.removeChild(tagUpperRule);
+                    }
+                    if (tagLowerRule != null && tagLowerRule.parent) {
+                        tagLowerRule.parent.removeChild(tagLowerRule);
+                    }
+                } else {
+                    if (tagUpperRule != null && !tagUpperRule.parent) {
+                        addChildAt(tagUpperRule, 1);
+                    }
+                    if (tagLowerRule != null && !tagLowerRule.parent) {
+                        addChildAt(tagLowerRule, 3);
+                    }
                 }
             }
             this.tagOptions = tagOptions;
@@ -238,30 +255,33 @@
             }
             customizeVisible = User.getInstance().accountAdmin;
 
-            /*if (!User.getInstance().tagsAndCopyEnabled) {
-                currentState = "noTags";
-                actionButton.dataProvider = noTagActions;
-            } else {*/
-                currentState = "";
-                var newColumns:Array = [];
-                for each (var o:Object in dataSourceGrid.columns) {
-                    newColumns.push(o);
-                }
-                var tagColumn:DataGridColumn = new DataGridColumn();
-                tagColumn.labelFunction = renderTags;
-                tagColumn.headerText = "Tags";
-                tagColumn.width = 140;
-                tagColumn.sortable = false;
 
-                newColumns.push(tagColumn);
-                dataSourceGrid.columns = newColumns;
-                actionButton.dataProvider = actions;
-            //}
-            for each (var tag:Tag in tags) {
-                var tagButton:TagButton = new TagButton();
-                tagButton.data = tag;
-                tagBox.addChild(tagButton);
+            var newColumns:Array = [];
+            for each (var o:Object in dataSourceGrid.columns) {
+                newColumns.push(o);
             }
+            var tagColumn:DataGridColumn = new DataGridColumn();
+            tagColumn.labelFunction = renderTags;
+            tagColumn.headerText = "Tags";
+            tagColumn.width = 140;
+            tagColumn.sortable = false;
+
+            newColumns.push(tagColumn);
+            dataSourceGrid.columns = newColumns;
+            actionButton.dataProvider = actions;
+            /*if (tags.length > 0) {
+                var text:Text = new Text();
+                text.styleName = "fallThroughFonts";
+                text.setStyle("fontWeight", "bold");
+                text.text = "Browse by Tag";
+                tagBox.addChildAt(text, 0);
+                for each (var tag:Tag in tags) {
+                    var tagButton:TagButton = new TagButton();
+                    tagButton.data = tag;
+                    tagBox.addChild(tagButton);
+                }
+            }*/
+            populateTags(_tags);
         }
 
         override protected function measure():void {
@@ -547,7 +567,7 @@
         <mx:LinkButton label="Delete Selected" click="deleteSelected()" fontSize="12" visible="{customizeVisible}"/>
     </mx:HBox>
     <mx:HRule id="tagUpperRule" width="100%" strokeColor="#CCCCCC"/>
-    <containers:FlowBox id="tagBox" width="100%" updateComplete="adapterFlowBoxUpdateCompleteHandler(event)"/>
+    <containers:FlowBox id="tagBox" width="100%" updateComplete="adapterFlowBoxUpdateCompleteHandler(event)" verticalAlign="middle"/>
     <mx:HRule id="tagLowerRule" width="100%" strokeColor="#CCCCCC"/>
     <mx:HBox paddingLeft="10" paddingRight="10"
          borderStyle="solid" cornerRadius="8" borderThickness="1" dropShadowEnabled="true"
