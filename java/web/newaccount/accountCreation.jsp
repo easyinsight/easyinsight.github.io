@@ -44,6 +44,7 @@
             user.setOptInEmail(true);
             user.setInitialSetupDone(true);
             user.setAnalyst(true);
+            user.setTestAccountVisible(true);
             com.easyinsight.users.AccountTransferObject account = new com.easyinsight.users.AccountTransferObject();
             account.setName(company);
             account.setAccountType(Account.PROFESSIONAL);
