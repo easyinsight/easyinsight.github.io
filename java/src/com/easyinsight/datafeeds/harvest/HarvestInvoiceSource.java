@@ -110,10 +110,6 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
                 Document invoices = runRestRequest(request, client, builder, source.getUrl(), true, source, false);
                 invoiceNodes = invoices.query("/invoices/invoice");
                 for(int i = 0;i < invoiceNodes.size();i++) {
-                    if(lastRefreshDate != null) {
-                        ds = new DataSet();
-
-                    }
                     IRow row = ds.createRow();
                     Node curInvoice = invoiceNodes.get(i);
                     String id = queryField(curInvoice, "id/text()");

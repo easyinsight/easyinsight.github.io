@@ -316,6 +316,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.INFUSIONSOFT_ORDER_ITEM, InfusionsoftOrderItemSource.class);
         registerType(FeedType.CACHED_ADDON, CachedAddonDataSource.class);
         registerType(FeedType.DISTINCT_CACHED_ADDON, DistinctCachedSource.class);
+        registerType(FeedType.HARVEST_PAYMENT, HarvestPaymentSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

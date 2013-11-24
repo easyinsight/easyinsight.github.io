@@ -8,6 +8,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.IJoin;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.kpi.KPI;
@@ -168,6 +169,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.HARVEST_EXPENSES);
         types.add(FeedType.HARVEST_EXPENSE_CATEGORIES);
         types.add(FeedType.HARVEST_INVOICES);
+        types.add(FeedType.HARVEST_PAYMENT);
         return types;
     }
 
@@ -236,7 +238,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
         return Arrays.asList(new ChildConnection(FeedType.HARVEST_CLIENT, FeedType.HARVEST_CONTACTS, HarvestClientSource.CLIENT_ID, HarvestClientContactSource.CLIENT_ID),
                 new ChildConnection(FeedType.HARVEST_CLIENT, FeedType.HARVEST_PROJECT,  HarvestClientSource.CLIENT_ID, HarvestProjectSource.CLIENT_ID),
                 new ChildConnection(FeedType.HARVEST_TASKS, FeedType.HARVEST_TIME, HarvestTaskSource.ID, HarvestTimeSource.TASK_ID),
-                new ChildConnection(FeedType.HARVEST_PROJECT, FeedType.HARVEST_TIME, HarvestProjectSource.PROJECT_ID, HarvestTimeSource.PROJECT_ID),
+                new ChildConnection(FeedType.HARVEST_PROJECT, FeedType.HARVEST_TIME, HarvestProjectSource.PROJECT_ID, HarvestTimeSource.PROJECT_ID, IJoin.ONE, IJoin.MANY),
                 new ChildConnection(FeedType.HARVEST_PROJECT, FeedType.HARVEST_TASK_ASSIGNMENTS, HarvestProjectSource.PROJECT_ID, HarvestTaskAssignmentSource.PROJECT_ID),
                 new ChildConnection(FeedType.HARVEST_TASKS, FeedType.HARVEST_TASK_ASSIGNMENTS, HarvestTaskSource.ID,  HarvestTaskAssignmentSource.TASK_ID),
                 new ChildConnection(FeedType.HARVEST_USERS, FeedType.HARVEST_TIME, HarvestUserSource.USER_ID,  HarvestTimeSource.USER_ID),
