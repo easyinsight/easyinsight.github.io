@@ -169,8 +169,8 @@ public class UserUploadService {
                     updateStmt.setInt(2, i);
                     updateStmt.setBoolean(3, tag.isDataSource());
                     updateStmt.setBoolean(4, tag.isReport());
-                    updateStmt.setLong(5, tag.getId());
-                    updateStmt.setBoolean(6, tag.isField());
+                    updateStmt.setBoolean(5, tag.isField());
+                    updateStmt.setLong(6, tag.getId());
                     updateStmt.executeUpdate();
                 }
                 i++;
