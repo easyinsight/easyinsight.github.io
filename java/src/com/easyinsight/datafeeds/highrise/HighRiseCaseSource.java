@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.highrise;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -40,6 +41,7 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
     public static final String COUNT = "Case Count";
     public static final String AUTHOR = "Case Author";
     public static final String TAGS = "Case Tags";
+    public static final String CASE_BACKGROUND_INFO = "Case Background Info";
 
     public HighRiseCaseSource() {
         setFeedName("Cases");
@@ -61,6 +63,11 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDateDimension(keys.get(UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(CLOSED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
+        Key backgroundInfoKey = keys.get(CASE_BACKGROUND_INFO);
+        if (backgroundInfoKey == null) {
+            backgroundInfoKey = new NamedKey(CASE_BACKGROUND_INFO);
+        }
+        analysisItems.add(new AnalysisDimension(backgroundInfoKey, true));
         return analysisItems;
     }
 
@@ -87,7 +94,7 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
                 loadingProgress(0, 1, "Synchronizing with cases...", callDataID);
                 Document companies;
                 if (offset == 0) {
-                    companies = runRestRequest("/kases/open.xml", client, builder, url, true, false, parentDefinition);
+                    companies = runRestRequest("/kases/open.xml", client, builder, url, true, true, parentDefinition);
                 } else {
                     companies = runRestRequest("/kases/open.xml?n=" + offset, client, builder, url, true, false, parentDefinition);
                 }
@@ -98,6 +105,7 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
                     Node companyNode = companyNodes.get(i);
                     String name = queryField(companyNode, "name/text()");
                     row.addValue(CASE_NAME, name);
+                    row.addValue(CASE_BACKGROUND_INFO, queryField(companyNode, "background/text()"));
 
                     String id = queryField(companyNode, "id/text()");
                     row.addValue(CASE_ID, id);
