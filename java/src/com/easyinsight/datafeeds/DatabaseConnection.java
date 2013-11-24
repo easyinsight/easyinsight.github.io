@@ -122,7 +122,9 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
                     PreparedStatement ps = conn.prepareStatement("SELECT STATUS FROM db_connection_cache where call_data_id = ?");
                     ps.setString(1, callDataID);
                     ResultSet rs = ps.executeQuery();
-                    val = rs.getInt(1);
+                    if (rs.next()) {
+                        val = rs.getInt(1);
+                    }
                     ps.close();
                 } catch (SQLException e) {
                     LogClass.error(e);
