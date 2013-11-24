@@ -17,6 +17,8 @@ public class AddonReport {
 
     public var selected:Boolean;
 
+    public var useNewNaming:Boolean = false;
+
     public function AddonReport() {
     }
 }

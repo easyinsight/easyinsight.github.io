@@ -132,32 +132,35 @@ public class DashboardStorage {
         return dashboards;
     }
 
-    public RolePrioritySet<DashboardDescriptor> getDashboardsForDataSource(long userID, long accountID, EIConnection conn, long dataSourceID) throws SQLException {
+    public RolePrioritySet<DashboardDescriptor> getDashboardsForDataSource(long userID, long accountID, EIConnection conn, long dataSourceID, boolean testAccountVisible) throws SQLException {
         RolePrioritySet<DashboardDescriptor> dashboards = new RolePrioritySet<DashboardDescriptor>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id, dashboard.account_visible, dashboard.folder from " +
-                "dashboard, user_to_dashboard, user where user.account_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
-                "dashboard.temporary_dashboard = ? and dashboard.account_visible = ? and user_to_dashboard.user_id = user.user_id and dashboard.data_source_id = ?");
         PreparedStatement ownerStmt = conn.prepareStatement("SELECT user.first_name, user.name from user, user_to_dashboard where " +
                 "user.user_id = user_to_dashboard.user_id and user_to_dashboard.dashboard_id = ?");
-        queryStmt.setLong(1, accountID);
-        queryStmt.setBoolean(2, false);
-        queryStmt.setBoolean(3, true);
-        queryStmt.setLong(4, dataSourceID);
-        ResultSet rs = queryStmt.executeQuery();
-        while (rs.next()) {
-            ownerStmt.setLong(1, rs.getLong(1));
-            ResultSet ownerRS = ownerStmt.executeQuery();
-            String name;
-            if (ownerRS.next()) {
-                String firstName = ownerRS.getString(1);
-                String lastName = ownerRS.getString(2);
-                name = firstName != null ? firstName + " " + lastName : lastName;
-            } else {
-                name = "";
+
+        if (testAccountVisible) {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id, dashboard.account_visible, dashboard.folder from " +
+                    "dashboard, user_to_dashboard, user where user.account_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
+                    "dashboard.temporary_dashboard = ? and dashboard.account_visible = ? and user_to_dashboard.user_id = user.user_id and dashboard.data_source_id = ?");
+            queryStmt.setLong(1, accountID);
+            queryStmt.setBoolean(2, false);
+            queryStmt.setBoolean(3, true);
+            queryStmt.setLong(4, dataSourceID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                ownerStmt.setLong(1, rs.getLong(1));
+                ResultSet ownerRS = ownerStmt.executeQuery();
+                String name;
+                if (ownerRS.next()) {
+                    String firstName = ownerRS.getString(1);
+                    String lastName = ownerRS.getString(2);
+                    name = firstName != null ? firstName + " " + lastName : lastName;
+                } else {
+                    name = "";
+                }
+                dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.SHARER, name, rs.getBoolean(5), rs.getInt(6)));
             }
-            dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.SHARER, name, rs.getBoolean(5), rs.getInt(6)));
+            queryStmt.close();
         }
-        queryStmt.close();
         PreparedStatement ueryAccountStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id, " +
                 "dashboard.account_visible, dashboard.folder from " +
                 "dashboard, user_to_dashboard where user_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +

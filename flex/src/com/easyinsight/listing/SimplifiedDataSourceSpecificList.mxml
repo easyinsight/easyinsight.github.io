@@ -46,7 +46,7 @@
             var selectedObject:Object = event.data;
             if (selectedObject is DataSourceDescriptor) {
                 var descriptor:DataSourceDescriptor = selectedObject as DataSourceDescriptor;
-                analyzeSource = new DescriptorAnalyzeSource(descriptor.id);
+                analyzeSource = new DescriptorAnalyzeSource(descriptor.id, descriptor.urlKey);
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
             } else if (selectedObject is LookupTableDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(selectedObject).id)));
@@ -241,11 +241,11 @@
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
             super.updateDisplayList(unscaledWidth, unscaledHeight);
             /*if (dataChanged) {
-                if (!dataSourceChanged) {
-                    preserveOpenState();
-                    var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
-                }
-            }*/
+             if (!dataSourceChanged) {
+             preserveOpenState();
+             var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
+             }
+             }*/
             if (columnsInvalid || uploadGrid.columns == null || uploadGrid.columns.length == 0) {
                 var columns:Array = [];
                 var nameColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
@@ -430,6 +430,9 @@
             var name1:String = obj1.name;
             var name2:String = obj2.name;
             return ObjectUtil.stringCompare(name1, name2, true);
+        }
+
+        public function set tags(values:ArrayCollection):void {
         }
         ]]></mx:Script>
     <mx:VBox

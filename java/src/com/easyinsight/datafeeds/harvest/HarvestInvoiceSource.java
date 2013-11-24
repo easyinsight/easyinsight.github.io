@@ -97,11 +97,6 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
     }
 
     @Override
-    protected String getUpdateKeyName() {
-        return ID;
-    }
-
-    @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         HarvestCompositeSource source = (HarvestCompositeSource) parentDefinition;
         HttpClient client = getHttpClient(source.getUsername(), source.getPassword());
@@ -112,16 +107,9 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
             DataSet ds = new DataSet();
             do {
                 String request = "/invoices?page=" + page++;
-                if(lastRefreshDate != null) {
-                    request = request + "&updated_since=" + UPDATED_SINCE_FORMAT.format(lastRefreshDate);
-                }
                 Document invoices = runRestRequest(request, client, builder, source.getUrl(), true, source, false);
                 invoiceNodes = invoices.query("/invoices/invoice");
                 for(int i = 0;i < invoiceNodes.size();i++) {
-                    if(lastRefreshDate != null) {
-                        ds = new DataSet();
-
-                    }
                     IRow row = ds.createRow();
                     Node curInvoice = invoiceNodes.get(i);
                     String id = queryField(curInvoice, "id/text()");
@@ -170,16 +158,10 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
                         row.addValue(keys.get(TAX_AMOUNT), Double.parseDouble(taxAmount));
                     if(tax2Amount != null && tax2Amount.length() > 0)
                         row.addValue(keys.get(TAX_2_AMOUNT), Double.parseDouble(tax2Amount));
-                    if(lastRefreshDate != null) {
-                        IWhere where = new StringWhere(keys.get(ID), row.getValue(keys.get(ID)).toString());
-                        IDataStorage.updateData(ds, Arrays.asList(where));
-                    }
                 }
 
             } while(invoiceNodes != null && invoiceNodes.size() > 0);
-            if(lastRefreshDate == null) {
-                IDataStorage.insertData(ds);
-            }
+            IDataStorage.insertData(ds);
         } catch (ReportException re) {
             // going to ignore on this case...
             re.printStackTrace();
@@ -191,7 +173,7 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
 
     @Override
     protected boolean clearsData(FeedDefinition parentSource) {
-        return false;
+        return true;
     }
 
     @Override

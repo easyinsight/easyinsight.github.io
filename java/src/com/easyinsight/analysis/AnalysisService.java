@@ -32,6 +32,7 @@ import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.storage.CachedCalculationTransform;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IDataTransform;
+import com.easyinsight.tag.Tag;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.util.RandomTextGenerator;
@@ -117,6 +118,7 @@ public class AnalysisService {
                 long dashboardStateID = rs.getLong(1);
                 DashboardStackPositions positions = new DashboardStackPositions();
                 positions.retrieve(conn, dashboardStateID);
+                positions.setId(dashboardStateID);
                 DashboardInfo dashboardInfo = new DashboardInfo();
                 dashboardInfo.setDashboardStackPositions(positions);
                 long reportID = rs.getLong(2);
@@ -264,6 +266,8 @@ public class AnalysisService {
 
             reportInfo.setAdmin(dataSourceAccessible);
             reportInfo.setReport(report);
+            List<SavedConfiguration> configurations = new DashboardService().getConfigurationsForReport(reportID);
+            reportInfo.setConfigurations(configurations);
             return reportInfo;
         } catch (Exception e) {
             LogClass.error(e);
@@ -1511,6 +1515,10 @@ public class AnalysisService {
             filterValueDefinition.setEnabled(true);
             filterValueDefinition.setInclusive(true);
             filterValueDefinition.setToggleEnabled(true);
+            if (value.type() == Value.NUMBER) {
+                int intValue = value.toDouble().intValue();
+                value = new StringValue(String.valueOf(intValue));
+            }
             if (multiValue) {
                 filterValueDefinition.setSingleValue(false);
 
@@ -1611,7 +1619,97 @@ public class AnalysisService {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
         try {
-            return analysisStorage.getInsightDescriptorsForDataSource(userID, SecurityUtil.getAccountID(), dataSourceID, conn);
+            List<InsightDescriptor> reports = analysisStorage.getInsightDescriptorsForDataSource(userID, SecurityUtil.getAccountID(), dataSourceID, conn, true);
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+            PreparedStatement getTagsToReportsStmt = conn.prepareStatement("SELECT REPORT_TO_TAG.TAG_ID, REPORT_ID FROM report_to_tag, account_tag WHERE " +
+                    "account_tag.account_tag_id = report_to_tag.tag_id and account_tag.account_id = ?");
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet tagRS = getTagsStmt.executeQuery();
+            Map<Long, Tag> tags = new HashMap<Long, Tag>();
+            while (tagRS.next()) {
+                tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5)));
+            }
+
+            getTagsToReportsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet dsTagRS = getTagsToReportsStmt.executeQuery();
+            Map<Long, List<Tag>> reportToTagMap = new HashMap<Long, List<Tag>>();
+            while (dsTagRS.next()) {
+                long reportID = dsTagRS.getLong(2);
+                long tagID = dsTagRS.getLong(1);
+                Tag tag = tags.get(tagID);
+                List<Tag> t = reportToTagMap.get(reportID);
+                if (t == null) {
+                    t = new ArrayList<Tag>();
+                    reportToTagMap.put(reportID, t);
+                }
+                t.add(tag);
+            }
+            getTagsStmt.close();
+            getTagsToReportsStmt.close();
+
+            for (InsightDescriptor insightDescriptors : reports) {
+                List<Tag> tagList = reportToTagMap.get(insightDescriptors.getId());
+                if (tagList == null) {
+                    tagList = new ArrayList<Tag>();
+                }
+                insightDescriptors.setTags(tagList);
+            }
+            return reports;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public ReportResults getReportsWithTags() {
+        long userID = SecurityUtil.getUserID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            boolean testAccountVisible = FeedService.testAccountVisible(conn);
+            List<InsightDescriptor> reports = analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn, testAccountVisible).values();
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+            PreparedStatement getTagsToReportsStmt = conn.prepareStatement("SELECT REPORT_TO_TAG.TAG_ID, REPORT_ID FROM report_to_tag, account_tag WHERE " +
+                    "account_tag.account_tag_id = report_to_tag.tag_id and account_tag.account_id = ?");
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet tagRS = getTagsStmt.executeQuery();
+            Map<Long, Tag> tags = new HashMap<Long, Tag>();
+            List<Tag> reportTags = new ArrayList<Tag>();
+            while (tagRS.next()) {
+                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5));
+                if (tag.isReport()) {
+                    reportTags.add(tag);
+                }
+                tags.put(tagRS.getLong(1), tag);
+            }
+
+            getTagsToReportsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet dsTagRS = getTagsToReportsStmt.executeQuery();
+            Map<Long, List<Tag>> reportToTagMap = new HashMap<Long, List<Tag>>();
+
+            while (dsTagRS.next()) {
+                long reportID = dsTagRS.getLong(2);
+                long tagID = dsTagRS.getLong(1);
+                Tag tag = tags.get(tagID);
+                List<Tag> t = reportToTagMap.get(reportID);
+                if (t == null) {
+                    t = new ArrayList<Tag>();
+                    reportToTagMap.put(reportID, t);
+                }
+                t.add(tag);
+            }
+            getTagsStmt.close();
+            getTagsToReportsStmt.close();
+
+            for (InsightDescriptor insightDescriptors : reports) {
+                List<Tag> tagList = reportToTagMap.get(insightDescriptors.getId());
+                if (tagList == null) {
+                    tagList = new ArrayList<Tag>();
+                }
+                insightDescriptors.setTags(tagList);
+            }
+            return new ReportResults(reports, reportTags);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -1626,6 +1724,35 @@ public class AnalysisService {
         try {
             boolean testAccountVisible = FeedService.testAccountVisible(conn);
             return analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn, testAccountVisible).values();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public Collection<InsightDescriptor> getInsightDescriptorsWithConfigurations() {
+        long userID = SecurityUtil.getUserID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            boolean testAccountVisible = FeedService.testAccountVisible(conn);
+            Collection<InsightDescriptor> reports = analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn, testAccountVisible).values();
+            PreparedStatement query = conn.prepareStatement("SELECT saved_configuration_id, configuration_name FROM saved_configuration, dashboard_state WHERE " +
+                    "saved_configuration.dashboard_state_id = dashboard_state.dashboard_state_id and dashboard_state.report_id = ?");
+            for (InsightDescriptor desc : reports) {
+                query.setLong(1, desc.getId());
+                List<SavedConfiguration> configs = new ArrayList<SavedConfiguration>();
+                ResultSet rs = query.executeQuery();
+                while (rs.next()) {
+                    SavedConfiguration savedConfiguration = new SavedConfiguration();
+                    savedConfiguration.setId(rs.getLong(1));
+                    savedConfiguration.setName(rs.getString(2));
+                    configs.add(savedConfiguration);
+                }
+                desc.setConfigs(configs);
+            }
+            return reports;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

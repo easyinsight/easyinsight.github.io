@@ -3,6 +3,10 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.Value;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.TreeData;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,6 +81,49 @@ public class TreeRow {
 
     public void setChildren(List<TreeRow> children) {
         this.children = children;
+    }
+
+    public void toPDF(WSTreeDefinition treeDefinition, ExportMetadata exportMetadata, PdfPTable table) {
+        if (getChildren().size() == 0) {
+            if (groupingField == null) {
+                PdfPCell valueCell = new PdfPCell(new Phrase(""));
+                valueCell.setBackgroundColor(new BaseColor(Integer.parseInt(backgroundColor, 16)));
+                valueCell.setMinimumHeight(20f);
+                table.addCell(valueCell);
+            } else {
+                PdfPCell valueCell = new PdfPCell(new Phrase(groupingColumn.toString()));
+                valueCell.setMinimumHeight(20f);
+                table.addCell(valueCell);
+            }
+            for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+                com.easyinsight.core.Value value =  (Value) values.get(analysisItem.qualifiedName());
+                if (value == null) {
+                    PdfPCell valueCell = new PdfPCell(new Phrase(""));
+                    if (backgroundColor != null) {
+                        valueCell.setBackgroundColor(new BaseColor(Integer.parseInt(backgroundColor, 16)));
+                    }
+                    valueCell.setMinimumHeight(20f);
+                    table.addCell(valueCell);
+                } else {
+                    PdfPCell valueCell = new PdfPCell(new Phrase(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, true)));
+                    if (backgroundColor != null) {
+                        valueCell.setBackgroundColor(new BaseColor(Integer.parseInt(backgroundColor, 16)));
+                    }
+                    valueCell.setMinimumHeight(20f);
+                    table.addCell(valueCell);
+                }
+            }
+        } else {
+            PdfPCell valueCell = new PdfPCell(new Phrase(groupingColumn.toString()));
+            valueCell.setColspan(treeDefinition.getItems().size() + 1);
+            valueCell.setBackgroundColor(new BaseColor(Integer.parseInt(backgroundColor, 16)));
+            valueCell.setMinimumHeight(20f);
+            table.addCell(valueCell);
+
+            for (TreeRow child : getChildren()) {
+                child.toPDF(treeDefinition, exportMetadata, table);
+            }
+        }
     }
 
     public String toHTML(WSTreeDefinition treeDefinition, ExportMetadata exportMetadata) {

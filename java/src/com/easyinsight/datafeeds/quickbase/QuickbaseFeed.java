@@ -183,6 +183,8 @@ public class QuickbaseFeed extends Feed {
         int masterCount = 0;
         int count;
 
+        Map<String, String> userMap = quickbaseCompositeSource.getOrCreateUserCache();
+        Map<String, String> typeMap = new HashMap<String, String>();
         do {
             count = 0;
             String requestBody;
@@ -218,19 +220,20 @@ public class QuickbaseFeed extends Feed {
                 }
             }
 
-            Map<String, String> userMap = quickbaseCompositeSource.getOrCreateUserCache();
-            Map<String, String> typeMap = new HashMap<String, String>();
-            try {
-                for (String fieldID : map.keySet()) {
-                    Nodes nodes = doc.query("//field[@id='"+fieldID+"']");
-                    if (nodes.size() > 0) {
-                        Element fieldNode = (Element) nodes.get(0);
-                        String fieldType = fieldNode.getAttribute("field_type").getValue();
-                        typeMap.put(fieldID, fieldType);
+
+            if (typeMap.size() == 0) {
+                try {
+                    for (String fieldID : map.keySet()) {
+                        Nodes nodes = doc.query("//field[@id='"+fieldID+"']");
+                        if (nodes.size() > 0) {
+                            Element fieldNode = (Element) nodes.get(0);
+                            String fieldType = fieldNode.getAttribute("field_type").getValue();
+                            typeMap.put(fieldID, fieldType);
+                        }
                     }
+                } catch (Exception e) {
+                    LogClass.error(e);
                 }
-            } catch (Exception e) {
-                LogClass.error(e);
             }
             Nodes records = doc.query("/qdbapi/table/records/record");
             for (int i = 0; i < records.size(); i++) {

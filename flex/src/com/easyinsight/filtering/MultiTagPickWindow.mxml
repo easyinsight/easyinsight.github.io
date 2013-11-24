@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+         horizontalAlign="center" creationComplete="creationCompleteHandler(event)" width="500" backgroundColor="#FFFFFF" paddingBottom="10"
+        paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:Metadata>
+        [Event(name="gotMetadataComplete", type="flash.events.Event")]
+    </mx:Metadata>
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.listing.Tag;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.binding.utils.BindingUtils;
+        import mx.collections.ArrayCollection;
+        import mx.controls.List;
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+
+        private var strings:ArrayCollection;
+
+        public var tags:ArrayCollection;
+
+        private var filterTileList:List;
+
+        [Bindable]
+        private var sourceValues:ArrayCollection;
+
+        private var _targetValues:ArrayCollection;
+
+        private var _reportID:int;
+
+
+        private var realValues:ArrayCollection;
+
+        [Bindable(event="targetValuesChanged")]
+        public function get targetValues():ArrayCollection {
+            return _targetValues;
+        }
+
+        public function set targetValues(value:ArrayCollection):void {
+            if (_targetValues == value) return;
+            _targetValues = value;
+            dispatchEvent(new Event("targetValuesChanged"));
+        }
+
+        public var selectedTags:ArrayCollection;
+
+        private function sourceChange():void {
+            sourceValues.refresh();
+        }
+
+        private function includedChange():void {
+            targetValues.refresh();
+        }
+
+        private function addAll():void {
+            var values:Array = sourceValues.toArray();
+            for each (var o:* in values) {
+                targetValues.addItem(o);
+            }
+            sourceValues.removeAll();
+        }
+
+        private function removeAll():void {
+            var values:Array = targetValues.toArray();
+            for each (var o:* in values) {
+                sourceValues.addItem(o);
+            }
+            targetValues.removeAll();
+        }
+
+        private var _typeChangeAllowed:Boolean = true;
+
+        [Bindable(event="typeChangeAllowedChanged")]
+        public function get typeChangeAllowed():Boolean {
+            return _typeChangeAllowed;
+        }
+
+        public function set typeChangeAllowed(value:Boolean):void {
+            if (_typeChangeAllowed == value) return;
+            _typeChangeAllowed = value;
+            dispatchEvent(new Event("typeChangeAllowedChanged"));
+        }
+
+        private function onCreation(event:FlexEvent):void {
+            PopUpUtil.centerPopUp(this);
+        }
+
+        private function gotTags():void {
+            tags = feedService.getFieldTags.lastResult as ArrayCollection;
+            filterTileList = new List();
+            filterTileList.id = "solutionGrid";
+            filterTileList.itemRenderer = new ClassFactory(FilterStringCheckbox);
+            filterTileList.columnWidth = 150;
+            filterTileList.rowHeight = 30;
+            filterTileList.verticalScrollPolicy = "on";
+            filterTileList.columnCount = 1;
+            filterTileList.percentWidth = 100;
+            filterTileList.maxHeight = 400;
+            filterTileList.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
+
+            BindingUtils.bindProperty(filterTileList, "dataProvider", this, "targetValues");
+
+            strings = new ArrayCollection();
+            var o:Object = new Object();
+            for each (var selectedItem:HibernateTag in selectedTags) {
+                o[String(selectedItem.tagID)] = true;
+            }
+            for each (var analysisItem:Tag in tags) {
+                strings.addItem(analysisItem);
+            }
+
+            sourceValues = strings;
+            loadedValuesBox.addChild(filterTileList);
+
+            var a:Array = strings.toArray().map(function (obj:Object, a:*, b:*):Object {
+                var m:BatchTagOption = new BatchTagOption(obj as Tag, o[String(Tag(obj).id)]);
+                return m;
+            });
+
+            realValues = new ArrayCollection(a);
+            targetValues = new ArrayCollection(a);
+        }
+
+        private function creationCompleteHandler(event:FlexEvent):void {
+            feedService.getFieldTags.send();
+        }
+
+        private function save():void {
+            var a:Array = realValues.toArray().concat();
+            a = a.filter(function (obj:Object, a:*, b:*):Boolean {
+                return obj.selected;
+            });
+
+
+            var selected:ArrayCollection = new ArrayCollection(a.map(function (obj:Object, a:*, b:*):Object {
+                var hTag:HibernateTag = new HibernateTag();
+                hTag.tagID = Tag(obj.tag).id;
+                return hTag;
+            }));
+
+            dispatchEvent(new MultiFieldEvent(selected));
+            PopUpManager.removePopUp(this);
+        }
+        ]]>
+	</mx:Script>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="getFieldTags" result="gotTags()"/>
+    </mx:RemoteObject>
+    <mx:VBox id="loadedValuesBox">
+
+    </mx:VBox>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EITitleWindow>

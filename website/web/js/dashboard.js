@@ -2,6 +2,7 @@ $.holdReady(true);
 Modernizr.load({ complete: function () {
     $.holdReady(false);
 }});
+
 var stack;
 var grid;
 var textTemplate;
@@ -249,7 +250,7 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
         var w = {"type": "report", "filters": fs3, "report": obj, "rendered": false, "id": obj.id };
         reportMap[obj.id] = w;
         var t = _.reduce(ff1, function (m, i) {
-            m[w.id + "filter" + i.id] = {"filter": i, "parent": w };
+            m[w.id + "_report_filter_" + i.id] = {"filter": i, "parent": w };
             return m;
         }, {});
         $.extend(filterMap, t);
@@ -265,7 +266,7 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
         }
         var x = {"type": "grid", "children": children };
         var u = _.reduce(ff2, function (m, i) {
-            m[x.id + "filter" + i.id] = {"filter": i, "parent": x };
+            m[x.id + "_grid_filter_" + i.id] = {"filter": i, "parent": x };
             return m;
         }, {});
         $.extend(filterMap, u)
@@ -277,10 +278,10 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
         for (var k = 0; k < obj.stack_items.length; k++) {
             ch = _.flatten(ch.concat(buildReportGraph(obj.stack_items[k].item, fs2, filterMap, stackMap, reportMap)))
         }
-        var y = {"type": "stack", "children": ch, "id": obj.id, "selected": 0, "data": obj };
+        var y = {"type": "stack", "children": ch, "id": obj.id, "data": obj };
         stackMap[obj.id] = y;
         var v = _.reduce(ff3, function (m, i) {
-            m[y.id + "filter" + i.id] = {"filter": i, "parent": y };
+            m[y.id + "_stack_filter_" + i.id] = {"filter": i, "parent": y };
             return m;
         }, {});
         $.extend(filterMap, v)
@@ -339,32 +340,37 @@ $(function () {
     $.get("/js/template.html", function (data) {
         var s = $(data);
         Filter = {
-            create: function (obj, parent_id) {
+            create: function (obj, parent_id, type) {
+                var c;
                 if (!obj) return;
                 if (obj.type == "single")
-                    return Filter.single({data: obj, parent_id: parent_id});
+                    c = Filter.single;
                 else if (obj.type == "multiple")
-                    return Filter.multiple({data: obj, parent_id: parent_id});
+                    c = Filter.multiple;
                 else if (obj.type == "rolling")
-                    return Filter.rolling({data: obj, parent_id: parent_id});
+                    c = Filter.rolling;
                 else if (obj.type == "date_range")
-                    return Filter.date_range({data: obj, parent_id: parent_id});
+                    c = Filter.date_range;
                 else if (obj.type == "flat_date_month")
-                    return Filter.flat_date_month({data: obj, parent_id: parent_id});
+                    c = Filter.flat_date_month;
                 else if (obj.type == "flat_date_year")
-                    return Filter.flat_date_year({data: obj, parent_id: parent_id});
+                    c = Filter.flat_date_year;
                 else if (obj.type == "multi_date")
-                    return Filter.multi_flat_date_month({data: obj, parent_id: parent_id});
+                    c = Filter.multi_flat_date_month;
                 else if (obj.type == "field_filter")
-                    return Filter.field_filter({data: obj, parent_id: parent_id});
+                    c = Filter.field_filter;
                 else if (obj.type == "multi_field_filter")
-                    return Filter.multiple({data: obj, parent_id: parent_id});
+                    c = Filter.multiple;
                 else if (obj.type == "pattern_filter")
-                    return Filter.pattern_filter({data: obj, parent_id: parent_id });
+                    c = Filter.pattern_filter;
                 else if (obj.type == "or_filter")
-                    return Filter.or_filter({data: obj, parent_id: parent_id });
+                    c = Filter.or_filter;
                 else
-                    return Filter.generic_filter({data: obj, parent_id: parent_id});
+                    c = Filter.generic_filter;
+                return c({data: obj, parent_id: parent_id, type: type});
+            },
+            label: function(data, parent_id, type) {
+                return ((typeof(parent_id) == 'undefined') ? '' : parent_id) + "_" + type + "_filter_" + data.id;
             },
             multi_flat_date_month: _.template($("#multi_flat_date_filter", s).html()),
             flat_date_year: _.template($("#flat_date_year_filter", s).html()),
@@ -375,7 +381,6 @@ $(function () {
             date_range: _.template($("#absolute_date_filter_template", s).html()),
             base_filter: _.template($("#filter_base", s).html()),
             field_filter: _.template($("#field_filter_template", s).html()),
-            //multi_field_filter:_.template($("#multi_value_filter_template", s).html()),
             pattern_filter: _.template($("#pattern_filter_template", s).html()),
             or_filter: _.template($("#or_filter_template", s).html()),
             generic_filter: _.template($("#generic_filter", s).html()),
@@ -394,7 +399,7 @@ $(function () {
         configurationDropdownTemplate = _.template($("#configuration_dropdown_template", s).html());
 
         var filterMap = _.reduce(flattenFilters(dashboardJSON["filters"]), function (m, i) {
-            m["filter" + i.id] = {"filter": i, "parent": null };
+            m["_dashboard_filter_" + i.id] = {"filter": i, "parent": null };
             return m;
         }, {});
         var stackMap = {};
@@ -731,7 +736,7 @@ $(function () {
             var q = $(e.target).parent().parent();
             var k = q.attr("id");
             var s = stackMap[k];
-            s.selected = selectedIndex(k);
+            s.data.selected = selectedIndex(k);
             saveStack(k);
             for (var f in filterMap) {
                 filterMap[f].filter.override = false;
@@ -848,20 +853,23 @@ $(function () {
 
         saveConfiguration = function (name, key) {
             var c = {"filters": _.reduce(filterMap, function (m, e, i) {
-                            m[e.filter.id] = toFilterString(e.filter, true);
+                            m[i] = toFilterString(e.filter, true);
                 return m;
                         }, {}), "stacks": _.reduce(stackMap, function(m, e, i) {
-                m[i] = e.selected;
+                m[i] = e.data.selected;
                 return m;
             }, {}), "name": name, "key": key }
-            console.log(c);
-            $.ajax({ url: "/app/html/dashboard/" + dashboardJSON["key"] + "/config",
+            $.ajax({ url: "/app/html/" + ((dashboardJSON["id"] != -1) ? "dashboard" : "report")  + "/" + dashboardJSON["key"] + "/config",
                 contentType: "application/json; charset=UTF-8",
                 data: JSON.stringify(c),
-                type: "POST"
+                type: "POST",
+                dataType: "json",
+                success: function(d) {
+                    window.location = d["target"];
+                }
             })
         }
-
     })
+
 })
 

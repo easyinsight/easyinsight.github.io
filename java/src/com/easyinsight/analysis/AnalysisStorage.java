@@ -455,13 +455,13 @@ public class AnalysisStorage {
         return descriptors;
     }
 
-    public List<InsightDescriptor> getInsightDescriptorsForDataSource(long userID, long accountID, long dataSourceID, EIConnection conn) throws SQLException {
+    public List<InsightDescriptor> getInsightDescriptorsForDataSource(long userID, long accountID, long dataSourceID, EIConnection conn, boolean testAccountVisible) throws SQLException {
         Collection<InsightDescriptor> descriptors = new HashSet<InsightDescriptor>();
         FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
         if (feedDefinition.getFeedType().getType() == FeedType.COMPOSITE.getType()) {
             CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feedDefinition;
             for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
-                descriptors.addAll(getInsightDescriptorsForDataSource(userID, accountID, node.getDataFeedID(), conn));
+                descriptors.addAll(getInsightDescriptorsForDataSource(userID, accountID, node.getDataFeedID(), conn, testAccountVisible));
             }
         }
         PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ACCOUNT_VISIBLE, FOLDER FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
@@ -475,18 +475,20 @@ public class AnalysisStorage {
             descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), new Date(), "", Roles.OWNER, rs.getBoolean(6), rs.getInt(7), ""));
         }
         queryStmt.close();
-        PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ACCOUNT_VISIBLE FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
-                "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = user.user_id and user.account_id = ? and analysis.account_visible = ? and temporary_report = ? AND " +
-                "analysis.data_feed_id = ?");
-        queryAccountStmt.setLong(1, accountID);
-        queryAccountStmt.setBoolean(2, true);
-        queryAccountStmt.setBoolean(3, false);
-        queryAccountStmt.setLong(4, dataSourceID);
-        ResultSet accountRS = queryAccountStmt.executeQuery();
-        while (accountRS.next()) {
-            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.SHARER, accountRS.getBoolean(6)));
+        if (testAccountVisible) {
+            PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ACCOUNT_VISIBLE FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
+                    "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = user.user_id and user.account_id = ? and analysis.account_visible = ? and temporary_report = ? AND " +
+                    "analysis.data_feed_id = ?");
+            queryAccountStmt.setLong(1, accountID);
+            queryAccountStmt.setBoolean(2, true);
+            queryAccountStmt.setBoolean(3, false);
+            queryAccountStmt.setLong(4, dataSourceID);
+            ResultSet accountRS = queryAccountStmt.executeQuery();
+            while (accountRS.next()) {
+                descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.SHARER, accountRS.getBoolean(6)));
+            }
+            queryAccountStmt.close();
         }
-        queryAccountStmt.close();
         return new ArrayList<InsightDescriptor>(descriptors);
     }
 

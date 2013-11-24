@@ -262,7 +262,6 @@ public class DashboardGrid extends DashboardElement {
     public JSONObject toJSON(FilterHTMLMetadata metadata, List<FilterDefinition> parentFilters) throws JSONException {
         JSONObject grid = super.toJSON(metadata, parentFilters);
         grid.put("type", "grid");
-        grid.put("id", getElementID());
 
         grid.put("show_label", showLabel);
         grid.put("label", getLabel());

@@ -11,6 +11,7 @@ import com.easyinsight.storage.*;
 import com.easyinsight.users.Account;
 import nu.xom.*;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.BasicHttpEntity;
@@ -280,6 +281,8 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         int count;
         int masterCount = 0;
 
+        Map<String, String> typeMap = new HashMap<String, String>();
+        Map<String, String> userMap = quickbaseCompositeSource.getOrCreateUserCache();
         try {
             do {
                 count = 0;
@@ -310,20 +313,21 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 }
 
 
-                Map<String, String> userMap = quickbaseCompositeSource.getOrCreateUserCache();
 
-                Map<String, String> typeMap = new HashMap<String, String>();
-                try {
-                    for (String fieldID : map.keySet()) {
-                        Nodes nodes = doc.query("//field[@id='"+fieldID+"']");
-                        if (nodes.size() > 0) {
-                            Element fieldNode = (Element) nodes.get(0);
-                            String fieldType = fieldNode.getAttribute("field_type").getValue();
-                            typeMap.put(fieldID, fieldType);
+
+                if (typeMap.size() == 0) {
+                    try {
+                        for (String fieldID : map.keySet()) {
+                            Nodes nodes = doc.query("//field[@id='"+fieldID+"']");
+                            if (nodes.size() > 0) {
+                                Element fieldNode = (Element) nodes.get(0);
+                                String fieldType = fieldNode.getAttribute("field_type").getValue();
+                                typeMap.put(fieldID, fieldType);
+                            }
                         }
+                    } catch (Exception e) {
+                        LogClass.error(e);
                     }
-                } catch (Exception e) {
-                    LogClass.error(e);
                 }
 
                 Nodes records = doc.query("/qdbapi/table/records/record");
@@ -359,6 +363,12 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 dataSet = new DataSet();
             } while (count == 1000);
             return null;
+        } catch (HttpResponseException hre) {
+            if ("Redirect".equals(hre.getMessage())) {
+                throw new ReportException(new DataSourceConnectivityReportFault("QuickBase URL of the target application has changed.", quickbaseCompositeSource));
+            } else {
+                throw new RuntimeException(hre);
+            }
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {

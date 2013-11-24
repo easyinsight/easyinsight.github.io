@@ -218,6 +218,12 @@
                 return obj.selected;
             });*/
 
+            valueFilter.fieldOrdering = new ArrayCollection(a.map(function (obj:Object, a:*, b:*):Object {
+                var handle1:AnalysisItemHandle = new AnalysisItemHandle();
+                handle1.name = obj.analysisItem.display;
+                return handle1;
+            }));
+
             if (allCheckBox.selected) {
                 valueFilter.all = true;
                 valueFilter.selectedItems = new ArrayCollection();

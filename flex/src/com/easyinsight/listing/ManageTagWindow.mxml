@@ -62,6 +62,9 @@
         <mx:columns>
             <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText="" sortable="false"/>
             <mx:DataGridColumn dataField="name" headerText="Tag" width="300" sortable="false"/>
+            <mx:DataGridColumn itemRenderer="com.easyinsight.util.DataSourceTagCheckbox" width="80" headerText="Data Source" sortable="false"/>
+            <mx:DataGridColumn itemRenderer="com.easyinsight.util.ReportTagCheckbox" width="80" headerText="Report" sortable="false"/>
+            <mx:DataGridColumn itemRenderer="com.easyinsight.util.FieldTagCheckbox" width="80" headerText="Field" sortable="false"/>
         </mx:columns>
     </mx:DataGrid>
     <mx:HBox>

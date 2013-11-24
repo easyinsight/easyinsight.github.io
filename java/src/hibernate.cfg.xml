@@ -117,6 +117,7 @@
         <mapping class="com.easyinsight.analysis.definitions.TrendColumn"/>
         <mapping class="com.easyinsight.analysis.DiagramLink"/>
         <mapping class="com.easyinsight.analysis.ReportStub"/>
+        <mapping class="com.easyinsight.analysis.WeNeedToReplaceHibernateTag"/>
 
         <mapping class="com.easyinsight.preferences.ApplicationSkinSettings"/>
 

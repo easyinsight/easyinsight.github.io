@@ -1,5 +1,8 @@
 package com.easyinsight.dashboard;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * User: jamesboe
  * Date: 11/14/13
@@ -37,6 +40,27 @@ public class FilterPositionKey {
 
         }
         return new FilterPositionKey(scope, filterID, urlKey);
+    }
+
+    public static FilterPositionKey parseHtmlKey(String string) {
+        Pattern p = Pattern.compile("^([A-Za-z0-9]*)_(report|dashboard|grid|stack)_filter_([0-9]+)$");
+        Matcher m = p.matcher(string);
+        if(!m.matches())
+            throw new RuntimeException("Doesn't match.");
+        String urlKey = m.replaceAll("$1");
+        if(urlKey.isEmpty()) {
+            urlKey = null;
+        }
+        String scope = m.replaceAll("$2");
+        int curScope = 0;
+        if("report".equals(scope))
+            curScope = DASHBOARD_REPORT;
+        else if("dashboard".equals(scope))
+            curScope = DASHBOARD;
+        else if("stack".equals(scope))
+            curScope = DASHBOARD_STACK;
+        long filterID = Long.parseLong(m.replaceAll("$3"));
+        return new FilterPositionKey(curScope, filterID, urlKey);
     }
 
     public String createURLKey() {
@@ -93,5 +117,15 @@ public class FilterPositionKey {
         result = 31 * result + (int) (filterID ^ (filterID >>> 32));
         result = 31 * result + (scopeURLKey != null ? scopeURLKey.hashCode() : 0);
         return result;
+    }
+
+    public static FilterPositionKey parseReportKey(String key) {
+        Pattern p = Pattern.compile("^([A-Za-z0-9]*)_container_(report|dashboard|grid|stack)_filter_([0-9]+)$");
+        Matcher m = p.matcher(key);
+        if(!m.matches())
+            throw new RuntimeException("Doesn't match.");
+        int curScope = REPORT;
+        long filterID = Long.parseLong(m.replaceAll("$3"));
+        return new FilterPositionKey(curScope, filterID, null);
     }
 }

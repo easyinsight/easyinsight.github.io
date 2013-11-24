@@ -360,4 +360,8 @@ public class WSListDefinition extends WSAnalysisDefinition {
     protected void assignResults(List<AnalysisItem> fields) {
         setColumns(fields);
     }
+
+    protected int extensionType() {
+        return ReportFieldExtension.TEXT;
+    }
 }

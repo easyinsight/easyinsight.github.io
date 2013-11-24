@@ -195,7 +195,6 @@ public class DashboardReport extends DashboardElement {
         }
         JSONObject reportJSON = super.toJSON(filterHTMLMetadata, parentFilters);
         reportJSON.put("type", "report");
-        reportJSON.put("id", "report" + getElementID());
         JSONObject reportDataJSON = new JSONObject();
         reportDataJSON.put("name", report.getName());
         reportDataJSON.put("id", report.getUrlKey());

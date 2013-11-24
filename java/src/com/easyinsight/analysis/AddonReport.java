@@ -10,6 +10,15 @@ import java.io.Serializable;
 public class AddonReport implements Serializable {
     private long reportID;
     private String reportName;
+    private boolean useNewNaming;
+
+    public boolean isUseNewNaming() {
+        return useNewNaming;
+    }
+
+    public void setUseNewNaming(boolean useNewNaming) {
+        this.useNewNaming = useNewNaming;
+    }
 
     public long getReportID() {
         return reportID;

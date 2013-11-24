@@ -1,6 +1,10 @@
 package com.easyinsight.core;
 
+import com.easyinsight.dashboard.SavedConfiguration;
+import com.easyinsight.tag.Tag;
+
 import java.util.Date;
+import java.util.List;
 
 /**
  * User: James Boe
@@ -12,6 +16,8 @@ public class InsightDescriptor extends EIDescriptor {
     private long dataFeedID;
     private int reportType;
     private Date lastDataTime;
+    private List<Tag> tags;
+    private List<SavedConfiguration> configs;
 
     @Override
     public int getType() {
@@ -49,12 +55,28 @@ public class InsightDescriptor extends EIDescriptor {
         setDescription(description);
     }
 
+    public List<SavedConfiguration> getConfigs() {
+        return configs;
+    }
+
+    public void setConfigs(List<SavedConfiguration> configs) {
+        this.configs = configs;
+    }
+
     public Date getLastDataTime() {
         return lastDataTime;
     }
 
     public void setLastDataTime(Date lastDataTime) {
         this.lastDataTime = lastDataTime;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 
     public int getReportType() {

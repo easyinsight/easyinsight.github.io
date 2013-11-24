@@ -87,6 +87,7 @@
 
         private function embed():void {
             var embedReportWindow:EmbedReportWindow = new EmbedReportWindow();
+            embedReportWindow.report = _report;
             embedReportWindow.reportName = _reportName;
             embedReportWindow.urlKey = _report.urlKey;
             embedReportWindow.dataSourceID = _dataSourceID;

@@ -8,14 +8,24 @@ package com.easyinsight.export;
 public class ExportProperties {
     private boolean embedded;
     private boolean emailed;
+    private String embedKey;
 
     public ExportProperties() {
 
     }
 
-    public ExportProperties(boolean emailed, boolean embedded) {
+    public ExportProperties(boolean emailed, boolean embedded, String embedKey) {
         this.emailed = emailed;
         this.embedded = embedded;
+        this.embedKey = embedKey;
+    }
+
+    public String getEmbedKey() {
+        return embedKey;
+    }
+
+    public void setEmbedKey(String embedKey) {
+        this.embedKey = embedKey;
     }
 
     public boolean isEmbedded() {

@@ -13,6 +13,8 @@ import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.NewHierarchyIntention;
 import com.easyinsight.pipeline.*;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -20,6 +22,7 @@ import java.io.Serializable;
 
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.security.SecurityUtil;
+import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -1269,6 +1272,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     }
 
+    // data source fields
+    // report fields
+    //
+
     public void multiField(MultiFieldFilterDefinition multiFieldFilterDefinition) throws SQLException {
         if (!supportsMultiField()) {
             return;
@@ -1278,9 +1285,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
         FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(id);
         Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
         Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
+        Map<Long, AnalysisItem> dataSourceFieldMap = new HashMap<Long, AnalysisItem>();
         for (AnalysisItem field : dataSource.getFields()) {
             map.put(field.getAnalysisItemID(), field);
             mapByName.put(field.toDisplay(), field);
+            dataSourceFieldMap.put(field.getAnalysisItemID(), field);
         }
         if (getAddedItems() != null) {
             for (AnalysisItem item : getAddedItems()) {
@@ -1305,7 +1314,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
             }
             for (AnalysisItemHandle field : multiFieldFilterDefinition.getAvailableItems()) {
                 AnalysisItem item = map.get(field.getAnalysisItemID());
-                if (item != null) {
+                if (field.getAnalysisItemID() > 0 && item != null) {
                     set.add(item);
                     positions.put(item, i++);
                 } else {
@@ -1315,6 +1324,49 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         positions.put(item, i++);
                     }
                 }
+            }
+
+            List<WeNeedToReplaceHibernateTag> tags = multiFieldFilterDefinition.getAvailableTags();
+
+            EIConnection conn = Database.instance().getConnection();
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.analysis_item_id FROM field_to_tag, feed_to_analysis_item WHERE account_tag_id = ? AND feed_to_analysis_item.feed_id = ? AND " +
+                    "field_to_tag.analysis_item_id = feed_to_analysis_item.analysis_item_id");
+            try {
+                for (WeNeedToReplaceHibernateTag tag : tags) {
+                    queryStmt.setLong(1, tag.getTagID());
+                    queryStmt.setLong(2, getDataFeedID());
+                    ResultSet rs = queryStmt.executeQuery();
+                    while (rs.next()) {
+                        long fieldID = rs.getLong(1);
+                        AnalysisItem analysisItem = dataSourceFieldMap.get(fieldID);
+                        try {
+                            analysisItem = analysisItem.clone();
+                        } catch (CloneNotSupportedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        positions.put(analysisItem, i++);
+                        set.add(analysisItem);
+                        PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
+                                "extension_type = ?");
+                        extStmt.setLong(1, fieldID);
+                        extStmt.setInt(2, extensionType());
+                        ResultSet extRS = extStmt.executeQuery();
+                        if (extRS.next()) {
+                            long extID = extRS.getLong(1);
+                            Session session = Database.instance().createSession(conn);
+                            try {
+                                ReportFieldExtension ext = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, extID).list().get(0);
+                                ext.afterLoad();
+                                analysisItem.setReportFieldExtension(ext);
+                            } finally {
+                                session.close();
+                            }
+                        }
+                        extStmt.close();
+                    }
+                }
+            } finally {
+                Database.closeConnection(conn);
             }
 
             fields = new ArrayList<AnalysisItem>(set);
@@ -1333,6 +1385,30 @@ public abstract class WSAnalysisDefinition implements Serializable {
                             positions.put(item, i++);
                         }
                     }
+                    if (item != null) {
+                        EIConnection conn = Database.instance().getConnection();
+                        try {
+                            PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
+                                    "extension_type = ?");
+                            extStmt.setLong(1, item.getAnalysisItemID());
+                            extStmt.setInt(2, extensionType());
+                            ResultSet extRS = extStmt.executeQuery();
+                            if (extRS.next()) {
+                                long extID = extRS.getLong(1);
+                                Session session = Database.instance().createSession(conn);
+                                try {
+                                    ReportFieldExtension ext = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, extID).list().get(0);
+                                    ext.afterLoad();
+                                    item.setReportFieldExtension(ext);
+                                } finally {
+                                    session.close();
+                                }
+                            }
+                            extStmt.close();
+                        } finally {
+                            Database.closeConnection(conn);
+                        }
+                    }
                 }
             }
             fields = new ArrayList<AnalysisItem>(set);
@@ -1349,5 +1425,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
         if (set.size() > 0) {
             assignResults(fields);
         }
+    }
+
+    protected int extensionType() {
+        return 0;
     }
 }

@@ -12,6 +12,7 @@ import java.util.*;
 public abstract class DataResults implements Cloneable {
     
     private Set<Long> invalidAnalysisItemIDs;
+    private WSAnalysisDefinition report;
     private FeedMetadata feedMetadata;
     private DataSourceInfo dataSourceInfo;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -22,6 +23,14 @@ public abstract class DataResults implements Cloneable {
     private String uid;
     private long databaseTime;
     private long processingTime;
+
+    public WSAnalysisDefinition getReport() {
+        return report;
+    }
+
+    public void setReport(WSAnalysisDefinition report) {
+        this.report = report;
+    }
 
     public long getDatabaseTime() {
         return databaseTime;

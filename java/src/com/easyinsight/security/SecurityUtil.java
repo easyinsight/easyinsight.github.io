@@ -279,7 +279,7 @@ public class SecurityUtil {
             try {
                 User u = (User) session.createQuery("from User where user_id = ?").setLong(0, userID).list().get(0);
                 jo.put("name", u.getUserName());
-                jo.put("designer", embedKey != null && u.isAnalyst());
+                jo.put("designer", embedKey != null || u.isAnalyst());
             } finally {
                 session.close();
             }

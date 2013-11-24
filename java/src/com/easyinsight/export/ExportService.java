@@ -497,7 +497,7 @@ public class ExportService {
                     html = ExportService.textReportToHtml(analysisDefinition, conn, insightRequestMetadata);
                 } else {
                     ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, new ExportProperties(true, true));
+                    html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, new ExportProperties(true, true, null));
                 }
                 String htmlBody = body + html;
                 new SendGridEmail().sendNoAttachmentEmail(email, subject, htmlBody, true, "reports@easy-insight.com", "Easy Insight");
@@ -600,6 +600,8 @@ public class ExportService {
             crosstabToPDFTable(analysisDefinition, conn, insightRequestMetadata, document, exportMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID) {
             kpiReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, document, exportMetadata);
+        } else if (analysisDefinition instanceof WSTreeDefinition) {
+            treeToPDFTable(analysisDefinition, conn, insightRequestMetadata, document, exportMetadata);
         } else {
             listReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, document, exportMetadata);
         }
@@ -743,6 +745,54 @@ public class ExportService {
             table.addCell(nowMeasureStyle);
             table.addCell(previousMeasureStyle);
             table.addCell(percentChangeDataCell);
+        }
+        document.add(table);
+    }
+
+    private void treeToPDFTable(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata, Document document,
+                                ExportMetadata exportMetadata) throws DocumentException {
+        DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
+        PipelineData pipelineData = dataSet.getPipelineData();
+
+        java.util.List<AnalysisItem> items = new java.util.ArrayList<AnalysisItem>(report.getAllAnalysisItems());
+        items.remove(null);
+        java.util.Collections.sort(items, new java.util.Comparator<AnalysisItem>() {
+
+            public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
+            }
+        });
+
+        WSTreeDefinition tree = (WSTreeDefinition) report;
+
+
+        /*sb.append("<tr style=\"").append(headerTRStyle).append("\">");*/
+
+        AnalysisHierarchyItem hierarchy = (AnalysisHierarchyItem) tree.getHierarchy();
+        PdfPTable table = new PdfPTable(1 + tree.getItems().size());
+        table.setSpacingBefore(20);
+        table.getDefaultCell().setPadding(5);
+
+        com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD);
+        PdfPCell hierarchyCell = new PdfPCell(new Phrase(hierarchy.toDisplay(), boldFont));
+        hierarchyCell.setMinimumHeight(20f);
+        hierarchyCell.setBackgroundColor(new BaseColor(210, 210, 210));
+
+        table.addCell(hierarchyCell);
+        for (AnalysisItem analysisItem : tree.getItems()) {
+            PdfPCell valueCell = new PdfPCell(new Phrase(analysisItem.toDisplay(), boldFont));
+            valueCell.setBackgroundColor(new BaseColor(210, 210, 210));
+            valueCell.setMinimumHeight(20f);
+            table.addCell(valueCell);
+        }
+
+        TreeData treeData = new TreeData(tree, hierarchy, exportMetadata, dataSet);
+        for (IRow row : dataSet.getRows()) {
+            treeData.addRow(row);
+        }
+        List<TreeRow> rows = treeData.toTreeRows(pipelineData);
+        for (TreeRow row : rows) {
+            row.toPDF(tree, exportMetadata, table);
         }
         document.add(table);
     }
@@ -1579,6 +1629,7 @@ public class ExportService {
         if (hasBenchmark) {
             sb.append("<th>").append("BK").append("</th>");
             sb.append("<th>").append("Variation").append("</th>");
+            // https://www.easy-insight.com/app/newUser?token=ihLpPZtiVAPByJnoCqeFiOfMCapsgH
         }
         sb.append("</tr>");
         AnalysisMeasure percentMeasure = new AnalysisMeasure();
@@ -2650,6 +2701,9 @@ public class ExportService {
                                 StringBuilder paramBuilder = new StringBuilder();
                                 DrillThrough drillThrough = (DrillThrough) defaultLink;
                                 paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
+                                if (exportProperties.getEmbedKey() != null) {
+                                    paramBuilder.append("&embedKey=" + exportProperties.getEmbedKey()+"&");
+                                }
                                 for (AnalysisItem dataItem : items) {
                                     for (int k = 0; k < listDataResults.getHeaders().length; k++) {
                                         AnalysisItem dataHeaderItem = listDataResults.getHeaders()[k];

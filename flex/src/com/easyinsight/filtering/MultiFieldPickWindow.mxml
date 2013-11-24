@@ -188,6 +188,7 @@
 
         private function save():void {
             var a:Array = realValues.toArray().concat();
+
             a = a.filter(function (obj:Object, a:*, b:*):Boolean {
                 return obj.selected;
             });

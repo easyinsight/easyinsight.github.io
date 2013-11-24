@@ -31,8 +31,36 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
             inverseJoinColumns = @JoinColumn(name = "analysis_item_handle_id", nullable = false))
     private List<AnalysisItemHandle> selectedItems;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "filter_to_field_tag",
+            joinColumns = @JoinColumn(name = "filter_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "hibernate_tag_id", nullable = false))
+    private List<WeNeedToReplaceHibernateTag> availableTags;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "ordering_analysis_item_filter_to_analysis_item_handle",
+            joinColumns = @JoinColumn(name = "filter_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "analysis_item_handle_id", nullable = false))
+    private List<AnalysisItemHandle> fieldOrdering;
+
     @Column(name="show_all")
     private boolean all;
+
+    public List<AnalysisItemHandle> getFieldOrdering() {
+        return fieldOrdering;
+    }
+
+    public void setFieldOrdering(List<AnalysisItemHandle> fieldOrdering) {
+        this.fieldOrdering = fieldOrdering;
+    }
+
+    public List<WeNeedToReplaceHibernateTag> getAvailableTags() {
+        return availableTags;
+    }
+
+    public void setAvailableTags(List<WeNeedToReplaceHibernateTag> availableTags) {
+        this.availableTags = availableTags;
+    }
 
     public boolean isAll() {
         return all;
@@ -99,26 +127,12 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
         super.beforeSave(session);
         for (AnalysisItemHandle analysisItem : availableItems) {
             analysisItem.save(session);
-            /*analysisItem.reportSave(session);
-            if (analysisItem.getKey().getKeyID() == 0) {
-                session.save(getField().getKey());
-            }
-            if (analysisItem.getAnalysisItemID() == 0) {
-                session.save(analysisItem);
-            } else {
-                session.update(analysisItem);
-            }*/
         }
         for (AnalysisItemHandle analysisItem : selectedItems) {
             analysisItem.save(session);
-            /*if (analysisItem.getKey().getKeyID() == 0) {
-                session.save(getField().getKey());
-            }
-            if (analysisItem.getAnalysisItemID() == 0) {
-                session.save(analysisItem);
-            } else {
-                session.update(analysisItem);
-            }*/
+        }
+        for (AnalysisItemHandle analysisItem : fieldOrdering) {
+            analysisItem.save(session);
         }
     }
 
@@ -136,6 +150,12 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
             replaceSelectedItems.add(selectedItem.clone());
         }
         multiFieldFilterDefinition.selectedItems = replaceSelectedItems;
+
+        List<AnalysisItemHandle> fieldOrderingItems = new ArrayList<AnalysisItemHandle>();
+        for (AnalysisItemHandle selectedItem : fieldOrdering) {
+            fieldOrderingItems.add(selectedItem.clone());
+        }
+        multiFieldFilterDefinition.fieldOrdering = fieldOrderingItems;
         return multiFieldFilterDefinition;
     }
 
@@ -163,6 +183,8 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
         super.afterLoad();
         setAvailableItems(new ArrayList<AnalysisItemHandle>(getAvailableItems()));
         setSelectedItems(new ArrayList<AnalysisItemHandle>(getSelectedItems()));
+        setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>(getAvailableTags()));
+        setFieldOrdering(new ArrayList<AnalysisItemHandle>(getFieldOrdering()));
     }
 
     @Override
@@ -196,7 +218,7 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
         if (isAll()) {
             existingChoices.put("All", true);
         }
-        Collections.sort(stringList);
+        //Collections.sort(stringList);
 
         JSONArray arr = new JSONArray(stringList);
         jo.put("values", arr);

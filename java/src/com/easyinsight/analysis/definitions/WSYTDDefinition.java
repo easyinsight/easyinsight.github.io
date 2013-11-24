@@ -152,4 +152,20 @@ public class WSYTDDefinition extends WSAnalysisDefinition {
         list.put("url", "/app/htmlExport");
         return list;
     }
+
+    protected boolean supportsMultiField() {
+        return true;
+    }
+
+    protected List<AnalysisItem> reportFieldsForMultiField() {
+        return measures;
+    }
+
+    protected void assignResults(List<AnalysisItem> fields) {
+        setMeasures(fields);
+    }
+
+    protected int extensionType() {
+        return ReportFieldExtension.YTD;
+    }
 }

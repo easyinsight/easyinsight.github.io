@@ -598,7 +598,7 @@ public class TransformContainer extends HBox
                     sectionMap[String(filter.filterDefinition.section)] = section;
                     filterTile.addChild(section);
                 }
-                section.addChild(filter as DisplayObject)
+                section.addChild(filter as DisplayObject);
             } else {
                 filterTile.addChild(filter as DisplayObject);
             }

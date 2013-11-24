@@ -32,22 +32,23 @@ public class DeleteConfigurationServlet extends HttpServlet {
         } catch(Exception e) {
             LogClass.error(e);
         }
-        Pattern p = Pattern.compile("^.*/html/dashboard/([A-Za-z0-9]+)/config/([A-Za-z0-9]+)$");
+        Pattern p = Pattern.compile("^.*/html/(dashboard|report)/([A-Za-z0-9]+)/config/([A-Za-z0-9]+)$");
         String referer = request.getHeader("Referer");
         String redirect = null;
         Matcher m = p.matcher(referer);
+        String target = m.replaceAll("$1");
         if(m.matches()) {
-            String config = m.replaceAll("$2");
-            System.out.println(config);
+            String config = m.replaceAll("$3");
+
             if(configID.equals(config))
-                redirect = RedirectUtil.getURL(request, "/app/html/dashboard/" + request.getParameter("dashboardID"));
+                redirect = RedirectUtil.getURL(request, "/app/html/" + target + "/" + request.getParameter("dashboardID"));
 
         }
         if(redirect == null) {
             redirect = referer;
         }
         if(redirect == null) {
-            redirect = RedirectUtil.getURL(request, "/app/html/dashboard/" + request.getParameter("dashboardID"));
+            redirect = RedirectUtil.getURL(request, "/app/html/" + target + "/" + request.getParameter("dashboardID"));
         }
         response.sendRedirect(redirect);
     }

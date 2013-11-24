@@ -33,7 +33,7 @@ public class DashboardStack extends DashboardElement {
     private String selectionType;
     private int stackFontSize = 16;
     private int defaultIndex;
-    private Map<String, FilterDefinition> overridenFilters;
+
 
     public int getDefaultIndex() {
         return defaultIndex;
@@ -41,14 +41,6 @@ public class DashboardStack extends DashboardElement {
 
     public void setDefaultIndex(int defaultIndex) {
         this.defaultIndex = defaultIndex;
-    }
-
-    public Map<String, FilterDefinition> getOverridenFilters() {
-        return overridenFilters;
-    }
-
-    public void setOverridenFilters(Map<String, FilterDefinition> overridenFilters) {
-        this.overridenFilters = overridenFilters;
     }
 
     public int getStackFontSize() {
@@ -367,20 +359,11 @@ public class DashboardStack extends DashboardElement {
 
     public JSONObject toJSON(FilterHTMLMetadata metadata, List<FilterDefinition> parentFilters) throws JSONException {
         JSONObject stack = super.toJSON(metadata, parentFilters);
-        stack.put("id", getUrlKey());
-        stack.put("type", "stack");
-        stack.put("selected", defaultIndex);
-        if (getOverridenFilters() != null) {
-            for (FilterDefinition filter : getFilters()) {
-                FilterDefinition overrideFilter = getOverridenFilters().get(String.valueOf(filter.getFilterID()));
-                if (overrideFilter != null) {
-                    filter.override(overrideFilter);
-                    filter.setEnabled(overrideFilter.isEnabled());
-                }
-            }
-        }
         List<FilterDefinition> curFilters = new ArrayList<FilterDefinition>(parentFilters);
         curFilters.addAll(getFilters());
+        stack.put("type", "stack");
+        stack.put("selected", defaultIndex);
+
         JSONArray stackItems = new JSONArray();
         stack.put("stack_items", stackItems);
         for (DashboardStackItem item : getGridItems()) {

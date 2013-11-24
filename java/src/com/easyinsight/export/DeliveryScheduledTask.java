@@ -430,7 +430,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     analysisDefinition.setName(deliveryInfo.getLabel());
                 }
                 updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
-                String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData, true, new ExportProperties(true, true));
+                String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData, true, new ExportProperties(true, true, null));
                 if (table != null) {
                     System.out.println("Returning HTML table for " + deliveryInfo.getId());
                     return new DeliveryResult(table);

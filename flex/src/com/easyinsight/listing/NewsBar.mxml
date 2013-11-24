@@ -26,6 +26,7 @@
 
         private function dismiss():void {
             userService.dismissNews.send();
+            User.getInstance().newsDismissDate = new Date();
             dispatchEvent(new Event('dismissNews'));
         }
 
