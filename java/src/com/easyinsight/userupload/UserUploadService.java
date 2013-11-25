@@ -669,6 +669,8 @@ public class UserUploadService {
                     "account_tag.account_tag_id = data_source_to_tag.account_tag_id and account_tag.account_id = ?");
             PreparedStatement getTagsToReportsStmt = conn.prepareStatement("SELECT REPORT_TO_TAG.TAG_ID, REPORT_ID FROM report_to_tag, account_tag WHERE " +
                     "account_tag.account_tag_id = report_to_tag.tag_id and account_tag.account_id = ?");
+            PreparedStatement getTagsToDashboardStmt = conn.prepareStatement("SELECT DASHBOARD_TO_TAG.TAG_ID, DASHBOARD_ID FROM dashboard_to_tag, account_tag WHERE " +
+                    "account_tag.account_tag_id = dashboard_to_tag.tag_id and account_tag.account_id = ?");
             getTagsStmt.setLong(1, SecurityUtil.getAccountID());
             ResultSet tagRS = getTagsStmt.executeQuery();
             Map<Long, Tag> tags = new LinkedHashMap<Long, Tag>();
@@ -709,6 +711,22 @@ public class UserUploadService {
             }
             getTagsToReportsStmt.close();
 
+            getTagsToDashboardStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet dashboardTagRS = getTagsToDashboardStmt.executeQuery();
+            Map<Long, List<Tag>> dashboardToTagMap = new HashMap<Long, List<Tag>>();
+            while (dashboardTagRS.next()) {
+                long dataSourceID = dashboardTagRS.getLong(2);
+                long tagID = dashboardTagRS.getLong(1);
+                Tag tag = tags.get(tagID);
+                List<Tag> t = dashboardToTagMap.get(dataSourceID);
+                if (t == null) {
+                    t = new ArrayList<Tag>();
+                    dashboardToTagMap.put(dataSourceID, t);
+                }
+                t.add(tag);
+            }
+            getTagsToDashboardStmt.close();
+
 
             Iterator<DataSourceDescriptor> dataSourceIter = dataSources.iterator();
             while (dataSourceIter.hasNext()) {
@@ -729,7 +747,11 @@ public class UserUploadService {
             long scorecardTime = 0;
 
             if (groupID == 0) {
-                objects.addAll(new DashboardStorage().getDashboards(userID, accountID, conn, testAccountVisible).values());
+                List<DashboardDescriptor> dashboards = new DashboardStorage().getDashboards(userID, accountID, conn, testAccountVisible).values();
+                for (DashboardDescriptor descriptor : dashboards) {
+                    descriptor.setTags(dashboardToTagMap.get(descriptor.getId()));
+                }
+                objects.addAll(dashboards);
                 dashboardTime = System.currentTimeMillis();
                 List<InsightDescriptor> reports = analysisStorage.getReports(userID, accountID, conn, testAccountVisible).values();
                 for (InsightDescriptor report : reports) {

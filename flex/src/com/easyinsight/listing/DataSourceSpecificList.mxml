@@ -480,6 +480,23 @@
                     columns.push(accountVisibleColumn);
                     remWidth += accountVisibleColumn.width;
                 }
+                if (ApplicationSkin.instance().reportTags) {
+                    var tagColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                    tagColumn.labelFunction = renderTags;
+                    tagColumn.headerText = "Tags";
+                    tagColumn.width = 140;
+                    tagColumn.sortable = false;
+
+                    columns.push(tagColumn);
+                }
+                if (ApplicationSkin.instance().reportAPIKey) {
+                    var apiKeyColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                    apiKeyColumn.dataField = "urlKey";
+                    apiKeyColumn.headerText = "API Key";
+                    apiKeyColumn.width = 140;
+                    columns.push(apiKeyColumn);
+                    remWidth += apiKeyColumn.width;
+                }
                 nameColumn.width = unscaledWidth - remWidth - 40;
                 columns.push(controlsColumn);
                 uploadGrid.columns = columns;
@@ -522,6 +539,27 @@
             }
         }
 
+        private function renderTags(value:Object, column:AdvancedDataGridColumn):String {
+            var ds:EIDescriptor = value as EIDescriptor;
+            if (ds is InsightDescriptor || ds is DashboardDescriptor) {
+                var tags:ArrayCollection = ds["tags"];
+                if (tags == null || tags.length == 0) {
+                    return "";
+                } else {
+                    var str:String = "";
+                    for (var i:int = 0; i < tags.length; i++) {
+                        var tag:Tag = tags.getItemAt(i) as Tag;
+                        str += tag.name;
+                        if (i < (tags.length - 1)) {
+                            str += ", ";
+                        }
+                    }
+                    return str;
+                }
+            }
+            return "";
+        }
+
         private function filterOnTag(obj:Object):Boolean {
             if (selectedTags != null && selectedTags.length > 0) {
                 var eiDescriptor:EIDescriptor = obj as EIDescriptor;
@@ -529,6 +567,17 @@
                     var insightDescriptor:InsightDescriptor = eiDescriptor as InsightDescriptor;
                     if (insightDescriptor.tags != null) {
                         for each (var tag:Tag in insightDescriptor.tags) {
+                            for each (var dsTag:Tag in selectedTags) {
+                                if (dsTag.id == tag.id) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                } else if (eiDescriptor is DashboardDescriptor) {
+                    var dashboardDescriptor:DashboardDescriptor = eiDescriptor as DashboardDescriptor;
+                    if (dashboardDescriptor.tags != null) {
+                        for each (var tag:Tag in dashboardDescriptor.tags) {
                             for each (var dsTag:Tag in selectedTags) {
                                 if (dsTag.id == tag.id) {
                                     return true;

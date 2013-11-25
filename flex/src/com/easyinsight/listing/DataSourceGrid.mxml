@@ -6,6 +6,7 @@
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.datasources.CopyDataSourceWindow;
         import com.easyinsight.datasources.DataSourceType;
+        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
@@ -260,13 +261,23 @@
             for each (var o:Object in dataSourceGrid.columns) {
                 newColumns.push(o);
             }
-            var tagColumn:DataGridColumn = new DataGridColumn();
-            tagColumn.labelFunction = renderTags;
-            tagColumn.headerText = "Tags";
-            tagColumn.width = 140;
-            tagColumn.sortable = false;
+            if (ApplicationSkin.instance().dataSourceTags) {
+                var tagColumn:DataGridColumn = new DataGridColumn();
+                tagColumn.labelFunction = renderTags;
+                tagColumn.headerText = "Tags";
+                tagColumn.width = 140;
+                tagColumn.sortable = false;
 
-            newColumns.push(tagColumn);
+                newColumns.push(tagColumn);
+            }
+            if (ApplicationSkin.instance().dataSourceAPIKey) {
+                var apiKeyColumn:DataGridColumn = new DataGridColumn();
+                apiKeyColumn.dataField = "urlKey";
+                apiKeyColumn.headerText = "API Key";
+                apiKeyColumn.width = 140;
+
+                newColumns.push(apiKeyColumn);
+            }
             dataSourceGrid.columns = newColumns;
             actionButton.dataProvider = actions;
             /*if (tags.length > 0) {

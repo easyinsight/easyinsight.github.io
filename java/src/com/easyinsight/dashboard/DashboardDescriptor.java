@@ -1,6 +1,9 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.tag.Tag;
+
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -10,6 +13,7 @@ import com.easyinsight.core.EIDescriptor;
 public class DashboardDescriptor extends EIDescriptor {
 
     private long dataSourceID;
+    private List<Tag> tags;
 
     public DashboardDescriptor() {
     }
@@ -27,6 +31,14 @@ public class DashboardDescriptor extends EIDescriptor {
         setRole(role);
         setAuthor(ownerName);
         setFolder(folder);
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 
     public long getDataSourceID() {
