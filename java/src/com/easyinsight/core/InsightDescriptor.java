@@ -55,6 +55,19 @@ public class InsightDescriptor extends EIDescriptor {
         setDescription(description);
     }
 
+    public InsightDescriptor(long id, String name, long dataFeedID, int reportType, String urlKey, Date creationDate, String ownerName, int role,
+                             boolean accountVisible, int folder, String description, Date dateModified) {
+        super(name, id, urlKey, accountVisible);
+        this.dataFeedID = dataFeedID;
+        this.reportType = reportType;
+        setCreationDate(creationDate);
+        setAuthor(ownerName);
+        setRole(role);
+        setFolder(folder);
+        setDescription(description);
+        setModifiedDate(dateModified);
+    }
+
     public List<SavedConfiguration> getConfigs() {
         return configs;
     }

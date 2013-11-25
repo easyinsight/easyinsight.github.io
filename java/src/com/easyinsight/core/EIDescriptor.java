@@ -33,6 +33,7 @@ public abstract class EIDescriptor implements Serializable {
     private String urlKey;
     private String author;
     private Date creationDate;
+    private Date modifiedDate;
     private boolean accountVisible;
     private long id;
     private int role = Roles.SUBSCRIBER;
@@ -40,6 +41,14 @@ public abstract class EIDescriptor implements Serializable {
     private String description;
 
     public abstract int getType();
+
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
 
     public String getDescription() {
         return description;

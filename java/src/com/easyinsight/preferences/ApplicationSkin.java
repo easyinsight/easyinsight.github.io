@@ -50,6 +50,15 @@ public class ApplicationSkin implements Serializable {
     private boolean myDataLookupTable;
     private boolean myDataAccountVisible;
 
+    private boolean dataSourceTags = false;
+    private boolean dataSourceAPIKey = false;
+    private boolean reportTags = false;
+    private boolean reportType = false;
+    private boolean reportAPIKey = false;
+    private boolean reportModified = false;
+    private boolean reportCached = false;
+    private boolean reportPersistedCached = false;
+
     private int customChartColor;
     private boolean customChartColorEnabled;
     private int gradientChartColor;
@@ -125,6 +134,25 @@ public class ApplicationSkin implements Serializable {
             properties.add(new ReportBooleanProperty("myDataDashboard", myDataNewDashboard));
             properties.add(new ReportBooleanProperty("myDataLookupTable", myDataLookupTable));
             properties.add(new ReportBooleanProperty("myDataAccountVisible", myDataAccountVisible));
+
+            properties.add(new ReportBooleanProperty("dataSourceTags", dataSourceTags));
+            properties.add(new ReportBooleanProperty("dataSourceAPIKey", dataSourceAPIKey));
+            properties.add(new ReportBooleanProperty("reportTags", reportTags));
+            properties.add(new ReportBooleanProperty("reportType", reportType));
+            properties.add(new ReportBooleanProperty("reportAPIKey", reportAPIKey));
+            properties.add(new ReportBooleanProperty("reportModified", reportModified));
+            properties.add(new ReportBooleanProperty("reportCached", reportCached));
+            properties.add(new ReportBooleanProperty("reportPersistedCached", reportPersistedCached));
+            /*
+            dataSourceTags = findBooleanProperty(properties, "dataSourceTags", false);
+        dataSourceAPIKey = findBooleanProperty(properties, "dataSourceAPIKey", false);
+        reportTags = findBooleanProperty(properties, "reportTags", false);
+        reportType = findBooleanProperty(properties, "reportType", false);
+        reportAPIKey = findBooleanProperty(properties, "reportAPIKey", false);
+        reportModified = findBooleanProperty(properties, "reportModified", false);
+        reportCached = findBooleanProperty(properties, "reportCached", false);
+        reportPersistedCached = findBooleanProperty(properties, "reportPersistedCached", false);
+             */
         }
         settings.setSkinID(id);
         settings.setProperties(properties);
@@ -182,6 +210,14 @@ public class ApplicationSkin implements Serializable {
         dashboardStackColor2Start = (int) findNumberProperty(properties, "dashboardStack2ColorStart", 0);
         dashboardStackColor2End = (int) findNumberProperty(properties, "dashboardStack2ColorEnd", 0);
         multiColors = multiColorProperty(properties, "multiColors");
+        dataSourceTags = findBooleanProperty(properties, "dataSourceTags", false);
+        dataSourceAPIKey = findBooleanProperty(properties, "dataSourceAPIKey", false);
+        reportTags = findBooleanProperty(properties, "reportTags", false);
+        reportType = findBooleanProperty(properties, "reportType", false);
+        reportAPIKey = findBooleanProperty(properties, "reportAPIKey", false);
+        reportModified = findBooleanProperty(properties, "reportModified", false);
+        reportCached = findBooleanProperty(properties, "reportCached", false);
+        reportPersistedCached = findBooleanProperty(properties, "reportPersistedCached", false);
     }
 
     public List<MultiColor> getMultiColors() {
@@ -222,6 +258,70 @@ public class ApplicationSkin implements Serializable {
 
     public void setGradientChartColorEnabled(boolean gradientChartColorEnabled) {
         this.gradientChartColorEnabled = gradientChartColorEnabled;
+    }
+
+    public boolean isDataSourceTags() {
+        return dataSourceTags;
+    }
+
+    public void setDataSourceTags(boolean dataSourceTags) {
+        this.dataSourceTags = dataSourceTags;
+    }
+
+    public boolean isDataSourceAPIKey() {
+        return dataSourceAPIKey;
+    }
+
+    public void setDataSourceAPIKey(boolean dataSourceAPIKey) {
+        this.dataSourceAPIKey = dataSourceAPIKey;
+    }
+
+    public boolean isReportTags() {
+        return reportTags;
+    }
+
+    public void setReportTags(boolean reportTags) {
+        this.reportTags = reportTags;
+    }
+
+    public boolean isReportType() {
+        return reportType;
+    }
+
+    public void setReportType(boolean reportType) {
+        this.reportType = reportType;
+    }
+
+    public boolean isReportAPIKey() {
+        return reportAPIKey;
+    }
+
+    public void setReportAPIKey(boolean reportAPIKey) {
+        this.reportAPIKey = reportAPIKey;
+    }
+
+    public boolean isReportModified() {
+        return reportModified;
+    }
+
+    public void setReportModified(boolean reportModified) {
+        this.reportModified = reportModified;
+    }
+
+    public boolean isReportCached() {
+        return reportCached;
+    }
+
+    public void setReportCached(boolean reportCached) {
+        this.reportCached = reportCached;
+    }
+
+    public boolean isReportPersistedCached() {
+        return reportPersistedCached;
+    }
+
+    public void setReportPersistedCached(boolean reportPersistedCached) {
+        this.reportPersistedCached = reportPersistedCached;
     }
 
     public int getDashboardStack1ColorStart() {

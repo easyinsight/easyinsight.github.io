@@ -54,6 +54,7 @@
     <mx:RemoteObject id="uploadService" destination="userUpload">
         <mx:method name="saveTags" result="saved()"/>
     </mx:RemoteObject>
+    <mx:Text text="You can configure tags to be applicable to data sources, reports, and/or fields by checking the Data Source, Report, and Field options below." width="400"/>
     <mx:HBox>
         <util:SaveButton label="Add Tag..." click="addTag()" fontSize="12"/>
         <util:SaveButton label="Delete Selected..." click="deleteSelected()" fontSize="12"/>
