@@ -42,6 +42,15 @@ public class ApplicationSkinTO {
     public var myDataLookupTable:Boolean = false;
     public var myDataAccountVisible:Boolean = false;
 
+    public var dataSourceTags:Boolean = false;
+    public var dataSourceAPIKey:Boolean = false;
+    public var reportTags:Boolean = false;
+    public var reportType:Boolean = false;
+    public var reportAPIKey:Boolean = false;
+    public var reportModified:Boolean = false;
+    public var reportCached:Boolean = false;
+    public var reportPersistedCached:Boolean = false;
+
     public var customChartColor:int;
     public var customChartColorEnabled:Boolean;
     public var gradientChartColor:int;

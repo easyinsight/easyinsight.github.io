@@ -33,6 +33,15 @@ public class ApplicationSkin extends EventDispatcher {
     private var _myDataLookupTable:Boolean = false;
     private var _myDataAccountVisible:Boolean = false;
 
+    private var _dataSourceTags:Boolean = false;
+    private var _dataSourceAPIKey:Boolean = false;
+    private var _reportTags:Boolean = false;
+    private var _reportType:Boolean = false;
+    private var _reportAPIKey:Boolean = false;
+    private var _reportModified:Boolean = false;
+    private var _reportCached:Boolean = false;
+    private var _reportPersistedCached:Boolean = false;
+
     public var customChartColor:int;
     public var customChartColorEnabled:Boolean;
     public var gradientChartColor:int;
@@ -115,6 +124,103 @@ public class ApplicationSkin extends EventDispatcher {
         myDataNewDashboard = appSkin.myDataNewDashboard;
         myDataLookupTable = appSkin.myDataLookupTable;
         myDataAccountVisible = appSkin.myDataAccountVisible;
+
+        dataSourceTags = appSkin.dataSourceTags;
+        dataSourceAPIKey = appSkin.dataSourceAPIKey;
+        reportTags = appSkin.reportTags;
+        reportType = appSkin.reportType;
+        reportAPIKey = appSkin.reportAPIKey;
+        reportModified = appSkin.reportModified;
+        reportCached = appSkin.reportCached;
+        reportPersistedCached = appSkin.reportPersistedCached;
+    }
+
+    [Bindable(event="dataSourceTagsChanged")]
+    public function get dataSourceTags():Boolean {
+        return _dataSourceTags;
+    }
+
+    public function set dataSourceTags(value:Boolean):void {
+        if (_dataSourceTags == value) return;
+        _dataSourceTags = value;
+        dispatchEvent(new Event("dataSourceTagsChanged"));
+    }
+
+    [Bindable(event="dataSourceAPIKeyChanged")]
+    public function get dataSourceAPIKey():Boolean {
+        return _dataSourceAPIKey;
+    }
+
+    public function set dataSourceAPIKey(value:Boolean):void {
+        if (_dataSourceAPIKey == value) return;
+        _dataSourceAPIKey = value;
+        dispatchEvent(new Event("dataSourceAPIKeyChanged"));
+    }
+
+    [Bindable(event="reportTagsChanged")]
+    public function get reportTags():Boolean {
+        return _reportTags;
+    }
+
+    public function set reportTags(value:Boolean):void {
+        if (_reportTags == value) return;
+        _reportTags = value;
+        dispatchEvent(new Event("reportTagsChanged"));
+    }
+
+    [Bindable(event="reportTypeChanged")]
+    public function get reportType():Boolean {
+        return _reportType;
+    }
+
+    public function set reportType(value:Boolean):void {
+        if (_reportType == value) return;
+        _reportType = value;
+        dispatchEvent(new Event("reportTypeChanged"));
+    }
+
+    [Bindable(event="reportAPIKeyChanged")]
+    public function get reportAPIKey():Boolean {
+        return _reportAPIKey;
+    }
+
+    public function set reportAPIKey(value:Boolean):void {
+        if (_reportAPIKey == value) return;
+        _reportAPIKey = value;
+        dispatchEvent(new Event("reportAPIKeyChanged"));
+    }
+
+    [Bindable(event="reportModifiedChanged")]
+    public function get reportModified():Boolean {
+        return _reportModified;
+    }
+
+    public function set reportModified(value:Boolean):void {
+        if (_reportModified == value) return;
+        _reportModified = value;
+        dispatchEvent(new Event("reportModifiedChanged"));
+    }
+
+    [Bindable(event="reportCachedChanged")]
+    public function get reportCached():Boolean {
+        return _reportCached;
+    }
+
+    public function set reportCached(value:Boolean):void {
+        if (_reportCached == value) return;
+        _reportCached = value;
+        dispatchEvent(new Event("reportCachedChanged"));
+    }
+
+    [Bindable(event="reportPersistedCachedChanged")]
+    public function get reportPersistedCached():Boolean {
+        return _reportPersistedCached;
+    }
+
+    public function set reportPersistedCached(value:Boolean):void {
+        if (_reportPersistedCached == value) return;
+        _reportPersistedCached = value;
+        dispatchEvent(new Event("reportPersistedCachedChanged"));
     }
 
     [Bindable(event="reportHeaderImageChanged")]
