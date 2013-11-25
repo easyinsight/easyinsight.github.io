@@ -17,6 +17,7 @@
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.datasources.DataSourceBehavior;
@@ -396,6 +397,78 @@
             }
         }
 
+        private function modifiedDateLabelFunction(object:Object, column:AdvancedDataGridColumn):String {
+            if (object is EIDescriptor) {
+                if (EIDescriptor(object).modifiedDate != null) {
+                    return formatter.format(EIDescriptor(object).modifiedDate);
+                } else {
+                    return "";
+                }
+            } else {
+                return "";
+            }
+        }
+
+        private static function renderReportType(object:Object, column:AdvancedDataGridColumn):String {
+            var label:String = "";
+            if (object is InsightDescriptor) {
+                switch (InsightDescriptor(object).reportType) {
+                    case AnalysisDefinition.LIST:
+                        label = "List";
+                        break;
+                    case AnalysisDefinition.CROSSTAB:
+                        label = "Crosstab";
+                        break;
+                    case AnalysisDefinition.TREE:
+                        label = "Tree";
+                        break;
+                    case AnalysisDefinition.SUMMARY:
+                        label = "Summary";
+                        break;
+                    case AnalysisDefinition.COLUMN:
+                        label = "Column Chart";
+                        break;
+                    case AnalysisDefinition.BAR:
+                        label = "Bar";
+                        break;
+                    case AnalysisDefinition.PIE:
+                        label = "Pie";
+                        break;
+                    case AnalysisDefinition.LINE:
+                        label = "Line";
+                        break;
+                    case AnalysisDefinition.AREA:
+                        label = "Area";
+                        break;
+                    case AnalysisDefinition.BUBBLE:
+                        label = "Bubble";
+                        break;
+                    case AnalysisDefinition.PLOT:
+                        label = "Plot";
+                        break;
+                    case AnalysisDefinition.MAP:
+                        label = "Map";
+                        break;
+                    case AnalysisDefinition.FORM:
+                        label = "Form";
+                        break;
+                    case AnalysisDefinition.YTD:
+                        label = "YTD";
+                        break;
+                    case AnalysisDefinition.COMPARE_YEARS:
+                        label = "Compare Years";
+                        break;
+                    case AnalysisDefinition.VERTICAL_LIST:
+                        label = "Vertical List";
+                        break;
+                    case AnalysisDefinition.DIAGRAM:
+                        label = "Diagram";
+                        break;
+                }
+            }
+            return label;
+        }
+
         private static function renderType(object:Object, column:AdvancedDataGridColumn):String {
             if (object is InsightDescriptor) {
                 return "Report";
@@ -476,6 +549,25 @@
                     columns.push(creationDateColumn);
                     remWidth += creationDateColumn.width;
                 }
+                if (ApplicationSkin.instance().reportModified) {
+                    var updateDateColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                    updateDateColumn.dataField = "modifiedDate";
+                    updateDateColumn.width = 140;
+                    updateDateColumn.headerText = "Modified Date";
+                    updateDateColumn.sortCompareFunction = customCreationSort;
+                    updateDateColumn.labelFunction = modifiedDateLabelFunction;
+                    columns.push(updateDateColumn);
+                    remWidth += updateDateColumn.width;
+                }
+                if (ApplicationSkin.instance().reportType) {
+                    var reportTypeColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                    reportTypeColumn.width = 140;
+                    reportTypeColumn.sortable = false;
+                    reportTypeColumn.headerText = "Report Type";
+                    reportTypeColumn.labelFunction = renderReportType;
+                    columns.push(reportTypeColumn);
+                    remWidth += reportTypeColumn.width;
+                }
                 if (ApplicationSkin.instance().myDataAccountVisible) {
                     columns.push(accountVisibleColumn);
                     remWidth += accountVisibleColumn.width;
@@ -522,8 +614,7 @@
                         uploadGrid.validateNow();
                     }
                 } else {
-                    var descriptors:ArrayCollection = _dataSourceDescriptor.children;
-                    uploadGrid.dataProvider = descriptors;
+                    uploadGrid.dataProvider = _dataSourceDescriptor.children;
                     uploadGrid.dataProvider.filterFunction = filterOnTag;
                     uploadGrid.dataProvider.refresh();
                 }
@@ -577,25 +668,15 @@
                 } else if (eiDescriptor is DashboardDescriptor) {
                     var dashboardDescriptor:DashboardDescriptor = eiDescriptor as DashboardDescriptor;
                     if (dashboardDescriptor.tags != null) {
-                        for each (var tag:Tag in dashboardDescriptor.tags) {
-                            for each (var dsTag:Tag in selectedTags) {
-                                if (dsTag.id == tag.id) {
+                        for each (var dashboardTag:Tag in dashboardDescriptor.tags) {
+                            for each (var dsTestTag:Tag in selectedTags) {
+                                if (dsTestTag.id == dashboardTag.id) {
                                     return true;
                                 }
                             }
                         }
                     }
                 }
-                /*var dsd:DataSourceDescriptor = obj as DataSourceDescriptor;
-                if (dsd.tags != null) {
-                    for each (var tag:Tag in dsd.tags) {
-                        for each (var dsTag:Tag in selectedTags) {
-                            if (dsTag.id == tag.id) {
-                                return true;
-                            }
-                        }
-                    }
-                }*/
                 return false;
             } else {
                 return true;

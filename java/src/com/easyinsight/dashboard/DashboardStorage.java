@@ -87,7 +87,7 @@ public class DashboardStorage {
         userStmt.close();
 
         PreparedStatement ueryAccountStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id, " +
-                "dashboard.account_visible, dashboard.folder from " +
+                "dashboard.account_visible, dashboard.folder, dashboard.creation_date, dashboard.update_date from " +
                 "dashboard, user_to_dashboard where user_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
                 "dashboard.temporary_dashboard = ?");
         ueryAccountStmt.setLong(1, userID);
@@ -95,14 +95,15 @@ public class DashboardStorage {
         ResultSet accountRS = ueryAccountStmt.executeQuery();
         while (accountRS.next()) {
             dashboards.add(new DashboardDescriptor(accountRS.getString(2), accountRS.getLong(1), accountRS.getString(3), accountRS.getLong(4), Roles.OWNER, name, accountRS.getBoolean(5),
-                    accountRS.getInt(6)));
+                    accountRS.getInt(6), new Date(accountRS.getTimestamp(7).getTime()), new Date(accountRS.getTimestamp(8).getTime())));
         }
         ueryAccountStmt.close();
 
         if (testAccountVisible) {
 
 
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id, dashboard.account_visible, dashboard.folder from " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id, " +
+                    "dashboard.account_visible, dashboard.folder, dashboard.creation_date, dashboard.update_date from " +
                     "dashboard, user_to_dashboard, user where user.account_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
                     "dashboard.temporary_dashboard = ? and dashboard.account_visible = ? and user_to_dashboard.user_id = user.user_id");
 
@@ -112,13 +113,14 @@ public class DashboardStorage {
             queryStmt.setBoolean(3, true);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.SHARER, name, rs.getBoolean(5), rs.getInt(6)));
+                dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.SHARER, name, rs.getBoolean(5), rs.getInt(6),
+                        new Date(rs.getTimestamp(7).getTime()), new Date(rs.getTimestamp(8).getTime())));
             }
             queryStmt.close();
         }
 
         PreparedStatement dashboardGroupStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.data_source_id, dashboard.URL_KEY, group_to_user_join.binding_type, " +
-                "dashboard.creation_date, dashboard.account_visible, dashboard.folder FROM dashboard, group_to_user_join," +
+                "dashboard.creation_date, dashboard.account_visible, dashboard.folder, dashboard.creation_date, dashboard.update_date FROM dashboard, group_to_user_join," +
                 "group_to_dashboard WHERE " +
                 "dashboard.dashboard_id = group_to_dashboard.dashboard_id and group_to_dashboard.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and dashboard.temporary_dashboard = ?");
         dashboardGroupStmt.setLong(1, userID);
@@ -126,7 +128,7 @@ public class DashboardStorage {
         ResultSet dashboardRS = dashboardGroupStmt.executeQuery();
         while (dashboardRS.next()) {
             dashboards.add(new DashboardDescriptor(dashboardRS.getString(2), dashboardRS.getLong(1),  dashboardRS.getString(4), dashboardRS.getLong(3), Roles.SUBSCRIBER, name,
-                    dashboardRS.getBoolean(7), dashboardRS.getInt(8)));
+                    dashboardRS.getBoolean(7), dashboardRS.getInt(8), new Date(dashboardRS.getTimestamp(9).getTime()), new Date(dashboardRS.getTimestamp(10).getTime())));
         }
         dashboardGroupStmt.close();
         return dashboards;

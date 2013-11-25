@@ -363,7 +363,7 @@ public class AnalysisStorage {
         PreparedStatement ownerStmt = conn.prepareStatement("SELECT user.first_name, user.name from user, user_to_analysis where " +
                 "user.user_id = user_to_analysis.user_id and user_to_analysis.analysis_id = ? and user_to_analysis.relationship_type = ?");
         PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, " +
-                "ANALYSIS.create_date, analysis.account_visible, analysis.folder, analysis.description FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
+                "ANALYSIS.create_date, analysis.account_visible, analysis.folder, analysis.description, analysis.update_date FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
                 "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? AND temporary_report = ?");
         PreparedStatement userStmt = conn.prepareStatement("SELECT USER.FIRST_NAME, USER.NAME FROM USER WHERE USER_ID = ?");
         userStmt.setLong(1, userID);
@@ -381,13 +381,13 @@ public class AnalysisStorage {
             long reportID = rs.getLong(1);
             reportIDs.add(reportID);
             InsightDescriptor descriptor = new InsightDescriptor(reportID, rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), new Date(rs.getTimestamp(6).getTime()), name, Roles.OWNER,
-                    rs.getBoolean(7), rs.getInt(8), rs.getString(9));
+                    rs.getBoolean(7), rs.getInt(8), rs.getString(9), new Date(rs.getTimestamp(10).getTime()));
             descriptors.add(descriptor);
         }
         queryStmt.close();
         if (testAccountVisible) {
             PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, create_date, " +
-                    "account_visible, analysis.folder, analysis.description FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
+                    "account_visible, analysis.folder, analysis.description, analysis.update_date FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
                     "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = user.user_id and user.account_id = ? and analysis.account_visible = ? and temporary_report = ?");
             queryAccountStmt.setLong(1, accountID);
             queryAccountStmt.setBoolean(2, true);
@@ -410,12 +410,13 @@ public class AnalysisStorage {
                     ownerName = "";
                 }
                 descriptors.add(new InsightDescriptor(reportID, accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5),
-                        new Date(accountRS.getTimestamp(6).getTime()), ownerName, Roles.SHARER, accountRS.getBoolean(7), accountRS.getInt(8), accountRS.getString(9)));
+                        new Date(accountRS.getTimestamp(6).getTime()), ownerName, Roles.SHARER, accountRS.getBoolean(7), accountRS.getInt(8), accountRS.getString(9),
+                        new Date(accountRS.getTimestamp(10).getTime())));
             }
             queryAccountStmt.close();
         }
         PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, " +
-                "group_to_user_join.binding_type, create_date, account_visible, folder, analysis.description FROM ANALYSIS, group_to_user_join," +
+                "group_to_user_join.binding_type, create_date, account_visible, folder, analysis.description, analysis.update_date FROM ANALYSIS, group_to_user_join," +
                 "group_to_insight WHERE " +
                 "analysis.analysis_id = group_to_insight.insight_id and group_to_insight.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and analysis.temporary_report = ?");
         userGroupStmt.setLong(1, userID);
@@ -434,7 +435,8 @@ public class AnalysisStorage {
                 ownerName = "";
             }
             descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5),
-                    new Date(groupRS.getTimestamp(7).getTime()), ownerName, groupRS.getInt(6), groupRS.getBoolean(8), groupRS.getInt(9), groupRS.getString(10)));
+                    new Date(groupRS.getTimestamp(7).getTime()), ownerName, groupRS.getInt(6), groupRS.getBoolean(8), groupRS.getInt(9), groupRS.getString(10),
+                    new Date(groupRS.getTimestamp(11).getTime())));
         }
         userGroupStmt.close();
         ownerStmt.close();

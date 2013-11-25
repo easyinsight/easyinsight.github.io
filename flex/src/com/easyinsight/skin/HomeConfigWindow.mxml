@@ -56,11 +56,10 @@
             items.addItem(new CheckBoxReportFormItem("Show Data Source API Key", "dataSourceAPIKey", skin.dataSourceAPIKey, skin));
             items.addItem(new CheckBoxReportFormItem("Show Data Source Tags", "dataSourceTags", skin.dataSourceTags, skin));
             items.addItem(new CheckBoxReportFormItem("Show Report API Key", "reportAPIKey", skin.reportAPIKey, skin));
-            items.addItem(new CheckBoxReportFormItem("Show Report Cached", "reportCached", skin.reportCached, skin));
             items.addItem(new CheckBoxReportFormItem("Show Report Modified", "reportModified", skin.reportModified, skin));
-            items.addItem(new CheckBoxReportFormItem("Show Report Persisted Cache", "reportPersistedCached", skin.reportPersistedCached, skin));
             items.addItem(new CheckBoxReportFormItem("Show Report Owner", "myDataOwner", skin.myDataOwner, skin));
             items.addItem(new CheckBoxReportFormItem("Show Report Tags", "reportTags", skin.reportTags, skin));
+            items.addItem(new CheckBoxReportFormItem("Show Report Type", "reportType", skin.reportType, skin));
             items.addItem(new CheckBoxReportFormItem("Create Scorecard", "myDataNewScorecard", skin.myDataNewScorecard, skin));
             var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
             lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);

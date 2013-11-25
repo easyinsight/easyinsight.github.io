@@ -742,25 +742,18 @@ public class UserUploadService {
 
             AnalysisStorage analysisStorage = new AnalysisStorage();
 
-            long dashboardTime = 0;
-            long reportTime = 0;
-            long scorecardTime = 0;
-
             if (groupID == 0) {
                 List<DashboardDescriptor> dashboards = new DashboardStorage().getDashboards(userID, accountID, conn, testAccountVisible).values();
                 for (DashboardDescriptor descriptor : dashboards) {
                     descriptor.setTags(dashboardToTagMap.get(descriptor.getId()));
                 }
                 objects.addAll(dashboards);
-                dashboardTime = System.currentTimeMillis();
                 List<InsightDescriptor> reports = analysisStorage.getReports(userID, accountID, conn, testAccountVisible).values();
                 for (InsightDescriptor report : reports) {
                     report.setTags(reportToTagMap.get(report.getId()));
                 }
                 objects.addAll(reports);
-                reportTime = System.currentTimeMillis();
                 objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn, testAccountVisible).values());
-                scorecardTime = System.currentTimeMillis();
             } else {
                 objects.addAll(analysisStorage.getReportsForGroup(groupID, conn).values());
                 objects.addAll(new DashboardStorage().getDashboardForGroup(groupID, conn).values());

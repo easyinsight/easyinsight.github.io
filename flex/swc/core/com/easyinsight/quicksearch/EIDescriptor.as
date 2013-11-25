@@ -21,6 +21,7 @@ public class EIDescriptor {
     public var name:String;
     public var author:String;
     public var creationDate:Date;
+    public var modifiedDate:Date;
     public var icon:Class;
     public var urlKey:String;
     public var role:int;
