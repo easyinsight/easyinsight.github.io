@@ -464,6 +464,24 @@
                     case AnalysisDefinition.DIAGRAM:
                         label = "Diagram";
                         break;
+                    case AnalysisDefinition.STACKED_COLUMN:
+                        label = "Stacked Column";
+                        break;
+                    case AnalysisDefinition.STACKED_BAR:
+                        label = "Stacked Bar";
+                        break;
+                    case AnalysisDefinition.TREND:
+                        label = "Trend";
+                        break;
+                    case AnalysisDefinition.TREND_GRID:
+                        label = "Trend Grid";
+                        break;
+                    case AnalysisDefinition.GANTT:
+                        label = "Gantt";
+                        break;
+                    case AnalysisDefinition.TREEMAP:
+                        label = "Tree Map";
+                        break;
                 }
             }
             return label;
