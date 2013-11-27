@@ -89,17 +89,18 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
 
             System.out.println("Invoking " + refreshEndpoint);
 
-
-            System.out.println("setting call data of " + callDataID + getDataFeedID());
-            try {
-                PreparedStatement ps = conn.prepareStatement("INSERT INTO db_connection_cache (status, call_data_id, data_source_id) values (?, ?, ?)");
-                ps.setInt(1, 1);
-                ps.setString(2, callDataID);
-                ps.setLong(3, getDataFeedID());
-                ps.execute();
-                ps.close();
-            } catch (SQLException e) {
-                LogClass.error(e);
+            if (callDataID != null) {
+                System.out.println("setting call data of " + callDataID + getDataFeedID());
+                try {
+                    PreparedStatement ps = conn.prepareStatement("INSERT INTO db_connection_cache (status, call_data_id, data_source_id) values (?, ?, ?)");
+                    ps.setInt(1, 1);
+                    ps.setString(2, callDataID);
+                    ps.setLong(3, getDataFeedID());
+                    ps.execute();
+                    ps.close();
+                } catch (SQLException e) {
+                    LogClass.error(e);
+                }
             }
             //MemCachedManager.add("dbConnectionCache" + callDataID + getDataFeedID(), 5000, 1);
 
