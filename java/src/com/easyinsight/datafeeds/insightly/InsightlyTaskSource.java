@@ -123,7 +123,7 @@ public class InsightlyTaskSource extends InsightlyBaseSource {
                         }
                     }
                 }
-                row.addValue(keys.get(TITLE), getValue(contactMap, "TITLE"));
+                row.addValue(keys.get(TITLE), getValue(contactMap, "Title"));
                 row.addValue(keys.get(PROJECT_ID), getValue(contactMap, "PROJECT_ID"));
                 row.addValue(keys.get(COMPLETED), getValue(contactMap, "COMPLETED"));
                 row.addValue(keys.get(DETAILS), getValue(contactMap, "DETAILS"));

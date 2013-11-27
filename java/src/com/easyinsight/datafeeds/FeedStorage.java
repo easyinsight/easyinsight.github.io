@@ -45,21 +45,21 @@ public class FeedStorage {
     }
 
     public List<LookupTableDescriptor> getLookupTableDescriptors(EIConnection conn) throws SQLException {
-        List<LookupTableDescriptor> descriptors = new ArrayList<LookupTableDescriptor>();
 
         PreparedStatement queryStmt = conn.prepareStatement("SELECT LOOKUP_TABLE_ID, LOOKUP_TABLE_NAME, DATA_SOURCE_ID FROM LOOKUP_TABLE, UPLOAD_POLICY_USERS, USER " +
                 "WHERE LOOKUP_TABLE.data_source_id = UPLOAD_POLICY_USERS.feed_id  AND UPLOAD_POLICY_USERS.user_id = user.user_id and user.account_id = ?");
         queryStmt.setLong(1, SecurityUtil.getAccountID());
         ResultSet rs = queryStmt.executeQuery();
+        Map<Long, LookupTableDescriptor> map = new HashMap<Long, LookupTableDescriptor>();
         while (rs.next()) {
             LookupTableDescriptor lookupTableDescriptor = new LookupTableDescriptor();
             lookupTableDescriptor.setId(rs.getLong(1));
             lookupTableDescriptor.setName(rs.getString(2));
             lookupTableDescriptor.setDataSourceID(rs.getLong(3));
-            descriptors.add(lookupTableDescriptor);
+            map.put(lookupTableDescriptor.getId(), lookupTableDescriptor);
         }
         queryStmt.close();
-        return descriptors;
+        return new ArrayList<LookupTableDescriptor>(map.values());
     }
 
     private void saveAddonReports(long dataSourceID, List<AddonReport> addonReports, EIConnection conn) throws Exception {
