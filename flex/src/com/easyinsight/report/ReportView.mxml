@@ -1002,8 +1002,8 @@
                    labelPlacement="right" id="editReportButton"
                    toolTip="Open this report in the report editor..." label="Edit Report" styleName="grayButton"/>
         <mx:Button labelPlacement="right" label="View in HTML" styleName="grayButton" click="viewInHTML()" icon="{htmlIcon}"/>
-        <listing:ArghButton label="{configLabel}" styleName="grayButton" itemClick="onConfigurationClick(event)" width="160" id="newButton"
-                            dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
+        <!--<listing:ArghButton label="{configLabel}" styleName="grayButton" itemClick="onConfigurationClick(event)" width="160" id="newButton"
+                            dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>-->
         <mx:Button labelPlacement="right" label="Add Row..." styleName="grayButton" click="addRow()" visible="{showAddRow}"/>
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
