@@ -146,17 +146,26 @@ public class Scheduler {
     }
 
     private void releaseLock(String lockName) {
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement lockStmt = conn.prepareStatement("DELETE FROM DISTRIBUTED_LOCK WHERE LOCK_NAME = ?");
-            lockStmt.setString(1, lockName);
-            lockStmt.executeUpdate();
-            lockStmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
+        boolean successful = false;
+        do {
+            Connection conn = Database.instance().getConnection();
+            try {
+                PreparedStatement lockStmt = conn.prepareStatement("DELETE FROM DISTRIBUTED_LOCK WHERE LOCK_NAME = ?");
+                lockStmt.setString(1, lockName);
+                lockStmt.executeUpdate();
+                lockStmt.close();
+                successful = true;
+            } catch (SQLException e) {
+                LogClass.error(e);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    // ignore
+                }
+            } finally {
+                Database.closeConnection(conn);
+            }
+        } while (!successful);
     }
 
     private boolean obtainLock(String lock) {

@@ -447,7 +447,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
                 if (deliveryInfo.getFormat() == ReportDelivery.PDF && (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID)) {
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID) ||
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
                     System.out.println("Running report " + deliveryInfo.getId() + " for inline PDF delivery");
                     analysisDefinition.updateMetadata();
                     updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
