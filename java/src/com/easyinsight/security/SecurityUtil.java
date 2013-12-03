@@ -66,17 +66,19 @@ public class SecurityUtil {
         if (!usingEmbed) {
             HttpSession session = request.getSession();
             String userName = (String) session.getAttribute("userName");
-            Long userID = (Long) session.getAttribute("userID");
-            Long accountID = (Long) session.getAttribute("accountID");
-            Integer accountType = (Integer) session.getAttribute("accountType");
-            Integer dayOfWeek = (Integer) session.getAttribute("dayOfWeek");
-            String persona = (String) session.getAttribute("persona");
-            Boolean accountAdmin = (Boolean) session.getAttribute("accountAdmin");
-            if (dayOfWeek == null) {
-                dayOfWeek = 1;
+            if (userName != null) {
+                Long userID = (Long) session.getAttribute("userID");
+                Long accountID = (Long) session.getAttribute("accountID");
+                Integer accountType = (Integer) session.getAttribute("accountType");
+                Integer dayOfWeek = (Integer) session.getAttribute("dayOfWeek");
+                String persona = (String) session.getAttribute("persona");
+                Boolean accountAdmin = (Boolean) session.getAttribute("accountAdmin");
+                if (dayOfWeek == null) {
+                    dayOfWeek = 1;
+                }
+                com.easyinsight.security.SecurityUtil.populateThreadLocal(userName, userID,
+                        accountID, accountType, accountAdmin, dayOfWeek, persona);
             }
-            com.easyinsight.security.SecurityUtil.populateThreadLocal(userName, userID,
-                    accountID, accountType, accountAdmin, dayOfWeek, persona);
         }
 
     }
@@ -344,10 +346,10 @@ public class SecurityUtil {
             userPrincipal = threadLocal.get();
             if (userPrincipal == null && required) {
                 throw new SecurityException();
-            } else if (!required) {
-                return 0;
-            } else {
+            } else if (userPrincipal != null) {
                 return userPrincipal.getAccountID();
+            } else {
+                return 0;
             }
         } else {
             return userPrincipal.getAccountID();
