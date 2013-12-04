@@ -88,6 +88,23 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
+        super.exchangeTokens(conn, request, externalPin);
+        try {
+            if (ytUserName != null && !"".equals(ytUserName) && ytPassword != null && !"".equals(ytPassword)) {
+                HttpClient httpClient = new HttpClient();
+                PostMethod postMethod = new PostMethod(url+"/rest/user/login?login="+ytUserName+"&password="+ytPassword);
+                postMethod.setRequestHeader("Connection", "keep-alive");
+                postMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                httpClient.executeMethod(postMethod);
+                cookie = postMethod.getResponseHeader("Set-Cookie").getValue();
+            }
+        } catch (IOException e) {
+            throw new ReportException(new DataSourceConnectivityReportFault("Invalid credentials.", this));
+        }
+    }
+
+    @Override
     protected void beforeRefresh(Date lastRefreshTime) {
         super.beforeRefresh(lastRefreshTime);
         try {
