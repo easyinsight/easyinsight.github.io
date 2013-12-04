@@ -172,10 +172,11 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     }
     beforeRefresh($("#" + id + " .loading"))();
     var embedComponent = typeof(userJSON.embedKey) != "undefined" ? ("&embedKey=" + userJSON.embedKey) : "";
+    var embedded = typeof(userJSON.embedded) != "undefined" ? ("&embedded=true") : "";
     var dashboardComponent = dashboardID == -1 ? "" : ("&dashboardID=" + dashboardID);
     var drillthroughComponent = typeof(drillthroughID) != "undefined" ? ("&drillThroughKey=" + drillthroughID) : "";
     var postData = {
-        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent + drillthroughComponent + embedComponent,
+        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent + drillthroughComponent + embedComponent + embedded,
         contentType: "application/json; charset=UTF-8",
         data: JSON.stringify(fullFilters),
         type: "POST"
