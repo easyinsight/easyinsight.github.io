@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 
 /**
@@ -26,7 +27,16 @@ public class DashboardReport extends DashboardElement {
     private int labelPlacement;
     private boolean autoCalculateHeight;
     private boolean spaceSides;
+    private long recommendedTag;
     private Map<String, FilterDefinition> overridenFilters = new HashMap<String, FilterDefinition>();
+
+    public long getRecommendedTag() {
+        return recommendedTag;
+    }
+
+    public void setRecommendedTag(long recommendedTag) {
+        this.recommendedTag = recommendedTag;
+    }
 
     public Map<String, FilterDefinition> getOverridenFilters() {
         return overridenFilters;
@@ -84,14 +94,20 @@ public class DashboardReport extends DashboardElement {
     @Override
     public long save(EIConnection conn) throws SQLException {
         long id = super.save(conn);
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_REPORT (DASHBOARD_ELEMENT_ID, REPORT_ID, LABEL_PLACEMENT, SHOW_LABEL, auto_calculate_height, space_sides) " +
-                "VALUES (?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_REPORT (DASHBOARD_ELEMENT_ID, REPORT_ID, " +
+                "LABEL_PLACEMENT, SHOW_LABEL, auto_calculate_height, space_sides, preferred_tag) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, getElementID());
         insertStmt.setLong(2, report.getId());
         insertStmt.setInt(3, labelPlacement);
         insertStmt.setBoolean(4, showLabel);
         insertStmt.setBoolean(5, autoCalculateHeight);
         insertStmt.setBoolean(6, spaceSides);
+        if (recommendedTag == 0) {
+            insertStmt.setNull(7, Types.BIGINT);
+        } else {
+            insertStmt.setLong(7, recommendedTag);
+        }
         insertStmt.execute();
         insertStmt.close();
         return id;
@@ -124,7 +140,7 @@ public class DashboardReport extends DashboardElement {
         DashboardReport dashboardReport = null;
         PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.title, analysis.data_feed_id, analysis.report_type, analysis.analysis_id, analysis.url_key, " +
                 "dashboard_report.label_placement, dashboard_report.show_label, dashboard_element.preferred_width, dashboard_element.preferred_height," +
-                "dashboard_report.auto_calculate_height, dashboard_report.space_sides FROM " +
+                "dashboard_report.auto_calculate_height, dashboard_report.space_sides, dashboard_report.preferred_tag FROM " +
                 "analysis, dashboard_report, dashboard_element WHERE dashboard_report.dashboard_element_id = dashboard_element.dashboard_element_id AND " +
                 "dashboard_report.report_id = analysis.analysis_id AND dashboard_element.dashboard_element_id = ?");
         queryStmt.setLong(1, elementID);
@@ -138,6 +154,7 @@ public class DashboardReport extends DashboardElement {
             dashboardReport.setPreferredHeight(rs.getInt(9));
             dashboardReport.setAutoCalculateHeight(rs.getBoolean(10));
             dashboardReport.setSpaceSides(rs.getBoolean(11));
+            dashboardReport.setRecommendedTag(rs.getLong(12));
             dashboardReport.loadElement(elementID, conn);
         }
         queryStmt.close();

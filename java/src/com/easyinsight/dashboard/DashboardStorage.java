@@ -232,8 +232,8 @@ public class DashboardStorage {
                     "PUBLIC_VISIBLE, border_color, border_thickness, background_color, padding," +
                     "recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing," +
                     "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding, " +
-                    "default_link, image_full_header, header_image_id, dashboard_version, persist_state) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    "default_link, image_full_header, header_image_id, dashboard_version, persist_state, embed_with_key, tablet_dashboard_id, phone_dashboard_id) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             insertStmt.setString(1, dashboard.getName());
             insertStmt.setString(2, dashboard.getUrlKey());
             insertStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -274,6 +274,17 @@ public class DashboardStorage {
             }
             insertStmt.setInt(31, dashboard.getVersion());
             insertStmt.setBoolean(32, dashboard.isEnableLocalStorage());
+            insertStmt.setBoolean(33, dashboard.isPublicWithKey());
+            if (dashboard.getTabletVersion() > 0) {
+                insertStmt.setLong(34, dashboard.getTabletVersion());
+            } else {
+                insertStmt.setNull(34, Types.BIGINT);
+            }
+            if (dashboard.getPhoneVersion() > 0) {
+                insertStmt.setLong(35, dashboard.getPhoneVersion());
+            } else {
+                insertStmt.setNull(35, Types.BIGINT);
+            }
             insertStmt.execute();
             dashboard.setId(Database.instance().getAutoGenKey(insertStmt));
             insertStmt.close();
@@ -283,7 +294,8 @@ public class DashboardStorage {
                     "PUBLIC_VISIBLE = ?, border_color = ?, border_thickness = ?, background_color = ?, padding = ?," +
                     "recommended_exchange = ?, ytd_date = ?, ytd_override = ?, marmotscript = ?, folder = ?, absolute_sizing = ?," +
                     "stack_fill1_start = ?, stack_fill1_end = ?, stack_fill2_start = ?, stack_fill2_end = ?, stack_fill_enabled = ?, report_horizontal_padding = ?," +
-                    "default_link = ?, image_full_header = ?, header_image_id = ?, dashboard_version = ?, persist_state = ? WHERE DASHBOARD_ID = ?");
+                    "default_link = ?, image_full_header = ?, header_image_id = ?, dashboard_version = ?, persist_state = ?, embed_with_key = ?," +
+                    "tablet_dashboard_id = ?, phone_dashboard_id = ? WHERE DASHBOARD_ID = ?");
             updateStmt.setString(1, dashboard.getName());
             updateStmt.setString(2, dashboard.getUrlKey());
             updateStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -322,7 +334,18 @@ public class DashboardStorage {
             }
             updateStmt.setInt(29, dashboard.getVersion());
             updateStmt.setBoolean(30, dashboard.isEnableLocalStorage());
-            updateStmt.setLong(31, dashboard.getId());
+            updateStmt.setBoolean(31, dashboard.isPublicWithKey());
+            if (dashboard.getTabletVersion() > 0) {
+                updateStmt.setLong(32, dashboard.getTabletVersion());
+            } else {
+                updateStmt.setNull(32, Types.BIGINT);
+            }
+            if (dashboard.getPhoneVersion() > 0) {
+                updateStmt.setLong(33, dashboard.getPhoneVersion());
+            } else {
+                updateStmt.setNull(33, Types.BIGINT);
+            }
+            updateStmt.setLong(34, dashboard.getId());
             updateStmt.executeUpdate();
             updateStmt.close();
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ?");
@@ -382,7 +405,8 @@ public class DashboardStorage {
                     "UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, temporary_dashboard, public_visible, border_color, border_thickness," +
                 "background_color, padding, recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing," +
                 "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding, " +
-                "default_link, image_full_header, header_image_id, dashboard_version, persist_state FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                "default_link, image_full_header, header_image_id, dashboard_version, persist_state, embed_with_key, tablet_dashboard_id, phone_dashboard_id" +
+                " FROM DASHBOARD WHERE DASHBOARD_ID = ?");
         queryStmt.setLong(1, dashboardID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -443,6 +467,15 @@ public class DashboardStorage {
             }
             dashboard.setVersion(rs.getInt(31));
             dashboard.setEnableLocalStorage(rs.getBoolean(32));
+            dashboard.setPublicWithKey(rs.getBoolean(33));
+            long tabletID = rs.getLong(34);
+            if (!rs.wasNull()) {
+                dashboard.setTabletVersion(tabletID);
+            }
+            long phoneID = rs.getLong(35);
+            if (!rs.wasNull()) {
+                dashboard.setPhoneVersion(phoneID);
+            }
             PreparedStatement findElementsStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, ELEMENT_TYPE FROM " +
                     "DASHBOARD_ELEMENT, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ? AND DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID = DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID");
             findElementsStmt.setLong(1, dashboardID);
