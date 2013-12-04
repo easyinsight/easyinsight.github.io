@@ -92,9 +92,8 @@
             embedReportWindow.urlKey = _report.urlKey;
             embedReportWindow.dataSourceID = _dataSourceID;
             embedReportWindow.reportType = _reportType;
-            embedReportWindow.x = this.x;
-            embedReportWindow.y = this.y;
             PopUpManager.addPopUp(embedReportWindow, this, true);
+            PopUpUtil.centerPopUp(embedReportWindow);
             PopUpManager.removePopUp(this);
         }
 

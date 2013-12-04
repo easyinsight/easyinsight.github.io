@@ -2,6 +2,12 @@
 <util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.administration.sharing.UserStub;
+        import com.easyinsight.dashboard.Dashboard;
+        import com.easyinsight.framework.User;
+
+        import mx.collections.ArrayCollection;
+
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -12,6 +18,13 @@
         private var _reportWidth:uint = 600;
 
         private var _reportHeight:uint = 500;
+
+        private var _dashboard:Dashboard;
+
+
+        public function set dashboard(value:Dashboard):void {
+            _dashboard = value;
+        }
 
         [Bindable(event="reportWidthChanged")]
         public function get reportWidth():uint {
@@ -57,7 +70,17 @@
 
         private function updateURL():void {
             if (showAsFlash == "html") {
-                url = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\"https://www.easy-insight.com/app/embeddedDashboard/" + _urlKey + "\"></iframe>";
+                var str:String = null;
+                if (userBox != null) {
+                    var user:UserStub = userBox.selectedItem as UserStub;
+                    if (user != null) {
+                        str = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\"https://www.easy-insight.com/app/html/user/"+user.userKey+"/dashboard/" + _urlKey + "/embed\"></iframe>";
+                    }
+                }
+                if (str == null) {
+                    str = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\"https://www.easy-insight.com/app/embeddedDashboard/" + _urlKey + "\"></iframe>";
+                }
+                url = str;
             } else {
                 url = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\"https://www.easy-insight.com/app/dashboard.jsp?width=" + _reportWidth + "&height=" + _reportHeight + "&id=" + _urlKey + "\"></iframe>";
             }
@@ -69,28 +92,77 @@
         }
 
         private var _showAsFlash:String = "flash";
+
+        [Bindable]
+        private var visibilityExplanation:String;
+
+        [Bindable]
+        private var visibilityIndex:int;
+
+        [Bindable]
+        private var users:ArrayCollection;
+
+        private function gotUsers():void {
+            var users:ArrayCollection = shareService.getUserStubs.lastResult as ArrayCollection;
+            var noSelection:Object = { email:"[ No User Selected ]"};
+            users.addItemAt(noSelection, 0);
+            this.users = users;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (_dashboard.publicVisible) {
+                visibilityExplanation = "Anyone viewing the page containing this dashboard will be able to see it without needing to log in via Easy Insight credentials.";
+            } else if (_dashboard.publicWithKey) {
+                visibilityExplanation = "Anyone viewing the page containing this dashboard will be able to see it without needing to log in via Easy Insight credentials if the appropriate embed key property is passed in as part of the URL.";
+                if (User.getInstance().accountAdmin) {
+                    visibilityIndex = 1;
+                    shareService.getUserStubs.send(false);
+                }
+            } else {
+                visibilityExplanation = "This dashboard will require users to be logged in.";
+            }
+        }
         ]]>
 	</mx:Script>
-    <mx:Label text="Do you want to embed the report as Flash or HTML5?"/>
-    <mx:RadioButtonGroup id="embedTypeGroup" selectedValue="{showAsFlash}" change="showAsFlash = String(embedTypeGroup.selectedValue)"/>
+    <mx:RemoteObject destination="share" id="shareService">
+        <mx:method name="getUserStubs" result="gotUsers()"/>
+    </mx:RemoteObject>
     <mx:HBox>
-        <mx:RadioButton label="Flash" value="flash" groupName="embedTypeGroup"/>
-        <mx:RadioButton label="HTML5" value="html" groupName="embedTypeGroup"/>
+        <mx:VBox>
+            <mx:Form paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+                <mx:FormItem label="Dashboard Width:">
+                    <mx:NumericStepper id="widthStepper" value="{reportWidth}" minimum="50" maximum="2400" change="reportWidth = widthStepper.value"/>
+                </mx:FormItem>
+                <mx:FormItem label="Dashboard Height:">
+                    <mx:NumericStepper id="heightStepper" value="{reportHeight}" minimum="50" maximum="2400" change="reportHeight = heightStepper.value"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Label text="Do you want to embed the report as Flash or HTML5?"/>
+            <mx:RadioButtonGroup id="embedTypeGroup" selectedValue="{showAsFlash}" change="showAsFlash = String(embedTypeGroup.selectedValue)"/>
+            <mx:HBox>
+                <mx:RadioButton label="Flash" value="flash" groupName="embedTypeGroup"/>
+                <mx:RadioButton label="HTML5" value="html" groupName="embedTypeGroup"/>
+            </mx:HBox>
+            <mx:Text width="400" text="{visibilityExplanation}"/>
+            <mx:ViewStack selectedIndex="{visibilityIndex}">
+                <mx:Box/>
+                <mx:VBox>
+                    <mx:Text width="400" text="Since this dashboard is publicly visible with an embed key, you can choose a user whose configuration and data level security permissions will be applied to this view."/>
+                    <mx:HBox>
+                        <mx:Text text="User:"/>
+                        <mx:ComboBox id="userBox" labelField="email" dataProvider="{users}" change="updateURL()"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:ViewStack>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Label text="You can paste this HTML into any web page to embed the dashboard into the page." fontSize="14"/>
+            <mx:HBox id="quickBox" verticalAlign="middle">
+                <mx:TextArea editable="false" text="{url}" width="400" height="200" wordWrap="true" id="firstTextArea" borderStyle="solid" borderThickness="1"/>
+                <util:SaveButton label="Copy to Clipboard" click="copyToClipboard()"/>
+            </mx:HBox>
+        </mx:VBox>
     </mx:HBox>
-	<mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-        <mx:Form paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
-            <mx:FormItem label="Dashboard Width:">
-                <mx:NumericStepper id="widthStepper" value="{reportWidth}" minimum="50" maximum="2400" change="reportWidth = widthStepper.value"/>
-            </mx:FormItem>
-            <mx:FormItem label="Dashboard Height:">
-                <mx:NumericStepper id="heightStepper" value="{reportHeight}" minimum="50" maximum="2400" change="reportHeight = heightStepper.value"/>
-            </mx:FormItem>
-        </mx:Form>
-        <mx:Label text="You can paste this HTML into any web page to embed the dashboard into the page." fontSize="14"/>
-		<mx:HBox id="quickBox" verticalAlign="middle">
-			<mx:TextArea editable="false" text="{url}" width="400" height="200" wordWrap="true" id="firstTextArea" borderStyle="solid" borderThickness="1"/>
-			<util:SaveButton label="Copy to Clipboard" click="copyToClipboard()"/>
-		</mx:HBox>
-		<util:CancelButton label="Close" click="PopUpManager.removePopUp(this)"/>
-	</mx:VBox>
+    <util:CancelButton label="Close" click="PopUpManager.removePopUp(this)"/>
 </util:EISlimWindow>
