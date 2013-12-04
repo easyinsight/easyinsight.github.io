@@ -835,6 +835,9 @@ public class UserService {
     }
 
     public static String checkPassword(String password) {
+        if (password == null) {
+            return "Your password must be at least eight characters.";
+        }
         String errorString = null;
         Pattern digits = Pattern.compile("[0-9]");
         Pattern upperCase = Pattern.compile("[A-Z]");
