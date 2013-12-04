@@ -62,12 +62,12 @@
 
                     PreparedStatement ps;
                     if (accountTier == Account.ADMINISTRATOR) {
-                        ps = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME, LAST_REFRESH_START, ANALYSIS_ID, TITLE FROM DATA_FEED, cached_addon_report_source, analysis WHERE " +
+                        ps = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME, LAST_REFRESH_START, ANALYSIS_ID, ANALYSIS.TITLE FROM DATA_FEED, cached_addon_report_source, analysis WHERE " +
                                 "cached_addon_report_source.data_source_id = data_feed.data_feed_id AND cached_addon_report_source.report_id = analysis.analysis_id");
                     } else {
-                        ps = conn.prepareStatement("SELECT DATA_FEED_ID, FEED_NAME, LAST_REFRESH_START FROM DATA_FEED, cached_addon_report_source, upload_policy_users, user WHERE " +
-                                "cached_addon_report_source.data_source_id = data_feed.data_feed_id AND data_feed.feed_id = upload_policy_users.feed_id and " +
-                                "upload_policy_users.user_id = user.user_id and user.account_id = ?");
+                        ps = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME, LAST_REFRESH_START, ANALYSIS_ID, ANALYSIS.TITLE FROM DATA_FEED, cached_addon_report_source, analysis, upload_policy_users, user WHERE " +
+                                "cached_addon_report_source.data_source_id = data_feed.data_feed_id AND data_feed.data_feed_id = upload_policy_users.feed_id and " +
+                                "upload_policy_users.user_id = user.user_id and user.account_id = ? AND cached_addon_report_source.report_id = analysis.analysis_id");
                         ps.setLong(1, SecurityUtil.getAccountID());
                     }
 
@@ -96,7 +96,7 @@
                             long reportID = usedRS.getLong(1);
                             String reportName = usedRS.getString(2);
                             String urlKey = usedRS.getString(3);
-                            sb.append("<a href=\"").append(RedirectUtil.getURL(request, "")).append("\">").append(reportName).append("</a>");
+                            sb.append("<a href=\"").append(RedirectUtil.getURL(request, "/app/html/report/" + urlKey)).append("\">").append(reportName).append("</a>");
                             sb.append(",");
                         }
                         if (sb.length() > 0) {
