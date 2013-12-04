@@ -24,9 +24,11 @@ public class HtmlExportServlet extends HtmlServlet {
             if (embeddedString != null) {
                 embedded = Boolean.parseBoolean(embeddedString);
             }
+            String embedKey = request.getParameter("embedKey");
             ExportProperties exportProperties = new ExportProperties();
             exportProperties.setEmbedded(embedded);
             exportProperties.setEmailed(false);
+            exportProperties.setEmbedKey(embedKey);
             html = DeliveryScheduledTask.createHTMLTable(conn, report, insightRequestMetadata, false, false, exportProperties);
         } catch (ReportException re) {
             html = re.getReportFault().toHTML();
