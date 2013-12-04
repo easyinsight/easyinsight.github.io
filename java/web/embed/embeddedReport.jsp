@@ -14,9 +14,7 @@
 <%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%
-    if(session.getAttribute("userName") != null) {
-        com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
-    }
+    com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
         long reportID;
         List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
@@ -60,6 +58,7 @@
         reportJSON.put("name", report.getName());
         reportJSON.put("id", -1);
         reportJSON.put("filters", new JSONArray());
+        reportJSON.put("drillthroughID", drillthroughArgh);
         JSONObject styleJSON = new JSONObject();
         styleJSON.put("main_stack_start", "#FFFFFF");
         styleJSON.put("alternative_stack_start", "#FFFFFF");
@@ -86,6 +85,8 @@
         } finally {
             c.close();
         }
+
+        userObject.put("embedded", true);
 %>
 
 <head>
