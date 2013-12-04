@@ -1025,7 +1025,7 @@ public class ExportService {
 
     public static @Nullable DateFormat getDateFormatForAccount(int dateLevel, @Nullable String explicitDateFormat, int dateFormat) {
         DateFormat sdf = null;
-        if (explicitDateFormat != null) {
+        if (explicitDateFormat != null && !"".equals(explicitDateFormat.trim())) {
             sdf = new SimpleDateFormat(explicitDateFormat);
         } else {
             if (dateLevel == AnalysisDateDimension.YEAR_LEVEL) {
