@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                   xmlns:dashboard="com.easyinsight.dashboard.*">
+                   xmlns:dashboard="com.easyinsight.dashboard.*" creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.DrillThrough;
         import com.easyinsight.analysis.ReportFormItem;
@@ -35,6 +35,13 @@
         [Bindable]
         public var reports:ArrayCollection;
 
+        [Bindable]
+        public var publicWithKey:Boolean;
+
+        private function onCreation():void {
+            dashboardService.getDashboards.send();
+        }
+
         protected override function createChildren():void {
             super.createChildren();
             items = StyleConfiguration.getDashboardItems(_dashboard);
@@ -61,6 +68,13 @@
                 _dashboard.publicVisible = publiclyVisibleCheckbox.selected;
                 _dashboard.exchangeVisible = exchangeVisibleCheckbox.selected;
                 _dashboard.defaultDrillthrough = drillWindow.save();
+                _dashboard.publicWithKey = publicWithKeyCheckbox.selected;
+                if (tabletComboBox.selectedItem is DashboardDescriptor) {
+                    _dashboard.tabletVersion = DashboardDescriptor(tabletComboBox.selectedItem).id;
+                }
+                if (phoneComboBox.selectedItem is DashboardDescriptor) {
+                    _dashboard.phoneVersion = DashboardDescriptor(phoneComboBox.selectedItem).id;
+                }
                 for each (var item:ReportFormItem in items) {
                     item.save();
                 }
@@ -79,6 +93,25 @@
             publicVisible =_dashboard.publicVisible;
             exchangeVisible = _dashboard.exchangeVisible;
             accountVisible = _dashboard.accountVisible;
+            publicWithKey = _dashboard.publicWithKey;
+            tabletID = _dashboard.tabletVersion;
+            phoneID = _dashboard.phoneVersion;
+        }
+
+        [Bindable]
+        private var tabletID:int;
+
+        [Bindable]
+        private var phoneID:int;
+
+        [Bindable]
+        private var dashboards:ArrayCollection;
+
+        private function gotDashboards():void {
+            var dashboards:ArrayCollection = dashboardService.getDashboards.lastResult as ArrayCollection;
+            var empty:Object = { name: "[ No Selection ]"};
+            dashboards.addItemAt(empty, 0);
+            this.dashboards = dashboards;
         }
         ]]></mx:Script>
     <mx:TabNavigator id="tabNavigator" creationPolicy="all" width="100%" height="325" paddingLeft="5" paddingRight="5"
@@ -102,6 +135,15 @@
                 <mx:FormItem label="Exchange Visible:">
                     <mx:CheckBox id="exchangeVisibleCheckbox" selected="{exchangeVisible}"/>
                 </mx:FormItem>
+                <mx:FormItem label="Publicly Visible with Key:">
+                    <mx:CheckBox id="publicWithKeyCheckbox" selected="{publicWithKey}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Redirect Dashboard for Tablets:">
+                    <util:SmartComboBox labelField="name" selectedProperty="id" selectedValue="{tabletID}" id="tabletComboBox" dataProvider="{dashboards}" width="380"/>
+                </mx:FormItem>
+                <mx:FormItem label="Redirect Dashboard for Phones:">
+                    <util:SmartComboBox labelField="name" selectedProperty="id" selectedValue="{phoneID}" id="phoneComboBox" dataProvider="{dashboards}" width="380"/>
+                </mx:FormItem>
             </mx:Form>
         </mx:Box>
         <mx:Box width="100%" height="300" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
@@ -116,4 +158,7 @@
         <util:SaveButton label="Save" click="save()"/>
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
     </mx:HBox>
+    <mx:RemoteObject destination="dashboardService" id="dashboardService">
+        <mx:method name="getDashboards" result="gotDashboards()"/>
+    </mx:RemoteObject>
 </util:EISlimWindow>

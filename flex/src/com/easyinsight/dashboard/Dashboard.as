@@ -57,7 +57,12 @@ public class Dashboard {
 
     public var configurations:ArrayCollection;
 
+    public var publicWithKey:Boolean;
+
     public var defaultDrillthrough:Link;
+
+    public var tabletVersion:int;
+    public var phoneVersion:int;
 
     public var version:int;
 

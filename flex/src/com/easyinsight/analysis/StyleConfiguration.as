@@ -43,6 +43,7 @@ import com.easyinsight.dashboard.DashboardTextElement;
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
 import mx.collections.SortField;
+import mx.rpc.remoting.RemoteObject;
 
 public class StyleConfiguration {
     public function StyleConfiguration() {
@@ -105,7 +106,9 @@ public class StyleConfiguration {
         }
         if (dashboardElement is DashboardReport) {
             items.addItem(new CheckBoxReportFormItem("Show Label", "showLabel", DashboardReport(dashboardElement).showLabel, dashboardElement));
-            items.addItem(new TextReportFormItem("Preferred Tag", "recommendedTag", DashboardReport(dashboardElement).recommendedTag, dashboardElement));
+            var dashboardService:RemoteObject = new RemoteObject();
+            dashboardService.destination = "analysisDefinition";
+            items.addItem(new ServerLoadComboBoxReportFormItem("Preferred Tag", "recommendedTag", DashboardReport(dashboardElement).recommendedTag, dashboardElement, dashboardService.getReportTags));
             items.addItem(new DashboardFilterFormItem("Filter Overrides", "dashboardFilterOverrides", dashboardElement.dashboardFilterOverrides, dashboardElement, filterDefinitions));
             items.addItem(new CheckBoxReportFormItem("Auto Calculate Height", "autoCalculateHeight", DashboardReport(dashboardElement).autoCalculateHeight, dashboardElement, null,
                     false, function(dashboardReport:DashboardReport):Boolean {
