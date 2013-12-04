@@ -43,11 +43,6 @@ public class HtmlServlet extends HttpServlet {
         } else if (req.getParameter("embedKey") != null) {
             SecurityUtil.populateThreadLocalFromSession(req);
         }
-        /*
-        select RemitId, [XManager].[dbo].[Vendor].VendorId from [XManager].[dbo].[Remit], [XManager].[dbo].[Vendor] where [XManager].[dbo].[Remit].VendorId = [XManager].[dbo].[Vendor].VendorId
-
-
-         */
         try {
 
             InputStream is = req.getInputStream();

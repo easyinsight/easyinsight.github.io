@@ -48,7 +48,6 @@
     </script>
 
     <script type="text/template" id="stack">
-
         <% if(stack_items.length == 1) { %>
             <%= Filter.filters({filter_values: filters, parent_id: id, type: "stack"}) %>
             <%= dashboardComponent(stack_items[0].item) %>
@@ -148,52 +147,65 @@
     </script>
 
     <script type="text/template" id="report_template">
-        <div>
-        <% if(show_label) { %>
-        <div>
-            <div class="dashboardReportHeader"><%- report.name %></div>
+        <div id="<%= data.id %>">
+            <%= fullReportTemplate(data) %>
+        </div>
+    </script>
 
-            <div class="reportMenu"> <a href="/app/html/report/<%= report.metadata.key %>" class="btn btn-default">Navigate</a>
-                <div class="btn-group">
-                    <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Export <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/app/exportExcel?reportID=<%= report.metadata.key %>"><button class="btn btn-inverse">Export to Excel</button></a></li>
-                        <li><a href="#" class="emailReportButton" data-key="<%= report.metadata.key %>"><button class="btn btn-inverse">Email Report</button></a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <% } %>
-        <%= Filter.filters({ filter_values: report.metadata.filters, parent_id: id, type: "report" }) %>
-        <div>
 
-            <div class="dashboardReportDiv" id="<%= id %>">
-                <% if(report.metadata.adhoc_execution) { %>
-                    <button class="adhoc btn btn-inverse">Run the Report</button>
-                <% } %>
-                <div class="reportArea" id="<%= id %>ReportArea"<%
-                if(typeof(preferredHeight) != "undefined" || typeof(preferredWidth) != "undefined") { %> style="<% if(typeof(preferredHeight) != "undefined") { %>height:<%- preferredHeight %>px;<% } %><%
-                if(typeof(preferredWidth) != "undefined") { %>width:<%- preferredWidth %>px;<% } %>"<% } %>></div>
-                <div class="noData" style="display:none">
-                    There is no data available for the combination of filters you have selected.
-                </div>
-                <div class="loading" <% if(report.metadata.adhoc_execution) { %>style="display:none"<% } %>>
-                    <div class="loadingText">
-                        Loading the report...
+        <script type="text/template" id="report_full_template">
+            <% if(show_label) { %>
+                    <div>
+                        <div class="dashboardReportHeader"><%- report.name %></div>
+
+                        <div class="reportMenu">
+                            <div class="btn-group report-dropdown-btn">
+                                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Report</a>
+                                <ul class="dropdown-menu report-dropdown">
+
+                                </ul>
+
+                            </div>
+                            <a href="/app/html/report/<%= report.metadata.key %>" class="btn btn-default">Navigate</a>
+                            <div class="btn-group">
+                                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Export <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/app/exportExcel?reportID=<%= report.metadata.key %>"><button class="btn btn-inverse">Export to Excel</button></a></li>
+                                    <li><a href="#" class="emailReportButton" data-key="<%= report.metadata.key %>"><button class="btn btn-inverse">Email Report</button></a></li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
-                    <div class="progress progress-striped active">
-                      <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
+                    <% } %>
+                    <%= Filter.filters({ filter_values: report.metadata.filters, parent_id: id, type: "report" }) %>
+                    <div>
+
+                        <div class="dashboardReportDiv" id="<%= id %>">
+                            <% if(report.metadata.adhoc_execution) { %>
+                                <button class="adhoc btn btn-inverse">Run the Report</button>
+                            <% } %>
+                            <div class="reportArea" id="<%= id %>ReportArea"<%
+                            if(typeof(preferredHeight) != "undefined" || typeof(preferredWidth) != "undefined") { %> style="<% if(typeof(preferredHeight) != "undefined") { %>height:<%- preferredHeight %>px;<% } %><%
+                            if(typeof(preferredWidth) != "undefined") { %>width:<%- preferredWidth %>px;<% } %>"<% } %>></div>
+                            <div class="noData" style="display:none">
+                                There is no data available for the combination of filters you have selected.
+                            </div>
+                            <div class="loading" <% if(report.metadata.adhoc_execution) { %>style="display:none"<% } %>>
+                                <div class="loadingText">
+                                    Loading the report...
+                                </div>
+                                <div class="progress progress-striped active">
+                                  <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
+                                </div>
+                            </div>
+                            <% if(report.metadata.adhoc_execution) { %>
+                                <div class="adhoc_instructions">
+                                    Adjust the filters to match your desired search and click the Run the Report button to actually retrieve data for this report.
+                                </div>
+                            <% } %>
+                        </div>
                     </div>
-                </div>
-                <% if(report.metadata.adhoc_execution) { %>
-                    <div class="adhoc_instructions">
-                        Adjust the filters to match your desired search and click the Run the Report button to actually retrieve data for this report.
-                    </div>
-                <% } %>
-            </div>
-        </div>
-        </div>
-</script>
+        </script>
 
 <script type="text/template" id="text_template">
     <% var vCenter = typeof(preferredHeight) != "undefined"; %>
@@ -497,6 +509,11 @@
     <% } %>
 </script>
 
+    <script type="text/template" id="report_list_template">
+        <% _.each(reports, function(e, i, l) { %>
+            <li><a class="report-target-link" href="#" data-report-target="<%- e.id %>"><%- e.name %></a></li>
+        <% }) %>
+    </script>
 
         <script type="text/template" id="email_modal">
             <div class="modal fade" id="emailReportWindow">
