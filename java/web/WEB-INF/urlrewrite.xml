@@ -52,6 +52,11 @@
     </rule>
 
     <rule>
+        <from>^/fixedDashboard</from>
+        <to>/html/fixedDashboard.jsp</to>
+    </rule>
+
+    <rule>
         <from>^/html/report/([A-Za-z0-9]+)$</from>
         <to>/html/report.jsp?reportID=$1</to>
     </rule>
@@ -64,6 +69,16 @@
     <rule>
         <from>^/html/report/drillthrough/([A-Za-z0-9]+)/embed$</from>
         <to>/embed/embeddedReport.jsp?drillthroughKey=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/html/user/([A-Za-z0-9]+)/report/drillthrough/([A-Za-z0-9]+)/embed$</from>
+        <to>/embed/embeddedReport.jsp?drillthroughKey=$2&amp;embedKey=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/html/user/([A-Za-z0-9]+)/report/([A-Za-z0-9]+)/embed$</from>
+        <to>/embed/embeddedReport.jsp?reportID=$2&amp;embedKey=$1</to>
     </rule>
 
     <rule>
@@ -84,6 +99,16 @@
     <rule>
         <from>^/html/report/([A-Za-z0-9]+)/config/([A-Za-z0-9]+)/delete$</from>
         <to>/html/deleteConfiguration?dashboardID=$1&amp;dashboardConfig=$2</to>
+    </rule>
+
+    <rule>
+        <from>^/html/user/([A-Za-z0-9]+)/dashboard/drillthrough/([A-Za-z0-9]+)/embed$</from>
+        <to>/embed/embeddedDashboard.jsp?drillthroughKey=$2&amp;embedKey=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/html/user/([A-Za-z0-9]+)/dashboard/([A-Za-z0-9]+)/embed$</from>
+        <to>/embed/embeddedDashboard.jsp?dashboardID=$2&amp;embedKey=$1</to>
     </rule>
 
     <rule>
@@ -189,7 +214,7 @@
     </rule>
 
     <rule>
-        <from>/html/reportsFolder/([A-Za-z0-9]+)/([A-Za-z0-9]+)</from>
+        <from>^/html/reportsFolder/([A-Za-z0-9]+)/([A-Za-z0-9]+)</from>
         <to>/html/folderReports.jsp?dataSourceID=$1&amp;folderID=$2</to>
     </rule>
 
