@@ -34,6 +34,15 @@ public class DeliveryInfo {
     private int format;
     private boolean sendIfNoData;
     private DeliveryExtension deliveryExtension;
+    private long configurationID;
+
+    public long getConfigurationID() {
+        return configurationID;
+    }
+
+    public void setConfigurationID(long configurationID) {
+        this.configurationID = configurationID;
+    }
 
     public void fromXML(Element element, XMLImportMetadata xmlImportMetadata) {
         id = Long.parseLong(element.getAttribute("id").getValue());

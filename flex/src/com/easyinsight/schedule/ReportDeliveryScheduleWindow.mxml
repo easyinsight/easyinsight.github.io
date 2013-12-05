@@ -41,7 +41,7 @@
         private function setup():void {
             addEventListener(RecipientEvent.DELETE_RECIPIENT, deleteRecipient);
             if (_fixedReportName == null) {
-                analysisService.getInsightDescriptors.send();
+                analysisService.getInsightDescriptorsWithConfigurations.send();
             }
             shareService.getUserStubs.send(false);
             BindingUtils.bindProperty(this, "reportID", deliveryConfiguration, "reportID");
@@ -81,6 +81,7 @@
                     recipients.addItem(group);
                 }
                 deliveryLabel = _activity.deliveryLabel;
+                configurationID = _activity.configurationID;
                 reportID = _activity.reportID;
                 body = _activity.body;
                 subjectLine = _activity.subject;
@@ -191,7 +192,7 @@
         private var recipients:ArrayCollection = new ArrayCollection();
 
         private function gotReports():void {
-            reports = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+            reports = analysisService.getInsightDescriptorsWithConfigurations.lastResult as ArrayCollection;
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("name", true)];
             reports.sort = sort;
@@ -297,12 +298,15 @@
 
         [Bindable]
         private var deliveryExtension:DeliveryExtension;
+
+        [Bindable]
+        private var configurationID:int;
         ]]></mx:Script>
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="addOrUpdateSchedule" result="saved()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
-        <mx:method name="getInsightDescriptors" result="gotReports()"/>
+        <mx:method name="getInsightDescriptorsWithConfigurations" result="gotReports()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="shareService" destination="share">
         <mx:method name="getUserStubs" result="gotUserStubs()"/>
@@ -312,7 +316,7 @@
             <mx:VBox label="Report" paddingLeft="10" paddingTop="10">
                 <schedule:ReportDeliveryConfiguration id="deliveryConfiguration" reportChangeable="{reportChangeable}"
                         reports="{reports}" reportID="{reportID}" formatValue="{formatValue}" deliveryLabel="{deliveryLabel}"
-                        sendOnNoData="{sendOnNoData}" deliveryExtension="{deliveryExtension}"/>
+                        sendOnNoData="{sendOnNoData}" deliveryExtension="{deliveryExtension}" configurationID="{configurationID}"/>
             </mx:VBox>
             <schedule:FilterDeliveryConfiguration label="Filters" paddingLeft="10" paddingRight="10" id="filterConfiguration"
                     customFilters="{customFilters}" reportID="{reportID}" dataSourceID="{dataSourceID}"/>

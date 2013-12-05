@@ -92,10 +92,6 @@
 
         public function set reportID(value:int):void {
             if (_reportID == value) return;
-            /*if (value != 0) {
-                ProgressAlert.alert(this, "Retrieving report information...", null, analysisService.getFilters);
-                analysisService.getFilters.send(value);
-            }*/
             _reportID = value;
             invalidateProperties();
             dispatchEvent(new Event("reportIDChanged"));
@@ -108,6 +104,8 @@
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getFilters" result="gotReport()"/>
     </mx:RemoteObject>
+    <mx:Text text="We recommend that you set up saved configurations of your reports for customizing filters instead of customizing filters at this screen." width="560"/>
+    <mx:HRule width="560"/>
     <mx:Label text="Do you want to customize any of the filters used for report delivery?" fontSize="14" width="100%" textAlign="center"/>
     <mx:HBox verticalAlign="middle" width="100%">
         <mx:CheckBox label="Yes, Customize Filters" id="customizeFiltersCheckbox" selected="{customFiltersExist}"/>

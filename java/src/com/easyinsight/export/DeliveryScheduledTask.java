@@ -4,6 +4,8 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.benchmark.ScheduledTaskBenchmarkInfo;
 import com.easyinsight.config.ConfigLoader;
+import com.easyinsight.dashboard.DashboardService;
+import com.easyinsight.dashboard.SavedConfiguration;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
@@ -217,7 +219,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             });
 
             PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
-                    "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID FROM USER, ACCOUNT " +
+                    "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
                     "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
             queryStmt.setInt(1, Account.ACTIVE);
             queryStmt.setInt(2, Account.TRIAL);
@@ -233,6 +235,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             final int firstDayOfWeek = queryRS.getInt(4);
             final long accountID = queryRS.getLong(8);
             final long userPersonaID = queryRS.getLong("USER.persona_ID");
+            final boolean accountReports = queryRS.getBoolean("USER.TEST_ACCOUNT_VISIBLE");
 
             UserInfo defaultUser = new UserInfo(queryRS.getString("USER.email"), queryRS.getString("USER.first_name"), queryRS.getString("USER.name"),
                     userName, ownerID, accountAdmin, userPersonaID);
@@ -276,12 +279,14 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 userInfoSet.add(new UserInfo(email, firstName, lastName, rs.getString(7), rs.getLong(5), rs.getBoolean(6), personaID));
             }
             groupStmt.close();
-            blah(userInfoSet, conn, subject, body, htmlEmail, timezoneOffset, infos, accountType, firstDayOfWeek, accountID, emails, defaultUser, senderEmail, senderName, true);
+            blah(userInfoSet, conn, subject, body, htmlEmail, timezoneOffset, infos, accountType, firstDayOfWeek, accountID, emails, defaultUser, senderEmail, senderName, true,
+                    accountReports);
         }
     }
 
     private void blah(Set<UserInfo> userInfoSet, EIConnection conn, String subject, String body, boolean htmlEmail, int timezoneOffset, List<DeliveryInfo> infos,
-                      int accountType, int firstDayOfWeek, long accountID, List<String> emails, UserInfo defaultUser, String senderEmail, String senderName, boolean sendIfNoData)
+                      int accountType, int firstDayOfWeek, long accountID, List<String> emails, UserInfo defaultUser, String senderEmail, String senderName, boolean sendIfNoData,
+                      boolean accountReports)
             throws SQLException, CloneNotSupportedException, MessagingException, InterruptedException, UnsupportedEncodingException {
         Map<List<UserDLS>, List<UserInfo>> personaMap = new HashMap<List<UserDLS>, List<UserInfo>>();
         for (UserInfo userInfo : userInfoSet) {
@@ -317,18 +322,18 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 sentEmails = true;
             }
             sendEmails(conn, subject, body, htmlEmail, timezoneOffset, infos, accountType, firstDayOfWeek, accountID,
-                    entry.getValue(), emailAddressesToSend, firstUser, personaName, senderEmail, senderName, sendIfNoData);
+                    entry.getValue(), emailAddressesToSend, firstUser, personaName, senderEmail, senderName, sendIfNoData, accountReports);
         }
         if (!sentEmails) {
             sendEmails(conn, subject, body, htmlEmail, timezoneOffset, infos, accountType, firstDayOfWeek, accountID,
-                    new ArrayList<UserInfo>(), emails, defaultUser, null, senderEmail, senderName, sendIfNoData);
+                    new ArrayList<UserInfo>(), emails, defaultUser, null, senderEmail, senderName, sendIfNoData, accountReports);
         }
     }
 
     private void sendEmails(final EIConnection conn, String subject, String body, boolean htmlEmail, final int timezoneOffset,
                             List<DeliveryInfo> infos, final int accountType, final int firstDayOfWeek, final long accountID,
                             List<UserInfo> users, List<String> emails, final UserInfo firstUser, @Nullable final String personaName, String senderEmail, String senderName,
-                            final boolean sendIfNoData)
+                            final boolean sendIfNoData, final boolean accountReports)
             throws InterruptedException, SQLException, MessagingException, UnsupportedEncodingException {
         String emailBody = body;
         BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
@@ -355,7 +360,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         }
                         latch.countDown();
                     } catch (ReportException re) {
-                        LogClass.userError(re.getReportFault().toString(), re);
+                        LogClass.info(re.getReportFault().toString());
+                        re.printStackTrace();
                         latch.countDown();
                     } catch (Exception e) {
                         LogClass.error(e);
@@ -410,7 +416,14 @@ public class DeliveryScheduledTask extends ScheduledTask {
             if (deliveryInfo.getLabel() != null && !"".equals(deliveryInfo.getLabel())) {
                 analysisDefinition.setName(deliveryInfo.getLabel());
             }
-            updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
+            List<FilterDefinition> customFilters;
+            if (deliveryInfo.getConfigurationID() > 0) {
+                SavedConfiguration configuration = new DashboardService().getConfigurationForReport(deliveryInfo.getConfigurationID(), conn).getSavedConfiguration();
+                customFilters = new ArrayList<FilterDefinition>(configuration.getDashboardStackPositions().getFilterMap().values());
+            } else {
+                customFilters = deliveryInfo.getFilters();
+            }
+            updateReportWithCustomFilters(analysisDefinition, customFilters);
             byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, conn, insightRequestMetadata, sendIfNoData, deliveryInfo.getFormat() == ReportDelivery.EXCEL_2007);
             if (bytes != null) {
                 String deliveryName;
@@ -429,7 +442,14 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 if (deliveryInfo.getLabel() != null && !"".equals(deliveryInfo.getLabel())) {
                     analysisDefinition.setName(deliveryInfo.getLabel());
                 }
-                updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
+                List<FilterDefinition> customFilters;
+                if (deliveryInfo.getConfigurationID() > 0) {
+                    SavedConfiguration configuration = new DashboardService().getConfigurationForReport(deliveryInfo.getConfigurationID(), conn).getSavedConfiguration();
+                    customFilters = new ArrayList<FilterDefinition>(configuration.getDashboardStackPositions().getFilterMap().values());
+                } else {
+                    customFilters = deliveryInfo.getFilters();
+                }
+                updateReportWithCustomFilters(analysisDefinition, customFilters);
                 String table = createHTMLTable(conn, analysisDefinition, insightRequestMetadata, sendIfNoData, true, new ExportProperties(true, true, null));
                 if (table != null) {
                     System.out.println("Returning HTML table for " + deliveryInfo.getId());
@@ -447,12 +467,19 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
                 if (deliveryInfo.getFormat() == ReportDelivery.PDF && (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID) ||
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
                         analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY)) {
                     System.out.println("Running report " + deliveryInfo.getId() + " for inline PDF delivery");
                     analysisDefinition.updateMetadata();
-                    updateReportWithCustomFilters(analysisDefinition, deliveryInfo.getFilters());
+                    List<FilterDefinition> customFilters;
+                    if (deliveryInfo.getConfigurationID() > 0) {
+                        SavedConfiguration configuration = new DashboardService().getConfigurationForReport(deliveryInfo.getConfigurationID(), conn).getSavedConfiguration();
+                        customFilters = new ArrayList<FilterDefinition>(configuration.getDashboardStackPositions().getFilterMap().values());
+                    } else {
+                        customFilters = deliveryInfo.getFilters();
+                    }
+                    updateReportWithCustomFilters(analysisDefinition, customFilters);
                     byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
                     String reportName = analysisDefinition.getName();
                     return new DeliveryResult(new AttachmentInfo(bytes, reportName + ".pdf", "application/pdf"));
@@ -649,7 +676,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
     private void reportDelivery(EIConnection conn) throws SQLException, IOException, MessagingException, DocumentException, CloneNotSupportedException, InterruptedException {
 
         PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, REPORT_DELIVERY_ID, TIMEZONE_OFFSET, SENDER_USER_ID, " +
-                "REPORT_DELIVERY_ID, send_if_no_data FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+                "REPORT_DELIVERY_ID, send_if_no_data, configuration_id FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         getInfoStmt.setLong(1, activityID);
         ResultSet deliveryInfoRS = getInfoStmt.executeQuery();
         if (deliveryInfoRS.next()) {
@@ -674,6 +701,10 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
             boolean sendIfNoData = deliveryInfoRS.getBoolean(10);
 
+            long configurationID = deliveryInfoRS.getLong(11);
+
+            deliveryInfo.setConfigurationID(configurationID);
+
             PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT USER_ID FROM user_to_analysis WHERE analysis_id = ?");
 
             findOwnerStmt.setLong(1, reportID);
@@ -685,7 +716,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 return;
             }
             PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
-                    "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID FROM USER, ACCOUNT " +
+                    "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
                     "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
             queryStmt.setInt(1, Account.ACTIVE);
             queryStmt.setInt(2, Account.TRIAL);
@@ -701,6 +732,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             final int firstDayOfWeek = queryRS.getInt(4);
             final long accountID = queryRS.getLong(8);
             final long userPersonaID = queryRS.getLong("USER.persona_ID");
+            final boolean accountReports = queryRS.getBoolean("USER.TEST_ACCOUNT_VISIBLE");
 
             UserInfo defaultUser = new UserInfo(queryRS.getString("USER.email"), queryRS.getString("USER.first_name"), queryRS.getString("USER.name"),
                     userName, ownerID, accountAdmin, userPersonaID);
@@ -754,7 +786,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             emailQueryStmt.close();
 
             blah(userInfoSet, conn, subject, body, htmlEmail, timezoneOffset, Arrays.asList(deliveryInfo), accountType, firstDayOfWeek, accountID,
-                    emails, defaultUser, senderEmail, senderName, sendIfNoData);
+                    emails, defaultUser, senderEmail, senderName, sendIfNoData, accountReports);
 
             queryStmt.close();
         }
@@ -762,6 +794,17 @@ public class DeliveryScheduledTask extends ScheduledTask {
     }
 
     private void updateReportWithCustomFilters(WSAnalysisDefinition analysisDefinition, List<FilterDefinition> customFilters) {
+
+        /*if (overridenFilters != null) {
+            for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                FilterDefinition overrideFilter = overridenFilters.get(String.valueOf(filter.getFilterID()));
+                if (overrideFilter != null) {
+                    filter.override(overrideFilter);
+                    filter.setEnabled(overrideFilter.isEnabled());
+                }
+            }
+        }*/
+
         if (analysisDefinition.getFilterDefinitions() != null) {
             List<FilterDefinition> replacements = new ArrayList<FilterDefinition>();
             Iterator<FilterDefinition> filterIter = analysisDefinition.getFilterDefinitions().iterator();

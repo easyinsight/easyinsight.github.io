@@ -26,6 +26,7 @@ public class DeliveryInfo implements IDeliverable {
     public var label:String;
     public var sendIfNoData:Boolean = true;
     public var deliveryExtension:DeliveryExtension;
+    public var configurationID:int;
 
     public function DeliveryInfo() {
     }
@@ -59,6 +60,10 @@ public class DeliveryInfo implements IDeliverable {
 
     public function setSendOnNoData(noData:Boolean):void {
         this.sendIfNoData = noData;
+    }
+
+    public function setConfigurationID(id:int):void {
+        configurationID = id;
     }
 }
 }

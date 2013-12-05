@@ -10,6 +10,11 @@
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
+        import com.easyinsight.report.SavedConfiguration;
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.controls.Alert;
+
         private var _reports:ArrayCollection;
 
         private var _reportID:int;
@@ -51,6 +56,32 @@
             if (_formatValue == "3") {
                 currentState = "pdf";
             }
+            var cfs:ArrayCollection;
+
+            cfs = new ArrayCollection();
+            cfs.addItem({ name: "[ Select a Configuration ]"});
+            if (reports != null && reportID > 0) {
+                for each (var rep:InsightDescriptor in reports) {
+                    if (rep.id == reportID) {
+                        var blahs:ArrayCollection = rep.configs;
+                        for each (var sc:SavedConfiguration in blahs) {
+                            cfs.addItem(sc);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            configurations = cfs;
+            if (configurationComboBox != null) {
+                configurationComboBox.selectedValue = configurationID;
+            }
+
+            if (configurations.length == 1) {
+                configEnabled = false;
+            } else {
+                configEnabled = true;
+            }
         }
 
         public function getUrlKey():String {
@@ -66,6 +97,7 @@
             if (_reports == value) return;
             _reports = value;
             dispatchEvent(new Event("reportsChanged"));
+            invalidateProperties();
         }
 
         [Bindable(event="reportIDChanged")]
@@ -93,7 +125,22 @@
         private function onReportChange():void {
             dataSourceID = reportComboBox.selectedItem.dataFeedID;
             reportID = reportComboBox.selectedItem.id;
+            var blahs:ArrayCollection = reportComboBox.selectedItem.configs;
+            var configs:ArrayCollection = new ArrayCollection();
+            configs.addItem({ name: "[ Select a Configuration ]"});
+            for each (var sc:SavedConfiguration in blahs) {
+                configs.addItem(sc);
+            }
+            this.configurations = configs;
+            if (configs.length == 1) {
+                configEnabled = false;
+            } else {
+                configEnabled = true;
+            }
         }
+
+        [Bindable]
+        private var configEnabled:Boolean;
 
         private var _dataSourceID:int;
 
@@ -122,6 +169,11 @@
                 ext = pdfExtension;
             }
             activity.setDeliveryExtension(ext);
+            if (configurationComboBox.selectedItem is SavedConfiguration) {
+                activity.setConfigurationID(configurationComboBox.selectedItem.id);
+            } else {
+                activity.setConfigurationID(0);
+            }
         }
 
         public function set deliveryExtension(extension:DeliveryExtension):void {
@@ -164,10 +216,32 @@
                 currentState = "";
             }
         }
+
+        private var _configurationID:int;
+
+
+        [Bindable(event="configurationIDChanged")]
+        public function get configurationID():int {
+            return _configurationID;
+        }
+
+        public function set configurationID(value:int):void {
+            if (_configurationID == value) return;
+            _configurationID = value;
+            dispatchEvent(new Event("configurationIDChanged"));
+            invalidateProperties();
+        }
+
+        [Bindable]
+        private var configurations:ArrayCollection;
         ]]></mx:Script>
     <mx:FormItem label="Report:" id="reportComboBoxItem">
         <util:SmartComboBox dataProvider="{reports}" selectedValue="{reportID}" selectedProperty="id"
                             id="reportComboBox" labelField="name" change="onReportChange()"/>
+    </mx:FormItem>
+    <mx:FormItem label="Configuration:" id="configurationComboBoxItem">
+        <util:SmartComboBox dataProvider="{configurations}" selectedValue="{configurationID}" selectedProperty="id"
+                            id="configurationComboBox" labelField="name" enabled="{configEnabled}"/>
     </mx:FormItem>
     <mx:FormItem label="Custom Delivery Label:">
         <mx:TextInput id="deliveryLabelInput" text="{deliveryLabel}" width="300"/>

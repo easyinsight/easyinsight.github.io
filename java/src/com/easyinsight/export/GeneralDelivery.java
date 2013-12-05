@@ -12,11 +12,9 @@ import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * User: jamesboe
@@ -174,7 +172,11 @@ public class GeneralDelivery extends ScheduledDelivery {
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO GENERAL_DELIVERY (SCHEDULED_ACCOUNT_ACTIVITY_ID, SENDER_USER_ID, SUBJECT," +
                 "BODY, TIMEZONE_OFFSET, HTML_EMAIL, DELIVERY_LABEL) VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, getScheduledActivityID());
-        insertStmt.setLong(2, SecurityUtil.getUserID());
+        if (getSenderID() > 0) {
+            insertStmt.setLong(2, getSenderID());
+        } else {
+            insertStmt.setNull(2, Types.BIGINT);
+        }
         insertStmt.setString(3, subject);
         insertStmt.setString(4, body);
         insertStmt.setInt(5, timezoneOffset);
@@ -182,7 +184,7 @@ public class GeneralDelivery extends ScheduledDelivery {
         insertStmt.setString(7, deliveryLabel);
         insertStmt.execute();
         long id = Database.instance().getAutoGenKey(insertStmt);
-        PreparedStatement insertReportStmt = conn.prepareStatement("INSERT INTO delivery_to_report (general_delivery_id, report_id, delivery_index, delivery_format, delivery_label, send_if_no_data) values (?, ?, ?, ?, ?, ?)", 
+        PreparedStatement insertReportStmt = conn.prepareStatement("INSERT INTO delivery_to_report (general_delivery_id, report_id, delivery_index, delivery_format, delivery_label, send_if_no_data, configuration_id) values (?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         PreparedStatement insertDashboardStmt = conn.prepareStatement("INSERT INTO delivery_to_dashboard (general_delivery_id, dashboard_id, delivery_index, delivery_format, delivery_label, send_if_no_data) values (?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
@@ -198,6 +200,11 @@ public class GeneralDelivery extends ScheduledDelivery {
                 insertReportStmt.setInt(4, deliveryInfo.getFormat());
                 insertReportStmt.setString(5, deliveryInfo.getLabel());
                 insertReportStmt.setBoolean(6, deliveryInfo.isSendIfNoData());
+                if (deliveryInfo.getConfigurationID() > 0) {
+                    insertReportStmt.setLong(7, deliveryInfo.getConfigurationID());
+                } else {
+                    insertReportStmt.setNull(7, Types.BIGINT);
+                }
                 insertReportStmt.execute();
                 long insertReportID = Database.instance().getAutoGenKey(insertReportStmt);
                 Session session = Database.instance().createSession(conn);
