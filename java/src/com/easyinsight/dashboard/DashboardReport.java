@@ -23,6 +23,7 @@ import java.util.*;
  */
 public class DashboardReport extends DashboardElement {
     private InsightDescriptor report;
+    private String tagName;
     private boolean showLabel;
     private int labelPlacement;
     private boolean autoCalculateHeight;
@@ -129,6 +130,14 @@ public class DashboardReport extends DashboardElement {
     public void updateScorecardIDs(Map<Long, Scorecard> scorecardReplacementMap) {
     }
 
+    public String getTagName() {
+        return tagName;
+    }
+
+    public void setTagName(String tagName) {
+        this.tagName = tagName;
+    }
+
     @Override
     public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap, List<AnalysisItem> allFields, boolean changingDataSource, FeedDefinition dataSource) {
         AnalysisDefinition replacement = reportReplacementMap.get(report.getId());
@@ -143,6 +152,7 @@ public class DashboardReport extends DashboardElement {
                 "dashboard_report.auto_calculate_height, dashboard_report.space_sides, dashboard_report.preferred_tag FROM " +
                 "analysis, dashboard_report, dashboard_element WHERE dashboard_report.dashboard_element_id = dashboard_element.dashboard_element_id AND " +
                 "dashboard_report.report_id = analysis.analysis_id AND dashboard_element.dashboard_element_id = ?");
+        PreparedStatement tagNameStmt = conn.prepareStatement("SELECT ACCOUNT_TAG.TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_TAG_ID = ?");
         queryStmt.setLong(1, elementID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -156,7 +166,16 @@ public class DashboardReport extends DashboardElement {
             dashboardReport.setSpaceSides(rs.getBoolean(11));
             dashboardReport.setRecommendedTag(rs.getLong(12));
             dashboardReport.loadElement(elementID, conn);
+            if (dashboardReport.getRecommendedTag() > 0) {
+                tagNameStmt.setLong(1, dashboardReport.getRecommendedTag());
+                ResultSet tagRS = tagNameStmt.executeQuery();
+                if (tagRS.next()) {
+                    String tagName = tagRS.getString(1);
+                    dashboardReport.setTagName(tagName);
+                }
+            }
         }
+        tagNameStmt.close();
         queryStmt.close();
         return dashboardReport;
     }
@@ -220,6 +239,7 @@ public class DashboardReport extends DashboardElement {
         reportDataJSON.put("metadata", reportDefinition.toJSON(md, parentFilters));
         reportJSON.put("report", reportDataJSON);
         reportJSON.put("show_label", isShowLabel());
+        reportJSON.put("tag", tagName);
 
         return reportJSON;
     }
