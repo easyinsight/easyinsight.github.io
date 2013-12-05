@@ -69,6 +69,7 @@
                 _dashboard.exchangeVisible = exchangeVisibleCheckbox.selected;
                 _dashboard.defaultDrillthrough = drillWindow.save();
                 _dashboard.publicWithKey = publicWithKeyCheckbox.selected;
+                _dashboard.enableLocalStorage = localStorageCheckbox.selected;
                 if (tabletComboBox.selectedItem is DashboardDescriptor) {
                     _dashboard.tabletVersion = DashboardDescriptor(tabletComboBox.selectedItem).id;
                 }
@@ -96,6 +97,7 @@
             publicWithKey = _dashboard.publicWithKey;
             tabletID = _dashboard.tabletVersion;
             phoneID = _dashboard.phoneVersion;
+            localStorage = _dashboard.enableLocalStorage;
         }
 
         [Bindable]
@@ -113,6 +115,9 @@
             dashboards.addItemAt(empty, 0);
             this.dashboards = dashboards;
         }
+
+        [Bindable]
+        private var localStorage:Boolean;
         ]]></mx:Script>
     <mx:TabNavigator id="tabNavigator" creationPolicy="all" width="100%" height="325" paddingLeft="5" paddingRight="5"
             paddingTop="5" paddingBottom="5">
@@ -137,6 +142,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="Publicly Visible with Key:">
                     <mx:CheckBox id="publicWithKeyCheckbox" selected="{publicWithKey}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Enable Local Storage:">
+                    <mx:CheckBox id="localStorageCheckbox" selected="{localStorage}"/>
                 </mx:FormItem>
                 <mx:FormItem label="Redirect Dashboard for Tablets:">
                     <util:SmartComboBox labelField="name" selectedProperty="id" selectedValue="{tabletID}" id="tabletComboBox" dataProvider="{dashboards}" width="380"/>

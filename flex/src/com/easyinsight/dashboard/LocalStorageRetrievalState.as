@@ -13,12 +13,10 @@ import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.net.SharedObject;
 
-import mx.collections.ArrayCollection;
-import mx.controls.Alert;
-
 public class LocalStorageRetrievalState implements IRetrievalState {
 
     private var urlKey:String;
+
     private var version:int;
 
     private var retrievalState:IRetrievalState;
@@ -38,6 +36,7 @@ public class LocalStorageRetrievalState implements IRetrievalState {
             if (so.size > 0) {
                 var obj:Object = so.data[key + "f" + filterDefinition.filterID];
                 if (obj != null) {
+
                     filterDefinition.loadFromSharedObject(obj);
                     filterDefinition.enabled = so.data[key + "f" + filterDefinition.filterID + "enabled"];
                 }

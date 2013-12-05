@@ -613,6 +613,7 @@
 
         private function onSetup(event:ReportSetupEvent):void {
             report = event.reportInfo.report;
+            reportStorageKey = "r" + report.urlKey;
             headerFontSize = report.headerFontSize;
             maxHeaderWidth = report.maxHeaderWidth;
 
@@ -741,6 +742,9 @@
             generateState();
             viewFactory.refresh();
         }
+
+        [Bindable]
+        private var reportStorageKey:String;
 
         private function onError(event:EIErrorEvent):void {
             stackTrace = event.error.getStackTrace();
@@ -1002,8 +1006,8 @@
                    labelPlacement="right" id="editReportButton"
                    toolTip="Open this report in the report editor..." label="Edit Report" styleName="grayButton"/>
         <mx:Button labelPlacement="right" label="View in HTML" styleName="grayButton" click="viewInHTML()" icon="{htmlIcon}"/>
-        <!--<listing:ArghButton label="{configLabel}" styleName="grayButton" itemClick="onConfigurationClick(event)" width="160" id="newButton"
-                            dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>-->
+        <listing:ArghButton label="{configLabel}" styleName="grayButton" itemClick="onConfigurationClick(event)" width="160" id="newButton"
+                            dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
         <mx:Button labelPlacement="right" label="Add Row..." styleName="grayButton" click="addRow()" visible="{showAddRow}"/>
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
@@ -1031,7 +1035,7 @@
         <mx:VBox width="100%" horizontalAlign="center">
             <filtering:TransformContainer id="transformContainer" filterEditable="false"
                                           existingFilters="{filterDefinitions}"
-                                          width="100%" feedID="{dataSourceID}"
+                                          width="100%" feedID="{dataSourceID}" filterStorageKey="{reportStorageKey}"
                                           reportView="true" reportID="{_reportID}" report="{report}" retrievalState="{retrievalState}"/>
         </mx:VBox>
     </mx:ViewStack>
