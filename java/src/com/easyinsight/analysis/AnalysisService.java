@@ -278,12 +278,16 @@ public class AnalysisService {
 
     public List<JoinOverride> generateForAddons(List<JoinOverride> existingOverrides, long dataSourceID, List<AnalysisItem> items,
                                                 List<AddonReport> newAddonReports, List<AddonReport> removedAddonReports) {
+        List<JoinOverride> toReturn;
         if (existingOverrides == null || existingOverrides.size() == 0) {
             existingOverrides = new ArrayList<JoinOverride>();
+            toReturn = existingOverrides;
             ReportJoins reportJoins = determineOverrides(dataSourceID, items);
             for (List<JoinOverride> overrides : reportJoins.getJoinOverrideMap().values()) {
                 existingOverrides.addAll(overrides);
             }
+        } else {
+            toReturn = new ArrayList<JoinOverride>();
         }
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -319,11 +323,11 @@ public class AnalysisService {
                         joinOverride.setDataSourceID(dataSourceID);
                         joinOverride.setSourceItem(matchItem);
                         joinOverride.setTargetItem(dimension);
-                        existingOverrides.add(joinOverride);
+                        toReturn.add(joinOverride);
                     }
                 }
             }
-            return existingOverrides;
+            return toReturn;
         } finally {
             Database.closeConnection(conn);
         }
