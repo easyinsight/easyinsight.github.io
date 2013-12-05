@@ -30,8 +30,10 @@ public class ReportsByTagServlet extends HttpServlet {
         SecurityUtil.populateThreadLocalFromSession(request);
         try {
             String tag = request.getParameter("tagName");
+            String dataSource = request.getParameter("dataSource");
             List<String> stringList = new ArrayList<String>();
-//            stringList.add(tag);
+            if(tag != null && !tag.isEmpty())
+                stringList.add(tag);
             ReportResults results = new AnalysisService().getReportsWithTags(stringList);
             JSONObject jo = new JSONObject();
             JSONArray ja = new JSONArray();
