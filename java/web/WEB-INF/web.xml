@@ -249,6 +249,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ReportInfo</servlet-name>
+        <servlet-class>com.easyinsight.html.ReportInfoServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>TokenRedirect</servlet-name>
         <display-name>TokenRedirect</display-name>
         <servlet-class>com.easyinsight.users.TokenRedirectServlet</servlet-class>
@@ -645,6 +650,20 @@
         <servlet-class>com.easyinsight.html.FilterValueServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>ReportsByTagServlet</servlet-name>
+        <servlet-class>com.easyinsight.html.ReportsByTagServlet</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>ReportsByTagServlet</servlet-name>
+        <url-pattern>/html/reportsByTag</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ReportInfo</servlet-name>
+        <url-pattern>/html/reportData</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CreateConfiguration</servlet-name>
         <url-pattern>/html/createConfiguration</url-pattern>

@@ -1243,6 +1243,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 filters.put(f.toJSON(new FilterHTMLMetadata(this)));
 
         }
+        jo.put("name", getName());
+        jo.put("id", urlKey);
         jo.put("filters", filters);
         jo.put("adhoc_execution", adHocExecution);
         jo.put("local_storage", persistState);

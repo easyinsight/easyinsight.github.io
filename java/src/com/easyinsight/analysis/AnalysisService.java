@@ -41,6 +41,7 @@ import nu.xom.Document;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -1668,60 +1669,78 @@ public class AnalysisService {
     }
 
     public ReportResults getReportsWithTags() {
-        long userID = SecurityUtil.getUserID();
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            boolean testAccountVisible = FeedService.testAccountVisible(conn);
-            List<InsightDescriptor> reports = analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn, testAccountVisible).values();
-            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
-            PreparedStatement getTagsToReportsStmt = conn.prepareStatement("SELECT REPORT_TO_TAG.TAG_ID, REPORT_ID FROM report_to_tag, account_tag WHERE " +
-                    "account_tag.account_tag_id = report_to_tag.tag_id and account_tag.account_id = ?");
-            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet tagRS = getTagsStmt.executeQuery();
-            Map<Long, Tag> tags = new HashMap<Long, Tag>();
-            List<Tag> reportTags = new ArrayList<Tag>();
-            while (tagRS.next()) {
-                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5));
-                if (tag.isReport()) {
-                    reportTags.add(tag);
-                }
-                tags.put(tagRS.getLong(1), tag);
-            }
-
-            getTagsToReportsStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet dsTagRS = getTagsToReportsStmt.executeQuery();
-            Map<Long, List<Tag>> reportToTagMap = new HashMap<Long, List<Tag>>();
-
-            while (dsTagRS.next()) {
-                long reportID = dsTagRS.getLong(2);
-                long tagID = dsTagRS.getLong(1);
-                Tag tag = tags.get(tagID);
-                List<Tag> t = reportToTagMap.get(reportID);
-                if (t == null) {
-                    t = new ArrayList<Tag>();
-                    reportToTagMap.put(reportID, t);
-                }
-                t.add(tag);
-            }
-            getTagsStmt.close();
-            getTagsToReportsStmt.close();
-
-            for (InsightDescriptor insightDescriptors : reports) {
-                List<Tag> tagList = reportToTagMap.get(insightDescriptors.getId());
-                if (tagList == null) {
-                    tagList = new ArrayList<Tag>();
-                }
-                insightDescriptors.setTags(tagList);
-            }
-            return new ReportResults(reports, reportTags);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
+        return getReportsWithTags(new ArrayList<String>());
     }
 
+    public ReportResults getReportsWithTags(List<String> reqTags) {
+        long userID = SecurityUtil.getUserID();
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                boolean testAccountVisible = FeedService.testAccountVisible(conn);
+                List<InsightDescriptor> reports = analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn, testAccountVisible).values();
+                PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+
+                getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+                ResultSet tagRS = getTagsStmt.executeQuery();
+                Map<Long, Tag> tags = new HashMap<Long, Tag>();
+                List<Tag> reportTags = new ArrayList<Tag>();
+                while (tagRS.next()) {
+                    Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5));
+                    if (tag.isReport()) {
+                        reportTags.add(tag);
+                    }
+                    tags.put(tagRS.getLong(1), tag);
+                }
+
+                PreparedStatement getTagsToReportsStmt = conn.prepareStatement("SELECT REPORT_TO_TAG.TAG_ID, REPORT_ID FROM report_to_tag, account_tag WHERE " +
+                        "account_tag.account_tag_id = report_to_tag.tag_id and account_tag.account_id = ?");
+
+                getTagsToReportsStmt.setLong(1, SecurityUtil.getAccountID());
+                ResultSet dsTagRS = getTagsToReportsStmt.executeQuery();
+                Map<Long, List<Tag>> reportToTagMap = new HashMap<Long, List<Tag>>();
+
+                while (dsTagRS.next()) {
+                    long reportID = dsTagRS.getLong(2);
+                    long tagID = dsTagRS.getLong(1);
+                    Tag tag = tags.get(tagID);
+                    List<Tag> t = reportToTagMap.get(reportID);
+                    if (t == null) {
+                        t = new ArrayList<Tag>();
+                        reportToTagMap.put(reportID, t);
+                    }
+                    t.add(tag);
+                }
+                getTagsStmt.close();
+                getTagsToReportsStmt.close();
+
+                List<InsightDescriptor> filtered = new ArrayList<InsightDescriptor>();
+                for (InsightDescriptor insightDescriptors : reports) {
+                    List<Tag> tagList = reportToTagMap.get(insightDescriptors.getId());
+                    if (tagList == null) {
+                        tagList = new ArrayList<Tag>();
+                    }
+                    insightDescriptors.setTags(tagList);
+                    if(reqTags != null && reqTags.size() > 0) {
+                        boolean found = false;
+                        for(Tag t : insightDescriptors.getTags()) {
+                            if(reqTags.contains(t.getName())) {
+                                found = true;
+                            }
+                        }
+                        if(found)
+                            filtered.add(insightDescriptors);
+                    } else {
+                        filtered.add(insightDescriptors);
+                    }
+                }
+                return new ReportResults(filtered, reportTags);
+            } catch (Exception e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            } finally {
+                Database.closeConnection(conn);
+            }
+    }
     public Collection<InsightDescriptor> getInsightDescriptors() {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
