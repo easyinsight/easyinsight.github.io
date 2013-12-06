@@ -558,6 +558,7 @@
                     window.addEventListener(SavedConfigurationEvent.CONFIGURATION_ADD, onConfigAdd, false, 0, true);
                 } else {
                     c = selectedConfiguration;
+                    c.dashboardStackPositions = pos;
                     window.addEventListener(SavedConfigurationEvent.CONFIGURATION_UPDATE, onConfigUpdate, false, 0, true);
                     // Tier (1/2/3/Reassignment)
                 }
