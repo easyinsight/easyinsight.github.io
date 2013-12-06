@@ -103,7 +103,7 @@
                     <div class="col-md-<%= span_size %>">
                     <% if(f["type"] == "report") {
                     %>
-                   <a href="#" class="grid_report_link" data-ref="<%= id %>_<%= f.id %>"><%- f.report.name %></a>
+                   <a href="#" class="grid_report_link" data-ref="<%= id %>_<%= f.id %>"><span class="<%= f.id %>_name"><%- f.report.name %></span></a>
                 <% } %> </div>
                 <% }) %>
                 </div>
@@ -115,7 +115,14 @@
                         if(f["type"] == "report") {
 
                         %>
-                        <div class="gridReportMenu" id="<%= id %>_<%= f.id %>"><%- f.report.name %>:
+                        <div class="gridReportMenu" id="<%= id %>_<%= f.id %>" data-report-target="<%= f.id %>"><span class="<%= f.id %>_name"><%- f.report.name %></span>:
+                            <div class="btn-group report-dropdown-btn">
+                                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Reports <span class="caret"></span></a>
+                                <ul class="dropdown-menu report-dropdown">
+
+                                </ul>
+
+                            </div>
                             <a href="/app/html/report/<%= f.report.metadata.key %>" class="btn btn-default">Navigate</a>
                             <div class="btn-group">
                                     <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Export <span class="caret"></span></a>
@@ -147,7 +154,7 @@
     </script>
 
     <script type="text/template" id="report_template">
-        <div id="<%= data.id %>">
+        <div id="<%= data.id %>" data-report-target="<%= data.id %>">
             <%= fullReportTemplate(data) %>
         </div>
     </script>
@@ -160,7 +167,7 @@
 
                         <div class="reportMenu">
                             <div class="btn-group report-dropdown-btn">
-                                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Report</a>
+                                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Reports <span class="caret"></span></a>
                                 <ul class="dropdown-menu report-dropdown">
 
                                 </ul>

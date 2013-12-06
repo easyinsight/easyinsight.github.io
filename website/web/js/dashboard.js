@@ -775,13 +775,20 @@ $(function () {
 
             $(".report-dropdown-btn", target).on("show.bs.dropdown", function(e) {
                 var c = $(e.target);
-                $.getJSON("/app/html/reportsByTag", function(data) {
+                var a = c.parent();
+                while(typeof(a.attr("data-report-target")) == "undefined") {
+                    a = a.parent();
+                }
+                var cc = a.attr("data-report-target");
+                var component = (typeof(reportMap[cc].report.tag) != "undefined") ? ("&tagName=" + reportMap[cc].report.tag) : "";
+                $.getJSON("/app/html/reportsByTag?dataSource=" + dashboardJSON["data_source_id"] + component, function(data) {
                     $(".report-dropdown", c).html(reportListTemplate(data))
                     $(".report-target-link", c).click(function(e) {
 
-                        var a = $(e.target).parent().parent().parent().parent().parent().parent().attr("id");
+
+
                         var b = $(e.target).attr("data-report-target");
-                        loadReport(b, a);
+                        loadReport(b, cc);
                         e.preventDefault();
                     })
                 })
@@ -861,7 +868,9 @@ $(function () {
         })
 
         $(".grid_report_link").click(function (e) {
-            var f = $(e.target).attr("data-ref");
+            var a = $(e.target);
+            while(typeof(a.attr("data-ref")) == "undefined") a = a.parent();
+            var f = a.attr("data-ref");
             $("#" + f).show({effect: "slide"});
             e.preventDefault();
         })
@@ -897,6 +906,7 @@ $(function () {
                 reportMap[dashboardKey].rendered = false;
                 reportMap[dashboardKey].base_map = t;
                 var t = $("#" + dashboardKey);
+                $("." + dashboardKey + "_name").html(data.name);
                 t.html(fullReportTemplate(reportMap[dashboardKey].report));
                 addFilterCallbacks(t);
                 renderReport(reportMap[dashboardKey], dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
