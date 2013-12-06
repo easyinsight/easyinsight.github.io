@@ -1668,6 +1668,32 @@ public class AnalysisService {
         }
     }
 
+    public List<Tag> getReportTags() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet tagRS = getTagsStmt.executeQuery();
+
+            List<Tag> reportTags = new ArrayList<Tag>();
+            while (tagRS.next()) {
+                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5));
+                if (tag.isReport()) {
+                    reportTags.add(tag);
+                }
+            }
+
+            return reportTags;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public ReportResults getReportsWithTags() {
         return getReportsWithTags(new ArrayList<String>());
     }
