@@ -163,4 +163,16 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
         }
         return object;
     }
+
+    protected boolean supportsMultiField() {
+        return isMultiMeasure();
+    }
+
+    protected List<AnalysisItem> reportFieldsForMultiField() {
+        return getMeasures();
+    }
+
+    protected void assignResults(List<AnalysisItem> fields) {
+        setMeasures(fields);
+    }
 }

@@ -18,12 +18,12 @@ import java.util.*;
 @Entity
 @Table(name="multi_analysis_item_filter")
 @PrimaryKeyJoinColumn(name="filter_id")
-public class MultiFieldFilterDefinition extends FilterDefinition {
+public class MultiFieldFilterDefinition extends FilterDefinition implements IFieldChoiceFilter {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "multi_analysis_item_filter_to_analysis_item_handle",
             joinColumns = @JoinColumn(name = "filter_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "analysis_item_handle_id", nullable = false))
-    private List<AnalysisItemHandle> availableItems;
+    private List<AnalysisItemHandle> availableHandles;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "selected_analysis_item_filter_to_analysis_item_handle",
@@ -42,6 +42,9 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
             joinColumns = @JoinColumn(name = "filter_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "analysis_item_handle_id", nullable = false))
     private List<AnalysisItemHandle> fieldOrdering;
+
+    @Column(name="exclude_report_fields")
+    private boolean excludeReportFields;
 
     @Column(name="show_all")
     private boolean all;
@@ -70,6 +73,14 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
         this.all = all;
     }
 
+    public boolean isExcludeReportFields() {
+        return excludeReportFields;
+    }
+
+    public void setExcludeReportFields(boolean excludeReportFields) {
+        this.excludeReportFields = excludeReportFields;
+    }
+
     public List<AnalysisItemHandle> getSelectedItems() {
         return selectedItems;
     }
@@ -78,12 +89,20 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
         this.selectedItems = selectedItems;
     }
 
-    public List<AnalysisItemHandle> getAvailableItems() {
-        return availableItems;
+    public List<AnalysisItemHandle> getAvailableHandles() {
+        return availableHandles;
     }
 
-    public void setAvailableItems(List<AnalysisItemHandle> availableItems) {
-        this.availableItems = availableItems;
+    public boolean excludeReportFields() {
+        return excludeReportFields;
+    }
+
+    public List<AnalysisItemHandle> selectedItems() {
+        return selectedItems;
+    }
+
+    public void setAvailableHandles(List<AnalysisItemHandle> availableItems) {
+        this.availableHandles = availableItems;
     }
 
     @Override
@@ -125,7 +144,7 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
     @Override
     public void beforeSave(Session session) {
         super.beforeSave(session);
-        for (AnalysisItemHandle analysisItem : availableItems) {
+        for (AnalysisItemHandle analysisItem : availableHandles) {
             analysisItem.save(session);
         }
         for (AnalysisItemHandle analysisItem : selectedItems) {
@@ -137,51 +156,46 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
     }
 
     @Override
-    public FilterDefinition clone() throws CloneNotSupportedException {
-        MultiFieldFilterDefinition multiFieldFilterDefinition = (MultiFieldFilterDefinition) super.clone();
-        List<AnalysisItemHandle> replaceAvailableItems = new ArrayList<AnalysisItemHandle>();
-        for (AnalysisItemHandle availableItem : availableItems) {
-            replaceAvailableItems.add(availableItem.clone());
-        }
-        multiFieldFilterDefinition.availableItems = replaceAvailableItems;
+    public void updateIDs(ReplacementMap replacementMap) {
+        super.updateIDs(replacementMap);
 
-        List<AnalysisItemHandle> replaceSelectedItems = new ArrayList<AnalysisItemHandle>();
-        for (AnalysisItemHandle selectedItem : selectedItems) {
-            replaceSelectedItems.add(selectedItem.clone());
+        List<AnalysisItemHandle> replaceAvailableHandles = new ArrayList<AnalysisItemHandle>();
+        for (AnalysisItemHandle availableItem : availableHandles) {
+            AnalysisItemHandle newHandle = new AnalysisItemHandle();
+            newHandle.setName(availableItem.getName());
+            replaceAvailableHandles.add(newHandle);
         }
-        multiFieldFilterDefinition.selectedItems = replaceSelectedItems;
+        this.availableHandles = replaceAvailableHandles;
 
-        List<AnalysisItemHandle> fieldOrderingItems = new ArrayList<AnalysisItemHandle>();
-        for (AnalysisItemHandle selectedItem : fieldOrdering) {
-            fieldOrderingItems.add(selectedItem.clone());
+        List<WeNeedToReplaceHibernateTag> replaceTags = new ArrayList<WeNeedToReplaceHibernateTag>();
+        for (WeNeedToReplaceHibernateTag tag : availableTags) {
+            WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
+            newTag.setTagID(newTag.getTagID());
+            replaceTags.add(tag);
         }
-        multiFieldFilterDefinition.fieldOrdering = fieldOrderingItems;
-        return multiFieldFilterDefinition;
+        this.availableTags = replaceTags;
+
+        List<AnalysisItemHandle> replaceFieldOrdering = new ArrayList<AnalysisItemHandle>();
+        for (AnalysisItemHandle availableItem : fieldOrdering) {
+            AnalysisItemHandle newHandle = new AnalysisItemHandle();
+            newHandle.setName(availableItem.getName());
+            replaceFieldOrdering.add(newHandle);
+        }
+        this.fieldOrdering = replaceFieldOrdering;
+
+        List<AnalysisItemHandle> replaceSelectedFields = new ArrayList<AnalysisItemHandle>();
+        for (AnalysisItemHandle availableItem : selectedItems) {
+            AnalysisItemHandle newHandle = new AnalysisItemHandle();
+            newHandle.setName(availableItem.getName());
+            newHandle.setSelected(availableItem.isSelected());
+            replaceSelectedFields.add(newHandle);
+        }
+        this.selectedItems = replaceSelectedFields;
     }
 
-    /*@Override
     public void afterLoad() {
         super.afterLoad();
-        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
-        for (AnalysisItem item : getAvailableItems()) {
-            AnalysisItem validItem = (AnalysisItem) Database.deproxy(item);
-            validItem.afterLoad();
-            items.add(validItem);
-        }
-        setAvailableItems(items);
-
-        List<AnalysisItem> selectedItems = new ArrayList<AnalysisItem>();
-        for (AnalysisItem item : getSelectedItems()) {
-            AnalysisItem validItem = (AnalysisItem) Database.deproxy(item);
-            validItem.afterLoad();
-            selectedItems.add(validItem);
-        }
-        setSelectedItems(selectedItems);
-    }*/
-
-    public void afterLoad() {
-        super.afterLoad();
-        setAvailableItems(new ArrayList<AnalysisItemHandle>(getAvailableItems()));
+        setAvailableHandles(new ArrayList<AnalysisItemHandle>(getAvailableHandles()));
         setSelectedItems(new ArrayList<AnalysisItemHandle>(getSelectedItems()));
         setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>(getAvailableTags()));
         setFieldOrdering(new ArrayList<AnalysisItemHandle>(getFieldOrdering()));
@@ -189,20 +203,13 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
 
     @Override
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
-        /*List<AnalysisItem> analysisItems = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
-        if (getEverything) {
-            analysisItems.addAll(availableItems);
-            analysisItems.addAll(selectedItems);
-        }
-        return analysisItems;*/
         return new ArrayList<AnalysisItem>();
     }
 
     @Override
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
         JSONObject jo = super.toJSON(filterHTMLMetadata);
-        WSAnalysisDefinition report = filterHTMLMetadata.getReport();
-        List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, report);
+        List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, null, null);
 
         jo.put("type", "multi_field_filter");
         jo.put("count", itemsAvailable.size());
@@ -225,5 +232,12 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
 
         jo.put("selected", existingChoices);
         return jo;
+    }
+
+    @Override
+    public void override(FilterDefinition overrideFilter) {
+        super.override(overrideFilter);
+        MultiFieldFilterDefinition overrideFilterDefinition = (MultiFieldFilterDefinition) overrideFilter;
+        setSelectedItems(overrideFilterDefinition.getSelectedItems());
     }
 }

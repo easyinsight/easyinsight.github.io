@@ -7,6 +7,15 @@
                 <mx:HBox creationComplete="PopUpUtil.centerPopUp(this)">
                     <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
                     <mx:RadioButton label="Create a Field Choice Filter" groupName="typeGroup" value="fieldChoiceFilter"/>
+                </mx:HBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="advancedReportWithMulti">
+            <mx:RemoveChild target="{advancedOptionsButton}"/>
+            <mx:AddChild relativeTo="{optionsBox}">
+                <mx:HBox creationComplete="PopUpUtil.centerPopUp(this)">
+                    <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
+                    <mx:RadioButton label="Create a Field Choice Filter" groupName="typeGroup" value="fieldChoiceFilter"/>
                     <mx:RadioButton label="Create a Multi Field Choice Filter" groupName="typeGroup" value="multiFieldChoiceFilter"/>
                 </mx:HBox>
             </mx:AddChild>
@@ -31,6 +40,7 @@
         </mx:State>
     </util:states>
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.util.PopUpUtil;
 
@@ -47,6 +57,8 @@
         public static const FIELD_LEVEL:int = 2;
 
         public var filterSource:int = REPORT_LEVEL;
+
+        public var reportType:int;
 
         private function newFieldFilter():void {
             var f:AnalysisItemWrapper = fieldBox.selectedItem as AnalysisItemWrapper;
@@ -81,9 +93,9 @@
 
         private function newMultipleFieldChoiceFilter():void {
             /*var f:AnalysisItemWrapper = aFieldBox.selectedItem as AnalysisItemWrapper;
-            if (f != null) {*/
-                dispatchEvent(new NewFilterEvent(NewFilterEvent.MULTI_FIELD_CHOICE_FILTER));
-                this.close();
+             if (f != null) {*/
+            dispatchEvent(new NewFilterEvent(NewFilterEvent.MULTI_FIELD_CHOICE_FILTER));
+            this.close();
             //}
         }
 
@@ -106,9 +118,19 @@
             }
         }
 
+        override protected function createChildren():void {
+            super.createChildren();
+
+        }
+
         private function toAdvanced():void {
             if (filterSource == REPORT_LEVEL) {
-                currentState = "advancedReport";
+                if (reportType == AnalysisDefinition.LIST || reportType == AnalysisDefinition.YTD || reportType == AnalysisDefinition.LINE ||
+                        reportType == AnalysisDefinition.VERTICAL_LIST || reportType == AnalysisDefinition.COMPARE_YEARS) {
+                    currentState = "advancedReportWithMulti";
+                } else {
+                    currentState = "advancedReport";
+                }
             } else if (filterSource == FIELD_LEVEL) {
                 currentState = "advancedField";
             } else if (filterSource == DASHBOARD_LEVEL) {

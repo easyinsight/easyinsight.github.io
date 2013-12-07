@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.NamedKey;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -128,5 +129,59 @@ public class WSVerticalListDefinition extends WSAnalysisDefinition {
         list.put("key", getUrlKey());
         list.put("url", "/app/htmlExport");
         return list;
+    }
+
+    protected boolean supportsMultiField() {
+        return true;
+    }
+
+    protected List<AnalysisItem> reportFieldsForMultiField() {
+        return measures;
+    }
+
+    protected void assignResults(List<AnalysisItem> fields) {
+        Map<String, List<AnalysisItem>> map = new LinkedHashMap<String, List<AnalysisItem>>();
+        for (AnalysisItem field : fields) {
+            boolean defined = false;
+            if (field.getReportFieldExtension() != null && field.getReportFieldExtension() instanceof VerticalListReportExtension) {
+                VerticalListReportExtension verticalListExtension = (VerticalListReportExtension) field.getReportFieldExtension();
+                if (verticalListExtension.getSection() != null && !"".equals(verticalListExtension.getSection().trim())) {
+                    defined = true;
+                    String section = verticalListExtension.getSection();
+                    List<AnalysisItem> items = map.get(section);
+                    if (items == null) {
+                        items = new ArrayList<AnalysisItem>();
+                        AnalysisMeasure placeHolder = new AnalysisMeasure(new NamedKey(section), AggregationTypes.SUM);
+                        VerticalListReportExtension ext = new VerticalListReportExtension();
+                        ext.setAlwaysShow(true);
+                        placeHolder.setReportFieldExtension(ext);
+                        items.add(placeHolder);
+                        map.put(section, items);
+                    }
+                    items.add(field);
+                }
+            }
+            if (!defined) {
+                List<AnalysisItem> items = map.get(null);
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>();
+                    map.put(null, items);
+                }
+                items.add(field);
+            }
+        }
+        List<AnalysisItem> result = new ArrayList<AnalysisItem>();
+        for (List<AnalysisItem> list : map.values()) {
+            result.addAll(list);
+        }
+        setMeasures(result);
+    }
+
+    protected int extensionType() {
+        return ReportFieldExtension.VERTICAL_LIST;
+    }
+
+    protected boolean accepts(AnalysisItem analysisItem) {
+        return analysisItem.hasType(AnalysisItemTypes.MEASURE);
     }
 }

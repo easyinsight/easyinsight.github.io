@@ -44,8 +44,9 @@
                 handle.name = v.display;
                 handles.addItem(handle);
             }
-            analysisItemFilter.availableItems = handles;
+            analysisItemFilter.availableHandles = handles;
             analysisItemFilter.availableTags = selectedTags;
+            analysisItemFilter.excludeReportFields = excludeReportFieldsCheckBox.selected;
             return analysisItemFilter;
         }
 
@@ -62,13 +63,17 @@
                 byAnalysisItemName[available.display] = available;
             }
             var availables:ArrayCollection = new ArrayCollection();
-            for each (var handle:AnalysisItemHandle in analysisItemFilter.availableItems) {
+            for each (var handle:AnalysisItemHandle in analysisItemFilter.availableHandles) {
                 var item:AnalysisItem = byAnalysisItemName[handle.name];
                 availables.addItem(item);
             }
             filterFields = availables;
             selectedTags = analysisItemFilter.availableTags;
+            excludeReportFields = analysisItemFilter.excludeReportFields;
         }
+
+        [Bindable]
+        private var excludeReportFields:Boolean;
 
         private function configureExplicitFields():void {
             var window:MultiFieldPickWindow = new MultiFieldPickWindow();
@@ -78,7 +83,6 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
-
 
 
         private function onMultiFieldUpdate(event:MultiFieldEvent):void {
@@ -116,4 +120,5 @@
         <mx:Button label="Configure Fields..." click="configureExplicitFields()" styleName="grayButton"/>
         <mx:Button label="Configure Tags..." click="configureTags()" styleName="grayButton"/>
     </mx:HBox>
+    <mx:CheckBox label="Exclude Report Fields" id="excludeReportFieldsCheckBox" selected="{excludeReportFields}"/>
 </mx:VBox>

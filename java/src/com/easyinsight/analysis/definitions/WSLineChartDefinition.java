@@ -547,7 +547,9 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
 
             xAxis.put("tickOptions", xAxisTickOptions);
             axes.put("xaxis", xAxis);
-            if (getMeasure() != null) {
+            if (isMultiMeasure()) {
+
+            } else {
                 axes.put("yaxis", getMeasureAxis(getMeasure()));
             }
 
@@ -593,5 +595,9 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
 
     protected void assignResults(List<AnalysisItem> fields) {
         setMeasures(fields);
+    }
+
+    protected boolean accepts(AnalysisItem analysisItem) {
+        return analysisItem.hasType(AnalysisItemTypes.MEASURE);
     }
 }

@@ -8,7 +8,7 @@
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
-        private var _embeddedFilter:MultiFieldFilterDefinition;
+        private var _embeddedFilter:AnalysisItemFilterDefinition;
         private var _dataSourceID:int;
 
 
@@ -24,11 +24,11 @@
         }
 
         [Bindable(event="embeddedFilterChanged")]
-        public function get embeddedFilter():MultiFieldFilterDefinition {
+        public function get embeddedFilter():AnalysisItemFilterDefinition {
             return _embeddedFilter;
         }
 
-        public function set embeddedFilter(value:MultiFieldFilterDefinition):void {
+        public function set embeddedFilter(value:AnalysisItemFilterDefinition):void {
             if (_embeddedFilter == value) return;
             _embeddedFilter = value;
             dispatchEvent(new Event("embeddedFilterChanged"));
@@ -86,7 +86,7 @@
         }
         ]]></mx:Script>
     <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
-        <filtering:FieldPickWindow filterValueDefinition="{embeddedFilter}"
+        <filtering:SingleFieldPickWindow filterValueDefinition="{embeddedFilter}"
                 id="mvWindow" typeChangeAllowed="false" otherFilters="{otherFilters}" report="{report}" dashboard="{dashboard}"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <util:SaveButton label="Save" click="save()"/>

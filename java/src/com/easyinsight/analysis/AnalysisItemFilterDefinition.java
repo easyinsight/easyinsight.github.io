@@ -23,7 +23,7 @@ import java.util.*;
 @Entity
 @Table(name="analysis_item_filter")
 @PrimaryKeyJoinColumn(name="filter_id")
-public class AnalysisItemFilterDefinition extends FilterDefinition {
+public class AnalysisItemFilterDefinition extends FilterDefinition implements IFieldChoiceFilter {
 
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name="target_item_id")
@@ -35,9 +35,83 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
             inverseJoinColumns = @JoinColumn(name = "analysis_item_id", nullable = false))
     private List<AnalysisItem> availableItems;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "multi_analysis_item_filter_to_analysis_item_handle",
+            joinColumns = @JoinColumn(name = "filter_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "analysis_item_handle_id", nullable = false))
+    private List<AnalysisItemHandle> availableHandles;
+
+    @Transient
+    private List<AnalysisItem> cachedFields;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "filter_to_field_tag",
+            joinColumns = @JoinColumn(name = "filter_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "hibernate_tag_id", nullable = false))
+    private List<WeNeedToReplaceHibernateTag> availableTags;
+
+    @Column(name="exclude_report_fields")
+    private boolean excludeReportFields;
+
+    public List<AnalysisItemHandle> getAvailableHandles() {
+        if (availableHandles != null && availableHandles.size() > 0) {
+            return availableHandles;
+        }
+        List<AnalysisItemHandle> handles = new ArrayList<AnalysisItemHandle>();
+        if (availableItems != null) {
+            for (AnalysisItem analysisItem : availableItems) {
+                AnalysisItemHandle handle = new AnalysisItemHandle();
+                handle.setAnalysisItemID(analysisItem.getAnalysisItemID());
+                handle.setName(analysisItem.toDisplay());
+                handles.add(handle);
+            }
+        }
+        return handles;
+    }
+
+    public boolean excludeReportFields() {
+        return excludeReportFields;
+    }
+
+    public List<AnalysisItemHandle> selectedItems() {
+        return availableHandles;
+    }
+
+    public List<AnalysisItem> getCachedFields() {
+        return cachedFields;
+    }
+
+    public void setCachedFields(List<AnalysisItem> cachedFields) {
+        this.cachedFields = cachedFields;
+    }
+
+    public void setAvailableHandles(List<AnalysisItemHandle> availableHandles) {
+        this.availableHandles = availableHandles;
+    }
+
     @Override
     public int type() {
         return FilterDefinition.ANALYSIS_ITEM;
+    }
+
+    public boolean isExcludeReportFields() {
+        return excludeReportFields;
+    }
+
+    public void setExcludeReportFields(boolean excludeReportFields) {
+        this.excludeReportFields = excludeReportFields;
+    }
+
+    public List<AnalysisItemHandle> getFieldOrdering() {
+        return null;
+    }
+
+    public List<WeNeedToReplaceHibernateTag> getAvailableTags() {
+        return availableTags;
+    }
+
+    public void setAvailableTags(List<WeNeedToReplaceHibernateTag> availableTags) {
+        this.availableTags = availableTags;
     }
 
     @Override
@@ -51,6 +125,22 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
             replaceAvailableItems.add(replacementMap.getField(availableItem));
         }
         this.availableItems = replaceAvailableItems;
+
+        List<AnalysisItemHandle> replaceAvailableHandles = new ArrayList<AnalysisItemHandle>();
+        for (AnalysisItemHandle availableItem : availableHandles) {
+            AnalysisItemHandle newHandle = new AnalysisItemHandle();
+            newHandle.setName(availableItem.getName());
+            replaceAvailableHandles.add(newHandle);
+        }
+        this.availableHandles = replaceAvailableHandles;
+
+        List<WeNeedToReplaceHibernateTag> replaceTags = new ArrayList<WeNeedToReplaceHibernateTag>();
+        for (WeNeedToReplaceHibernateTag tag : availableTags) {
+            WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
+            newTag.setTagID(newTag.getTagID());
+            replaceTags.add(tag);
+        }
+        this.availableTags = replaceTags;
     }
 
     public List<AnalysisItem> getAvailableItems() {
@@ -123,6 +213,9 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
                 session.update(analysisItem);
             }
         }
+        for (AnalysisItemHandle analysisItem : availableHandles) {
+            analysisItem.save(session);
+        }
     }
 
     @Override
@@ -137,6 +230,8 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
             items.add(validItem);
         }
         setAvailableItems(items);
+        setAvailableHandles(new ArrayList<AnalysisItemHandle>(getAvailableHandles()));
+        setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>(getAvailableTags()));
     }
 
     @Override
@@ -192,13 +287,14 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
     @Override
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
         JSONObject jo = super.toJSON(filterHTMLMetadata);
+        List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, null, null);
         jo.put("type", "field_filter");
         jo.put("selected", String.valueOf(targetItem.getAnalysisItemID()));
         JSONArray available = new JSONArray();
-        for(AnalysisItem analysisItem : getAvailableItems()) {
+        for(AnalysisItemSelection analysisItem : itemsAvailable) {
             JSONObject j = new JSONObject();
-            j.put("value", analysisItem.getAnalysisItemID());
-            j.put("label", analysisItem.toDisplay());
+            j.put("value", analysisItem.getAnalysisItem().getAnalysisItemID());
+            j.put("label", analysisItem.getAnalysisItem().toDisplay());
             available.put(j);
         }
         jo.put("values", available);

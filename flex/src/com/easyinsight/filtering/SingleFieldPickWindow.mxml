@@ -7,22 +7,20 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-        import com.easyinsight.analysis.AnalysisItemHandle;
         import com.easyinsight.dashboard.Dashboard;
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
-
         import mx.controls.List;
+        import mx.controls.RadioButtonGroup;
         import mx.events.FlexEvent;
         import mx.events.PropertyChangeEvent;
         import mx.rpc.events.ResultEvent;
         import mx.rpc.remoting.RemoteObject;
 
-
         private var strings:ArrayCollection;
 
-        private var _filterValueDefinition:MultiFieldFilterDefinition;
+        private var _filterValueDefinition:AnalysisItemFilterDefinition;
 
         private var filterTileList:List;
 
@@ -51,13 +49,7 @@
         private function setup():void {
         }
 
-        private var _fields:ArrayCollection;
-
-        public function set fields(value:ArrayCollection):void {
-            _fields = value;
-        }
-
-        public function set filterValueDefinition(filterValueDefinition:MultiFieldFilterDefinition):void {
+        public function set filterValueDefinition(filterValueDefinition:AnalysisItemFilterDefinition):void {
             this._filterValueDefinition = filterValueDefinition;
             //
         }
@@ -65,14 +57,6 @@
         [Bindable]
         private var includeFilter:Boolean;
         private var _otherFilters:ArrayCollection;
-
-        public function get otherFilters():ArrayCollection {
-            return _otherFilters;
-        }
-
-        public function set otherFilters(value:ArrayCollection):void {
-            _otherFilters = value;
-        }
 
         private var _report:AnalysisDefinition;
 
@@ -86,6 +70,14 @@
             _dashboard = value;
         }
 
+        public function get otherFilters():ArrayCollection {
+            return _otherFilters;
+        }
+
+        public function set otherFilters(value:ArrayCollection):void {
+            _otherFilters = value;
+        }
+
         override protected function commitProperties():void {
             super.commitProperties();
             dataService = new RemoteObject();
@@ -93,12 +85,6 @@
             dataService.possibleFields.addEventListener(ResultEvent.RESULT, gotMetadata);
             dataService.possibleFields.send(_filterValueDefinition, _report, _dashboard);
         }
-
-        /*private static function compare(obj1:Object, obj2:Object, fields:Array = null):int {
-         var string1:String = obj1 as String;
-         var string2:String = obj2 as String;
-         return ObjectUtil.stringCompare(string1, string2, true);
-         }*/
 
         private function gotMetadata(event:ResultEvent):void {
             var fields:ArrayCollection = dataService.possibleFields.lastResult as
@@ -121,13 +107,13 @@
 //            filteredStrings.filterFunction = targetFilterFunction;
             filteredStrings.refresh();
 
-            var all:Boolean = _filterValueDefinition.all;
-            allCheckBox.selected = all;
 
             loadedValuesBox.addChild(filterTileList);
 
+            var selectedName:String = _filterValueDefinition.targetItem.display;
+
             var a:Array = strings.toArray().map(function (obj:Object, a:*, b:*):Object {
-                var m:MultiFieldFilterOption = new MultiFieldFilterOption(obj as AnalysisItemSelection, obj.selected || all);
+                var m:MultiFieldFilterOption = new MultiFieldFilterOption(obj as AnalysisItemSelection, obj.analysisItem.display == selectedName);
                 m.addEventListener("selectedChanged", valueChanged, false, 0, true);
                 return m;
             });
@@ -139,17 +125,13 @@
         }
 
         private function valueChanged(event:PropertyChangeEvent):void {
-            if (event.newValue == false && allCheckBox.selected) {
-                allCheckBox.selected = false;
-            } else if (event.newValue == true) {
+            if (event.newValue == true) {
                 var b:Boolean = true;
                 for each(var v:* in realValues) {
                     if (!v.selected)
                         b = false;
                 }
-                if (b) {
-                    allCheckBox.selected = true;
-                }
+
             }
         }
 
@@ -182,59 +164,22 @@
         }
 
         public function makeUpdates():FilterDefinition {
-            var valueFilter:MultiFieldFilterDefinition = _filterValueDefinition as MultiFieldFilterDefinition;
-            var a:Array = realValues.toArray().concat();
-            /*a = a.filter(function (obj:Object, a:*, b:*):Boolean {
-             return obj.selected;
-             });*/
+            var valueFilter:AnalysisItemFilterDefinition = _filterValueDefinition as AnalysisItemFilterDefinition;
+            //var a:Array = realValues.toArray().concat();
 
-            valueFilter.fieldOrdering = new ArrayCollection(a.map(function (obj:Object, a:*, b:*):Object {
-                var handle1:AnalysisItemHandle = new AnalysisItemHandle();
-                handle1.name = obj.analysisItem.display;
-                return handle1;
-            }));
-
-            if (allCheckBox.selected) {
-                valueFilter.all = true;
-                valueFilter.selectedItems = new ArrayCollection();
-            } else {
-                var i:int = 0;
-                valueFilter.all = false;
-                valueFilter.selectedItems = new ArrayCollection(a.map(function (obj:Object, a:*, b:*):Object {
-                    var handle:AnalysisItemHandle = new AnalysisItemHandle();
-                    handle.analysisItemID = obj.analysisItem.analysisItemID;
-                    handle.name = obj.analysisItem.display;
-                    handle.selected = obj.selected;
-                    return handle;
-                }));
-            }
-
-            for each (var v:AnalysisItemHandle in valueFilter.selectedItems) {
-                //targetValues.getItemIndex();
-                // find the index for each selected item...
-            }
+            valueFilter.targetItem = FilterStringRadioButton(radioGroup.selection.parent).data.analysisItem;
+            /*for each (var o:Object in a) {
+                if (o.selected) {
+                    valueFilter.targetItem = o.analysisItem;
+                    break;
+                }
+            }*/
 
             return _filterValueDefinition;
         }
 
         public function set filterDefinition(filterDefinition:FilterDefinition):void {
-            _filterValueDefinition = filterDefinition as MultiFieldFilterDefinition;
-        }
-
-        private function addAll():void {
-            var values:Array = sourceValues.toArray();
-            for each (var o:* in values) {
-                targetValues.addItem(o);
-            }
-            sourceValues.removeAll();
-        }
-
-        private function removeAll():void {
-            var values:Array = targetValues.toArray();
-            for each (var o:* in values) {
-                sourceValues.addItem(o);
-            }
-            targetValues.removeAll();
+            _filterValueDefinition = filterDefinition as AnalysisItemFilterDefinition;
         }
 
         [Bindable]
@@ -255,8 +200,6 @@
 
         private var filterString:String = "";
 
-        private var allCheckBox:CheckBox;
-
         private var selectedFilter:Boolean;
 
         private function valuesFilterFunction(o:Object):Boolean {
@@ -273,10 +216,14 @@
             loadedValuesBox.addChild(filterTileList);
         }
 
+        private var radioGroup:RadioButtonGroup = new RadioButtonGroup();
+
         private function creationCompleteHandler(event:FlexEvent):void {
             filterTileList = new List();
             filterTileList.id = "solutionGrid";
-            filterTileList.itemRenderer = new ClassFactory(FilterStringCheckbox);
+            var cf:ClassFactory = new ClassFactory(FilterStringRadioButton);
+            cf.properties = { radioGroup: radioGroup };
+            filterTileList.itemRenderer = cf;
             filterTileList.dragEnabled = true;
             filterTileList.dropEnabled = true;
             filterTileList.dragMoveEnabled = true;
@@ -285,28 +232,11 @@
             filterTileList.verticalScrollPolicy = "on";
             filterTileList.columnCount = 1;
             filterTileList.percentWidth = 100;
-            allCheckBox = new CheckBox();
-            allCheckBox.label = "All";
-            allCheckBox.addEventListener(Event.CHANGE, allCheckBox_changeHandler);
 
             BindingUtils.bindProperty(filterTileList, "dataProvider", this, "targetValues");
         }
 
-        private function allCheckBox_changeHandler(event:Event):void {
-            var b:Boolean = allCheckBox.selected;
-            for each(var a:* in realValues) {
-                a.selected = b;
-            }
-        }
-
-        private function selectedFilterEvent(event:Event):void {
-            selectedFilter = selectedFilterCheckBox.selected;
-            filterTileList.dataProvider.refresh();
-            loadedValuesBox.addChild(filterTileList);
-        }
-
         private function addLoadedBox(event:FlexEvent):void {
-            loadedValuesBox.addChildAt(allCheckBox, 0);
             loadedValuesBox.addChild(filterTileList);
         }
         ]]>
@@ -315,12 +245,9 @@
         <mx:Image source="@Embed('../../../../assets/icon-search-black.png')"/>
         <mx:TextInput id="filterBox" width="100%" change="filterBox_changeHandler(event)"/>
     </mx:HBox>
-    <mx:HBox>
-        <mx:CheckBox id="selectedFilterCheckBox" change="selectedFilterEvent(event)" label="Show only selected values"/>
-    </mx:HBox>
     <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}" width="100%">
         <mx:Box>
-            <mx:ProgressBar label="Loading the available values..." indeterminate="true"/>
+            <mx:ProgressBar label="Loading the available fields..." indeterminate="true"/>
         </mx:Box>
 
         <mx:VBox id="loadedValuesBox" creationComplete="addLoadedBox(event)">
