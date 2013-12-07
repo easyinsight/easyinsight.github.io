@@ -14,6 +14,7 @@ public class ReportFieldExtension {
 
     public static const TEXT:int = 1;
     public static const YTD:int = 2;
+    public static const VERTICAL_LIST:int = 3;
 
     public function ReportFieldExtension() {
     }
