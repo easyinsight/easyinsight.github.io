@@ -60,10 +60,8 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
             var endObject:Object = new Object();
             for (var j:int = 0; j < headers.length; j++) {
                 var headerDimension:AnalysisItem = headers[j];
-                var aliasItem:AnalysisItem = map[headerDimension.qualifiedName()] as AnalysisItem;
-                if (aliasItem != null) {
-                    headerDimension = aliasItem;
-                }
+
+
                 var value:Value = values[j];
                 var key:String = headerDimension.qualifiedName();
                 if (_preserveValues) {
@@ -74,6 +72,14 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
                 if (value.links != null) {
                     for (var linkKey:String in value.links) {
                         endObject[linkKey + "_link"] = value.links[linkKey];
+                    }
+                }
+                var aliasItem:AnalysisItem = map[headerDimension.qualifiedName()] as AnalysisItem;
+                if (aliasItem != null) {
+                    if (_preserveValues) {
+                        endObject[aliasItem.qualifiedName()] = value;
+                    } else {
+                        endObject[aliasItem.qualifiedName()] = value.getValue();
                     }
                 }
             }
@@ -90,7 +96,7 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         var serviceData:ServiceData = translate(listData, report);
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, serviceData.data, 
                 listData.dataSourceInfo, listData.additionalProperties, listData.auditMessages, listData.reportFault,
-                listData.limitedResults, listData.maxResults, listData.limitResults, listData.suggestions, serviceData.data.length > 0));
+                listData.limitedResults, listData.maxResults, listData.limitResults, listData.suggestions, serviceData.data.length > 0, listData.report));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
@@ -102,7 +108,7 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         var serviceData:ServiceData = translate(listData, report);
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, serviceData.data,
                 listData.dataSourceInfo, listData.additionalProperties, listData.auditMessages, listData.reportFault,
-                listData.limitedResults, listData.maxResults, listData.limitResults, listData.suggestions, serviceData.data.length > 0));
+                listData.limitedResults, listData.maxResults, listData.limitResults, listData.suggestions, serviceData.data.length > 0, listData.report));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

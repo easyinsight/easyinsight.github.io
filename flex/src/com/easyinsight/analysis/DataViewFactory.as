@@ -1,6 +1,9 @@
 package com.easyinsight.analysis {
 import com.easyinsight.customupload.ProblemDataEvent;
+import com.easyinsight.filtering.AnalysisItemFilterDefinition;
+import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.filtering.FilterRawData;
+import com.easyinsight.filtering.MultiFieldFilterDefinition;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.ReportModuleLoader;
 import com.easyinsight.report.ReportCanvas;
@@ -472,12 +475,13 @@ public class DataViewFactory extends VBox implements IRetrievable {
         if (event.reportFault != null) {
             event.reportFault.popup(this, onProblem);
         } else {
-            _controlBar.onDataReceipt(event);
-            _lastData = event.dataSet;
-            _lastProperties = event.additionalProperties;
-            _hasData = event.hasData;
-            overlayIndex = 0;
             try {
+                _controlBar.onDataReceipt(event);
+                _lastData = event.dataSet;
+                _lastProperties = event.additionalProperties;
+                _hasData = event.hasData;
+                overlayIndex = 0;
+
                 if (event.hasData) {
                     showReport();
                     if (event.reportAudit != null && event.reportAudit.length > 0) {
@@ -485,7 +489,20 @@ public class DataViewFactory extends VBox implements IRetrievable {
                     } else {
                         _controlBar.deleteExplainButton();
                     }
-                    _reportRenderer.renderReport(event.dataSet, _analysisDefinition, new Object(), event.additionalProperties);
+                    if (event.report == null) {
+                        _reportRenderer.renderReport(event.dataSet, _analysisDefinition, new Object(), event.additionalProperties);
+                    } else {
+                        var useReportInEvent:Boolean = false;
+                        if (event.report.filterDefinitions != null) {
+                            for each (var f:FilterDefinition in event.report.filterDefinitions) {
+                                if (f is MultiFieldFilterDefinition || f is AnalysisItemFilterDefinition) {
+                                    useReportInEvent = true;
+                                    break;
+                                }
+                            }
+                        }
+                        _reportRenderer.renderReport(event.dataSet, useReportInEvent ? event.report : _analysisDefinition, new Object(), event.additionalProperties);
+                    }
                 } else {
                     showNoData();
                 }

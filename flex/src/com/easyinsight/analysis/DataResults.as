@@ -15,6 +15,7 @@ public class DataResults {
     public var auditMessages:ArrayCollection;
     public var suggestions:ArrayCollection;
     public var uid:String;
+    public var report:AnalysisDefinition;
 
     public var databaseTime:int;
     public var processingTime:int;
