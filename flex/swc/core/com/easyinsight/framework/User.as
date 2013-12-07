@@ -59,7 +59,6 @@ public class User extends EventDispatcher
     public var newsDate:Date;
     public var newsDismissDate:Date;
     public var accountOverSize:Boolean;
-    public var tagsAndCopyEnabled:Boolean;
     public var hourlyRefreshEnabled:Boolean;
 
     public function getDateFormat():String {
@@ -156,7 +155,6 @@ public class User extends EventDispatcher
         _user.newsDate = response.newsDate;
         _user.newsDismissDate = response.newsDismissDate;
         _user.accountOverSize = response.accountOverSize;
-        _user.tagsAndCopyEnabled = response.tagsAndCopyEnabled;
         _user.hourlyRefreshEnabled = response.hourlyRefreshEnabled;
         if (response.reportImage != null) {
             _user.loadBytes(response.reportImage);
