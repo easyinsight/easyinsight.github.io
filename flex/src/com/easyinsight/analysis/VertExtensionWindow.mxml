@@ -16,6 +16,7 @@
             var ext:VerticalListReportExtension = new VerticalListReportExtension();
             ext.lineAbove = verticalLineBox.selected;
             ext.alwaysShow = alwaysShowBox.selected;
+            ext.section = sectionInput.text;
             analysisItem.reportFieldExtension = ext;
         }
 
@@ -25,6 +26,7 @@
             if (ext != null) {
                 verticalLineAbove = ext.lineAbove;
                 alwaysShow = ext.alwaysShow;
+                section = ext.section;
             }
         }
 
@@ -36,6 +38,9 @@
 
         [Bindable]
         private var alwaysShow:Boolean;
+
+        [Bindable]
+        private var section:String;
         ]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="Draw a vertical line over this field:">
@@ -43,6 +48,9 @@
         </mx:FormItem>
         <mx:FormItem label="Always show this field:">
             <mx:CheckBox id="alwaysShowBox" selected="{alwaysShow}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Section:">
+            <mx:TextInput id="sectionInput" text="{section}"/>
         </mx:FormItem>
     </mx:Form>
 
