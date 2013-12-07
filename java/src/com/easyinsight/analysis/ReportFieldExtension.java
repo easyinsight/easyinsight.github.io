@@ -24,6 +24,7 @@ public class ReportFieldExtension implements Cloneable, Serializable {
 
     public static final int TEXT = 1;
     public static final int YTD = 2;
+    public static final int VERTICAL_LIST = 3;
 
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="report_field_extension_id")
