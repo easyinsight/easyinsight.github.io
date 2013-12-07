@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
+                   creationComplete="onCreation()" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.listing.Tag;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.events.CollectionEvent;
+        import mx.events.MenuEvent;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var fields:ArrayCollection;
+
+        [Bindable]
+        private var tagOptions:ArrayCollection;
+
+        public var dataSourceID:int;
+
+        private function onCreation():void {
+            ProgressAlert.alert(this, "Retrieving...", null, feedService.getAnalysisItemConfigurations, feedService.getFieldTags);
+            feedService.getAnalysisItemConfigurations.send(dataSourceID);
+            feedService.getFieldTags.send();
+        }
+
+        private function gotConfigurations():void {
+            fields = feedService.getAnalysisItemConfigurations.lastResult as ArrayCollection;
+        }
+
+        private function gotTags():void {
+            var tags:ArrayCollection = feedService.getFieldTags.lastResult as ArrayCollection;
+            var tagOptions:ArrayCollection = new ArrayCollection();
+            for each (var opTag:Tag in tags) {
+                tagOptions.addItem({label: "Add tag - " + opTag.name + " - to selected", data: opTag, op: "add"});
+                tagOptions.addItem({label: "Remove tag - " + opTag.name + " - from selected", data: opTag, op: "remove"});
+            }
+            this.tagOptions = tagOptions;
+        }
+
+        private function onTagItemClick(event:MenuEvent):void {
+            var op:String = event.item.op;
+            if (op == "add") {
+                var addTag:Tag = event.item.data as Tag;
+                applyTag(addTag);
+            } else if (op == "remove") {
+                var removeTag:Tag = event.item.data as Tag;
+                dropTag(removeTag);
+            }
+        }
+
+        private function applyTag(addTag:Tag):void {
+            var selected:ArrayCollection = new ArrayCollection();
+
+
+            for each (var desc:AnalysisItemConfiguration in fields) {
+                if (desc.selected) {
+                    selected.addItem(desc);
+                }
+            }
+
+            if (selected.length == 0) {
+                Alert.show("You must select at least one field to tag.");
+            } else {
+                for each (var descToSelect:AnalysisItemConfiguration in fields) {
+                    if (descToSelect.selected) {
+                        descToSelect.tags.addItem(addTag);
+                    }
+                }
+                dataGrid.dataProvider.dispatchEvent( new CollectionEvent(CollectionEvent.COLLECTION_CHANGE));
+            }
+        }
+
+        private function dropTag(addTag:Tag):void {
+            var selected:ArrayCollection = new ArrayCollection();
+            for each (var desc:AnalysisItemConfiguration in fields) {
+                if (desc.selected) {
+                    selected.addItem(desc);
+                }
+            }
+            if (selected.length == 0) {
+                Alert.show("You must select at least one field to untag.");
+            } else {
+                for each (var descToSelect:AnalysisItemConfiguration in fields) {
+                    if (descToSelect.selected) {
+                        for each (var t:Tag in descToSelect) {
+                            if (t.id == addTag.id) {
+                                descToSelect.tags.removeItemAt(descToSelect.tags.getItemIndex(t));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private function saved():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function renderTags(value:Object, column:DataGridColumn):String {
+            var ds:AnalysisItemConfiguration = value as AnalysisItemConfiguration;
+            if (ds.tags == null || ds.tags.length == 0) {
+                return "";
+            } else {
+                var str:String = "";
+                for (var i:int = 0; i < ds.tags.length; i++) {
+                    var tag:Tag = ds.tags.getItemAt(i) as Tag;
+                    str += tag.name;
+                    if (i < (ds.tags.length - 1)) {
+                        str += ", ";
+                    }
+                }
+                return str;
+            }
+        }
+
+        private function save():void {
+            ProgressAlert.alert(this, "Saving...", null, feedService.updateAnalysisItemConfigurations);
+            feedService.updateAnalysisItemConfigurations.send(fields);
+        }
+        ]]></mx:Script>
+    <mx:Style>
+        .myCustomPopUpStyleName {
+            fontSize: 12;
+            fontFamily: "Lucida Grande";
+            textAlign: left;
+            dropShadowEnabled: false;
+            borderStyle: solid;
+            borderThickness: 1;
+            cornerRadius: 8;
+        }
+    </mx:Style>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="getAnalysisItemConfigurations" result="gotConfigurations()"/>
+        <mx:method name="updateAnalysisItemConfigurations" result="saved()"/>
+        <mx:method name="getFieldTags" result="gotTags()"/>
+    </mx:RemoteObject>
+    <mx:HBox>
+        <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onTagItemClick(event)" width="160" id="tagButton"
+                            dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{fields}" wordWrap="true" variableRowHeight="true" height="450" id="dataGrid">
+        <mx:columns>
+            <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>
+            <mx:DataGridColumn headerText="Field" dataField="display" width="400"/>
+            <mx:DataGridColumn headerText="Tags"  width="200" wordWrap="true" labelFunction="renderTags"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
+         implements="com.easyinsight.administration.feed.IFeedAdminDetail" label="Database Configuration" paddingTop="10">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.DatabaseConnection;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
+
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            dataSource = feedDefinition as DatabaseConnection;
+        }
+
+        private function convert():void {
+            var window:DataSourceConvertWindow = new DataSourceConvertWindow();
+            window.dataSourceDefinition = dataSource;
+            window.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onAnalyze(event:AnalyzeEvent):void {
+            dispatchEvent(event);
+        }
+
+        private var dataSource:DatabaseConnection;
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:DatabaseConnection = feedDefinition as DatabaseConnection;
+
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+
+        [Bindable]
+        private var selectedFormat:String;
+        ]]></mx:Script>
+    <util:SaveButton label="Convert Data Source to a Different Type" click="convert()" fontSize="12"/>
+</mx:VBox>
