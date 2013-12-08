@@ -277,8 +277,6 @@ public class FunctionFactory {
             return new FindRecord();
         } else if (s.equals("accumulate")) {
             return new Accumulate();
-        } else if (s.equals("tagreplace")) {
-            return new TagReplace();
         } else if (s.equals("rank")) {
             return new Rank();
         }else {
