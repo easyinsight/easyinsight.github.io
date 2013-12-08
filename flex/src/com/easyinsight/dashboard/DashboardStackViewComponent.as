@@ -10,6 +10,7 @@ import com.easyinsight.report.TempReportExportWindow;
 import com.easyinsight.skin.DashboardHeaderBackgroundImage;
 import com.easyinsight.skin.ImageLoadEvent;
 import com.easyinsight.skin.ImageLoader;
+import com.easyinsight.util.AsyncResponderAlert;
 import com.easyinsight.util.CookieUtil;
 import com.easyinsight.util.PopUpUtil;
 
@@ -363,10 +364,12 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     }
 
     private function logout(event:MouseEvent):void {
-
         User.destroy();
         CookieUtil.deleteCookie("eisession");
+        CookieUtil.deleteCookie("eiRememberMe");
+        CookieUtil.deleteCookie("eiUserName");
         var token:AsyncToken = ServerConfig.getChannelSet("dashboardService").logout();
+        AsyncResponderAlert.alert(this, "Logging out...", token);
         token.addResponder(new AsyncResponder(logoutResultEvent, logoutFaultEvent));
     }
 
@@ -601,6 +604,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             transformContainer.setStyle("paddingRight", 10);
             transformContainer.setStyle("paddingTop", 10);
             transformContainer.setStyle("paddingBottom", 10);
+            transformContainer.dashboard = dashboardEditorMetadata.dashboard;
             transformContainer.reportView = true;
             transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
             transformContainer.role = dashboardEditorMetadata.role;
