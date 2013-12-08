@@ -35,7 +35,7 @@ public class AdjustFilterFunction extends Function {
             }
         }
         if (fieldToAssign == null) {
-            throw new FunctionException("Could not find field " + fieldToAssign + ".");
+            throw new FunctionException("Could not find field " + fieldName + ".");
         }
         filterToAdjust.setField(fieldToAssign);
         return new EmptyValue();

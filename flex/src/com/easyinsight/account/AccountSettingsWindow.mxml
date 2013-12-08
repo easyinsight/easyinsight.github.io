@@ -8,8 +8,6 @@
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
-        [Bindable]
-        private var apiEnabled:Boolean = false;
 
         [Bindable]
         private var defaultMaxResults:String;
@@ -33,7 +31,6 @@
 
         private function gotSettings():void {
             var accountSettings:AccountSettings = userService.getAccountSettings.lastResult as AccountSettings;
-            apiEnabled = accountSettings.apiEnabled;
             dateFormat = accountSettings.dateFormat;
             currencySymbol = accountSettings.currencySymbol;
             firstDayOfWeek = accountSettings.firstDayOfWeek;
@@ -44,7 +41,6 @@
 
         private function save():void {
             var accountSettings:AccountSettings = new AccountSettings();
-            accountSettings.apiEnabled = apiEnabledCheckbox.selected;
             accountSettings.dateFormat = dateBox.selectedItem.data;
             accountSettings.currencySymbol = currencySymbolInput.text;
             accountSettings.firstDayOfWeek = dayBox.selectedItem.data;
@@ -89,9 +85,6 @@
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-            <mx:FormItem label="API Enabled:">
-                <mx:CheckBox id="apiEnabledCheckbox" selected="{apiEnabled}"/>
-            </mx:FormItem>
             <mx:FormItem label="Date Formatting:">
                 <util:SmartComboBox id="dateBox" rowCount="6" selectedValue="{dateFormat}" selectedProperty="data">
                     <util:dataProvider>

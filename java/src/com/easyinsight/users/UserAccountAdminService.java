@@ -588,6 +588,8 @@ public class UserAccountAdminService {
                     user.setPassword(PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256"));
                     user.setHashType("SHA-256");
                     user.setInitialSetupDone(!requirePasswordChange);
+                    user.setUserKey(RandomTextGenerator.generateText(25));
+                    user.setUserSecretKey(RandomTextGenerator.generateText(25));
                     account.addUser(user);
                     final String sso;
                     if (account.getExternalLogin() != null) {
@@ -1075,7 +1077,7 @@ public class UserAccountAdminService {
 
         PreparedStatement statsStmt = conn.prepareStatement("SELECT max_users, max_size, core_small_biz_connections, addon_small_biz_connections," +
                 "core_designers, core_storage, addon_storage_units, pricing_model, addon_designers, addon_quickbase_connections," +
-                "unlimited_quickbase_connections, addon_salesforce_connections, send_emails_to_new_users FROM account where account_id = ?");
+                "unlimited_quickbase_connections, send_emails_to_new_users FROM account where account_id = ?");
         statsStmt.setLong(1, accountID);
         ResultSet statRS = statsStmt.executeQuery();
         statRS.next();
@@ -1090,8 +1092,7 @@ public class UserAccountAdminService {
         int addonDesigners = statRS.getInt(9);
         int addonQuickbaseConnections = statRS.getInt(10);
         boolean unlimitedQuickbaseConnections = statRS.getBoolean(11);
-        int addonSalesforceConnections = statRS.getInt(12);
-        boolean sendEmailsToNewUsers = statRS.getBoolean(13);
+        boolean sendEmailsToNewUsers = statRS.getBoolean(12);
         statsStmt.close();
 
         PreparedStatement dataSourceStmt = conn.prepareStatement("SELECT DATA_FEED_ID, FEED_TYPE FROM DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE " +
@@ -1103,7 +1104,6 @@ public class UserAccountAdminService {
         Set<Long> ids = new HashSet<Long>();
         int smallBizConnections = 0;
         int quickbaseConnections = 0;
-        int salesforceConnections = 0;
         while (dsRS.next()) {
             long id = dsRS.getLong(1);
             int feedType = dsRS.getInt(2);
@@ -1114,8 +1114,6 @@ public class UserAccountAdminService {
                     smallBizConnections++;
                 } else if (billingType == ConnectionBillingType.QUICKBASE) {
                     quickbaseConnections++;
-                } else if (billingType == ConnectionBillingType.SALESFORCE) {
-                    salesforceConnections++;
                 }
             }
         }
@@ -1166,10 +1164,8 @@ public class UserAccountAdminService {
 
         accountStats.setAddonQuickbaseConnections(addonQuickbaseConnections);
         accountStats.setUnlimitedQuickbaseConnections(unlimitedQuickbaseConnections);
-        accountStats.setAddonSalesforceConnections(addonSalesforceConnections);
 
         accountStats.setUsedQuickbaseConnections(quickbaseConnections);
-        accountStats.setUsedSalesforceConnections(salesforceConnections);
 
         accountStats.setCoreSpace(coreStorage);
         accountStats.setAddonStorageUnits(addonStorageUnits);

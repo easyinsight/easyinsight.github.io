@@ -18,9 +18,7 @@ public class AccountStats {
 
     public var unlimitedQuickbaseConnections:Boolean;
     public var addonQuickbaseConnections:int;
-    public var addonSalesforceConnections:int;
     public var usedQuickbaseConnections:int;
-    public var usedSalesforceConnections:int;
 
     public var coreDesigners:int;
     public var addonDesigners:int;

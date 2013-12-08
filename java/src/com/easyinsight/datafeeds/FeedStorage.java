@@ -695,6 +695,10 @@ public class FeedStorage {
     static long time = 0;
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws Exception {
+        updateDataFeedConfiguration(feedDefinition, conn, -1);
+    }
+
+    public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn, int overrideType) throws Exception {
         ReportCache.instance().flushResults(feedDefinition.getDataFeedID());
         //feedCache.remove(feedDefinition.getDataFeedID());
         MemCachedManager.delete("ds" + feedDefinition.getDataFeedID());
@@ -712,7 +716,11 @@ public class FeedStorage {
         feedDefinition.setDateUpdated(new Date());
         int i = 1;
         updateDataFeedStmt.setString(i++, feedDefinition.getFeedName());
-        updateDataFeedStmt.setInt(i++, feedDefinition.getFeedType().getType());
+        if (overrideType > -1) {
+            updateDataFeedStmt.setInt(i++, overrideType);
+        } else {
+            updateDataFeedStmt.setInt(i++, feedDefinition.getFeedType().getType());
+        }
         updateDataFeedStmt.setBoolean(i++, feedDefinition.getUploadPolicy().isPubliclyVisible());
         updateDataFeedStmt.setLong(i++, feedDefinition.getSize());
         updateDataFeedStmt.setString(i++, feedDefinition.getDescription());
