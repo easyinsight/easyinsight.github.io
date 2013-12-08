@@ -279,7 +279,9 @@ public class FunctionFactory {
             return new Accumulate();
         } else if (s.equals("rank")) {
             return new Rank();
-        }else {
+        } else if (s.equals("aggregate")) {
+            return new Aggregate();
+        } else {
             return null;
         }
     }
