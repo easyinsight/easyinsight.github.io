@@ -42,10 +42,19 @@ public class ReportDelivery extends ScheduledDelivery {
     private long senderID;
     private long dataSourceID;
     private String deliveryLabel;
+    private long configurationID;
     private boolean sendIfNoData;
     private DeliveryExtension deliveryExtension;
 
     private List<FilterDefinition> customFilters;
+
+    public long getConfigurationID() {
+        return configurationID;
+    }
+
+    public void setConfigurationID(long configurationID) {
+        this.configurationID = configurationID;
+    }
 
     public DeliveryExtension getDeliveryExtension() {
         return deliveryExtension;
@@ -237,7 +246,8 @@ public class ReportDelivery extends ScheduledDelivery {
         clearStmt.executeUpdate();
         clearStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY (REPORT_ID, delivery_format, subject, body, " +
-                "SCHEDULED_ACCOUNT_ACTIVITY_ID, html_email, timezone_offset, sender_user_id, delivery_label, send_if_no_data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                "SCHEDULED_ACCOUNT_ACTIVITY_ID, html_email, timezone_offset, sender_user_id, delivery_label, send_if_no_data, configuration_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, reportID);
         insertStmt.setInt(2, reportFormat);
         insertStmt.setString(3, subject);
@@ -252,6 +262,11 @@ public class ReportDelivery extends ScheduledDelivery {
         }
         insertStmt.setString(9, deliveryLabel);
         insertStmt.setBoolean(10, sendIfNoData);
+        if (configurationID > 0) {
+            insertStmt.setLong(11, configurationID);
+        } else {
+            insertStmt.setNull(11, Types.BIGINT);
+        }
         insertStmt.execute();
         long deliveryID = Database.instance().getAutoGenKey(insertStmt);
         insertStmt.close();
@@ -278,7 +293,7 @@ public class ReportDelivery extends ScheduledDelivery {
     protected void customLoad(EIConnection conn) throws SQLException {
         super.customLoad(conn);
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, ANALYSIS.TITLE, " +
-                "timezone_offset, SENDER_USER_ID, REPORT_DELIVERY_ID, ANALYSIS.DATA_FEED_ID, DELIVERY_LABEL, SEND_IF_NO_DATA FROM " +
+                "timezone_offset, SENDER_USER_ID, REPORT_DELIVERY_ID, ANALYSIS.DATA_FEED_ID, DELIVERY_LABEL, SEND_IF_NO_DATA, CONFIGURATION_ID FROM " +
                 "REPORT_DELIVERY, ANALYSIS WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ? AND REPORT_DELIVERY.REPORT_ID = ANALYSIS.ANALYSIS_ID");
         queryStmt.setLong(1, getScheduledActivityID());
@@ -300,6 +315,7 @@ public class ReportDelivery extends ScheduledDelivery {
             dataSourceID = rs.getLong(10);
             deliveryLabel = rs.getString(11);
             sendIfNoData = rs.getBoolean(12);
+            configurationID = rs.getLong(13);
             Session session = Database.instance().createSession(conn);
             try {
                 PreparedStatement filterStmt = conn.prepareStatement("SELECT FILTER_ID FROM DELIVERY_TO_FILTER_DEFINITION WHERE REPORT_DELIVERY_ID = ?");

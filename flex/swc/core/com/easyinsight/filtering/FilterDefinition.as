@@ -46,6 +46,7 @@ import mx.utils.ObjectUtil;
     public var notCondition:Boolean;
     public var parentFilters:String;
     public var fieldChoiceFilterLabel:String;
+    public var customizable:Boolean;
     public var section:int;
     public var flexID:int = flexIDCtr++;
 		

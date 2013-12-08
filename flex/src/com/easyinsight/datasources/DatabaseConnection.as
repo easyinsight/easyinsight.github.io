@@ -7,6 +7,7 @@
  */
 package com.easyinsight.datasources {
 import com.easyinsight.administration.feed.ServerDataSourceDefinition;
+import com.easyinsight.customupload.PushDatabaseConfiguration;
 
 import mx.collections.ArrayCollection;
 
@@ -14,8 +15,8 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.easyinsight.datafeeds.DatabaseConnection")]
 public class DatabaseConnection extends ServerDataSourceDefinition {
 
-    public var refreshKey:String;
-    public var refreshUrl:String;
+    public var refreshKey:String = "";
+    public var refreshUrl:String = "";
 
     public function DatabaseConnection() {
     }
@@ -26,6 +27,9 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
 
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
+        var config:PushDatabaseConfiguration = new PushDatabaseConfiguration();
+        config.dataSourceDefinition = this;
+        pages.addItem(config);
         return pages;
     }
 }

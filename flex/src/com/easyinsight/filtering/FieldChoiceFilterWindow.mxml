@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:filtering="com.easyinsight.filtering.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.dashboard.Dashboard;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _embeddedFilter:AnalysisItemFilterDefinition;
+        private var _dataSourceID:int;
+
+
+        [Bindable(event="dataSourceIDChanged")]
+        public function get dataSourceID():int {
+            return _dataSourceID;
+        }
+
+        public function set dataSourceID(value:int):void {
+            if (_dataSourceID == value) return;
+            _dataSourceID = value;
+            dispatchEvent(new Event("dataSourceIDChanged"));
+        }
+
+        [Bindable(event="embeddedFilterChanged")]
+        public function get embeddedFilter():AnalysisItemFilterDefinition {
+            return _embeddedFilter;
+        }
+
+        public function set embeddedFilter(value:AnalysisItemFilterDefinition):void {
+            if (_embeddedFilter == value) return;
+            _embeddedFilter = value;
+            dispatchEvent(new Event("embeddedFilterChanged"));
+        }
+
+        private function save():void {
+            mvWindow.makeUpdates();
+            dispatchEvent(new Event("updated"));
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        public var reportID:int;
+
+        [Bindable]
+        public var dashboardID:int;
+
+        private var _report:AnalysisDefinition;
+
+
+        [Bindable(event="reportChanged")]
+        public function get report():AnalysisDefinition {
+            return _report;
+        }
+
+        public function set report(value:AnalysisDefinition):void {
+            if (_report == value) return;
+            _report = value;
+            dispatchEvent(new Event("reportChanged"));
+        }
+
+        private var _otherFilters:ArrayCollection;
+        private var _dashboard:Dashboard;
+
+        [Bindable(event="dashboardChanged")]
+        public function get dashboard():Dashboard {
+            return _dashboard;
+        }
+
+        public function set dashboard(value:Dashboard):void {
+            if (_dashboard == value) return;
+            _dashboard = value;
+            dispatchEvent(new Event("dashboardChanged"));
+        }
+
+        [Bindable(event="otherFiltersChanged")]
+        public function get otherFilters():ArrayCollection {
+            return _otherFilters;
+        }
+
+        public function set otherFilters(value:ArrayCollection):void {
+            if (_otherFilters == value) return;
+            _otherFilters = value;
+            dispatchEvent(new Event("otherFiltersChanged"));
+        }
+        ]]></mx:Script>
+    <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <filtering:SingleFieldPickWindow filterValueDefinition="{embeddedFilter}"
+                id="mvWindow" typeChangeAllowed="false" otherFilters="{otherFilters}" report="{report}" dashboard="{dashboard}"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

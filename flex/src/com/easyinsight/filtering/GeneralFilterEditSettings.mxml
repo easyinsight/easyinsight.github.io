@@ -61,6 +61,7 @@
             role = _filterDefinition.minimumRole;
             fieldFilter = _filterDefinition.fieldChoiceFilterLabel;
             section = _filterDefinition.section;
+            customizable = _filterDefinition.customizable;
             if (_filterDefinition.field != null) {
                 filterField = filterDefinition.field.display + " - " + filterDefinition.field.key.createString();
             }
@@ -147,6 +148,7 @@
             _filterDefinition.filterName = filterNameInput.text;
             _filterDefinition.templateFilter = parameterFilterCheckbox.selected;
             _filterDefinition.toggleEnabled = toggleCheckbox.selected;
+            _filterDefinition.customizable = customizableCheckbox.selected;
             _filterDefinition.minimumRole = int(roleComboBox.selectedItem.data);
             _filterDefinition.fieldChoiceFilterLabel = fieldFilterInput.text;
             _filterDefinition.section = sectionInput.value;
@@ -172,6 +174,9 @@
 
         [Bindable]
         private var section:int;
+
+        [Bindable]
+        private var customizable:Boolean;
 		]]>
 	</mx:Script>
 	<mx:VBox id="coreBox">
@@ -185,6 +190,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="Show on Report View:">
                     <mx:CheckBox selected="{showOnReportView}" id="reportViewCheckbox"/>
+                </mx:FormItem>
+                <mx:FormItem label="Customizable on Toggle:">
+                    <mx:CheckBox selected="{customizable}" id="customizableCheckbox"/>
                 </mx:FormItem>
                 <mx:FormItem label="Filter Name:">
                     <mx:TextInput id="filterNameInput" text="{filterName}"/>

@@ -13,6 +13,7 @@ public class UserStub extends FeedConsumer {
     private String email;
     private long accountID;
     private String firstName;
+    private String userKey;
 
     public UserStub() {
     }
@@ -27,8 +28,27 @@ public class UserStub extends FeedConsumer {
         this.firstName = firstName;
     }
 
+    /*
+    public function get displayName():String {
+            return ;
+        }
+     */
+
+    public String displayName() {
+        String name = firstName != null ? (firstName + " " + fullName) : fullName;
+        return name + " ( " + email + " )";
+    }
+
     public int type() {
         return FeedConsumer.USER;
+    }
+
+    public String getUserKey() {
+        return userKey;
+    }
+
+    public void setUserKey(String userKey) {
+        this.userKey = userKey;
     }
 
     public String getFirstName() {

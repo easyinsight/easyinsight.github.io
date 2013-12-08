@@ -15,6 +15,7 @@
         import com.easyinsight.report.SavedConfigurationEvent;
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.AsyncResponderAlert;
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.framework.User;
         import com.easyinsight.util.PopUpUtil;
@@ -47,6 +48,10 @@
         import mx.collections.ArrayCollection;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
+        import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncToken;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
         import mx.utils.URLUtil;
 
         [Bindable]
@@ -85,18 +90,29 @@
 
         private var autoSize:Boolean = false;
 
+        private function logoutResultEvent(event:ResultEvent, token:Object = null):void {
+            User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
+        }
+
+        private function logoutFaultEvent(event:FaultEvent, token:Object = null):void {
+        }
+
         private function onCreation():void {
             commandProcessor = new CommandProcessor();
             stage.addEventListener(Event.RESIZE, onResize);
             addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(ReportNavigationEvent.TO_REPORT, onNavigation);
             addEventListener(SizeOverrideEvent.SIZE_OVERRIDE, sizeOverride);
+            var blah:DashboardView = this;
             var logoutItem:ContextMenuItem = new ContextMenuItem("Log Out");
             logoutItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
                 User.destroy();
                 CookieUtil.deleteCookie("eisession");
-                ServerConfig.getChannelSet(dashboardService.destination).logout();
-                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
+                CookieUtil.deleteCookie("eiRememberMe");
+                CookieUtil.deleteCookie("eiUserName");
+                var token:AsyncToken = ServerConfig.getChannelSet(dashboardService.destination).logout();
+                AsyncResponderAlert.alert(blah, "Logging out...", token);
+                token.addResponder(new AsyncResponder(logoutResultEvent, logoutFaultEvent));
             });
             if (!_fixedID) {
                 //Alert.show("normal dashboard, no?");
@@ -542,6 +558,7 @@
                     window.addEventListener(SavedConfigurationEvent.CONFIGURATION_ADD, onConfigAdd, false, 0, true);
                 } else {
                     c = selectedConfiguration;
+                    c.dashboardStackPositions = pos;
                     window.addEventListener(SavedConfigurationEvent.CONFIGURATION_UPDATE, onConfigUpdate, false, 0, true);
                     // Tier (1/2/3/Reassignment)
                 }

@@ -64,6 +64,7 @@
         UIData uiData = Utils.createUIData();
         dashboard.getFilters().addAll(drillthroughFilters);
         JSONObject jo = dashboard.toJSON(filterHTMLMetadata);
+        jo.put("data_source_id", dataSourceDescriptor.getUrlKey());
         if(drillthroughKey != null) {
             jo.put("drillthroughID", drillthroughKey);
         }

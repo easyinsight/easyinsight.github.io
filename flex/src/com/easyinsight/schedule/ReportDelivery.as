@@ -24,9 +24,14 @@ public class ReportDelivery extends ScheduledDelivery implements IDeliverable {
     public var deliveryLabel:String;
     public var sendIfNoData:Boolean = true;
     public var deliveryExtension:DeliveryExtension;
+    public var configurationID:int;
 
     public function ReportDelivery() {
         super();
+    }
+
+    public function setConfigurationID(id:int):void {
+        this.configurationID = id;
     }
 
     override public function get describe():String {

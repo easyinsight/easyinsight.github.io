@@ -55,6 +55,7 @@
         import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.ImprovedSaveWindow;
+        import com.easyinsight.analysis.JoinOverride;
         import com.easyinsight.analysis.JoinOverrideEvent;
         import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.ReportAuditWindow;
@@ -510,7 +511,14 @@
 
         public function generatedAddonJoins():void {
             var joins:ArrayCollection = analysisService.generateForAddons.lastResult as ArrayCollection;
-            analysisDefinition.joinOverrides = joins;
+            if (analysisDefinition.joinOverrides == null || analysisDefinition.joinOverrides.length == 0) {
+                analysisDefinition.joinOverrides = joins;
+            } else {
+                for each (var retJoin:JoinOverride in joins) {
+                    analysisDefinition.joinOverrides.addItem(retJoin);
+                }
+            }
+
         }
 
         public var embedded:Boolean;

@@ -30,12 +30,13 @@
             if (reportID != _deliveryInfo.id) {
                 reportID = _deliveryInfo.id;
                 dataSourceID = _deliveryInfo.dataSourceID;
+                configurationID = _deliveryInfo.configurationID;
                 formatValue = String(_deliveryInfo.format);
                 customFilters = _deliveryInfo.filters;
                 deliveryLabel = _deliveryInfo.label;
                 sendIfNoData = _deliveryInfo.sendIfNoData;
                 deliveryExtension = _deliveryInfo.deliveryExtension;
-                analysisService.getInsightDescriptors.send();
+                analysisService.getInsightDescriptorsWithConfigurations.send();
             }
         }
 
@@ -91,7 +92,7 @@
         }
 
         private function gotReports():void {
-            var descriptors:ArrayCollection = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+            var descriptors:ArrayCollection = analysisService.getInsightDescriptorsWithConfigurations.lastResult as ArrayCollection;
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("name", true) ];
             descriptors.sort = sort;
@@ -103,24 +104,27 @@
         private var deliveryLabel:String;
 
         [Bindable]
+        private var configurationID:int;
+
+        [Bindable]
         private var sendIfNoData:Boolean = true;
 
         [Bindable]
         private var deliveryExtension:DeliveryExtension;
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
-        <mx:method name="getInsightDescriptors" result="gotReports()"/>
+        <mx:method name="getInsightDescriptorsWithConfigurations" result="gotReports()"/>
     </mx:RemoteObject>
     <mx:VBox backgroundColor="#FFFFFF" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:TabNavigator width="100%" height="100%" creationPolicy="all">
             <mx:VBox label="Report" paddingLeft="10" paddingTop="10" width="100%" height="100%">
                 <schedule:ReportDeliveryConfiguration id="deliveryConfiguration" reportChangeable="true"
                                                       reportID="{reportID}" formatValue="{formatValue}" deliveryLabel="{deliveryLabel}"
-                        sendOnNoData="{sendIfNoData}" deliveryExtension="{deliveryExtension}"/>
+                        sendOnNoData="{sendIfNoData}" deliveryExtension="{deliveryExtension}" configurationID="{configurationID}"/>
             </mx:VBox>
-                <schedule:FilterDeliveryConfiguration label="Filters" paddingLeft="10" paddingRight="10" id="filterConfiguration"
-                                                  customFilters="{customFilters}" reportID="{reportID}" dataSourceID="{dataSourceID}"
-                                                  width="100%" height="100%"/>
+            <schedule:FilterDeliveryConfiguration label="Filters" paddingLeft="10" paddingRight="10" id="filterConfiguration"
+                                              customFilters="{customFilters}" reportID="{reportID}" dataSourceID="{dataSourceID}"
+                                              width="100%" height="100%"/>
         </mx:TabNavigator>
         <mx:HBox width="100%" horizontalAlign="center">
             <util:SaveButton label="Save" click="save()"/>

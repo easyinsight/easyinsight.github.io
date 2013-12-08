@@ -35,6 +35,7 @@ public class DrillthroughServlet extends HtmlServlet {
         if (embeddedString != null) {
             embedded = Boolean.parseBoolean(embeddedString);
         }
+        String embedKey = request.getParameter("embedKey");
         AnalysisItem linkItem = null;
         Map<String, Object> data = new HashMap<String, Object>();
         for (AnalysisItem analysisItem : report.getAllAnalysisItems()) {
@@ -93,7 +94,9 @@ public class DrillthroughServlet extends HtmlServlet {
                 saveStmt.setLong(2, filter.getFilterID());
                 saveStmt.execute();
             }
-            if (embedded) {
+            if (embedKey != null) {
+                result.put("url", "/app/html/user/"+embedKey+"/report/drillthrough/" + urlKey + "/embed");
+            } else if (embedded) {
                 result.put("url", "/app/html/report/drillthrough/" + urlKey + "/embed");
             } else {
                 result.put("url", "/app/html/report/drillthrough/" + urlKey);
@@ -119,7 +122,9 @@ public class DrillthroughServlet extends HtmlServlet {
                 saveStmt.setLong(2, filter.getFilterID());
                 saveStmt.execute();
             }
-            if (embedded) {
+            if (embedKey != null) {
+                result.put("url", "/app/html/user/"+embedKey+"/report/drillthrough/" + urlKey + "/embed");
+            } else if (embedded) {
                 result.put("url", "/app/html/dashboard/drillthrough/" + urlKey + "/embed");
             } else {
                 result.put("url", "/app/html/dashboard/drillthrough/" + urlKey);

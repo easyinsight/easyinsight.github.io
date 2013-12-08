@@ -1,14 +1,14 @@
 <?xml version="1.0" ?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.DashboardPDFCreator;
+
         import com.easyinsight.analysis.DashboardPDFWindow;
         import com.easyinsight.analysis.EmbedDashboardWindow;
         import com.easyinsight.report.DashboardURLWindow;
-        import com.easyinsight.report.URLWindow;
+
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.core.UIComponent;
+
 
         import mx.core.UIComponent;
 
@@ -75,10 +75,10 @@
 
         private function embed():void {
             var embedReportWindow:EmbedDashboardWindow = new EmbedDashboardWindow();
+            embedReportWindow.dashboard = _dashboard;
             embedReportWindow.urlKey = _dashboard.urlKey;
-            embedReportWindow.x = this.x;
-            embedReportWindow.y = this.y;
             PopUpManager.addPopUp(embedReportWindow, this, true);
+            PopUpUtil.centerPopUp(embedReportWindow);
             PopUpManager.removePopUp(this);
         }
 

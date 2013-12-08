@@ -6,7 +6,6 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.filtering {
-import com.easyinsight.analysis.AnalysisItem;
 
 import mx.collections.ArrayCollection;
 
@@ -15,9 +14,10 @@ import mx.collections.ArrayCollection;
 public class MultiFieldFilterDefinition extends FilterDefinition {
 
     public var selectedItems:ArrayCollection = new ArrayCollection();
-    public var availableItems:ArrayCollection = new ArrayCollection();
+    public var availableHandles:ArrayCollection = new ArrayCollection();
     public var availableTags:ArrayCollection = new ArrayCollection();
     public var fieldOrdering:ArrayCollection = new ArrayCollection();
+    public var excludeReportFields:Boolean;
     public var all:Boolean = true;
 
     public function MultiFieldFilterDefinition() {
@@ -52,27 +52,23 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
 
     override public function updateFromReportView(filter:FilterDefinition):void {
         super.updateFromReportView(filter);
-        var aFilter:MultiFieldFilterDefinition = filter as MultiFieldFilterDefinition;
-        availableItems = aFilter.availableItems;
-        selectedItems = aFilter.selectedItems;
     }
 
     override public function getSaveValue():Object {
         var o:Object = new Object();
-        o["availableItems"] = availableItems;
         o["selectedItems"] = selectedItems;
+        o["all"] = all;
         //return targetItem.analysisItemID;
-        return null;
+        return o;
     }
 
     override public function loadFromSharedObject(value:Object):void {
-        var a:ArrayCollection = value["availableItems"];
-        if (a != null) {
-            availableItems = a;
-        }
         var s:ArrayCollection = value["selectedItems"];
         if (s != null) {
             selectedItems = s;
+        }
+        if (value["all"] != null) {
+            all = value["all"];
         }
     }
 }

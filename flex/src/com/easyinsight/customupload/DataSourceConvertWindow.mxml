@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+                   xmlns:util="com.easyinsight.util.*" horizontalAlign="left">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.DataSourceType;
+        import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.managers.PopUpManager;
+
+        private var dataSource:FeedDefinitionData;
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            dataSource = feedDefinition;
+        }
+
+        private function convertTo(type:int):void {
+            ProgressAlert.alert(this, "Converting data source...", null, feedService.convertDataSource);
+            feedService.convertDataSource.send(dataSource, type);
+        }
+
+        private function convertToFile(format:int):void {
+
+        }
+
+        private function converted():void {
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSource.dataFeedID , urlKey: dataSource.apiKey})));
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var currentConnectionType:String;
+        ]]></mx:Script>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="convertDataSource" result="converted()"/>
+    </mx:RemoteObject>
+    <mx:Text text="{currentConnectionType}"/>
+    <mx:Text text="Choose the type of data source you want to convert to:"/>
+    <mx:HRule/>
+    <!--<mx:Button label="Excel Upload" styleName="grayButton" click="convertToFile(UploadFormat.EXCEL)"/>
+    <mx:Button label="CSV Upload" styleName="grayButton" click="convertToFile(UploadFormat.CSV)"/>-->
+    <mx:Button label="Database Push Connection" styleName="grayButton" click="convertTo(DataSourceType.DATABASE)"/>
+    <mx:Button label="MySQL Server Side Pull Connection" styleName="grayButton" click="convertTo(DataSourceType.MYSQL_SERVER)"/>
+    <mx:Button label="SQL Server Server Side Pull Connection" styleName="grayButton" click="convertTo(DataSourceType.SERVER_SQL_SERVER)"/>
+    <mx:Button label="Oracle Server Side Pull Connection" styleName="grayButton" click="convertTo(DataSourceType.SERVER_ORACLE)"/>
+    <mx:Button label="PostgreSQL Server Side Pull Connection" styleName="grayButton" click="convertTo(DataSourceType.SERVER_POSTGRES)"/>
+    <mx:HRule/>
+    <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+</util:EISlimWindow>

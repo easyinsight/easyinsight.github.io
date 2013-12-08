@@ -3,8 +3,9 @@ package com.easyinsight.analysis {
 [RemoteClass(alias="com.easyinsight.datafeeds.AnalysisItemNode")]
 public class AnalysisItemNode extends FeedNode{
     public var analysisItem:AnalysisItem;
-    public function AnalysisItemNode() {
+    public function AnalysisItemNode(analysisItem:AnalysisItem = null) {
         super();
+        this.analysisItem = analysisItem;
     }
 
     override public function get display():String {

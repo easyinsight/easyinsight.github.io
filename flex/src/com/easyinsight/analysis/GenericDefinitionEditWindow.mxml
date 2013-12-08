@@ -27,6 +27,7 @@
             exchangeVisible = _definition.solutionVisible;
             publiclyVisible = _definition.publiclyVisible;
             publicWithKey = _definition.publicWithKey;
+            localStorage = _definition.enableLocalStorage;
         }
 
         private var _startIndex:int;
@@ -110,6 +111,7 @@
             _definition.solutionVisible = exchangeVisibleCheckbox.selected;
             _definition.publiclyVisible = publiclyVisibleCheckbox.selected;
             _definition.publicWithKey = publicWithKeyCheckbox.selected;
+            _definition.enableLocalStorage = localStorageCheckbox.selected;
             dispatchEvent(new ReportPreferencesEvent(refreshNecessary));
             PopUpManager.removePopUp(this);
         }
@@ -135,6 +137,9 @@
         public function cancel():void {
             PopUpManager.removePopUp(this);
         }
+
+        [Bindable]
+        private var localStorage:Boolean;
         ]]>
     </mx:Script>
     <mx:TabNavigator id="tabNavigator" creationPolicy="all" selectedIndex="{startIndex}" width="100%" height="325" paddingLeft="5" paddingRight="5"
@@ -160,6 +165,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="Public with Key:">
                     <mx:CheckBox id="publicWithKeyCheckbox" selected="{publicWithKey}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Enable Local Storage:">
+                    <mx:CheckBox id="localStorageCheckbox" selected="{localStorage}"/>
                 </mx:FormItem>
             </mx:Form>
         </mx:Box>

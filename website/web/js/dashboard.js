@@ -7,9 +7,11 @@ var stack;
 var grid;
 var textTemplate;
 var reportTemplate;
+var fullReportTemplate;
 
 var gaugeTemplate;
 var configurationDropdownTemplate;
+var reportListTemplate;
 
 var dashboard;
 var email_modal;
@@ -30,7 +32,7 @@ var dashboardComponent = function (obj) {
     } else if (obj.type == "text") {
         return textTemplate(obj);
     } else if (obj.type == "report") {
-        return reportTemplate(obj);
+        return reportTemplate({data: obj });
     }
 }
 
@@ -172,14 +174,16 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     }
     beforeRefresh($("#" + id + " .loading"))();
     var embedComponent = typeof(userJSON.embedKey) != "undefined" ? ("&embedKey=" + userJSON.embedKey) : "";
+    var embedded = typeof(userJSON.embedded) != "undefined" ? ("&embedded=true") : "";
     var dashboardComponent = dashboardID == -1 ? "" : ("&dashboardID=" + dashboardID);
     var drillthroughComponent = typeof(drillthroughID) != "undefined" ? ("&drillThroughKey=" + drillthroughID) : "";
     var postData = {
-        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent + drillthroughComponent + embedComponent,
+        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent + drillthroughComponent + embedComponent + embedded,
         contentType: "application/json; charset=UTF-8",
         data: JSON.stringify(fullFilters),
         type: "POST"
     }
+
     if (obj.metadata.type == "pie") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
@@ -247,12 +251,14 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
         var ff1 = flattenFilters(obj.report.metadata.filters);
         var fs3 = filterStack.concat(ff1);
 
-        var w = {"type": "report", "filters": fs3, "report": obj, "rendered": false, "id": obj.id };
+        var w = {"type": "report", "filters": fs3, "report": obj, "rendered": false, "id": obj.id, parent_filters: filterStack.concat() };
+
         reportMap[obj.id] = w;
         var t = _.reduce(ff1, function (m, i) {
             m[w.id + "_report_filter_" + i.id] = {"filter": i, "parent": w };
             return m;
         }, {});
+        w["base_map"] = t;
         $.extend(filterMap, t);
         return w;
     } else if (obj.type == "grid") {
@@ -391,12 +397,14 @@ $(function () {
         stack = _.template($("#stack", s).html());
         grid = _.template($("#grid", s).html());
         reportTemplate = _.template($("#report_template", s).html());
+        fullReportTemplate = _.template($("#report_full_template", s).html());
         textTemplate = _.template($("#text_template", s).html());
         gaugeTemplate = _.template($("#gauge_template", s).html());
         email_modal = _.template($("#email_modal", s).html());
         multi_value_results = _.template($("#multi_value_results_template", s).html());
         multi_field_value_results = _.template($("#multi_value_results_template", s).html());
         configurationDropdownTemplate = _.template($("#configuration_dropdown_template", s).html());
+        reportListTemplate = _.template($("#report_list_template", s).html());
 
         var filterMap = _.reduce(flattenFilters(dashboardJSON["filters"]), function (m, i) {
             m["_dashboard_filter_" + i.id] = {"filter": i, "parent": null };
@@ -466,121 +474,329 @@ $(function () {
 
         hideFilters(graph, filterMap);
         renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], false);
-        $(".single_filter").change(function (e) {
-            var k = $(e.target).attr("id");
-            var f = filterMap[k];
-            f.filter.selected = $(e.target).val();
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-            saveFilter(f, k);
-        });
-
-        $(".month_select, .year_select").change(function (e) {
-            var k = $(e.target).attr("id");
-            var f = filterMap[k];
-            f.filter.selected = $(e.target).val();
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-            saveFilter(f, k);
-        })
 
         var selectionMap = {};
+        function addFilterCallbacks(target) {
+            $(".single_filter", target).change(function (e) {
+                var k = $(e.target).attr("id");
+                var f = filterMap[k];
+                f.filter.selected = $(e.target).val();
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k);
+            });
 
-        var allCheck = function (e) {
-            if ($(e.target).is(":checked")) {
-                $("input", $(e.target).parent().parent()).attr("checked", "checked");
-                for(i in selectionMap)
-                    selectionMap[i] = true;
-            } else {
-                $("input", $(e.target).parent().parent()).removeAttr("checked");
-                for(i in selectionMap)
-                    selectionMap[i] = false;
+            $(".month_select, .year_select", target).change(function (e) {
+                var k = $(e.target).attr("id");
+                var f = filterMap[k];
+                f.filter.selected = $(e.target).val();
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k);
+            })
+
+            var allCheck = function (e) {
+                if ($(e.target).is(":checked")) {
+                    $("input", $(e.target).parent().parent()).attr("checked", "checked");
+                    for(i in selectionMap)
+                        selectionMap[i] = true;
+                } else {
+                    $("input", $(e.target).parent().parent()).removeAttr("checked");
+                    for(i in selectionMap)
+                        selectionMap[i] = false;
+                }
             }
+
+            var choiceAllCheck = function (e) {
+                var checked = $(e.target).is(":checked");
+                selectionMap[$(".cb_filter_value", $(e.target).parent()).html()] = checked;
+                if (checked && _.all(selectionMap, function(e, i, l) { return (i == "All") || e; })) {
+                    $(".cb_all_choice", $(e.target).parent().parent()).attr("checked", "checked");
+                    selectionMap["All"] = true;
+                } else {
+                    $(".cb_all_choice", $(e.target).parent().parent()).removeAttr("checked");
+                    selectionMap["All"] = false;
+                }
+            };
+
+            $('.multi_value_modal', target).on('show.bs.modal', function (e) {
+                var f = filterMap[$(e.target).attr("id").replace(/_modal$/g, "")].filter;
+
+                if(f.error) {
+                    $(".loading-bar", e.target).show();
+                    $.getJSON("/app/html/filterValue?filterID=" + f.id, function(d) {
+                        $(".loading-bar", e.target).hide();
+                        f.values = d.values;
+                        var m = _.reduce(f.values, function(m, e) {
+                            m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
+                            return m;
+                        }, {});
+                        selectionMap = $.extend({}, m, f.selected);
+                        if(d.values.length > 100) {
+                            d.error = "Too many values, please refine your search."
+                        }
+                        $(".multi-value-list", $(e.target)).html(multi_value_results({ data: { selected: selectionMap }, results: d }));
+                        delete f.error;
+                    })
+                } else {
+                    var m = _.reduce(f.values, function(m, e) {
+                                    m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
+                                    return m;
+                                }, {});
+                    selectionMap = $.extend({}, m, f.selected);
+                }
+            });
+
+            $('.multi_field_value_modal', target).on('show.bs.modal', function (e) {
+                var f = filterMap[$(e.target).attr("id").replace(/_modal$/g, "")].filter;
+
+                var m = _.reduce(f.values, function(m, e) {
+                    m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
+                    return m;
+                }, {});
+                selectionMap = $.extend({}, m, f.selected);
+            });
+
+            $(".cb_all_choice", target).click(allCheck);
+
+            $(".cb_filter_choice", target).click(choiceAllCheck);
+
+            $(".multi_value_save", target).click(function (e) {
+                var a = $(e.target).parent().parent().parent().parent();
+                var k = a.attr("id").replace(/_modal$/g, "");
+                var f = filterMap[k];
+                f.filter.selected = selectionMap;
+                var selectVals = toSelectedArray(selectionMap);
+                var label;
+                if(selectionMap["All"]) {
+                    label = "All";
+                } else {
+                    label = selectVals.length == 1 ? selectVals[0] : selectVals.length + " Items";
+                }
+                $(".multi_filter", $(a).parent()).html(label);
+
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k);
+            });
+
+            $(".multi_flat_month_save", target).click(function (e) {
+                var a = $(e.target).parent().parent().parent().parent();
+                var k = a.attr("id").replace(/_modal$/g, "");
+                var f = filterMap[k];
+                var min = $(".multi_flat_month_start", a).val();
+                var max = $(".multi_flat_month_end", a).val();
+                f.filter.start = parseInt(min);
+                f.filter.end = parseInt(max);
+                $("#" + a.attr("id").replace(/_modal$/g, "")).html(short_months[f.filter.start] + " to " + short_months[f.filter.end]);
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k);
+            });
+
+            $(".rolling_filter_type", target).change(function (e) {
+                var t = $(".custom", $(e.target).parent());
+                var k = $(e.target).attr("id").replace(/_type$/g, "");
+                var f = filterMap[k];
+                if ($(e.target).val() == "18") {
+                    t.show();
+
+                } else {
+                    t.hide();
+                }
+                f.filter.interval_type = $(e.target).val();
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k);
+            });
+
+            $(".rolling_filter_direction", target).change(function (e) {
+                var k = $(e.target).attr("id").replace(/_custom_direction$/g, "");
+                var f = filterMap[k];
+                f.filter.direction = $(e.target).val();
+
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+
+                saveFilter(f, k);
+            });
+
+            $(".rolling_filter_value", target).change(function (e) {
+                var k = $(e.target).attr("id").replace(/_custom_value$/g, "")
+                var f = filterMap[k];
+                f.filter.value = parseInt($(e.target).val());
+
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k);
+            });
+
+            $(".rolling_filter_interval", target).change(function (e) {
+                var k = $(e.target).attr("id").replace(/_custom_interval$/g, "")
+                var f = filterMap[k];
+                f.filter.interval = $(e.target).val();
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k);
+            });
+
+            $(".field_filter", target).change(function (e) {
+                var k = $(e.target).attr("id")
+                var f = filterMap[k];
+                f.filter.selected = $(e.target).val();
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k);
+            });
+
+            $(".filter_enabled", target).change(function (e) {
+                var k = $(e.target).attr("id").replace(/_enabled$/g, "");
+                var f = filterMap[k];
+
+                f.filter.enabled = $(e.target).is(":checked");
+
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k);
+            });
+
+            $(".start_date_filter", target).datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
+                var z = $(e.target);
+                var k = z.attr("id").replace(/_date_start$/, "");
+                var f = filterMap[k];
+                f.filter.start = z.val();
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k);
+            });
+
+            $(".end_date_filter", target).datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
+                var z = $(e.target);
+                var k = z.attr("id").replace(/_date_end$/, "");
+                var f = filterMap[k];
+                f.filter.end = z.val();
+                if (f.parent == null) {
+                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                } else {
+                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                }
+                saveFilter(f, k);
+            });
+
+            $(".adhoc", target).click(function (e) {
+                var z = $(e.target);
+                $(".adhoc_instructions", z.parent()).hide();
+                renderReport(reportMap[$(z.parent()).attr("id")], dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+            })
+
+            $(".dashboardReportHeader", target).click(function (e) {
+                var f = $(".reportMenu", $(e.target).parent());
+                f.slideToggle({ complete: function () {
+                    f.css("overflow", "visible")
+                }});
+            });
+
+            function filterText(e) {
+                var p = $(e.target).parent();
+                while (!p.hasClass("input-group")) p = p.parent();
+                var val = $(".value-search-input", p).val();
+                var modalParent = p.parent().parent().parent().parent().parent();
+                var f = filterMap[modalParent.attr("id").replace(/_modal$/g, "")];
+
+                var d = {values: _.filter(f.filter.values, function(e, i, l) {
+                    return e.toLowerCase().match(val.toLowerCase()); })}
+                if(d.values.length > 100) {
+                    d["error"] = "Too many values, please refine your search."
+                }
+    //            $.getJSON("/app/html/filterValue?filterID=" + f.filter.id + "&q=" + encodeURIComponent(val), function (d) {
+                    $(".multi-value-list", modalParent).html(multi_value_results({ data: { selected: selectionMap }, results: d }));
+                    $(".cb_all_choice", modalParent).click(allCheck);
+                    $(".cb_filter_choice", modalParent).click(choiceAllCheck);
+    //            });
+            }
+
+            $(".value-search-btn", target).click(filterText);
+            $(".value-search-input", target).change(filterText);
+
+            $(".pattern_input", target).blur(function (e) {
+                var k = $(e.target).attr("id");
+                var f = filterMap[k];
+                var p = $(e.target).val();
+                if (p != f.filter.pattern) {
+                    f.filter.pattern = p;
+                    if (f.parent == null) {
+                        renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                    } else {
+                        renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+                    }
+                    saveFilter(f, k);
+                }
+
+            })
+
+
+            $(".report-emailReportButton", target).click(function (e) {
+                $("#emailReportWindow").modal(true, true, true);
+                e.preventDefault();
+            })
+
+            $(".report-dropdown-btn", target).on("show.bs.dropdown", function(e) {
+                var c = $(e.target);
+                var a = c.parent();
+                while(typeof(a.attr("data-report-target")) == "undefined") {
+                    a = a.parent();
+                }
+                var cc = a.attr("data-report-target");
+                var component = (typeof(reportMap[cc].report.tag) != "undefined") ? ("&tagName=" + reportMap[cc].report.tag) : "";
+                $.getJSON("/app/html/reportsByTag?dataSource=" + dashboardJSON["data_source_id"] + component, function(data) {
+                    $(".report-dropdown", c).html(reportListTemplate(data))
+                    $(".report-target-link", c).click(function(e) {
+
+
+
+                        var b = $(e.target).attr("data-report-target");
+                        loadReport(b, cc);
+                        e.preventDefault();
+                    })
+                })
+            })
+
         }
 
-        var choiceAllCheck = function (e) {
-            var checked = $(e.target).is(":checked");
-            selectionMap[$(".cb_filter_value", $(e.target).parent()).html()] = checked;
-            if (checked && _.all(selectionMap, function(e, i, l) { return (i == "All") || e; })) {
-                $(".cb_all_choice", $(e.target).parent().parent()).attr("checked", "checked");
-                selectionMap["All"] = true;
-            } else {
-                $(".cb_all_choice", $(e.target).parent().parent()).removeAttr("checked");
-                selectionMap["All"] = false;
-            }
-
-
-        };
-
-        $('.multi_value_modal').on('show.bs.modal', function (e) {
-            var f = filterMap[$(e.target).attr("id").replace(/_modal$/g, "")].filter;
-
-            if(f.error) {
-                $(".loading-bar", e.target).show();
-                $.getJSON("/app/html/filterValue?filterID=" + f.id, function(d) {
-                    $(".loading-bar", e.target).hide();
-                    f.values = d.values;
-                    var m = _.reduce(f.values, function(m, e) {
-                        m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
-                        return m;
-                    }, {});
-                    selectionMap = $.extend({}, m, f.selected);
-                    if(d.values.length > 100) {
-                        d.error = "Too many values, please refine your search."
-                    }
-                    $(".multi-value-list", $(e.target)).html(multi_value_results({ data: { selected: selectionMap }, results: d }));
-                    delete f.error;
-                })
-            } else {
-                var m = _.reduce(f.values, function(m, e) {
-                                m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
-                                return m;
-                            }, {});
-                selectionMap = $.extend({}, m, f.selected);
-            }
-        });
-
-        $('.multi_field_value_modal').on('show.bs.modal', function (e) {
-            var f = filterMap[$(e.target).attr("id").replace(/_modal$/g, "")].filter;
-
-            var m = _.reduce(f.values, function(m, e) {
-                m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
-                return m;
-            }, {});
-            selectionMap = $.extend({}, m, f.selected);
-        });
-
-        $(".cb_all_choice").click(allCheck);
-
-        $(".cb_filter_choice").click(choiceAllCheck);
-
-        $(".multi_value_save").click(function (e) {
-            var a = $(e.target).parent().parent().parent().parent();
-            var k = a.attr("id").replace(/_modal$/g, "");
-            var f = filterMap[k];
-            f.filter.selected = selectionMap;
-            var selectVals = toSelectedArray(selectionMap);
-            var label;
-            if(selectionMap["All"]) {
-                label = "All";
-            } else {
-                label = selectVals.length == 1 ? selectVals[0] : selectVals.length + " Items";
-            }
-            $(".multi_filter", $(a).parent()).html(label);
-
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-            saveFilter(f, k);
-        });
+        addFilterCallbacks($(document));
 
         $(".save-as-config-btn").click(function(e) {
             var v = $("#save-as-config-name").val();
@@ -598,138 +814,7 @@ $(function () {
             e.preventDefault();
         })
 
-        $(".multi_flat_month_save").click(function (e) {
-            var a = $(e.target).parent().parent().parent().parent();
-            var k = a.attr("id").replace(/_modal$/g, "");
-            var f = filterMap[k];
-            var min = $(".multi_flat_month_start", a).val();
-            var max = $(".multi_flat_month_end", a).val();
-            f.filter.start = parseInt(min);
-            f.filter.end = parseInt(max);
-            $("#" + a.attr("id").replace(/_modal$/g, "")).html(short_months[f.filter.start] + " to " + short_months[f.filter.end]);
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-            saveFilter(f, k);
-        })
 
-        $(".rolling_filter_type").change(function (e) {
-            var t = $(".custom", $(e.target).parent());
-            var k = $(e.target).attr("id").replace(/_type$/g, "");
-            var f = filterMap[k];
-            if ($(e.target).val() == "18") {
-                t.show();
-
-            } else {
-                t.hide();
-            }
-            f.filter.interval_type = $(e.target).val();
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-            saveFilter(f, k);
-        });
-
-        $(".rolling_filter_direction").change(function (e) {
-            var k = $(e.target).attr("id").replace(/_custom_direction$/g, "");
-            var f = filterMap[k];
-            f.filter.direction = $(e.target).val();
-
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-
-            saveFilter(f, k);
-        });
-
-        $(".rolling_filter_value").change(function (e) {
-            var k = $(e.target).attr("id").replace(/_custom_value$/g, "")
-            var f = filterMap[k];
-            f.filter.value = parseInt($(e.target).val());
-
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-            saveFilter(f, k);
-        });
-
-        $(".rolling_filter_interval").change(function (e) {
-            var k = $(e.target).attr("id").replace(/_custom_interval$/g, "")
-            var f = filterMap[k];
-            f.filter.interval = $(e.target).val();
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-            saveFilter(f, k);
-        });
-
-        $(".field_filter").change(function (e) {
-            var k = $(e.target).attr("id")
-            var f = filterMap[k];
-            f.filter.selected = $(e.target).val();
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-            saveFilter(f, k);
-        });
-
-        $(".filter_enabled").change(function (e) {
-            var k = $(e.target).attr("id").replace(/_enabled$/g, "");
-            var f = filterMap[k];
-
-            f.filter.enabled = $(e.target).is(":checked");
-
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-            saveFilter(f, k);
-        });
-
-        $(".start_date_filter").datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
-            var z = $(e.target);
-            var k = z.attr("id").replace(/_date_start$/, "");
-            var f = filterMap[k];
-            f.filter.start = z.val();
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-            saveFilter(f, k);
-        });
-
-        $(".end_date_filter").datePicker({clickInput: true, startDate: '1900/01/01'}).bind("dateSelected", function (e, selectedDate, td) {
-            var z = $(e.target);
-            var k = z.attr("id").replace(/_date_end$/, "");
-            var f = filterMap[k];
-            f.filter.end = z.val();
-            if (f.parent == null) {
-                renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            } else {
-                renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-            }
-            saveFilter(f, k);
-        });
-
-        $(".adhoc").click(function (e) {
-            var z = $(e.target);
-            $(".adhoc_instructions", z.parent()).hide();
-            renderReport(reportMap[$(z.parent()).attr("id")], dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-        })
 
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             $(".filter").removeClass("hideFilter");
@@ -754,29 +839,6 @@ $(function () {
             }
             showFilters = !showFilters;
         })
-
-        $(".pattern_input").blur(function (e) {
-            var k = $(e.target).attr("id");
-            var f = filterMap[k];
-            var p = $(e.target).val();
-            if (p != f.filter.pattern) {
-                f.filter.pattern = p;
-                if (f.parent == null) {
-                    renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-                } else {
-                    renderReports(f.parent, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
-                }
-                saveFilter(f, k);
-            }
-
-        })
-
-        $(".dashboardReportHeader").click(function (e) {
-            var f = $(".reportMenu", $(e.target).parent());
-            f.slideToggle({ complete: function () {
-                f.css("overflow", "visible")
-            }});
-        });
 
         $(".clickable_grid").click(function (e) {
             var g = $(e.target).parent()
@@ -803,17 +865,13 @@ $(function () {
             $.getJSON('/app/emailReport?reportID=' + currentReport + '&format=' + format + "&recipient=" + recipient + "&subject=" + subject + "&body=" + body, function (data) {
                 alert('Email sent.');
             });
-
         })
 
         $(".grid_report_link").click(function (e) {
-            var f = $(e.target).attr("data-ref");
+            var a = $(e.target);
+            while(typeof(a.attr("data-ref")) == "undefined") a = a.parent();
+            var f = a.attr("data-ref");
             $("#" + f).show({effect: "slide"});
-            e.preventDefault();
-        })
-
-        $(".report-emailReportButton").click(function (e) {
-            $("#emailReportWindow").modal(true, true, true);
             e.preventDefault();
         })
 
@@ -822,34 +880,41 @@ $(function () {
             if (!f.hasClass("gridReportMenu"))
                 f = f.parent();
             f.hide({effect: "slide", direction: "left"})
+            e.preventDefault();
         })
-
-        function filterText(e) {
-            var p = $(e.target).parent();
-            while (!p.hasClass("input-group")) p = p.parent();
-            var val = $(".value-search-input", p).val();
-            var modalParent = p.parent().parent().parent().parent().parent();
-            var f = filterMap[modalParent.attr("id").replace(/_modal$/g, "")];
-
-            var d = {values: _.filter(f.filter.values, function(e, i, l) {
-                return e.toLowerCase().match(val.toLowerCase()); })}
-            if(d.values.length > 100) {
-                d["error"] = "Too many values, please refine your search."
-            }
-//            $.getJSON("/app/html/filterValue?filterID=" + f.filter.id + "&q=" + encodeURIComponent(val), function (d) {
-                $(".multi-value-list", modalParent).html(multi_value_results({ data: { selected: selectionMap }, results: d }));
-                $(".cb_all_choice", modalParent).click(allCheck);
-                $(".cb_filter_choice", modalParent).click(choiceAllCheck);
-//            });
-        }
-
-        $(".value-search-btn").click(filterText);
-        $(".value-search-input").change(filterText);
 
         $(".delete-config").click(function(e) {
             e.preventDefault();
             window.location.href = $(e.target).parent().attr("href") + "/delete";
         })
+
+        function loadReport(key, dashboardKey) {
+            $.getJSON("/app/html/report/" + key + "/data.json", function(data) {
+                var cc;
+                for(cc in reportMap[dashboardKey].base_map) {
+                    delete filterMap[cc];
+                }
+                var w = reportMap[dashboardKey];
+                var ff1 = data.filters;
+                var t = _.reduce(ff1, function (m, i) {
+                    m[w.id + "_report_filter_" + i.id] = {"filter": i, "parent": w };
+                    return m;
+                }, {});
+                $.extend(filterMap, t);
+                reportMap[dashboardKey].filters = data.filters.concat(reportMap[dashboardKey].parent_filters);
+                reportMap[dashboardKey].report.report = { metadata: data, id: data.id, name: data.name };
+                reportMap[dashboardKey].rendered = false;
+                reportMap[dashboardKey].base_map = t;
+                var t = $("#" + dashboardKey);
+                $("." + dashboardKey + "_name").html(data.name);
+                t.html(fullReportTemplate(reportMap[dashboardKey].report));
+                addFilterCallbacks(t);
+                renderReport(reportMap[dashboardKey], dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+
+            })
+        }
+
+
 
         saveConfiguration = function (name, key) {
             var c = {"filters": _.reduce(filterMap, function (m, e, i) {

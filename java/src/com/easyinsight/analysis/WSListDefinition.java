@@ -364,4 +364,8 @@ public class WSListDefinition extends WSAnalysisDefinition {
     protected int extensionType() {
         return ReportFieldExtension.TEXT;
     }
+
+    protected boolean accepts(AnalysisItem analysisItem) {
+        return true;
+    }
 }

@@ -15,6 +15,7 @@ public class VerticalListReportExtension extends ReportFieldExtension {
 
     public var lineAbove:Boolean;
     public var alwaysShow:Boolean;
+    public var section:String;
     
     public function VerticalListReportExtension() {
     }

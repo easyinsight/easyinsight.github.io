@@ -87,18 +87,23 @@
         }
 
         private function gotGroupDetails():void {
+            adminEnabled = User.getInstance().accountAdmin;
+            editorEnabled = User.getInstance().accountAdmin;
             var group:Group = groupService.getGroup.lastResult as Group;
 
+            var a:Boolean = false;
             for each (var groupUser:GroupUser in group.groupUsers) {
                 if (groupUser.role == GroupUser.OWNER) {
                     if (groupUser.userID == User.getInstance().userID && groupUser.role == 1) {
+                        a = true;
                         editorEnabled = true;
-                        adminEnabled = true;
                     } else if (groupUser.userID == User.getInstance().userID && groupUser.role == 2) {
                         editorEnabled = true;
                     }
                 }
             }
+
+            adminEnabled = adminEnabled || a;
 
             this._group = group;
         }

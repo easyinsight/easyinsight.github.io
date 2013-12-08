@@ -11,6 +11,9 @@
         import com.easyinsight.analysis.AddonReportEvent;
         import com.easyinsight.analysis.AddonReportWindow;
         import com.easyinsight.analysis.AnalysisChangedEvent;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemNode;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.code.DataSourceMarmotScriptWindow;
@@ -266,6 +269,25 @@
 
         [Bindable]
         private var showAddonReports:Boolean;
+
+        private function fieldTags():void {
+            var window:FieldTagging = new FieldTagging();
+            window.dataSourceID = feedDefinition.dataFeedID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function fieldExtensions():void {
+            var window:FieldExtensions = new FieldExtensions();
+            window.dataSourceID = feedDefinition.dataFeedID;
+            var aFields:ArrayCollection = new ArrayCollection();
+            for each (var field:AnalysisItem in feedDefinition.fields) {
+                aFields.addItem(new AnalysisItemWrapper(new AnalysisItemNode(field)));
+            }
+            window.allFields = aFields;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
 		]]>
 	</mx:Script>
     <mx:RemoteObject id="shareService" destination="share">
@@ -288,6 +310,8 @@
                                        icon="@Embed(source='../../../../../assets/refresh.png')" labelPlacement="right" enabled="{refreshable}"/>-->
             <mx:Button icon="@Embed(source='../../../../../assets/code_edit.png')" click="editCode()" toolTip="Edit Code..."
                     label="Edit Code" labelPlacement="right" styleName="grayButton"/>
+            <mx:Button label="Field Tags" styleName="grayButton" click="fieldTags()"/>
+            <mx:Button label="Field Extensions" styleName="grayButton" click="fieldExtensions()"/>
             <mx:Button click="addonReports()" label="Addon Reports" labelPlacement="right" styleName="grayButton" visible="{showAddonReports}"/>
             <mx:Spacer width="100%"/>
             <easyinsight:LoggedOnStatus textColor="#FFFFFF" id="logonStatus"/>

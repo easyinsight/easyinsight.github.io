@@ -43,6 +43,7 @@ public class Dashboard implements Cloneable, Serializable {
     private String authorName;
     private boolean temporary;
     private boolean publicVisible;
+    private boolean publicWithKey;
     private int padding;
     private int backgroundColor;
     private int borderThickness;
@@ -72,9 +73,17 @@ public class Dashboard implements Cloneable, Serializable {
     private int headerBackgroundColor;
     private int version;
     private boolean enableLocalStorage;
-    private DashboardDescriptor tabletVersion;
-    private DashboardDescriptor phoneVersion;
+    private long tabletVersion;
+    private long phoneVersion;
     private List<SavedConfiguration> configurations;
+
+    public boolean isPublicWithKey() {
+        return publicWithKey;
+    }
+
+    public void setPublicWithKey(boolean publicWithKey) {
+        this.publicWithKey = publicWithKey;
+    }
 
     public List<SavedConfiguration> getConfigurations() {
         return configurations;
@@ -84,19 +93,19 @@ public class Dashboard implements Cloneable, Serializable {
         this.configurations = configurations;
     }
 
-    public DashboardDescriptor getTabletVersion() {
+    public long getTabletVersion() {
         return tabletVersion;
     }
 
-    public void setTabletVersion(DashboardDescriptor tabletVersion) {
+    public void setTabletVersion(long tabletVersion) {
         this.tabletVersion = tabletVersion;
     }
 
-    public DashboardDescriptor getPhoneVersion() {
+    public long getPhoneVersion() {
         return phoneVersion;
     }
 
-    public void setPhoneVersion(DashboardDescriptor phoneVersion) {
+    public void setPhoneVersion(long phoneVersion) {
         this.phoneVersion = phoneVersion;
     }
 
@@ -593,8 +602,10 @@ public class Dashboard implements Cloneable, Serializable {
         dashboard.put("local_storage", enableLocalStorage);
 
         JSONArray configurations = new JSONArray();
-        for(SavedConfiguration sc : getConfigurations()) {
-            configurations.put(sc.toJSON());
+        if (getConfigurations() != null) {
+            for(SavedConfiguration sc : getConfigurations()) {
+                configurations.put(sc.toJSON());
+            }
         }
         dashboard.put("configurations", configurations);
         JSONObject styles = new JSONObject();

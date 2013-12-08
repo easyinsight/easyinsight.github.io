@@ -141,7 +141,7 @@
         private var recipients:ArrayCollection = new ArrayCollection();
 
         private function gotReports():void {
-            reports = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+            reports = analysisService.getInsightDescriptorsWithConfigurations.lastResult as ArrayCollection;
         }
 
         private function addRecipient():void {
@@ -241,7 +241,7 @@
         <mx:method name="addOrUpdateSchedule" result="saved()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
-        <mx:method name="getInsightDescriptors" result="gotReports()"/>
+        <mx:method name="getInsightDescriptorsWithConfigurations" result="gotReports()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="shareService" destination="share">
 		<mx:method name="getUserStubs" result="gotUserStubs()"/>

@@ -38,10 +38,51 @@ public class DataService {
 
     private FeedRegistry feedRegistry = FeedRegistry.instance();
 
-    public List<AnalysisItemSelection> possibleFields(MultiFieldFilterDefinition filter, WSAnalysisDefinition report) {
+    public List<AnalysisItemSelection> possibleFields(IFieldChoiceFilter filter, @Nullable WSAnalysisDefinition reportEditorReport, @Nullable Dashboard dashboardEditorDashboard) {
+        WSAnalysisDefinition report = null;
+        long dashboardID = 0;
         try {
-            long id = report.getDataFeedID();
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(id);
+            long dataSourceID;
+            if (reportEditorReport != null) {
+                report = reportEditorReport;
+                dataSourceID = reportEditorReport.getDataFeedID();
+            } else if (dashboardEditorDashboard != null) {
+                dashboardID = dashboardEditorDashboard.getId();
+                dataSourceID = dashboardEditorDashboard.getDataSourceID();
+            } else {
+                EIConnection conn = Database.instance().getConnection();
+
+                try {
+                    PreparedStatement stmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM analysis_to_filter_join WHERE FILTER_ID = ?");
+                    stmt.setLong(1, filter.getFilterID());
+                    ResultSet rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        report = new AnalysisStorage().getAnalysisDefinition(rs.getLong(1), conn);
+                        dataSourceID = report.getDataFeedID();
+                    } else {
+                        PreparedStatement dashboardStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, dashboard.DASHBOARD_ID FROM dashboard_to_filter, dashboard WHERE " +
+                                "dashboard_to_filter.filter_id = ? and dashboard_to_filter.dashboard_id = dashboard.dashboard_id");
+                        dashboardStmt.setLong(1, filter.getFilterID());
+                        ResultSet dashboardRS = dashboardStmt.executeQuery();
+                        if (dashboardRS.next()) {
+                            dataSourceID = dashboardRS.getLong(1);
+                            dashboardID = dashboardRS.getLong(2);
+                        } else {
+                            throw new RuntimeException();
+                        }
+                    }
+                } finally {
+                    Database.closeConnection(conn);
+                }
+
+                if (report != null) {
+                    SecurityUtil.authorizeInsight(report.getAnalysisID());
+                } else if (dashboardID > 0) {
+                    SecurityUtil.authorizeDashboard(dashboardID);
+                }
+            }
+
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID);
             Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
             Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
             final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
@@ -49,11 +90,13 @@ public class DataService {
                 map.put(field.getAnalysisItemID(), field);
                 mapByName.put(field.toDisplay(), field);
             }
-            if (report.getAddedItems() != null) {
-                for (AnalysisItem item : report.getAddedItems()) {
-                    mapByName.put(item.toDisplay(), item);
-                    if (item.getAnalysisItemID() != 0) {
-                        map.put(item.getAnalysisItemID(), item);
+            if (report != null) {
+                if (report.getAddedItems() != null) {
+                    for (AnalysisItem item : report.getAddedItems()) {
+                        mapByName.put(item.toDisplay(), item);
+                        if (item.getAnalysisItemID() != 0) {
+                            map.put(item.getAnalysisItemID(), item);
+                        }
                     }
                 }
             }
@@ -63,14 +106,14 @@ public class DataService {
 
             Set<AnalysisItem> set = new HashSet<AnalysisItem>();
             int i = 0;
-            if (report instanceof WSListDefinition) {
+            if (!filter.excludeReportFields() && report != null && report instanceof WSListDefinition) {
                 WSListDefinition list = (WSListDefinition) report;
                 set.addAll(list.getColumns());
                 for (AnalysisItem item : list.getColumns()) {
                     positions.put(item, i++);
                 }
             }
-            for (AnalysisItemHandle field : filter.getAvailableItems()) {
+            for (AnalysisItemHandle field : filter.getAvailableHandles()) {
                 AnalysisItem item = map.get(field.getAnalysisItemID());
                 if (item != null) {
                     set.add(item);
@@ -97,31 +140,33 @@ public class DataService {
             try {
                 for (WeNeedToReplaceHibernateTag tag : tags) {
                     queryStmt.setLong(1, tag.getTagID());
-                    queryStmt.setLong(2, report.getDataFeedID());
+                    queryStmt.setLong(2, dataSourceID);
                     ResultSet rs = queryStmt.executeQuery();
                     while (rs.next()) {
                         long fieldID = rs.getLong(1);
                         AnalysisItem analysisItem = dataSourceFieldMap.get(fieldID);
-                        positions.put(analysisItem, i++);
-                        set.add(analysisItem);
-                        PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
-                                "extension_type = ?");
-                        extStmt.setLong(1, fieldID);
-                        extStmt.setInt(2, report.extensionType());
-                        ResultSet extRS = extStmt.executeQuery();
-                        if (extRS.next()) {
-                            long extID = extRS.getLong(1);
-                            Session session = Database.instance().createSession(conn);
-                            try {
-                                ReportFieldExtension ext = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, extID).list().get(0);
-                                ext.afterLoad();
-                                analysisItem.setReportFieldExtension(ext);
-                            } finally {
-                                session.close();
+                        //if (report == null || report.accepts(analysisItem)) {
+                            positions.put(analysisItem, i++);
+                            set.add(analysisItem);
+                            PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
+                                    "extension_type = ?");
+                            extStmt.setLong(1, fieldID);
+                            extStmt.setInt(2, report.extensionType());
+                            ResultSet extRS = extStmt.executeQuery();
+                            if (extRS.next()) {
+                                long extID = extRS.getLong(1);
+                                Session session = Database.instance().createSession(conn);
+                                try {
+                                    ReportFieldExtension ext = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, extID).list().get(0);
+                                    ext.afterLoad();
+                                    analysisItem.setReportFieldExtension(ext);
+                                } finally {
+                                    session.close();
+                                }
                             }
+                            extStmt.close();
                         }
-                        extStmt.close();
-                    }
+                    //}
                 }
             } finally {
                 Database.closeConnection(conn);
@@ -129,7 +174,7 @@ public class DataService {
 
 
             i = 0;
-            for (AnalysisItemHandle handle : filter.getSelectedItems()) {
+            for (AnalysisItemHandle handle : filter.selectedItems()) {
                 AnalysisItem item = mapByName.get(handle.getName());
                 if (item != null) {
                     positions.put(item, i++);
@@ -2210,9 +2255,9 @@ public class DataService {
             String currency = "USD";
             if ("$".equals(symbol)) {
                 currency = "USD";
-            } else if ("Û".equals(symbol)) {
+            } else if ("ï¿½".equals(symbol)) {
                 currency = "EUR";
-            } else if ("£".equals(symbol) || "?".equals(symbol)) {
+            } else if ("ï¿½".equals(symbol) || "?".equals(symbol)) {
                 currency = "GBP";
             }
             insightRequestMetadata.setTargetCurrency(currency);

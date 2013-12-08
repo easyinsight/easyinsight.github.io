@@ -74,6 +74,9 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name = "minimum_role")
     private int minimumRole = 4;
 
+    @Column(name="customizable")
+    private boolean customizable;
+
     @Column(name="drillthrough")
     private boolean drillthrough;
     @Column(name = "parent_filters")
@@ -99,6 +102,14 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     @Transient
     transient private String pipelineName;
+
+    public boolean isCustomizable() {
+        return customizable;
+    }
+
+    public void setCustomizable(boolean customizable) {
+        this.customizable = customizable;
+    }
 
     public long getFlexID() {
         return flexID;

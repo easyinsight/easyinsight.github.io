@@ -11,13 +11,14 @@ package com.easyinsight.administration.sharing
 		public var email:String;
         public var accountID:int;
         public var firstName:String;
+        public var userKey:String;
 		
 		public function UserStub()
 		{
 		}
 
         public function get displayName():String {
-            return firstName != null ? (firstName + " " + fullName) : fullName;
+            return (firstName != null ? (firstName + " " + fullName) : fullName) + " ( " + email + " )";
         }
 	}
 }

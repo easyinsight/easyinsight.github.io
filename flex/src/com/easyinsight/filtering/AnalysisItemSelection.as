@@ -17,5 +17,9 @@ public class AnalysisItemSelection {
 
     public function AnalysisItemSelection() {
     }
+
+    public function get display():String {
+        return analysisItem.display;
+    }
 }
 }

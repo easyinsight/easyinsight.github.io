@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.AnalysisItemConfiguration;
+        import com.easyinsight.analysis.ytd.YTDReportFieldExtension;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.core.UIComponent;
+        import mx.managers.PopUpManager;
+
+
+        public var reportType:int;
+
+        private var editor:IReportExtensionEditor;
+
+        public var config:AnalysisItemConfiguration;
+
+        private var _analysisItems:ArrayCollection;
+
+        public function set analysisItems(value:ArrayCollection):void {
+            _analysisItems = value;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            var editor:UIComponent;
+            var fakeAnalysisItem:AnalysisItem = new AnalysisItem();
+            if (reportType == ReportFieldExtension.TEXT) {
+                var textEditor:TextExtensionWindow = new TextExtensionWindow();
+                fakeAnalysisItem.reportFieldExtension = config.textExtension;
+                editor = textEditor;
+                textEditor.analysisItem = fakeAnalysisItem;
+            } else if (reportType == ReportFieldExtension.YTD) {
+                var ytdEditor:YTDExtensionWindow = new YTDExtensionWindow();
+                fakeAnalysisItem.reportFieldExtension = config.ytdExtension;
+                ytdEditor.analysisItems = _analysisItems;
+                editor = ytdEditor;
+                ytdEditor.analysisItem = fakeAnalysisItem;
+            } else if (reportType == ReportFieldExtension.VERTICAL_LIST) {
+                var verticalListEditor:VertExtensionWindow = new VertExtensionWindow();
+                fakeAnalysisItem.reportFieldExtension = config.ytdExtension;
+                verticalListEditor.analysisItems = _analysisItems;
+                editor = verticalListEditor;
+                verticalListEditor.analysisItem = fakeAnalysisItem;
+            }
+            this.editor = editor as IReportExtensionEditor;
+            addChildAt(editor, 0);
+        }
+
+        private function save():void {
+            var item:AnalysisItem = new AnalysisItem();
+            editor.save(item);
+            if (reportType == ReportFieldExtension.TEXT) {
+                var ext:ReportFieldExtension = item.reportFieldExtension;
+                config.textExtension = ext as TextReportFieldExtension;
+            } else if (reportType == ReportFieldExtension.YTD) {
+                var ytdExt:ReportFieldExtension = item.reportFieldExtension;
+                config.ytdExtension = ytdExt as YTDReportFieldExtension;
+            }
+
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

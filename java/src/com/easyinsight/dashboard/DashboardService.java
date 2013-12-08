@@ -549,7 +549,7 @@ public class DashboardService {
             Set<Long> reportIDs = dashboard.containedReports();
             EIConnection conn = Database.instance().getConnection();
             try {
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT PUBLICLY_VISIBLE, ACCOUNT_VISIBLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT PUBLICLY_VISIBLE, ACCOUNT_VISIBLE, PUBLIC_WITH_KEY FROM ANALYSIS WHERE ANALYSIS_ID = ?");
                 boolean accessProblem = false;
                 for (Long reportID : reportIDs) {
                     queryStmt.setLong(1, reportID);
@@ -557,10 +557,14 @@ public class DashboardService {
                     if (rs.next()) {
                         boolean publicVisible = rs.getBoolean(1);
                         boolean accountVisible = rs.getBoolean(2);
+                        boolean publicWithKey = rs.getBoolean(3);
                         if (dashboard.isPublicVisible() && !publicVisible) {
                             accessProblem = true;
                         }
                         if (dashboard.isAccountVisible() && !accountVisible) {
+                            accessProblem = true;
+                        }
+                        if (dashboard.isPublicWithKey() && !publicWithKey) {
                             accessProblem = true;
                         }
                     }
@@ -596,6 +600,15 @@ public class DashboardService {
                 PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET ACCOUNT_VISIBLE = ? WHERE ANALYSIS_ID = ?");
                 for (long reportID : reportIDs) {
                     updateStmt.setBoolean(1, dashboard.isAccountVisible());
+                    updateStmt.setLong(2, reportID);
+                    updateStmt.executeUpdate();
+                }
+                updateStmt.close();
+            }
+            if (dashboard.isPublicWithKey()) {
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET PUBLIC_WITH_KEY = ? WHERE ANALYSIS_ID = ?");
+                for (long reportID : reportIDs) {
+                    updateStmt.setBoolean(1, dashboard.isPublicWithKey());
                     updateStmt.setLong(2, reportID);
                     updateStmt.executeUpdate();
                 }
@@ -783,9 +796,6 @@ public class DashboardService {
             dashboard.setOverridenFilters(overriddenFilters);
             dashboard.visit(new StateVisitor(dashboardStackPositions));
         }
-        /*if (dashboardCache != null) {
-            dashboardCache.put(cacheKey, dashboard);
-        }*/
         BenchmarkManager.recordBenchmarkForDashboard("DashboardView", System.currentTimeMillis() - startTime, SecurityUtil.getUserID(false), dashboardID);
         return dashboard;
     }
@@ -800,6 +810,27 @@ public class DashboardService {
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public boolean isDashboardPublicWithKey(String urlKey) {
+        boolean isPublic = false;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT embed_with_key FROM DASHBOARD WHERE URL_KEY = ?");
+            stmt.setString(1, urlKey);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                isPublic = rs.getBoolean(1);
+            }
+            stmt.close();
+        } catch (SQLException se) {
+            LogClass.error(se);
+            throw new RuntimeException(se);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+        return isPublic;
     }
 
     private static class StateVisitor implements IDashboardVisitor {

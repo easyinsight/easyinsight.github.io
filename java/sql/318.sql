@@ -1,9 +1,9 @@
-alter table account_tag add data_source_tag tinyint(4) not null default 1;
-alter table account_tag add report_tag tinyint(4) not null default 0;
-alter table account_tag add field_tag tinyint(4) not null default 0;
+#alter table account_tag add data_source_tag tinyint(4) not null default 1;
+#alter table account_tag add report_tag tinyint(4) not null default 0;
+#alter table account_tag add field_tag tinyint(4) not null default 0;
 
 
-
+drop table if exists field_to_tag;
 create table field_to_tag (
   field_to_tag_id bigint(20) auto_increment not null,
   analysis_item_id bigint(20) not null,
@@ -13,6 +13,8 @@ create table field_to_tag (
   constraint field_to_tag_ibfk2 foreign key (account_tag_id) references account_tag (account_tag_id) on delete cascade
 );
 
+
+drop table if exists report_to_tag;
 create table report_to_tag (
   report_to_tag_id bigint(20) auto_increment not null,
   tag_id bigint(20) not null,
@@ -22,6 +24,7 @@ create table report_to_tag (
   constraint report_to_tag_ibfk2 foreign key (report_id) references analysis (analysis_id) on delete cascade
 );
 
+drop table if exists dashboard_to_tag;
 create table dashboard_to_tag (
   dashboard_to_tag_id bigint(20) auto_increment not null,
   tag_id bigint(20) not null,
@@ -31,6 +34,8 @@ create table dashboard_to_tag (
   constraint dashboard_to_tag_ibfk2 foreign key (dashboard_id) references dashboard (dashboard_id) on delete cascade
 );
 
+
+drop table if exists storage_database;
 create table storage_database (
   storage_database_id bigint(20) auto_increment not null,
   database_name varchar(255) not null,
@@ -43,7 +48,7 @@ create table storage_database (
 );
 
 
-
+drop table if exists group_to_tag;
 create table group_to_tag (
   group_to_tag_id bigint(20) auto_increment not null,
   account_tag_id bigint(20) not null,
@@ -65,6 +70,7 @@ create table distinct_cached_addon_report_source (
   constraint distinct_cached_addon_report_source_ibfk2 foreign key (report_id) references analysis (analysis_id) on delete cascade
 );
 
+drop table if exists hibernate_tag;
 create table hibernate_tag (
   hibernate_tag_id bigint(20) auto_increment not null,
   tag_id bigint(20) not null,
@@ -72,6 +78,7 @@ create table hibernate_tag (
   constraint hibernate_tag_ibfk1 foreign key (tag_id) references account_tag (account_tag_id) on delete cascade
 );
 
+drop table if exists filter_to_field_tag;
 create table filter_to_field_tag (
   filter_to_field_tag_id bigint(20) auto_increment not null,
   filter_id bigint(20) not null,

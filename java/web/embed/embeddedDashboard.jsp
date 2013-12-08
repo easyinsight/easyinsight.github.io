@@ -15,9 +15,7 @@
 <%
 
 
-    if(session.getAttribute("userName") != null) {
-        com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
-    }
+    com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
 
 
@@ -63,7 +61,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Easy Insight</title>
+    <title><%= dashboard.getName() %></title>
     <jsp:include page="../html/bootstrapHeader.jsp"/>
     <jsp:include page="../html/reportDashboardHeader.jsp"/>
     <script type="text/javascript">
@@ -78,11 +76,11 @@
 <body>
 <div class="nav nav-pills reportNav">
     <div class="container">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
-                <div class="btn-group">
+                <div class="btn-group reportControlBtnGroup">
 
-                    <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                    <a class="reportControl" data-toggle="dropdown" href="#">
                         Refresh Data
                         <span class="caret"></span>
                     </a>
@@ -100,8 +98,8 @@
                         </li>
                     </ul>
                 </div>
-                <div class="btn-group">
-                    <button class="btn btn-inverse toggle-filters">Toggle Filters</button>
+                <div class="btn-group reportControlBtnGroup">
+                    <a class="reportControl toggle-filters">Toggle Filters</a>
                 </div>
             </div>
         </div>

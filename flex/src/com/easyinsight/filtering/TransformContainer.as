@@ -292,7 +292,7 @@ public class TransformContainer extends HBox
             else
                 filter = new FlatDateFilter(_feedID,  filterDefinition.field, _reportID,  _dashboardID, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.ANALYSIS_ITEM) {
-            filter = new AnalysisItemFilter(_feedID, filterDefinition.field, _retrievalState, filterMetadata);
+            filter = new AnalysisItemFilter(_feedID, filterDefinition.field, _retrievalState, filterMetadata, _report, _dashboard);
         } else if (filterDefinition.getType() == FilterDefinition.MULTI_FLAT_DATE) {
             filter = new MultiFlatDateFilter(_feedID,  filterDefinition.field, _retrievalState, filterMetadata);
         } else if (filterDefinition.getType() == FilterDefinition.MONTH_CUTOFF) {
@@ -356,6 +356,9 @@ public class TransformContainer extends HBox
 
     public function addNewFilter(advancedAvailable:Boolean = true):void {
         var window:NewFilterWindow = new NewFilterWindow();
+        if (_report != null) {
+            window.reportType = _report.reportType;
+        }
         window.filterSource = _filterSource;
         window.availableFields = new ArrayCollection(this._analysisItems.toArray());
         window.advancedAvailable = advancedAvailable;
@@ -397,7 +400,7 @@ public class TransformContainer extends HBox
         } else if (event.filterType == NewFilterEvent.MULTI_FIELD_CHOICE_FILTER) {
             var multiFieldFilter:MultiFieldFilterDefinition = new MultiFieldFilterDefinition();
             multiFieldFilter.field = event.analysisItem;
-            multiFieldFilter.availableItems = new ArrayCollection();
+            multiFieldFilter.availableHandles = new ArrayCollection();
             multiFieldFilter.toggleEnabled = true;
             addFilterDefinition(multiFieldFilter);
         }
@@ -603,7 +606,7 @@ public class TransformContainer extends HBox
                 filterTile.addChild(filter as DisplayObject);
             }
         } else {
-            if (!filter.filterDefinition.showOnReportView && roleVisible) {
+            if (!filter.filterDefinition.showOnReportView && filter.filterDefinition.customizable) {
                 hiddenButAvailableFilters.addItem(filter);
             }
         }

@@ -1,8 +1,6 @@
 package com.easyinsight.calculations.functions;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemFilterDefinition;
-import com.easyinsight.analysis.WSAnalysisDefinition;
+import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSCompareYearsDefinition;
 import com.easyinsight.analysis.definitions.WSVerticalListDefinition;
 import com.easyinsight.analysis.definitions.WSYTDDefinition;
@@ -49,13 +47,23 @@ public class RemoveField extends Function {
                     iter.remove();
                 }
             }
-        }else if (calculationMetadata.getFilterDefinition() != null && calculationMetadata.getFilterDefinition() instanceof AnalysisItemFilterDefinition) {
+        } else if (calculationMetadata.getFilterDefinition() != null && calculationMetadata.getFilterDefinition() instanceof AnalysisItemFilterDefinition) {
             String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
             AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) calculationMetadata.getFilterDefinition();
             Iterator<AnalysisItem> iter = analysisItemFilterDefinition.getAvailableItems().iterator();
             while (iter.hasNext()) {
                 AnalysisItem analysisItem = iter.next();
                 if (analysisItem.toDisplay().toLowerCase().equals(fieldName)) {
+                    iter.remove();
+                }
+            }
+        }  else if (calculationMetadata.getFilterDefinition() != null && calculationMetadata.getFilterDefinition() instanceof MultiFieldFilterDefinition) {
+            String fieldName = minusQuotes(params.get(0)).toString().toLowerCase();
+            MultiFieldFilterDefinition analysisItemFilterDefinition = (MultiFieldFilterDefinition) calculationMetadata.getFilterDefinition();
+            Iterator<AnalysisItemHandle> iter = analysisItemFilterDefinition.getSelectedItems().iterator();
+            while (iter.hasNext()) {
+                AnalysisItemHandle analysisItem = iter.next();
+                if (analysisItem.getName().toLowerCase().equals(fieldName)) {
                     iter.remove();
                 }
             }

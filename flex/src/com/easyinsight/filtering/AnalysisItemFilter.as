@@ -1,9 +1,10 @@
 package com.easyinsight.filtering {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRetrievalState;
+import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.skin.ImageConstants;
-
-import com.easyinsight.util.SmartComboBox;
+import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -14,7 +15,7 @@ import mx.containers.HBox;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.Label;
-import mx.events.DropdownEvent;
+import mx.controls.LinkButton;
 import mx.managers.PopUpManager;
 
 public class AnalysisItemFilter extends HBox implements IFilter {
@@ -22,12 +23,16 @@ public class AnalysisItemFilter extends HBox implements IFilter {
     private var _feedID:int;
     private var _analysisItem:AnalysisItem;
 
-    private var comboBox:SmartComboBox;
+    private var linkButton:Button;
     private var deleteButton:Button;
     private var editButton:Button;
     private var _analysisItems:ArrayCollection;
 
     private var _filterEnabled:Boolean;
+
+
+    private var _report:AnalysisDefinition;
+    private var _dashboard:Dashboard;
 
     [Bindable(event="filterEnabledChanged")]
     public function get filterEnabled():Boolean {
@@ -44,12 +49,15 @@ public class AnalysisItemFilter extends HBox implements IFilter {
 
     private var filterMetadata:FilterMetadata;
 
-    public function AnalysisItemFilter(feedID:int, analysisItem:AnalysisItem, retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
+    public function AnalysisItemFilter(feedID:int, analysisItem:AnalysisItem, retrievalState:IRetrievalState, filterMetadata:FilterMetadata, report:AnalysisDefinition,
+            dashboard:Dashboard) {
         super();
         this._feedID = feedID;
         this._analysisItem = analysisItem;
         this._retrievalState = retrievalState;
         this.filterMetadata = filterMetadata;
+        this._report = report;
+        this._dashboard = dashboard;
         setStyle("verticalAlign", "middle");
     }
 
@@ -80,14 +88,22 @@ public class AnalysisItemFilter extends HBox implements IFilter {
             filterLabel.text =  FilterDefinition.getLabel(event.filterDefinition, _analysisItem);
         }
         _analysisItem = event.filterDefinition.field;
-        comboBox.dataProvider = _filterDefinition.availableItems;
-        comboBox.rowCount = Math.min(_filterDefinition.availableItems.length, 15);
+        /*linkButton.dataProvider = _filterDefinition.availableItems;
+        linkButton.rowCount = Math.min(_filterDefinition.availableItems.length, 15);*/
+    }
+
+    private function onUpdated(event:Event):void {
+        if (_retrievalState != null) {
+            _retrievalState.updateFilter(_filterDefinition, filterMetadata);
+        }
+        updateFilterLabel();
+        dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 
     private function onChange(event:Event):void {
         var checkbox:CheckBox = event.currentTarget as CheckBox;
         _filterDefinition.enabled = checkbox.selected;
-        comboBox.enabled = checkbox.selected;
+        linkButton.enabled = checkbox.selected;
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 
@@ -106,15 +122,16 @@ public class AnalysisItemFilter extends HBox implements IFilter {
 
         filterLabel = new Label();
         filterLabel.styleName = "filterLabel";
+
         filterLabel.text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         addChild(filterLabel);
-        if (comboBox == null) {
-            comboBox = new SmartComboBox();
-            comboBox.labelField = "display";
-            comboBox.maxWidth = 300;
-            comboBox.addEventListener(DropdownEvent.CLOSE, filterValueChanged);
+        if (linkButton == null) {
+            linkButton = new Button();
+            linkButton.maxWidth = 200;
+            linkButton.addEventListener(MouseEvent.CLICK, onClick);
+            linkButton.styleName = "multiFilterButton";
         }
-        addChild(comboBox);
+        addChild(linkButton);
 
         if (_filterEditable) {
             if (editButton == null) {
@@ -140,25 +157,29 @@ public class AnalysisItemFilter extends HBox implements IFilter {
             _filterDefinition.targetItem = _analysisItem;
         }
 
-        comboBox.dataProvider = _filterDefinition.availableItems;
-        comboBox.rowCount = Math.min(_filterDefinition.availableItems.length, 15);
-        comboBox.selectedProperty = "display";
-        comboBox.selectedValue = _filterDefinition.targetItem.display;
+        updateFilterLabel();
+        if (_loadingFromReport) {
+            _loadingFromReport = false;
 
-        if (!_loadingFromReport) {
-            if (newFilter) {
-                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
-                newFilter = false;
-            } else {
-                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this));
-            }
         } else {
-            loadingFromReport = false;
-            newFilter = false;
+            dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
         }
     }
 
-    private var newFilter:Boolean = true;
+    private function onClick(event:MouseEvent):void {
+        var window:FieldChoiceFilterWindow = new FieldChoiceFilterWindow();
+        window.embeddedFilter = _filterDefinition;
+        window.dataSourceID = _feedID;
+        window.report = _report;
+        window.dashboard = _dashboard;
+        window.addEventListener("updated", onUpdated, false, 0, true);
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUpWithY(window, 40);
+    }
+
+    private function updateFilterLabel():void {
+        linkButton.label = _filterDefinition.targetItem.display;
+    }
 
     private var _loadingFromReport:Boolean = false;
 
@@ -179,18 +200,6 @@ public class AnalysisItemFilter extends HBox implements IFilter {
         if (_valuesSet == value) return;
         _valuesSet = value;
         dispatchEvent(new Event("valuesSetChanged"));
-    }
-
-    private function filterValueChanged(event:DropdownEvent):void {
-        var newValue:AnalysisItem = event.currentTarget.selectedItem as AnalysisItem;
-
-        if (newValue != _filterDefinition.targetItem) {
-            _filterDefinition.targetItem = newValue;
-            if (_retrievalState != null) {
-                _retrievalState.updateFilter(_filterDefinition, filterMetadata);
-            }
-            dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
-        }
     }
 
     private function deleteSelf(event:MouseEvent):void {

@@ -34,6 +34,17 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
     @Column(name="always_show")
     private boolean alwaysShow;
 
+    @Column(name="section")
+    private String section;
+
+    public String getSection() {
+        return section;
+    }
+
+    public void setSection(String section) {
+        this.section = section;
+    }
+
     public boolean isAlwaysShow() {
         return alwaysShow;
     }
@@ -87,14 +98,14 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
 
     public void upbenchmarkIDs(ReplacementMap replacementMap) {
         benchmark = replacementMap.getField(benchmark);
-//        dateField = replacementMap.getField(dateField);
+        //dateField = replacementMap.getField(dateField);
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
         if (getEverything) {
             items.add(benchmark);
-  //          items.add(dateField);
+            //items.add(dateField);
         }
         return items;
     }

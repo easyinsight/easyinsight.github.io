@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.filtering.IFilterDetailEditor"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
          horizontalAlign="center" creationComplete="creationCompleteHandler(event)" width="300">
     <mx:Metadata>
         [Event(name="gotMetadataComplete", type="flash.events.Event")]
@@ -7,9 +7,7 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-
         import com.easyinsight.analysis.AnalysisItemHandle;
-
         import com.easyinsight.dashboard.Dashboard;
 
         import mx.binding.utils.BindingUtils;
@@ -33,26 +31,8 @@
 
         private var _targetValues:ArrayCollection;
 
-        private var _reportID:int;
-        private var _report:AnalysisDefinition;
-
-        private var _dashboardID:int;
-
-        private var _dashboard:Dashboard;
-
         private var realValues:ArrayCollection;
 
-
-        [Bindable(event="dashboardChanged")]
-        public function get dashboard():Dashboard {
-            return _dashboard;
-        }
-
-        public function set dashboard(value:Dashboard):void {
-            if (_dashboard == value) return;
-            _dashboard = value;
-            dispatchEvent(new Event("dashboardChanged"));
-        }
 
         [Bindable(event="targetValuesChanged")]
         public function get targetValues():ArrayCollection {
@@ -65,24 +45,6 @@
             dispatchEvent(new Event("targetValuesChanged"));
         }
 
-        public function set reportID(value:int):void {
-            _reportID = value;
-        }
-
-
-        public function get report():AnalysisDefinition {
-            return _report;
-        }
-
-        public function set report(value:AnalysisDefinition):void {
-            _report = value;
-        }
-
-        public function set dashboardID(value:int):void {
-            _dashboardID = value;
-        }
-
-        private var _feedID:int;
 
         private var dataService:RemoteObject;
 
@@ -100,10 +62,6 @@
             //
         }
 
-        public function set feedID(feedID:int):void {
-            this._feedID = feedID;
-        }
-
         [Bindable]
         private var includeFilter:Boolean;
         private var _otherFilters:ArrayCollection;
@@ -116,19 +74,31 @@
             _otherFilters = value;
         }
 
+        private var _report:AnalysisDefinition;
+
+        private var _dashboard:Dashboard;
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
+
+        public function set dashboard(value:Dashboard):void {
+            _dashboard = value;
+        }
+
         override protected function commitProperties():void {
             super.commitProperties();
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.possibleFields.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.possibleFields.send(_filterValueDefinition, report);
+            dataService.possibleFields.send(_filterValueDefinition, _report, _dashboard);
         }
 
         /*private static function compare(obj1:Object, obj2:Object, fields:Array = null):int {
-            var string1:String = obj1 as String;
-            var string2:String = obj2 as String;
-            return ObjectUtil.stringCompare(string1, string2, true);
-        }*/
+         var string1:String = obj1 as String;
+         var string2:String = obj2 as String;
+         return ObjectUtil.stringCompare(string1, string2, true);
+         }*/
 
         private function gotMetadata(event:ResultEvent):void {
             var fields:ArrayCollection = dataService.possibleFields.lastResult as
@@ -136,18 +106,18 @@
             var filteredStrings:ArrayCollection = new ArrayCollection();
 
             /*var o:Object = new Object();
-            for each (var selected:AnalysisItemHandle in MultiFieldFilterDefinition(_filterValueDefinition).selectedItems) {
-                o[selected.analysisItemID] = true;
-            }*/
+             for each (var selected:AnalysisItemHandle in MultiFieldFilterDefinition(_filterValueDefinition).selectedItems) {
+             o[selected.analysisItemID] = true;
+             }*/
             strings = new ArrayCollection();
             for each (var analysisItem:AnalysisItemSelection in fields) {
                 strings.addItem(analysisItem);
             }
             /*strings.sort = new Sort();
-            strings.sort.compareFunction = compare;*/
+             strings.sort.compareFunction = compare;*/
             sourceValues = strings;
             /*filteredStrings.sort = new Sort();
-            filteredStrings.sort.compareFunction = compare;*/
+             filteredStrings.sort.compareFunction = compare;*/
 //            filteredStrings.filterFunction = targetFilterFunction;
             filteredStrings.refresh();
 
@@ -215,8 +185,8 @@
             var valueFilter:MultiFieldFilterDefinition = _filterValueDefinition as MultiFieldFilterDefinition;
             var a:Array = realValues.toArray().concat();
             /*a = a.filter(function (obj:Object, a:*, b:*):Boolean {
-                return obj.selected;
-            });*/
+             return obj.selected;
+             });*/
 
             valueFilter.fieldOrdering = new ArrayCollection(a.map(function (obj:Object, a:*, b:*):Object {
                 var handle1:AnalysisItemHandle = new AnalysisItemHandle();

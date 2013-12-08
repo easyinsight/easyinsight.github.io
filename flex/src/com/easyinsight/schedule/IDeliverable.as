@@ -15,5 +15,6 @@ public interface IDeliverable {
     function setName(name:String):void;
     function setLabel(label:String):void;
     function setSendOnNoData(noData:Boolean):void;
+    function setConfigurationID(id:int):void;
 }
 }

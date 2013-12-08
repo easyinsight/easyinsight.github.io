@@ -14,7 +14,7 @@ public class DashboardReport extends DashboardElement {
     public var showLabel:Boolean = true;
     public var autoCalculateHeight:Boolean;
     public var spaceSides:Boolean = true;
-    public var recommendedTag:String;
+    public var recommendedTag:int;
     public var overridenFilters:Object;
 
     public function DashboardReport() {

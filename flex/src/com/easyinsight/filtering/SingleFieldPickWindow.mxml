@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+         horizontalAlign="center" creationComplete="creationCompleteHandler(event)" width="300">
+    <mx:Metadata>
+        [Event(name="gotMetadataComplete", type="flash.events.Event")]
+    </mx:Metadata>
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.dashboard.Dashboard;
+
+        import mx.binding.utils.BindingUtils;
+        import mx.collections.ArrayCollection;
+        import mx.controls.List;
+        import mx.controls.RadioButtonGroup;
+        import mx.events.FlexEvent;
+        import mx.events.PropertyChangeEvent;
+        import mx.rpc.events.ResultEvent;
+        import mx.rpc.remoting.RemoteObject;
+
+        private var strings:ArrayCollection;
+
+        private var _filterValueDefinition:AnalysisItemFilterDefinition;
+
+        private var filterTileList:List;
+
+        [Bindable]
+        private var sourceValues:ArrayCollection;
+
+        private var _targetValues:ArrayCollection;
+
+        private var realValues:ArrayCollection;
+
+
+        [Bindable(event="targetValuesChanged")]
+        public function get targetValues():ArrayCollection {
+            return _targetValues;
+        }
+
+        public function set targetValues(value:ArrayCollection):void {
+            if (_targetValues == value) return;
+            _targetValues = value;
+            dispatchEvent(new Event("targetValuesChanged"));
+        }
+
+
+        private var dataService:RemoteObject;
+
+        private function setup():void {
+        }
+
+        public function set filterValueDefinition(filterValueDefinition:AnalysisItemFilterDefinition):void {
+            this._filterValueDefinition = filterValueDefinition;
+            //
+        }
+
+        [Bindable]
+        private var includeFilter:Boolean;
+        private var _otherFilters:ArrayCollection;
+
+        private var _report:AnalysisDefinition;
+
+        private var _dashboard:Dashboard;
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
+
+        public function set dashboard(value:Dashboard):void {
+            _dashboard = value;
+        }
+
+        public function get otherFilters():ArrayCollection {
+            return _otherFilters;
+        }
+
+        public function set otherFilters(value:ArrayCollection):void {
+            _otherFilters = value;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            dataService = new RemoteObject();
+            dataService.destination = "data";
+            dataService.possibleFields.addEventListener(ResultEvent.RESULT, gotMetadata);
+            dataService.possibleFields.send(_filterValueDefinition, _report, _dashboard);
+        }
+
+        private function gotMetadata(event:ResultEvent):void {
+            var fields:ArrayCollection = dataService.possibleFields.lastResult as
+                    ArrayCollection;
+            var filteredStrings:ArrayCollection = new ArrayCollection();
+
+            /*var o:Object = new Object();
+             for each (var selected:AnalysisItemHandle in MultiFieldFilterDefinition(_filterValueDefinition).selectedItems) {
+             o[selected.analysisItemID] = true;
+             }*/
+            strings = new ArrayCollection();
+            for each (var analysisItem:AnalysisItemSelection in fields) {
+                strings.addItem(analysisItem);
+            }
+            /*strings.sort = new Sort();
+             strings.sort.compareFunction = compare;*/
+            sourceValues = strings;
+            /*filteredStrings.sort = new Sort();
+             filteredStrings.sort.compareFunction = compare;*/
+//            filteredStrings.filterFunction = targetFilterFunction;
+            filteredStrings.refresh();
+
+
+            loadedValuesBox.addChild(filterTileList);
+
+            var selectedName:String = _filterValueDefinition.targetItem.display;
+
+            var a:Array = strings.toArray().map(function (obj:Object, a:*, b:*):Object {
+                var m:MultiFieldFilterOption = new MultiFieldFilterOption(obj as AnalysisItemSelection, obj.analysisItem.display == selectedName);
+                m.addEventListener("selectedChanged", valueChanged, false, 0, true);
+                return m;
+            });
+
+            realValues = new ArrayCollection(a);
+            targetValues = new ArrayCollection(a);
+            targetValues.filterFunction = valuesFilterFunction;
+            stackIndex = 1;
+        }
+
+        private function valueChanged(event:PropertyChangeEvent):void {
+            if (event.newValue == true) {
+                var b:Boolean = true;
+                for each(var v:* in realValues) {
+                    if (!v.selected)
+                        b = false;
+                }
+
+            }
+        }
+
+        private function sourceChange():void {
+            sourceValues.refresh();
+        }
+
+        private function includedChange():void {
+            targetValues.refresh();
+        }
+
+        private var _includedKeyword:String;
+
+        public function get includedKeyword():String {
+            return _includedKeyword;
+        }
+
+        public function set includedKeyword(value:String):void {
+            _includedKeyword = value;
+        }
+
+        private var _keyword:String;
+
+        public function get keyword():String {
+            return _keyword;
+        }
+
+        public function set keyword(value:String):void {
+            _keyword = value;
+        }
+
+        public function makeUpdates():FilterDefinition {
+            var valueFilter:AnalysisItemFilterDefinition = _filterValueDefinition as AnalysisItemFilterDefinition;
+            //var a:Array = realValues.toArray().concat();
+
+            valueFilter.targetItem = FilterStringRadioButton(radioGroup.selection.parent).data.analysisItem;
+            /*for each (var o:Object in a) {
+                if (o.selected) {
+                    valueFilter.targetItem = o.analysisItem;
+                    break;
+                }
+            }*/
+
+            return _filterValueDefinition;
+        }
+
+        public function set filterDefinition(filterDefinition:FilterDefinition):void {
+            _filterValueDefinition = filterDefinition as AnalysisItemFilterDefinition;
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
+
+        private var _typeChangeAllowed:Boolean = true;
+
+        [Bindable(event="typeChangeAllowedChanged")]
+        public function get typeChangeAllowed():Boolean {
+            return _typeChangeAllowed;
+        }
+
+        public function set typeChangeAllowed(value:Boolean):void {
+            if (_typeChangeAllowed == value) return;
+            _typeChangeAllowed = value;
+            dispatchEvent(new Event("typeChangeAllowedChanged"));
+        }
+
+        private var filterString:String = "";
+
+        private var selectedFilter:Boolean;
+
+        private function valuesFilterFunction(o:Object):Boolean {
+            var result:Boolean = true;
+            if (selectedFilter) {
+                result = (o.selected as Boolean);
+            }
+            return result && (o.label as String).toLowerCase().indexOf(filterString.toLowerCase()) != -1;
+        }
+
+        private function filterBox_changeHandler(event:Event):void {
+            filterString = filterBox.text;
+            filterTileList.dataProvider.refresh();
+            loadedValuesBox.addChild(filterTileList);
+        }
+
+        private var radioGroup:RadioButtonGroup = new RadioButtonGroup();
+
+        private function creationCompleteHandler(event:FlexEvent):void {
+            filterTileList = new List();
+            filterTileList.id = "solutionGrid";
+            var cf:ClassFactory = new ClassFactory(FilterStringRadioButton);
+            cf.properties = { radioGroup: radioGroup };
+            filterTileList.itemRenderer = cf;
+            filterTileList.dragEnabled = true;
+            filterTileList.dropEnabled = true;
+            filterTileList.dragMoveEnabled = true;
+            filterTileList.columnWidth = 150;
+            filterTileList.rowHeight = 30;
+            filterTileList.verticalScrollPolicy = "on";
+            filterTileList.columnCount = 1;
+            filterTileList.percentWidth = 100;
+
+            BindingUtils.bindProperty(filterTileList, "dataProvider", this, "targetValues");
+        }
+
+        private function addLoadedBox(event:FlexEvent):void {
+            loadedValuesBox.addChild(filterTileList);
+        }
+        ]]>
+	</mx:Script>
+    <mx:HBox width="100%">
+        <mx:Image source="@Embed('../../../../assets/icon-search-black.png')"/>
+        <mx:TextInput id="filterBox" width="100%" change="filterBox_changeHandler(event)"/>
+    </mx:HBox>
+    <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}" width="100%">
+        <mx:Box>
+            <mx:ProgressBar label="Loading the available fields..." indeterminate="true"/>
+        </mx:Box>
+
+        <mx:VBox id="loadedValuesBox" creationComplete="addLoadedBox(event)">
+
+        </mx:VBox>
+
+    </mx:ViewStack>
+</mx:VBox>

@@ -43,6 +43,11 @@
     </filter>
 
     <filter>
+        <filter-name>EmbedKeyFilter</filter-name>
+        <filter-class>com.easyinsight.html.EmbedKeyFilter</filter-class>
+    </filter>
+
+    <filter>
         <filter-name>DisablePublic</filter-name>
         <filter-class>com.easyinsight.html.DisablePublicFilter</filter-class>
     </filter>
@@ -135,6 +140,11 @@
     <filter-mapping>
         <filter-name>ReportFilter</filter-name>
         <url-pattern>/html/report/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>EmbedKeyFilter</filter-name>
+        <url-pattern>/html/user/*</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
@@ -236,6 +246,11 @@
         <servlet-name>CreateConfiguration</servlet-name>
         <display-name>CreateConfiguration</display-name>
         <servlet-class>com.easyinsight.html.CreateConfigurationServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ReportInfo</servlet-name>
+        <servlet-class>com.easyinsight.html.ReportInfoServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -635,6 +650,20 @@
         <servlet-class>com.easyinsight.html.FilterValueServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>ReportsByTagServlet</servlet-name>
+        <servlet-class>com.easyinsight.html.ReportsByTagServlet</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>ReportsByTagServlet</servlet-name>
+        <url-pattern>/html/reportsByTag</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ReportInfo</servlet-name>
+        <url-pattern>/html/reportData</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CreateConfiguration</servlet-name>
         <url-pattern>/html/createConfiguration</url-pattern>
