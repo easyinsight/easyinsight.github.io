@@ -59,6 +59,20 @@ public class FeedService {
         // this goes into a different data provider        
     }
 
+    public FeedDefinition convertDataSource(FeedDefinition dataSource, int toType) {
+        SecurityUtil.authorizeFeed(dataSource.getDataFeedID(), Roles.OWNER);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            feedStorage.updateDataFeedConfiguration(dataSource, conn, toType);
+            return feedStorage.getFeedDefinitionData(dataSource.getDataFeedID(), conn, false);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public List<Tag> getFieldTags() {
         EIConnection conn = Database.instance().getConnection();
         try {
