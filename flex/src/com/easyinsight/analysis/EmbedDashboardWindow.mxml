@@ -78,7 +78,7 @@
                     }
                 }
                 if (str == null) {
-                    str = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\"https://www.easy-insight.com/app/embeddedDashboard/" + _urlKey + "\"></iframe>";
+                    str = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\"https://www.easy-insight.com/app/html/dashboard/" + _urlKey + "/embed\"></iframe>";
                 }
                 url = str;
             } else {
