@@ -44,23 +44,27 @@ public class Concat extends Function {
         SimpleCalculationCache simpleCache = (SimpleCalculationCache) calculationMetadata.getCache(new SimpleCacheBuilder(instanceIDField), processName);
         Value instanceValue = getParameter(0);
         List<IRow> rows = simpleCache.rowsForValue(instanceValue);
-        StringBuilder sb = new StringBuilder();
-        for (IRow row : rows) {
-            Value value = row.getValue(targetField);
-            if (value.type() == Value.EMPTY) {
-                continue;
+        if (rows != null) {
+            StringBuilder sb = new StringBuilder();
+            for (IRow row : rows) {
+                Value value = row.getValue(targetField);
+                if (value.type() == Value.EMPTY) {
+                    continue;
+                }
+                String str = value.toString().trim();
+                if ("".equals(str)) {
+                    continue;
+                }
+                sb.append(str).append(", ");
             }
-            String str = value.toString().trim();
-            if ("".equals(str)) {
-                continue;
+            if (sb.length() > 0) {
+                sb.deleteCharAt(sb.length() - 1);
+                sb.deleteCharAt(sb.length() - 1);
             }
-            sb.append(str).append(", ");
+            return new StringValue(sb.toString());
+        } else {
+            return new EmptyValue();
         }
-        if (sb.length() > 0) {
-            sb.deleteCharAt(sb.length() - 1);
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        return new StringValue(sb.toString());
     }
 
     @Override
