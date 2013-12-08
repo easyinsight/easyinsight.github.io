@@ -94,8 +94,6 @@ public class Account {
     private boolean unlimitedQuickbaseConnections;
     @Column(name="addon_quickbase_connections")
     private int addonQuickbaseConnections;
-    @Column(name="addon_salesforce_connections")
-    private int addonSalesforceConnections;
 
     @Column(name="enterprise_addon_cost")
     private int enterpriseAddonCost;
@@ -348,14 +346,6 @@ public class Account {
 
     public void setAddonQuickbaseConnections(int addonQuickbaseConnections) {
         this.addonQuickbaseConnections = addonQuickbaseConnections;
-    }
-
-    public int getAddonSalesforceConnections() {
-        return addonSalesforceConnections;
-    }
-
-    public void setAddonSalesforceConnections(int addonSalesforceConnections) {
-        this.addonSalesforceConnections = addonSalesforceConnections;
     }
 
     public int getAddonDesigners() {

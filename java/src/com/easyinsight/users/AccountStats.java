@@ -40,9 +40,7 @@ public class AccountStats {
 
     private boolean unlimitedQuickbaseConnections;
     private int addonQuickbaseConnections;
-    private int addonSalesforceConnections;
     private int usedQuickbaseConnections;
-    private int usedSalesforceConnections;
     private boolean sendEmail;
 
     private List<DataSourceStats> statsList;
@@ -71,28 +69,12 @@ public class AccountStats {
         this.addonQuickbaseConnections = addonQuickbaseConnections;
     }
 
-    public int getAddonSalesforceConnections() {
-        return addonSalesforceConnections;
-    }
-
-    public void setAddonSalesforceConnections(int addonSalesforceConnections) {
-        this.addonSalesforceConnections = addonSalesforceConnections;
-    }
-
     public int getUsedQuickbaseConnections() {
         return usedQuickbaseConnections;
     }
 
     public void setUsedQuickbaseConnections(int usedQuickbaseConnections) {
         this.usedQuickbaseConnections = usedQuickbaseConnections;
-    }
-
-    public int getUsedSalesforceConnections() {
-        return usedSalesforceConnections;
-    }
-
-    public void setUsedSalesforceConnections(int usedSalesforceConnections) {
-        this.usedSalesforceConnections = usedSalesforceConnections;
     }
 
     public int getAddonDesigners() {
