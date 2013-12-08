@@ -88,31 +88,39 @@ public class DataSourceTypeRegistry {
     }
 
     private void registerConnectionBillingTypes() {
-        connectionBillingInfoMap.put(FeedType.SALESFORCE, ConnectionBillingType.SALESFORCE);
         connectionBillingInfoMap.put(FeedType.QUICKBASE_COMPOSITE, ConnectionBillingType.QUICKBASE);
 
         connectionBillingInfoMap.put(FeedType.BASECAMP_MASTER, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.BASECAMP_NEXT_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
-        connectionBillingInfoMap.put(FeedType.HIGHRISE_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
-        connectionBillingInfoMap.put(FeedType.ZENDESK_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
-        connectionBillingInfoMap.put(FeedType.PIVOTAL_TRACKER, ConnectionBillingType.SMALL_BIZ);
-        connectionBillingInfoMap.put(FeedType.CONSTANT_CONTACT, ConnectionBillingType.SMALL_BIZ);
-        connectionBillingInfoMap.put(FeedType.GOOGLE_ANALYTICS, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.BATCHBOOK2_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.BATCHBOOK_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.CONSTANT_CONTACT, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.FRESHBOOKS_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
-        connectionBillingInfoMap.put(FeedType.INSIGHTLY_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
-        connectionBillingInfoMap.put(FeedType.YOUTRACK_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.GOOGLE_ANALYTICS, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.HARVEST_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.HIGHRISE_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.INFUSIONSOFT_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.INSIGHTLY_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.LINKEDIN, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.PIVOTAL_TRACKER, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.SALESFORCE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.SENDGRID, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.SOLVE360_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.TRELLO_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.WUFOO_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.XERO_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.YOUTRACK_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.ZENDESK_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
 
-        connectionBillingInfoMap.put(FeedType.SERVER_MYSQL, ConnectionBillingType.CUSTOM_DATA);
-        connectionBillingInfoMap.put(FeedType.DEFAULT, ConnectionBillingType.CUSTOM_DATA);
-        connectionBillingInfoMap.put(FeedType.STATIC, ConnectionBillingType.CUSTOM_DATA);
-        connectionBillingInfoMap.put(FeedType.JSON, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.CLEARDB_COMPOSITE, ConnectionBillingType.CUSTOM_DATA);
         connectionBillingInfoMap.put(FeedType.DATABASE_CONNECTION, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.DEFAULT, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.JSON, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.SERVER_MYSQL, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.SERVER_SQL_SERVER, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.SERVER_POSTGRES, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.SERVER_ORACLE, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.STATIC, ConnectionBillingType.CUSTOM_DATA);
         connectionBillingInfoMap.put(FeedType.TREASURE_DATA, ConnectionBillingType.CUSTOM_DATA);
     }
 

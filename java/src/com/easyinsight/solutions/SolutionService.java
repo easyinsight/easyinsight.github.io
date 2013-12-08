@@ -305,11 +305,6 @@ public class SolutionService {
                     } else if (stats.getUsedQuickbaseConnections() >= stats.getAddonQuickbaseConnections()) {
                         installationValidation.setEnterpriseLimit(true);
                     }
-                } else if (connectionBillingType == ConnectionBillingType.SALESFORCE) {
-                    // do we have salesforce connections available?
-                    if (stats.getUsedSalesforceConnections() >= stats.getAddonSalesforceConnections()) {
-                        installationValidation.setEnterpriseLimit(true);
-                    }
                 }
             }
             long existingID = 0;
@@ -926,12 +921,13 @@ public class SolutionService {
                     "analysis.create_date, ANALYSIS.DESCRIPTION, DATA_FEED.FEED_NAME, ANALYSIS.AUTHOR_NAME," +
                     "DATA_FEED.PUBLICLY_VISIBLE, SOLUTION.NAME, SOLUTION.SOLUTION_ID, ANALYSIS.url_key, analysis.recommended_exchange FROM DATA_FEED, SOLUTION, ANALYSIS " +
                     " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                    "DATA_FEED.feed_type = SOLUTION.data_source_type AND ANALYSIS.SOLUTION_VISIBLE = ?");
+                    "DATA_FEED.feed_type = SOLUTION.data_source_type AND ANALYSIS.SOLUTION_VISIBLE = ? AND ANALYSIS.RECOMMENDED_EXCHANGE = ?");
 
             PreparedStatement getReportRatingStmt = conn.prepareStatement("SELECT count(exchange_report_install_id) from " +
                     "exchange_report_install where report_id = ?");
 
             analysisQueryStmt.setBoolean(1, true);
+            analysisQueryStmt.setBoolean(2, true);
             ResultSet analysisRS = analysisQueryStmt.executeQuery();
             while (analysisRS.next()) {
                 long analysisID = analysisRS.getLong(1);
