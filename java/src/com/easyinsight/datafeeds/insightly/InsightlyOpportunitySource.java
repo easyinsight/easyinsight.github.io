@@ -34,6 +34,7 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
     public static final String FORECAST_CLOSE_DATE = "Forecast Close Date";
     public static final String ACTUAL_CLOSE_DATE = "Actual Close Date";
     public static final String CATEGORY = "Opportunity Category";
+    public static final String PIPELINE = "Opportunity Pipeline";
     public static final String STAGE = "Opportunity Stage";
     public static final String STATE = "Opportunity State";
     public static final String RESPONSIBLE_USER = "Responsible User";
@@ -96,6 +97,11 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
         if (probabilityKey == null) {
             probabilityKey = new NamedKey(PROBABILITY);
         }
+        Key pipelineKey = keys.get(PIPELINE);
+        if (pipelineKey == null) {
+            pipelineKey = new NamedKey(PIPELINE);
+        }
+        fields.add(new AnalysisDimension(pipelineKey, true));
         fields.add(new AnalysisMeasure(probabilityKey, PROBABILITY, AggregationTypes.AVERAGE, true, FormattingConfiguration.PERCENTAGE));
         fields.add(new AnalysisMeasure(keys.get(BID_DURATION), AggregationTypes.SUM));
         fields.add(new AnalysisMeasure(keys.get(BID_AMOUNT), BID_AMOUNT, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
@@ -126,11 +132,19 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
                 userMap.put(user.get("USER_ID").toString(), user.get("FIRST_NAME").toString() + " " + user.get("LAST_NAME").toString());
                 System.out.println("blah");
             }
-            List pipelineStageList = runJSONRequest("pipelineStages", insightlyCompositeSource, httpClient);
+
+            Map<String, String> pipelineMap = new HashMap<String, String>();
+            List pipelineList = runJSONRequest("Pipelines", insightlyCompositeSource, httpClient);
+            for (Object pipelineObject : pipelineList) {
+                Map pipelineObj = (Map) pipelineObject;
+                String pipelineID = pipelineObj.get("PIPELINE_ID").toString();
+                pipelineMap.put(pipelineID, pipelineObj.get("PIPELINE_NAME").toString());
+            }
+            List pipelineStageList = runJSONRequest("PipelineStages", insightlyCompositeSource, httpClient);
             Map<String, String> pipelineStageMap = new HashMap<String, String>();
             for (Object pipelineObject : pipelineStageList) {
-                Map pipelineMap = (Map) pipelineObject;
-                pipelineStageMap.put(pipelineMap.get("STAGE_ID").toString(), pipelineMap.get("STAGE_NAME").toString());
+                Map pipelineStageObject = (Map) pipelineObject;
+                pipelineStageMap.put(pipelineStageObject.get("STAGE_ID").toString(), pipelineStageObject.get("STAGE_NAME").toString());
             }
             List categoryList = runJSONRequest("opportunityCategories", insightlyCompositeSource, httpClient);
             Map<String, String> categoryMap = new HashMap<String, String>();
@@ -174,9 +188,13 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
                 if (category != null) {
                     row.addValue(keys.get(CATEGORY), category);
                 }
-                String pipelineStageID = pipelineStageMap.get(getValue(contactMap, "PIPELINE_STAGE_ID").toString());
+                String pipelineStageID = pipelineStageMap.get(getValue(contactMap, "STAGE_ID").toString());
                 if (pipelineStageID != null) {
                     row.addValue(keys.get(STAGE), pipelineStageID);
+                }
+                String pipelineID = pipelineMap.get(getValue(contactMap, "PIPELINE_ID").toString());
+                if (pipelineID != null) {
+                    row.addValue(keys.get(PIPELINE), pipelineID);
                 }
                 for (AnalysisItem field : getFields()) {
                     if (field.getKey().toKeyString().startsWith("OPPORTUNITY_FIELD")) {
