@@ -64,8 +64,8 @@ public class CampaignCache extends ConstantContactBaseSource {
                         }
                     }
                     Date lastRun;
-                    if (node.get("last_run_date") != null) {
-                        lastRun = DATE_FORMAT.parse(node.get("last_run_date").toString());
+                    if (node.get("modified_date") != null) {
+                        lastRun = DATE_FORMAT.parse(node.get("modified_date").toString());
                     } else {
                         lastRun = new Date(1);
                     }
