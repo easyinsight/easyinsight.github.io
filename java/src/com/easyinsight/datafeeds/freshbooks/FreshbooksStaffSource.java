@@ -107,13 +107,18 @@ public class FreshbooksStaffSource extends FreshbooksBaseSource {
                     String userName = queryField(invoice, "username/text()");
                     String email = queryField(invoice, "email/text()");
                     String staffID = queryField(invoice, "staff_id/text()");
-                    int rate = Integer.parseInt(queryField(invoice, "rate/text()"));
+                    int rate;
+                    try {
+                        rate = Integer.parseInt(queryField(invoice, "rate/text()"));
+                    } catch (NumberFormatException e) {
+                        rate = 0;
+                    }
 
                     IRow row = dataSet.createRow();
                     addValue(row, FreshbooksStaffSource.FIRST_NAME, firstName, keys);
                     addValue(row, FreshbooksStaffSource.STAFF_ID, staffID, keys);
                     addValue(row, FreshbooksStaffSource.LAST_NAME, lastName, keys);
-                    addValue(row, FreshbooksStaffSource.EMAIL, lastName, keys);
+                    addValue(row, FreshbooksStaffSource.EMAIL, email, keys);
                     addValue(row, FreshbooksStaffSource.NAME, name, keys);
                     addValue(row, FreshbooksStaffSource.USERNAME, userName, keys);
                     addValue(row, FreshbooksStaffSource.USERNAME, userName, keys);
