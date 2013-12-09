@@ -8,6 +8,7 @@ var grid;
 var textTemplate;
 var reportTemplate;
 var fullReportTemplate;
+var test;
 
 var gaugeTemplate;
 var configurationDropdownTemplate;
@@ -914,16 +915,18 @@ $(function () {
             })
         }
 
-
-
         saveConfiguration = function (name, key) {
+            var ac = _.reduce(reportMap, function(m, e, i) {
+                m[i] = e.report.report.id;
+                return m;
+            }, {});
             var c = {"filters": _.reduce(filterMap, function (m, e, i) {
                             m[i] = toFilterString(e.filter, true);
                 return m;
                         }, {}), "stacks": _.reduce(stackMap, function(m, e, i) {
                 m[i] = e.data.selected;
                 return m;
-            }, {}), "name": name, "key": key }
+            }, {}), "reports": ac, "name": name, "key": key }
             $.ajax({ url: "/app/html/" + ((dashboardJSON["id"] != -1) ? "dashboard" : "report")  + "/" + dashboardJSON["key"] + "/config",
                 contentType: "application/json; charset=UTF-8",
                 data: JSON.stringify(c),

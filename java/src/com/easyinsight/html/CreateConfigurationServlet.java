@@ -79,7 +79,17 @@ public class CreateConfigurationServlet extends HttpServlet {
                 }
             } else {
                 dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
-                filters = ds.getFiltersForDashboard(dashboardIDString);
+
+                Map<String, InsightDescriptor> reportList = new HashMap<String, InsightDescriptor>();
+                for(Map.Entry<String, Object> e : ((JSONObject) jo.get("reports")).entrySet()) {
+                    InsightResponse ir = new AnalysisService().openAnalysisIfPossible((String) e.getValue());
+                    if(ir.getInsightDescriptor() != null)
+                    reportList.put(e.getKey(), ir.getInsightDescriptor());
+                }
+
+
+                filters = ds.getFiltersForDashboard(dashboardIDString, reportList);
+
                 for(Map.Entry<String, Object> e : ((JSONObject) jo.get("filters")).entrySet()) {
                     FilterPositionKey filterKey = FilterPositionKey.parseHtmlKey(e.getKey());
                     if(filters.containsKey(filterKey)) {
@@ -89,6 +99,9 @@ public class CreateConfigurationServlet extends HttpServlet {
                     }
 
                 }
+
+                positions.setReports(reportList);
+
 
             }
 
