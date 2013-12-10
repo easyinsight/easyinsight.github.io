@@ -231,7 +231,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         long time = cal.getTimeInMillis();
         time = 0;
         Map<String, IRow> ticketMap = new HashMap<String, IRow>();
-        String updateDate = updateFormat.format(cal.getTime());
+        String updateDate = "2010-01-01";
         String nextPage = zendeskCompositeSource.getUrl() + "/api/v2/exports/tickets.json?start_time=" + time;
 
         while (nextPage != null) {
@@ -257,8 +257,28 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
 
 
         nextPage = zendeskCompositeSource.getUrl() + "/api/v2/search.json?query=" + "type:ticket%20updated>" + updateDate;
+        int retryCount = 0;
         while (nextPage != null) {
-            Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
+            Map ticketObjects;
+
+            retryCount = 0;
+            do {
+                ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
+
+                //System.out.println(jo);
+
+
+                if(ticketObjects != null && "Sorry, we could not complete your search query. Please try again in a moment.".equals(ticketObjects.get("description"))) {
+                    System.out.println("Struggling to search...");
+                    if(retryCount > 10) {
+                        throw new RuntimeException("We are having problems retrieving comments from Zendesk at the moment.");
+                    }
+                    retryCount++;
+                    ticketObjects = null;
+                    Thread.sleep(10000);
+                }
+            } while(ticketObjects == null);
+
             List results = (List) ticketObjects.get("results");
             if (results != null) {
                 for (Object obj : results) {

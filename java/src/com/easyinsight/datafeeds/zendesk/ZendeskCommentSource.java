@@ -70,8 +70,8 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
         try {
 
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
-            if(!zendeskCompositeSource.isLoadComments())
-                return new DataSet();
+            /*if(!zendeskCompositeSource.isLoadComments())
+                return new DataSet();*/
             HttpClient httpClient = getHttpClient(zendeskCompositeSource);
             ZendeskUserCache zendeskUserCache = zendeskCompositeSource.getOrCreateUserCache(httpClient);
             return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache, IDataStorage);
@@ -136,22 +136,24 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
 
         int retryCount = 0;
 
-        String path = "/api/v2/search.json?query=created>2010-1-1%20type:comment";
+        String path = "/api/v2/search.json?query=created>2010-01-01%20type:comment";
             do {
                 JSONObject jo = null;
                 retryCount = 0;
                 do {
                     jo = (JSONObject) runJSONRestRequest(zendeskCompositeSource, httpClient, path, builder);
+
                     //System.out.println(jo);
 
 
                     if(jo != null && "Sorry, we could not complete your search query. Please try again in a moment.".equals(jo.get("description"))) {
+                        System.out.println("Struggling to search...");
                         if(retryCount > 10) {
                             throw new RuntimeException("We are having problems retrieving comments from Zendesk at the moment.");
                         }
                         retryCount++;
                         jo = null;
-                        Thread.sleep(2000);
+                        Thread.sleep(10000);
                     }
                 } while(jo == null);
                 //System.out.println(jo.toString());
