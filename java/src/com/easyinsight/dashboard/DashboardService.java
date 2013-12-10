@@ -713,9 +713,9 @@ public class DashboardService {
         }
     }
 
-    public Map<FilterPositionKey, FilterDefinition> getFiltersForDashboard(String urlKey) {
+    public Map<FilterPositionKey, FilterDefinition> getFiltersForDashboard(String urlKey, Map<String, InsightDescriptor> reportList) {
         Dashboard d = getDashboardView(canAccessDashboard(urlKey), null);
-        ListFiltersVisitor listFiltersVisitor = new ListFiltersVisitor();
+        ListFiltersVisitor listFiltersVisitor = new ListFiltersVisitor(reportList);
         d.visit(listFiltersVisitor);
         Map<FilterPositionKey, FilterDefinition> list = listFiltersVisitor.getFilters();
         for(FilterDefinition f : FilterUtils.flattenFilters(d.getFilters())) {
@@ -860,6 +860,12 @@ public class DashboardService {
             }
             if (dashboardElement instanceof DashboardReport) {
                 DashboardReport dashboardReport = (DashboardReport) dashboardElement;
+
+                InsightDescriptor report = dashboardStackPositions.getReports().get(dashboardReport.getUrlKey());
+                if (report != null) {
+                    dashboardReport.setReport(report);
+                }
+
                 // adjust filters, adjust reports...
                 WSAnalysisDefinition reportDefinition = new AnalysisStorage().getAnalysisDefinition(dashboardReport.getReport().getId());
                 Map<String, FilterDefinition> filters = new HashMap<String, FilterDefinition>();
@@ -871,24 +877,31 @@ public class DashboardService {
                     }
                 }
                 dashboardReport.setOverridenFilters(filters);
-                InsightDescriptor report = dashboardStackPositions.getReports().get(dashboardReport.getUrlKey());
-                if (report != null) {
-                    dashboardReport.setReport(report);
-                }
+
             }
         }
     }
 
     private static class ListFiltersVisitor implements IDashboardVisitor {
+        private Map<String, InsightDescriptor> reportList;
+
         private Map<FilterPositionKey, FilterDefinition> filters = new HashMap<FilterPositionKey, FilterDefinition>();
 
         private Map<FilterPositionKey, FilterDefinition> getFilters() {
             return filters;
         }
 
+        private ListFiltersVisitor(Map<String, InsightDescriptor> reportList) {
+            this.reportList = reportList;
+        }
+
         public void accept(DashboardElement dashboardElement) {
             if(dashboardElement instanceof DashboardReport) {
                 InsightDescriptor id = ((DashboardReport) dashboardElement).getReport();
+
+                if(reportList.containsKey(dashboardElement.getUrlKey()) && !reportList.get(dashboardElement.getUrlKey()).getUrlKey().equals(id.getUrlKey())) {
+                    id = reportList.get(dashboardElement.getUrlKey());
+                }
                 WSAnalysisDefinition ad = new AnalysisService().openAnalysisDefinition(id.getId());
                 for(FilterDefinition f : FilterUtils.flattenFilters(ad.getFilterDefinitions())) {
                     FilterPositionKey fk = new FilterPositionKey(FilterPositionKey.DASHBOARD_REPORT, f.getFilterID(), dashboardElement.getUrlKey());
