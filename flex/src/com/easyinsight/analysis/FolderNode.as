@@ -12,5 +12,9 @@ public class FolderNode extends FeedNode{
     override public function get display():String {
         return folder.name;
     }
+
+    override public function get unqualifiedDisplay():String {
+        return folder.name;
+    }
 }
 }
