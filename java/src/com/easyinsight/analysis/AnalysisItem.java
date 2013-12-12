@@ -79,6 +79,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="based_on_report_field")
     private Long basedOnReportField;
 
+    @Column(name="unqualified_display_name")
+    private String unqualifiedDisplayName;
+
     @Column(name = "sort_sequence")
     private int sortSequence;
 
@@ -164,6 +167,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public String getUnqualifiedDisplayName() {
+        return unqualifiedDisplayName;
+    }
+
+    public void setUnqualifiedDisplayName(String unqualifiedDisplayName) {
+        this.unqualifiedDisplayName = unqualifiedDisplayName;
     }
 
     public Long getBasedOnReportField() {
@@ -386,6 +397,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
     }
 
+    public String toUnqualifiedDisplay() {
+        if (unqualifiedDisplayName == null) {
+            return toDisplay();
+        } else {
+            return unqualifiedDisplayName;
+        }
+    }
+
     public boolean isHighIsGood() {
         return highIsGood;
     }
@@ -407,6 +426,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public void setDisplayName(String displayName) {
+        if (unqualifiedDisplayName == null) {
+            unqualifiedDisplayName = displayName;
+        }
         this.displayName = displayName;
     }
 
