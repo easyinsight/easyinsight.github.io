@@ -1975,18 +1975,12 @@ public class AnalysisService {
             allItems.addAll(reportItems);
             CalculationTreeNode tree;
             ICalculationTreeVisitor visitor;
-            CalculationsParser.startExpr_return ret;
-            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
-            CommonTokenStream tokes = new CommonTokenStream();
-            tokes.setTokenSource(lexer);
-            CalculationsParser parser = new CalculationsParser(tokes);
-            parser.setTreeAdaptor(new NodeFactory());
+
             Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, UniqueKey> map = new HashMap<String, UniqueKey>();
             try {
-                ret = parser.startExpr();
-                tree = (CalculationTreeNode) ret.getTree();
+                tree = CalculationHelper.createTree(calculationString);
 
                 if (allItems != null) {
                     KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);

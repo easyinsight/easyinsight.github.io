@@ -71,15 +71,9 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
-        CalculationsParser.startExpr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(derivationCode));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
 
+        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
 
         List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
 
@@ -88,8 +82,7 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         }
 
         try {
-            ret = parser.startExpr();
-            tree = (CalculationTreeNode) ret.getTree();
+            tree = CalculationHelper.createTree(derivationCode);
 
             if (allItems != null) {
                 KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
@@ -144,25 +137,19 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
     public Value calculate(IRow row, Collection<AnalysisItem> analysisItems, CalculationMetadata calculationMetadata) {
         CalculationTreeNode calculationTreeNode;
         ICalculationTreeVisitor visitor;
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(derivationCode));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
         Resolver r = new Resolver();
         for (Key key : row.getKeys()) {
             r.addKey(key);
         }
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
         try {
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
-                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                    calculationTreeNode.deleteChild(i);
-                    break;
-                }
-            }
+
+            calculationTreeNode = CalculationHelper.createTree(derivationCode);
+//            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
+//                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
+//                    calculationTreeNode.deleteChild(i);
+//                    break;
+//                }
+//            }
             Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
             for (AnalysisItem analysisItem : analysisItems) {
                 List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());

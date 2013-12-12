@@ -6,6 +6,7 @@ options { output=AST; }
 tokens
 {
 	FuncEval;
+	VariableToken;
 	OpenParen = '(';
 	CloseParen = ')';
 	Add = '+';
@@ -54,18 +55,30 @@ factor	:	symbol | parenExpr;
 // Rule to remove parenthesis out of the AST
 parenExpr
 	:	OpenParen expr CloseParen -> expr;
-symbol	:	literal | Variable | function;
-function:	Variable OpenParen (expr (Comma expr)*)? CloseParen -> ^(FuncEval Variable (expr (expr)*)?);
+symbol	:	literal | variable | function;
+function:	variable OpenParen (expr (Comma expr)*)? CloseParen -> ^(FuncEval variable (expr (expr)*)?);
 
+variable:	(namespacedVariable | normalVariable);
+namespacedVariable
+	:	(BracketedVariable (Dot BracketedVariable)*) -> ^(VariableToken BracketedVariable BracketedVariable*);
+
+normalVariable: NoBracketsVariable -> ^(VariableToken NoBracketsVariable);
+	
+/*nobracketsVariable
+	:	NoBracketsVariable -> ^(VariableToken NoBracketsVariable);*/
 /* LEXR */
 
 literal	:	Decimal | String;
 
 Decimal	:	((UInteger (Dot UInteger)?) | (Dot UInteger)) ('E' Integer)?;
 
-Variable:	BracketedVariable | NoBracketsVariable;
-
 String	:	'\"' (Character | Digit | VariableWhitespace | SpecialChars | ']' | '[')* '\"';
+
+BracketedVariable
+	:	OpenBrace (Character | Digit | VariableSpecialChars) (Character | Digit | VariableSpecialChars | VariableWhitespace)* CloseBrace;
+
+NoBracketsVariable
+	:	Character (Character | Digit | VariableWhitespace)*;
 
 // Last rule to make sure whitespace incorporated in earlier rules is counted.
 
@@ -95,12 +108,7 @@ fragment InternationalCharacters
 	
 fragment Character
 	:	LowerCase | UpperCase | InternationalCharacters;
-	
-fragment BracketedVariable
-	:	OpenBrace (Character | Digit | VariableSpecialChars) (Character | Digit | VariableSpecialChars | VariableWhitespace)* CloseBrace;
 
-fragment NoBracketsVariable
-	:	Character (Character | Digit | VariableWhitespace)*;
 	
 // List any special characters that should be part of variable names here.
 fragment NoBracketSpecialChars

@@ -26,7 +26,7 @@ public class VariableNode extends CalculationTreeNode {
     }
     
     public void resolveVariableKey(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems) {
-        String s = getText().trim();
+        String s = getChild(0).getText().trim();
         if(s.startsWith("[") && s.endsWith("]"))
             s = s.substring(1, s.length() - 1);
         variableKey = new NamedKeySpecification(s);

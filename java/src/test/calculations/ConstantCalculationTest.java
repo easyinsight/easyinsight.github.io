@@ -44,14 +44,14 @@ public class ConstantCalculationTest extends TestCase {
 
     private double evalString(String s) {
         ICalculationTreeVisitor visitor = null;
-        CalculationsParser.expr_return ret;
+        CalculationsParser.startExpr_return ret;
         CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(s));
         CommonTokenStream tokes = new CommonTokenStream();
         tokes.setTokenSource(lexer);
         CalculationsParser parser = new CalculationsParser(tokes);
         parser.setTreeAdaptor(new NodeFactory());
         try {
-            ret = parser.expr();
+            ret = parser.startExpr();
             CalculationTreeNode c = (CalculationTreeNode) ret.getTree();
             //visitor = new ResolverVisitor(null, new FunctionFactory());
             c.accept(visitor);

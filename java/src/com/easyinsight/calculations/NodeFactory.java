@@ -66,7 +66,7 @@ public class NodeFactory extends CommonTreeAdaptor {
             case CalculationsLexer.Divide:
                 retVal = new DivideNode(payload);
                 break;
-            case CalculationsLexer.Variable:
+            case CalculationsLexer.VariableToken:
                 retVal = new VariableNode(payload);
                 break;
             case CalculationsLexer.Decimal:

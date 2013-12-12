@@ -17,7 +17,7 @@ public class FunctionNode extends OperationNode {
     }
 
     public void resolveFunction(FunctionFactory f) {
-        func = f.createFunction(getChild(0).getText().trim());
+        func = f.createFunction(getChild(0).getChild(0).getText().trim());
     }
     
     private IFunction func;

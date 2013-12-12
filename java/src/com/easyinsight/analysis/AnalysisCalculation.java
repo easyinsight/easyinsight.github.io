@@ -144,17 +144,9 @@ public class AnalysisCalculation extends AnalysisMeasure {
         Set<KeySpecification> specs;
 
         ICalculationTreeVisitor visitor;
-        CalculationsParser.startExpr_return ret;
-
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
 
         try {
-            ret = parser.startExpr();
-            tree = (CalculationTreeNode) ret.getTree();
+            tree = CalculationHelper.createTree(calculationString);
 
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
             tree.accept(visitor);
@@ -216,26 +208,6 @@ public class AnalysisCalculation extends AnalysisMeasure {
             items = super.measureFilters(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
         }
         return items;
-    }
-
-    private CalculationTreeNode evalString(String s) {
-        CalculationTreeNode calculationTreeNode;        
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(s));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        try {
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            //visitor = new ResolverVisitor(r, new FunctionFactory());
-            //calculationTreeNode.accept(visitor);
-        } catch (RecognitionException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-        return calculationTreeNode;
     }
 
     public List<AnalysisItem> getDerivedItems() {

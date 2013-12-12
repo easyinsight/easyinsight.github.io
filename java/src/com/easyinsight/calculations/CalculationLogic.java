@@ -22,21 +22,8 @@ public class CalculationLogic {
         calculationMetadata.setDataSourceFields(allItems);
         CalculationTreeNode calculationTreeNode;
         ICalculationTreeVisitor visitor;
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
         try {
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
-                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                    calculationTreeNode.deleteChild(i);
-                    break;
-                }
-            }
+            calculationTreeNode = CalculationHelper.createTree(code);
             KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
             Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();

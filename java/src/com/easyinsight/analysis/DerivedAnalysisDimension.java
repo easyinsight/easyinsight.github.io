@@ -88,12 +88,7 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
-        CalculationsParser.startExpr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(derivationCode));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
+
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
         Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
 
@@ -113,14 +108,12 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
         //if (!includeFilters) return analysisItemList;
 
         try {
-            ret = parser.startExpr();
-
             if (allItems != null) {
                 KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
                 keyMap = mapper.getKeyMap();
                 displayMap = mapper.getDisplayMap();
             }
-            tree = (CalculationTreeNode) ret.getTree();
+            tree = CalculationHelper.createTree(derivationCode);
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
             tree.accept(visitor);
         } catch (FunctionException fe) {
