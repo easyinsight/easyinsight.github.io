@@ -22,6 +22,6 @@ public class AnalysisItemNode extends FeedNode {
 
     @Override
     public String toDisplay() {
-        return analysisItem.toDisplay();
+        return analysisItem.toUnqualifiedDisplay();
     }
 }
