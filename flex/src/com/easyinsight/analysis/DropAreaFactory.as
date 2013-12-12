@@ -16,7 +16,7 @@ public class DropAreaFactory {
             return hierarchyComboBox;
         } else {*/
             var dropAreaLabel:Label = new Label();
-            dropAreaLabel.text = analysisItem.display;
+            dropAreaLabel.text = analysisItem.unqualifiedDisplay;
             return dropAreaLabel;
         //}
     }
