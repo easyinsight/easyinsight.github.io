@@ -41,6 +41,27 @@ public class CompositeFeed extends Feed {
         this.addonReports = addonReports;
     }
 
+    public Key originalField(Key key, AnalysisItem originalItem) {
+        if (key instanceof ReportKey) {
+            ReportKey reportKey = (ReportKey) key;
+            Key parentKey = reportKey.getParentKey();
+            ReportKey parentReportKey = (ReportKey) parentKey;
+            AnalysisBasedFeed cachedFeed = new AnalysisBasedFeed();
+            cachedFeed.setAnalysisDefinition(new AnalysisStorage().getAnalysisDefinition(parentReportKey.getReportID()));
+            return cachedFeed.originalField(parentKey, originalItem);
+        } else if (key instanceof DerivedKey) {
+            DerivedKey derivedKey = (DerivedKey) key;
+            long dataSourceID = derivedKey.getFeedID();
+            for (CompositeFeedNode node : compositeFeedNodes) {
+                if (node.getDataFeedID() == dataSourceID) {
+                    Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+                    return feed.originalField(derivedKey.getParentKey(), originalItem);
+                }
+            }
+        }
+        return null;
+    }
+
     public List<Long> getDataSourceIDs() {
         List<Long> ids = super.getDataSourceIDs();
         for (CompositeFeedNode node : compositeFeedNodes) {
@@ -96,7 +117,7 @@ public class CompositeFeed extends Feed {
                 if (joinOverride.getDataSourceID() == getFeedID()) {
                     if (joinOverride.getMarmotScript() != null && !"".equals(joinOverride.getMarmotScript())) {
                         try {
-                            List<IJoin> newJoins = new ReportCalculation(joinOverride.getMarmotScript()).applyJoinCalculation(new ArrayList<FilterDefinition>(filters));
+                            List<IJoin> newJoins = new ReportCalculation(joinOverride.getMarmotScript()).applyJoinCalculation(new ArrayList<FilterDefinition>(filters), getFeedID());
                             for (IJoin newJoin : newJoins) {
                                 newJoin.reconcile(compositeFeedNodes, getFields());
                             }
@@ -164,7 +185,7 @@ public class CompositeFeed extends Feed {
             for (CompositeFeedConnection connection : this.connections) {
                 if (connection.getMarmotScript() != null && !"".equals(connection.getMarmotScript())) {
                     try {
-                        List<IJoin> newJoins = new ReportCalculation(connection.getMarmotScript()).applyJoinCalculation(new ArrayList<FilterDefinition>(filters));
+                        List<IJoin> newJoins = new ReportCalculation(connection.getMarmotScript()).applyJoinCalculation(new ArrayList<FilterDefinition>(filters), getFeedID());
                         for (IJoin newJoin : newJoins) {
                             newJoin.reconcile(compositeFeedNodes, getFields());
                         }

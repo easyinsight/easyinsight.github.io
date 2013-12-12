@@ -1,6 +1,9 @@
 package com.easyinsight.datafeeds;
 
 
+import com.easyinsight.core.DerivedKey;
+import com.easyinsight.core.Key;
+import com.easyinsight.core.ReportKey;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -157,6 +160,11 @@ public abstract class Feed implements Serializable {
 
     public void setFields(List<AnalysisItem> fields) {
         this.fields = fields;
+        if (fields != null) {
+            for (AnalysisItem field : fields) {
+                keyMap.put(field.getKey(), field);
+            }
+        }
     }
 
     public long getFeedID() {
@@ -165,6 +173,19 @@ public abstract class Feed implements Serializable {
 
     public void setFeedID(long feedID) {
         this.feedID = feedID;
+    }
+
+    private Map<Key, AnalysisItem> keyMap = new HashMap<Key, AnalysisItem>();
+
+    public Key originalField(Key key, AnalysisItem originalItem) {
+        AnalysisItem baseItem = keyMap.get(key);
+        if (baseItem != null && originalItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && baseItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+            AnalysisDateDimension date = (AnalysisDateDimension) originalItem;
+            AnalysisDateDimension baseDate = (AnalysisDateDimension) baseItem;
+            date.setDateOnlyField(baseDate.isDateOnlyField());
+        }
+        System.out.println("Data source " + getName() + " - " + getFeedID() + " looking for " + key.toKeyString());
+        return null;
     }
 
     public List<Long> getDataSourceIDs() {
