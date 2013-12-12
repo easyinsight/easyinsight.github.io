@@ -62,6 +62,8 @@
             fieldFilter = _filterDefinition.fieldChoiceFilterLabel;
             section = _filterDefinition.section;
             customizable = _filterDefinition.customizable;
+            defaultDate = _filterDefinition.defaultDateFilter;
+            flexibleDate = _filterDefinition.flexibleDateFilter;
             if (_filterDefinition.field != null) {
                 filterField = filterDefinition.field.display + " - " + filterDefinition.field.key.createString();
             }
@@ -151,6 +153,8 @@
             _filterDefinition.customizable = customizableCheckbox.selected;
             _filterDefinition.minimumRole = int(roleComboBox.selectedItem.data);
             _filterDefinition.fieldChoiceFilterLabel = fieldFilterInput.text;
+            _filterDefinition.defaultDateFilter = defaultDateCheckbox.selected;
+            _filterDefinition.flexibleDateFilter = flexibleDateCheckbox.selected;
             _filterDefinition.section = sectionInput.value;
             dispatchEvent(new FilterEditEvent(_filterDefinition, previousDefinition, null, rebuild));
             PopUpManager.removePopUp(this);
@@ -177,6 +181,12 @@
 
         [Bindable]
         private var customizable:Boolean;
+
+        [Bindable]
+        private var flexibleDate:Boolean;
+
+        [Bindable]
+        private var defaultDate:Boolean;
 		]]>
 	</mx:Script>
 	<mx:VBox id="coreBox">
@@ -230,6 +240,12 @@
                 </mx:FormItem>
                 <mx:FormItem label="Use Field Choice Filter:">
                     <mx:TextInput id="fieldFilterInput" text="{fieldFilter}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Default Date Filter:">
+                    <mx:CheckBox id="defaultDateCheckbox" selected="{defaultDate}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Flexible Date Filter:">
+                    <mx:CheckBox id="flexibleDateCheckbox" selected="{flexibleDate}"/>
                 </mx:FormItem>
             </mx:Form>
         </mx:HBox>
