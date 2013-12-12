@@ -18,7 +18,6 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
     public var availableItems:ArrayCollection  = new ArrayCollection();
     public var availableHandles:ArrayCollection = new ArrayCollection();
     public var availableTags:ArrayCollection = new ArrayCollection();
-    public var excludeReportFields:Boolean;
 
     public function AnalysisItemFilterDefinition() {
     }

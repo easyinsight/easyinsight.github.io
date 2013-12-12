@@ -1,7 +1,6 @@
 package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.filtering.FilterDefinition;
 
 import flash.events.EventDispatcher;
 
@@ -47,6 +46,8 @@ import mx.utils.ObjectUtil;
     public var parentFilters:String;
     public var fieldChoiceFilterLabel:String;
     public var customizable:Boolean;
+    public var flexibleDateFilter:Boolean;
+    public var defaultDateFilter:Boolean;
     public var section:int;
     public var flexID:int = flexIDCtr++;
 		
@@ -86,7 +87,7 @@ import mx.utils.ObjectUtil;
             return filterDefinition.filterName + ":";
         }
         if (filterDefinition.field != null) {
-            return filterDefinition.field.display + ":";
+            return filterDefinition.field.unqualifiedDisplay + ":";
         }
         return "";
     }
@@ -103,7 +104,7 @@ import mx.utils.ObjectUtil;
             return filterDefinition.filterName + end;
         }
         if (filterDefinition.field != null) {
-            return filterDefinition.field.display + end;
+            return filterDefinition.field.unqualifiedDisplay + end;
         }
         return "";
     }
