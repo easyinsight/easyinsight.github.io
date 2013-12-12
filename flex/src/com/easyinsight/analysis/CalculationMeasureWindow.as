@@ -16,7 +16,7 @@ public class CalculationMeasureWindow extends CalculationWindow {
         showMeasures = true;
         if (analysisCalculation != null) {
             calcText = analysisCalculation.calculationString;
-            calcName = analysisCalculation.display;
+            calcName = analysisCalculation.unqualifiedDisplay;
             aggregation = analysisCalculation.aggregation;
             formattingConfiguration = analysisCalculation.formattingConfiguration;
             applyBefore = analysisCalculation.applyBeforeAggregation;
@@ -44,8 +44,11 @@ public class CalculationMeasureWindow extends CalculationWindow {
             var namedKey:NamedKey = new NamedKey();
             namedKey.name = nameInput.text;
             analysisCalculation.key = namedKey;
+            analysisCalculation.displayName = nameInput.text;
+            analysisCalculation.unqualifiedDisplayName = nameInput.text;
         } else {
             analysisCalculation.displayName = nameInput.text;
+            analysisCalculation.unqualifiedDisplayName = nameInput.text;
         }
         analysisCalculation.applyBeforeAggregation = rowLevelCheckbox.selected;
         analysisCalculation.aggregation = measureAggregationBox.selectedItem.value;
