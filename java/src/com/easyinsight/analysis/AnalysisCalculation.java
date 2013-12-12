@@ -148,7 +148,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
         try {
             tree = CalculationHelper.createTree(calculationString);
 
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), structure.getNamespaceMap());
             tree.accept(visitor);
         }  catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
@@ -171,19 +171,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
         VariableListVisitor variableVisitor = new VariableListVisitor();
         tree.accept(variableVisitor);
 
-        specs = variableVisitor.getVariableList();
-
-        /*if (!includeFilters && isApplyBeforeAggregation()) return analysisItemList;
-
-        if (!isApplyBeforeAggregation() && !hasCriteria(criteria, CleanupComponent.AGGREGATE_CALCULATIONS)) return analysisItemList;*/
-
-        for (KeySpecification spec : specs) {
-            AnalysisItem analysisItem;
-            try {
-                analysisItem = spec.findAnalysisItem(keyMap, displayMap);
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
+        for (AnalysisItem analysisItem : variableVisitor.getVariableList()) {
             if (analysisItem != null) {
                 for (AnalysisItem analysisItem1 : analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure)) {
                     if (structure.getInsightRequestMetadata().getPipelines(analysisItem).isEmpty()) {

@@ -114,7 +114,7 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
                 displayMap = mapper.getDisplayMap();
             }
             tree = CalculationHelper.createTree(derivationCode);
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), structure.getNamespaceMap());
             tree.accept(visitor);
         } catch (FunctionException fe) {
             LogClass.error("On calculating " + derivationCode, fe);
@@ -137,15 +137,7 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
         VariableListVisitor variableVisitor = new VariableListVisitor();
         tree.accept(variableVisitor);
 
-        Set<KeySpecification> specs = variableVisitor.getVariableList();
-
-        for (KeySpecification spec : specs) {
-            AnalysisItem analysisItem;
-            try {
-                analysisItem = spec.findAnalysisItem(keyMap, displayMap);
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
+        for (AnalysisItem analysisItem : variableVisitor.getVariableList()) {
             if (analysisItem != null) {
                 for (AnalysisItem analysisItem1 : analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure)) {
                     if (structure.getInsightRequestMetadata().getPipelines(analysisItem).isEmpty()) {
