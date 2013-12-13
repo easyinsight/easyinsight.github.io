@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <mx:AdvancedDataGrid xmlns:mx="http://www.adobe.com/2006/mxml"
-        rowHeight="24" fontSize="14"
+        fontSize="14"
                 selectable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off" styleName="myFontStyle" headerColors="[#EEEEEE, #EEEEEE]">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -24,7 +24,11 @@
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition):void {
             if (dataSet.length > 0) {
                 var trendDef:TrendGridDefinition = analysisDefinition as TrendGridDefinition;
-                setStyle("fontSize", 12);
+                if (trendDef.useCustomFontFamily) {
+                    setStyle("fontFamily", trendDef.getFont());
+                }
+                rowHeight = trendDef.fontSize + 10;
+                setStyle("fontSize", trendDef.fontSize);
                 setStyle("color", 0x505050);
                 this.trend = trendDef;
                 previousText = trendDef.dayWindow + " days ago";
