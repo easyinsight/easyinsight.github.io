@@ -16,8 +16,10 @@ public class CalculationHelper {
         CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(s));
         CommonTokenStream tokes = new CommonTokenStream();
         tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
+        NodeFactory nf = new NodeFactory();
+        CalculationsParser parser = new CalculationParser(tokes);
+
+        parser.setTreeAdaptor(nf);
         ret = parser.startExpr();
         return (CalculationTreeNode) ret.getTree();
 
