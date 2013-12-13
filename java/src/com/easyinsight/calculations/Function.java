@@ -41,7 +41,6 @@ public abstract class Function implements IFunction {
     }
 
     protected AnalysisItem findDataSourceItem(int parameter) {
-        VariableNode variableNode = (VariableNode) functionNode.getChild(parameter);
         String string = getParameterName(parameter);
         if (string.startsWith("[")) {
             string = minusBrackets(string);
