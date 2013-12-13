@@ -286,13 +286,13 @@
                     xField = newXField;
                 }
 
-                var newXAxisTitle:String = (barChartDef.xAxisLabel != null && barChartDef.xAxisLabel != "") ? barChartDef.xAxisLabel : newXAxisItem.display;
+                var newXAxisTitle:String = (barChartDef.xAxisLabel != null && barChartDef.xAxisLabel != "") ? barChartDef.xAxisLabel : newXAxisItem.unqualifiedDisplay;
                 if (newXAxisTitle != xAxisTitle) {
                     xAxisTitle = newXAxisTitle;
                     xAxis.title = xAxisTitle;
                 }
 
-                var newYAxisTitle:String = (barChartDef.yAxisLabel != null && barChartDef.yAxisLabel != "") ? barChartDef.yAxisLabel : newYAxisItem.display;
+                var newYAxisTitle:String = (barChartDef.yAxisLabel != null && barChartDef.yAxisLabel != "") ? barChartDef.yAxisLabel : newYAxisItem.unqualifiedDisplay;
                 if (newYAxisTitle != yAxisTitle) {
                     yAxisTitle = newYAxisTitle;
                     yAxis.title = yAxisTitle;

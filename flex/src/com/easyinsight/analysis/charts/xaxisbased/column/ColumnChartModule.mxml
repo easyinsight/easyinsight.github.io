@@ -138,9 +138,14 @@
                 if (measure == null) {
                     return null;
                 }
-                if (fieldName == 'yValue')
-                    return(item[measure.qualifiedName()].toNumber());
-                else if (fieldName == "xValue")
+                if (fieldName == 'yValue') {
+                    trace("looking for " + measure.qualifiedName());
+                    var o:Object = item[measure.qualifiedName()];
+                    if (o != null) {
+                        return(o.toNumber());
+                    }
+                    return null;
+                } else if (fieldName == "xValue")
                     return(item[xField].toString());
                 else
                     return null;

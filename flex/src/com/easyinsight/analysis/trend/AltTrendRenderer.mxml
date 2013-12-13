@@ -151,7 +151,7 @@
             var change:Number = (now - previous) / previous * 100;
             percentChange = formatter.format(change);
             trendColor = getColor(_outcome);
-            trendLabel = value.measure.display;
+            trendLabel = value.measure.unqualifiedDisplay;
 
             var mFormatter:Formatter = _outcome.measure.getFormatter();
             currentValue = mFormatter.format(_outcome.now.getValue());

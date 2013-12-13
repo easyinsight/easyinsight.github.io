@@ -342,7 +342,7 @@
 
                 xAxis.categoryField = newXAxisItem.qualifiedName();
 
-                var newXAxisTitle:String = (columnChartDef.xAxisLabel != null && columnChartDef.xAxisLabel != "") ? columnChartDef.xAxisLabel : newXAxisItem.display;
+                var newXAxisTitle:String = (columnChartDef.xAxisLabel != null && columnChartDef.xAxisLabel != "") ? columnChartDef.xAxisLabel : newXAxisItem.unqualifiedDisplay;
                 if (newXAxisTitle != xAxisTitle) {
                     xAxisTitle = newXAxisTitle;
                     xAxis.title = xAxisTitle;
@@ -353,7 +353,7 @@
                     yField = newYField;
                 }
 
-                var newYAxisTitle:String = (columnChartDef.yAxisLabel != null && columnChartDef.yAxisLabel != "") ? columnChartDef.yAxisLabel : newYAxisItem.display;
+                var newYAxisTitle:String = (columnChartDef.yAxisLabel != null && columnChartDef.yAxisLabel != "") ? columnChartDef.yAxisLabel : newYAxisItem.unqualifiedDisplay;
                 if (newYAxisTitle != yAxisTitle) {
                     yAxisTitle = newYAxisTitle;
                     yAxis.title = yAxisTitle;
