@@ -163,7 +163,7 @@
 
         public function set analysisItem(analysisItem:AnalysisItem):void {
             this.startingAnalysisItem = analysisItem;
-            this.displayName = analysisItem.display;
+            this.displayName = analysisItem.unqualifiedDisplayName == null ? analysisItem.displayName : analysisItem.unqualifiedDisplayName;
             this.key = analysisItem.key;
             this.hidden = analysisItem.hidden;
             //this.reload = analysisItem.reloadFromDataSource;
@@ -241,6 +241,7 @@
                     /*if (analysisItem.getType() == existingType) {
                      analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
                      }*/
+                    analysisItem.unqualifiedDisplayName = fieldNameInput.text;
                     analysisItem.displayName = fieldNameInput.text;
                     analysisItem.originalDisplayName = startingAnalysisItem.originalDisplayName != null ? startingAnalysisItem.originalDisplayName : startingAnalysisItem.display;
                     analysisItem.key = key;

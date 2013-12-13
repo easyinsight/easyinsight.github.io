@@ -63,11 +63,6 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         this.derivationCode = derivationCode;
     }
 
-    @Override
-    public boolean isTimeshift() {
-        return false;
-    }
-
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
@@ -89,7 +84,7 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
                 keyMap = mapper.getKeyMap();
                 displayMap = mapper.getDisplayMap();
             }
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), structure.getNamespaceMap());
             tree.accept(visitor);
         } catch (FunctionException fe) {
             LogClass.error("On calculating " + derivationCode, fe);
@@ -112,15 +107,7 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         VariableListVisitor variableVisitor = new VariableListVisitor();
         tree.accept(variableVisitor);
 
-        Set<KeySpecification> specs = variableVisitor.getVariableList();
-
-        for (KeySpecification spec : specs) {
-            AnalysisItem analysisItem;
-            try {
-                analysisItem = spec.findAnalysisItem(keyMap, displayMap);
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
+        for (AnalysisItem analysisItem : variableVisitor.getVariableList()) {
             if (analysisItem != null) {
                 for (AnalysisItem analysisItem1 : analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure)) {
                     if (structure.getInsightRequestMetadata().getPipelines(analysisItem).isEmpty()) {
@@ -132,55 +119,6 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         }
 
         return analysisItemList;
-    }
-
-    public Value calculate(IRow row, Collection<AnalysisItem> analysisItems, CalculationMetadata calculationMetadata) {
-        CalculationTreeNode calculationTreeNode;
-        ICalculationTreeVisitor visitor;
-        Resolver r = new Resolver();
-        for (Key key : row.getKeys()) {
-            r.addKey(key);
-        }
-        try {
-
-            calculationTreeNode = CalculationHelper.createTree(derivationCode);
-//            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
-//                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-//                    calculationTreeNode.deleteChild(i);
-//                    break;
-//                }
-//            }
-            Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : analysisItems) {
-                List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    keyMap.put(analysisItem.getKey().toKeyString(), items);
-                }
-                items.add(analysisItem);
-            }
-            Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : analysisItems) {
-                List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
-                if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
-                    displayMap.put(analysisItem.toDisplay(), items);
-                }
-                items.add(analysisItem);
-            }
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
-            calculationTreeNode.accept(visitor);
-
-            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, this, calculationMetadata);
-            calculationTreeNode.accept(rowVisitor);
-            return rowVisitor.getResult();
-        } catch (FunctionException fe) {
-            throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
-        } catch (ReportException re) {
-            throw re;
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage() + " in calculating " + derivationCode, e);
-        }
     }
 
     public List<AnalysisItem> getDerivedItems() {

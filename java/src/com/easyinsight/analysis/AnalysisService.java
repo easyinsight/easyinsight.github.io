@@ -1039,7 +1039,7 @@ public class AnalysisService {
 
             List<ActualRowLayoutItem> forms;
             if ("Data Log".equals(useSource.getFeedName())) {
-                forms = createForms(pool);
+                forms = createForms(pool, dataSourceID);
             } else {
                 forms = new ArrayList<ActualRowLayoutItem>();
                 ActualRowLayoutItem actualRowLayoutItem = new ActualRowLayoutItem();
@@ -1167,7 +1167,7 @@ public class AnalysisService {
 
                 List<ActualRowLayoutItem> forms;
                 if ("Data Log".equals(useSource.getFeedName())) {
-                    forms = createForms(pool);
+                    forms = createForms(pool, report.getDataFeedID());
                 } else {
                     forms = new ArrayList<ActualRowLayoutItem>();
                     ActualRowLayoutItem actualRowLayoutItem = new ActualRowLayoutItem();
@@ -1189,24 +1189,24 @@ public class AnalysisService {
         }
     }
 
-    private List<ActualRowLayoutItem> createForms(List<AnalysisItem> pool) throws SQLException {
+    private List<ActualRowLayoutItem> createForms(List<AnalysisItem> pool, long dataSourceID) throws SQLException {
         List<ActualRowLayoutItem> forms = new ArrayList<ActualRowLayoutItem>();
-        forms.addAll(new ReportCalculation("defineform(2, 0, 300, 110, \"Related Provider\", \"Date\")").apply(pool));
+        forms.addAll(new ReportCalculation("defineform(2, 0, 300, 110, \"Related Provider\", \"Date\")").apply(pool, dataSourceID));
         forms.addAll(new ReportCalculation("defineform(3, 0, 120, 140, \"Visits Schd\", \"Walk-Ins\", \"MC/WC Schd\", \"Init Evals Schd\"," +
-                "\"Init Evals CX/NS\", \"FUV CX/NS\", \"Hr-WK per FD\", \"Hr-Patient per FD\", \"Procedures/Day-FD\", \"Notes\")").apply(pool));
+                "\"Init Evals CX/NS\", \"FUV CX/NS\", \"Hr-WK per FD\", \"Hr-Patient per FD\", \"Procedures/Day-FD\", \"Notes\")").apply(pool, dataSourceID));
         forms.addAll(new ReportCalculation("defineform(3, 0, 120, 140, \"Visits per PMR\", \"Visits-Override\", \"Charges-Override\", \"Adjustments\"," +
                 "\"Payments-Override\", \"Expenses\", \"Net Income\", \"wRVU-Override\", \"RVU-Override\", \"Gross Payroll\", \"FTE Hrs for MNT\"," +
                 "\"Payments-Bonus Override\", \"Bonus Base Override\", \"Bonus % Override\", \"Bonus Override\", \"Bonus-Splints\", \"HR-Override\"," +
                 "\"Hr-Admin\", \"Hr-CME\", \"HR-PTO\", \"Hr-HOL\", \"Hr-Patient per PMR\", \"Hr-WK per PMR\", \"HR-WK-Override\", \"Hr-Paid\"," +
                 "\"FUV per PMR\", \"FUV-Override\", \"Charges-CAP\", \"Charges-FFS\", \"Charges-FFS\", \"Charges-Supplies\", \"Charges-Treatment\", \"A/R\"," +
                 "\"Payments-CAP\", \"Payments-FFS\", \"Payments-FFS\", \"Payments-Supplies\", \"Payments-Treatment\", \"Referral-HT\", \"Referral-OT\"," +
-                "\"Referral-PT\", \"Referral-SP\", \"Referral-Override\")").apply(pool));
-        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*PT/OT*\")").apply(pool));
-        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*Orthotics*\")").apply(pool));
-        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*CA WC*\")").apply(pool));
-        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*MediCal*\")").apply(pool));
-        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*SPEECH*\")").apply(pool));
-        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*X39*\")").apply(pool));
+                "\"Referral-PT\", \"Referral-SP\", \"Referral-Override\")").apply(pool, dataSourceID));
+        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*PT/OT*\")").apply(pool, dataSourceID));
+        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*Orthotics*\")").apply(pool, dataSourceID));
+        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*CA WC*\")").apply(pool, dataSourceID));
+        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*MediCal*\")").apply(pool, dataSourceID));
+        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*SPEECH*\")").apply(pool, dataSourceID));
+        forms.addAll(new ReportCalculation("defineform(3, 1, 120, 140, \"*X39*\")").apply(pool, dataSourceID));
         return forms;
     }
 
@@ -1668,32 +1668,6 @@ public class AnalysisService {
         }
     }
 
-    public List<Tag> getReportTags() {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-
-            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
-
-            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet tagRS = getTagsStmt.executeQuery();
-
-            List<Tag> reportTags = new ArrayList<Tag>();
-            while (tagRS.next()) {
-                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5));
-                if (tag.isReport()) {
-                    reportTags.add(tag);
-                }
-            }
-
-            return reportTags;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
     public ReportResults getReportsWithTags() {
         return getReportsWithTags(new ArrayList<String>());
     }
@@ -1767,6 +1741,103 @@ public class AnalysisService {
                 Database.closeConnection(conn);
             }
     }
+
+    public ReportResults getReportsWithTags(List<String> reqTags, long dataSourceID) {
+        long userID = SecurityUtil.getUserID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            boolean testAccountVisible = FeedService.testAccountVisible(conn);
+            List<InsightDescriptor> reports = analysisStorage.getInsightDescriptorsForDataSource(userID, SecurityUtil.getAccountID(), dataSourceID, conn, testAccountVisible);
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet tagRS = getTagsStmt.executeQuery();
+            Map<Long, Tag> tags = new HashMap<Long, Tag>();
+            List<Tag> reportTags = new ArrayList<Tag>();
+            while (tagRS.next()) {
+                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5));
+                if (tag.isReport()) {
+                    reportTags.add(tag);
+                }
+                tags.put(tagRS.getLong(1), tag);
+            }
+
+            PreparedStatement getTagsToReportsStmt = conn.prepareStatement("SELECT REPORT_TO_TAG.TAG_ID, REPORT_ID FROM report_to_tag, account_tag WHERE " +
+                    "account_tag.account_tag_id = report_to_tag.tag_id and account_tag.account_id = ?");
+
+            getTagsToReportsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet dsTagRS = getTagsToReportsStmt.executeQuery();
+            Map<Long, List<Tag>> reportToTagMap = new HashMap<Long, List<Tag>>();
+
+            while (dsTagRS.next()) {
+                long reportID = dsTagRS.getLong(2);
+                long tagID = dsTagRS.getLong(1);
+                Tag tag = tags.get(tagID);
+                List<Tag> t = reportToTagMap.get(reportID);
+                if (t == null) {
+                    t = new ArrayList<Tag>();
+                    reportToTagMap.put(reportID, t);
+                }
+                t.add(tag);
+            }
+            getTagsStmt.close();
+            getTagsToReportsStmt.close();
+
+            List<InsightDescriptor> filtered = new ArrayList<InsightDescriptor>();
+            for (InsightDescriptor insightDescriptors : reports) {
+                List<Tag> tagList = reportToTagMap.get(insightDescriptors.getId());
+                if (tagList == null) {
+                    tagList = new ArrayList<Tag>();
+                }
+                insightDescriptors.setTags(tagList);
+                if(reqTags != null && reqTags.size() > 0) {
+                    boolean found = false;
+                    for(Tag t : insightDescriptors.getTags()) {
+                        if(reqTags.contains(t.getName())) {
+                            found = true;
+                        }
+                    }
+                    if(found)
+                        filtered.add(insightDescriptors);
+                } else {
+                    filtered.add(insightDescriptors);
+                }
+            }
+            return new ReportResults(filtered, reportTags);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public List<Tag> getReportTags() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet tagRS = getTagsStmt.executeQuery();
+
+            List<Tag> reportTags = new ArrayList<Tag>();
+            while (tagRS.next()) {
+                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5));
+                if (tag.isReport()) {
+                    reportTags.add(tag);
+                }
+            }
+
+            return reportTags;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public Collection<InsightDescriptor> getInsightDescriptors() {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
@@ -1978,7 +2049,7 @@ public class AnalysisService {
 
             Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, UniqueKey> map = new HashMap<String, UniqueKey>();
+            Map<String, UniqueKey> map = new NamespaceGenerator().generate(dataSourceID, report.getAddonReports());
             try {
                 tree = CalculationHelper.createTree(calculationString);
 
@@ -1992,7 +2063,7 @@ public class AnalysisService {
                         filter.calculationItems(displayMap);
                     }
                 }
-                visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+                visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), map);
                 tree.accept(visitor);
             } catch (RecognitionException e) {
                 e.printStackTrace();
@@ -2000,16 +2071,6 @@ public class AnalysisService {
             }
             VariableListVisitor variableVisitor = new VariableListVisitor();
             tree.accept(variableVisitor);
-
-            Set<KeySpecification> specs = variableVisitor.getVariableList();
-
-            for (KeySpecification spec : specs) {
-                try {
-                    spec.findAnalysisItem(keyMap, displayMap);
-                } catch (CloneNotSupportedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
 
             return null;
         } catch (ClassCastException cce) {

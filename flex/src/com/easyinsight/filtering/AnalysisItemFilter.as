@@ -10,6 +10,8 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
+import mx.collections.Sort;
+import mx.collections.SortField;
 import mx.containers.HBox;
 
 import mx.controls.Button;
@@ -76,7 +78,12 @@ public class AnalysisItemFilter extends HBox implements IFilter {
         window.detailClass = AnalysisItemFilterEditor;
         window.feedID = _feedID;
         window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
-        window.analysisItems = _analysisItems;
+        var fields:ArrayCollection = new ArrayCollection(_analysisItems.toArray());
+        var sort:Sort = new Sort();
+        sort.fields = [new SortField("displayName")];
+        fields.sort = sort;
+        fields.refresh();
+        window.analysisItems = fields;
         window.filterDefinition = _filterDefinition;
         PopUpManager.addPopUp(window, this, true);
         window.x = 50;
@@ -178,7 +185,7 @@ public class AnalysisItemFilter extends HBox implements IFilter {
     }
 
     private function updateFilterLabel():void {
-        linkButton.label = _filterDefinition.targetItem.display;
+        linkButton.label = _filterDefinition.targetItem.unqualifiedDisplay;
     }
 
     private var _loadingFromReport:Boolean = false;

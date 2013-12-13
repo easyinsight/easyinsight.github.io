@@ -374,7 +374,7 @@
                     if (listDef.multiLineHeaders) {
                         columnHeaderObject.headerWordWrap = true;
                     }
-                    columnHeaderObject.headerText = myHeader.display;
+                    columnHeaderObject.headerText = myHeader.unqualifiedDisplay;
                     columnHeaderObject.dataField = myHeader.qualifiedName();
                     var headerFactory:ClassFactory = new ClassFactory(ListViewHeaderRenderer);
                     headerFactory.properties = { eiColor:def.headerTextColor };

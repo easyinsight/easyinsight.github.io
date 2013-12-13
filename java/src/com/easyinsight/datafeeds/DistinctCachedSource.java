@@ -112,6 +112,7 @@ public class DistinctCachedSource extends ServerDataSourceDefinition {
             }
             clone.setOriginalDisplayName(item.toDisplay());
             clone.setDisplayName(item.toDisplay());
+            clone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay());
             clone.setBasedOnReportField(item.getAnalysisItemID());
             Key key = keys.get(clone.toDisplay());
             if (key == null) {

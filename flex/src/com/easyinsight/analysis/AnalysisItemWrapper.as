@@ -26,12 +26,16 @@ public class AnalysisItemWrapper extends EventDispatcher
             }
             if (_children.length > 0) {
                 var sort:Sort = new Sort();
-                sort.fields = [ new SortField("sortType"), new SortField("displayName", true) ];
+                sort.fields = [ new SortField("sortType"), new SortField("unqualifiedDisplayName", true) ];
                 _children.sort = sort;
                 _children.refresh();
             }
             //_children.sort = null;
 		}
+
+    public function get unqualifiedDisplayName():String {
+        return feedNode.unqualifiedDisplay;
+    }
 
     public function get sortType():int {
         return isAnalysisItem() ? 1 : 0;

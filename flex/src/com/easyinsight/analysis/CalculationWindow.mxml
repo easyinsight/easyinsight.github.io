@@ -49,11 +49,15 @@
             <group label="Dates">
                 <function label="date" signature="date(Numeric Field)" description="If no parameter, constructs a date with the present time, if Numeric Field passed in, constructs a date from the number of milliseconds"/>
                 <function label="dayofmonth" signature="dayofmonth(Date Field)" description="Returns the day of month of the date contained in Field"/>
+                <function label="dayofquarter" signature="dayofmonth(Date Field)" description="Returns the quarter of the date contained in Field"/>
                 <function label="dayofyear" signature="dayofyear(Date Field)" description="Returns the day of year of the date contained in Field"/>
                 <function label="days" signature="days(Number of Days)" description="Translates the specified number of days into milliseconds"/>
                 <function label="daysinmonth" signature="daysinmonth(Date Field)" description="Returns the number of days in the month of the date contained in Field"/>
+                <function label="daysinquarter" signature="daysinquarter(Date Field)" description="Returns the number of days in the quarter of the date contained in Field"/>
                 <function label="month" signature="month(Date Field)" description="Returns the month of the date contained in Field"/>
+                <function label="months" signature="months(Number)" description="Returns the specified number of months as an interval"/>
                 <function label="now" signature="now()" description="Returns the current time in milliseconds"/>
+                <function label="quarters" signature="quarters(Number)" description="Returns the specified number of quarters as an interval"/>
                 <function label="weekofyear" signature="weekofyear(Date Field)" description="Returns the week of the year of the date contained in Field"/>
                 <function label="year" signature="year(Date Field)" description="Returns the year of the date contained in Field"/>
             </group>
@@ -77,9 +81,17 @@
                 <function label="sqrt" signature="sqrt(Number)" description="Calculate the square root of Number"/>
                 <function label="tan" signature="tan(Number)" description="Calculate the tangent of Number"/>
             </group>
+            <group label="Other">
+                <function label="concat" signature="concat(Instance Field, Target Field)" description="Dividing up the data by Instance Field, concatenate all of the values of Target Field into a list such that the end result is Value1, Value2, Value3."/>
+                <function label="first" signature="first(Instance Field, Label, Date Field, Target Field)" description="Dividing up the data by Instance Field and ordering the results by Date Field, return the value of Target Field for the first row of each result."/>
+                <function label="last" signature="first(Instance Field, Label, Date Field, Target Field)" description="Dividing up the data by Instance Field and ordering the results by Date Field, return the value of Target Field for the last row of each result."/>
+            </group>
             <group label="Text">
                 <function label="bracketvalue" signature="bracketvalue(String)" description="Returns the first bracketed value found in String. For example, bracketvalue(Deal [John]) would produce a value of John."/>
+                <function label="dateformat" signature="dateformat(Date, String)" description="Formats Date based on the formatting specified in String."/>
+                <function label="decimaldegrees" signature="decimaldegrees(String)" description="Converts the longitude or latitude coordinate passed in as String into the decimal degrees format required for mapping in Easy Insight."/>
                 <function label="firstValue" signature="firstValue(String, String)" description="Returns the first non empty value passed into the function."/>
+                <function label="format" signature="firstValue(Field)" description="Formats the value of Field based on its configured formatting and returns the result as a String."/>
                 <function label="lower" signature="lower(String)" description="Returns a fully lower case version of String."/>
                 <function label="namedbracketdate" signature="namedbracketdate(String, Name, Date Pattern)" description="Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Description, &quot;Target Close&quot;, &quot;MM-dd-YYYY&quot;) will construct a date of &quot;12-15-2010&quot; out of a sample value of [Target Close: 12-15-2010] in the Deal Description field."/>
                 <function label="namedbracketvalue" signature="namedbracketvalue(String, String)" description="Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Name, &quot;Type&quot;) will construct the string &quot;Direct Sales&quot; out of a sample value of [Type: Direct Sales] in the Deal Name field."/>
@@ -332,6 +344,9 @@
         [Bindable]
         protected var wordWrap:Boolean;
 
+        [Bindable]
+        protected var dateTime:Boolean;
+
         public function higlight():void {
             calculationInput.setStyle("borderColor", 0x00AA00);
             calculationInput.setStyle("backgroundColor", 0xBBFFBB);
@@ -346,11 +361,11 @@
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="validateCalculation" result="validatedCalculation()"/>
     </mx:RemoteObject>
-    <mx:HBox width="100%" height="100%">
+    <mx:HBox>
         <mx:VBox horizontalAlign="center">
             <mx:Label text="Available Functions" fontFamily="Tahoma" fontWeight="bold"/>
             <mx:Tree labelField="@label" width="300" itemClick="onFunctionClick(event)" dragEnabled="true" dragMoveEnabled="false"
-                    dataProvider="{functions}" showRoot="false">
+                     dataProvider="{functions}" showRoot="false">
             </mx:Tree>
             <mx:VBox borderStyle="inset" borderThickness="1" backgroundColor="#FFFFFF" visible="{functionSignature != null}">
                 <mx:Label text="{functionSignature}"/>
@@ -359,8 +374,11 @@
                              width="300" height="80"/>
             </mx:VBox>
         </mx:VBox>
+    <mx:VBox>
+    <mx:HBox width="100%" height="100%">
+
         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-            <mx:FormItem label="Name: " direction="horizontal" width="100%">
+            <mx:FormItem label="Name: " direction="horizontal" width="100%" labelWidth="100">
                 <mx:TextInput id="nameInput" width="100%" text="{calcName}"/>
             </mx:FormItem>
             <mx:FormItem label="" direction="vertical" fontFamily="Lucida Grande" fontWeight="normal">
@@ -379,12 +397,6 @@
                         </mx:GridItem>
                     </mx:GridRow>
                 </mx:Grid>
-            </mx:FormItem>
-            <mx:FormItem label="Calculation: " direction="horizontal" width="100%">
-                <schedule:CursorTextArea id="calculationInput" dragEnter="dragEnterHandler(event)"
-                                         dragDrop="dragDropHandler(event)"
-                                         width="300" height="100"
-                                         text="{calcText}" borderStyle="solid" borderThickness="1"/>
             </mx:FormItem>
             <mx:FormItem label="" direction="horizontal">
                 <mx:Button label="+" click="appendSymbol('+')" toolTip="Add"/>
@@ -455,6 +467,9 @@
                 <mx:FormItem label="Apply Before Aggregation:">
                     <mx:CheckBox id="dateApplyBeforeAggregationCheckbox" selected="{dateApplyBeforeAggregation}"/>
                 </mx:FormItem>
+                <mx:FormItem label="Date Time:">
+                    <mx:CheckBox id="dateTimeCheckbox" selected="{dateTime}"/>
+                </mx:FormItem>
             </mx:Form>
             <mx:Form>
                 <mx:FormItem label="Word Wrap">
@@ -468,6 +483,14 @@
                 </mx:FormItem>
             </mx:Form>
          </mx:ViewStack>
+    </mx:HBox>
+        <mx:FormItem label="Calculation: " direction="horizontal" width="100%" labelWidth="100">
+            <schedule:CursorTextArea id="calculationInput" dragEnter="dragEnterHandler(event)"
+                                     dragDrop="dragDropHandler(event)"
+                                     width="550" height="100"
+                                     text="{calcText}" borderStyle="solid" borderThickness="1"/>
+        </mx:FormItem>
+    </mx:VBox>
     </mx:HBox>
     <mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="3"/>
 </mx:Canvas>

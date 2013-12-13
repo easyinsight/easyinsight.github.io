@@ -17,5 +17,9 @@ public class FeedNode {
     public function get display():String {
         return null;
     }
+
+    public function get unqualifiedDisplay():String {
+        return null;
+    }
 }
 }

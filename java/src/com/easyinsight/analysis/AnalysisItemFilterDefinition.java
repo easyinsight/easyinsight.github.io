@@ -50,9 +50,6 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
             inverseJoinColumns = @JoinColumn(name = "hibernate_tag_id", nullable = false))
     private List<WeNeedToReplaceHibernateTag> availableTags;
 
-    @Column(name="exclude_report_fields")
-    private boolean excludeReportFields;
-
     public List<AnalysisItemHandle> getAvailableHandles() {
         if (availableHandles != null && availableHandles.size() > 0) {
             return availableHandles;
@@ -70,7 +67,7 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
     }
 
     public boolean excludeReportFields() {
-        return excludeReportFields;
+        return true;
     }
 
     public List<AnalysisItemHandle> selectedItems() {
@@ -92,14 +89,6 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
     @Override
     public int type() {
         return FilterDefinition.ANALYSIS_ITEM;
-    }
-
-    public boolean isExcludeReportFields() {
-        return excludeReportFields;
-    }
-
-    public void setExcludeReportFields(boolean excludeReportFields) {
-        this.excludeReportFields = excludeReportFields;
     }
 
     public List<AnalysisItemHandle> getFieldOrdering() {
@@ -294,7 +283,7 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
         for(AnalysisItemSelection analysisItem : itemsAvailable) {
             JSONObject j = new JSONObject();
             j.put("value", analysisItem.getAnalysisItem().getAnalysisItemID());
-            j.put("label", analysisItem.getAnalysisItem().toDisplay());
+            j.put("label", analysisItem.getAnalysisItem().toUnqualifiedDisplay());
             available.put(j);
         }
         jo.put("values", available);

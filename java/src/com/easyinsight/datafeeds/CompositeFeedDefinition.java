@@ -375,7 +375,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             Map<String, AnalysisItem> keyMap = new HashMap<String, AnalysisItem>();
             Map<String, List<AnalysisItem>> duplicateNameMap = new HashMap<String, List<AnalysisItem>>();
             for (AnalysisItem analysisItem : analysisItemVisitor.fields) {
-                String displayName = analysisItem.toDisplay();
+                String displayName = analysisItem.toUnqualifiedDisplay();
                 AnalysisItem existing = keyMap.get(displayName);
                 if (existing == null) {
                     keyMap.put(displayName, analysisItem);
@@ -395,6 +395,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
                     DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
                     String name = getCompositeFeedName(derivedKey.getFeedID(), conn);
                     analysisItem.setDisplayName(name + " - " + entry.getKey());
+                    analysisItem.setUnqualifiedDisplayName(entry.getKey());
                 }
             }
 

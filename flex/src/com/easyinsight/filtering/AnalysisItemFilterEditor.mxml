@@ -28,7 +28,6 @@
             }
             analysisItemFilter.availableHandles = handles;
             analysisItemFilter.availableTags = selectedTags;
-            analysisItemFilter.excludeReportFields = excludeReportFieldsCheckBox.selected;
             return analysisItemFilter;
         }
 
@@ -54,7 +53,6 @@
 
             filterFields = selectedItems;
             selectedTags = analysisItemFilter.availableTags;
-            excludeReportFields = analysisItemFilter.excludeReportFields;
         }
 
         public function set feedID(feedID:int):void {
@@ -95,13 +93,9 @@
         private function onMultiTagUpdate(event:MultiFieldEvent):void {
             selectedTags = event.fields;
         }
-
-        [Bindable]
-        private var excludeReportFields:Boolean;
         ]]></mx:Script>
     <mx:HBox>
         <mx:Button label="Configure Fields..." click="configureExplicitFields()" styleName="grayButton"/>
         <mx:Button label="Configure Tags..." click="configureTags()" styleName="grayButton"/>
     </mx:HBox>
-    <mx:CheckBox label="Exclude Report Fields" id="excludeReportFieldsCheckBox" selected="{excludeReportFields}"/>
 </mx:VBox>

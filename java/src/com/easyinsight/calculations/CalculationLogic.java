@@ -32,7 +32,7 @@ public class CalculationLogic {
                     filter.calculationItems(displayMap);
                 }
             }
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(report.getDataFeedID(), report.getAddonReports()));
             calculationTreeNode.accept(visitor);
 
             calculateResults(calculationTreeNode, calculationMetadata);

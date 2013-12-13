@@ -448,7 +448,8 @@ public class FeedDefinition implements Cloneable, Serializable {
                     clone = new AnalysisDimension();
                 }
                 clone.setOriginalDisplayName(item.toDisplay());
-                clone.setDisplayName(item.toDisplay());
+                clone.setDisplayName(report.getName() + " - " + item.toDisplay());
+                clone.setUnqualifiedDisplayName(item.getUnqualifiedDisplayName());
                 ReportKey reportKey = new ReportKey();
                 reportKey.setParentKey(item.getKey());
                 reportKey.setReportID(addonReportID);
@@ -484,6 +485,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         for (AnalysisItem field : allFields) {
             try {
                 AnalysisItem clone = field.clone();
+                //clone.setParentItemID(field.getAnalysisItemID());
                 clones.add(clone);
                 clone.setConcrete(true);
                 replacementMap.put(field.getAnalysisItemID(), clone);

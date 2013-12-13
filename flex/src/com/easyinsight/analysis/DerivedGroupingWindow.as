@@ -16,7 +16,7 @@ public class DerivedGroupingWindow extends CalculationWindow {
         showMeasures = false;
         if (derivedGrouping != null) {
             calcText = derivedGrouping.derivationCode;
-            calcName = derivedGrouping.display;
+            calcName = derivedGrouping.unqualifiedDisplay;
             wordWrap = derivedGrouping.wordWrap;
             groupingApplyBeforeAggregation = derivedGrouping.applyBeforeAggregation;
             html = derivedGrouping.html;
@@ -39,8 +39,11 @@ public class DerivedGroupingWindow extends CalculationWindow {
             var namedKey:NamedKey = new NamedKey();
             namedKey.name = nameInput.text;
             derivedGrouping.key = namedKey;
+            derivedGrouping.displayName = nameInput.text;
+            derivedGrouping.unqualifiedDisplayName = nameInput.text;
         } else {
             derivedGrouping.displayName = nameInput.text;
+            derivedGrouping.unqualifiedDisplayName = nameInput.text;
         }
         derivedGrouping.derivationCode = calculationInput.text;
         derivedGrouping.html = htmlCheckbox.selected;
