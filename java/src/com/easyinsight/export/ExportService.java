@@ -629,7 +629,7 @@ public class ExportService {
         for (AnalysisItem analysisItem : items) {
             for (AnalysisItem headerItem : listDataResults.getHeaders()) {
                 if (headerItem == analysisItem) {
-                    PdfPCell cell = new PdfPCell(new Phrase(analysisItem.toDisplay()));
+                    PdfPCell cell = new PdfPCell(new Phrase(analysisItem.toUnqualifiedDisplay()));
                     //cell.setFixedHeight(20f);
                     cell.setMinimumHeight(20f);
                     cell.setBackgroundColor(new BaseColor(180, 180, 180));
@@ -700,7 +700,7 @@ public class ExportService {
         if (kpiDefinition.getGroupings() != null) {
             for (i = 0; i < kpiDefinition.getGroupings().size(); i++) {
                 AnalysisItem grouping = kpiDefinition.getGroupings().get(i);
-                PdfPCell cell = new PdfPCell(new Phrase(grouping.toDisplay()));
+                PdfPCell cell = new PdfPCell(new Phrase(grouping.toUnqualifiedDisplay()));
                 cell.setMinimumHeight(20f);
                 cell.setBackgroundColor(new BaseColor(180, 180, 180));
                 table.addCell(cell);
@@ -727,7 +727,7 @@ public class ExportService {
                     table.addCell(groupingCell);
                 }
             }
-            PdfPCell labelDataCell = new PdfPCell(new Phrase(trendOutcome.getMeasure().toDisplay()));
+            PdfPCell labelDataCell = new PdfPCell(new Phrase(trendOutcome.getMeasure().toUnqualifiedDisplay()));
             PdfPCell nowMeasureStyle = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(),
                     exportMetadata.cal, exportMetadata.currencySymbol, false)));
             PdfPCell previousMeasureStyle = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(),
@@ -774,13 +774,13 @@ public class ExportService {
         table.getDefaultCell().setPadding(5);
 
         com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD);
-        PdfPCell hierarchyCell = new PdfPCell(new Phrase(hierarchy.toDisplay(), boldFont));
+        PdfPCell hierarchyCell = new PdfPCell(new Phrase(hierarchy.toUnqualifiedDisplay(), boldFont));
         hierarchyCell.setMinimumHeight(20f);
         hierarchyCell.setBackgroundColor(new BaseColor(210, 210, 210));
 
         table.addCell(hierarchyCell);
         for (AnalysisItem analysisItem : tree.getItems()) {
-            PdfPCell valueCell = new PdfPCell(new Phrase(analysisItem.toDisplay(), boldFont));
+            PdfPCell valueCell = new PdfPCell(new Phrase(analysisItem.toUnqualifiedDisplay(), boldFont));
             valueCell.setBackgroundColor(new BaseColor(210, 210, 210));
             valueCell.setMinimumHeight(20f);
             table.addCell(valueCell);
@@ -1213,14 +1213,14 @@ public class ExportService {
         for (AnalysisItem measureItem : vertReport.getMeasures()) {
             AnalysisMeasure analysisMeasure = (AnalysisMeasure) measureItem;
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("Label", analysisMeasure.toDisplay());
+            map.put("Label", analysisMeasure.toUnqualifiedDisplay());
             map.put("baseMeasure", analysisMeasure);
             boolean atLeastOneValue = false;
             for (int i = 0; i < verticalList.getReports().size(); i++) {
                 WSVerticalListDefinition vert = (WSVerticalListDefinition) verticalList.getReports().get(i);
                 AnalysisMeasure applyMeasure = null;
                 for (AnalysisItem measure : vert.getMeasures()) {
-                    if (measure.toDisplay().equals(analysisMeasure.toDisplay())) {
+                    if (measure.toUnqualifiedDisplay().equals(analysisMeasure.toUnqualifiedDisplay())) {
                         applyMeasure = (AnalysisMeasure) measure;
                     }
                 }
@@ -1233,7 +1233,7 @@ public class ExportService {
                     Map<String, Value> valueMap = new HashMap<String, Value>();
                     for (AnalysisItem aItem : vert.getAllAnalysisItems()) {
                         Value value = row.getValue(aItem);
-                        valueMap.put(aItem.toDisplay(), value);
+                        valueMap.put(aItem.toUnqualifiedDisplay(), value);
                     }
                     valueList.add(valueMap);
                 }
@@ -1245,7 +1245,7 @@ public class ExportService {
                         sortValue = new StringValue(vert.getName());
                         columnValue = vert.getName();
                     } else {
-                        value = row.get(vert.getColumn().toDisplay());
+                        value = row.get(vert.getColumn().toUnqualifiedDisplay());
                         if (value.getSortValue() != null) {
                             sortValue = value.getSortValue();
                         } else {
@@ -1259,7 +1259,7 @@ public class ExportService {
                     if (value != null && value.type() == Value.EMPTY) {
                         continue;
                     }
-                    Value measureValue = row.get(applyMeasure.toDisplay());
+                    Value measureValue = row.get(applyMeasure.toUnqualifiedDisplay());
                     if (measureValue.toDouble() != 0) {
                         atLeastOneValue = true;
                     }
@@ -1326,7 +1326,7 @@ public class ExportService {
             sb.append("<tr style=\"" + ytdTRStyle + "\">");
             //AnalysisMeasure baseMeasure = (AnalysisMeasure) map.get("baseMeasure");
             sb.append("<td style=\"white-space: nowrap;" + cellStyle + "\">");
-            sb.append(baseMeasure.toDisplay());
+            sb.append(baseMeasure.toUnqualifiedDisplay());
             sb.append("</td>");
             for (SortInfo sortInfo : vListInfo.columns) {
                 String columnName = sortInfo.label;
@@ -1367,7 +1367,7 @@ public class ExportService {
         for (AnalysisItem measureItem : verticalList.getMeasures()) {
             AnalysisMeasure analysisMeasure = (AnalysisMeasure) measureItem;
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("Label", analysisMeasure.toDisplay());
+            map.put("Label", analysisMeasure.toUnqualifiedDisplay());
             map.put("baseMeasure", analysisMeasure);
             boolean atLeastOneValue = false;
             for (IRow row : dataSet.getRows()) {
@@ -1464,7 +1464,7 @@ public class ExportService {
             for (i = 0; i < kpiReport.getGroupings().size(); i++) {
                 AnalysisItem grouping = kpiReport.getGroupings().get(i);
                 sb.append("<th style=\"" + thStyle + "\">");
-                sb.append(grouping.toDisplay());
+                sb.append(grouping.toUnqualifiedDisplay());
                 sb.append("</th>");
             }
         }
@@ -1487,7 +1487,7 @@ public class ExportService {
                     sb.append("</td>");
                 }
             }
-            sb.append("<td style=\"" + tdStyle + "left\">").append(trendOutcome.getMeasure().toDisplay()).append("</td>");
+            sb.append("<td style=\"" + tdStyle + "left\">").append(trendOutcome.getMeasure().toUnqualifiedDisplay()).append("</td>");
             String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, false);
             sb.append("<td style=\"" + tdStyle + "right\">").append(nowValue).append("</td>");
             String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, false);
@@ -1570,7 +1570,7 @@ public class ExportService {
                 ytdTRStyle += "border-bottom:solid 1px black";
             }
             sb.append("<tr style=\"" + ytdTRStyle + "\">");
-            sb.append("<td style=\"white-space: nowrap;text-align:left;").append(cellStyle).append("\">").append(baseMeasure.toDisplay()).append("</td>");
+            sb.append("<td style=\"white-space: nowrap;text-align:left;").append(cellStyle).append("\">").append(baseMeasure.toUnqualifiedDisplay()).append("</td>");
 
             for (String header : ytdStuff.getHeaders()) {
                 if (alwaysShow) {
@@ -1675,7 +1675,7 @@ public class ExportService {
                 }
 
                 sb.append("<tr style=\"" + ytdTRStyle + "\">");
-                sb.append("<td style=\"white-space: nowrap; ").append(cellStyle).append("\">").append(baseMeasure.toDisplay()).append("</td>");
+                sb.append("<td style=\"white-space: nowrap; ").append(cellStyle).append("\">").append(baseMeasure.toUnqualifiedDisplay()).append("</td>");
                 if (ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
                     Map<Value, TimeIntervalValue> map = new HashMap<Value, TimeIntervalValue>();
                     for (int i = 0; i < ytdValue.getTimeIntervalValues().size(); i++) {
@@ -1807,7 +1807,7 @@ public class ExportService {
             for (i = 0; i < crosstabDefinition.getGroupings().size(); i++) {
                 AnalysisItem grouping = crosstabDefinition.getGroupings().get(i);
                 Cell groupingCell = headerRow.createCell(i);
-                groupingCell.setCellValue(createRichTextString(grouping.toDisplay(), groupingCell));
+                groupingCell.setCellValue(createRichTextString(grouping.toUnqualifiedDisplay(), groupingCell));
             }
         }
         Cell labelCell = headerRow.createCell(i++);
@@ -1838,7 +1838,7 @@ public class ExportService {
                 }
             }
             Cell labelDataCell = dataRow.createCell(i++);
-            labelDataCell.setCellValue(createRichTextString(trendOutcome.getMeasure().toDisplay(), labelDataCell));
+            labelDataCell.setCellValue(createRichTextString(trendOutcome.getMeasure().toUnqualifiedDisplay(), labelDataCell));
             Style nowMeasureStyle = getStyle(styleMap, trendOutcome.getMeasure(), workbook, exportMetadata, trendOutcome.getNow());
             nowMeasureStyle.format(dataRow, i++, trendOutcome.getNow(), trendOutcome.getMeasure(), exportMetadata.cal);
             Style previousMeasureStyle = getStyle(styleMap, trendOutcome.getMeasure(), workbook, exportMetadata, trendOutcome.getHistorical());
@@ -1939,7 +1939,7 @@ public class ExportService {
             Row row = sheet.createRow(j++);
             AnalysisItem baseMeasure = ytdValue.getMeasure();
             Cell rowHeaderCell = row.createCell(0);
-            rowHeaderCell.setCellValue(baseMeasure.toDisplay());
+            rowHeaderCell.setCellValue(baseMeasure.toUnqualifiedDisplay());
             int i = 0;
             for (String header : ytdStuff.getHeaders()) {
                 CompareYearsResult compareYearsResult = ytdValue.getResults().get(header);
@@ -2001,7 +2001,7 @@ public class ExportService {
             Row row = sheet.createRow(j++);
             AnalysisMeasure baseMeasure = ytdValue.getAnalysisMeasure();
             Cell rowHeaderCell = row.createCell(0);
-            rowHeaderCell.setCellValue(baseMeasure.toDisplay());
+            rowHeaderCell.setCellValue(baseMeasure.toUnqualifiedDisplay());
             if (ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
                 Map<Value, TimeIntervalValue> map = new HashMap<Value, TimeIntervalValue>();
                 for (int i = 0; i < ytdValue.getTimeIntervalValues().size(); i++) {
@@ -2071,7 +2071,7 @@ public class ExportService {
             Row row = sheet.createRow(j++);
             AnalysisMeasure baseMeasure = (AnalysisMeasure) map.get("baseMeasure");
             Cell rowHeaderCell = row.createCell(0);
-            rowHeaderCell.setCellValue(baseMeasure.toDisplay());
+            rowHeaderCell.setCellValue(baseMeasure.toUnqualifiedDisplay());
             for (int i = 0; i < vListInfo.columns.size(); i++) {
                 SortInfo sortInfo = vListInfo.columns.get(i);
                 Value value = (Value) map.get(sortInfo.label);
@@ -2548,11 +2548,11 @@ public class ExportService {
 
         AnalysisHierarchyItem hierarchy = (AnalysisHierarchyItem) tree.getHierarchy();
         sb.append("<th style=\"").append(thStyle).append("\">");
-        sb.append(hierarchy.toDisplay());
+        sb.append(hierarchy.toUnqualifiedDisplay());
         sb.append("</th>");
         for (AnalysisItem analysisItem : tree.getItems()) {
             sb.append("<th style=\"").append(thStyle).append("\">");
-            sb.append(analysisItem.toDisplay());
+            sb.append(analysisItem.toUnqualifiedDisplay());
             sb.append("</th>");
         }
         sb.append("</tr>");
@@ -2629,7 +2629,7 @@ public class ExportService {
             for (AnalysisItem headerItem : listDataResults.getHeaders()) {
                 if (headerItem == analysisItem) {
                     sb.append("<th style=\"").append(thStyle).append("\">");
-                    sb.append(headerItem.toDisplay());
+                    sb.append(headerItem.toUnqualifiedDisplay());
                     sb.append("</th>");
                 }
             }
@@ -2824,7 +2824,7 @@ public class ExportService {
                 for (AnalysisItem headerItem : fields) {
                     if (headerItem == analysisItem) {
                         sb.append("<th style=\"").append(thStyle).append("\">");
-                        sb.append(headerItem.toDisplay());
+                        sb.append(headerItem.toUnqualifiedDisplay());
                         sb.append("</th>");
                     }
                 }
