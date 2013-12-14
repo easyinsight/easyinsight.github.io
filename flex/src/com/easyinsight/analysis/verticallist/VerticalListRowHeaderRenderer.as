@@ -78,7 +78,7 @@ public class VerticalListRowHeaderRenderer extends UIComponent implements IListI
         if (_analysisMeasure == null) {
             _valText = "";
         } else {
-            _valText = _analysisMeasure.display;
+            _valText = _analysisMeasure.unqualifiedDisplay;
             if (_analysisMeasure.reportFieldExtension != null && _analysisMeasure.reportFieldExtension is YTDReportFieldExtension) {
                 var testExt:YTDReportFieldExtension = _analysisMeasure.reportFieldExtension as YTDReportFieldExtension;
                 bold = testExt.alwaysShow;
