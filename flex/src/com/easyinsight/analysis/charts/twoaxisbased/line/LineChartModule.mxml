@@ -258,7 +258,7 @@
                     if (additionalProperties != null && additionalProperties["xAxisMaximum"] != null) {
                         dateAxis.maximum = additionalProperties["xAxisMaximum"];
                     }
-                    dateAxis.title = dateDimension.display;
+                    dateAxis.title = dateDimension.unqualifiedDisplay;
                     xAxis = dateAxis;
                 } else {
                     var categoryAxis:CategoryAxis = new CategoryAxis();
