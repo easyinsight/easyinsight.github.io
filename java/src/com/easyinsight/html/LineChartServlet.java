@@ -84,12 +84,15 @@ public class LineChartServlet extends HtmlServlet {
                     series.put(yAxisValue, array);
                 }
                 JSONArray values = new JSONArray();
-                DateValue dateValue = (DateValue) row.getValue(date);
-                String formattedDate = dateFormat.format(dateValue.getDate());
-                xAxisValues.add(dateValue.getDate());
-                values.put(formattedDate);
-                values.put(row.getValue(measure).toDouble());
-                array.put(dateValue.getDate(), row.getValue(measure).toDouble());
+                Value value = row.getValue(date);
+                if (value.type() == Value.DATE) {
+                    DateValue dateValue = (DateValue) value;
+                    String formattedDate = dateFormat.format(dateValue.getDate());
+                    xAxisValues.add(dateValue.getDate());
+                    values.put(formattedDate);
+                    values.put(row.getValue(measure).toDouble());
+                    array.put(dateValue.getDate(), row.getValue(measure).toDouble());
+                }
                 //array.put(values);
             }
 
