@@ -113,7 +113,6 @@
                     _.each(grid, function(e, i, l) {
                         _.each(e, function(f, i, l) {
                         if(f["type"] == "report") {
-
                         %>
                         <div class="gridReportMenu" id="<%= id %>_<%= f.id %>" data-report-target="<%= f.id %>"><span class="<%= f.id %>_name"><%- f.report.name %></span>:
                             <div class="btn-group report-dropdown-btn">
@@ -123,7 +122,9 @@
                                 </ul>
 
                             </div>
-                            <a href="/app/html/report/<%= f.report.metadata.key %>" class="btn btn-default">Navigate</a>
+                            <% if(location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+/)) { %>
+                            <a href="/app/html/report/<%= f.report.metadata.key %>" class="btn btn-default navigate-button">Navigate</a>
+                            <% } %>
                             <div class="btn-group">
                                     <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Export <span class="caret"></span></a>
                                     <ul class="dropdown-menu">
@@ -173,7 +174,9 @@
                                 </ul>
 
                             </div>
-                            <a href="/app/html/report/<%= report.metadata.key %>" class="btn btn-default">Navigate</a>
+                            <% if(location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+/)) { %>
+                            <a href="/app/html/report/<%= report.metadata.key %>" class="btn btn-default navigate-button">Navigate</a>
+                            <% } %>
                             <div class="btn-group">
                                 <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Export <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
