@@ -393,7 +393,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             for (Map.Entry<String, List<AnalysisItem>> entry : duplicateNameMap.entrySet()) {
                 for (AnalysisItem analysisItem : entry.getValue()) {
                     DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
-                    String name = getCompositeFeedName(derivedKey.getFeedID(), conn);
+                    String name = getImmediateName(derivedKey, conn);
                     analysisItem.setDisplayName(name + " - " + entry.getKey());
                     analysisItem.setUnqualifiedDisplayName(entry.getKey());
                 }
@@ -466,6 +466,29 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
         }
         return folder;
+    }
+
+    private String getImmediateName(DerivedKey derivedKey, Connection conn) {
+        try {
+            derivedKey = findDerivedKey(derivedKey);
+            PreparedStatement nameStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+            nameStmt.setLong(1, derivedKey.getFeedID());
+            ResultSet rs = nameStmt.executeQuery();
+            rs.next();
+            String name = rs.getString(1);
+            nameStmt.close();
+            return name;
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private DerivedKey findDerivedKey(DerivedKey derivedKey) {
+        if (derivedKey.getParentKey() instanceof DerivedKey) {
+            return findDerivedKey((DerivedKey) derivedKey.getParentKey());
+        }
+        return derivedKey;
     }
 
     private String getCompositeFeedName(long feedID, Connection conn) {
@@ -666,5 +689,30 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
         }
         return sources;
+    }
+
+    @Override
+    public void populate(Key key, EIConnection conn) throws SQLException {
+        super.populate(key, conn);
+        if (key instanceof DerivedKey) {
+            DerivedKey derivedKey = (DerivedKey) key;
+            new FeedStorage().getFeedDefinitionData(derivedKey.getFeedID(), conn).populate(((DerivedKey) key).getParentKey(), conn);
+        }
+    }
+
+    public void onLoad(EIConnection conn) throws SQLException {
+        super.onLoad(conn);
+        Map<Long, FeedDefinition> map = new HashMap<Long, FeedDefinition>();
+        for (CompositeFeedNode node : getCompositeFeedNodes()) {
+            map.put(node.getDataFeedID(), new FeedStorage().getFeedDefinitionData(node.getDataFeedID(), conn));
+        }
+        for (AnalysisItem item : getFields()) {
+            Key key = item.getKey();
+            if (key instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                FeedDefinition child = map.get(derivedKey.getFeedID());
+                child.populate(((DerivedKey) key).getParentKey(), conn);
+            }
+        }
     }
 }
