@@ -26,7 +26,7 @@ public class NamespaceGenerator {
             Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
             if (feed.getDataSource() instanceof CompositeFeedDefinition) {
                 Blah blah = new Blah();
-                blah.visit((CompositeFeedDefinition) feed.getDataSource());
+                blah.traverse((CompositeFeedDefinition) feed.getDataSource());
                 map = blah.map;
             } else {
                 map = new HashMap<String, UniqueKey>();
@@ -43,13 +43,19 @@ public class NamespaceGenerator {
         }
     }
 
-    private class Blah extends CompositeFeedNodeVisitor {
+    private class Blah  {
 
         private Map<String, UniqueKey> map = new HashMap<String, UniqueKey>();
 
-        @Override
-        protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
-            map.put(compositeFeedNode.getDataSourceName(), new UniqueKey(compositeFeedNode.getDataFeedID(), UniqueKey.DERIVED));
+
+        protected void traverse(CompositeFeedDefinition compositeFeedDefinition) throws SQLException {
+            for (CompositeFeedNode compositeFeedNode : compositeFeedDefinition.getCompositeFeedNodes()) {
+                map.put(compositeFeedNode.getDataSourceName(), new UniqueKey(compositeFeedNode.getDataFeedID(), UniqueKey.DERIVED));
+                Feed feed = FeedRegistry.instance().getFeed(compositeFeedNode.getDataFeedID());
+                if (feed.getDataSource() instanceof CompositeFeedDefinition) {
+                    traverse((CompositeFeedDefinition) feed.getDataSource());
+                }
+            }
         }
     }
 }
