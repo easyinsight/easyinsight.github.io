@@ -1,8 +1,6 @@
 package com.easyinsight.datafeeds;
 
-import com.easyinsight.core.DataSourceDescriptor;
-import com.easyinsight.core.InsightDescriptor;
-import com.easyinsight.core.ReportKey;
+import com.easyinsight.core.*;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.security.SecurityUtil;
@@ -11,7 +9,6 @@ import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.SuggestedUser;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.core.Key;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.storage.DataStorage;
@@ -540,10 +537,8 @@ public class FeedDefinition implements Cloneable, Serializable {
                 boolean hasVisibleChildren = clonedFolder.getChildFolders().size() > 0;
                 if (!hasVisibleChildren) {
                     for (AnalysisItem analysisItem : clonedFolder.getChildItems()) {
-                        if (!analysisItem.isHidden()) {
-                            hasVisibleChildren = true;
-                            break;
-                        }
+                        hasVisibleChildren = true;
+                        break;
                     }
                 }
                 if (hasVisibleChildren) {
@@ -555,9 +550,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         }
         addKPIs(kpis, replacementMap, feedNodes);
         for (AnalysisItem analysisItem : replacementMap.values()) {
-            if (!analysisItem.isHidden()) {
-                feedNodes.add(analysisItem.toFeedNode());
-            }
+            feedNodes.add(analysisItem.toFeedNode());
         }
         if (addonReports != null) {
             EIConnection conn = Database.instance().getConnection();

@@ -690,29 +690,4 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
         return sources;
     }
-
-    @Override
-    public void populate(Key key, EIConnection conn) throws SQLException {
-        super.populate(key, conn);
-        if (key instanceof DerivedKey) {
-            DerivedKey derivedKey = (DerivedKey) key;
-            new FeedStorage().getFeedDefinitionData(derivedKey.getFeedID(), conn).populate(((DerivedKey) key).getParentKey(), conn);
-        }
-    }
-
-    public void onLoad(EIConnection conn) throws SQLException {
-        super.onLoad(conn);
-        Map<Long, FeedDefinition> map = new HashMap<Long, FeedDefinition>();
-        for (CompositeFeedNode node : getCompositeFeedNodes()) {
-            map.put(node.getDataFeedID(), new FeedStorage().getFeedDefinitionData(node.getDataFeedID(), conn));
-        }
-        for (AnalysisItem item : getFields()) {
-            Key key = item.getKey();
-            if (key instanceof DerivedKey) {
-                DerivedKey derivedKey = (DerivedKey) key;
-                FeedDefinition child = map.get(derivedKey.getFeedID());
-                child.populate(((DerivedKey) key).getParentKey(), conn);
-            }
-        }
-    }
 }
