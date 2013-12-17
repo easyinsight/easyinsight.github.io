@@ -3,8 +3,6 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.definitions.WSStackedBarChartDefinition;
 import com.easyinsight.analysis.definitions.WSStackedColumnChartDefinition;
 import com.easyinsight.calculations.*;
-import com.easyinsight.calculations.generated.CalculationsParser;
-import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.*;
 import com.easyinsight.database.EIConnection;
@@ -38,10 +36,7 @@ import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.util.RandomTextGenerator;
 import nu.xom.Builder;
 import nu.xom.Document;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -2051,7 +2046,7 @@ public class AnalysisService {
             Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, UniqueKey> map = new NamespaceGenerator().generate(dataSourceID, report.getAddonReports());
             try {
-                tree = CalculationHelper.createTree(calculationString);
+                tree = CalculationHelper.createTree(calculationString, false);
 
                 if (allItems != null) {
                     KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);

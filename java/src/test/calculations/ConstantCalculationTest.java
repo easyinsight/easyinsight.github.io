@@ -42,25 +42,25 @@ public class ConstantCalculationTest extends TestCase {
     }
 
 
-    private double evalString(String s) {
-        ICalculationTreeVisitor visitor = null;
-        CalculationsParser.startExpr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(s));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        try {
-            ret = parser.startExpr();
-            CalculationTreeNode c = (CalculationTreeNode) ret.getTree();
-            //visitor = new ResolverVisitor(null, new FunctionFactory());
-            c.accept(visitor);
-            visitor = new EvaluationVisitor();
-            c.accept(visitor);
-
-        } catch (RecognitionException e) {
-            e.printStackTrace();
-        }
-        return visitor.getResult().toDouble();
-    }
+//    private double evalString(String s) {
+//        ICalculationTreeVisitor visitor = null;
+//        CalculationsParser.startExpr_return ret;
+//        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(s));
+//        CommonTokenStream tokes = new CommonTokenStream();
+//        tokes.setTokenSource(lexer);
+//        CalculationsParser parser = new CalculationsParser(tokes);
+//        parser.setTreeAdaptor(new NodeFactory());
+//        try {
+//            ret = parser.startExpr();
+//            CalculationTreeNode c = (CalculationTreeNode) ret.getTree();
+//            //visitor = new ResolverVisitor(null, new FunctionFactory());
+//            c.accept(visitor);
+//            visitor = new EvaluationVisitor();
+//            c.accept(visitor);
+//
+//        } catch (RecognitionException e) {
+//            e.printStackTrace();
+//        }
+//        return visitor.getResult().toDouble();
+//    }
 }

@@ -1,9 +1,6 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.calculations.*;
-import com.easyinsight.calculations.NodeFactory;
-import com.easyinsight.calculations.generated.CalculationsLexer;
-import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.core.ReportKey;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
@@ -11,8 +8,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.Pipeline;
 import nu.xom.Attribute;
 import nu.xom.Element;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 
 import javax.persistence.*;
 import java.util.*;
@@ -113,7 +108,7 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
                 keyMap = mapper.getKeyMap();
                 displayMap = mapper.getDisplayMap();
             }
-            tree = CalculationHelper.createTree(derivationCode);
+            tree = CalculationHelper.createTree(derivationCode, false);
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), structure.getNamespaceMap());
             tree.accept(visitor);
         } catch (FunctionException fe) {

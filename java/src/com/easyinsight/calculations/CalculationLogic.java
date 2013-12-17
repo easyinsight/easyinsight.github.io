@@ -1,11 +1,7 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.calculations.generated.CalculationsLexer;
-import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.logging.LogClass;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 
 import java.util.*;
 
@@ -23,7 +19,7 @@ public class CalculationLogic {
         CalculationTreeNode calculationTreeNode;
         ICalculationTreeVisitor visitor;
         try {
-            calculationTreeNode = CalculationHelper.createTree(code);
+            calculationTreeNode = CalculationHelper.createTree(code, false);
             KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
             Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();

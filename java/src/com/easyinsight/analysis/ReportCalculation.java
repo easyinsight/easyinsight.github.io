@@ -1,7 +1,6 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.calculations.*;
-import com.easyinsight.calculations.functions.NamedKeySpecification;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
@@ -47,7 +46,7 @@ public class ReportCalculation {
 
 
         try {
-            tree = CalculationHelper.createTree(calculationString);
+            tree = CalculationHelper.createTree(calculationString, false);
 
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), structure.getNamespaceMap());
             tree.accept(visitor);
@@ -77,7 +76,7 @@ public class ReportCalculation {
     private DataSet createDataSet(List<AnalysisItem> allFields, Feed feed, List<FilterDefinition> dlsFilters, EIConnection conn, Map<String, List<AnalysisItem>> keyMap,
                                   Map<String, List<AnalysisItem>> displayMap) throws RecognitionException {
         CalculationTreeNode calculationTreeNode;
-        calculationTreeNode = CalculationHelper.createTree(code);
+        calculationTreeNode = CalculationHelper.createTree(code, false);
         ResolverVisitor resolverVisitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(feed.getFeedID(), null));
         calculationTreeNode.accept(resolverVisitor);
         VariableListVisitor variableVisitor = new VariableListVisitor();
@@ -119,7 +118,7 @@ public class ReportCalculation {
         CompositeCalculationMetadata compositeCalculationMetadata = new CompositeCalculationMetadata();
         compositeCalculationMetadata.setFilters(filters);
         ICalculationTreeVisitor visitor;
-        CalculationTreeNode calculationTreeNode = CalculationHelper.createTree(code);
+        CalculationTreeNode calculationTreeNode = CalculationHelper.createTree(code, false);
         visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory(),
                 new NamespaceGenerator().generate(dataSourceID, null));
         calculationTreeNode.accept(visitor);
@@ -162,7 +161,7 @@ public class ReportCalculation {
                 metadata.setOp(op);
                 op.setTarget(analysisItem);
                 ICalculationTreeVisitor visitor;
-                CalculationTreeNode calculationTreeNode = CalculationHelper.createTree(derivedAnalysisDimension.getDerivationCode());
+                CalculationTreeNode calculationTreeNode = CalculationHelper.createTree(derivedAnalysisDimension.getDerivationCode(), false);
                 visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(dataSourceID, null));
                 calculationTreeNode.accept(visitor);
                 ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, metadata);
@@ -183,7 +182,7 @@ public class ReportCalculation {
         drillthroughCalculationMetadata.setDataSourceFields(dataSource.getFields());
         drillthroughCalculationMetadata.setAnalysisItems(analysisItems);
         ICalculationTreeVisitor visitor;
-        CalculationTreeNode calculationTreeNode = CalculationHelper.createTree(code);
+        CalculationTreeNode calculationTreeNode = CalculationHelper.createTree(code, false);
 
         visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory(),
                 new NamespaceGenerator().generate(report.getDataFeedID(), null));
@@ -199,7 +198,7 @@ public class ReportCalculation {
             dataSourceCalculationMetadata.setDataSource(dataSource);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
-            calculationTreeNode = CalculationHelper.createTree(code);
+            calculationTreeNode = CalculationHelper.createTree(code, false);
             visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory(),
                     new NamespaceGenerator().generate(dataSource.getDataFeedID(), null));
             calculationTreeNode.accept(visitor);
@@ -217,7 +216,7 @@ public class ReportCalculation {
             dataSourceCalculationMetadata.setAnalysisItemPool(analysisItems);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
-            calculationTreeNode = CalculationHelper.createTree(code);
+            calculationTreeNode = CalculationHelper.createTree(code, false);
             visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory(),
                     new NamespaceGenerator().generate(dataSourceID, null));
             calculationTreeNode.accept(visitor);
@@ -261,7 +260,7 @@ public class ReportCalculation {
             calculationMetadata.setDataSourceFields(myFields);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
-            calculationTreeNode = CalculationHelper.createTree(code);
+            calculationTreeNode = CalculationHelper.createTree(code, false);
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(feed.getFeedID(), null));
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
@@ -280,7 +279,7 @@ public class ReportCalculation {
             calculationMetadata.setDataSourceFields(allFields);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
-            calculationTreeNode = CalculationHelper.createTree(code);
+            calculationTreeNode = CalculationHelper.createTree(code, false);
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(feed.getFeedID(), null));
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
@@ -313,7 +312,7 @@ public class ReportCalculation {
         calculationMetadata.setDataSourceFields(allFields);
         CalculationTreeNode calculationTreeNode;
         ICalculationTreeVisitor visitor;
-        calculationTreeNode = CalculationHelper.createTree(code);
+        calculationTreeNode = CalculationHelper.createTree(code, false);
         visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(feed.getFeedID(), null));
         calculationTreeNode.accept(visitor);
         ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
@@ -344,7 +343,7 @@ public class ReportCalculation {
             calculationMetadata.setDataSourceFields(allFields);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
-            calculationTreeNode = CalculationHelper.createTree(code);
+            calculationTreeNode = CalculationHelper.createTree(code, false);
 
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(feed.getFeedID(), null));
             calculationTreeNode.accept(visitor);
@@ -359,7 +358,7 @@ public class ReportCalculation {
             calculationMetadata.setDataSourceFields(allFields);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
-            calculationTreeNode = CalculationHelper.createTree(code);
+            calculationTreeNode = CalculationHelper.createTree(code, false);
 
             visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(report.getDataFeedID(), null));
             calculationTreeNode.accept(visitor);

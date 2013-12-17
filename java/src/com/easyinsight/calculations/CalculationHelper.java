@@ -11,13 +11,13 @@ import org.antlr.runtime.RecognitionException;
  */
 public class CalculationHelper {
 
-    public static CalculationTreeNode createTree(String s) throws RecognitionException {
+    public static CalculationTreeNode createTree(String s, boolean exceptionOnRecovery) throws RecognitionException {
         CalculationsParser.startExpr_return ret;
         CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(s));
         CommonTokenStream tokes = new CommonTokenStream();
         tokes.setTokenSource(lexer);
         NodeFactory nf = new NodeFactory();
-        CalculationsParser parser = new CalculationParser(tokes);
+        CalculationsParser parser = new CalculationParser(tokes, s, exceptionOnRecovery);
 
         parser.setTreeAdaptor(nf);
         ret = parser.startExpr();

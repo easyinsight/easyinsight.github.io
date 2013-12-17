@@ -1,18 +1,12 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.calculations.*;
-import com.easyinsight.calculations.generated.CalculationsLexer;
-import com.easyinsight.calculations.generated.CalculationsParser;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.Value;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.Pipeline;
 import nu.xom.Attribute;
 import nu.xom.Element;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 
 import javax.persistence.*;
 import java.util.*;
@@ -77,7 +71,7 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         }
 
         try {
-            tree = CalculationHelper.createTree(derivationCode);
+            tree = CalculationHelper.createTree(derivationCode, false);
 
             if (allItems != null) {
                 KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);

@@ -49,6 +49,25 @@ public class LogClass {
         log.error(message);
     }
 
+    public static void calculationError(String message) {
+
+            if(ConfigLoader.instance().isProduction()) {
+                try {
+                    String username = null;
+                    try {
+                        username = SecurityUtil.getUserName();
+                    } catch(Exception se) {
+                    }
+                    new SendGridEmail().sendEmail("errors@easy-insight.com", "[Calculation Error] " + (username != null ? username : "Unknown") + ": " + message, message , "donotreply@easy-insight.com", false, "Easy Insight");
+                }
+                catch(Exception ex) {
+                    // do nothing, wtf do you do at this point?
+                    ex.printStackTrace();
+                }
+            }
+            log.error(message);
+        }
+
     public static void userError(String message, Throwable e) {
 
         if(ConfigLoader.instance().isProduction()) {
