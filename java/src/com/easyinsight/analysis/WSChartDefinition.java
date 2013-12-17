@@ -230,6 +230,11 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         return xAxis;
     }
 
+
+    public JSONObject getAxes() throws JSONException {
+        return null;
+    }
+
     protected JSONArray transformColors(JSONArray colors) {
         JSONArray newColors = new JSONArray();
         try {

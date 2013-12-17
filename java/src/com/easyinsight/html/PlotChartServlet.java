@@ -1,9 +1,6 @@
 package com.easyinsight.html;
 
-import com.easyinsight.analysis.DataService;
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.InsightRequestMetadata;
-import com.easyinsight.analysis.WSAnalysisDefinition;
+import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSBubbleChartDefinition;
 import com.easyinsight.analysis.definitions.WSPlotChartDefinition;
 import com.easyinsight.database.EIConnection;
@@ -31,15 +28,9 @@ public class PlotChartServlet extends HtmlServlet {
         WSPlotChartDefinition plotDefinition = (WSPlotChartDefinition) report;
 
         JSONObject params = new JSONObject();
-        JSONObject axes = new JSONObject();
-        JSONObject xAxis = new JSONObject();
-        JSONObject yAxis = new JSONObject();
-        axes.put("xaxis", xAxis);
-        axes.put("yaxis", yAxis);
+        JSONObject axes = ((WSChartDefinition) report).getAxes();
         params.put("axes", axes);
         object.put("params", params);
-        xAxis.put("label", plotDefinition.getXaxisMeasure().toDisplay());
-        yAxis.put("label", plotDefinition.getYaxisMeasure().toDisplay());
         List<JSONArray> arrays = new ArrayList<JSONArray>();
 
         for (IRow row : dataSet.getRows()) {

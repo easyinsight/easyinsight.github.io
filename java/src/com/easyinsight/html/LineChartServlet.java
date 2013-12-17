@@ -1,6 +1,7 @@
 package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.analysis.definitions.WSLineChartDefinition;
 import com.easyinsight.analysis.definitions.WSTwoAxisDefinition;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.EmptyValue;
@@ -29,11 +30,7 @@ public class LineChartServlet extends HtmlServlet {
         JSONObject object = new JSONObject();
 
         JSONObject params = new JSONObject();
-        JSONObject axes = new JSONObject();
-        JSONObject xAxis = new JSONObject();
-        JSONObject yyAxis = new JSONObject();
-        axes.put("xaxis", xAxis);
-        axes.put("yaxis", yyAxis);
+        JSONObject axes = ((WSChartDefinition) report).getAxes();
         params.put("axes", axes);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         // need series, need ticks
@@ -43,8 +40,8 @@ public class LineChartServlet extends HtmlServlet {
         if (twoAxisDefinition.isMultiMeasure()) {
             List<AnalysisItem> measures = twoAxisDefinition.getMeasures();
             AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
-            xAxis.put("label", date.toDisplay());
-            yyAxis.put("label", measures.get(0).toDisplay());
+//            xAxis.put("label", date.toDisplay());
+//            yyAxis.put("label", measures.get(0).toDisplay());
             for (AnalysisItem measure : measures) {
                 JSONArray measureArray = new JSONArray();
                 labelArray.put(measure.toDisplay());
@@ -68,10 +65,6 @@ public class LineChartServlet extends HtmlServlet {
             AnalysisItem measure = twoAxisDefinition.getMeasure();
             AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
             AnalysisItem yAxis = twoAxisDefinition.getYaxis();
-
-            xAxis.put("label", date.toDisplay());
-            yyAxis.put("label", measure.toDisplay());
-
             Map<String, Map<Date, Double>> series = new HashMap<String, Map<Date, Double>>();
 
             Set<Date> xAxisValues = new HashSet<Date>();
@@ -134,7 +127,6 @@ public class LineChartServlet extends HtmlServlet {
 
         response.setContentType("application/json");
         String argh = object.toString();
-        System.out.println(argh);
         response.getOutputStream().write(argh.getBytes());
         response.getOutputStream().flush();
     }

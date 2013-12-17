@@ -151,6 +151,16 @@ public class WSPlotChartDefinition extends WSChartDefinition {
         return argh;
     }
 
+    @Override
+    public JSONObject getAxes() throws JSONException {
+        JSONObject axes = new JSONObject();
+        JSONObject xAxis = getMeasureAxis(xaxisMeasure);
+        JSONObject yAxis = getMeasureAxis(yaxisMeasure);
+        axes.put("xaxis", xAxis);
+        axes.put("yaxis", yAxis);
+        return axes;
+    }
+
     private JSONObject getJsonObject() {
         JSONObject params;
         JSONObject object = new JSONObject();

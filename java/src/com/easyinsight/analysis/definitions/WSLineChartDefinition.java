@@ -521,6 +521,27 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         return argh;
     }
 
+    @Override
+    protected JSONObject getGroupingAxis(AnalysisItem analysisItem) throws JSONException {
+        JSONObject groupingAxis = super.getGroupingAxis(analysisItem);
+        groupingAxis.put("renderer", "$.jqplot.DateAxisRenderer");
+
+        JSONObject xAxisTickOptions = groupingAxis.getJSONObject("tickOptions");
+        AnalysisDateDimension date = (AnalysisDateDimension) this.getXaxis();
+        if (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
+            xAxisTickOptions.put("formatString", "'%b %#d'");
+        } else if (date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+            xAxisTickOptions.put("formatString", "'%b'");
+        } else if (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
+            xAxisTickOptions.put("formatString", "'%b'");
+        } else {
+            xAxisTickOptions.put("formatString", "'%b %#d'");
+        }
+
+        groupingAxis.put("tickOptions", xAxisTickOptions);
+        return groupingAxis;
+    }
+
     private JSONObject getJsonObject() {
         JSONObject params;
         JSONObject object = new JSONObject();
@@ -529,31 +550,9 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
 
             JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
-            JSONObject axes = new JSONObject();
-            JSONObject xAxis = getGroupingAxis(getXaxis());
-            xAxis.put("renderer", "$.jqplot.DateAxisRenderer");
-
-            JSONObject xAxisTickOptions = xAxis.getJSONObject("tickOptions");
-            AnalysisDateDimension date = (AnalysisDateDimension) this.getXaxis();
-            if (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
-                xAxisTickOptions.put("formatString", "'%b %#d'");
-            } else if (date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
-                xAxisTickOptions.put("formatString", "'%b'");
-            } else if (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
-                xAxisTickOptions.put("formatString", "'%b'");
-            } else {
-                xAxisTickOptions.put("formatString", "'%b %#d'");
-            }
-
-            xAxis.put("tickOptions", xAxisTickOptions);
-            axes.put("xaxis", xAxis);
-            if (isMultiMeasure()) {
-
-            } else {
-                axes.put("yaxis", getMeasureAxis(getMeasure()));
-            }
-
+            JSONObject axes = getAxes();
             jsonParams.put("axes", axes);
+
             JSONObject legend = getLegend();
             jsonParams.put("legend", legend);
             JSONObject highlighter = new JSONObject();

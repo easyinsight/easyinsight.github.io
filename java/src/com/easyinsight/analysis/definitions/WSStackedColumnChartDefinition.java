@@ -247,10 +247,8 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
             seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
             jsonParams.put("grid", getGrid());
-            JSONObject axes = new JSONObject();
-            axes.put("xaxis", getGroupingAxis(getXaxis()));
-            axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
-            jsonParams.put("axes", axes);
+
+            jsonParams.put("axes", getAxes());
             JSONArray seriesColors = getSeriesColors();
             jsonParams.put("seriesColors", seriesColors);
 
@@ -263,6 +261,14 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
             throw new RuntimeException(e);
         }
         return fullObject;
+    }
+
+    @Override
+    public JSONObject getAxes() throws JSONException {
+        JSONObject axes = new JSONObject();
+        axes.put("xaxis", getGroupingAxis(getXaxis()));
+        axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
+        return axes;
     }
 
     protected JSONArray getSeriesColors() {
