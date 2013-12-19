@@ -66,6 +66,8 @@ public class TempStorage implements IDataStorage {
         return tableName;
     }
 
+    private int maxLen = 255;
+
     public void createTable(String sql) throws SQLException {
         EIConnection storageConn = storageDatabase.getConnection();
         try {
@@ -73,8 +75,19 @@ public class TempStorage implements IDataStorage {
             if (existsRS.next()) {
                 storageConn.prepareStatement("DROP TABLE " + tableName).execute();
             }
-            PreparedStatement createSQL = storageConn.prepareStatement(sql);
-            createSQL.execute();
+            try {
+                PreparedStatement createSQL = storageConn.prepareStatement(sql);
+                createSQL.execute();
+            } catch (SQLException e) {
+                if (e.getMessage().contains("Row size too large")) {
+                    maxLen = 100;
+                    String nextTry = defineTempInsertTable();
+                    PreparedStatement createSQL = storageConn.prepareStatement(nextTry);
+                    createSQL.execute();
+                } else {
+                    throw e;
+                }
+            }
         } finally {
             Database.closeConnection(storageConn);
         }
@@ -119,7 +132,7 @@ public class TempStorage implements IDataStorage {
         } else if (type == Value.TEXT) {
             column = "k" + key.getKeyID() + " TEXT";
         } else {
-            column = "k" + key.getKeyID() + " VARCHAR(255)";
+            column = "k" + key.getKeyID() + " VARCHAR("+maxLen+")";
         }
         return column;
     }
@@ -427,8 +440,8 @@ public class TempStorage implements IDataStorage {
             if (string == null) {
                 insertStmt.setNull(i++, Types.VARCHAR);
             } else {
-                if (keyMetadata.getType() == Value.STRING && string.length() > 253) {
-                    string = string.substring(0, 253);
+                if (keyMetadata.getType() == Value.STRING && string.length() > (maxLen - 2)) {
+                    string = string.substring(0, maxLen - 2);
                 } else if (keyMetadata.getType() == Value.TEXT && string.length() > 65530) {
                     string = string.substring(0, 65530);
                 }
