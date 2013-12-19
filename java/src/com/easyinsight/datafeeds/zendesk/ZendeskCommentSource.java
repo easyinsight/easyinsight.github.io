@@ -74,7 +74,7 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
                 return new DataSet();*/
             HttpClient httpClient = getHttpClient(zendeskCompositeSource);
             ZendeskUserCache zendeskUserCache = zendeskCompositeSource.getOrCreateUserCache(httpClient);
-            return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache, IDataStorage);
+            return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache, IDataStorage, lastRefreshDate);
 
         } catch (ReportException re) {
             LogClass.error(re);
@@ -96,103 +96,52 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
 
     @Override
     protected boolean clearsData(FeedDefinition parentSource) {
-        return true;
+        return false;
     }
 
-    private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, IDataStorage IDataStorage,
-                                   ZendeskUserCache zendeskUserCache) throws Exception {
+    private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, ZendeskUserCache userCache, IDataStorage dataStorage, Date lastRefresh) throws Exception {
 
-        HttpClient httpClient = getHttpClient(zendeskCompositeSource);
-
-        DateFormat updateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, -1);
-        String updateDate = updateFormat.format(cal.getTime());
         Key noteKey = zendeskCompositeSource.getField(COMMENT_TICKET_ID).toBaseKey();
-        String nextPage = zendeskCompositeSource.getUrl() + "/api/v2/search.json?query=" + "type:comment%20updated>" + updateDate;
-        while (nextPage != null) {
-            //
-            Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
 
-            List results = (List) ticketObjects.get("results");
-            for (Object obj : results) {
-                Map map = (Map) obj;
-                //System.out.println("blah");
+        List<Comment> comments = zendeskCompositeSource.getComments();
+        Map<String, List<Comment>> map = new HashMap<String, List<Comment>>();
+        for (Comment comment : comments) {
+            List<Comment> commentList = map.get(comment.getCommentTicketID());
+            if (commentList == null) {
+                commentList = new ArrayList<Comment>();
+                map.put(comment.getCommentTicketID(), commentList);
             }
-            if (ticketObjects.get("next_page") != null) {
-                nextPage = ticketObjects.get("next_page").toString();
-            } else {
-                nextPage = null;
-            }
+            commentList.add(comment);
         }
-    }
-
-    private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, ZendeskUserCache userCache, IDataStorage dataStorage) throws Exception {
 
         DataSet dataSet = new DataSet();
-        HttpClient httpClient = getHttpClient(zendeskCompositeSource);
-        Builder builder = new Builder();
 
+        for (Map.Entry<String, List<Comment>> entry : map.entrySet()) {
+            String commentID = entry.getKey();
+            List<Comment> commentList = entry.getValue();
 
-        int retryCount = 0;
+            for (Comment comment : commentList) {
+                IRow row = dataSet.createRow();
+                row.addValue(COMMENT_TICKET_ID, comment.getCommentTicketID());
+                row.addValue(COMMENT_BODY, comment.getCommentBody());
+                row.addValue(COMMENT_CREATED_AT, new DateValue(comment.getCreatedAt()));
+                row.addValue(AUTHOR, comment.getCommentAuthor());
+                row.addValue(COUNT, 1);
+            }
 
-        String path = "/api/v2/search.json?query=created>2010-01-01%20type:comment";
-            do {
-                JSONObject jo = null;
-                retryCount = 0;
-                do {
-                    jo = (JSONObject) runJSONRestRequest(zendeskCompositeSource, httpClient, path, builder);
-
-                    //System.out.println(jo);
-
-
-                    if(jo != null && "Sorry, we could not complete your search query. Please try again in a moment.".equals(jo.get("description"))) {
-                        System.out.println("Struggling to search...");
-                        if(retryCount > 10) {
-                            throw new RuntimeException("We are having problems retrieving comments from Zendesk at the moment.");
-                        }
-                        retryCount++;
-                        jo = null;
-                        Thread.sleep(10000);
-                    }
-                } while(jo == null);
-                //System.out.println(jo.toString());
-                for(Object o : (JSONArray) jo.get("results")) {
-                    JSONObject event = (JSONObject) o;
-                    parseTicket(keys, userCache, dataSet, event, new JSONObject(), "1");
-
-                }
-                dataStorage.insertData(dataSet);
+            if (lastRefresh != null) {
+                StringWhere userWhere = new StringWhere(noteKey, commentID);
+                dataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
                 dataSet = new DataSet();
-                path = (String) jo.get("next_page");
-            } while(path != null);
-        return null;
-    }
+            }
 
-    private String parseTicket(Map<String, Key> keys, ZendeskUserCache userCache, DataSet dataSet, JSONObject event, JSONObject audit, String ticketID) throws ParseException, InterruptedException {
-        String thisIsSoStupid = "^https:\\/\\/.*\\.zendesk\\.com\\/api\\/v2\\/tickets\\/(\\d+)\\.json";
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        try {
-            String s = (String) ((JSONObject) ((JSONObject) ((JSONObject) event.get("via")).get("source")).get("from")).get("name");
-            IRow row = dataSet.createRow();
-            row.addValue(keys.get(COMMENT_TICKET_ID), ((String) event.get("url")).replaceAll(thisIsSoStupid, "$1"));
-            row.addValue(keys.get(AUTHOR), s);
-            String a = (String) event.get("created_at");
-            row.addValue(keys.get(COMMENT_CREATED_AT), df.parse(a));
-            row.addValue(keys.get(COMMENT_BODY), event.get("description").toString());
-            row.addValue(keys.get(COUNT), 1);
-            return ticketID;
-        } catch (ReportException re) {
-            throw re;
-        } catch (Exception e) {
-            LogClass.error(e);
+
+        }
+
+        if (lastRefresh == null) {
+            dataStorage.insertData(dataSet);
         }
         return null;
-    }
-
-    @Override
-    protected String getUpdateKeyName() {
-        return COMMENT_TICKET_ID;
     }
 
     protected Value queryUser(String value, ZendeskUserCache zendeskUserCache) throws InterruptedException {
@@ -219,7 +168,8 @@ public class ZendeskCommentSource extends ZendeskBaseSource {
         return new EmptyValue();
     }
 
-    private DataSet getTicketsChangedSince() {
-        return null;
+    @Override
+    protected String getUpdateKeyName() {
+        return COMMENT_TICKET_ID;
     }
 }
