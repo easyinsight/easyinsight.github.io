@@ -216,10 +216,8 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
-            JSONObject axes = new JSONObject();
-            axes.put("xaxis", getMeasureAxis(getMeasures().get(0)));
-            axes.put("yaxis", getGroupingAxis(getYaxis()));
-            jsonParams.put("axes", axes);
+
+            jsonParams.put("axes", getAxes());
             JSONArray seriesColors = getSeriesColors();
             jsonParams.put("seriesColors", seriesColors);
             params = new JSONObject(jsonParams);
@@ -231,6 +229,14 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
             throw new RuntimeException(e);
         }
         return fullObject;
+    }
+
+    @Override
+    public JSONObject getAxes() throws JSONException {
+        JSONObject axes = new JSONObject();
+        axes.put("xaxis", getMeasureAxis(getMeasures().get(0)));
+        axes.put("yaxis", getGroupingAxis(getYaxis()));
+        return axes;
     }
 
     @Override

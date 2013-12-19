@@ -49,7 +49,11 @@ Chart = {
                     }
                 }
                 if (data["params"]) {
-                    params.jqplotOptions = $.extend(true, {}, params.jqplotOptions, data["params"]);
+                    console.log(data["params"])
+                    var v = JSON.stringify(data["params"]).replace(/\"/g, "");
+                    eval("var w = " + v);
+                    params.jqplotOptions = $.extend(true, {}, params.jqplotOptions, w);
+                    console.log(params.jqplotOptions)
                 }
                 Chart.charts[target] = $.jqplot(target + 'ReportArea', s1, params.jqplotOptions);
 

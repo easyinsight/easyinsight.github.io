@@ -1,8 +1,6 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.calculations.*;
-import com.easyinsight.calculations.generated.CalculationsParser;
-import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.core.ReportKey;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
@@ -13,9 +11,6 @@ import javax.persistence.*;
 import com.easyinsight.pipeline.Pipeline;
 import nu.xom.Attribute;
 import nu.xom.Element;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
 
 import java.util.*;
 
@@ -144,19 +139,11 @@ public class AnalysisCalculation extends AnalysisMeasure {
         Set<KeySpecification> specs;
 
         ICalculationTreeVisitor visitor;
-        CalculationsParser.startExpr_return ret;
-
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
 
         try {
-            ret = parser.startExpr();
-            tree = (CalculationTreeNode) ret.getTree();
+            tree = CalculationHelper.createTree(calculationString, false);
 
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), structure.getNamespaceMap());
             tree.accept(visitor);
         }  catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
@@ -179,19 +166,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
         VariableListVisitor variableVisitor = new VariableListVisitor();
         tree.accept(variableVisitor);
 
-        specs = variableVisitor.getVariableList();
-
-        /*if (!includeFilters && isApplyBeforeAggregation()) return analysisItemList;
-
-        if (!isApplyBeforeAggregation() && !hasCriteria(criteria, CleanupComponent.AGGREGATE_CALCULATIONS)) return analysisItemList;*/
-
-        for (KeySpecification spec : specs) {
-            AnalysisItem analysisItem;
-            try {
-                analysisItem = spec.findAnalysisItem(keyMap, displayMap);
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
+        for (AnalysisItem analysisItem : variableVisitor.getVariableList()) {
             if (analysisItem != null) {
                 for (AnalysisItem analysisItem1 : analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure)) {
                     if (structure.getInsightRequestMetadata().getPipelines(analysisItem).isEmpty()) {
@@ -216,26 +191,6 @@ public class AnalysisCalculation extends AnalysisMeasure {
             items = super.measureFilters(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
         }
         return items;
-    }
-
-    private CalculationTreeNode evalString(String s) {
-        CalculationTreeNode calculationTreeNode;        
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(s));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        try {
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            //visitor = new ResolverVisitor(r, new FunctionFactory());
-            //calculationTreeNode.accept(visitor);
-        } catch (RecognitionException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-        return calculationTreeNode;
     }
 
     public List<AnalysisItem> getDerivedItems() {

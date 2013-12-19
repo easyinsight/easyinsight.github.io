@@ -43,7 +43,7 @@ public class TrendNameRenderer extends UIComponent implements IListItemRenderer 
     public function set data(val:Object):void {
         trendOutcome = val as TrendOutcome;
         if (trendOutcome != null) {
-            nameLabel.text = trendOutcome.measure.display;
+            nameLabel.text = trendOutcome.measure.unqualifiedDisplay;
             var filters:ArrayCollection = trendOutcome.measure.filters;
             if (trendOutcome.dimensions != null && trendOutcome.report.groupings != null && trendOutcome.report.groupings.length > 0) {
                 var dimension:AnalysisItem = trendOutcome.report.groupings.getItemAt(0) as AnalysisItem;

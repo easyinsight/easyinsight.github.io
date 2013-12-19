@@ -75,10 +75,11 @@ public class FilterUtils {
             AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
             String value = curFilter != null ? (String) curFilter.get("selected") : null;
             if (value != null) {
-                long fieldID = Long.valueOf(value);
-                for (AnalysisItem item : analysisItemFilterDefinition.getAvailableItems()) {
-                    if (item.getAnalysisItemID() == fieldID) {
-                        analysisItemFilterDefinition.setTargetItem(item);
+                long fieldID = Long.parseLong(value);
+                List<AnalysisItemSelection> possibles = new DataService().possibleFields(analysisItemFilterDefinition, null, null);
+                for (AnalysisItemSelection possible : possibles) {
+                    if (possible.getAnalysisItem().getAnalysisItemID() == fieldID) {
+                        analysisItemFilterDefinition.setTargetItem(possible.getAnalysisItem());
                         break;
                     }
                 }

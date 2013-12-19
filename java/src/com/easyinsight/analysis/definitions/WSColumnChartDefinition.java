@@ -295,11 +295,8 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
-            JSONObject axes = new JSONObject();
-            JSONObject xAxis = getGroupingAxis(getXaxis());
-            axes.put("xaxis", xAxis);
-            axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
-            jsonParams.put("axes", axes);
+
+            jsonParams.put("axes", getAxes());
             params = new JSONObject(jsonParams);
             fullObject.put("jqplotOptions", params);
             JSONObject drillthroughOptions = new JSONObject();
@@ -318,5 +315,14 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             throw new RuntimeException(e);
         }
         return fullObject;
+    }
+
+    @Override
+    public JSONObject getAxes() throws JSONException {
+        JSONObject axes = new JSONObject();
+        JSONObject xAxis = getGroupingAxis(getXaxis());
+        axes.put("xaxis", xAxis);
+        axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
+        return axes;
     }
 }

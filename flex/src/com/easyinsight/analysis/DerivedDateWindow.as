@@ -16,7 +16,8 @@ public class DerivedDateWindow extends CalculationWindow {
         showMeasures = false;
         if (derivedGrouping != null) {
             calcText = derivedGrouping.derivationCode;
-            calcName = derivedGrouping.display;
+            calcName = derivedGrouping.unqualifiedDisplay;
+            dateTime = !derivedGrouping.dateOnlyField;
             dateLevel = derivedGrouping.dateLevel;
             dateApplyBeforeAggregation = derivedGrouping.applyBeforeAggregation;
         } else {
@@ -41,10 +42,14 @@ public class DerivedDateWindow extends CalculationWindow {
             var namedKey:NamedKey = new NamedKey();
             namedKey.name = nameInput.text;
             derivedGrouping.key = namedKey;
+            derivedGrouping.displayName = nameInput.text;
+            derivedGrouping.unqualifiedDisplayName = nameInput.text;
         } else {
             derivedGrouping.displayName = nameInput.text;
+            derivedGrouping.unqualifiedDisplayName = nameInput.text;
         }
         derivedGrouping.dateLevel = int(dateBox.selectedItem.data);
+        derivedGrouping.dateOnlyField = !dateTimeCheckbox.selected;
         derivedGrouping.derivationCode = calculationInput.text;
         derivedGrouping.applyBeforeAggregation = dateApplyBeforeAggregationCheckbox.selected;
         return derivedGrouping;

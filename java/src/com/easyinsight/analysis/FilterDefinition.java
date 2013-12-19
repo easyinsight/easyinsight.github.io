@@ -55,6 +55,13 @@ public class FilterDefinition implements Serializable, Cloneable {
     private AnalysisItem field;
     @Column(name = "apply_before_aggregation")
     private boolean applyBeforeAggregation = true;
+
+    @Column(name="flexible_date_filter")
+    private boolean flexibleDateFilter;
+
+    @Column(name="default_date_filter")
+    private boolean defaultDateFilter;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "filter_id")
@@ -130,6 +137,22 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     public void setSection(int section) {
         this.section = section;
+    }
+
+    public boolean isFlexibleDateFilter() {
+        return flexibleDateFilter;
+    }
+
+    public void setFlexibleDateFilter(boolean flexibleDateFilter) {
+        this.flexibleDateFilter = flexibleDateFilter;
+    }
+
+    public boolean isDefaultDateFilter() {
+        return defaultDateFilter;
+    }
+
+    public void setDefaultDateFilter(boolean defaultDateFilter) {
+        this.defaultDateFilter = defaultDateFilter;
     }
 
     public String getFieldChoiceFilterLabel() {
@@ -522,7 +545,7 @@ public class FilterDefinition implements Serializable, Cloneable {
             return getFilterName() + (colon ? ":" : "");
         }
         if (getField() != null) {
-            return getField().toDisplay() + (colon ? ":" : "");
+            return getField().toUnqualifiedDisplay() + (colon ? ":" : "");
         }
         return "";
     }

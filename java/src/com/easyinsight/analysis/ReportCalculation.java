@@ -1,10 +1,6 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.calculations.*;
-import com.easyinsight.calculations.functions.NamedKeySpecification;
-import com.easyinsight.calculations.NodeFactory;
-import com.easyinsight.calculations.generated.CalculationsLexer;
-import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
@@ -20,8 +16,6 @@ import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.PipelineData;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.IDataTransform;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 
 import java.sql.PreparedStatement;
@@ -49,19 +43,12 @@ public class ReportCalculation {
         Set<KeySpecification> specs;
 
         ICalculationTreeVisitor visitor;
-        CalculationsParser.startExpr_return ret;
 
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
 
         try {
-            ret = parser.startExpr();
-            tree = (CalculationTreeNode) ret.getTree();
+            tree = CalculationHelper.createTree(calculationString, false);
 
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), structure.getNamespaceMap());
             tree.accept(visitor);
         } catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + calculationString + ".", null));
@@ -77,21 +64,10 @@ public class ReportCalculation {
         VariableListVisitor variableVisitor = new VariableListVisitor();
         tree.accept(variableVisitor);
 
-        specs = variableVisitor.getVariableList();
-
-
         List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
 
-        for (KeySpecification spec : specs) {
-            AnalysisItem analysisItem;
-            try {
-                analysisItem = spec.findAnalysisItem(keyMap, displayMap);
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
-            if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, new HashSet<AnalysisItem>(), structure));
-            }
+        for (AnalysisItem analysisItem : variableVisitor.getVariableList()) {
+            analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, new HashSet<AnalysisItem>(), structure));
         }
 
         return analysisItemList;
@@ -100,43 +76,26 @@ public class ReportCalculation {
     private DataSet createDataSet(List<AnalysisItem> allFields, Feed feed, List<FilterDefinition> dlsFilters, EIConnection conn, Map<String, List<AnalysisItem>> keyMap,
                                   Map<String, List<AnalysisItem>> displayMap) throws RecognitionException {
         CalculationTreeNode calculationTreeNode;
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        ret = parser.expr();
-        calculationTreeNode = (CalculationTreeNode) ret.getTree();
-        for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
-            if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                calculationTreeNode.deleteChild(i);
-                break;
-            }
-        }
-        ResolverVisitor resolverVisitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+        calculationTreeNode = CalculationHelper.createTree(code, false);
+        ResolverVisitor resolverVisitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(feed.getFeedID(), null));
         calculationTreeNode.accept(resolverVisitor);
         VariableListVisitor variableVisitor = new VariableListVisitor();
         calculationTreeNode.accept(variableVisitor);
 
-        Set<KeySpecification> specs = variableVisitor.getVariableList();
         Set<AnalysisItem> analysisItemList = new HashSet<AnalysisItem>();
-        for (KeySpecification spec : specs) {
-            if (spec instanceof NamedKeySpecification) {
+
+
+
+        for (AnalysisItem analysisItem : analysisItemList) {
+            // TODO: clean up
+            /*if (spec instanceof NamedKeySpecification) {
                 NamedKeySpecification namedKeySpecification = (NamedKeySpecification) spec;
                 if ("Persona".equals(namedKeySpecification.getKey())) {
                     continue;
                 }
-            }
-            AnalysisItem analysisItem;
-            try {
-                analysisItem = spec.findAnalysisItem(keyMap, displayMap);
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
-            if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null)));
-            }
+            }*/
+            analysisItemList.addAll(analysisItem.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null)));
+
         }
         if (analysisItemList.size() > 0) {
             List<IComponent> filterComponents = new ArrayList<IComponent>();
@@ -155,25 +114,13 @@ public class ReportCalculation {
         }
     }
 
-    public List<IJoin> applyJoinCalculation(List<FilterDefinition> filters) throws RecognitionException {
+    public List<IJoin> applyJoinCalculation(List<FilterDefinition> filters, long dataSourceID) throws RecognitionException {
         CompositeCalculationMetadata compositeCalculationMetadata = new CompositeCalculationMetadata();
         compositeCalculationMetadata.setFilters(filters);
         ICalculationTreeVisitor visitor;
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        ret = parser.expr();
-        CalculationTreeNode calculationTreeNode = (CalculationTreeNode) ret.getTree();
-        for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
-            if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                calculationTreeNode.deleteChild(i);
-                break;
-            }
-        }
-        visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory());
+        CalculationTreeNode calculationTreeNode = CalculationHelper.createTree(code, false);
+        visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory(),
+                new NamespaceGenerator().generate(dataSourceID, null));
         calculationTreeNode.accept(visitor);
         ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, compositeCalculationMetadata);
         calculationTreeNode.accept(rowVisitor);
@@ -214,21 +161,8 @@ public class ReportCalculation {
                 metadata.setOp(op);
                 op.setTarget(analysisItem);
                 ICalculationTreeVisitor visitor;
-                CalculationsParser.expr_return ret;
-                CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(derivedAnalysisDimension.getDerivationCode()));
-                CommonTokenStream tokes = new CommonTokenStream();
-                tokes.setTokenSource(lexer);
-                CalculationsParser parser = new CalculationsParser(tokes);
-                parser.setTreeAdaptor(new NodeFactory());
-                ret = parser.expr();
-                CalculationTreeNode calculationTreeNode = (CalculationTreeNode) ret.getTree();
-                for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
-                    if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                        calculationTreeNode.deleteChild(i);
-                        break;
-                    }
-                }
-                visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+                CalculationTreeNode calculationTreeNode = CalculationHelper.createTree(derivedAnalysisDimension.getDerivationCode(), false);
+                visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(dataSourceID, null));
                 calculationTreeNode.accept(visitor);
                 ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, metadata);
                 calculationTreeNode.accept(rowVisitor);
@@ -248,21 +182,10 @@ public class ReportCalculation {
         drillthroughCalculationMetadata.setDataSourceFields(dataSource.getFields());
         drillthroughCalculationMetadata.setAnalysisItems(analysisItems);
         ICalculationTreeVisitor visitor;
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        ret = parser.expr();
-        CalculationTreeNode calculationTreeNode = (CalculationTreeNode) ret.getTree();
-        for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
-            if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                calculationTreeNode.deleteChild(i);
-                break;
-            }
-        }
-        visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory());
+        CalculationTreeNode calculationTreeNode = CalculationHelper.createTree(code, false);
+
+        visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory(),
+                new NamespaceGenerator().generate(report.getDataFeedID(), null));
         calculationTreeNode.accept(visitor);
         ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, drillthroughCalculationMetadata);
         calculationTreeNode.accept(rowVisitor);
@@ -275,21 +198,9 @@ public class ReportCalculation {
             dataSourceCalculationMetadata.setDataSource(dataSource);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
-            CalculationsParser.expr_return ret;
-            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
-            CommonTokenStream tokes = new CommonTokenStream();
-            tokes.setTokenSource(lexer);
-            CalculationsParser parser = new CalculationsParser(tokes);
-            parser.setTreeAdaptor(new NodeFactory());
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
-                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                    calculationTreeNode.deleteChild(i);
-                    break;
-                }
-            }
-            visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory());
+            calculationTreeNode = CalculationHelper.createTree(code, false);
+            visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory(),
+                    new NamespaceGenerator().generate(dataSource.getDataFeedID(), null));
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, dataSourceCalculationMetadata);
             calculationTreeNode.accept(rowVisitor);
@@ -299,27 +210,15 @@ public class ReportCalculation {
         }
     }
 
-    public List<ActualRowLayoutItem> apply(List<AnalysisItem> analysisItems) throws SQLException {
+    public List<ActualRowLayoutItem> apply(List<AnalysisItem> analysisItems, long dataSourceID) throws SQLException {
         try {
             FormCalculationMetadata dataSourceCalculationMetadata = new FormCalculationMetadata();
             dataSourceCalculationMetadata.setAnalysisItemPool(analysisItems);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
-            CalculationsParser.expr_return ret;
-            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
-            CommonTokenStream tokes = new CommonTokenStream();
-            tokes.setTokenSource(lexer);
-            CalculationsParser parser = new CalculationsParser(tokes);
-            parser.setTreeAdaptor(new NodeFactory());
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
-                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                    calculationTreeNode.deleteChild(i);
-                    break;
-                }
-            }
-            visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory());
+            calculationTreeNode = CalculationHelper.createTree(code, false);
+            visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), new FunctionFactory(),
+                    new NamespaceGenerator().generate(dataSourceID, null));
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, dataSourceCalculationMetadata);
             calculationTreeNode.accept(rowVisitor);
@@ -361,21 +260,8 @@ public class ReportCalculation {
             calculationMetadata.setDataSourceFields(myFields);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
-            CalculationsParser.expr_return ret;
-            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
-            CommonTokenStream tokes = new CommonTokenStream();
-            tokes.setTokenSource(lexer);
-            CalculationsParser parser = new CalculationsParser(tokes);
-            parser.setTreeAdaptor(new NodeFactory());
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
-                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                    calculationTreeNode.deleteChild(i);
-                    break;
-                }
-            }
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            calculationTreeNode = CalculationHelper.createTree(code, false);
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(feed.getFeedID(), null));
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);
@@ -393,21 +279,8 @@ public class ReportCalculation {
             calculationMetadata.setDataSourceFields(allFields);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
-            CalculationsParser.expr_return ret;
-            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
-            CommonTokenStream tokes = new CommonTokenStream();
-            tokes.setTokenSource(lexer);
-            CalculationsParser parser = new CalculationsParser(tokes);
-            parser.setTreeAdaptor(new NodeFactory());
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
-                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                    calculationTreeNode.deleteChild(i);
-                    break;
-                }
-            }
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            calculationTreeNode = CalculationHelper.createTree(code, false);
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(feed.getFeedID(), null));
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);
@@ -439,21 +312,8 @@ public class ReportCalculation {
         calculationMetadata.setDataSourceFields(allFields);
         CalculationTreeNode calculationTreeNode;
         ICalculationTreeVisitor visitor;
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        ret = parser.expr();
-        calculationTreeNode = (CalculationTreeNode) ret.getTree();
-        for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
-            if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                calculationTreeNode.deleteChild(i);
-                break;
-            }
-        }
-        visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+        calculationTreeNode = CalculationHelper.createTree(code, false);
+        visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(feed.getFeedID(), null));
         calculationTreeNode.accept(visitor);
         ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
         calculationTreeNode.accept(rowVisitor);
@@ -483,21 +343,9 @@ public class ReportCalculation {
             calculationMetadata.setDataSourceFields(allFields);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
-            CalculationsParser.expr_return ret;
-            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
-            CommonTokenStream tokes = new CommonTokenStream();
-            tokes.setTokenSource(lexer);
-            CalculationsParser parser = new CalculationsParser(tokes);
-            parser.setTreeAdaptor(new NodeFactory());
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
-                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                    calculationTreeNode.deleteChild(i);
-                    break;
-                }
-            }
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            calculationTreeNode = CalculationHelper.createTree(code, false);
+
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(feed.getFeedID(), null));
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);
@@ -510,21 +358,9 @@ public class ReportCalculation {
             calculationMetadata.setDataSourceFields(allFields);
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
-            CalculationsParser.expr_return ret;
-            CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
-            CommonTokenStream tokes = new CommonTokenStream();
-            tokes.setTokenSource(lexer);
-            CalculationsParser parser = new CalculationsParser(tokes);
-            parser.setTreeAdaptor(new NodeFactory());
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount(); i++) {
-                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                    calculationTreeNode.deleteChild(i);
-                    break;
-                }
-            }
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            calculationTreeNode = CalculationHelper.createTree(code, false);
+
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(report.getDataFeedID(), null));
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, null, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);

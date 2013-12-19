@@ -94,6 +94,11 @@ public class Account {
     private boolean unlimitedQuickbaseConnections;
     @Column(name="addon_quickbase_connections")
     private int addonQuickbaseConnections;
+    @Column(name="field_model")
+    private boolean fieldModel;
+
+    @Column(name="exchange_author")
+    private boolean exchangeAuthor;
 
     @Column(name="enterprise_addon_cost")
     private int enterpriseAddonCost;
@@ -265,6 +270,9 @@ public class Account {
     @Column(name="send_emails_to_new_users")
     private boolean sendEmailsToNewUsers = true;
 
+    @Column(name="look_and_feel_customized")
+    private boolean lookAndFeelCustomized;
+
     @Column(name="use_html_version")
     private boolean useHTMLVersion = false;
 
@@ -282,6 +290,14 @@ public class Account {
 
     public void setSendEmailsToNewUsers(boolean sendEmailsToNewUsers) {
         this.sendEmailsToNewUsers = sendEmailsToNewUsers;
+    }
+
+    public boolean isFieldModel() {
+        return fieldModel;
+    }
+
+    public void setFieldModel(boolean fieldModel) {
+        this.fieldModel = fieldModel;
     }
 
     public boolean isHourlyRefreshEnabled() {
@@ -332,6 +348,14 @@ public class Account {
         this.enterpriseAddonCost = enterpriseAddonCost;
     }
 
+    public boolean isExchangeAuthor() {
+        return exchangeAuthor;
+    }
+
+    public void setExchangeAuthor(boolean exchangeAuthor) {
+        this.exchangeAuthor = exchangeAuthor;
+    }
+
     public boolean isUnlimitedQuickbaseConnections() {
         return unlimitedQuickbaseConnections;
     }
@@ -346,6 +370,14 @@ public class Account {
 
     public void setAddonQuickbaseConnections(int addonQuickbaseConnections) {
         this.addonQuickbaseConnections = addonQuickbaseConnections;
+    }
+
+    public boolean isLookAndFeelCustomized() {
+        return lookAndFeelCustomized;
+    }
+
+    public void setLookAndFeelCustomized(boolean lookAndFeelCustomized) {
+        this.lookAndFeelCustomized = lookAndFeelCustomized;
     }
 
     public int getAddonDesigners() {

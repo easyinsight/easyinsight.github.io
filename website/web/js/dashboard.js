@@ -417,6 +417,8 @@ $(function () {
         var dashboardKey = (dashboardJSON["id"] != -1) ? ("dashboard " + dashboardJSON["id"]) : ("report " + dashboardJSON["base"]["id"]);
         var saveFilter;
         var saveStack;
+        var saveReport;
+        var filtersFromLocalStorage;
 
 
         $("#configuration-dropdown").html(configurationDropdownTemplate({"dashboard": dashboardJSON, "user": userJSON}))
@@ -426,6 +428,10 @@ $(function () {
                 var cur;
                 var vals = JSON.parse(localStorage[dashboardKey]);
                 var filters = vals["filters"];
+                var reports = vals["reports"];
+                for(cur in reports) {
+                    loadReport(reports[cur], cur);
+                }
                 for (cur in filters) {
                     if (typeof(filterMap[cur]) != "undefined" && typeof(filters[cur]) != "undefined")
                         $.extend(filterMap[cur].filter, filters[cur]);
@@ -460,11 +466,37 @@ $(function () {
                 localStorage[dashboardKey] = JSON.stringify(report);
             }
 
+            saveReport = function(dashboard_report_id, report_id) {
+                if(localStorage[dashboardKey] == null) {
+                    localStorage[dashboardKey] = JSON.stringify({});
+                }
+                var report = JSON.parse(localStorage[dashboardKey]);
+                if(typeof(report["reports"]) == "undefined") {
+                    report["reports"] = {};
+                }
+                report["reports"][report_id] = dashboard_report_id;
+                localStorage[dashboardKey] = JSON.stringify(report);
+            }
+
+            filtersFromLocalStorage = function(a) {
+                var vals = JSON.parse(localStorage[dashboardKey]);
+                var filters = vals["filters"];
+                if(typeof(filters) != "undefined") {
+                    for (cur in a) {
+                        if (typeof(filters[cur]) != "undefined" && typeof(a[cur]) != "undefined")
+                            $.extend(a[cur].filter, filters[cur]);
+                    }
+                }
+                return a;
+            }
+
         } else {
             saveFilter = function (f, key) {
             };
             saveStack = function (k) {
             };
+            saveReport = function(a, b) { }
+            filtersFromLocalStorage = function(a) { return a; }
         }
 
 
@@ -790,6 +822,7 @@ $(function () {
 
                         var b = $(e.target).attr("data-report-target");
                         loadReport(b, cc);
+                        saveReport(b, cc);
                         e.preventDefault();
                     })
                 })
@@ -901,6 +934,7 @@ $(function () {
                     m[w.id + "_report_filter_" + i.id] = {"filter": i, "parent": w };
                     return m;
                 }, {});
+                t = filtersFromLocalStorage(t);
                 $.extend(filterMap, t);
                 reportMap[dashboardKey].filters = data.filters.concat(reportMap[dashboardKey].parent_filters);
                 reportMap[dashboardKey].report.report = { metadata: data, id: data.id, name: data.name };

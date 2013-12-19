@@ -521,6 +521,7 @@ public class AnalysisDefinition implements Cloneable {
                     }
                     clone.setOriginalDisplayName(item.toDisplay());
                     clone.setDisplayName(report.getName() + " - " + item.toDisplay());
+                    clone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay());
                     clone.setBasedOnReportField(item.getAnalysisItemID());
                     ReportKey reportKey = new ReportKey();
                     reportKey.setParentKey(item.getKey());

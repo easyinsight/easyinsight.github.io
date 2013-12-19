@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<diagram:DiagramNode xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:diagrammer="com.anotherflexdev.diagrammer.*"
+<diagram:DiagramNode xmlns:mx="http://www.adobe.com/2006/mxml"
                      editable="false" xmlns:diagram="com.easyinsight.analysis.diagram.*">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -40,7 +40,7 @@
 
         override public function set outcome(value:TrendOutcome):void {
             _outcome = value;
-            this.nodeName = _outcome.measure.display;
+            this.nodeName = _outcome.measure.unqualifiedDisplay;
             if (_outcome.measure.reportFieldExtension != null && _outcome.measure.reportFieldExtension is DiagramReportFieldExtension &&
                     DiagramReportFieldExtension(_outcome.measure.reportFieldExtension).date) {
                 showStatus = true;
@@ -99,12 +99,12 @@
             DiagramReportFieldExtension(_outcome.measure.reportFieldExtension).y = this.y;
         }
         ]]></mx:Script>
-    <mx:Canvas borderStyle="solid" borderThickness="1" borderColor="0x333333" width="100%" height="52" cornerRadius="5" backgroundColor="0xf8f8ff"
+    <mx:Canvas borderStyle="solid" borderThickness="1" borderColor="0x333333" width="100%" height="52" cornerRadius="5" backgroundColor="0xf8fff8"
             horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundAlpha=".8" id="canvas">
         <mx:Image id="iconImage" y="8" x="5"/>
-        <mx:Label text="{outcomeValue}" x="35" y="15" width="100%" textAlign="center" fontSize="14"/>
+        <mx:Label text="{outcomeValue}" x="35" y="15" width="100%" textAlign="center" fontSize="14" fontFamily="Open Sans" styleName="myFontStyle"/>
     </mx:Canvas>
     <diagram:lblNodeName>
-		<mx:Text y="51" text="{nodeName}" selectable="false" left="1" right="1" textAlign="center" fontFamily="Lucida Grande"/>
+		<mx:Text y="51" text="{nodeName}" selectable="false" left="1" right="1" textAlign="center" fontFamily="Open Sans" styleName="myFontStyle"/>
 	</diagram:lblNodeName>
 </diagram:DiagramNode>

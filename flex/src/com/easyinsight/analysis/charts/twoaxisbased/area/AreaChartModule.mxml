@@ -60,7 +60,7 @@
             var lineSeriesItem:AreaSeriesItem = hitData.chartItem as AreaSeriesItem;
             if (def.multiMeasure) {
                 for each (var aMeasure:AnalysisMeasure in def.measures) {
-                    if (aMeasure.display == lineSeries.displayName) {
+                    if (aMeasure.unqualifiedDisplay == lineSeries.displayName) {
                         string = lineSeries.displayName + "\n" +
                                 xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + aMeasure.getFormatter().format(lineSeriesItem.yValue);
                         break;
@@ -125,10 +125,10 @@
             var verticalAxis:LinearAxis = new LinearAxis();
             verticalAxis.baseAtZero = areaChartDef.baseAtZero == "true";
             if (!areaChartDef.multiMeasure && areaChartDef.measure != null) {
-                verticalAxis.title = areaChartDef.measure.display;
+                verticalAxis.title = areaChartDef.measure.unqualifiedDisplay;
             } else {
                 if (areaChartDef.measures.length == 1) {
-                    verticalAxis.title = AnalysisItem(areaChartDef.measures.getItemAt(0)).display;
+                    verticalAxis.title = AnalysisItem(areaChartDef.measures.getItemAt(0)).unqualifiedDisplay;
                 } else {
                     verticalAxis.title = "Measures";
                 }
@@ -202,7 +202,7 @@
                             dateAxis.dataUnits = "minutes";
                             break;
                     }
-                    dateAxis.displayName = dateDimension.display;
+                    dateAxis.displayName = dateDimension.unqualifiedDisplay;
                     if (additionalProperties["xAxisMinimum"] != null) {
                         dateAxis.minimum = additionalProperties["xAxisMinimum"];
                     }
@@ -213,9 +213,9 @@
                     xAxis = dateAxis;
                 } else {
                     var categoryAxis:CategoryAxis = new CategoryAxis();
-                    categoryAxis.displayName = xAxisDimension.display;
+                    categoryAxis.displayName = xAxisDimension.unqualifiedDisplay;
                     categoryAxis.dataProvider = categories;
-                    categoryAxis.title = xAxisDimension.display;
+                    categoryAxis.title = xAxisDimension.unqualifiedDisplay;
                     xAxis = categoryAxis;
                 }
                 var vAxisRenderer:AxisRenderer = new AxisRenderer();

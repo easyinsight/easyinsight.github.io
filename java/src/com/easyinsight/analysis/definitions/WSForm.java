@@ -136,7 +136,7 @@ public class WSForm extends WSAnalysisDefinition {
                 sb.append("<fieldset>\n");
                 sb.append("<div class=\"form-group\">\n");
                 String inputName = String.valueOf(analysisItem.getAnalysisItemID());
-                sb.append("<label class=\"col-md-4 control-label\" for=\"").append(inputName).append("\">").append(analysisItem.toDisplay()).append("</label>");
+                sb.append("<label class=\"col-md-4 control-label\" for=\"").append(inputName).append("\">").append(analysisItem.toUnqualifiedDisplay()).append("</label>");
                 sb.append("<div class=\"col-md-6\">");
                 sb.append("<input type=\"text\" class=\"form-control\" readonly=\"readonly\" id=\"").append(inputName).append("\" value=\"").append(row.getValue(analysisItem).toHTMLString()).append("\">");
                 sb.append("</div>");

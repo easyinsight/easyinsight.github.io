@@ -123,28 +123,8 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
-            JSONObject axes = new JSONObject();
-            JSONObject xAxis = getGroupingAxis(getXaxis());
-            xAxis.put("renderer", "$.jqplot.DateAxisRenderer");
 
-            JSONObject xAxisTickOptions = xAxis.getJSONObject("tickOptions");
-            AnalysisDateDimension date = (AnalysisDateDimension) this.getXaxis();
-            if (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
-                xAxisTickOptions.put("formatString", "'%b %#d'");
-            } else if (date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
-                xAxisTickOptions.put("formatString", "'%b'");
-            } else if (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
-                xAxisTickOptions.put("formatString", "'%b'");
-            } else {
-                xAxisTickOptions.put("formatString", "'%b %#d'");
-            }
-
-            xAxis.put("tickOptions", xAxisTickOptions);
-            axes.put("xaxis", xAxis);
-            if (getMeasure() != null) {
-                axes.put("yaxis", getMeasureAxis(getMeasure()));
-            }
-            jsonParams.put("axes", axes);
+            jsonParams.put("axes", getAxes());
             JSONObject highlighter = new JSONObject();
             highlighter.put("show", true);
             highlighter.put("sizeAdjust", 7.5);
@@ -162,6 +142,32 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
             throw new RuntimeException(e);
         }
         return object;
+    }
+
+    @Override
+    public JSONObject getAxes() throws JSONException {
+        JSONObject axes = new JSONObject();
+        JSONObject xAxis = getGroupingAxis(getXaxis());
+        xAxis.put("renderer", "$.jqplot.DateAxisRenderer");
+
+        JSONObject xAxisTickOptions = xAxis.getJSONObject("tickOptions");
+        AnalysisDateDimension date = (AnalysisDateDimension) this.getXaxis();
+        if (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
+            xAxisTickOptions.put("formatString", "'%b %#d'");
+        } else if (date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+            xAxisTickOptions.put("formatString", "'%b'");
+        } else if (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
+            xAxisTickOptions.put("formatString", "'%b'");
+        } else {
+            xAxisTickOptions.put("formatString", "'%b %#d'");
+        }
+
+        xAxis.put("tickOptions", xAxisTickOptions);
+        axes.put("xaxis", xAxis);
+        if (getMeasure() != null) {
+            axes.put("yaxis", getMeasureAxis(getMeasure()));
+        }
+        return axes;
     }
 
     protected boolean supportsMultiField() {

@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.core.Key;
+import com.easyinsight.core.ReportKey;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.EIConnection;
@@ -36,6 +37,22 @@ public class AnalysisBasedFeed extends Feed {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
         return new ArrayList<AnalysisItem>(analysisDefinition.getAllAnalysisItems());
     }*/
+
+    public Key originalField(Key key, AnalysisItem originalItem) {
+        if (key instanceof ReportKey) {
+            ReportKey reportKey = (ReportKey) key;
+            Key parentKey = reportKey.getParentKey();
+            if (parentKey instanceof ReportKey) {
+                ReportKey parentReportKey = (ReportKey) parentKey;
+                AnalysisBasedFeed cachedFeed = new AnalysisBasedFeed();
+                cachedFeed.setAnalysisDefinition(new AnalysisStorage().getAnalysisDefinition(parentReportKey.getReportID()));
+                return cachedFeed.originalField(parentReportKey, originalItem);
+            } else {
+                return FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID()).originalField(parentKey, originalItem);
+            }
+        }
+        return null;
+    }
 
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
