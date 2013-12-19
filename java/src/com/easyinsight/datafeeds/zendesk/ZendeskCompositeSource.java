@@ -163,14 +163,14 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         return DataSourceInfo.COMPOSITE_PULL;
     }
 
-    private transient Set<String> ticketIdList;
+    private transient List<Comment> comments;
 
-    public Set<String> ticketIdList() {
-        return ticketIdList;
+    public List<Comment> getComments() {
+        return comments;
     }
 
-    public void populateTicketIdList(Set<String> ticketIdList) {
-        this.ticketIdList = ticketIdList;
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 
     private transient ZendeskUserCache zendeskUserCache;
@@ -231,5 +231,11 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     }
     public void setZdApiKey(String value) {
         zdApiKey = value;
+    }
+
+    @Override
+    protected void refreshDone() {
+        super.refreshDone();
+        comments = null;
     }
 }
