@@ -131,10 +131,10 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                 String code = httpRequest.getParameter("code");
                 if (code != null) {
                     OAuthClientRequest request = OAuthClientRequest.tokenLocation("https://na1.salesforce.com/services/oauth2/token").
-                                setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY).
-                                setClientSecret(SalesforceBaseDataSource.SALESFORCE_SECRET_KEY).
-                                setRedirectURI("https://www.easy-insight.com/app/oauth").
-                                setCode(code).buildBodyMessage();
+                            setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY).
+                            setClientSecret(SalesforceBaseDataSource.SALESFORCE_SECRET_KEY).
+                            setRedirectURI("https://www.easy-insight.com/app/oauth").
+                            setCode(code).buildBodyMessage();
                     OAuthClient client = new OAuthClient(new URLConnectionClient());
                     OAuthJSONAccessTokenResponse response = client.accessToken(request);
                     accessToken = response.getAccessToken();
@@ -218,32 +218,12 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         }
     }
 
-    private static class AuthFailed extends Exception {
-
-    }
-
     @Override
-    protected List<IServerDataSourceDefinition> childDataSources(EIConnection conn) throws Exception {
-        List<IServerDataSourceDefinition> defaultChildren = super.childDataSources(conn);
-        Document doc;
+    protected void beforeRefresh(Date lastRefreshTime) {
         try {
-            HttpGet httpRequest = new HttpGet(instanceName + "/services/data/v20.0/sobjects/");
-            httpRequest.setHeader("Accept", "application/xml");
-            httpRequest.setHeader("Content-Type", "application/xml");
-            httpRequest.setHeader("Authorization", "OAuth " + accessToken);
-
-
-            org.apache.http.client.HttpClient cc = new DefaultHttpClient();
-            ResponseHandler<String> responseHandler = new BasicResponseHandler();
-
-            String string = cc.execute(httpRequest, responseHandler);
-
-            Builder builder = new Builder();
-
-            doc = builder.build(new ByteArrayInputStream(string.getBytes()));
-        } catch (HttpResponseException hre) {
-            if ("Unauthorized".equals(hre.getMessage())) {
-                refreshTokenInfo();
+            super.beforeRefresh(lastRefreshTime);
+            Document doc;
+            try {
                 HttpGet httpRequest = new HttpGet(instanceName + "/services/data/v20.0/sobjects/");
                 httpRequest.setHeader("Accept", "application/xml");
                 httpRequest.setHeader("Content-Type", "application/xml");
@@ -258,11 +238,122 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                 Builder builder = new Builder();
 
                 doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+            } catch (HttpResponseException hre) {
+                if ("Unauthorized".equals(hre.getMessage())) {
+                    refreshTokenInfo();
+                    HttpGet httpRequest = new HttpGet(instanceName + "/services/data/v20.0/sobjects/");
+                    httpRequest.setHeader("Accept", "application/xml");
+                    httpRequest.setHeader("Content-Type", "application/xml");
+                    httpRequest.setHeader("Authorization", "OAuth " + accessToken);
+
+
+                    org.apache.http.client.HttpClient cc = new DefaultHttpClient();
+                    ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+                    String string = cc.execute(httpRequest, responseHandler);
+
+                    Builder builder = new Builder();
+
+                    doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+                } else {
+                    throw hre;
+                }
+            }
+            sobjectNodes = doc.query("/DescribeGlobal/sobjects");
+            fieldMap = new HashMap<String, List<AnalysisItem>>();
+            for (int i = 0; i < sobjectNodes.size(); i++) {
+                Node sobjectNode = sobjectNodes.get(i);
+                String name = sobjectNode.query("name/text()").get(0).getValue();
+                List<AnalysisItem> items = itemsFor(name);
+                fieldMap.put(name, items);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Nodes getSobjectNodes() {
+        return sobjectNodes;
+    }
+
+    public Map<String, List<AnalysisItem>> getFieldMap() {
+        return fieldMap;
+    }
+
+    private List<AnalysisItem> itemsFor(String sobjectName) throws ParsingException, IOException {
+        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
+        HttpGet httpRequest = new HttpGet(getInstanceName() + "/services/data/v20.0/sobjects/" + sobjectName + "/describe/");
+        httpRequest.setHeader("Accept", "application/xml");
+        httpRequest.setHeader("Content-Type", "application/xml");
+        httpRequest.setHeader("Authorization", "OAuth " + getAccessToken());
+
+
+        org.apache.http.client.HttpClient cc = new DefaultHttpClient();
+        ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+        String string = cc.execute(httpRequest, responseHandler);
+        //System.out.println(string);
+        Builder builder = new Builder();
+        Document doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+        Nodes fieldsNodes = doc.query("/" + sobjectName + "/fields");
+        for (int i = 0; i < fieldsNodes.size(); i++) {
+            Node fieldNode = fieldsNodes.get(i);
+            String fieldName = fieldNode.query("name/text()").get(0).getValue();
+            System.out.println("\t" + fieldName);
+            String friendlyName = fieldNode.query("label/text()").get(0).getValue();
+            String type = fieldNode.query("type/text()").get(0).getValue().toUpperCase();
+            if("BOOLEAN".equals(type) ||
+                    "STRING".equals(type) ||
+                    "TEXTAREA".equals(type) ||
+                    "PHONE".equals(type) ||
+                    "URL".equals(type) ||
+                    "PICKLIST".equals(type) ||
+                    "ID".equals(type) ||
+                    "REFERENCE".equals(type)) {
+                items.add(new AnalysisDimension(new NamedKey(fieldName), friendlyName));
+            }
+            else if("DOUBLE".equals(type) || "INT".equals(type)) {
+                items.add(new AnalysisMeasure(new NamedKey(fieldName), friendlyName, AggregationTypes.SUM));
+            } else if ("CURRENCY".equals(type)) {
+                AnalysisMeasure analysisMeasure = new AnalysisMeasure(new NamedKey(fieldName), friendlyName, AggregationTypes.SUM);
+                FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
+                formattingConfiguration.setFormattingType(FormattingConfiguration.CURRENCY);
+                analysisMeasure.setFormattingConfiguration(formattingConfiguration);
+                items.add(analysisMeasure);
+            } else if ("PERCENT".equals(type)) {
+                AnalysisMeasure analysisMeasure = new AnalysisMeasure(new NamedKey(fieldName), friendlyName, AggregationTypes.AVERAGE);
+                FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
+                formattingConfiguration.setFormattingType(FormattingConfiguration.PERCENTAGE);
+                analysisMeasure.setFormattingConfiguration(formattingConfiguration);
+                items.add(analysisMeasure);
+            } else if ("DATE".equals(type)) {
+                AnalysisDateDimension dateDim = new AnalysisDateDimension(new NamedKey(fieldName), friendlyName, AnalysisDateDimension.DAY_LEVEL);
+                dateDim.setDateOnlyField(true);
+                items.add(dateDim);
+            } else if ("DATETIME".equals(type)) {
+                AnalysisDateDimension dateDimension = new AnalysisDateDimension(new NamedKey(fieldName), friendlyName, AnalysisDateDimension.DAY_LEVEL);
+                dateDimension.setCustomDateFormat("yyyy-MM-dd'T'HH:mm:SS.sss'Z'");
+                items.add(dateDimension);
             } else {
-                throw hre;
+                System.out.println("** NO CLUE HOW TO HANDLE " + type);
             }
         }
-        Nodes sobjectNodes = doc.query("/DescribeGlobal/sobjects");
+        return items;
+    }
+
+    private transient Nodes sobjectNodes;
+    private transient Map<String, List<AnalysisItem>> fieldMap;
+
+    @Override
+    protected void refreshDone() {
+        super.refreshDone();
+        sobjectNodes = null;
+        fieldMap = null;
+    }
+
+    @Override
+    protected List<IServerDataSourceDefinition> childDataSources(EIConnection conn) throws Exception {
+        List<IServerDataSourceDefinition> defaultChildren = super.childDataSources(conn);
         List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
         List<SFConnection> connectionList = new ArrayList<SFConnection>();
         Map<String, SalesforceSObjectSource> map = new HashMap<String, SalesforceSObjectSource>();
@@ -270,6 +361,47 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         for (IServerDataSourceDefinition child : defaultChildren) {
             SalesforceSObjectSource source = (SalesforceSObjectSource) child;
             map.put(source.getSobjectName(), source);
+        }
+
+        if (sobjectNodes == null) {
+            Document doc;
+            try {
+                HttpGet httpRequest = new HttpGet(instanceName + "/services/data/v20.0/sobjects/");
+                httpRequest.setHeader("Accept", "application/xml");
+                httpRequest.setHeader("Content-Type", "application/xml");
+                httpRequest.setHeader("Authorization", "OAuth " + accessToken);
+
+
+                org.apache.http.client.HttpClient cc = new DefaultHttpClient();
+                ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+                String string = cc.execute(httpRequest, responseHandler);
+
+                Builder builder = new Builder();
+
+                doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+            } catch (HttpResponseException hre) {
+                if ("Unauthorized".equals(hre.getMessage())) {
+                    refreshTokenInfo();
+                    HttpGet httpRequest = new HttpGet(instanceName + "/services/data/v20.0/sobjects/");
+                    httpRequest.setHeader("Accept", "application/xml");
+                    httpRequest.setHeader("Content-Type", "application/xml");
+                    httpRequest.setHeader("Authorization", "OAuth " + accessToken);
+
+
+                    org.apache.http.client.HttpClient cc = new DefaultHttpClient();
+                    ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+                    String string = cc.execute(httpRequest, responseHandler);
+
+                    Builder builder = new Builder();
+
+                    doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+                } else {
+                    throw hre;
+                }
+            }
+            sobjectNodes = doc.query("/DescribeGlobal/sobjects");
         }
 
         for (int i = 0; i < sobjectNodes.size(); i++) {
@@ -281,7 +413,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                 String searchableString = sobjectNode.query("searchable/text()").get(0).getValue();
                 boolean searchable = Boolean.parseBoolean(searchableString);
                 if (searchable || "UserRole".equals(name) || "OpportunityHistory".equals(name) || "OpportunityStage".equals(name)) {
-                //if (searchable) {
+                    //if (searchable) {
                     SalesforceSObjectSource salesforceSObjectSource = new SalesforceSObjectSource();
                     salesforceSObjectSource.setSobjectName(name);
                     salesforceSObjectSource.setFeedName(name);
@@ -322,7 +454,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
             }
         }
         //if (getConnections() == null || getConnections().size() == 0) {
-            setConnections(connections);
+        setConnections(connections);
         //}
         return defaultChildren;
     }

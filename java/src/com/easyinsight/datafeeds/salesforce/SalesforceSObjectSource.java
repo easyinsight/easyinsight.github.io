@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.salesforce;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
@@ -50,32 +51,7 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        try {
-            List<String> keys = new ArrayList<String>();
-            SalesforceBaseDataSource salesforceBaseDataSource = (SalesforceBaseDataSource) parentDefinition;
-            HttpGet httpRequest = new HttpGet(salesforceBaseDataSource.getInstanceName() + "/services/data/v20.0/sobjects/" + sobjectName + "/describe/");
-            httpRequest.setHeader("Accept", "application/xml");
-            httpRequest.setHeader("Content-Type", "application/xml");
-            httpRequest.setHeader("Authorization", "OAuth " + salesforceBaseDataSource.getAccessToken());
-
-
-            org.apache.http.client.HttpClient cc = new DefaultHttpClient();
-            ResponseHandler<String> responseHandler = new BasicResponseHandler();
-
-            String string = cc.execute(httpRequest, responseHandler);
-            System.out.println(string);
-            Builder builder = new Builder();
-            Document doc = builder.build(new ByteArrayInputStream(string.getBytes()));
-            Nodes fieldsNodes = doc.query("/" + sobjectName + "/fields");
-            for (int i = 0; i < fieldsNodes.size(); i++) {
-                Node fieldNode = fieldsNodes.get(i);
-                String name = fieldNode.query("name/text()").get(0).getValue();
-                keys.add(name);
-            }
-            return keys;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return new ArrayList<String>();
     }
 
 
@@ -88,63 +64,14 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         try {
             List<AnalysisItem> items = new ArrayList<AnalysisItem>();
-            SalesforceBaseDataSource salesforceBaseDataSource = (SalesforceBaseDataSource) parentDefinition;
-            HttpGet httpRequest = new HttpGet(salesforceBaseDataSource.getInstanceName() + "/services/data/v20.0/sobjects/" + sobjectName + "/describe/");
-            httpRequest.setHeader("Accept", "application/xml");
-            httpRequest.setHeader("Content-Type", "application/xml");
-            httpRequest.setHeader("Authorization", "OAuth " + salesforceBaseDataSource.getAccessToken());
-
-
-            org.apache.http.client.HttpClient cc = new DefaultHttpClient();
-            ResponseHandler<String> responseHandler = new BasicResponseHandler();
-
-            String string = cc.execute(httpRequest, responseHandler);
-            //System.out.println(string);
-            Builder builder = new Builder();
-            Document doc = builder.build(new ByteArrayInputStream(string.getBytes()));
-            Nodes fieldsNodes = doc.query("/" + sobjectName + "/fields");
-            System.out.println(sobjectName);
-            for (int i = 0; i < fieldsNodes.size(); i++) {
-                Node fieldNode = fieldsNodes.get(i);
-                String fieldName = fieldNode.query("name/text()").get(0).getValue();
-                System.out.println("\t" + fieldName);
-                String friendlyName = fieldNode.query("label/text()").get(0).getValue();
-                String type = fieldNode.query("type/text()").get(0).getValue().toUpperCase();
-                if("BOOLEAN".equals(type) ||
-                        "STRING".equals(type) ||
-                        "TEXTAREA".equals(type) ||
-                        "PHONE".equals(type) ||
-                        "URL".equals(type) ||
-                        "PICKLIST".equals(type) ||
-                        "ID".equals(type) ||
-                        "REFERENCE".equals(type)) {
-                    items.add(new AnalysisDimension(keys.get(fieldName), friendlyName));
+            List<AnalysisItem> fields = ((SalesforceBaseDataSource) parentDefinition).getFieldMap().get(sobjectName);
+            for (AnalysisItem field : fields) {
+                NamedKey key = (NamedKey) field.getKey();
+                Key existing = keys.get(key.getName());
+                if (existing != null) {
+                    field.setKey(existing);
                 }
-                else if("DOUBLE".equals(type) || "INT".equals(type)) {
-                    items.add(new AnalysisMeasure(keys.get(fieldName), friendlyName, AggregationTypes.SUM));
-                } else if ("CURRENCY".equals(type)) {
-                    AnalysisMeasure analysisMeasure = new AnalysisMeasure(keys.get(fieldName), friendlyName, AggregationTypes.SUM);
-                    FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
-                    formattingConfiguration.setFormattingType(FormattingConfiguration.CURRENCY);
-                    analysisMeasure.setFormattingConfiguration(formattingConfiguration);
-                    items.add(analysisMeasure);
-                } else if ("PERCENT".equals(type)) {
-                    AnalysisMeasure analysisMeasure = new AnalysisMeasure(keys.get(fieldName), friendlyName, AggregationTypes.AVERAGE);
-                    FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
-                    formattingConfiguration.setFormattingType(FormattingConfiguration.PERCENTAGE);
-                    analysisMeasure.setFormattingConfiguration(formattingConfiguration);
-                    items.add(analysisMeasure);
-                } else if ("DATE".equals(type)) {
-                    AnalysisDateDimension dateDim = new AnalysisDateDimension(keys.get(fieldName), friendlyName, AnalysisDateDimension.DAY_LEVEL);
-                    dateDim.setDateOnlyField(true);
-                    items.add(dateDim);
-                } else if ("DATETIME".equals(type)) {
-                    AnalysisDateDimension dateDimension = new AnalysisDateDimension(keys.get(fieldName), friendlyName, AnalysisDateDimension.DAY_LEVEL);
-                    dateDimension.setCustomDateFormat("yyyy-MM-dd'T'HH:mm:SS.sss'Z'");
-                    items.add(dateDimension);
-                } else {
-                    System.out.println("** NO CLUE HOW TO HANDLE " + type);
-                }
+                items.add(field);
             }
             return items;
         } catch (Exception e) {
