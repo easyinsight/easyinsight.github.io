@@ -47,6 +47,8 @@ public class DistinctCachedSourceFeed extends Feed {
             }
             stmt.close();
             return feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
