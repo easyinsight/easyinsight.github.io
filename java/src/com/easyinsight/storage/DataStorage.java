@@ -590,10 +590,19 @@ public class DataStorage implements IDataStorage {
             if (existsRS.next()) {
                 storageConn.prepareStatement("DROP TABLE " + getTableName()).execute();
             }
-            String sql = defineTableSQL(false);
-            LogClass.info("Creating new storage table in migration with sql " + sql);
-            PreparedStatement createSQL = storageConn.prepareStatement(sql);
-            createSQL.execute();
+
+            try {
+                String sql = defineTableSQL(false);
+                LogClass.info("Creating new storage table in migration with sql " + sql);
+                PreparedStatement createSQL = storageConn.prepareStatement(sql);
+                createSQL.execute();
+            } catch (SQLException e) {
+                if (e.getMessage().contains("Row size too large")) {
+                    String sql = defineTableSQL(true);
+                    PreparedStatement createSQL = storageConn.prepareStatement(sql);
+                    createSQL.execute();
+                }
+            }
 
             if (migrateData) {
                 if (!fieldMigrations.isEmpty() || dataSourceType != FeedType.QUICKBASE_CHILD.getType()) {
@@ -1177,7 +1186,7 @@ public class DataStorage implements IDataStorage {
                     throw new RuntimeException("Attempt made to query derived analysis item " + analysisItem.toDisplay() + " of class " + analysisItem.getClass().getName());
                 }
             }
-            
+
             String columnName = analysisItem.toKeySQL();
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && aggregateQuery) {
                 AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
@@ -1656,7 +1665,7 @@ public class DataStorage implements IDataStorage {
     private static void addOrUpdateMetadata(long dataFeedID, FeedPersistenceMetadata metadata, Connection conn, int dataSourceType) {
         try {
             //if (dataSourceType == FeedType.DATABASE_CONNECTION.getType() || dataSourceType == FeedType.SALESFORCE_SUB.getType()) {
-                //if (metadata.getMetadataID() > 0) {
+            //if (metadata.getMetadataID() > 0) {
             try {
                 PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_PERSISTENCE_METADATA WHERE FEED_ID = ? AND " +
                         "VERSION = ?");
@@ -2104,7 +2113,7 @@ public class DataStorage implements IDataStorage {
     }
 
     public File archive(@NotNull List<AnalysisItem> fields,
-                                InsightRequestMetadata insightRequestMetadata) throws SQLException, IOException, S3ServiceException {
+                        InsightRequestMetadata insightRequestMetadata) throws SQLException, IOException, S3ServiceException {
         Calendar cal = Calendar.getInstance();
         Calendar shiftedCal = Calendar.getInstance();
         int timeOffset = insightRequestMetadata.getUtcOffset() / 60;
@@ -2126,7 +2135,7 @@ public class DataStorage implements IDataStorage {
         FileOutputStream fos = new FileOutputStream(file);
         BufferedOutputStream bos = new BufferedOutputStream(fos, 512);
         CsvWriter csvWriter = new CsvWriter(bos, ',', Charset.forName("UTF-8"));
-        
+
         for (AnalysisItem field : fields) {
             if (field.persistable()) {
                 if (field.isKeyColumn()) {

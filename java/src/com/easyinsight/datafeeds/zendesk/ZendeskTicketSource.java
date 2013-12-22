@@ -256,23 +256,26 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                             }
                         }
                     }
-                    Map detail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + "/comments.json", zendeskCompositeSource, httpClient);
-                    List comments = (List) detail.get("comments");
-                    if (comments != null) {
-                        String firstComment = null;
-                        for (Object commentMapObj : comments) {
-                            Map commentMap = (Map) commentMapObj;
-                            String commentID = commentMap.get("id").toString();
-                            String commentDescription = commentMap.get("body").toString();
-                            if (firstComment == null) {
-                                firstComment = commentDescription;
-                            }
-                            String author = queryUser(commentMap.get("author_id").toString(), userCache).toString();
-                            Date createdAt = adf.parse(commentMap.get("created_at").toString());
-                            commentList.add(new Comment(Long.parseLong(commentID), commentDescription, author, createdAt, id));
-                        }
+                    if (zendeskCompositeSource.isLoadComments()) {
+                        Map detail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + "/comments.json", zendeskCompositeSource, httpClient);
 
-                        row.addValue(DESCRIPTION, firstComment);
+                        List comments = (List) detail.get("comments");
+                        if (comments != null) {
+                            String firstComment = null;
+                            for (Object commentMapObj : comments) {
+                                Map commentMap = (Map) commentMapObj;
+                                String commentID = commentMap.get("id").toString();
+                                String commentDescription = commentMap.get("body").toString();
+                                if (firstComment == null) {
+                                    firstComment = commentDescription;
+                                }
+                                String author = queryUser(commentMap.get("author_id").toString(), userCache).toString();
+                                Date createdAt = adf.parse(commentMap.get("created_at").toString());
+                                commentList.add(new Comment(Long.parseLong(commentID), commentDescription, author, createdAt, id));
+                            }
+
+                            row.addValue(DESCRIPTION, firstComment);
+                        }
                     }
                     if (lastStart != null) {
                         StringWhere userWhere = new StringWhere(noteKey, id);
