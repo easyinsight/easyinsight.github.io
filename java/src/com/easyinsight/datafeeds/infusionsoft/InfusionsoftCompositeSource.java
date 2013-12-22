@@ -86,6 +86,22 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
+    protected void refreshDone() {
+        super.refreshDone();
+        cache = null;
+    }
+
+    private InfusionsoftCustomCache cache;
+
+    public InfusionsoftCustomCache getCache() {
+        if (cache == null) {
+            cache = new InfusionsoftCustomCache();
+            cache.query(this);
+        }
+        return cache;
+    }
+
+    @Override
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM INFUSIONSOFT WHERE DATA_SOURCE_ID = ?");
