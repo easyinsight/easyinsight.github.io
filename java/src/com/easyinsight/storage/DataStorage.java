@@ -590,10 +590,19 @@ public class DataStorage implements IDataStorage {
             if (existsRS.next()) {
                 storageConn.prepareStatement("DROP TABLE " + getTableName()).execute();
             }
-            String sql = defineTableSQL(false);
-            LogClass.info("Creating new storage table in migration with sql " + sql);
-            PreparedStatement createSQL = storageConn.prepareStatement(sql);
-            createSQL.execute();
+
+            try {
+                String sql = defineTableSQL(false);
+                LogClass.info("Creating new storage table in migration with sql " + sql);
+                PreparedStatement createSQL = storageConn.prepareStatement(sql);
+                createSQL.execute();
+            } catch (SQLException e) {
+                if (e.getMessage().contains("Row size too large")) {
+                    String sql = defineTableSQL(true);
+                    PreparedStatement createSQL = storageConn.prepareStatement(sql);
+                    createSQL.execute();
+                }
+            }
 
             if (migrateData) {
                 if (!fieldMigrations.isEmpty() || dataSourceType != FeedType.QUICKBASE_CHILD.getType()) {
