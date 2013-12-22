@@ -22,16 +22,23 @@ public class DataTypeMutex {
     private Map<FeedType, Semaphore> mutexMap = new HashMap<FeedType, Semaphore>();
 
     private Set<FeedType> lockRequiredTypes;
+    private Set<FeedType> superLockRequiredTypes;
 
     private DataTypeMutex() {
         lockRequiredTypes = new HashSet<FeedType>();
+        superLockRequiredTypes = new HashSet<FeedType>();
         lockRequiredTypes.add(FeedType.BASECAMP_MASTER);
         lockRequiredTypes.add(FeedType.HIGHRISE_COMPOSITE);
         lockRequiredTypes.add(FeedType.PIVOTAL_TRACKER);
         lockRequiredTypes.add(FeedType.WHOLE_FOODS);
         lockRequiredTypes.add(FeedType.CONSTANT_CONTACT);
+        superLockRequiredTypes.add(FeedType.ZENDESK_COMPOSITE);
         for (FeedType feedType : lockRequiredTypes) {
             Semaphore semaphore = new Semaphore(3, true);
+            mutexMap.put(feedType, semaphore);
+        }
+        for (FeedType feedType : superLockRequiredTypes) {
+            Semaphore semaphore = new Semaphore(1, true);
             mutexMap.put(feedType, semaphore);
         }
     }
@@ -41,7 +48,7 @@ public class DataTypeMutex {
     }
 
     public void lock(FeedType feedType, long dataSourceID) {
-        if (lockRequiredTypes.contains(feedType)) {
+        if (lockRequiredTypes.contains(feedType) || superLockRequiredTypes.contains(feedType)) {
             Semaphore semaphore = mutexMap.get(feedType);
             if (semaphore.tryAcquire()) {
             } else {
@@ -55,8 +62,8 @@ public class DataTypeMutex {
     }
 
     public void unlock(FeedType feedType) {
-        if (lockRequiredTypes.contains(feedType)) {
-            Semaphore semaphore = mutexMap.get(feedType);            
+        if (lockRequiredTypes.contains(feedType) || superLockRequiredTypes.contains(feedType)) {
+            Semaphore semaphore = mutexMap.get(feedType);
             semaphore.release();
         }
     }
