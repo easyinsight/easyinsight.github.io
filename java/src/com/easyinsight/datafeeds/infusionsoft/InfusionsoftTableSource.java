@@ -25,8 +25,13 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
         Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
         List<String> fields = new ArrayList<String>();
         for (AnalysisItem field : fieldList) {
-            fields.add(field.getKey().toKeyString());
-            map.put(field.getKey().toKeyString(), field);
+            if (Character.isDigit(field.getKey().toKeyString().charAt(0))) {
+                fields.add("_" + field.toDisplay());
+                map.put("_" + field.toDisplay(), field);
+            } else {
+                fields.add(field.getKey().toKeyString());
+                map.put(field.getKey().toKeyString(), field);
+            }
         }
         XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
         config.setServerURL(new URL("https://"+infusionsoftCompositeSource.getUrl()+".infusionsoft.com:443/api/xmlrpc"));
@@ -56,20 +61,20 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                     Object value = resultMap.get(field);
                     AnalysisItem analysisItem = map.get(field);
                     if (value instanceof Date) {
-                        row.addValue(field, new DateValue((Date) value));
+                        row.addValue(analysisItem.getKey(), new DateValue((Date) value));
                     } else if (value instanceof Number) {
                         if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                             Number number = (Number) value;
                             if (number instanceof Integer) {
-                                row.addValue(field, String.valueOf(number));
+                                row.addValue(analysisItem.getKey(), String.valueOf(number));
                             } else {
-                                row.addValue(field, (Number) value);
+                                row.addValue(analysisItem.getKey(), (Number) value);
                             }
                         } else {
-                            row.addValue(field, (Number) value);
+                            row.addValue(analysisItem.getKey(), (Number) value);
                         }
                     } else {
-                        row.addValue(field, (String) value);
+                        row.addValue(analysisItem.getKey(), (String) value);
                     }
                 }
             }
