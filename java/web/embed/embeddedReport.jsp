@@ -155,6 +155,7 @@
                                 </button>
                             </li>
                             <%
+                                if(((Boolean) request.getAttribute("public")) != true) {
                                 FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
                                 if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
                             %>
@@ -166,6 +167,7 @@
                                 </button>
                             </li>
                             <%
+                                    }
                                 }
                             %>
                         </ul>
