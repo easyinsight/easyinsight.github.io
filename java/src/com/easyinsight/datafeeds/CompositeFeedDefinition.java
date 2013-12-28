@@ -23,7 +23,6 @@ import org.hibernate.Session;
  * Time: 11:55:05 PM
  */
 public class CompositeFeedDefinition extends FeedDefinition {
-    // if (([Todo Completed At] > 0 && [Todo Completed At] <= [Todo Due At]) || nowdate() <= [Todo Due At], "On Time", "Late")
     private List<CompositeFeedNode> compositeFeedNodes = new ArrayList<CompositeFeedNode>();
     private List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
 
