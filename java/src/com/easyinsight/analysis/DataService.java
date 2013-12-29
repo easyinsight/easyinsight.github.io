@@ -2272,23 +2272,25 @@ public class DataService {
                 }
             }
 
-            try {
-                PreparedStatement modelStmt = conn.prepareStatement("SELECT field_model FROM account WHERE account_id = ?");
-                modelStmt.setLong(1, SecurityUtil.getAccountID());
-                ResultSet modelRS = modelStmt.executeQuery();
-                modelRS.next();
-                boolean fieldModel = modelRS.getBoolean(1);
-                modelStmt.close();
-                if (fieldModel) {
-                    for (AnalysisItem analysisItem : analysisItems) {
-                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                            AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
-                            feed.originalField(dateDimension.getKey(), dateDimension);
+            if (SecurityUtil.getAccountID(false) > 0) {
+                try {
+                    PreparedStatement modelStmt = conn.prepareStatement("SELECT field_model FROM account WHERE account_id = ?");
+                    modelStmt.setLong(1, SecurityUtil.getAccountID());
+                    ResultSet modelRS = modelStmt.executeQuery();
+                    modelRS.next();
+                    boolean fieldModel = modelRS.getBoolean(1);
+                    modelStmt.close();
+                    if (fieldModel) {
+                        for (AnalysisItem analysisItem : analysisItems) {
+                            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                                AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
+                                feed.originalField(dateDimension.getKey(), dateDimension);
+                            }
                         }
                     }
+                } catch (Exception e) {
+                    LogClass.error(e);
                 }
-            } catch (Exception e) {
-                LogClass.error(e);
             }
 
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
