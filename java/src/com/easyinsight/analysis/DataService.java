@@ -694,6 +694,8 @@ public class DataService {
                     passthrough = true;
                 } else {
                     AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
+                    structure.setReport(analysisDefinition);
+                    structure.setInsightRequestMetadata(insightRequestMetadata);
                     List<AnalysisItem> fields = new ArrayList<AnalysisItem>(FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn).getFields());
                     fields.addAll(analysisDefinition.allAddedItems(insightRequestMetadata));
                     Collection<AnalysisItem> needed = analysisItem.getAnalysisItems(fields, Arrays.asList(analysisItem), false, true,
