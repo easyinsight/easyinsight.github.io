@@ -22,21 +22,26 @@ public class NamespaceGenerator {
     public Map<String, UniqueKey> generate(long dataSourceID, @Nullable List<AddonReport> addonReports) {
 
         try {
-            Map<String, UniqueKey> map;
-            Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
-            if (feed.getDataSource() instanceof CompositeFeedDefinition) {
-                Blah blah = new Blah();
-                blah.traverse((CompositeFeedDefinition) feed.getDataSource());
-                map = blah.map;
-            } else {
+            Map<String, UniqueKey> map = new HashMap<String, UniqueKey>();
+            return map;
+            /*if (dataSourceID == 0) {
                 map = new HashMap<String, UniqueKey>();
+            } else {
+                Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+                if (feed.getDataSource() instanceof CompositeFeedDefinition) {
+                    Blah blah = new Blah();
+                    blah.traverse((CompositeFeedDefinition) feed.getDataSource());
+                    map = blah.map;
+                } else {
+                    map = new HashMap<String, UniqueKey>();
+                }
             }
             if (addonReports != null) {
                 for (AddonReport addonReport : addonReports) {
                     map.put(addonReport.getReportName(), new UniqueKey(addonReport.getReportID(), UniqueKey.REPORT));
                 }
             }
-            return map;
+            return map;*/
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

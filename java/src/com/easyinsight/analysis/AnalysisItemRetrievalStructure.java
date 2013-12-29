@@ -4,10 +4,7 @@ import com.easyinsight.calculations.NamespaceGenerator;
 import com.easyinsight.pipeline.Pipeline;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -35,7 +32,11 @@ public class AnalysisItemRetrievalStructure {
 
     public Map<String, UniqueKey> getNamespaceMap() {
         if (namespaceMap == null) {
-            namespaceMap = new NamespaceGenerator().generate(report.getDataFeedID(), report.getAddonReports());
+            if (report == null) {
+                namespaceMap = new HashMap<String, UniqueKey>();
+            } else {
+                namespaceMap = new NamespaceGenerator().generate(report.getDataFeedID(), report.getAddonReports());
+            }
         }
         return namespaceMap;
     }
