@@ -23,7 +23,6 @@ import org.hibernate.Session;
  * Time: 11:55:05 PM
  */
 public class CompositeFeedDefinition extends FeedDefinition {
-    // if (([Todo Completed At] > 0 && [Todo Completed At] <= [Todo Due At]) || nowdate() <= [Todo Due At], "On Time", "Late")
     private List<CompositeFeedNode> compositeFeedNodes = new ArrayList<CompositeFeedNode>();
     private List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
 
@@ -375,7 +374,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             Map<String, AnalysisItem> keyMap = new HashMap<String, AnalysisItem>();
             Map<String, List<AnalysisItem>> duplicateNameMap = new HashMap<String, List<AnalysisItem>>();
             for (AnalysisItem analysisItem : analysisItemVisitor.fields) {
-                String displayName = analysisItem.toDisplay();
+                String displayName = analysisItem.toUnqualifiedDisplay();
                 AnalysisItem existing = keyMap.get(displayName);
                 if (existing == null) {
                     keyMap.put(displayName, analysisItem);
@@ -393,8 +392,9 @@ public class CompositeFeedDefinition extends FeedDefinition {
             for (Map.Entry<String, List<AnalysisItem>> entry : duplicateNameMap.entrySet()) {
                 for (AnalysisItem analysisItem : entry.getValue()) {
                     DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
-                    String name = getCompositeFeedName(derivedKey.getFeedID(), conn);
+                    String name = getImmediateName(derivedKey, conn);
                     analysisItem.setDisplayName(name + " - " + entry.getKey());
+                    analysisItem.setUnqualifiedDisplayName(entry.getKey());
                 }
             }
 
@@ -465,6 +465,29 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
         }
         return folder;
+    }
+
+    private String getImmediateName(DerivedKey derivedKey, Connection conn) {
+        try {
+            derivedKey = findDerivedKey(derivedKey);
+            PreparedStatement nameStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+            nameStmt.setLong(1, derivedKey.getFeedID());
+            ResultSet rs = nameStmt.executeQuery();
+            rs.next();
+            String name = rs.getString(1);
+            nameStmt.close();
+            return name;
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private DerivedKey findDerivedKey(DerivedKey derivedKey) {
+        if (derivedKey.getParentKey() instanceof DerivedKey) {
+            return findDerivedKey((DerivedKey) derivedKey.getParentKey());
+        }
+        return derivedKey;
     }
 
     private String getCompositeFeedName(long feedID, Connection conn) {

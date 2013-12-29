@@ -39,6 +39,7 @@ public class DistinctCachedSourceFeed extends Feed {
             if (rs.next()) {
                 CachedAnalysisBasedFeed cachedFeed = new CachedAnalysisBasedFeed();
                 cachedFeed.setAnalysisDefinition(report);
+                cachedFeed.setReportFilters(insightRequestMetadata.getReportFilters());
                 feed = cachedFeed;
             } else {
                 AnalysisBasedFeed cachedFeed = new AnalysisBasedFeed();

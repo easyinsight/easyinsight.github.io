@@ -48,7 +48,7 @@ public class MultiFieldFilterOption extends EventDispatcher {
 
     public function MultiFieldFilterOption(analysisItem:AnalysisItemSelection, selected:Boolean = false) {
         this.analysisItem = analysisItem.analysisItem;
-        _label = analysisItem.analysisItem.display;
+        _label = analysisItem.analysisItem.unqualifiedDisplay;
         this.selected = selected;
     }
 

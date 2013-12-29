@@ -36,6 +36,7 @@ public class AnalysisItem {
     public var keyColumn:Boolean;
     public var labelColumn:Boolean;
     public var fromField:AnalysisItem;
+    public var unqualifiedDisplayName:String;
     public var kpi:Boolean;
     public var fieldType:int;
     //public var flexID:int = flexIDCtr++;
@@ -47,6 +48,13 @@ public class AnalysisItem {
 
     public function AnalysisItem() {
         super();
+    }
+
+    public function get unqualifiedDisplay():String {
+        if (unqualifiedDisplayName != null) {
+            return unqualifiedDisplayName;
+        }
+        return display;
     }
 
     public function get display():String {

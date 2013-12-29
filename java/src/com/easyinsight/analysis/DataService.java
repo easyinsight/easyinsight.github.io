@@ -90,6 +90,7 @@ public class DataService {
                 map.put(field.getAnalysisItemID(), field);
                 mapByName.put(field.toDisplay(), field);
             }
+
             if (report != null) {
                 if (report.getAddedItems() != null) {
                     for (AnalysisItem item : report.getAddedItems()) {
@@ -496,9 +497,8 @@ public class DataService {
             }
             //clone.setParentItemID(item.getAnalysisItemID());
             clone.setOriginalDisplayName(item.toDisplay());
-            if (!addonReport.isUseNewNaming()) {
-                clone.setDisplayName(report.getName() + " - " + item.toDisplay());
-            }
+            clone.setDisplayName(report.getName() + " - " + item.toDisplay());
+            clone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay());
             clone.setBasedOnReportField(item.getAnalysisItemID());
             ReportKey reportKey = new ReportKey();
             reportKey.setParentKey(item.getKey());
@@ -2031,6 +2031,7 @@ public class DataService {
         }
 
         private ReportRetrieval toPipeline() throws SQLException {
+
             feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
             if (analysisDefinition.getAdditionalGroupingItems() == null) {
                 analysisDefinition.setAdditionalGroupingItems(new ArrayList<AnalysisItem>());
@@ -2074,6 +2075,8 @@ public class DataService {
             List<FilterDefinition> dlsFilters = addDLSFilters(analysisDefinition.getDataFeedID(), conn);
             analysisDefinition.getFilterDefinitions().addAll(dlsFilters);
 
+            analysisDefinition.applyStyling(conn, feed.getFeedType().getType());
+
             Set<AnalysisItem> fieldsReplaced = new HashSet<AnalysisItem>();
             for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                 if (filter.getFieldChoiceFilterLabel() != null && !"".equals(filter.getFieldChoiceFilterLabel())) {
@@ -2116,12 +2119,61 @@ public class DataService {
                 }
             }
 
+            // if there's a date to assign, swap it here
+
+            /*try {
+                for (AnalysisItem field : analysisDefinition.createStructure().values()) {
+                    if (field.getFilters() != null) {
+                        for (FilterDefinition filter : field.getFilters()) {
+                            if (filter instanceof MeasureFilterFilterDefinition) {
+                                MeasureFilterFilterDefinition measureFilterFilterDefinition = (MeasureFilterFilterDefinition) filter;
+                                String targetFilter = measureFilterFilterDefinition.getTargetFilter();
+                                // find the filter named target filter
+                                for (FilterDefinition testFilter : analysisDefinition.getFilterDefinitions()) {
+                                    if (testFilter.isTemplateFilter() && testFilter.getFilterName() != null && testFilter.getFilterName().equals(targetFilter)) {
+                                        // find the values for test filter
+                                        FilterValueDefinition filterValueDefinition = (FilterValueDefinition) testFilter;
+                                        List<Object> values = filterValueDefinition.getFilteredValues();
+                                        for (Object value : values) {
+                                            String string = value.toString();
+                                            AnalysisItem clone = field.clone();
+                                            FilterValueDefinition clonedFilter = new FilterValueDefinition();
+                                            clonedFilter.setField(testFilter.getField());
+                                            clonedFilter.setInclusive(true);
+                                            clonedFilter.setFilteredValues(Arrays.asList((Object) string));
+                                            clone.getFilters().add(clonedFilter);
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
+            }*/
+
+            for (FilterDefinition filter : new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions())) {
+                if (filter.isFlexibleDateFilter()) {
+                    Iterator<FilterDefinition> iter = analysisDefinition.getFilterDefinitions().iterator();
+                    while (iter.hasNext()) {
+                        FilterDefinition existingFilter = iter.next();
+                        if (existingFilter.isDefaultDateFilter()) {
+                            iter.remove();
+                            filter.setField(existingFilter.getField());
+                        }
+                    }
+                }
+            }
+
+
+
             feed.getDataSource().decorateLinks(new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values()));
 
             analysisDefinition.tweakReport(aliases);
 
             // acquirent report header on embed
-            // medecare zendesk
             // balance freshbooks
             // oeo report
             // activity report on highrise
@@ -2218,6 +2270,25 @@ public class DataService {
                 }
             }
 
+            try {
+                PreparedStatement modelStmt = conn.prepareStatement("SELECT field_model FROM account WHERE account_id = ?");
+                modelStmt.setLong(1, SecurityUtil.getAccountID());
+                ResultSet modelRS = modelStmt.executeQuery();
+                modelRS.next();
+                boolean fieldModel = modelRS.getBoolean(1);
+                modelStmt.close();
+                if (fieldModel) {
+                    for (AnalysisItem analysisItem : analysisItems) {
+                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                            AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
+                            feed.originalField(dateDimension.getKey(), dateDimension);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
+
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
 
             for (AnalysisItem analysisItem : analysisItems) {
@@ -2233,6 +2304,8 @@ public class DataService {
             for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
                 filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
             }
+
+
 
             boolean aggregateQuery = analysisDefinition.isAggregateQueryIfPossible();
             Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();

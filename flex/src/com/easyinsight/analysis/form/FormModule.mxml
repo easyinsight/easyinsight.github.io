@@ -62,7 +62,7 @@
                     formItem.setStyle("fontWeight", "bold");
                     formItem.setStyle("fontSize", formReport.labelFontSize);
 
-                    formItem.label = item.display + ":";
+                    formItem.label = item.unqualifiedDisplay + ":";
 
                     var renderer:FormCellRenderer = new FormCellRenderer();
                     renderer.analysisItem = item;

@@ -274,12 +274,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = getGrid();
             jsonParams.put("grid", grid);
-            JSONObject axes = new JSONObject();
-            JSONObject xAxis = getMeasureAxis(getMeasures().get(0));
-            axes.put("xaxis", xAxis);
-            JSONObject yAxis = getGroupingAxis(getYaxis());
-            axes.put("yaxis", yAxis);
-            jsonParams.put("axes", axes);
+            jsonParams.put("axes", getAxes());
             params = new JSONObject(jsonParams);
             fullObject.put("jqplotOptions", params);
             JSONObject drillthroughOptions = new JSONObject();
@@ -298,6 +293,16 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
             throw new RuntimeException(e);
         }
         return fullObject;
+    }
+
+    @Override
+    public JSONObject getAxes() throws JSONException {
+        JSONObject axes = new JSONObject();
+        JSONObject xAxis = getMeasureAxis(getMeasures().get(0));
+        axes.put("xaxis", xAxis);
+        JSONObject yAxis = getGroupingAxis(getYaxis());
+        axes.put("yaxis", yAxis);
+        return axes;
     }
 
     @Override

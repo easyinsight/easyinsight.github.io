@@ -127,7 +127,13 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean passThroughFilters;
     private boolean enableLocalStorage;
 
+    private String defaultDate;
+
     private boolean publicWithKey;
+
+    private boolean usePrimaryColor;
+    private boolean useSecondaryColor;
+    private boolean useTertiaryColor;
 
     private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
@@ -228,6 +234,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setNewFilterStrategy(boolean newFilterStrategy) {
         this.newFilterStrategy = newFilterStrategy;
+    }
+
+    public String getDefaultDate() {
+        return defaultDate;
+    }
+
+    public void setDefaultDate(String defaultDate) {
+        this.defaultDate = defaultDate;
     }
 
     protected String generateDescription() {
@@ -442,6 +456,30 @@ public abstract class WSAnalysisDefinition implements Serializable {
         this.urlKey = urlKey;
     }
 
+    public boolean isUseSecondaryColor() {
+        return useSecondaryColor;
+    }
+
+    public void setUseSecondaryColor(boolean useSecondaryColor) {
+        this.useSecondaryColor = useSecondaryColor;
+    }
+
+    public boolean isUsePrimaryColor() {
+        return usePrimaryColor;
+    }
+
+    public void setUsePrimaryColor(boolean usePrimaryColor) {
+        this.usePrimaryColor = usePrimaryColor;
+    }
+
+    public boolean isUseTertiaryColor() {
+        return useTertiaryColor;
+    }
+
+    public void setUseTertiaryColor(boolean useTertiaryColor) {
+        this.useTertiaryColor = useTertiaryColor;
+    }
+
     public boolean isTemporaryReport() {
         return temporaryReport;
     }
@@ -607,6 +645,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     }
                     clone.setOriginalDisplayName(item.toDisplay());
                     clone.setDisplayName(report.getName() + " - " + item.toDisplay());
+                    clone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay());
                     clone.setBasedOnReportField(item.getAnalysisItemID());
                     ReportKey reportKey = new ReportKey();
                     reportKey.setParentKey(item.getKey());
@@ -1010,6 +1049,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
         customField2 = findStringProperty(properties, "customField2", "");
         cachePartitionFilter = findStringProperty(properties, "cachePartitionFilter", "");
         enableLocalStorage = findBooleanProperty(properties, "enableLocalStorage", false);
+        usePrimaryColor = findBooleanProperty(properties, "usePrimaryColor", false);
+        useSecondaryColor = findBooleanProperty(properties, "useSecondaryColor", false);
+        useTertiaryColor = findBooleanProperty(properties, "useTertiaryColor", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -1040,6 +1082,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportStringProperty("customField2", customField2));
         properties.add(new ReportStringProperty("cachePartitionFilter", cachePartitionFilter));
         properties.add(new ReportBooleanProperty("cacheFilters", cacheFilters));
+        properties.add(new ReportBooleanProperty("usePrimaryColor", usePrimaryColor));
+        properties.add(new ReportBooleanProperty("useSecondaryColor", useSecondaryColor));
+        properties.add(new ReportBooleanProperty("useTertiaryColor", useTertiaryColor));
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }
@@ -1484,5 +1529,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     protected int extensionType() {
         return 0;
+    }
+
+    public void applyStyling(EIConnection conn, int dataSourceType) throws SQLException {
+
     }
 }

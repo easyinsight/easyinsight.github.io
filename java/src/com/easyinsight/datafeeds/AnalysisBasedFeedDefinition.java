@@ -52,7 +52,8 @@ public class AnalysisBasedFeedDefinition extends FeedDefinition {
         PreparedStatement retrieveStmt = conn.prepareStatement("SELECT REPORT_ID FROM REPORT_BASED_DATA_SOURCE WHERE DATA_FEED_ID = ?");
         retrieveStmt.setLong(1, getDataFeedID());
         ResultSet rs = retrieveStmt.executeQuery();
-        rs.next();
-        reportID = rs.getLong(1);
+        if (rs.next()) {
+            reportID = rs.getLong(1);
+        }
     }
 }

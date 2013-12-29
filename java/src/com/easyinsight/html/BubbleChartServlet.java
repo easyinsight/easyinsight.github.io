@@ -42,15 +42,9 @@ public class BubbleChartServlet extends HtmlServlet {
             dimension = plotDefinition.getDimension();
         }
         JSONObject params = new JSONObject();
-        JSONObject axes = new JSONObject();
-        JSONObject xAxis = new JSONObject();
-        JSONObject yAxis = new JSONObject();
-        axes.put("xaxis", xAxis);
-        axes.put("yaxis", yAxis);
+        JSONObject axes = ((WSChartDefinition) report).getAxes();
         params.put("axes", axes);
         object.put("params", params);
-        xAxis.put("label", xAxisMeasure.toDisplay());
-        yAxis.put("label", yAxisMeasure.toDisplay());
 
         Link l = dimension.defaultLink();
         if (l != null && l instanceof DrillThrough) {

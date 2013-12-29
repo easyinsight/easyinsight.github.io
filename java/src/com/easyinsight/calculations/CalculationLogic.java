@@ -1,11 +1,7 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.calculations.generated.CalculationsLexer;
-import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.logging.LogClass;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 
 import java.util.*;
 
@@ -22,21 +18,8 @@ public class CalculationLogic {
         calculationMetadata.setDataSourceFields(allItems);
         CalculationTreeNode calculationTreeNode;
         ICalculationTreeVisitor visitor;
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(code));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
         try {
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
-                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                    calculationTreeNode.deleteChild(i);
-                    break;
-                }
-            }
+            calculationTreeNode = CalculationHelper.createTree(code, false);
             KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
             Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
@@ -45,7 +28,7 @@ public class CalculationLogic {
                     filter.calculationItems(displayMap);
                 }
             }
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory());
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(report.getDataFeedID(), report.getAddonReports()));
             calculationTreeNode.accept(visitor);
 
             calculateResults(calculationTreeNode, calculationMetadata);

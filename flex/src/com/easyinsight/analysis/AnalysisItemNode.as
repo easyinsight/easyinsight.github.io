@@ -14,5 +14,9 @@ public class AnalysisItemNode extends FeedNode{
         }
         return analysisItem.display;
     }
+
+    override public function get unqualifiedDisplay():String {
+        return analysisItem.unqualifiedDisplay;
+    }
 }
 }

@@ -1,11 +1,13 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.calculations.NamespaceGenerator;
 import com.easyinsight.pipeline.Pipeline;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -19,6 +21,7 @@ public class AnalysisItemRetrievalStructure {
     private List<String> sections = new ArrayList<String>(Arrays.asList(Pipeline.BEFORE, Pipeline.AFTER, Pipeline.LAST, Pipeline.LAST_FILTERS));
     private String currentSection;
     private InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+    private Map<String, UniqueKey> namespaceMap;
 
     public AnalysisItemRetrievalStructure(@Nullable String currentSection, AnalysisItemRetrievalStructure structure) {
         setReport(structure.getReport());
@@ -26,7 +29,15 @@ public class AnalysisItemRetrievalStructure {
         setOnStorage(structure.isOnStorage());
         setBaseReport(structure.baseReport);
         setSections(structure.sections);
+
         this.currentSection = currentSection;
+    }
+
+    public Map<String, UniqueKey> getNamespaceMap() {
+        if (namespaceMap == null) {
+            namespaceMap = new NamespaceGenerator().generate(report.getDataFeedID(), report.getAddonReports());
+        }
+        return namespaceMap;
     }
 
     public AnalysisItemRetrievalStructure(@Nullable String currentSection) {

@@ -2,8 +2,7 @@ package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
-import com.easyinsight.core.EmptyValue;
-import com.easyinsight.core.Value;
+import com.easyinsight.core.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +23,37 @@ public abstract class Function implements IFunction {
     protected CalculationMetadata calculationMetadata;
 
     private FunctionNode functionNode;
+
+    protected AnalysisItem findReportItem(int parameter, List<AnalysisItem> fields) {
+        Value value = params.get(parameter);
+        String string = value.toString();
+        if (string.startsWith("[")) {
+            string = minusBrackets(string);
+        } else if (string.startsWith("\"")) {
+            string = minusQuotes(value).toString();
+        }
+        for (AnalysisItem field : fields) {
+            if (string.equals(field.toDisplay())) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    protected AnalysisItem findDataSourceItem(int parameter) {
+        String string = getParameterName(parameter);
+        if (string.startsWith("[")) {
+            string = minusBrackets(string);
+        } else if (string.startsWith("\"")) {
+            string = minusQuotes(new StringValue(string)).toString();
+        }
+        for (AnalysisItem field : calculationMetadata.getDataSourceFields()) {
+            if (string.equals(field.toDisplay())) {
+                return field;
+            }
+        }
+        return null;
+    }
 
     public void clearParams() {
         if (params != null) {
@@ -78,7 +108,7 @@ public abstract class Function implements IFunction {
     }
 
     protected String getParameterName(int position) {
-        return (functionNode.getChild(position + 1)).getText();
+        return (functionNode.getChild(position + 1).getChild(0)).getText();
     }
 
     public void setCalculationMetadata(CalculationMetadata calculationMetadata) {

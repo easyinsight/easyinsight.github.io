@@ -649,7 +649,7 @@
                 fieldGrid.dataProvider = f;
                 if (openState != null) {
                     for each (var availableWrapper:AnalysisItemWrapper in availableFields) {
-                        var open:Boolean = openState[availableWrapper.displayName];
+                        var open:Boolean = openState[availableWrapper.unqualifiedDisplayName];
                         if (open) {
                             fieldGrid.expandItem(availableWrapper, true);
                         }
@@ -667,7 +667,7 @@
         private function preserveOpenState():Object {
             var openState:Object = new Object();
             for each (var obj:AnalysisItemWrapper in availableFields) {
-                openState[obj.displayName] = fieldGrid.isItemOpen(obj);
+                openState[obj.unqualifiedDisplayName] = fieldGrid.isItemOpen(obj);
             }
             return openState;
         }
@@ -689,7 +689,7 @@
             } else if (!wrapper1.isAnalysisItem() && wrapper2.isAnalysisItem()) {
                 return -1;
             } else {
-                return ObjectUtil.stringCompare(wrapper1.displayName, wrapper2.displayName, true);
+                return ObjectUtil.stringCompare(wrapper1.unqualifiedDisplayName, wrapper2.unqualifiedDisplayName, true);
             }
         }
 
@@ -1308,7 +1308,7 @@
         private function filterFunction(item:Object):Boolean {
             var a:AnalysisItemWrapper = item as AnalysisItemWrapper;
             if (a == null) return false;
-            if (a.displayName == null) return false;
+            if (a.unqualifiedDisplayName == null) return false;
             var view:IHierarchicalCollectionView = fieldGrid.dataProvider as IHierarchicalCollectionView;
             if (view == null) return false;
             var children:ICollectionView = view.getChildren(a);
@@ -1317,7 +1317,7 @@
                 children.filterFunction = filterFunction;
                 children.refresh();
             }
-            return children.length > 0 || a.displayName.toLowerCase().indexOf(searchText.toLowerCase()) != -1;
+            return children.length > 0 || a.unqualifiedDisplayName.toLowerCase().indexOf(searchText.toLowerCase()) != -1;
 
         }
 
@@ -1459,7 +1459,7 @@
                                                  showHeaders="false"
                                                  groupItemRenderer="{rendererFactory}" x="0" y="84">
                     <easyinsight:columns>
-                        <mx:AdvancedDataGridColumn headerText="" dataField="displayName"/>
+                        <mx:AdvancedDataGridColumn headerText="" dataField="unqualifiedDisplayName"/>
                     </easyinsight:columns>
                 </easyinsight:AnotherHackDataGrid>
             </mx:Canvas>

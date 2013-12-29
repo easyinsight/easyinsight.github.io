@@ -31,14 +31,16 @@ class QueryStateNode {
     public Feed feed;
     private String pipelineName;
     private Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+    private Collection<FilterDefinition> parentFilters;
     private QueryNodeKey queryNodeKey;
 
     QueryStateNode() {
 
     }
 
-    QueryStateNode(long feedID, Feed feed, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata) {
+    QueryStateNode(long feedID, Feed feed, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata, Collection<FilterDefinition> parentFilters) {
         this.feedID = feedID;
+        this.parentFilters = parentFilters;
         queryNodeKey = new DataSourceQueryNodeKey(feedID);
         queryData = new QueryData(queryNodeKey);
         this.feed = feed;
@@ -109,7 +111,7 @@ class QueryStateNode {
     }
 
     public DataSet produceDataSet(InsightRequestMetadata insightRequestMetadata) throws ReportException {
-
+        insightRequestMetadata.setReportFilters(parentFilters);
         DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
 
         Pipeline pipeline;

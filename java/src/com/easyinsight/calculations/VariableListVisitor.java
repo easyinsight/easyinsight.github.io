@@ -1,5 +1,6 @@
 package com.easyinsight.calculations;
 
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Value;
 
 import java.util.Set;
@@ -11,7 +12,7 @@ import java.util.HashSet;
  * Time: 10:14:02 AM
  */
 public class VariableListVisitor implements ICalculationTreeVisitor {
-    private Set<KeySpecification> variableList = new HashSet<KeySpecification>();
+    private Set<AnalysisItem> variableList = new HashSet<AnalysisItem>();
 
     public void visit(CalculationTreeNode node) {
         visitChildren(node);
@@ -82,7 +83,7 @@ public class VariableListVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(VariableNode node) {
-        variableList.add(node.getVariableKey());
+        variableList.add(node.getAnalysisItem());
     }
 
     public void visit(FunctionNode node) {
@@ -92,7 +93,7 @@ public class VariableListVisitor implements ICalculationTreeVisitor {
     public Value getResult() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
-    public Set<KeySpecification> getVariableList() {
+    public Set<AnalysisItem> getVariableList() {
         return variableList;
     }
 

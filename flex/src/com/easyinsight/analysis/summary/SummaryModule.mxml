@@ -111,7 +111,7 @@
                 var hierarchyFactory:ClassFactory = new ClassFactory(SummaryTreeRenderer);
                 hierarchyFactory.properties = { analysisItem:hierarchy, report:treeDef };
                 coreGrid.groupItemRenderer = hierarchyFactory;
-                hierarchyColumn.headerText = hierarchy.display;
+                hierarchyColumn.headerText = hierarchy.unqualifiedDisplay;
                 hierarchyColumn.sortCompareFunction = sortCompare;
                 var rendererProviders:Array = [];
                 hierarchyColumn.labelFunction = function (item:Object, column:AdvancedDataGridColumn):String {

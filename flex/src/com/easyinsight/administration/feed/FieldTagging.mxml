@@ -25,8 +25,16 @@
             feedService.getFieldTags.send();
         }
 
+        [Bindable]
+        private var filteredFields:ArrayCollection;
+
         private function gotConfigurations():void {
+
             fields = feedService.getAnalysisItemConfigurations.lastResult as ArrayCollection;
+            var filteredFields:ArrayCollection = new ArrayCollection(fields.toArray());
+            filteredFields.filterFunction = valuesFilterFunction;
+            filteredFields.refresh();
+            this.filteredFields = filteredFields;
         }
 
         private function gotTags():void {
@@ -116,6 +124,19 @@
             }
         }
 
+        private var filterString:String = "";
+
+        private function filterBox_changeHandler(event:Event):void {
+            filterString = filterBox.text;
+            filteredFields.refresh();
+        }
+
+        private function valuesFilterFunction(o:Object):Boolean {
+            var result:Boolean = true;
+
+            return result && (o.display as String).toLowerCase().indexOf(filterString.toLowerCase()) != -1;
+        }
+
         private function save():void {
             ProgressAlert.alert(this, "Saving...", null, feedService.updateAnalysisItemConfigurations);
             feedService.updateAnalysisItemConfigurations.send(fields);
@@ -141,7 +162,11 @@
         <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onTagItemClick(event)" width="160" id="tagButton"
                             dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
     </mx:HBox>
-    <mx:DataGrid dataProvider="{fields}" wordWrap="true" variableRowHeight="true" height="450" id="dataGrid">
+    <mx:HBox width="100%">
+        <mx:Image source="@Embed('../../../../../assets/icon-search-black.png')"/>
+        <mx:TextInput id="filterBox" width="100%" change="filterBox_changeHandler(event)"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{filteredFields}" wordWrap="true" variableRowHeight="true" height="450" id="dataGrid">
         <mx:columns>
             <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>
             <mx:DataGridColumn headerText="Field" dataField="display" width="400"/>

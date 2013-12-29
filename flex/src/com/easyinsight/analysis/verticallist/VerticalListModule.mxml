@@ -92,7 +92,7 @@
 
                 var formatter:Formatter = measure.getFormatter();
                 var obj:Object = new Object();
-                obj["Label"] = measure.display;
+                obj["Label"] = measure.unqualifiedDisplay;
                 obj["baseMeasure"] = measure;
                 var metrics:TextLineMetrics = dataGrid.measureText(measure.display);
                 headerWidth = Math.max(headerWidth, metrics.width + metrics.x + metrics.x);

@@ -272,6 +272,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             }
             clone.setOriginalDisplayName(item.toDisplay());
             clone.setDisplayName(report.getName() + " - " + item.toDisplay());
+            clone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay());
             clone.setBasedOnReportField(item.getAnalysisItemID());
             Key key = keys.get(clone.toDisplay());
             if (key == null) {
@@ -287,6 +288,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                     String name = filter.getFilterName() + "cache";
                     AnalysisItem clone = new AnalysisDimension();
                     clone.setDisplayName(name);
+                    clone.setUnqualifiedDisplayName(name);
                     Key key = new NamedKey(clone.toDisplay());
                     clone.setKey(key);
                     items.add(clone);

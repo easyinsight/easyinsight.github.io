@@ -114,7 +114,7 @@ public class CompositeFeedNode implements Serializable {
         if (reportID > 0) {
             return new ReportQueryStateNode(reportID, conn, analysisItems, insightRequestMetadata, reportFilters);
         } else {
-            return new QueryStateNode(getDataFeedID(), FeedRegistry.instance().getFeed(getDataFeedID(), conn), conn, analysisItems, insightRequestMetadata);
+            return new QueryStateNode(getDataFeedID(), FeedRegistry.instance().getFeed(getDataFeedID(), conn), conn, analysisItems, insightRequestMetadata, reportFilters);
         }
     }
 

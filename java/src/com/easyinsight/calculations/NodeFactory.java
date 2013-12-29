@@ -4,6 +4,8 @@ import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.sun.org.apache.xpath.internal.operations.NotEquals;
 import com.sun.tools.corba.se.idl.constExpr.LessThan;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.*;
 import org.antlr.runtime.Token;
 
@@ -11,6 +13,11 @@ public class NodeFactory extends CommonTreeAdaptor {
 
     public NodeFactory() {
         super();
+    }
+
+    @Override
+    public Object errorNode(TokenStream input, Token start, Token stop, RecognitionException e) {
+        return super.errorNode(input, start, stop, e);
     }
 
     public Object create(Token payload) {
@@ -66,7 +73,7 @@ public class NodeFactory extends CommonTreeAdaptor {
             case CalculationsLexer.Divide:
                 retVal = new DivideNode(payload);
                 break;
-            case CalculationsLexer.Variable:
+            case CalculationsLexer.VariableToken:
                 retVal = new VariableNode(payload);
                 break;
             case CalculationsLexer.Decimal:
