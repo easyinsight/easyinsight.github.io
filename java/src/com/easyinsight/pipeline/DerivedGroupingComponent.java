@@ -25,7 +25,7 @@ public class DerivedGroupingComponent implements IComponent {
             return dataSet;
         }
         FieldCalculationLogic fieldCalculationLogic = new FieldCalculationLogic(dimension, dataSet);
-        fieldCalculationLogic.calculate(dimension.getDerivationCode(), pipelineData.getReport(), pipelineData.getAllItems(), pipelineData.getInsightRequestMetadata());
+        fieldCalculationLogic.calculate(dimension.getDerivationCode(), pipelineData.getReport(), pipelineData.getAllItems(), pipelineData.getInsightRequestMetadata(), pipelineData);
         pipelineData.getReportItems().add(dimension);
         return dataSet;
     }

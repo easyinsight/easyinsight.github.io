@@ -31,9 +31,10 @@ public abstract class Pipeline {
     private ResultsBridge resultsBridge = new ListResultsBridge();
     private AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
 
-    public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
+    public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         structure.setReport(report);
         structure.setInsightRequestMetadata(insightRequestMetadata);
+        structure.setConn(conn);
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(dataSource.getFields());
         allFields.addAll(report.allAddedItems(insightRequestMetadata));
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, insightRequestMetadata, allFields, dataSource, null);
@@ -56,11 +57,12 @@ public abstract class Pipeline {
         this.additionalItems = additionalItems;
     }
 
-    public Pipeline setup(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
+    public Pipeline setup(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         if (preassigned == null) {
             throw new RuntimeException("You can only use this setup() call when you've preassigned an earlier data source.");
         }
         structure.setReport(report);
+        structure.setConn(conn);
         structure.setInsightRequestMetadata(insightRequestMetadata);
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(preassigned.getFields());
         allFields.addAll(additionalItems);
@@ -98,7 +100,7 @@ public abstract class Pipeline {
         return this;
     }
 
-    public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allFields) {
+    public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allFields, EIConnection conn) {
         structure.setReport(report);
         structure.setInsightRequestMetadata(insightRequestMetadata);
         int i = 1;

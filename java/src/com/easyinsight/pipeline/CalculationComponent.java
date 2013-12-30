@@ -28,7 +28,7 @@ public class CalculationComponent implements IComponent, DescribableComponent {
             return dataSet;
         }
         FieldCalculationLogic fieldCalculationLogic = new FieldCalculationLogic(analysisCalculation, dataSet);
-        fieldCalculationLogic.calculate(analysisCalculation.getCalculationString(), pipelineData.getReport(), pipelineData.getAllItems(), pipelineData.getInsightRequestMetadata());
+        fieldCalculationLogic.calculate(analysisCalculation.getCalculationString(), pipelineData.getReport(), pipelineData.getAllItems(), pipelineData.getInsightRequestMetadata(), pipelineData);
         pipelineData.getReportItems().add(analysisCalculation);
         List<IComponent> components = fieldCalculationLogic.getGeneratedComponents();
         for (IComponent component : components) {
