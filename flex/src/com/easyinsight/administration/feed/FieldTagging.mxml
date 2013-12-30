@@ -92,7 +92,7 @@
             } else {
                 for each (var descToSelect:AnalysisItemConfiguration in fields) {
                     if (descToSelect.selected) {
-                        for each (var t:Tag in descToSelect) {
+                        for each (var t:Tag in descToSelect.tags) {
                             if (t.id == addTag.id) {
                                 descToSelect.tags.removeItemAt(descToSelect.tags.getItemIndex(t));
                                 break;
@@ -100,6 +100,7 @@
                         }
                     }
                 }
+                dataGrid.dataProvider.dispatchEvent( new CollectionEvent(CollectionEvent.COLLECTION_CHANGE));
             }
         }
 
