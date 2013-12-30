@@ -695,6 +695,7 @@ public class DataService {
                 } else {
                     AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
                     structure.setReport(analysisDefinition);
+                    structure.setConn(conn);
                     structure.setInsightRequestMetadata(insightRequestMetadata);
                     List<AnalysisItem> fields = new ArrayList<AnalysisItem>(FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn).getFields());
                     fields.addAll(analysisDefinition.allAddedItems(insightRequestMetadata));
@@ -2245,6 +2246,7 @@ public class DataService {
 
             AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
             structure.setReport(analysisDefinition);
+            structure.setConn(conn);
             structure.setInsightRequestMetadata(insightRequestMetadata);
             Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields, structure, insightRequestMetadata);
             if (analysisDefinition.isDataSourceFields()) {
@@ -2347,7 +2349,7 @@ public class DataService {
             timeshift(validQueryItems, filters, feed, insightRequestMetadata);
             dataSet = retrieveDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
             pipeline = new StandardReportPipeline(insightRequestMetadata.getIntermediatePipelines());
-            pipeline.setup(analysisDefinition, feed, insightRequestMetadata, allFields);
+            pipeline.setup(analysisDefinition, feed, insightRequestMetadata, allFields, conn);
             dataSourceInfo = feed.createSourceInfo(conn);
             if (dataSet.getLastTime() == null) {
                 dataSet.setLastTime(new Date());
