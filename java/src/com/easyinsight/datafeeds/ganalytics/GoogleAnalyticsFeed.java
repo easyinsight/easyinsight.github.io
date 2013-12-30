@@ -241,9 +241,14 @@ public class GoogleAnalyticsFeed extends Feed {
             Date startDate = null;
             Date endDate = null;
 
+            // https://localhost:4443/app/html/embeddedReport/YexERMtXvYiwSqndQxGX?showToolbar=1&showFilters=1&embedKey=gzQlrQUkhxkr
+
             Set<String> titleFilters = new HashSet<String>();
 
             for (FilterDefinition filterDefinition : filters) {
+                if (filterDefinition.getField() == null) {
+                    continue;
+                }
                 if (filterDefinition.getField().getKey().toKeyString().equals(GoogleAnalyticsDataSource.DATE) ||
                         filterDefinition.getField().toDisplay().equals("Date")) {
                     if (filterDefinition instanceof FilterDateRangeDefinition) {
