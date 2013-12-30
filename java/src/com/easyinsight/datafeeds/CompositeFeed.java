@@ -293,7 +293,7 @@ public class CompositeFeed extends Feed {
                 WSListDefinition analysisDefinition = new WSListDefinition();
                 List<AnalysisItem> fields = new ArrayList<AnalysisItem>(analysisItems);
                 analysisDefinition.setColumns(fields);
-                pipeline.setup(analysisDefinition, insightRequestMetadata);
+                pipeline.setup(analysisDefinition, insightRequestMetadata, conn);
                 dataSet = pipeline.toDataSet(dataSet);
             }
             return dataSet;
@@ -710,7 +710,7 @@ public class CompositeFeed extends Feed {
             WSListDefinition analysisDefinition = new WSListDefinition();
             analysisDefinition.setFieldToUniqueMap(insightRequestMetadata.getFieldToUniqueMap());
             analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
-            pipeline.setup(analysisDefinition, insightRequestMetadata);
+            pipeline.setup(analysisDefinition, insightRequestMetadata, conn);
             dataSet = pipeline.toDataSet(dataSet);
         } else if (getFeedType().getType() == FeedType.BASECAMP_MASTER.getType() && !insightRequestMetadata.isOptimized() && !insightRequestMetadata.isTraverseAllJoins()) {
             CompositeReportPipeline compositePipeline = new CompositeReportPipeline();
@@ -729,7 +729,7 @@ public class CompositeFeed extends Feed {
             }
             analysisDefinition.setAddedItems(additionalFields);
             analysisDefinition.setColumns(new ArrayList<AnalysisItem>(analysisItems));
-            compositePipeline.setup(analysisDefinition, this, insightRequestMetadata);
+            compositePipeline.setup(analysisDefinition, this, insightRequestMetadata, conn);
             dataSet = compositePipeline.toDataSet(dataSet);
         }
         return dataSet;
