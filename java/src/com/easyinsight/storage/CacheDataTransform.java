@@ -124,7 +124,7 @@ public class CacheDataTransform implements IDataTransform {
         blah.setFilterDefinitions(new ArrayList<FilterDefinition>());
         blah.setColumns(Arrays.asList((AnalysisItem) calculation));
         CacheCalculationPipeline pipeline = new CacheCalculationPipeline(Arrays.asList(calculation));
-        pipeline.setup(blah, feed, new InsightRequestMetadata());
+        pipeline.setup(blah, feed, new InsightRequestMetadata(), conn);
         DataSet resultSet = pipeline.toDataSet(dataSet);
         IRow result = resultSet.getRow(0);
         Value targetValue = result.getValue(calculation);

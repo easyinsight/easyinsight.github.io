@@ -79,7 +79,7 @@ public class CachedCalculationTransform implements IDataTransform {
             calculationlist.add((AnalysisCalculation) item);
         }
         CacheCalculationPipeline pipeline = new CacheCalculationPipeline(calculationlist);
-        pipeline.setup(blah, feed, new InsightRequestMetadata());
+        pipeline.setup(blah, feed, new InsightRequestMetadata(), conn);
         DataSet resultSet = pipeline.toDataSet(dataSet);
         IRow result = resultSet.getRow(0);
         for (AnalysisItem calculation : calculations) {
