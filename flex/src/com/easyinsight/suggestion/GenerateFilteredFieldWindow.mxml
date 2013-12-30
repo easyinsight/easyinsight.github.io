@@ -41,6 +41,7 @@
                 var field:AnalysisItem = fields[i] as AnalysisItem;
                 field.filters = new ArrayCollection([ fieldFilters.getItemAt(i)]);
                 field.displayName = FilterValueDefinition(fieldFilters.getItemAt(i)).filteredValues.getItemAt(0).toString() + " " + measures.selectedAnalysisItem().display;
+                field.unqualifiedDisplayName = FilterValueDefinition(fieldFilters.getItemAt(i)).filteredValues.getItemAt(0).toString() + " " + measures.selectedAnalysisItem().display;
                 addField(field);
             }
             PopUpManager.removePopUp(this);
