@@ -46,8 +46,19 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
     @Column(name="exclude_report_fields")
     private boolean excludeReportFields;
 
+    @Column(name="alpha_sort")
+    private boolean alphaSort;
+
     @Column(name="show_all")
     private boolean all;
+
+    public boolean isAlphaSort() {
+        return alphaSort;
+    }
+
+    public void setAlphaSort(boolean alphaSort) {
+        this.alphaSort = alphaSort;
+    }
 
     public List<AnalysisItemHandle> getFieldOrdering() {
         return fieldOrdering;
