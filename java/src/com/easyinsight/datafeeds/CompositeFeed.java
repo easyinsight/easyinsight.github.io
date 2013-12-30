@@ -304,9 +304,11 @@ public class CompositeFeed extends Feed {
         }
 
         // determine which keys are matched to which fields as we proceed here
+        String error = null;
         try {
             Iterator<QueryStateNode> neededNodeIter = new HashMap<QueryNodeKey, QueryStateNode>(neededNodes).values().iterator();
             QueryStateNode firstNode = neededNodeIter.next();
+
             while (neededNodeIter.hasNext()) {
                 QueryStateNode nextNode = neededNodeIter.next();
                 List<Edge> neededEdges = DijkstraShortestPath.findPathBetween(graph, firstNode, nextNode);
@@ -318,7 +320,8 @@ public class CompositeFeed extends Feed {
                         }
                     }
                     if (!stillOkay) {
-                        throw new ReportException(new GenericReportFault("We weren't able to find a way to join data across the specified fields. Please adjust the report to try again."));
+                        error = "We weren't able to find a way to join data between " + firstNode.dataSourceName + " and " + nextNode.dataSourceName + ". Please adjust the report to try again.";
+                        throw new ReportException(new GenericReportFault("We weren't able to find a way to join data between " + firstNode.dataSourceName + " and " + nextNode.dataSourceName + ". Please adjust the report to try again."));
                     }
                 }
                 for (Edge edge : neededEdges) {
@@ -330,7 +333,7 @@ public class CompositeFeed extends Feed {
             }
         } catch (ReportException e) {
             insightRequestMetadata.getSuggestions().add(new IntentionSuggestion("No Join in Data",
-                    "We weren't able to find a way to join data on " + getName() + ".",
+                    error,
                     IntentionSuggestion.SCOPE_REPORT, IntentionSuggestion.WARNING_JOIN_FAILURE, IntentionSuggestion.WARNING));
             if (insightRequestMetadata.isNoDataOnNoJoin()) {
                 return new DataSet();
