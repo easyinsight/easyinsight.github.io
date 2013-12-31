@@ -84,7 +84,9 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                             row.addValue(analysisItem.getKey(), (Number) value);
                         }
                     } else {
-                        row.addValue(analysisItem.getKey(), value.toString());
+                        if (value != null) {
+                            row.addValue(analysisItem.getKey(), value.toString());
+                        }
                     }
                 }
             }
