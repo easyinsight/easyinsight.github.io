@@ -279,7 +279,7 @@ public class ReportCalculation {
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
             calculationTreeNode = CalculationHelper.createTree(code, false);
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(feed.getFeedID(), null, conn));
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new HashMap<String, UniqueKey>());
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);
