@@ -35,10 +35,19 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     private String zdUserName;
     private String zdPassword;
     private boolean loadComments;
+    private boolean hackMethod = true;
     private String zdApiKey;
 
     public ZendeskCompositeSource() {
         setFeedName("Zendesk");
+    }
+
+    public boolean isHackMethod() {
+        return hackMethod;
+    }
+
+    public void setHackMethod(boolean hackMethod) {
+        this.hackMethod = hackMethod;
     }
 
     @Override
@@ -121,8 +130,8 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ZENDESK (URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, DATA_SOURCE_ID, LOAD_COMMENTS) " +
-                "VALUES (?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ZENDESK (URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, DATA_SOURCE_ID, LOAD_COMMENTS, HACK_METHOD) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setString(1, url);
         insertStmt.setString(2, zdUserName);
         if (zdPassword != null && (zdApiKey == null || zdApiKey.isEmpty())) {
@@ -136,14 +145,34 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
             insertStmt.setString(4, null);
         insertStmt.setLong(5, getDataFeedID());
         insertStmt.setBoolean(6, isLoadComments());
+        insertStmt.setBoolean(7, hackMethod);
         insertStmt.execute();
         insertStmt.close();
     }
 
     @Override
+    protected void beforeRefresh(Date lastRefreshTime) {
+        super.beforeRefresh(lastRefreshTime);
+        ZendeskUserCache cache = new ZendeskUserCache();
+        try {
+            cache.populate(ZendeskUserCache.getHttpClient(this), null, this);
+            for (ZendeskUser zendeskUser : cache.getUsers().values()) {
+                if (zdUserName.equals(zendeskUser.getEmail())) {
+                    System.out.println("...");
+                    if (!"admin".equals(zendeskUser.getRole())) {
+                        throw new ReportException(new DataSourceConnectivityReportFault("You must be an administrator for the Zendesk connection to function.", this));
+                    }
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, LOAD_COMMENTS FROM ZENDESK WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, LOAD_COMMENTS, HACK_METHOD FROM ZENDESK WHERE DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -155,6 +184,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
             if (zdPassword != null) {
                 zdPassword = PasswordStorage.decryptString(zdPassword);
             }
+            hackMethod = rs.getBoolean(6);
         }
     }
 

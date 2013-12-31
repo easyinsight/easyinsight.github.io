@@ -27,7 +27,12 @@ public class NamespaceGenerator {
             if (dataSourceID == 0) {
                 map = new HashMap<String, UniqueKey>();
             } else {
-                FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+                FeedDefinition dataSource;
+                if (conn == null) {
+                    dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID);
+                } else {
+                    dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+                }
                 if (dataSource instanceof CompositeFeedDefinition) {
                     Blah blah = new Blah();
                     blah.traverse((CompositeFeedDefinition) dataSource, conn);
