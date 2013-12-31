@@ -169,6 +169,26 @@ public class DataService {
                         }
                     //}
                 }
+                PreparedStatement query2Stmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ?");
+
+                for (WeNeedToReplaceHibernateTag tag : tags) {
+                    query2Stmt.setLong(1, tag.getTagID());
+                    ResultSet rs = query2Stmt.executeQuery();
+                    while (rs.next()) {
+                        String fieldName = rs.getString(1);
+                        AnalysisItem analysisItem = mapByName.get(fieldName);
+                        if (analysisItem != null) {
+                            positions.put(analysisItem, i++);
+                            if (set.contains(analysisItem)) {
+                                set.remove(analysisItem);
+                            }
+                            set.add(analysisItem);
+                        }
+                    }
+                }
+
+                query2Stmt.close();
+
             } finally {
                 Database.closeConnection(conn);
             }
