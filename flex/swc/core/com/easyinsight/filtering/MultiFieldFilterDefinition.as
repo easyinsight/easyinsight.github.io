@@ -19,6 +19,7 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
     public var fieldOrdering:ArrayCollection = new ArrayCollection();
     public var excludeReportFields:Boolean;
     public var all:Boolean = true;
+    public var alphaSort:Boolean = false;
 
     public function MultiFieldFilterDefinition() {
     }

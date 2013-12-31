@@ -7,10 +7,10 @@ import com.easyinsight.core.NamedKey;
 import java.util.Map;
 
 /**
- * User: jamesboe
- * Date: 12/16/13
- * Time: 2:51 PM
- */
+* User: jamesboe
+* Date: 12/16/13
+* Time: 2:51 PM
+*/
 class CustomField {
     private int id;
     private int type;
@@ -62,4 +62,3 @@ class CustomField {
         }
     }
 }
-

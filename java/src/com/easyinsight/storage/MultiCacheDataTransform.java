@@ -52,7 +52,7 @@ public class MultiCacheDataTransform implements IDataTransform {
         blah.setColumns(columns);
         CacheCalculationPipeline pipeline = new CacheCalculationPipeline(calculations);
         System.out.println(dataSet);
-        pipeline.setup(blah, feed, new InsightRequestMetadata());
+        pipeline.setup(blah, feed, new InsightRequestMetadata(), conn);
         DataSet resultSet = pipeline.toDataSet(dataSet);
         IRow result = resultSet.getRow(0);
         for (MultiCacheInfo multiCacheInfo : infos) {

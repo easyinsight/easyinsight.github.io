@@ -44,11 +44,15 @@
 
                 for each (var handle:AnalysisItemHandle in analysisItemFilter.availableHandles) {
                     var item:AnalysisItem = byAnalysisItemName[handle.name];
-                    selectedItems.addItem(item);
+                    if (item != null) {
+                        selectedItems.addItem(item);
+                    }
                 }
 
-            } else {
+            } else if (analysisItemFilter.availableItems != null) {
                 selectedItems = analysisItemFilter.availableItems;
+            } else {
+                selectedItems = new ArrayCollection();
             }
 
             filterFields = selectedItems;

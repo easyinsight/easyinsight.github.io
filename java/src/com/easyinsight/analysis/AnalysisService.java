@@ -2044,9 +2044,9 @@ public class AnalysisService {
 
             Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
-            Map<String, UniqueKey> map = new NamespaceGenerator().generate(dataSourceID, report.getAddonReports());
+            Map<String, UniqueKey> map = new NamespaceGenerator().generate(dataSourceID, report.getAddonReports(), conn);
             try {
-                tree = CalculationHelper.createTree(calculationString, false);
+                tree = CalculationHelper.createTree(calculationString, true);
 
                 if (allItems != null) {
                     KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);

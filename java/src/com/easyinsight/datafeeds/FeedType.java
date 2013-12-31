@@ -220,6 +220,14 @@ public class FeedType implements Serializable {
     public static final FeedType CACHED_ADDON = new FeedType(192);
     public static final FeedType DISTINCT_CACHED_ADDON = new FeedType(193);
     public static final FeedType HARVEST_PAYMENT = new FeedType(194);
+    public static final FeedType INFUSIONSOFT_PAYMENT = new FeedType(195);
+    public static final FeedType INFUSIONSOFT_INVOICES = new FeedType(196);
+    public static final FeedType INFUSIONSOFT_INVOICE_ITEM = new FeedType(197);
+    public static final FeedType INFUSIONSOFT_INVOICE_PAYMENT = new FeedType(198);
+    public static final FeedType INFUSIONSOFT_LEAD_SOURCE = new FeedType(199);
+    public static final FeedType INFUSIONSOFT_PAY_PLAN = new FeedType(200);
+    public static final FeedType INFUSIONSOFT_EXPENSES = new FeedType(201);
+    public static final FeedType INFUSIONSOFT_JOB_RECURRING_INSTANCE = new FeedType(202);
 
     public FeedType() {
     }

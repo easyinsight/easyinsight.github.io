@@ -44,6 +44,7 @@
                 handle.name = v.display;
                 handles.addItem(handle);
             }
+            analysisItemFilter.alphaSort = alphaSortCheckBox.selected;
             analysisItemFilter.availableHandles = handles;
             analysisItemFilter.availableTags = selectedTags;
             analysisItemFilter.excludeReportFields = excludeReportFieldsCheckBox.selected;
@@ -69,6 +70,7 @@
             }
             filterFields = availables;
             selectedTags = analysisItemFilter.availableTags;
+            alphaSort = alphaSortCheckBox.selected;
             excludeReportFields = analysisItemFilter.excludeReportFields;
         }
 
@@ -114,6 +116,9 @@
         private function onMultiTagUpdate(event:MultiFieldEvent):void {
             selectedTags = event.fields;
         }
+
+        [Bindable]
+        private var alphaSort:Boolean;
         ]]></mx:Script>
 
     <mx:HBox>
@@ -121,4 +126,5 @@
         <mx:Button label="Configure Tags..." click="configureTags()" styleName="grayButton"/>
     </mx:HBox>
     <mx:CheckBox label="Exclude Report Fields" id="excludeReportFieldsCheckBox" selected="{excludeReportFields}"/>
+    <mx:CheckBox label="Alpha Sort Fields" id="alphaSortCheckBox" selected="{alphaSort}"/>
 </mx:VBox>

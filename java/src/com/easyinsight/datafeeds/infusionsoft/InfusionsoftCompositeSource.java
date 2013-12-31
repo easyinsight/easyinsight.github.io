@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.infusionsoft;
 
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.IJoin;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.users.Account;
@@ -10,10 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -77,6 +75,14 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.INFUSIONSOFT_RECURRING_ORDERS);
         types.add(FeedType.INFUSIONSOFT_CAMPAIGNS);
         types.add(FeedType.INFUSIONSOFT_ORDER_ITEM);
+        types.add(FeedType.INFUSIONSOFT_PAYMENT);
+        types.add(FeedType.INFUSIONSOFT_INVOICES);
+        types.add(FeedType.INFUSIONSOFT_INVOICE_ITEM);
+        types.add(FeedType.INFUSIONSOFT_INVOICE_PAYMENT);
+        types.add(FeedType.INFUSIONSOFT_LEAD_SOURCE);
+        types.add(FeedType.INFUSIONSOFT_JOB_RECURRING_INSTANCE);
+        types.add(FeedType.INFUSIONSOFT_PAY_PLAN);
+        types.add(FeedType.INFUSIONSOFT_EXPENSES);
         return types;
     }
 
@@ -131,6 +137,26 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
     @Override
     protected Collection<ChildConnection> getChildConnections() {
-        return new ArrayList<ChildConnection>();
+        List<ChildConnection> connections = new ArrayList<ChildConnection>();
+
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_COMPANIES, InfusionsoftContactSource.COMPANY_ID, InfusionsoftCompanySource.ID));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_AFFILIATES, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftAffiliateSource.CONTACT_ID, InfusionsoftContactSource.ID));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_EXPENSES, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftExpenseSource.CONTACT_ID, InfusionsoftContactSource.ID));
+
+        // ecommerce
+
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_JOBS, InfusionsoftContactSource.ID, InfusionsoftJobSource.CONTACT_ID, IJoin.ONE, IJoin.MANY));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_JOBS, FeedType.INFUSIONSOFT_ORDER_ITEM, InfusionsoftJobSource.JOB_ID, InfusionsoftOrderItemSource.ORDER_ID, IJoin.ONE, IJoin.ONE));
+
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICES, FeedType.INFUSIONSOFT_INVOICE_ITEM, InfusionsoftInvoiceSource.ID, InfusionsoftInvoiceItemSource.INVOICE_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICE_ITEM, FeedType.INFUSIONSOFT_ORDER_ITEM, InfusionsoftInvoiceItemSource.ORDER_ITEM_ID, InfusionsoftOrderItemSource.ORDER_ITEM_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICES, FeedType.INFUSIONSOFT_JOBS, InfusionsoftInvoiceSource.JOB_ID, InfusionsoftJobSource.JOB_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICES, FeedType.INFUSIONSOFT_INVOICE_PAYMENT, InfusionsoftInvoiceSource.ID, InfusionsoftInvoicePaymentSource.INVOICE_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_PAYMENT, FeedType.INFUSIONSOFT_INVOICE_PAYMENT, InfusionsoftPaymentSource.PAYMENT_ID, InfusionsoftInvoicePaymentSource.PAYMENT_ID, IJoin.ONE, IJoin.ONE));
+
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_AFFILIATES, InfusionsoftLeadSource.AFFILIATE_ID, InfusionsoftAffiliateSource.AFFILIATE_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftLeadSource.CONTACT_ID, InfusionsoftContactSource.ID, IJoin.ONE, IJoin.ONE));
+
+        return connections;
     }
 }

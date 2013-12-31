@@ -25,7 +25,7 @@ public class MarmotHerderComponent implements IComponent {
                 String line = toker.nextToken();
                 for (IRow row : dataSet.getRows()) {
                     try {
-                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), allItems, keyMap, displayMap, row);
+                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), allItems, keyMap, displayMap, row, pipelineData.getConn());
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {

@@ -2,6 +2,7 @@ package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.pipeline.PipelineData;
 
 import java.util.*;
 
@@ -11,7 +12,7 @@ import java.util.*;
  * Time: 12:40 PM
  */
 public class CalculationLogic {
-    public void calculate(String code, WSAnalysisDefinition report, Collection<AnalysisItem> allItems, InsightRequestMetadata insightRequestMetadata) {
+    public void calculate(String code, WSAnalysisDefinition report, Collection<AnalysisItem> allItems, InsightRequestMetadata insightRequestMetadata, PipelineData pipelineData) {
         CalculationMetadata calculationMetadata = new CalculationMetadata();
         calculationMetadata.setReport(report);
         calculationMetadata.setInsightRequestMetadata(insightRequestMetadata);
@@ -28,7 +29,7 @@ public class CalculationLogic {
                     filter.calculationItems(displayMap);
                 }
             }
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(report != null ? report.getDataFeedID() : 0, report != null ? report.getAddonReports() : null));
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(report != null ? report.getDataFeedID() : 0, report != null ? report.getAddonReports() : null, pipelineData.getConn()));
             calculationTreeNode.accept(visitor);
 
             calculateResults(calculationTreeNode, calculationMetadata);

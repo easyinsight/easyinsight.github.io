@@ -200,7 +200,7 @@ public class FallthroughConnection extends CompositeFeedConnection {
         WSListDefinition analysisDefinition = new WSListDefinition();
         analysisDefinition.setColumns(new ArrayList<AnalysisItem>(neededItems));
         analysisDefinition.setFilterDefinitions(new ArrayList<FilterDefinition>());
-        pipeline.setup(analysisDefinition, feed, new InsightRequestMetadata());
+        pipeline.setup(analysisDefinition, feed, new InsightRequestMetadata(), conn);
         return pipeline.toDataSet(dataSet);
     }
 }

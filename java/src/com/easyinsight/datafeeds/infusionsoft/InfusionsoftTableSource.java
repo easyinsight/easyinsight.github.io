@@ -22,9 +22,16 @@ import java.util.*;
 public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition {
 
     protected DataSet query(String table, List<AnalysisItem> fieldList, InfusionsoftCompositeSource infusionsoftCompositeSource) throws MalformedURLException, XmlRpcException {
+        return query(table, fieldList, infusionsoftCompositeSource, new HashSet<String>());
+    }
+
+    protected DataSet query(String table, List<AnalysisItem> fieldList, InfusionsoftCompositeSource infusionsoftCompositeSource, Collection<String> skip) throws MalformedURLException, XmlRpcException {
         Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
         List<String> fields = new ArrayList<String>();
         for (AnalysisItem field : fieldList) {
+            if (skip.contains(field.getKey().toKeyString())) {
+                continue;
+            }
             if (Character.isDigit(field.getKey().toKeyString().charAt(0))) {
                 fields.add("_" + field.toDisplay());
                 map.put("_" + field.toDisplay(), field);
@@ -58,6 +65,9 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                 count++;
                 IRow row = dataSet.createRow();
                 for (String field : fields) {
+                    if (skip.contains(field)) {
+                        continue;
+                    }
                     Object value = resultMap.get(field);
                     AnalysisItem analysisItem = map.get(field);
                     if (value instanceof Date) {

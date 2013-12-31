@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.calculations.NamespaceGenerator;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.pipeline.Pipeline;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,9 +20,14 @@ public class AnalysisItemRetrievalStructure {
     private String currentSection;
     private InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
     private Map<String, UniqueKey> namespaceMap;
+    private EIConnection conn;
 
     public AnalysisItemRetrievalStructure(@Nullable String currentSection, AnalysisItemRetrievalStructure structure) {
         setReport(structure.getReport());
+        setConn(structure.getConn());
+        if (structure.namespaceMap != null) {
+            this.namespaceMap = structure.namespaceMap;
+        }
         setInsightRequestMetadata(structure.getInsightRequestMetadata());
         setOnStorage(structure.isOnStorage());
         setBaseReport(structure.baseReport);
@@ -30,12 +36,16 @@ public class AnalysisItemRetrievalStructure {
         this.currentSection = currentSection;
     }
 
+    public EIConnection getConn() {
+        return conn;
+    }
+
     public Map<String, UniqueKey> getNamespaceMap() {
         if (namespaceMap == null) {
             if (report == null) {
                 namespaceMap = new HashMap<String, UniqueKey>();
             } else {
-                namespaceMap = new NamespaceGenerator().generate(report.getDataFeedID(), report.getAddonReports());
+                namespaceMap = new NamespaceGenerator().generate(report.getDataFeedID(), report.getAddonReports(), conn);
             }
         }
         return namespaceMap;
@@ -80,6 +90,10 @@ public class AnalysisItemRetrievalStructure {
 
     public void setReport(WSAnalysisDefinition report) {
         this.report = report;
+    }
+
+    public void setConn(EIConnection conn) {
+        this.conn = conn;
     }
 
     public List<FilterDefinition> getFilters() {

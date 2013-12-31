@@ -103,7 +103,7 @@ public class CachedAnalysisBasedFeed extends Feed {
             }
             List<FilterDefinition> includeFilters = new ArrayList<FilterDefinition>();
             includeFilters.addAll(filters);
-            if (analysisDefinition.isCacheFilters()) {
+            if (analysisDefinition.isCacheFilters() && reportFilters != null) {
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     if (filter.getField() != null) {
                         for (FilterDefinition reportFilter : reportFilters) {
