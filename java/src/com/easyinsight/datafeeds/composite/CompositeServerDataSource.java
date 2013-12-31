@@ -140,7 +140,8 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
         newSource = newSource || getFeedType().getType() == FeedType.ZENDESK_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.CONSTANT_CONTACT.getType() ||
-                getFeedType().getType() == FeedType.HARVEST_COMPOSITE.getType();
+                getFeedType().getType() == FeedType.HARVEST_COMPOSITE.getType() ||
+                getFeedType().getType() == FeedType.INFUSIONSOFT_COMPOSITE.getType();
 
         for (FeedType feedType : feedTypes) {
             FeedDefinition existing = feedTypeMap.get(feedType);
@@ -279,7 +280,8 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         try {
             long startTime = System.currentTimeMillis();
             // record start time
-            if (getFeedType().getType() == FeedType.BATCHBOOK_COMPOSITE.getType()) {
+            if (getFeedType().getType() == FeedType.BATCHBOOK_COMPOSITE.getType() ||
+                    getFeedType().getType() == FeedType.SALESFORCE.getType()) {
                 conn.commit();
                 conn.setAutoCommit(true);
                 beforeRefresh(lastRefreshTime);
