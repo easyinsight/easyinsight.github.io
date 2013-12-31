@@ -326,6 +326,14 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.DISTINCT_CACHED_ADDON, DistinctCachedSource.class);
         registerType(FeedType.HARVEST_PAYMENT, HarvestPaymentSource.class);
         registerType(FeedType.INFUSIONSOFT_PAYMENT, InfusionsoftPaymentSource.class);
+        registerType(FeedType.INFUSIONSOFT_INVOICES, InfusionsoftInvoiceSource.class);
+        registerType(FeedType.INFUSIONSOFT_INVOICE_ITEM, InfusionsoftInvoiceItemSource.class);
+        registerType(FeedType.INFUSIONSOFT_INVOICE_PAYMENT, InfusionsoftInvoicePaymentSource.class);
+        registerType(FeedType.INFUSIONSOFT_LEAD_SOURCE, InfusionsoftLeadSourceSource.class);
+        registerType(FeedType.INFUSIONSOFT_PAY_PLAN, InfusionsoftPayPlanSource.class);
+        registerType(FeedType.INFUSIONSOFT_EXPENSES, InfusionsoftExpenseSource.class);
+        registerType(FeedType.INFUSIONSOFT_JOB_RECURRING_INSTANCE, InfusionsoftJobRecurringInstanceSource.class);
+        registerType(FeedType.INFUSIONSOFT_EXPENSES, InfusionsoftExpenseSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
