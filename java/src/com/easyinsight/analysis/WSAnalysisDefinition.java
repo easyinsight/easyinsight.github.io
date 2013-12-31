@@ -1380,9 +1380,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
             List<WeNeedToReplaceHibernateTag> tags = multiFieldFilterDefinition.getAvailableTags();
 
             EIConnection conn = Database.instance().getConnection();
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.analysis_item_id FROM field_to_tag, feed_to_analysis_item WHERE account_tag_id = ? AND feed_to_analysis_item.feed_id = ? AND " +
-                    "field_to_tag.analysis_item_id = feed_to_analysis_item.analysis_item_id");
+
             try {
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.analysis_item_id FROM field_to_tag, feed_to_analysis_item WHERE account_tag_id = ? AND feed_to_analysis_item.feed_id = ? AND " +
+                        "field_to_tag.analysis_item_id = feed_to_analysis_item.analysis_item_id");
                 for (WeNeedToReplaceHibernateTag tag : tags) {
                     queryStmt.setLong(1, tag.getTagID());
                     queryStmt.setLong(2, getDataFeedID());
@@ -1391,6 +1392,22 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         long fieldID = rs.getLong(1);
                         AnalysisItem analysisItem = dataSourceFieldMap.get(fieldID);
                         if (accepts(analysisItem)) {
+                            positions.put(analysisItem, i++);
+                            if (set.contains(analysisItem)) {
+                                set.remove(analysisItem);
+                            }
+                            set.add(analysisItem);
+                        }
+                    }
+                }
+                PreparedStatement query2Stmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ?");
+                for (WeNeedToReplaceHibernateTag tag : tags) {
+                    query2Stmt.setLong(1, tag.getTagID());
+                    ResultSet rs = query2Stmt.executeQuery();
+                    while (rs.next()) {
+                        String fieldName = rs.getString(1);
+                        AnalysisItem analysisItem = mapByName.get(fieldName);
+                        if (analysisItem != null && accepts(analysisItem)) {
                             positions.put(analysisItem, i++);
                             if (set.contains(analysisItem)) {
                                 set.remove(analysisItem);
