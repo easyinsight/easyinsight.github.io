@@ -1491,10 +1491,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
             }
         }
 
+        final boolean alphaSort = multiFieldFilterDefinition.isAlphaSort();
+
         Collections.sort(clones, new Comparator<AnalysisItem>() {
 
             public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
-                if (fieldOrderingMap.isEmpty()) {
+                if (alphaSort) {
+                    return analysisItem.toUnqualifiedDisplay().compareTo(analysisItem1.toUnqualifiedDisplay());
+                } else if (fieldOrderingMap.isEmpty()) {
                     Integer p1 = positions.get(analysisItem);
                     Integer p2 = positions.get(analysisItem1);
                     return p1.compareTo(p2);
