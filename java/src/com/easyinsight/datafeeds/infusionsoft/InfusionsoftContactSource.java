@@ -1,10 +1,8 @@
 package com.easyinsight.datafeeds.infusionsoft;
 
-import com.easyinsight.analysis.AnalysisDateDimension;
-import com.easyinsight.analysis.AnalysisDimension;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.ReportException;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -28,6 +26,8 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
     public static final String FIRST_NAME = "FirstName";
     public static final String LAST_NAME = "LastName";
     public static final String DATE_CREATED = "DateCreated";
+    public static final String LEAD_SOURCE_ID = "LeadSourceId";
+    public static final String NAME = "Name";
 
     public InfusionsoftContactSource() {
         setFeedName("Contacts");
@@ -52,13 +52,44 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(FIRST_NAME), "First Name"));
         analysisitems.add(new AnalysisDimension(keys.get(LAST_NAME), "Last Name"));
         analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Contact Creation Date", AnalysisDateDimension.DAY_LEVEL));
+        Key nameKey = keys.get(NAME);
+        if (nameKey == null) {
+            nameKey = new NamedKey(NAME);
+        }
+        analysisitems.add(new AnalysisDimension(nameKey, "Name"));
+        Key leadSourceID = keys.get(LEAD_SOURCE_ID);
+        if (leadSourceID == null) {
+            leadSourceID = new NamedKey(LEAD_SOURCE_ID);
+        }
+        analysisitems.add(new AnalysisDimension(leadSourceID, "Lead Source ID"));
+        InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
+        List<CustomField> customFields = infusionsoftCompositeSource.getCache().getCustomFieldMap().get(-1);
+        if (customFields != null) {
+            for (CustomField customField : customFields) {
+                analysisitems.add(customField.createAnalysisItem(keys));
+            }
+        }
         return analysisitems;
     }
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            return query("Contact", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            DataSet dataSet = query("Contact", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(NAME));
+            for (IRow row : dataSet.getRows()) {
+                String firstName = row.getValue(keys.get(FIRST_NAME)).toString();
+                String lastName = row.getValue(keys.get(LAST_NAME)).toString();
+                String name;
+                if (!firstName.isEmpty() && !lastName.isEmpty()) {
+                    name = firstName + " " + lastName;
+                } else if (!firstName.isEmpty()) {
+                    name = lastName;
+                } else {
+                    name = firstName;
+                }
+                row.addValue(keys.get(NAME), name);
+            }
+            return dataSet;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

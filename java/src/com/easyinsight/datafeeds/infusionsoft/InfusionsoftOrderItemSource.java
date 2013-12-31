@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.infusionsoft;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -61,7 +62,42 @@ public class InfusionsoftOrderItemSource extends InfusionsoftTableSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            return query("OrderItem", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            DataSet dataSet = query("OrderItem", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            for (IRow row : dataSet.getRows()) {
+                Value value = row.getValue(keys.get(ITEM_TYPE));
+                if (value.toString().equals("0")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Unknown Type");
+                } else if (value.toString().equals("1")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Shipping");
+                } else if (value.toString().equals("2")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Tax");
+                } else if (value.toString().equals("3")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Service and Misc");
+                } else if (value.toString().equals("4")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Product");
+                } else if (value.toString().equals("5")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Upsell Product");
+                } else if (value.toString().equals("6")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Finance Charge");
+                } else if (value.toString().equals("7")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Special");
+                } else if (value.toString().equals("8")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Program");
+                } else if (value.toString().equals("9")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Subscription Plan");
+                } else if (value.toString().equals("10")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Special: Free Trial Days");
+                } else if (value.toString().equals("11")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Special: Order Total");
+                } else if (value.toString().equals("12")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Special: Product");
+                } else if (value.toString().equals("13")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Special: Category");
+                } else if (value.toString().equals("14")) {
+                    row.addValue(keys.get(ITEM_TYPE), "Special: Shipping");
+                }
+            }
+            return dataSet;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

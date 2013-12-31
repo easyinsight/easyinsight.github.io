@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.infusionsoft;
 
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.IJoin;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.users.Account;
@@ -10,10 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -77,6 +75,7 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.INFUSIONSOFT_RECURRING_ORDERS);
         types.add(FeedType.INFUSIONSOFT_CAMPAIGNS);
         types.add(FeedType.INFUSIONSOFT_ORDER_ITEM);
+        types.add(FeedType.INFUSIONSOFT_PAYMENT);
         return types;
     }
 
@@ -131,6 +130,15 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
     @Override
     protected Collection<ChildConnection> getChildConnections() {
-        return new ArrayList<ChildConnection>();
+        List<ChildConnection> connections = new ArrayList<ChildConnection>();
+
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_COMPANIES, InfusionsoftContactSource.COMPANY_ID, InfusionsoftCompanySource.ID));
+
+        // ecommerce
+
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_JOBS, InfusionsoftContactSource.ID, InfusionsoftJobSource.CONTACT_ID, IJoin.ONE, IJoin.MANY));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_JOBS, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftJobSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID, IJoin.MANY, IJoin.ONE));
+
+        return connections;
     }
 }
