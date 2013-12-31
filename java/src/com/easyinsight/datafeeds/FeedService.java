@@ -104,6 +104,8 @@ public class FeedService {
             List<AnalysisItemConfiguration> configurations = new ArrayList<AnalysisItemConfiguration>();
             PreparedStatement ps = conn.prepareStatement("SELECT field_to_tag.account_tag_id, account_tag.tag_name FROM field_to_tag, account_tag WHERE analysis_item_id = ? AND " +
                     "field_to_tag.account_tag_id = account_tag.account_tag_id");
+            PreparedStatement byName = conn.prepareStatement("SELECT field_to_tag.account_tag_id, account_tag.tag_name FROM field_to_tag, account_tag WHERE field_to_tag.display_name = ? AND " +
+                    "field_to_tag.account_tag_id = account_tag.account_tag_id");
             PreparedStatement loadFormatting = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ?");
 
             for (AnalysisItem field : dataSource.getFields()) {
@@ -111,13 +113,20 @@ public class FeedService {
                 configuration.setAnalysisItem(field);
                 ps.setLong(1, field.getAnalysisItemID());
                 ResultSet rs = ps.executeQuery();
-                List<Tag> tags = new ArrayList<Tag>();
+                Set<Tag> tags = new HashSet<Tag>();
                 while (rs.next()) {
                     long tagID = rs.getLong(1);
                     String tagName = rs.getString(2);
                     tags.add(new Tag(tagID, tagName, false, false, false));
                 }
-                configuration.setTags(tags);
+                byName.setString(1, field.toDisplay());
+                ResultSet byNameRS = byName.executeQuery();
+                while (byNameRS.next()) {
+                    long tagID = byNameRS.getLong(1);
+                    String tagName = byNameRS.getString(2);
+                    tags.add(new Tag(tagID, tagName, false, false, false));
+                }
+                configuration.setTags(new ArrayList<Tag>(tags));
                 loadFormatting.setLong(1, field.getAnalysisItemID());
                 ResultSet formattingRS = loadFormatting.executeQuery();
                 while (formattingRS.next()) {
@@ -153,7 +162,7 @@ public class FeedService {
         try {
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM field_to_tag WHERE analysis_item_id = ?");
             PreparedStatement clearExtStmt = conn.prepareStatement("DELETE FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ?");
-            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO field_to_tag (account_tag_id, analysis_item_id) values (?, ?)");
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO field_to_tag (account_tag_id, analysis_item_id, display_name) values (?, ?, ?)");
             PreparedStatement saveExtStmt = conn.prepareStatement("INSERT INTO analysis_item_to_report_field_extension (report_field_extension_id, " +
                     "analysis_item_id, extension_type) values (?, ?, ?)");
             for (AnalysisItemConfiguration configuration : configurations) {
@@ -164,6 +173,7 @@ public class FeedService {
                 for (Tag tag : configuration.getTags()) {
                     saveStmt.setLong(1, tag.getId());
                     saveStmt.setLong(2, configuration.getAnalysisItem().getAnalysisItemID());
+                    saveStmt.setString(3, configuration.getAnalysisItem().toDisplay());
                     saveStmt.execute();
                 }
                 saveExtension(conn, saveExtStmt, configuration, configuration.getTextExtension(), ReportFieldExtension.TEXT);

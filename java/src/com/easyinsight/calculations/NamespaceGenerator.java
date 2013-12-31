@@ -56,7 +56,12 @@ public class NamespaceGenerator {
         protected void traverse(CompositeFeedDefinition compositeFeedDefinition, EIConnection conn) throws SQLException {
             for (CompositeFeedNode compositeFeedNode : compositeFeedDefinition.getCompositeFeedNodes()) {
                 map.put(compositeFeedNode.getDataSourceName(), new UniqueKey(compositeFeedNode.getDataFeedID(), UniqueKey.DERIVED));
-                FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(compositeFeedNode.getDataFeedID(), conn);
+                FeedDefinition dataSource;
+                if (conn == null) {
+                    dataSource = new FeedStorage().getFeedDefinitionData(compositeFeedNode.getDataFeedID());
+                } else {
+                    dataSource = new FeedStorage().getFeedDefinitionData(compositeFeedNode.getDataFeedID(), conn);
+                }
                 if (dataSource instanceof CompositeFeedDefinition) {
                     traverse((CompositeFeedDefinition) dataSource, conn);
                 }
