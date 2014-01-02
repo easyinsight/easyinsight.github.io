@@ -122,6 +122,8 @@ public class Crosstab {
         
             WSListDefinition rowTotals = new WSListDefinition();
             rowTotals.setDataFeedID(crosstabDefinition.getDataFeedID());
+            rowTotals.setOptimized(crosstabDefinition.isOptimized());
+            rowTotals.setJoinOverrides(crosstabDefinition.getJoinOverrides());
             rowTotals.setFilterDefinitions(crosstabDefinition.getFilterDefinitions());
             rowTotals.setColumns(Arrays.asList(crosstabDefinition.getMeasures().get(0), crosstabDefinition.getRows().get(0)));
             DataSet rowDataSet = DataService.listDataSet(rowTotals, insightRequestMetadata, conn);
@@ -133,6 +135,8 @@ public class Crosstab {
 
             WSListDefinition columnTotals = new WSListDefinition();
             columnTotals.setDataFeedID(crosstabDefinition.getDataFeedID());
+            columnTotals.setOptimized(crosstabDefinition.isOptimized());
+            columnTotals.setJoinOverrides(crosstabDefinition.getJoinOverrides());
             columnTotals.setFilterDefinitions(crosstabDefinition.getFilterDefinitions());
             columnTotals.setColumns(Arrays.asList(crosstabDefinition.getMeasures().get(0), crosstabDefinition.getColumns().get(0)));
             DataSet columnDataSet = DataService.listDataSet(columnTotals, insightRequestMetadata, conn);
@@ -168,7 +172,7 @@ public class Crosstab {
                 for (int j = 0; j < crosstabDefinition.getColumns().size(); j++) {
                     for (int k = 0; k < crosstabDefinition.getMeasures().size(); k++) {
                         AnalysisItem analysisItem = crosstabDefinition.getMeasures().get(k);
-                        array[j + 2][i + crosstabDefinition.getRows().size() + k] = new CrosstabValue(new StringValue(analysisItem.toDisplay()), analysisItem, true, false);
+                        array[j + 2][i + crosstabDefinition.getRows().size() + k] = new CrosstabValue(new StringValue(analysisItem.toDisplay()), analysisItem, true, false, analysisItem);
                     }
                 }
             }    
@@ -233,7 +237,7 @@ public class Crosstab {
                 if (aggregateValue.toDouble() != null) {
                     sum = aggregateValue.toDouble();
                 }
-                array[rowSections.size() + crosstabDefinition.getColumns().size() + 1][i + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true);
+                array[rowSections.size() + crosstabDefinition.getColumns().size() + 1][i + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true, crosstabDefinition.getMeasures().get(0));
             }
         }
 
