@@ -363,6 +363,8 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 }
             }
 
+
+
             List<AnalysisItem> fields = getFields() == null ? new ArrayList<AnalysisItem>() : getFields();
 
             // Clear any existing fields from child data sources, since those may have changed
@@ -407,6 +409,16 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 AnalysisItem analysisItem = iter.next();
                 if (fieldSet.contains(analysisItem.toDisplay())) {
                     iter.remove();
+                }
+            }
+
+            if (isFieldCleanupEnabled()) {
+                Iterator<AnalysisItem> testIter = fields.iterator();
+                while (testIter.hasNext()) {
+                    AnalysisItem test = testIter.next();
+                    if (test.isConcrete()) {
+                        testIter.remove();
+                    }
                 }
             }
 

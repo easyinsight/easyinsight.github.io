@@ -101,8 +101,8 @@ public class FeedStorage {
                 "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, " +
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, INHERIT_ACCOUNT_API_SETTINGS," +
                 "CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE, last_refresh_start, marmotscript, " +
-                "concrete_fields_editable, refresh_marmot_script, refresh_behavior, kpi_source) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "concrete_fields_editable, refresh_marmot_script, refresh_behavior, kpi_source, field_cleanup_enabled) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -143,7 +143,8 @@ public class FeedStorage {
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isConcreteFieldsEditable());
         insertDataFeedStmt.setString(i++, feedDefinition.getRefreshMarmotScript());
         insertDataFeedStmt.setInt(i++, feedDefinition.getDataSourceType());
-        insertDataFeedStmt.setBoolean(i, feedDefinition.isKpiSource());
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.isKpiSource());
+        insertDataFeedStmt.setBoolean(i, feedDefinition.isFieldCleanupEnabled());
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
         feedDefinition.setDataFeedID(feedID);
@@ -711,7 +712,7 @@ public class FeedStorage {
                 "FEED_SIZE = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
                 "API_KEY = ?, unchecked_api_enabled = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ?," +
                 "CREATE_DATE = ?, UPDATE_DATE = ?, ACCOUNT_VISIBLE = ?, LAST_REFRESH_START = ?, MARMOTSCRIPT = ?, CONCRETE_FIELDS_EDITABLE = ?, REFRESH_MARMOT_SCRIPT = ?," +
-                "REFRESH_BEHAVIOR = ?, KPI_SOURCE = ? " +
+                "REFRESH_BEHAVIOR = ?, KPI_SOURCE = ?, field_cleanup_enabled = ? " +
                 "WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         int i = 1;
@@ -749,6 +750,7 @@ public class FeedStorage {
         updateDataFeedStmt.setString(i++, feedDefinition.getRefreshMarmotScript());
         updateDataFeedStmt.setInt(i++, feedDefinition.getDataSourceType());
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isKpiSource());
+        updateDataFeedStmt.setBoolean(i++, feedDefinition.isFieldCleanupEnabled());
         updateDataFeedStmt.setLong(i, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
@@ -805,7 +807,7 @@ public class FeedStorage {
         PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, CREATE_DATE," +
                 "UPDATE_DATE, FEED_SIZE," +
                 "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, API_KEY, unchecked_api_enabled, " +
-                "VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, LAST_REFRESH_START, MARMOTSCRIPT, CONCRETE_FIELDS_EDITABLE, refresh_marmot_script, kpi_source " +
+                "VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, LAST_REFRESH_START, MARMOTSCRIPT, CONCRETE_FIELDS_EDITABLE, refresh_marmot_script, kpi_source, field_cleanup_enabled " +
                 "FROM DATA_FEED WHERE " +
                 "DATA_FEED_ID = ?");
         queryFeedStmt.setLong(1, identifier);
@@ -849,7 +851,8 @@ public class FeedStorage {
             feedDefinition.setMarmotScript(rs.getString(i++));
             feedDefinition.setConcreteFieldsEditable(rs.getBoolean(i++));
             feedDefinition.setRefreshMarmotScript(rs.getString(i++));
-            feedDefinition.setKpiSource(rs.getBoolean(i));
+            feedDefinition.setKpiSource(rs.getBoolean(i++));
+            feedDefinition.setFieldCleanupEnabled(rs.getBoolean(i));
             feedDefinition.setAddonReports(getAddonReports(identifier, (EIConnection) conn));
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
             feedDefinition.setDataSourceBehavior(feedDefinition.getDataSourceType());
