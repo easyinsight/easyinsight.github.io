@@ -103,6 +103,7 @@ public abstract class Pipeline {
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allFields, EIConnection conn) {
         structure.setReport(report);
         structure.setInsightRequestMetadata(insightRequestMetadata);
+        structure.setConn(conn);
         int i = 1;
         if (insightRequestMetadata.getIntermediatePipelines() != null) {
             for (String pipe : insightRequestMetadata.getIntermediatePipelines()) {
