@@ -416,7 +416,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 Iterator<AnalysisItem> testIter = fields.iterator();
                 while (testIter.hasNext()) {
                     AnalysisItem test = testIter.next();
-                    if (test.isConcrete()) {
+                    if (test.getKey() instanceof DerivedKey) {
                         testIter.remove();
                     }
                 }
