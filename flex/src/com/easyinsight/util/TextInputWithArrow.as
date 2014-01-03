@@ -7,7 +7,6 @@
  */
 package com.easyinsight.util {
 import flash.display.Shape;
-import flash.display.Sprite;
 import flash.events.Event;
 import flash.events.MouseEvent;
 
@@ -30,6 +29,7 @@ public class TextInputWithArrow extends Canvas {
     private var autoCompleteManager:AutoCompleteManager;
 
     private var _dataProvider:ArrayCollection;
+    private var _filteredProvider:ArrayCollection;
 
     [Bindable(event="dataProviderChanged")]
     public function get dataProvider():ArrayCollection {
@@ -39,7 +39,21 @@ public class TextInputWithArrow extends Canvas {
     public function set dataProvider(value:ArrayCollection):void {
         if (_dataProvider == value) return;
         _dataProvider = value;
+        if (value != null) {
+            filteredProvider = new ArrayCollection(value.toArray());
+        }
         dispatchEvent(new Event("dataProviderChanged"));
+    }
+
+    [Bindable(event="filteredProviderChanged")]
+    public function get filteredProvider():ArrayCollection {
+        return _filteredProvider;
+    }
+
+    public function set filteredProvider(value:ArrayCollection):void {
+        if (_filteredProvider == value) return;
+        _filteredProvider = value;
+        dispatchEvent(new Event("filteredProviderChanged"));
     }
 
     private function onClick(event:MouseEvent):void {
@@ -49,13 +63,14 @@ public class TextInputWithArrow extends Canvas {
     override protected function createChildren():void {
         super.createChildren();
         autoCompleteManager = new AutoCompleteManager();
-        BindingUtils.bindProperty(autoCompleteManager, "dataProvider", this, "dataProvider");
+        BindingUtils.bindProperty(autoCompleteManager, "dataProvider", this, "filteredProvider");
         autoCompleteManager.minCharsForCompletion = 0;
         autoCompleteManager.labelField = labelField;
         autoCompleteManager.maxRowCount = 12;
         autoCompleteManager.target = textInput;
         textInput.width = 300;
         textInput.addEventListener(MouseEvent.CLICK, onClick);
+        addEventListener(MouseEvent.CLICK, onClick);
         addChild(textInput);
         var shape:Shape = new Shape();
         shape.graphics.beginFill(0);
