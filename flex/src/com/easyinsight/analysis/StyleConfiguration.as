@@ -300,9 +300,9 @@ public class StyleConfiguration {
                     ["none", "bold"]));
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", ColumnChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
             items.addItem(new ColorReportFormItem("Label Outside Font Color", "labelOutsideFontColor", ColumnChartDefinition(report).labelOutsideFontColor, report, "useOutsideLabelFontColor"));
-            items.addItem(new CheckBoxReportFormItem("Use Color 1", "usePrimaryColor", report.usePrimaryColor, report));
+            /*items.addItem(new CheckBoxReportFormItem("Use Color 1", "usePrimaryColor", report.usePrimaryColor, report));
             items.addItem(new CheckBoxReportFormItem("Use Color 2", "useSecondaryColor", report.useSecondaryColor, report));
-            items.addItem(new CheckBoxReportFormItem("Use Color 3", "useTertiaryColor", report.useTertiaryColor, report));
+            items.addItem(new CheckBoxReportFormItem("Use Color 3", "useTertiaryColor", report.useTertiaryColor, report));*/
         }
 
         if (report is StackedBarChartDefinition) {
