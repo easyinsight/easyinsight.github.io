@@ -68,6 +68,15 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean kpiSource;
     private List<AddonReport> addonReports;
     private boolean fieldCleanupEnabled;
+    private boolean fieldLookupEnabled;
+
+    public boolean isFieldLookupEnabled() {
+        return fieldLookupEnabled;
+    }
+
+    public void setFieldLookupEnabled(boolean fieldLookupEnabled) {
+        this.fieldLookupEnabled = fieldLookupEnabled;
+    }
 
     public boolean isFieldCleanupEnabled() {
         return fieldCleanupEnabled;
