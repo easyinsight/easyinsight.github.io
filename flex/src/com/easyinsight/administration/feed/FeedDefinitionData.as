@@ -44,6 +44,8 @@ import mx.collections.ArrayCollection;
         public var dataSourceBehavior:int;
         public var kpiSource:Boolean;
         public var addonReports:ArrayCollection;
+        public var fieldCleanupEnabled:Boolean;
+        public var fieldLookupEnabled:Boolean;
 		
 		public function FeedDefinitionData()
 		{

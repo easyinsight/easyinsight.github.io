@@ -7,6 +7,7 @@
  */
 package com.easyinsight.analysis {
 
+import com.easyinsight.administration.feed.FeedDefinitionData;
 import com.easyinsight.analysis.charts.bubble.BubbleChartDefinition;
 import com.easyinsight.analysis.charts.plot.PlotChartDefinition;
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
@@ -64,6 +65,13 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Stack Fill Headers", "fillStackHeaders",  dashboard.fillStackHeaders, dashboard));
         items.addItem(new ImageReportFormItem("Header Image", "headerImage", dashboard.headerImage, dashboard));
         items.addItem(new CheckBoxReportFormItem("Full-Size Header Image", "imageFullHeader", dashboard.imageFullHeader, dashboard));
+        return items;
+    }
+
+    public static function getDataSourceItems(dataSource:FeedDefinitionData):ArrayCollection {
+        var items:ArrayCollection = new ArrayCollection();
+        items.addItem(new CheckBoxReportFormItem("Field Cleanup Enabled", "fieldCleanupEnabled", dataSource.fieldCleanupEnabled, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Field Lookup Enabled", "fieldLookupEnabled", dataSource.fieldLookupEnabled, dataSource));
         return items;
     }
 
@@ -292,6 +300,9 @@ public class StyleConfiguration {
                     ["none", "bold"]));
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", ColumnChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
             items.addItem(new ColorReportFormItem("Label Outside Font Color", "labelOutsideFontColor", ColumnChartDefinition(report).labelOutsideFontColor, report, "useOutsideLabelFontColor"));
+            /*items.addItem(new CheckBoxReportFormItem("Use Color 1", "usePrimaryColor", report.usePrimaryColor, report));
+            items.addItem(new CheckBoxReportFormItem("Use Color 2", "useSecondaryColor", report.useSecondaryColor, report));
+            items.addItem(new CheckBoxReportFormItem("Use Color 3", "useTertiaryColor", report.useTertiaryColor, report));*/
         }
 
         if (report is StackedBarChartDefinition) {

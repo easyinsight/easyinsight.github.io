@@ -67,7 +67,24 @@ public class FeedDefinition implements Cloneable, Serializable {
     private DataSourceInfo dataSourceInfo;
     private boolean kpiSource;
     private List<AddonReport> addonReports;
+    private boolean fieldCleanupEnabled;
+    private boolean fieldLookupEnabled;
 
+    public boolean isFieldLookupEnabled() {
+        return fieldLookupEnabled;
+    }
+
+    public void setFieldLookupEnabled(boolean fieldLookupEnabled) {
+        this.fieldLookupEnabled = fieldLookupEnabled;
+    }
+
+    public boolean isFieldCleanupEnabled() {
+        return fieldCleanupEnabled;
+    }
+
+    public void setFieldCleanupEnabled(boolean fieldCleanupEnabled) {
+        this.fieldCleanupEnabled = fieldCleanupEnabled;
+    }
 
     public List<AddonReport> getAddonReports() {
         return addonReports;
@@ -530,9 +547,9 @@ public class FeedDefinition implements Cloneable, Serializable {
                 FeedFolder clonedFolder = feedFolder.clone();
                 clonedFolder.updateIDs(replacementMap);
 
-                if (compositeSourceFolder(clonedFolder)) {
+                /*if (compositeSourceFolder(clonedFolder)) {
                     addKPIsToFolder(clonedFolder, kpis, replacementMap);
-                }
+                }*/
 
                 boolean hasVisibleChildren = clonedFolder.getChildFolders().size() > 0;
                 if (!hasVisibleChildren) {

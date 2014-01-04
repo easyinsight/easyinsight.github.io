@@ -288,6 +288,13 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
+        private function dataSourceProperties():void {
+            var window:DataSourcePropertiesWindow = new DataSourcePropertiesWindow();
+            window.dataSource = feedDefinition;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
 		]]>
 	</mx:Script>
     <mx:RemoteObject id="shareService" destination="share">
@@ -312,7 +319,7 @@
                     label="Edit Code" labelPlacement="right" styleName="grayButton"/>
             <mx:Button label="Field Tags" styleName="grayButton" click="fieldTags()"/>
             <mx:Button label="Field Extensions" styleName="grayButton" click="fieldExtensions()"/>
-            <mx:Button click="addonReports()" label="Addon Reports" labelPlacement="right" styleName="grayButton" visible="{showAddonReports}"/>
+            <mx:Button label="Data Source Properties" styleName="grayButton" click="dataSourceProperties()"/>
             <mx:Spacer width="100%"/>
             <easyinsight:LoggedOnStatus textColor="#FFFFFF" id="logonStatus"/>
         </mx:HBox>

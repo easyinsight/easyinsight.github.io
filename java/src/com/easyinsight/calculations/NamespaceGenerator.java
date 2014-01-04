@@ -3,10 +3,11 @@ package com.easyinsight.calculations;
 import com.easyinsight.analysis.AddonReport;
 import com.easyinsight.analysis.UniqueKey;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.*;
 import com.easyinsight.logging.LogClass;
 import org.jetbrains.annotations.Nullable;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -27,16 +28,15 @@ public class NamespaceGenerator {
             if (dataSourceID == 0) {
                 map = new HashMap<String, UniqueKey>();
             } else {
-                FeedDefinition dataSource;
-                if (conn == null) {
-                    dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID);
-                } else {
-                    dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-                }
-                if (dataSource instanceof CompositeFeedDefinition) {
+                if (conn != null) {
+                    PreparedStatement ps = conn.prepareStatement("SELECT COMPOSITE_NODE.DATA_FEED_ID, DATA_FEED.feed_name FROM COMPOSITE_NODE, COMPOSITE_FEED, DATA_FEED " +
+                            "WHERE COMPOSITE_FEED.data_feed_id = ? AND " +
+                            "COMPOSITE_NODE.composite_feed_id = composite_feed.composite_feed_id AND " +
+                            "COMPOSITE_NODE.data_feed_id = DATA_FEED.data_feed_id");
                     Blah blah = new Blah();
-                    blah.traverse((CompositeFeedDefinition) dataSource, conn);
+                    blah.traverse(dataSourceID, conn, ps);
                     map = blah.map;
+                    ps.close();
                 } else {
                     map = new HashMap<String, UniqueKey>();
                 }
@@ -58,18 +58,14 @@ public class NamespaceGenerator {
         private Map<String, UniqueKey> map = new HashMap<String, UniqueKey>();
 
 
-        protected void traverse(CompositeFeedDefinition compositeFeedDefinition, EIConnection conn) throws SQLException {
-            for (CompositeFeedNode compositeFeedNode : compositeFeedDefinition.getCompositeFeedNodes()) {
-                map.put(compositeFeedNode.getDataSourceName(), new UniqueKey(compositeFeedNode.getDataFeedID(), UniqueKey.DERIVED));
-                FeedDefinition dataSource;
-                if (conn == null) {
-                    dataSource = new FeedStorage().getFeedDefinitionData(compositeFeedNode.getDataFeedID());
-                } else {
-                    dataSource = new FeedStorage().getFeedDefinitionData(compositeFeedNode.getDataFeedID(), conn);
-                }
-                if (dataSource instanceof CompositeFeedDefinition) {
-                    traverse((CompositeFeedDefinition) dataSource, conn);
-                }
+        protected void traverse(long dataSourceID, EIConnection conn, PreparedStatement ps) throws SQLException {
+            ps.setLong(1, dataSourceID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                long id = rs.getLong(1);
+                String name = rs.getString(2);
+                map.put(name, new UniqueKey(id, UniqueKey.DERIVED));
+                traverse(id, conn, ps);
             }
         }
     }

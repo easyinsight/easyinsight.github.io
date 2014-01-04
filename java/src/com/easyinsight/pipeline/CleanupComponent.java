@@ -26,6 +26,7 @@ public class CleanupComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(pipelineName);
+        structure.setConn(pipelineData.getConn());
         int i = 1;
         if (pipelineData.getInsightRequestMetadata() != null && pipelineData.getInsightRequestMetadata().getIntermediatePipelines() != null) {
             for (String pipe : pipelineData.getInsightRequestMetadata().getIntermediatePipelines()) {

@@ -2296,13 +2296,17 @@ public class DataService {
 
             if (SecurityUtil.getAccountID(false) > 0) {
                 try {
-                    PreparedStatement modelStmt = conn.prepareStatement("SELECT field_model FROM account WHERE account_id = ?");
-                    modelStmt.setLong(1, SecurityUtil.getAccountID());
-                    ResultSet modelRS = modelStmt.executeQuery();
-                    modelRS.next();
-                    boolean fieldModel = modelRS.getBoolean(1);
-                    modelStmt.close();
-                    if (fieldModel) {
+                    boolean fieldLookupEnabled = feed.getDataSource().isFieldLookupEnabled();
+                    if (!fieldLookupEnabled) {
+                        PreparedStatement modelStmt = conn.prepareStatement("SELECT field_model FROM account WHERE account_id = ?");
+                        modelStmt.setLong(1, SecurityUtil.getAccountID());
+                        ResultSet modelRS = modelStmt.executeQuery();
+                        modelRS.next();
+                        fieldLookupEnabled = modelRS.getBoolean(1);
+                        modelStmt.close();
+                    }
+
+                    if (fieldLookupEnabled) {
                         for (AnalysisItem analysisItem : analysisItems) {
                             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                                 AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
