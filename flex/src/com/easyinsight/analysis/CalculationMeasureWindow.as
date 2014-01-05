@@ -47,6 +47,9 @@ public class CalculationMeasureWindow extends CalculationWindow {
             analysisCalculation.displayName = nameInput.text;
             analysisCalculation.unqualifiedDisplayName = nameInput.text;
         } else {
+            if (analysisCalculation.key is NamedKey) {
+                NamedKey(analysisCalculation.key).name = nameInput.text;
+            }
             analysisCalculation.displayName = nameInput.text;
             analysisCalculation.unqualifiedDisplayName = nameInput.text;
         }

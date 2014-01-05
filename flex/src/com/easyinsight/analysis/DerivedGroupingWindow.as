@@ -42,6 +42,9 @@ public class DerivedGroupingWindow extends CalculationWindow {
             derivedGrouping.displayName = nameInput.text;
             derivedGrouping.unqualifiedDisplayName = nameInput.text;
         } else {
+            if (derivedGrouping.key is NamedKey) {
+                NamedKey(derivedGrouping.key).name = nameInput.text;
+            }
             derivedGrouping.displayName = nameInput.text;
             derivedGrouping.unqualifiedDisplayName = nameInput.text;
         }
