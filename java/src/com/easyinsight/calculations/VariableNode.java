@@ -6,6 +6,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.ReportKey;
 import org.antlr.runtime.Token;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,30 +67,42 @@ public class VariableNode extends CalculationTreeNode {
                         throw new FunctionException("Could not resolve namespace " + namespace + ".");
                     }
 
-                    AnalysisItem matchedTo = null;
+                    //AnalysisItem matchedTo = null;
+                    List<AnalysisItem> matchedByKey = new ArrayList<AnalysisItem>();
                     for (AnalysisItem testItem : analysisItems) {
                         Key key = testItem.getKey();
                         if (key instanceof DerivedKey) {
                             DerivedKey derivedKey = (DerivedKey) key;
+
                             UniqueKey testKey = new UniqueKey(derivedKey.getFeedID(), UniqueKey.DERIVED);
                             if (testKey.equals(uniqueKey)) {
-                                matchedTo = testItem;
-                                break;
+                                matchedByKey.add(testItem);
+                                /*matchedTo = testItem;
+                                break;*/
                             }
                         } else if (key instanceof ReportKey) {
                             ReportKey reportKey = (ReportKey) key;
                             UniqueKey testKey = new UniqueKey(reportKey.getReportID(), UniqueKey.REPORT);
                             if (testKey.equals(uniqueKey)) {
-                                matchedTo = testItem;
-                                break;
+                                matchedByKey.add(testItem);
+                                //matchedTo = testItem;
+                                //break;
                             }
                         }
                     }
 
-                    if (matchedTo == null) {
-                        analysisItem = analysisItems.get(0);
-                    } else {
-                        analysisItem = matchedTo;
+                    if (matchedByKey.size() > 1) {
+                        for (AnalysisItem testItem : matchedByKey) {
+                            if (s.equals(testItem.toUnqualifiedDisplay())) {
+                                analysisItem = testItem;
+                                break;
+                            }
+                        }
+                        if (analysisItem == null) {
+                            analysisItem = matchedByKey.get(0);
+                        }
+                    } else if (matchedByKey.size() == 1) {
+                        analysisItem = matchedByKey.get(0);
                     }
                 }
                 if (analysisItem == null) {
