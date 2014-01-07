@@ -618,12 +618,7 @@
                 if(overlap) {
                     var c = this._elem;
                     var h = (parseInt(c.css("height").replace(/px/,"")) + 8) + "px";
-
-                    console.log("height:" + h)
-
                     c.css("height", h);
-                    console.log(c.css("height"));
-                    console.log(c);
                     var j = 0;
                     for(var i = 0;i < ticks.length;i++) {
                         var t = ticks[i];
