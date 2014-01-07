@@ -28,6 +28,7 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
     public static final String DATE_CREATED = "DateCreated";
     public static final String LEAD_SOURCE_ID = "LeadSourceId";
     public static final String NAME = "Name";
+    public static final String EMAIL = "Email";
 
     public InfusionsoftContactSource() {
         setFeedName("Contacts");
@@ -61,7 +62,12 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
         if (leadSourceID == null) {
             leadSourceID = new NamedKey(LEAD_SOURCE_ID);
         }
+        Key email = keys.get(EMAIL);
+        if (email == null) {
+            email = new NamedKey(EMAIL);
+        }
         analysisitems.add(new AnalysisDimension(leadSourceID, "Lead Source ID"));
+        analysisitems.add(new AnalysisDimension(email, "Email"));
         InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
         List<CustomField> customFields = infusionsoftCompositeSource.getCache().getCustomFieldMap().get(-1);
         if (customFields != null) {
@@ -80,9 +86,9 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
                 String firstName = row.getValue(keys.get(FIRST_NAME)).toString();
                 String lastName = row.getValue(keys.get(LAST_NAME)).toString();
                 String name;
-                if (!firstName.isEmpty() && !lastName.isEmpty()) {
+                if (!empty(firstName) && !empty(lastName)) {
                     name = firstName + " " + lastName;
-                } else if (!firstName.isEmpty()) {
+                } else if (!empty(firstName)) {
                     name = lastName;
                 } else {
                     name = firstName;
@@ -94,5 +100,9 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    private boolean empty(String string) {
+        return string.isEmpty() || "(Empty)".equals(string);
     }
 }

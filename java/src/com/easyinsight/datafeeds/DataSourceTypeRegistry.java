@@ -16,6 +16,8 @@ import com.easyinsight.datafeeds.database.*;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.freshbooks.*;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
+import com.easyinsight.datafeeds.github.GithubCompositeSource;
+import com.easyinsight.datafeeds.github.GithubRepositorySource;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
 import com.easyinsight.datafeeds.harvest.*;
 import com.easyinsight.datafeeds.highrise.*;
@@ -334,6 +336,10 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.INFUSIONSOFT_EXPENSES, InfusionsoftExpenseSource.class);
         registerType(FeedType.INFUSIONSOFT_JOB_RECURRING_INSTANCE, InfusionsoftJobRecurringInstanceSource.class);
         registerType(FeedType.INFUSIONSOFT_EXPENSES, InfusionsoftExpenseSource.class);
+        registerType(FeedType.GITHUB_REPOSITORY, GithubRepositorySource.class);
+        registerType(FeedType.GITHUB_COMPOSITE, GithubCompositeSource.class);
+        registerType(FeedType.INFUSIONSOFT_TAG, InfusionsoftTagSource.class);
+        registerType(FeedType.INFUSIONSOFT_CONTACT_TO_TAG, InfusionsoftContactToTag.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
