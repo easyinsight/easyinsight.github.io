@@ -33,7 +33,11 @@
     </style>
     <title>Easy Insight Reports and Dashboards</title>
     <jsp:include page="bootstrapHeader.jsp"/>
+    <jsp:include page="reportDashboardHeader.jsp"/>
     <script type="text/javascript" src="/js/dashboard.js"></script>
+    <script type="text/javascript">
+        var dashboardJSON = {"base": {"type": "text"}};
+    </script>
 </head>
 <body>
 <%
