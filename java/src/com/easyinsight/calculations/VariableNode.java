@@ -6,13 +6,10 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.ReportKey;
 import org.antlr.runtime.Token;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class VariableNode extends CalculationTreeNode {
-
-    private List<String> warnings;
 
     public VariableNode(Token t) {
         super(t);
@@ -21,10 +18,6 @@ public class VariableNode extends CalculationTreeNode {
     /*public KeySpecification getVariableKey() {
         return variableKey;
     }*/
-
-    public List<String> getWarnings() {
-        return warnings;
-    }
 
     public AnalysisItem getAnalysisItem() {
         return analysisItem;
@@ -73,46 +66,30 @@ public class VariableNode extends CalculationTreeNode {
                         throw new FunctionException("Could not resolve namespace " + namespace + ".");
                     }
 
-                    //AnalysisItem matchedTo = null;
-                    List<AnalysisItem> matchedByKey = new ArrayList<AnalysisItem>();
+                    AnalysisItem matchedTo = null;
                     for (AnalysisItem testItem : analysisItems) {
                         Key key = testItem.getKey();
                         if (key instanceof DerivedKey) {
                             DerivedKey derivedKey = (DerivedKey) key;
-
                             UniqueKey testKey = new UniqueKey(derivedKey.getFeedID(), UniqueKey.DERIVED);
                             if (testKey.equals(uniqueKey)) {
-                                matchedByKey.add(testItem);
-                                /*matchedTo = testItem;
-                                break;*/
+                                matchedTo = testItem;
+                                break;
                             }
                         } else if (key instanceof ReportKey) {
                             ReportKey reportKey = (ReportKey) key;
                             UniqueKey testKey = new UniqueKey(reportKey.getReportID(), UniqueKey.REPORT);
                             if (testKey.equals(uniqueKey)) {
-                                matchedByKey.add(testItem);
-                                //matchedTo = testItem;
-                                //break;
+                                matchedTo = testItem;
+                                break;
                             }
                         }
                     }
 
-                    if (matchedByKey.size() > 1) {
-                        for (AnalysisItem testItem : matchedByKey) {
-                            if (s.equals(testItem.toUnqualifiedDisplay())) {
-                                analysisItem = testItem;
-                                break;
-                            }
-                        }
-                        if (analysisItem == null) {
-                            if (warnings == null) {
-                                warnings = new ArrayList<String>();
-                            }
-                            warnings.add("We found multiple fields matching the name of " + s + ".");
-                            analysisItem = matchedByKey.get(0);
-                        }
-                    } else if (matchedByKey.size() == 1) {
-                        analysisItem = matchedByKey.get(0);
+                    if (matchedTo == null) {
+                        analysisItem = analysisItems.get(0);
+                    } else {
+                        analysisItem = matchedTo;
                     }
                 }
                 if (analysisItem == null) {
@@ -125,7 +102,6 @@ public class VariableNode extends CalculationTreeNode {
                         }
                     }
                     if (!matched) {
-                        warnings.add("We found multiple fields matching the name of " + s + ".");
                         analysisItem = analysisItems.get(0);
                     }
                 }
