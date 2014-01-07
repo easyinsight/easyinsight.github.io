@@ -512,17 +512,19 @@
             if (this.name == 'xaxis' || this.name == 'x2axis') {
                 var createXAxis = function (ticks) {
                     var maxHeight = 0;
+                    var maxAngle = 0;
                     for (var i = 0; i < ticks.length; i++) {
                         var t = ticks[i];
                         var dist = (this.u2p(.5) - this.u2p(0));
-                        var aa = Math.floor(dist - 2);
+                        var fontSize = Math.floor(dist - 2);
                         if (dist < t._textRenderer.height) {
-                            if (aa < 12) {
+                            console.log("rotating...");
+                            if (fontSize < 12) {
 
-                                var modifier = 20 + 8 * (12 - aa);
-                                aa = Math.max(5, aa);
+                                var modifier = 20 + 8 * (12 - fontSize);
+                                fontSize = Math.max(5, fontSize);
                                 if (modifier < 90)
-                                    aa = 10;
+                                    fontSize = 10;
 
                                 if (t.angle <= 0) {
                                     t.angle = t.angle - modifier;
@@ -535,7 +537,7 @@
                                     t.angle = 90;
                                 t._textRenderer.angle = (t.angle * Math.PI / 180.0);
                             }
-                            t._textRenderer.fontSize = aa + "px";
+                            t._textRenderer.fontSize = fontSize + "px";
                         }
 
                         if (t.show && t.showLabel) {
@@ -556,6 +558,9 @@
                                 ee.style.height = hh;
                                 if (hh > maxHeight)
                                     maxHeight = hh;
+                                if( Math.abs(t.angle) > Math.abs(maxAngle) ) {
+                                    maxAngle = t.angle;
+                                }
 
                                 switch (t.labelPosition) {
                                     case 'auto':
@@ -591,29 +596,49 @@
 
                         }
                     }
-                    return maxHeight;
+                    return {maxHeight: maxHeight, maxAngle: maxAngle };
                 }
                 var maxHeight = createXAxis.call(this, ticks);
                 var prev = null;
+                var overlap = false;
                 for(var i = 0;i < ticks.length;i++) {
                     var t = ticks[i];
-                    if(typeof(t.angle) != "undefined" && t.angle == 0) {
-                        var curElem = t._elem;
-                        if(typeof(curElem) != "undefined") {
-                            if(prev != null) {
-                                var ff = $(prev._elem);
-                                var yy = $(curElem);
-                                if(ff.offset().left + ff.outerWidth() > yy.offset().left) {
-                                    t.angle = -15;
-                                    prev.angle = -15;
-                                    t.angle = Math.max(-90, Math.min(t.angle, 90));
-                                    t._textRenderer.angle = (t.angle * Math.PI / 180.0);
-                                    prev.angle = Math.max(-90, Math.min(prev.angle, 90));
-                                    prev._textRenderer.angle = (prev.angle * Math.PI / 180.0);
-                                }
+//                    if(typeof(t.angle) != "undefined" && t.angle == 0) {
+                    var curElem = t._elem;
+                    if(typeof(curElem) != "undefined") {
+                        if(prev != null) {
+                            var ff = $(prev._elem);
+                            var yy = $(curElem);
+                            if(ff.offset().left + ff.outerWidth() > yy.offset().left) {
+                                overlap = true;
                             }
-                            prev = t;
                         }
+                        prev = t;
+                    }
+//                    }
+                }
+                if(overlap) {
+                    var c = this._elem;
+                    var h = (parseInt(c.css("height").replace(/px/,"")) + 4) + "px";
+                    console.log("height:" + h)
+
+                    c.height("height", h);
+                    console.log(c);
+
+                    var j = 0;
+                    for(var i = 0;i < ticks.length;i++) {
+                        var t = ticks[i];
+                        if(t.constructor == $.jqplot.CanvasAxisTickRenderer && typeof(t._elem) != "undefined") {
+                            if(j % 2 > 0) {
+                                var y = $(t._elem);
+                                var fs = ticks[i]._textRenderer.fontSize;
+                                var fontSize = parseInt(fs.replace(/px/, ""));
+                                y.css('top', (fontSize + 2) + "px");
+                            }
+                            j = j + 1;
+                        }
+
+
                     }
                 }
 
@@ -628,7 +653,7 @@
                         var a = this._label._elem.outerHeight(true);
                         var b = this._label._elem.parent().height();
                         var c = this._label._elem.parent().parent().height();
-                        this._label._elem.parent().css("height", (a + maxHeight) + "px");
+                        this._label._elem.parent().css("height", (a + maxHeight.maxHeight) + "px");
                         this._label._elem.parent().parent().css("height", (c + (this._label._elem.parent().height() - b)) + "px");
                         labeledge = ['bottom', this._label._elem.outerHeight(true)];
                     }
