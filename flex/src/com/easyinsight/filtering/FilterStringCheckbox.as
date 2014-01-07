@@ -32,6 +32,7 @@ public class FilterStringCheckbox extends GridCheckbox {
 
 
     override protected function isSelected():Boolean {
+        if(!data) return false;
         return data.selected;
     }
 
