@@ -603,7 +603,6 @@
                 var overlap = false;
                 for(var i = 0;i < ticks.length;i++) {
                     var t = ticks[i];
-//                    if(typeof(t.angle) != "undefined" && t.angle == 0) {
                     var curElem = t._elem;
                     if(typeof(curElem) != "undefined") {
                         if(prev != null) {
@@ -615,16 +614,16 @@
                         }
                         prev = t;
                     }
-//                    }
                 }
                 if(overlap) {
                     var c = this._elem;
                     var h = (parseInt(c.css("height").replace(/px/,"")) + 4) + "px";
+
                     console.log("height:" + h)
 
-                    c.height("height", h);
+                    c.css("height", h);
+                    console.log(c.css("height"));
                     console.log(c);
-
                     var j = 0;
                     for(var i = 0;i < ticks.length;i++) {
                         var t = ticks[i];
@@ -653,8 +652,6 @@
                         var a = this._label._elem.outerHeight(true);
                         var b = this._label._elem.parent().height();
                         var c = this._label._elem.parent().parent().height();
-                        this._label._elem.parent().css("height", (a + maxHeight.maxHeight) + "px");
-                        this._label._elem.parent().parent().css("height", (c + (this._label._elem.parent().height() - b)) + "px");
                         labeledge = ['bottom', this._label._elem.outerHeight(true)];
                     }
                     else {
