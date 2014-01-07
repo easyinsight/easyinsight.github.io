@@ -617,7 +617,7 @@
                 }
                 if(overlap) {
                     var c = this._elem;
-                    var h = (parseInt(c.css("height").replace(/px/,"")) + 4) + "px";
+                    var h = (parseInt(c.css("height").replace(/px/,"")) + 8) + "px";
 
                     console.log("height:" + h)
 
@@ -632,7 +632,7 @@
                                 var y = $(t._elem);
                                 var fs = ticks[i]._textRenderer.fontSize;
                                 var fontSize = parseInt(fs.replace(/px/, ""));
-                                y.css('top', (fontSize + 2) + "px");
+                                y.css('top', (fontSize + 4) + "px");
                             }
                             j = j + 1;
                         }
