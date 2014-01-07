@@ -91,7 +91,7 @@
         this.prefix = '';
         // prop: fontFamily
         // css spec for the font-family css attribute.
-        this.fontFamily = '"Helvetica Neue",helvetica,arial,sans-serif';
+        this.fontFamily = '"Marker Felt",helvetica,arial,sans-serif';
         // prop: fontSize
         // CSS spec for font size.
         this.fontSize = '10pt';

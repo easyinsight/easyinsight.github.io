@@ -499,13 +499,13 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
-        includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
-        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
-        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
-        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
-        includes.add("/js/plugins/jqplot.enhancedLegendRenderer.min.js");
-        includes.add("/js/visualizations/chart.js");
-        includes.add("/js/visualizations/util.js");
+//        includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
+//        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
+//        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+//        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
+//        includes.add("/js/plugins/jqplot.enhancedLegendRenderer.min.js");
+//        includes.add("/js/visualizations/chart.js");
+//        includes.add("/js/visualizations/util.js");
         return includes;
     }
 
