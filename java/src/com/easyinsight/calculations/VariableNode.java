@@ -12,6 +12,8 @@ import java.util.Map;
 
 public class VariableNode extends CalculationTreeNode {
 
+    private List<String> warnings;
+
     public VariableNode(Token t) {
         super(t);
     }
@@ -19,6 +21,10 @@ public class VariableNode extends CalculationTreeNode {
     /*public KeySpecification getVariableKey() {
         return variableKey;
     }*/
+
+    public List<String> getWarnings() {
+        return warnings;
+    }
 
     public AnalysisItem getAnalysisItem() {
         return analysisItem;
@@ -99,6 +105,10 @@ public class VariableNode extends CalculationTreeNode {
                             }
                         }
                         if (analysisItem == null) {
+                            if (warnings == null) {
+                                warnings = new ArrayList<String>();
+                            }
+                            warnings.add("We found multiple fields matching the name of " + s + ".");
                             analysisItem = matchedByKey.get(0);
                         }
                     } else if (matchedByKey.size() == 1) {
@@ -115,6 +125,7 @@ public class VariableNode extends CalculationTreeNode {
                         }
                     }
                     if (!matched) {
+                        warnings.add("We found multiple fields matching the name of " + s + ".");
                         analysisItem = analysisItems.get(0);
                     }
                 }
