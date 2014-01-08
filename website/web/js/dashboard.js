@@ -29,13 +29,16 @@ var millisecondFormatter = function(format, val) {
     if(val ==  0)
         return String("");
     var result = "";
+    if(format == "s")
+            val = val * 1000;
     var unsigned = Math.abs(val);
-
     var milliseconds, seconds, minutes, hours, days;
     if (unsigned < 60000) {
         seconds = Math.floor(unsigned / 1000);
         milliseconds =  (val % 1000);
-        result = seconds + "s:" + milliseconds + "ms";
+        result = seconds + "s:";
+        if(format == "ms")
+            result = result + milliseconds + "ms";
     } else if (unsigned < (60000 * 60)) {
         minutes = Math.floor(unsigned / 60000);
         seconds = Math.floor(unsigned / 1000) % 60;

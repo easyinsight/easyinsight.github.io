@@ -209,8 +209,9 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         JSONObject tickOptions = new JSONObject();
         if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.CURRENCY) {
             tickOptions.put("formatter", "$.jqplot.currencyTickNumberFormatter");
-        } else if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.MILLISECONDS) {
+        } else if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.MILLISECONDS || analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.SECONDS) {
             tickOptions.put("formatter", "millisecondFormatter");
+            tickOptions.put("formatString", analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.MILLISECONDS ? "'ms'" : "'s'");
         } else {
             tickOptions.put("formatter", "$.jqplot.tickNumberFormatter");
         }
