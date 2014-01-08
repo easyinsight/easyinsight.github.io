@@ -25,6 +25,36 @@ var multi_field_value_results;
 
 var saveConfiguration;
 
+var millisecondFormatter = function(format, val) {
+    if(val ==  0)
+        return String("");
+    var result = "";
+    var unsigned = Math.abs(val);
+
+    var milliseconds, seconds, minutes, hours, days;
+    if (unsigned < 60000) {
+        seconds = Math.floor(unsigned / 1000);
+        milliseconds =  (val % 1000);
+        result = seconds + "s:" + milliseconds + "ms";
+    } else if (unsigned < (60000 * 60)) {
+        minutes = Math.floor(unsigned / 60000);
+        seconds = Math.floor(unsigned / 1000) % 60;
+        result = minutes + "m: " + seconds + "s";
+    } else if (unsigned < (60000 * 60 * 24)) {
+        hours = Math.floor(unsigned / (60000 * 60));
+        minutes = Math.floor(unsigned % 24);
+        result = hours + "h:" + minutes + "m";
+    } else {
+        days = Math.floor(unsigned / (60000 * 60 * 24));
+        hours = Math.floor(unsigned / (60000 * 60) % 24);
+        result = days + "d:" + hours + "h";
+    }
+    if (val < 0) {
+        result = "(" + result + ")";
+    }
+    return String(result);
+}
+
 var dashboardComponent = function (obj) {
     if (obj.type == "stack")
         return stack(obj);
