@@ -518,7 +518,6 @@
                         var dist = (this.u2p(.5) - this.u2p(0));
                         var fontSize = Math.floor(dist - 2);
                         if (dist < t._textRenderer.height) {
-                            console.log("rotating...");
                             if (fontSize < 12) {
 
                                 var modifier = 20 + 8 * (12 - fontSize);

@@ -2215,13 +2215,18 @@ public class ExportService {
                 if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
                     doubleValue = 0;
                 }
-                if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.MILLISECONDS) {
+                if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.MILLISECONDS || analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.SECONDS) {
                     String result;
+                    if(analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.SECONDS) {
+                        doubleValue = doubleValue * 1000;
+                    }
                     double unsigned = Math.abs(doubleValue);
                     if (unsigned < 60000L) {
                         int seconds = (int) (unsigned / 1000);
                         int milliseconds = (int) (unsigned % 1000);
-                        result = seconds + "s:" + milliseconds + "ms";
+                        result = seconds + "s:";
+                        if(analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.MILLISECONDS)
+                            result = result + milliseconds + "ms";
                     } else if (unsigned < (60000 * 60)) {
                         int minutes = (int) (unsigned / 60000);
                         int seconds = (int) (unsigned / 1000) % 60;

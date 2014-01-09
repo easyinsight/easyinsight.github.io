@@ -172,14 +172,14 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
-        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
-        includes.add("/js/plugins/jqplot.categoryAxisRenderer.js");
-        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
-        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
-        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
-        includes.add("/js/plugins/jqplot.pointLabels.js");
-        includes.add("/js/visualizations/chart.js");
-        includes.add("/js/visualizations/util.js");
+//        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
+//        includes.add("/js/plugins/jqplot.categoryAxisRenderer.js");
+//        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
+//        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
+//        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+//        includes.add("/js/plugins/jqplot.pointLabels.js");
+//        includes.add("/js/visualizations/chart.js");
+//        includes.add("/js/visualizations/util.js");
         return includes;
     }
 

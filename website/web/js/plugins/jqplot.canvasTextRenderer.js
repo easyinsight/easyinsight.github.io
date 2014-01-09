@@ -396,7 +396,6 @@
     {
         // var fstyle = this.fontStyle+' '+this.fontVariant+' '+this.fontWeight+' '+this.fontSize+' '+this.fontFamily;
         var fstyle = this.fontSize+' '+this.fontFamily;
-        console.log(fstyle);
         ctx.save();
         ctx.font = fstyle;
         var w = ctx.measureText(str).width;
@@ -438,7 +437,6 @@
          ctx.fillStyle = this.fillStyle;
         // var fstyle = this.fontStyle+' '+this.fontVariant+' '+this.fontWeight+' '+this.fontSize+' '+this.fontFamily;
         var fstyle = this.fontSize+' '+this.fontFamily;
-        console.log(fstyle);
          ctx.font = fstyle;
          ctx.translate(tx, ty);
          ctx.rotate(this.angle);
