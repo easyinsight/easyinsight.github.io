@@ -50,7 +50,6 @@ public class PlotChartServlet extends HtmlServlet {
 
         response.setContentType("application/json");
         String argh = object.toString();
-        System.out.println(argh);
         response.getOutputStream().write(argh.getBytes());
         response.getOutputStream().flush();
     }
