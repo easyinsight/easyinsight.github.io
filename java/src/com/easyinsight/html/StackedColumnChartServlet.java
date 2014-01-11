@@ -205,9 +205,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
                     }
                     total = total + curVal;
                 }
-                System.out.println(total);
                 if (total == 0.0) {
-                    System.out.println(k);
                     zeroIndicies.add(k);
                 }
             }
@@ -247,8 +245,6 @@ public class StackedColumnChartServlet extends HtmlServlet {
         object.put("ticks", axisNames);
         object.put("series", series);
 
-
-        System.out.println(blahs);
         response.setContentType("application/json");
         response.getOutputStream().
 

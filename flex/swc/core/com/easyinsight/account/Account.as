@@ -26,6 +26,8 @@ package com.easyinsight.account
         public static const REACTIVATION_POSSIBLE:int = 11;
         public static const BILLING_FAILED:int = 12;
 
+        public static const NEW_PRICING:int = 1;
+
 		public var accountType:int;
 		public var accountID:int;
         public var maxUsers:int;
@@ -36,6 +38,9 @@ package com.easyinsight.account
         public var activated:Boolean;
         public var optInEmail:Boolean;
         public var currencySymbol:String = "$";
+        public var pricingModel:int;
+        public var nextBillAmount:Number;
+        public var nextBillDate:Date;
 		
 		public function Account()
 		{

@@ -1,0 +1,1 @@
+alter table account add (cancelling_user varchar(60), cancelling_reason varchar(255), next_bill_date datetime, next_bill_amount double);
