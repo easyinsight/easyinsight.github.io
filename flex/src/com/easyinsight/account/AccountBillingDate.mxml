@@ -21,8 +21,10 @@
                     case (Account.NEW_PRICING):
                         if(accountInfo.account.nextBillDate) {
                             billAmountVisible = true;
-                            //TODO: proper formatter
-                            nextBillDate = accountInfo.account.nextBillDate.toString();
+                            var format:String = User.getInstance().getDateFormat();
+                            var formatter:DateFormatter = new DateFormatter();
+                            formatter.formatString = format;
+                            nextBillDate = formatter.format(accountInfo.account.nextBillDate);
                         }
                         break;
                 }
