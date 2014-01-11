@@ -177,6 +177,7 @@ public class RollingFilterDefinition extends FilterDefinition {
                     } else {
                         startDate = null;
                     }
+                    System.out.println("Start date was calculated to " + startDate);
                     if (interval.isEndDefined()) {
                         Value value = new ReportCalculation(interval.getEndScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
                         if (value.type() == Value.DATE) {
