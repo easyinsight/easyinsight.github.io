@@ -8,7 +8,6 @@ import com.easyinsight.core.Value;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * User: jamesboe
@@ -31,7 +30,7 @@ public class DayOfMonth extends Function {
         }
         if (startDate != null) {
             Calendar calendar = Calendar.getInstance();
-            int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
+            /*int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
             String string;
             if (time > 0) {
                 string = "GMT-"+Math.abs(time);
@@ -41,7 +40,7 @@ public class DayOfMonth extends Function {
                 string = "GMT";
             }
             TimeZone timeZone = TimeZone.getTimeZone(string);
-            calendar.setTimeZone(timeZone);
+            calendar.setTimeZone(timeZone);*/
             calendar.setTimeInMillis(startDate.getTime());
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
