@@ -183,6 +183,25 @@ public class RollingFilterDefinition extends FilterDefinition {
                         cal.set(Calendar.SECOND, 0);
                         cal.set(Calendar.MILLISECOND, 0);
                         startDate = cal.getTime();
+                    } else if (startDate != null) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(startDate);
+                        cal.set(Calendar.HOUR_OF_DAY, 0);
+                        cal.set(Calendar.MINUTE, 0);
+                        cal.set(Calendar.SECOND, 0);
+                        cal.set(Calendar.MILLISECOND, 0);
+                        int time = insightRequestMetadata.getUtcOffset() / 60;
+                        String string;
+                        if (time > 0) {
+                            string = "GMT-"+Math.abs(time);
+                        } else if (time < 0) {
+                            string = "GMT+"+Math.abs(time);
+                        } else {
+                            string = "GMT";
+                        }
+                        TimeZone timeZone = TimeZone.getTimeZone(string);
+                        cal.setTimeZone(timeZone);
+                        startDate = cal.getTime();
                     }
                     System.out.println("Start date was calculated to " + startDate);
                     if (interval.isEndDefined()) {
@@ -207,8 +226,27 @@ public class RollingFilterDefinition extends FilterDefinition {
                         cal.set(Calendar.SECOND, 59);
                         cal.set(Calendar.MILLISECOND, 0);
                         endDate = cal.getTime();
+                    } else if (endDate != null) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(endDate);
+                        cal.set(Calendar.HOUR_OF_DAY, 0);
+                        cal.set(Calendar.MINUTE, 0);
+                        cal.set(Calendar.SECOND, 0);
+                        cal.set(Calendar.MILLISECOND, 0);
+                        int time = insightRequestMetadata.getUtcOffset() / 60;
+                        String string;
+                        if (time > 0) {
+                            string = "GMT-"+Math.abs(time);
+                        } else if (time < 0) {
+                            string = "GMT+"+Math.abs(time);
+                        } else {
+                            string = "GMT";
+                        }
+                        TimeZone timeZone = TimeZone.getTimeZone(string);
+                        cal.setTimeZone(timeZone);
+                        endDate = cal.getTime();
                     }
-                    System.out.println("End date was calculated to " + startDate);
+                    System.out.println("End date was calculated to " + endDate);
                 }
             }
         } catch (RecognitionException e) {
