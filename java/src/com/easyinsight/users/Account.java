@@ -276,6 +276,50 @@ public class Account {
     @Column(name="use_html_version")
     private boolean useHTMLVersion = false;
 
+    @Column(name="cancelling_user")
+    private String cancellingUser;
+
+    @Column(name="cancelling_reason")
+    private String cancellingReason;
+
+    @Column(name="next_bill_date")
+    private Date nextBillDate;
+
+    @Column(name="next_bill_amount")
+    private Double nextBillAmount;
+
+    public Date getNextBillDate() {
+        return nextBillDate;
+    }
+
+    public void setNextBillDate(Date nextBillDate) {
+        this.nextBillDate = nextBillDate;
+    }
+
+    public Double getNextBillAmount() {
+        return nextBillAmount;
+    }
+
+    public void setNextBillAmount(Double nextBillAmount) {
+        this.nextBillAmount = nextBillAmount;
+    }
+
+    public String getCancellingReason() {
+        return cancellingReason;
+    }
+
+    public void setCancellingReason(String cancellingReason) {
+        this.cancellingReason = cancellingReason;
+    }
+
+    public String getCancellingUser() {
+        return cancellingUser;
+    }
+
+    public void setCancellingUser(String cancellingUser) {
+        this.cancellingUser = cancellingUser;
+    }
+
     public boolean isUseHTMLVersion() {
         return useHTMLVersion;
     }
@@ -759,6 +803,9 @@ public class Account {
         transfer.setMaxUsers(maxUsers);
         transfer.setAccountState(accountState);
         transfer.setApiEnabled(apiEnabled);
+        transfer.setPricingModel(pricingModel);
+        transfer.setNextBillDate(nextBillDate);
+        transfer.setNextBillAmount(nextBillAmount);
         return transfer;
     }
 

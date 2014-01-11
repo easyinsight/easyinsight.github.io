@@ -18,6 +18,8 @@
                 <mx:Form width="100%" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
                     <account:AccountState accountInfo="{accountInfo}"/>
                     <account:AccountTrialDate accountInfo="{accountInfo}"/>
+                    <account:AccountBillingAmount accountInfo="{accountInfo}"/>
+                    <account:AccountBillingDate accountInfo="{accountInfo}" />
                 </mx:Form>
                 <mx:Button label="Upgrade or Downgrade Account..." click="upgrade()" styleName="grayButton" fontSize="14" width="260" id="upgradeButton"/>
                 <mx:Button label="View Invoices..." click="invoices()" styleName="grayButton" fontSize="14" width="260" id="invoicesButton"/>

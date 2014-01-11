@@ -285,11 +285,12 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                             info.setTransactionTime(t.getCreatedAt().getTime());
                             info.setAmount(t.getAmount().toString());
                             account.getBillingInfo().add(info);
-
                             transactions.add(t.getId());
                             // TODO: email out the invoice here
                         }
                     }
+                    account.setNextBillAmount(ss.getNextBillingPeriodAmount().doubleValue());
+                    account.setNextBillDate(ss.getNextBillingDate().getTime());
                     if (ss.getStatus() == Subscription.Status.ACTIVE) {
                         account.setAccountState(Account.ACTIVE);
                     } else if (ss.getStatus() == Subscription.Status.PAST_DUE) {
@@ -304,6 +305,8 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                     System.out.println("\tUpdated " + account.getAccountID() + " to " + account.getAccountState() + ".");
                 }
 
+            } else {
+                System.out.println("Can't find a default card for " + account.getAccountID());
             }
         }
 

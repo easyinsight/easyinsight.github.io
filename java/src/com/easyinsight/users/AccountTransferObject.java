@@ -18,6 +18,33 @@ public class AccountTransferObject {
     private Date creationDate;
     private boolean optInEmail;
     private String googleAppsDomain;
+    private int pricingModel;
+    private Double nextBillAmount;
+    private Date nextBillDate;
+
+    public int getPricingModel() {
+        return pricingModel;
+    }
+
+    public void setPricingModel(int pricingModel) {
+        this.pricingModel = pricingModel;
+    }
+
+    public Double getNextBillAmount() {
+        return nextBillAmount;
+    }
+
+    public void setNextBillAmount(Double nextBillAmount) {
+        this.nextBillAmount = nextBillAmount;
+    }
+
+    public Date getNextBillDate() {
+        return nextBillDate;
+    }
+
+    public void setNextBillDate(Date nextBillDate) {
+        this.nextBillDate = nextBillDate;
+    }
 
     public String getGoogleAppsDomain() {
         return googleAppsDomain;

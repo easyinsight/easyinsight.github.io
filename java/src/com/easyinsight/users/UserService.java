@@ -443,9 +443,10 @@ public class UserService {
 
     public void cancelPaidAccount() {
         long accountID = SecurityUtil.getAccountID();
+        String userID = SecurityUtil.getUserName();
         Session session = Database.instance().createSession();
         try {
-            cancelPaidAccount(accountID, session);
+            cancelPaidAccount(userID, accountID, session);
         } catch (Exception e) {
             session.getTransaction().rollback();
             LogClass.error(e);
@@ -455,25 +456,10 @@ public class UserService {
         }
     }
 
-    public void cancelPaidAccount(String username) {
-        long accountID = SecurityUtil.getAccountID();
-        Session session = Database.instance().createSession();
-        try {
-            User user = (User) session.createQuery("from User where userName = ?").setString(0, username).list().get(0);
-            cancelPaidAccount(user.getAccount().getAccountID(), session);
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-    }
-
-    public void cancelPaidAccount(long accountID, Session session) {
+    public void cancelPaidAccount(String cancellingUser, long accountID, Session session) {
         session.getTransaction().begin();
         Account a = (Account) session.createQuery("from Account where accountID  = ?").setLong(0, accountID).list().get(0);
-        cancelAccount(session, a);
+        cancelAccount(session, a, cancellingUser);
         session.getTransaction().commit();
     }
 
@@ -482,7 +468,7 @@ public class UserService {
         try {
             session.getTransaction().begin();
             Account a = (Account) session.createQuery("from Account where snappCloudId = ?").setString(0, snappCloudId).list().get(0);
-            cancelAccount(session, a);
+            cancelAccount(session, a, "");
             session.getTransaction().commit();
         } catch (Exception e) {
             session.getTransaction().rollback();
@@ -493,8 +479,9 @@ public class UserService {
         }
     }
 
-    private void cancelAccount(Session session, Account a) {
+    private void cancelAccount(Session session, Account a, String cancellingUser) {
         a.setAccountState(Account.CLOSING);
+        a.setCancellingUser(cancellingUser);
         if (a.isBillingInformationGiven() != null && a.isBillingInformationGiven()) {
             BillingSystem billingSystem = BillingSystemFactory.getBillingSystem();
             billingSystem.cancelPlan(a.getAccountID());

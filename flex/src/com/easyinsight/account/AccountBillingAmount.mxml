@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<account:AccountFormItem xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
+        label="Next Bill Amount:" visible="{billAmountVisible}">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+
+        import mx.controls.Alert;
+
+        import mx.formatters.DateFormatter;
+
+        [Bindable]
+        private var nextBillAmount:String;
+
+        [Bindable]
+        private var billAmountVisible:Boolean;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (accountInfo != null) {
+                switch (accountInfo.account.pricingModel) {
+                    case (Account.NEW_PRICING):
+                        if(!isNaN(accountInfo.account.nextBillAmount)) {
+                            billAmountVisible = true;
+                            //TODO: Proper formatter
+                            nextBillAmount = accountInfo.account.nextBillAmount.toFixed(2);
+                        }
+                        break;
+                }
+            }
+        }]]></mx:Script>
+    <mx:Label text="{nextBillAmount}" fontFamily="Lucida Grande" fontWeight="normal"/>
+</account:AccountFormItem>
