@@ -12,14 +12,9 @@ import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Node;
-import nu.xom.Nodes;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URLEncoder;
 import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -236,132 +231,97 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         }
         Key noteKey = zendeskCompositeSource.getField(TICKET_ID).toBaseKey();
         DateFormat adf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        Date start = new Date(System.currentTimeMillis() - (1000 * 60 * 60));
         long time = cal.getTimeInMillis() / 1000;
         String nextPage = zendeskCompositeSource.getUrl() + "/api/v2/exports/tickets.json?start_time=" + time;
         List<Comment> commentList = new ArrayList<Comment>();
-        if (zendeskCompositeSource.isHackMethod()) {
 
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                String updateDate = sdf.format(cal.getTime());
-                nextPage = zendeskCompositeSource.getUrl() + "/api/v2/search.json?query=" + "type:ticket%20updated>" + updateDate;
-                while (nextPage != null) {
-                    Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
-                    List results = (List) ticketObjects.get("results");
-                    if (results != null) {
-                        for (Object obj : results) {
-                            Map map = (Map) obj;
-                            String ticketID = map.get("id").toString();
+        int safeguard = 0;
+        while (nextPage != null) {
+            Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
+            List results = (List) ticketObjects.get("results");
+            if (results != null) {
+                for (Object obj : results) {
+                    Map map = (Map) obj;
+                    IRow row = dataSet.createRow();
+                    String id = parseTicket(keys, userCache, row, map);
 
-                            IRow row = dataSet.createRow();
-                            parseTicketFromSearch(keys, userCache, row, map);
-                            row.addValue(TICKET_ID, ticketID);
-                            if (map.get("description") != null) {
-                                row.addValue(DESCRIPTION, map.get("description").toString());
-                            }
-                            if (map.get("custom_fields") != null) {
-                                List customFields = (List) map.get("custom_fields");
-                                for (Object customFieldObj : customFields) {
-                                    Map customFieldMap = (Map) customFieldObj;
-                                    String fieldID = customFieldMap.get("id").toString();
-                                    if (customFieldMap.get("value") != null) {
-                                        String value = customFieldMap.get("value").toString();
-                                        Key key = keys.get("zd" + fieldID);
-                                        row.addValue(key, value);
-                                    }
+                    if (zendeskCompositeSource.isHackMethod()) {
+                        Map ticketDetail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + ".json", zendeskCompositeSource, httpClient);
+
+                        Map detailObject = (Map) ticketDetail.get("ticket");
+                        List customFields = (List) detailObject.get("custom_fields");
+                        for (Object cFieldObj : customFields) {
+                            Map customFieldMap = (Map) cFieldObj;
+                            String fieldID = customFieldMap.get("id").toString();
+
+                            Object fieldValueObject = customFieldMap.get("value");
+                            if (fieldValueObject != null) {
+                                Key key = keys.get("zd" + fieldID);
+                                if (key != null) {
+                                    row.addValue(key, fieldValueObject.toString());
                                 }
                             }
-                            if (zendeskCompositeSource.isLoadComments()) {
-                                Map detail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + ticketID + "/comments.json", zendeskCompositeSource, httpClient);
-
-                                List comments = (List) detail.get("comments");
-                                if (comments != null) {
-                                    String firstComment = null;
-                                    for (Object commentMapObj : comments) {
-                                        Map commentMap = (Map) commentMapObj;
-                                        String commentID = commentMap.get("id").toString();
-                                        String commentDescription = commentMap.get("body").toString();
-                                        if (firstComment == null) {
-                                            firstComment = commentDescription;
-                                        }
-                                        String author = queryUser(commentMap.get("author_id").toString(), userCache).toString();
-                                        Date createdAt = adf.parse(commentMap.get("created_at").toString());
-                                        commentList.add(new Comment(Long.parseLong(commentID), commentDescription, author, createdAt, ticketID));
-                                    }
-                                }
-                            }
-                            if (lastStart != null) {
-                                StringWhere userWhere = new StringWhere(noteKey, ticketID);
-                                dataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
-                                dataSet = new DataSet();
-                            }
-
-                            // parse custom fields and anything else that's missing
                         }
-                    }
-                    if (ticketObjects.get("next_page") != null) {
-                        nextPage = ticketObjects.get("next_page").toString();
                     } else {
-                        nextPage = null;
-                    }
-                }
-                if (lastStart == null) {
-                    dataStorage.insertData(dataSet);
-                }
-                zendeskCompositeSource.setComments(commentList);
-        } else {
-            while (nextPage != null) {
-                int count = 0;
-                Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
-                List results = (List) ticketObjects.get("results");
-                if (results != null) {
-                    for (Object obj : results) {
-                        count++;
-                        Map map = (Map) obj;
-                        IRow row = dataSet.createRow();
-                        String id = parseTicket(keys, userCache, row, map);
-                        for (Map.Entry<String, Key> entry : keys.entrySet()) {
-                            if (entry.getKey().startsWith("zd")) {
-                                int customFieldID = Integer.parseInt(entry.getKey().substring(2));
-                                Object customFieldObject = map.get("field_" + customFieldID);
-                                if (customFieldObject != null) {
-                                    row.addValue(entry.getKey(), customFieldObject.toString());
+                        if (map.get("custom_fields") != null) {
+                            List customFields = (List) map.get("custom_fields");
+                            for (Object customFieldObj : customFields) {
+                                Map customFieldMap = (Map) customFieldObj;
+                                String fieldID = customFieldMap.get("id").toString();
+                                if (customFieldMap.get("value") != null) {
+                                    String value = customFieldMap.get("value").toString();
+                                    Key key = keys.get("zd" + fieldID);
+                                    row.addValue(key, value);
                                 }
                             }
                         }
-                        if (zendeskCompositeSource.isLoadComments()) {
-                            Map detail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + "/comments.json", zendeskCompositeSource, httpClient);
+                    }
 
-                            List comments = (List) detail.get("comments");
-                            if (comments != null) {
-                                String firstComment = null;
-                                for (Object commentMapObj : comments) {
-                                    Map commentMap = (Map) commentMapObj;
-                                    String commentID = commentMap.get("id").toString();
-                                    String commentDescription = commentMap.get("body").toString();
-                                    if (firstComment == null) {
-                                        firstComment = commentDescription;
-                                    }
-                                    String author = queryUser(commentMap.get("author_id").toString(), userCache).toString();
-                                    Date createdAt = adf.parse(commentMap.get("created_at").toString());
-                                    commentList.add(new Comment(Long.parseLong(commentID), commentDescription, author, createdAt, id));
+                    if (zendeskCompositeSource.isLoadComments()) {
+                        Map detail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + "/comments.json", zendeskCompositeSource, httpClient);
+
+                        List comments = (List) detail.get("comments");
+                        if (comments != null) {
+                            String firstComment = null;
+                            for (Object commentMapObj : comments) {
+                                Map commentMap = (Map) commentMapObj;
+                                String commentID = commentMap.get("id").toString();
+                                String commentDescription = commentMap.get("body").toString();
+                                if (firstComment == null) {
+                                    firstComment = commentDescription;
                                 }
-
-                                row.addValue(DESCRIPTION, firstComment);
+                                String author = queryUser(commentMap.get("author_id").toString(), userCache).toString();
+                                Date createdAt = adf.parse(commentMap.get("created_at").toString());
+                                commentList.add(new Comment(Long.parseLong(commentID), commentDescription, author, createdAt, id));
                             }
-                        }
-                        if (lastStart != null) {
-                            StringWhere userWhere = new StringWhere(noteKey, id);
-                            dataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
-                            dataSet = new DataSet();
+
+                            row.addValue(DESCRIPTION, firstComment);
                         }
                     }
+                    if (lastStart != null) {
+                        StringWhere userWhere = new StringWhere(noteKey, id);
+                        dataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
+                        dataSet = new DataSet();
+                    }
                 }
-                if (ticketObjects.get("next_page") != null && !ticketObjects.get("next_page").toString().equals(nextPage) && count == 1000) {
-                    nextPage = ticketObjects.get("next_page").toString();
-                    Thread.sleep(60000);
-                } else {
+            }
+            if (ticketObjects.get("next_page") != null && !ticketObjects.get("next_page").toString().equals(nextPage)) {
+                safeguard++;
+                if (safeguard == 50) {
+                    return null;
+                }
+                nextPage = ticketObjects.get("next_page").toString();
+                long ms = Long.parseLong(nextPage.split("\\=")[1]) * 1000;
+                Calendar c2 = Calendar.getInstance();
+                c2.setTimeInMillis(ms);
+                if (c2.getTime().after(start)) {
                     nextPage = null;
+                } else {
+                    Thread.sleep(60000);
                 }
+            } else {
+                nextPage = null;
             }
 
             if (lastStart == null) {
@@ -382,83 +342,6 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             }
         }
         return new EmptyValue();
-    }
-
-    private String parseTicketFromSearch(Map<String, Key> keys, ZendeskUserCache userCache, IRow row, Map ticketNode) throws ParseException, InterruptedException {
-        try {
-            row.addValue(keys.get(ASSIGNEE), queryUser(ticketNode, "assignee_id", userCache));
-            row.addValue(keys.get(COUNT), 1);
-            row.addValue(keys.get(CREATED_AT), queryOtherDate(ticketNode, "created_at"));
-            row.addValue(keys.get(DESCRIPTION), queryField(ticketNode, "description"));
-            row.addValue(keys.get(DUE_DATE), queryOtherDate(ticketNode, "due_date"));
-            row.addValue(keys.get(STATUS), queryField(ticketNode, "status"));
-            row.addValue(keys.get(TICKET_TYPE), queryField(ticketNode, "type"));
-            row.addValue(keys.get(PRIORITY), queryField(ticketNode, "priority"));
-            //row.addValue(keys.get(RESOLUTION_TIME), queryDate(ticketNode, "resolution_time"));
-            row.addValue(keys.get(SOLVED_AT), queryOtherDate(ticketNode, "solved_at"));
-            row.addValue(keys.get(UPDATED_AT), queryOtherDate(ticketNode, "updated_at"));
-            row.addValue(keys.get(GROUP_ID), queryField(ticketNode, "group_id"));
-            row.addValue(keys.get(SUBJECT), queryField(ticketNode, "subject"));
-            row.addValue(keys.get(ORGANIZATION_ID), queryField(ticketNode, "organization_id"));
-            String id = queryField(ticketNode, "id");
-            row.addValue(keys.get(TICKET_ID), id);
-            row.addValue(keys.get(REQUESTER), queryUser(ticketNode, "requester_id", userCache));
-            row.addValue(keys.get(SUBMITTER), queryUser(ticketNode, "submitter_id", userCache));
-            //row.addValue(keys.get(VIA), queryField(ticketNode, "via"));
-            String tags = queryField(ticketNode, "current_tags");
-            if (tags != null) {
-                String[] tagElements = tags.split(" ");
-                StringBuilder stringBuilder = new StringBuilder();
-                for (String tag : tagElements) {
-                    stringBuilder.append(tag).append(",");
-                }
-                stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-                row.addValue(keys.get(TAGS), stringBuilder.toString());
-            }
-
-
-
-            /*try {
-                int viaID = Integer.parseInt(queryField(ticketNode, "via-id/text()"));
-
-                if (viaID == 0) {
-                    row.addValue(keys.get(VIA), "Web Form");
-                } else if (viaID == 4) {
-                    row.addValue(keys.get(VIA), "Mail");
-                } else if (viaID == 5) {
-                    row.addValue(keys.get(VIA), "Web Service API");
-                } else if (viaID == 16) {
-                    row.addValue(keys.get(VIA), "Get Satisfaction");
-                } else if (viaID == 17) {
-                    row.addValue(keys.get(VIA), "Dropbox");
-                } else if (viaID == 19) {
-                    row.addValue(keys.get(VIA), "Ticket merge");
-                } else if (viaID == 21) {
-                    row.addValue(keys.get(VIA), "Recovered from suspended tickets");
-                } else if (viaID == 23) {
-                    row.addValue(keys.get(VIA), "Twitter favorite");
-                } else if (viaID == 24) {
-                    row.addValue(keys.get(VIA), "Forum topic");
-                } else if (viaID == 26) {
-                    row.addValue(keys.get(VIA), "Twitter direct message");
-                } else if (viaID == 27) {
-                    row.addValue(keys.get(VIA), "Closed ticket");
-                } else if (viaID == 29) {
-                    row.addValue(keys.get(VIA), "Chat");
-                } else if (viaID == 30) {
-                    row.addValue(keys.get(VIA), "Twitter public message");
-                }
-            } catch (NumberFormatException e) {
-                // ignore
-            }*/
-
-            return id;
-        } catch (ReportException re) {
-            throw re;
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-        return null;
     }
 
     private String parseTicket(Map<String, Key> keys, ZendeskUserCache userCache, IRow row, Map ticketNode) throws ParseException, InterruptedException {
