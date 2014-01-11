@@ -5,6 +5,7 @@
         import com.easyinsight.framework.User;
 
         import mx.controls.Alert;
+        import mx.formatters.CurrencyFormatter;
 
         import mx.formatters.DateFormatter;
 
@@ -19,10 +20,11 @@
             if (accountInfo != null) {
                 switch (accountInfo.account.pricingModel) {
                     case (Account.NEW_PRICING):
-                        if(!isNaN(accountInfo.account.nextBillAmount)) {
+                        if(!isNaN(accountInfo.account.nextBillAmount) && accountInfo.account.nextBillAmount > 0) {
                             billAmountVisible = true;
-                            //TODO: Proper formatter
-                            nextBillAmount = accountInfo.account.nextBillAmount.toFixed(2);
+                            var cf:CurrencyFormatter = new CurrencyFormatter();
+                            cf.precision = 0;
+                            nextBillAmount = cf.format(accountInfo.account.nextBillAmount);
                         }
                         break;
                 }
