@@ -16,10 +16,7 @@ import org.json.JSONObject;
 import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -177,6 +174,15 @@ public class RollingFilterDefinition extends FilterDefinition {
                     } else {
                         startDate = null;
                     }
+                    if (startDate != null && !((AnalysisDateDimension) getField()).isTimeshift()) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(startDate);
+                        cal.set(Calendar.HOUR, 0);
+                        cal.set(Calendar.MINUTE, 0);
+                        cal.set(Calendar.SECOND, 0);
+                        cal.set(Calendar.MILLISECOND, 0);
+                        startDate = cal.getTime();
+                    }
                     System.out.println("Start date was calculated to " + startDate);
                     if (interval.isEndDefined()) {
                         Value value = new ReportCalculation(interval.getEndScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
@@ -191,6 +197,16 @@ public class RollingFilterDefinition extends FilterDefinition {
                     } else {
                         endDate = null;
                     }
+                    if (endDate != null && !((AnalysisDateDimension) getField()).isTimeshift()) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(endDate);
+                        cal.set(Calendar.HOUR, 0);
+                        cal.set(Calendar.MINUTE, 0);
+                        cal.set(Calendar.SECOND, 0);
+                        cal.set(Calendar.MILLISECOND, 0);
+                        endDate = cal.getTime();
+                    }
+                    System.out.println("End date was calculated to " + startDate);
                 }
             }
         } catch (RecognitionException e) {
