@@ -29,17 +29,19 @@ public class DayOfYear extends Function {
         }
         if (startDate != null) {
             Calendar calendar = Calendar.getInstance();
-            /*int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
-            String string;
-            if (time > 0) {
-                string = "GMT-"+Math.abs(time);
-            } else if (time < 0) {
-                string = "GMT+"+Math.abs(time);
-            } else {
-                string = "GMT";
+            if (calculationMetadata != null && calculationMetadata.isFilterTimeShift()) {
+                int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
+                String string;
+                if (time > 0) {
+                    string = "GMT-"+Math.abs(time);
+                } else if (time < 0) {
+                    string = "GMT+"+Math.abs(time);
+                } else {
+                    string = "GMT";
+                }
+                TimeZone timeZone = TimeZone.getTimeZone(string);
+                calendar.setTimeZone(timeZone);
             }
-            TimeZone timeZone = TimeZone.getTimeZone(string);
-            calendar.setTimeZone(timeZone);*/
             calendar.setTimeInMillis(startDate.getTime());
             //return new NumericValue(calendar.get(Calendar.DAY_OF_YEAR));
             if (params.size() == 2) {

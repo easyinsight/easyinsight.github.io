@@ -289,9 +289,10 @@ public class ReportCalculation {
     }
 
     public Value filterApply(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
-                      Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) throws RecognitionException {
+                      Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata, boolean shift) throws RecognitionException {
         //DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
         CalculationMetadata calculationMetadata = new CalculationMetadata();
+        calculationMetadata.setFilterTimeShift(shift);
         calculationMetadata.setFeed(feed);
         calculationMetadata.setReport(report);
         calculationMetadata.setInsightRequestMetadata(insightRequestMetadata);
