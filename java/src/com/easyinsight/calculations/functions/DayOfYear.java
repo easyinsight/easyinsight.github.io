@@ -29,7 +29,7 @@ public class DayOfYear extends Function {
         }
         if (startDate != null) {
             Calendar calendar = Calendar.getInstance();
-            int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
+            /*int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
             String string;
             if (time > 0) {
                 string = "GMT-"+Math.abs(time);
@@ -39,7 +39,7 @@ public class DayOfYear extends Function {
                 string = "GMT";
             }
             TimeZone timeZone = TimeZone.getTimeZone(string);
-            calendar.setTimeZone(timeZone);
+            calendar.setTimeZone(timeZone);*/
             calendar.setTimeInMillis(startDate.getTime());
             //return new NumericValue(calendar.get(Calendar.DAY_OF_YEAR));
             if (params.size() == 2) {
