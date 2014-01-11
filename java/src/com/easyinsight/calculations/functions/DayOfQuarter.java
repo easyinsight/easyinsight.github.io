@@ -32,7 +32,7 @@ public class DayOfQuarter extends Function {
         if (startDate != null) {
             Calendar cal = Calendar.getInstance();
             int today = cal.get(Calendar.DAY_OF_YEAR);
-            int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
+            /*int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
             String string;
             if (time > 0) {
                 string = "GMT-"+Math.abs(time);
@@ -42,7 +42,7 @@ public class DayOfQuarter extends Function {
                 string = "GMT";
             }
             TimeZone timeZone = TimeZone.getTimeZone(string);
-            cal.setTimeZone(timeZone);
+            cal.setTimeZone(timeZone);*/
             cal.setTimeInMillis(startDate.getTime());
 
 
