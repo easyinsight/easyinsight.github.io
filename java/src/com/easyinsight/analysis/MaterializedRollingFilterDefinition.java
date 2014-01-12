@@ -55,8 +55,8 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             endDate = endDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
             limitDate = limitDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
         }
-        System.out.println("Materialized using start date " + new Date(limitDate));
-        System.out.println("Materialized using end date " + new Date(endDate));
+        /*System.out.println("Materialized using start date " + new Date(limitDate));
+        System.out.println("Materialized using end date " + new Date(endDate));*/
         if (rollingFilterDefinition.getInterval() > ALL) {
             if (rollingFilterDefinition.getStartDate() != null && rollingFilterDefinition.getEndDate() == null) {
                 mode = RollingFilterDefinition.AFTER;
