@@ -55,6 +55,8 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             endDate = endDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
             limitDate = limitDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
         }
+        /*System.out.println("Materialized using start date " + new Date(limitDate));
+        System.out.println("Materialized using end date " + new Date(endDate));*/
         if (rollingFilterDefinition.getInterval() > ALL) {
             if (rollingFilterDefinition.getStartDate() != null && rollingFilterDefinition.getEndDate() == null) {
                 mode = RollingFilterDefinition.AFTER;
@@ -79,7 +81,9 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         if (!(rollingFilterDefinition.getField() instanceof AnalysisDateDimension)) {
             throw new RuntimeException("Report attempted to run a rolling filter on field " + rollingFilterDefinition.getField().toDisplay() + " - " + rollingFilterDefinition.getField().getAnalysisItemID());
         }
+        System.out.println("looking for start date");
         if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
+            System.out.println("\tTime shifting...");
             int time = insightRequestMetadata.getUtcOffset() / 60;
             String string;
             if (time > 0) {
@@ -152,7 +156,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 cal.set(Calendar.MINUTE, 0);
                 cal.set(Calendar.SECOND, 0);
                 cal.set(Calendar.MILLISECOND, 0);
-                cal.set(Calendar.DAY_OF_YEAR, 0);
+                cal.set(Calendar.DAY_OF_YEAR, 1);
                 break;
             case DAY:
                 cal.setTimeInMillis(cal.getTimeInMillis() - (60 * 60 * 1000 * 24));
