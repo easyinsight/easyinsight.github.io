@@ -40,6 +40,8 @@
             dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
             dashboard = new DashboardService().getDashboard(dashboardID);
         }
+        String showToolbarString = request.getParameter("showToolbar");
+        boolean showToolbar = showToolbarString != null && "1".equals(showToolbarString);
         dashboard.getFilters().addAll(drillthroughFilters);
         FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, true);
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
@@ -74,6 +76,7 @@
     <script type="text/javascript" src="/js/dashboard.js"></script>
 </head>
 <body>
+<% if (showToolbar) { %>
 <div class="nav nav-pills reportNav">
     <div class="container">
         <div class="col-md-12">
@@ -105,6 +108,7 @@
         </div>
     </div>
 </div>
+<% } %>
 
 <div class="container">
     <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>
