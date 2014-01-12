@@ -203,7 +203,6 @@ public class RollingFilterDefinition extends FilterDefinition {
                         cal.setTimeZone(timeZone);
                         startDate = cal.getTime();
                     }
-                    System.out.println("Start date was calculated to " + startDate);
                     if (interval.isEndDefined()) {
                         Value value = new ReportCalculation(interval.getEndScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata,
                                 ((AnalysisDateDimension) getField()).isTimeshift());
@@ -246,7 +245,6 @@ public class RollingFilterDefinition extends FilterDefinition {
                         cal.setTimeZone(timeZone);
                         endDate = cal.getTime();
                     }
-                    System.out.println("End date was calculated to " + endDate);
                 }
             }
         } catch (RecognitionException e) {
