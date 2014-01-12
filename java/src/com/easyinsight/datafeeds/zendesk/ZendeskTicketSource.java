@@ -250,16 +250,20 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                         Map ticketDetail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + ".json", zendeskCompositeSource, httpClient);
 
                         Map detailObject = (Map) ticketDetail.get("ticket");
-                        List customFields = (List) detailObject.get("custom_fields");
-                        for (Object cFieldObj : customFields) {
-                            Map customFieldMap = (Map) cFieldObj;
-                            String fieldID = customFieldMap.get("id").toString();
+                        if (detailObject != null) {
+                            List customFields = (List) detailObject.get("custom_fields");
+                            if (customFields != null) {
+                                for (Object cFieldObj : customFields) {
+                                    Map customFieldMap = (Map) cFieldObj;
+                                    String fieldID = customFieldMap.get("id").toString();
 
-                            Object fieldValueObject = customFieldMap.get("value");
-                            if (fieldValueObject != null) {
-                                Key key = keys.get("zd" + fieldID);
-                                if (key != null) {
-                                    row.addValue(key, fieldValueObject.toString());
+                                    Object fieldValueObject = customFieldMap.get("value");
+                                    if (fieldValueObject != null) {
+                                        Key key = keys.get("zd" + fieldID);
+                                        if (key != null) {
+                                            row.addValue(key, fieldValueObject.toString());
+                                        }
+                                    }
                                 }
                             }
                         }

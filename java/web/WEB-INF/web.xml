@@ -349,6 +349,12 @@
         <servlet-class>com.easyinsight.export.EmailServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>GetDataSource</servlet-name>
+        <display-name>GetDataSource</display-name>
+        <servlet-class>com.easyinsight.api.v3.GetDataSourceServlet</servlet-class>
+    </servlet>
+
     <!--<servlet>
         <servlet-name>ReportImage</servlet-name>
         <display-name>ReportImage</display-name>
@@ -762,6 +768,11 @@
     <servlet-mapping>
         <servlet-name>ListDataSourcesByTag</servlet-name>
         <url-pattern>/json/listDataSourcesByTag</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>GetDataSource</servlet-name>
+        <url-pattern>/json/GetDataSource</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
