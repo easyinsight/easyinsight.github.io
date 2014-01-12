@@ -37,7 +37,6 @@ public abstract class Batchbook2BaseSource extends ServerDataSourceDefinition {
         String url = parentDefinition.getUrl() + "/api/v1";
         String blah = url + path + (path.contains("?") ? "&" : "?") + "auth_token=" + parentDefinition.getToken();
         HttpMethod restMethod = new GetMethod(blah);
-        System.out.println(blah);
         restMethod.setRequestHeader("Accept", "application/json");
         restMethod.setRequestHeader("Content-Type", "application/json");
 
@@ -48,7 +47,6 @@ public abstract class Batchbook2BaseSource extends ServerDataSourceDefinition {
             } else if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
             }
-            System.out.println(restMethod.getResponseBodyAsString());
             return (Map) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
         } catch (ReportException re) {
             throw re;

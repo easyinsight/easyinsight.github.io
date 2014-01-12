@@ -30,8 +30,19 @@ public class CalculationMetadata {
     private InsightRequestMetadata insightRequestMetadata;
     private FeedDefinition dataSource;
     private Map<String, ICalculationCache> cacheMap = new HashMap<String, ICalculationCache>();
+    private boolean filterTimeShift;
     private List<IComponent> generatedComponents = new ArrayList<IComponent>();
     private Calendar calendar = Calendar.getInstance();
+
+    private List<String> warnings = new ArrayList<String>();
+
+    public boolean isFilterTimeShift() {
+        return filterTimeShift;
+    }
+
+    public void setFilterTimeShift(boolean filterTimeShift) {
+        this.filterTimeShift = filterTimeShift;
+    }
 
     public Calendar getCalendar() {
         return calendar;
@@ -49,6 +60,14 @@ public class CalculationMetadata {
             cacheMap.put(key, cache);
         }
         return cache;
+    }
+
+    public void addWarning(String warning) {
+        warnings.add(warning);
+    }
+
+    public List<String> getWarnings() {
+        return warnings;
     }
 
     public Feed getFeed() {

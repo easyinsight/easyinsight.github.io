@@ -130,12 +130,12 @@ public class WSPlotChartDefinition extends WSChartDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
-        includes.add("/js/plugins/jqplot.bubbleRenderer.min.js");
-        includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
-        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
-        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
-        includes.add("/js/visualizations/chart.js");
-        includes.add("/js/visualizations/util.js");
+//        includes.add("/js/plugins/jqplot.bubbleRenderer.min.js");
+//        includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
+//        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
+//        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
+//        includes.add("/js/visualizations/chart.js");
+//        includes.add("/js/visualizations/util.js");
         return includes;
     }
 

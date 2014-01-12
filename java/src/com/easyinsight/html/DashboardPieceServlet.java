@@ -46,7 +46,6 @@ public class DashboardPieceServlet extends HttpServlet {
             response.setContentType("text/html");
             response.setCharacterEncoding("UTF-8");
             String html = element.toHTML(new FilterHTMLMetadata(dashboard, req, drillThroughKey, embedded));
-            System.out.println("Retrieved " + html);
             response.getOutputStream().write(html.getBytes());
             response.getOutputStream().flush();
         } catch (Exception e) {

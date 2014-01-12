@@ -57,7 +57,7 @@ public class SampleCustomerDataSource extends ServerDataSourceDefinition {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         try {
-            for (int i = 0; i < 250000; i++) {
+            for (int i = 0; i < 5000; i++) {
                 IRow row = dataSet.createRow();
                 row.addValue(keys.get(CUSTOMER), String.valueOf(i));
                 row.addValue(keys.get(INDUSTRY), industries[i % industries.length]);

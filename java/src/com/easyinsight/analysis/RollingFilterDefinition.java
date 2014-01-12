@@ -16,10 +16,7 @@ import org.json.JSONObject;
 import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -165,7 +162,8 @@ public class RollingFilterDefinition extends FilterDefinition {
             for (CustomRollingInterval interval : intervals) {
                 if (interval.getIntervalNumber() == this.getInterval()) {
                     if (interval.isStartDefined()) {
-                        Value value = new ReportCalculation(interval.getStartScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                        Value value = new ReportCalculation(interval.getStartScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata,
+                                ((AnalysisDateDimension) getField()).isTimeshift());
                         if (value.type() == Value.DATE) {
                             DateValue dateValue = (DateValue) value;
                             startDate = dateValue.getDate();
@@ -177,8 +175,38 @@ public class RollingFilterDefinition extends FilterDefinition {
                     } else {
                         startDate = null;
                     }
+                    if (startDate != null && !((AnalysisDateDimension) getField()).isTimeshift()) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(startDate);
+                        cal.set(Calendar.HOUR_OF_DAY, 0);
+                        cal.set(Calendar.MINUTE, 0);
+                        cal.set(Calendar.SECOND, 0);
+                        cal.set(Calendar.MILLISECOND, 0);
+                        startDate = cal.getTime();
+                    } else if (startDate != null) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(startDate);
+                        cal.set(Calendar.HOUR_OF_DAY, 0);
+                        cal.set(Calendar.MINUTE, 0);
+                        cal.set(Calendar.SECOND, 0);
+                        cal.set(Calendar.MILLISECOND, 0);
+                        int time = insightRequestMetadata.getUtcOffset() / 60;
+                        String string;
+                        if (time > 0) {
+                            string = "GMT-"+Math.abs(time);
+                        } else if (time < 0) {
+                            string = "GMT+"+Math.abs(time);
+                        } else {
+                            string = "GMT";
+                        }
+                        TimeZone timeZone = TimeZone.getTimeZone(string);
+                        cal.setTimeZone(timeZone);
+                        startDate = cal.getTime();
+                    }
+                    System.out.println("Start date was calculated to " + startDate);
                     if (interval.isEndDefined()) {
-                        Value value = new ReportCalculation(interval.getEndScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                        Value value = new ReportCalculation(interval.getEndScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata,
+                                ((AnalysisDateDimension) getField()).isTimeshift());
                         if (value.type() == Value.DATE) {
                             DateValue dateValue = (DateValue) value;
                             endDate = dateValue.getDate();
@@ -190,6 +218,35 @@ public class RollingFilterDefinition extends FilterDefinition {
                     } else {
                         endDate = null;
                     }
+                    if (endDate != null && !((AnalysisDateDimension) getField()).isTimeshift()) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(endDate);
+                        cal.set(Calendar.HOUR_OF_DAY, 23);
+                        cal.set(Calendar.MINUTE, 59);
+                        cal.set(Calendar.SECOND, 59);
+                        cal.set(Calendar.MILLISECOND, 0);
+                        endDate = cal.getTime();
+                    } else if (endDate != null) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(endDate);
+                        cal.set(Calendar.HOUR_OF_DAY, 23);
+                        cal.set(Calendar.MINUTE, 59);
+                        cal.set(Calendar.SECOND, 59);
+                        cal.set(Calendar.MILLISECOND, 0);
+                        int time = insightRequestMetadata.getUtcOffset() / 60;
+                        String string;
+                        if (time > 0) {
+                            string = "GMT-"+Math.abs(time);
+                        } else if (time < 0) {
+                            string = "GMT+"+Math.abs(time);
+                        } else {
+                            string = "GMT";
+                        }
+                        TimeZone timeZone = TimeZone.getTimeZone(string);
+                        cal.setTimeZone(timeZone);
+                        endDate = cal.getTime();
+                    }
+                    System.out.println("End date was calculated to " + endDate);
                 }
             }
         } catch (RecognitionException e) {

@@ -1245,14 +1245,14 @@ public class AnalysisService {
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             if (startDate != null) {
                 Value value = new ReportCalculation(startDate).filterApply(null, null, new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
-                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata, false);
                 filterDateTest.setStartDate(value.toString());
             } else {
                 filterDateTest.setStartDate("");
             }
             if (endDate != null) {
                 Value value = new ReportCalculation(endDate).filterApply(null, null, new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
-                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata, false);
                 filterDateTest.setEndDate(value.toString());
             } else {
                 filterDateTest.setEndDate("");

@@ -35,7 +35,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     private String zdUserName;
     private String zdPassword;
     private boolean loadComments;
-    private boolean hackMethod = true;
+    private boolean hackMethod = false;
     private String zdApiKey;
 
     public ZendeskCompositeSource() {
@@ -150,7 +150,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         insertStmt.close();
     }
 
-    @Override
+    /*@Override
     protected void beforeRefresh(Date lastRefreshTime) {
         super.beforeRefresh(lastRefreshTime);
         ZendeskUserCache cache = new ZendeskUserCache();
@@ -167,7 +167,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     @Override
     public void customLoad(Connection conn) throws SQLException {
