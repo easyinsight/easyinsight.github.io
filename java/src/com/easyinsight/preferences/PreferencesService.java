@@ -81,10 +81,17 @@ public class PreferencesService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE, USER WHERE USER_IMAGE_ID = ? AND ((USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID) OR (USER_IMAGE.public_visibility = ?))");
+            PreparedStatement queryStmt;
+
+            if(accountID == 0) {
+                queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE WHERE USER_IMAGE_ID = ? AND PUBLIC_VISIBILITY = ?");
+                queryStmt.setBoolean(2, true);
+            } else {
+                queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE, USER WHERE USER_IMAGE_ID = ? AND ((USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID))");
+                queryStmt.setLong(2, accountID);
+            }
             queryStmt.setLong(1, imageID);
-            queryStmt.setLong(2, accountID);
-            queryStmt.setBoolean(3, true);
+
             ResultSet rs = queryStmt.executeQuery();
             if (!rs.next()) {
                 return null;
