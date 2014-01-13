@@ -1,5 +1,6 @@
 package com.easyinsight.users;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +9,7 @@ import java.util.List;
  * Date: 3/8/12
  * Time: 3:27 PM
  */
-public class DataSourceStats {
+public class DataSourceStats implements Serializable {
     private String name;
     private boolean visible;
     private long dataSourceID;
