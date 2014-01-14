@@ -8,6 +8,9 @@
 <%@ page import="org.hibernate.StatelessSession" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.text.NumberFormat" %>
+<%@ page import="java.util.Locale" %>
+<%@ page import="com.easyinsight.export.ExportService" %>
+<%@ page import="com.easyinsight.analysis.AnalysisDateDimension" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -87,7 +90,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-offset-1 col-md10">
-                        You will be charged again on <%= new SimpleDateFormat("MM-dd-yyyy").format(account.getNextBillDate()) %> for <%= NumberFormat.getCurrencyInstance().format(account.getNextBillAmount()) %>.
+                        You will be charged again on <%= ExportService.getDateFormatForAccount(AnalysisDateDimension.DAY_LEVEL, null).format(account.getNextBillDate()) %> for <%= NumberFormat.getCurrencyInstance(Locale.US).format(account.getNextBillAmount()) %>.
                     </div>
                 </div>
                 <% } %>
