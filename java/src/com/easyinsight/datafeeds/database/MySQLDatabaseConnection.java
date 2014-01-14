@@ -3,7 +3,9 @@ package com.easyinsight.datafeeds.database;
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.logging.LogClass;
 
 import java.sql.*;
 import java.text.MessageFormat;
@@ -91,7 +93,10 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
     @Override
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
-
+        if (getCopyingFromSource() > 0) {
+            MySQLDatabaseConnection dataSource = (MySQLDatabaseConnection) new FeedStorage().getFeedDefinitionData(getCopyingFromSource(), conn);
+            setDbPassword(dataSource.getDbPassword());
+        }
         PreparedStatement findPasswordStmt = conn.prepareStatement("SELECT DATABASE_PASSWORD FROM MYSQL_DATABASE_CONNECTION WHERE DATA_SOURCE_ID = ?");
         findPasswordStmt.setLong(1, getDataFeedID());
         ResultSet passwordRS = findPasswordStmt.executeQuery();
@@ -141,7 +146,11 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
             dbUserName = rs.getString(4);
             dbPassword = rs.getString(5);
             if (dbPassword != null && !"".equals(dbPassword)) {
-                dbPassword = PasswordStorage.decryptString(dbPassword);
+                try {
+                    dbPassword = PasswordStorage.decryptString(dbPassword);
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
             }
             setQuery(rs.getString(6));
             setRebuildFields(rs.getBoolean(7));
