@@ -354,7 +354,7 @@ public class ReportCalculation {
     }
 
     public void applyAfterReport(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
-                                 IRow row, EIConnection conn) throws RecognitionException {
+                                 IRow row, Map<String, UniqueKey> namespaceMap) throws RecognitionException {
 
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setReport(report);
@@ -363,7 +363,7 @@ public class ReportCalculation {
             ICalculationTreeVisitor visitor;
             calculationTreeNode = CalculationHelper.createTree(code, false);
 
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(report.getDataFeedID(), report.getAddonReports(), conn));
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), namespaceMap);
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, null, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);

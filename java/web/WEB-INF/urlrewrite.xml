@@ -62,6 +62,11 @@
     </rule>
 
     <rule>
+        <from>^/reportHeader/([0-9]+)$</from>
+        <to>/reportHeader?imageID=$1</to>
+    </rule>
+
+    <rule>
         <from>^/html/report/drillthrough/([A-Za-z0-9]+)$</from>
         <to>/html/report.jsp?drillthroughKey=$1</to>
     </rule>
