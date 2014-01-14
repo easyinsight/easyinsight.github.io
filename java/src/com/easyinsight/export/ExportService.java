@@ -907,10 +907,14 @@ public class ExportService {
             }
             FormattingConfiguration formattingConfiguration = headerItem.getFormattingConfiguration();
             if (formattingConfiguration.getFormattingType() == FormattingConfiguration.CURRENCY) {
-                NumberFormat currencyFormatter = new DecimalFormat(currencySymbol + "###,###.##");
+                String symbolToUse = currencySymbol;
+                if (!pdf && symbolToUse.charAt(0) == 8364) {
+                    symbolToUse = "&euro;";
+                }
+                NumberFormat currencyFormatter = new DecimalFormat("###,###.##");
                 currencyFormatter.setMaximumFractionDigits(analysisMeasure.getPrecision());
                 currencyFormatter.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
-                valueString = currencyFormatter.format(doubleValue);
+                valueString = symbolToUse + currencyFormatter.format(doubleValue);
             } else if (formattingConfiguration.getFormattingType() == FormattingConfiguration.MILLISECONDS) {
                 double absoluteValue = Math.abs(doubleValue);
                 if (absoluteValue < 60000) {
@@ -1018,6 +1022,23 @@ public class ExportService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static @Nullable DateFormat getDateFormatForAccount(int dateLevel, @Nullable String explicitDateFormat) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement accountStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            accountStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = accountStmt.executeQuery();
+            rs.next();
+            int dateFormat = rs.getInt(1);
+            accountStmt.close();
+            return getDateFormatForAccount(dateLevel, explicitDateFormat, dateFormat);
+        } catch (Exception e) {
+            return new SimpleDateFormat("yyyy-MM-dd");
         } finally {
             Database.closeConnection(conn);
         }
@@ -2676,8 +2697,17 @@ public class ExportService {
                                 styleString.append(";color:").append(hexString);
                             }
                             if (textValueExtension.getBackgroundColor() != TextValueExtension.WHITE) {
-                                String hexString = "#" + Integer.toHexString(textValueExtension.getBackgroundColor());
+                                String hexString = Integer.toHexString(textValueExtension.getBackgroundColor());
+                                if (hexString.length() == 4) {
+                                    hexString = "00" + hexString;
+                                } else if (hexString.length() == 2) {
+                                    hexString = "0000" + hexString;
+                                }
+                                hexString = "#" + hexString;
                                 styleString.append(";background-color:").append(hexString);
+                            }
+                            if (textValueExtension.isBold()) {
+                                styleString.append(";font-weight:bold");
                             }
                         }
                         sb.append("<td style=\"").append(styleString.toString()).append("\">");
