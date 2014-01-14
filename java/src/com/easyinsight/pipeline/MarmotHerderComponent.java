@@ -1,6 +1,7 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.calculations.NamespaceGenerator;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.*;
@@ -12,10 +13,18 @@ import java.util.*;
  */
 public class MarmotHerderComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        if (pipelineData.getReport().getReportRunMarmotScript() != null) {
+        if (pipelineData.getReport().getReportRunMarmotScript() != null && !"".equals(pipelineData.getReport().getReportRunMarmotScript())) {
+            Map<String, UniqueKey> namespaceMap = null;
+
             List<AnalysisItem> allItems = new ArrayList<AnalysisItem>(pipelineData.getAllItems());
             if (pipelineData.getReport() != null && pipelineData.getReport().getAddedItems() != null) {
+                if (pipelineData.getConn() != null) {
+                    namespaceMap = new NamespaceGenerator().generate(pipelineData.getReport().getDataFeedID(), pipelineData.getReport().getAddonReports(), pipelineData.getConn());
+                }
                 allItems.addAll(pipelineData.getReport().getAddedItems());
+            }
+            if (namespaceMap == null) {
+                namespaceMap = new HashMap<String, UniqueKey>();
             }
             KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
@@ -25,7 +34,7 @@ public class MarmotHerderComponent implements IComponent {
                 String line = toker.nextToken();
                 for (IRow row : dataSet.getRows()) {
                     try {
-                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), allItems, keyMap, displayMap, row, pipelineData.getConn());
+                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), allItems, keyMap, displayMap, row, namespaceMap);
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {
@@ -33,18 +42,7 @@ public class MarmotHerderComponent implements IComponent {
                     }
                 }
             }
-        }/*
-
-        for (AnalysisItem item : pipelineData.getReportItems()) {
-            if (item.getMarmotScript() != null && !"".equals(item.getMarmotScript().trim())) {
-                StringTokenizer toker = new StringTokenizer(item.getMarmotScript(), "\r\n");
-                while (toker.hasMoreTokens()) {
-                    String line = toker.nextToken();
-                    new FieldDecorationCalculationLogic(item, dataSet).calculate(line, pipelineData.getReport(),
-                            pipelineData.getAllItems());
-                }
-            }
-        }*/
+        }
         return dataSet;
     }
 

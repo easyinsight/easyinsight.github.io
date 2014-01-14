@@ -1,10 +1,8 @@
 <?xml version="1.0" ?>
 <account:AccountFormItem xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
-        label="Next Bill Amount:" visible="{billAmountVisible}">
+        label="Next Bill Date:" visible="{billAmountVisible}">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
-
-        import mx.controls.Alert;
 
         import mx.formatters.DateFormatter;
 
