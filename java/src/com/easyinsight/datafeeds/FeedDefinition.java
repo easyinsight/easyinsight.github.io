@@ -69,6 +69,19 @@ public class FeedDefinition implements Cloneable, Serializable {
     private List<AddonReport> addonReports;
     private boolean fieldCleanupEnabled;
     private boolean fieldLookupEnabled;
+    private long defaultFieldTag;
+
+    public boolean isMigrateRequired() {
+        return true;
+    }
+
+    public long getDefaultFieldTag() {
+        return defaultFieldTag;
+    }
+
+    public void setDefaultFieldTag(long defaultFieldTag) {
+        this.defaultFieldTag = defaultFieldTag;
+    }
 
     public boolean isFieldLookupEnabled() {
         return fieldLookupEnabled;
