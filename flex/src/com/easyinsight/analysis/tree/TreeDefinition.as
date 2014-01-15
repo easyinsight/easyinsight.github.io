@@ -20,6 +20,9 @@ public class TreeDefinition extends AnalysisDefinition{
     public var headerColor2:uint = 0xEFEFEF;
     public var autoExpandAll:Boolean = false;
     public var summaryTotal:Boolean = false;
+    public var headerMode:Boolean = false;
+    public var summaryBackgroundColor:uint;
+    public var summaryTextColor:uint;
 
     public function TreeDefinition() {
         super();

@@ -207,10 +207,12 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("Auto Expand All", "autoExpandAll", TreeDefinition(report).autoExpandAll, report));
             items.addItem(new CheckBoxReportFormItem("Summary Row", "summaryTotal", TreeDefinition(report).summaryTotal, report));
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
+            items.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", TreeDefinition(report).summaryBackgroundColor, report));
+            items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", TreeDefinition(report).summaryTextColor, report));
         }
-        /*if (report is SummaryDefinition) {
-         items.addItem(new TextReportFormItem("Summary Label", "summaryReportLine", SummaryDefinition(report).summaryReportLine, report));
-         }*/
+        if (report is SummaryDefinition) {
+            items.addItem(new CheckBoxReportFormItem("Separate Summary Line", "headerMode", SummaryDefinition(report).headerMode, report));
+        }
         if (report is ChartDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show Legend", "showLegend", ChartDefinition(report).showLegend, report));
             items.addItem(new TextReportFormItem("X Axis Label", "xAxisLabel", ChartDefinition(report).xAxisLabel, report));
@@ -276,6 +278,7 @@ public class StyleConfiguration {
                     ["Linear", "Logarithmic"]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", BarChartDefinition(report).labelPosition,
                     report, ["none", "auto"]));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", BarChartDefinition(report).multiColors, report));
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", BarChartDefinition(report).labelFontSize, report, 8, 48));
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", BarChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
             items.addItem(new ColorReportFormItem("Label Outside Font Color", "labelOutsideFontColor", BarChartDefinition(report).labelOutsideFontColor, report, "useOutsideLabelFontColor"));
@@ -300,9 +303,10 @@ public class StyleConfiguration {
                     ["none", "bold"]));
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", ColumnChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
             items.addItem(new ColorReportFormItem("Label Outside Font Color", "labelOutsideFontColor", ColumnChartDefinition(report).labelOutsideFontColor, report, "useOutsideLabelFontColor"));
-            /*items.addItem(new CheckBoxReportFormItem("Use Color 1", "usePrimaryColor", report.usePrimaryColor, report));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", ColumnChartDefinition(report).multiColors, report));
+            items.addItem(new CheckBoxReportFormItem("Use Color 1", "usePrimaryColor", report.usePrimaryColor, report));
             items.addItem(new CheckBoxReportFormItem("Use Color 2", "useSecondaryColor", report.useSecondaryColor, report));
-            items.addItem(new CheckBoxReportFormItem("Use Color 3", "useTertiaryColor", report.useTertiaryColor, report));*/
+            items.addItem(new CheckBoxReportFormItem("Use Color 3", "useTertiaryColor", report.useTertiaryColor, report));
         }
 
         if (report is StackedBarChartDefinition) {
