@@ -65,6 +65,12 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.INFUSIONSOFT_STAGE);
         types.add(FeedType.INFUSIONSOFT_STAGE_HISTORY);
         types.add(FeedType.INFUSIONSOFT_AFFILIATES);
+
+        types.add(FeedType.INFUSIONSOFT_CAMPAIGNEE);
+        types.add(FeedType.INFUSIONSOFT_CAMPAIGN_STEP);
+        types.add(FeedType.INFUSIONSOFT_REFERRAL);
+        types.add(FeedType.INFUSIONSOFT_TAG_GROUP);
+
         types.add(FeedType.INFUSIONSOFT_COMPANIES);
         types.add(FeedType.INFUSIONSOFT_CONTACTS);
         types.add(FeedType.INFUSIONSOFT_JOBS);
