@@ -311,48 +311,32 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             if (partitionFilter == null) {
                 blah(IDataStorage, conn, report, null, null, false);
             } else if (partitionFilter instanceof FlatDateFilter) {
-                Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID(), conn);
-                AnalysisItemResultMetadata metadata = feed.getMetadata(partitionFilter.getField(), new InsightRequestMetadata(), conn, report, new ArrayList<FilterDefinition>(), null);
-
-                AnalysisDateDimensionResultMetadata yearMetadata = (AnalysisDateDimensionResultMetadata) metadata;
                 FlatDateFilter flatDateFilter = (FlatDateFilter) partitionFilter;
-                Calendar endCal = Calendar.getInstance();
-                endCal.setTime(yearMetadata.getLatestDate());
-                int endYear = endCal.get(Calendar.YEAR);
-                if (endYear > 2014) {
-                    endYear = 2014;
+                int startYear;
+                if (flatDateFilter.getStartYear() != 0) {
+                    startYear = flatDateFilter.getStartYear();
+                    int endYear = 2014;
+                    /*if (endYear > 2014) {
+                        endYear = 2014;
+                    }*/
+                    Calendar cal = Calendar.getInstance();
+
+                    cal.set(Calendar.YEAR, startYear);
+
+                    boolean keepGoing = true;
+                    do {
+                        int year = cal.get(Calendar.YEAR);
+                        if (year > endYear) {
+                            keepGoing = false;
+                        } else {
+                            System.out.println("Generating report for " + year);
+                            flatDateFilter.setValue(year);
+                            Key key = new NamedKey(flatDateFilter.getFilterName() + "cache");
+                            blah(IDataStorage, conn, report, key, String.valueOf(year), lastRefreshDate != null && lastRefreshDate.after(new Date(1000)));
+                            cal.add(Calendar.YEAR, 1);
+                        }
+                    } while (keepGoing);
                 }
-                Calendar cal = Calendar.getInstance();
-                Calendar ph = Calendar.getInstance();
-
-                if (lastRefreshDate != null && lastRefreshDate.getTime() > 10000) {
-                    ph.add(Calendar.YEAR, -1);
-                } else {
-
-                    // bracket things at 1990 at the moment
-
-                    ph.set(Calendar.YEAR, 1990);
-                }
-
-                if (ph.getTime().after(yearMetadata.getEarliestDate())) {
-                    cal.setTime(ph.getTime());
-                } else {
-                    cal.setTime(yearMetadata.getEarliestDate());
-                }
-
-                boolean keepGoing = true;
-                do {
-                    int year = cal.get(Calendar.YEAR);
-                    if (year > endYear) {
-                        keepGoing = false;
-                    } else {
-                        System.out.println("Generating report for " + year);
-                        flatDateFilter.setValue(year);
-                        Key key = new NamedKey(flatDateFilter.getFilterName() + "cache");
-                        blah(IDataStorage, conn, report, key, String.valueOf(year), lastRefreshDate != null && lastRefreshDate.after(new Date(1000)));
-                        cal.add(Calendar.YEAR, 1);
-                    }
-                } while (keepGoing);
             } else if (partitionFilter instanceof FilterValueDefinition) {
 
             }

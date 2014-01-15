@@ -8,14 +8,28 @@
         [Bindable]
         private var showAll:Boolean;
 
+        [Bindable]
+        private var startYear:String;
+
         public function makeUpdates():FilterDefinition {
             lastValueFilter.allOption = showAll;
+            var year:int = int(startYearInput.text);
+            if (year > 1900) {
+                lastValueFilter.startYear = year;
+            } else {
+                lastValueFilter.startYear = 0;
+            }
             return lastValueFilter;
         }
 
         public function set filterDefinition(filterDefinition:FilterDefinition):void {
             lastValueFilter = filterDefinition as FlatDateFilterDefinition;
             showAll = lastValueFilter.allOption;
+            if (lastValueFilter.startYear > 1900) {
+                startYear = String(lastValueFilter.startYear);
+            } else {
+                startYear = "";
+            }
         }
 
         public function set feedID(feedID:int):void {
@@ -27,6 +41,9 @@
     <mx:Form>
         <mx:FormItem label="All Option:">
             <mx:CheckBox id="allCheckbox" selected="{showAll}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Start Year:">
+            <mx:TextInput id="startYearInput" text="{startYear}"/>
         </mx:FormItem>
     </mx:Form>
 </mx:VBox>
