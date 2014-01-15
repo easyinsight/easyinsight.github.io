@@ -2373,8 +2373,14 @@ public class AnalysisService {
 
     public WSAnalysisDefinition openAnalysisDefinition(long analysisID) {
         try {
-            SecurityUtil.authorizeInsight(analysisID);
-            return analysisStorage.getAnalysisDefinition(analysisID);
+            int role = SecurityUtil.authorizeInsight(analysisID);
+            WSAnalysisDefinition report = analysisStorage.getAnalysisDefinition(analysisID);
+            if (role == Roles.SUBSCRIBER) {
+                report.setCanSave(false);
+            } else {
+                report.setCanSave(true);
+            }
+            return report;
         } catch (Exception e) {
             LogClass.error(e);
             return null;
