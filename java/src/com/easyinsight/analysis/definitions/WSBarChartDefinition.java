@@ -5,10 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -29,6 +26,15 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
     private boolean useInsideLabelFontColor;
     private boolean useOutsideLabelFontColor;
     private String labelFontWeight;
+    private List<MultiColor> multiColors = new ArrayList<MultiColor>();
+
+    public List<MultiColor> getMultiColors() {
+        return multiColors;
+    }
+
+    public void setMultiColors(List<MultiColor> multiColors) {
+        this.multiColors = multiColors;
+    }
 
     public int getLabelFontSize() {
         return labelFontSize;
@@ -149,6 +155,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         labelOutsideFontColor = (int) findNumberProperty(properties, "labelOutsideFontColor", 0);
         useInsideLabelFontColor = findBooleanProperty(properties, "useInsideLabelFontColor", false);
         useOutsideLabelFontColor = findBooleanProperty(properties, "useOutsideLabelFontColor", false);
+        multiColors = multiColorProperty(properties, "multiColors");
     }
 
     @Override
@@ -166,6 +173,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         properties.add(new ReportBooleanProperty("useOutsideLabelFontColor", useOutsideLabelFontColor));
         properties.add(new ReportNumericProperty("labelInsideFontColor", labelInsideFontColor));
         properties.add(new ReportNumericProperty("labelOutsideFontColor", labelOutsideFontColor));
+        properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         return properties;
     }
 

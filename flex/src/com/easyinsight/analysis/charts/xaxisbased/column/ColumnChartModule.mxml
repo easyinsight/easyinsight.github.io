@@ -8,6 +8,7 @@
         import com.easyinsight.analysis.AnalysisMeasure;
 
         import com.easyinsight.analysis.ChartDefinition;
+        import com.easyinsight.analysis.MultiColor;
 
         import com.easyinsight.analysis.SortFunctionFactory;
 
@@ -44,6 +45,15 @@
 
         override protected function useGradientColor():Boolean {
             return ColumnChartDefinition(chartDef).gradientColor > 0;
+        }
+
+        override protected function getMultiColors():ArrayCollection {
+            return ColumnChartDefinition(chartDef).multiColors;
+        }
+
+        override protected function useMultiColor():Boolean {
+            var def:ColumnChartDefinition = chartDef as ColumnChartDefinition;
+            return (def.multiColors != null && def.multiColors.length > 0 && MultiColor(def.multiColors.getItemAt(0)).color1StartEnabled);
         }
 
         override protected function getGradientColor():uint {

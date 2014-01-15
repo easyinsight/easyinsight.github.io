@@ -18,6 +18,7 @@
 
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.Link;
+        import com.easyinsight.analysis.MultiColor;
 
         import com.easyinsight.analysis.Value;
         import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartDefinition;
@@ -291,7 +292,17 @@
                         fills = FillProvider.getColors(FillProvider.linearGradients, getAngle());
                     }
                 } else {
-                    fills = [FillProvider.getColor(FillProvider.linearGradients, j, getAngle())];
+                    if (useMultiColor()) {
+                        var colors:Array = [];
+                        for each (var mc:MultiColor in getMultiColors()) {
+                            if (mc.color1StartEnabled) {
+                                colors.push(new SolidColor(mc.color1Start));
+                            }
+                        }
+                        fills = [colors[j % colors.length]];
+                    } else {
+                        fills = [FillProvider.getColor(FillProvider.linearGradients, j, getAngle())];
+                    }
                 }
                 mySeries[j].setStyle("fills", fills);
 
@@ -303,6 +314,14 @@
                 legendItems.push(legendItem);
             }
             return legendItems;
+        }
+
+        protected function getMultiColors():ArrayCollection {
+            return null;
+        }
+
+        protected function useMultiColor():Boolean {
+            return false;
         }
 
         [Bindable]

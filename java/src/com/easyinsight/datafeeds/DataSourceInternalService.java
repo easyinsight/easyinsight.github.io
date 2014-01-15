@@ -57,7 +57,7 @@ public class DataSourceInternalService {
                     metadata = DataStorage.writeConnection(feedDefinition, conn, SecurityUtil.getAccountID(), systemUpdate);
                 }
                 feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
-                int version = metadata.migrate(existingFields, feedDefinition.getFields());
+                int version = metadata.migrate(existingFields, feedDefinition.getFields(), feedDefinition.isMigrateRequired());
                 feedStorage.updateVersion(feedDefinition, version, conn);
                 metadata.commit();
             } else {

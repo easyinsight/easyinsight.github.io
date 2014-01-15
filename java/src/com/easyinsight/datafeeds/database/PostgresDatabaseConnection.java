@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.database;
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedType;
 
 import java.sql.*;
@@ -91,7 +92,10 @@ public class PostgresDatabaseConnection extends ServerDatabaseConnection {
     @Override
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
-
+        if (getCopyingFromSource() > 0) {
+            MySQLDatabaseConnection dataSource = (MySQLDatabaseConnection) new FeedStorage().getFeedDefinitionData(getCopyingFromSource(), conn);
+            setDbPassword(dataSource.getDbPassword());
+        }
         PreparedStatement findPasswordStmt = conn.prepareStatement("SELECT DATABASE_PASSWORD FROM postgres_database_connection WHERE DATA_SOURCE_ID = ?");
         findPasswordStmt.setLong(1, getDataFeedID());
         ResultSet passwordRS = findPasswordStmt.executeQuery();

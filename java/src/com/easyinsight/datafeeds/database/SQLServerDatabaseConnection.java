@@ -5,6 +5,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
@@ -195,7 +196,10 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
     @Override
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
-
+        if (getCopyingFromSource() > 0) {
+            MySQLDatabaseConnection dataSource = (MySQLDatabaseConnection) new FeedStorage().getFeedDefinitionData(getCopyingFromSource(), conn);
+            setDbPassword(dataSource.getDbPassword());
+        }
         PreparedStatement findPasswordStmt = conn.prepareStatement("SELECT DATABASE_PASSWORD FROM SQL_SERVER_DATABASE_CONNECTION WHERE DATA_SOURCE_ID = ?");
         findPasswordStmt.setLong(1, getDataFeedID());
         ResultSet passwordRS = findPasswordStmt.executeQuery();
