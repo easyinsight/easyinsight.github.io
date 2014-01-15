@@ -11,6 +11,7 @@ package com.easyinsight.groups
         public static const VIEWER:int = 3;
 
 		public var role:int;
+        public var selected:Boolean;
 		
 		public function GroupUser()
 		{

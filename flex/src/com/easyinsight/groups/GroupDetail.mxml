@@ -80,9 +80,8 @@
         }
 
         public function gotFocus():void {
-            ProgressAlert.alert(this, "Retrieving group data...", null, groupService.getGroup, groupService.getGroupMessages);
+            ProgressAlert.alert(this, "Retrieving group data...", null, groupService.getGroup);
             groupService.getGroup.send(groupID);
-            groupService.getGroupMessages.send(groupID, null, null);
             groupData.gotFocus();
         }
 
@@ -145,7 +144,7 @@
         <mx:method name="removeDashboardFromGroup" result="removed()"/>
         <mx:method name="removeScorecardFromGroup" result="removed()"/>
     </mx:RemoteObject>
-    <mx:VBox width="800" height="400" id="primaryCanvas" paddingTop="10" paddingLeft="10" paddingRight="10"
+    <mx:VBox width="800" height="500" id="primaryCanvas" paddingTop="10" paddingLeft="10" paddingRight="10"
              paddingBottom="10" horizontalAlign="center">
             <mx:ToggleButtonBar id="buttonBar" itemClick="blah()" buttonStyleName="grayButton">
                 <mx:dataProvider>

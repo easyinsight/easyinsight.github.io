@@ -8,7 +8,6 @@ import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
-import com.easyinsight.audit.AuditMessage;
 import com.easyinsight.users.Account;
 
 import java.sql.PreparedStatement;
@@ -103,48 +102,7 @@ public class GroupService {
         SecurityUtil.authorizeAccountTier(Account.BASIC);
         long userID = SecurityUtil.getUserID();
         try {
-            return groupStorage.addGroup(group, userID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public long addGroupComment(GroupComment groupComment) {
-        SecurityUtil.authorizeGroup(groupComment.getGroupID(), Roles.SUBSCRIBER);
-        try {
-            groupComment.setUserID(SecurityUtil.getUserID());
-            return groupStorage.addGroupComment(groupComment);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<AuditMessage> getGroupMessagesForUser(Date startDate, Date endDate) {
-        List<AuditMessage> messages = new ArrayList<AuditMessage>();
-        try {
-            List<GroupDescriptor> groups = getMemberGroups();
-            for (GroupDescriptor groupDescriptor : groups) {
-                messages.addAll(getGroupMessages(groupDescriptor.getGroupID(), startDate, endDate));
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-        return messages;        
-    }
-
-    public List<AuditMessage> getGroupMessages(long groupID, Date startDate, Date endDate) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
-        try {
-            if (startDate == null) {
-                startDate = new Date(0);
-            }
-            if (endDate == null) {
-                endDate = new Date();
-            }
-            return groupStorage.getGroupMessages(groupID, startDate, endDate, 0);
+            return groupStorage.addGroup(group, userID, SecurityUtil.getAccountID());
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -167,7 +125,6 @@ public class GroupService {
         try {
             conn.setAutoCommit(false);
             groupStorage.updateGroup(group, conn);
-            groupStorage.addGroupAudit(new GroupAuditMessage(SecurityUtil.getUserID(), new Date(), "Group updated", group.getGroupID(), null), conn);
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -264,6 +221,16 @@ public class GroupService {
         }
     }
 
+    public void removeTagFromGroup(long tagID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        try {
+            groupStorage.removeTagFromGroup(tagID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void removeDashboardFromGroup(long dashboardID, long groupID) {
         SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
         try {
@@ -278,16 +245,6 @@ public class GroupService {
         SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
         try {
             groupStorage.removeScorecardFromGroup(scorecardID, groupID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void removeGoalTreeFromGroup(long goalTreeID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
-        try {
-            groupStorage.removeGoalTreeFromGroup(goalTreeID, groupID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -316,6 +273,16 @@ public class GroupService {
         SecurityUtil.authorizeInsight(insightID);
         try {
             groupStorage.addReportToGroup(insightID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addTagToGroup(long tagID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
+        try {
+            groupStorage.addReportToGroup(tagID, groupID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
