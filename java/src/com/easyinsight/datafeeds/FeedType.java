@@ -233,6 +233,12 @@ public class FeedType implements Serializable {
     public static final FeedType GITHUB_STAT = new FeedType(205);
     public static final FeedType INFUSIONSOFT_TAG = new FeedType(206);
     public static final FeedType INFUSIONSOFT_CONTACT_TO_TAG = new FeedType(207);
+    public static final FeedType FRESHDESK_COMPOSITE = new FeedType(208);
+    public static final FeedType FRESHDESK_TICKET = new FeedType(209);
+    public static final FeedType INFUSIONSOFT_CAMPAIGNEE = new FeedType(210);
+    public static final FeedType INFUSIONSOFT_CAMPAIGN_STEP = new FeedType(211);
+    public static final FeedType INFUSIONSOFT_REFERRAL = new FeedType(212);
+    public static final FeedType INFUSIONSOFT_TAG_GROUP = new FeedType(213);
 
     public FeedType() {
     }

@@ -15,6 +15,8 @@ import com.easyinsight.datafeeds.constantcontact.*;
 import com.easyinsight.datafeeds.database.*;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.freshbooks.*;
+import com.easyinsight.datafeeds.freshdesk.FreshdeskCompositeSource;
+import com.easyinsight.datafeeds.freshdesk.FreshdeskTicketSource;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
 import com.easyinsight.datafeeds.github.GithubCompositeSource;
 import com.easyinsight.datafeeds.github.GithubRepositorySource;
@@ -340,6 +342,12 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.GITHUB_COMPOSITE, GithubCompositeSource.class);
         registerType(FeedType.INFUSIONSOFT_TAG, InfusionsoftTagSource.class);
         registerType(FeedType.INFUSIONSOFT_CONTACT_TO_TAG, InfusionsoftContactToTag.class);
+        registerType(FeedType.FRESHDESK_COMPOSITE, FreshdeskCompositeSource.class);
+        registerType(FeedType.FRESHDESK_TICKET, FreshdeskTicketSource.class);
+        registerType(FeedType.INFUSIONSOFT_REFERRAL, InfusionsoftReferralSource.class);
+        registerType(FeedType.INFUSIONSOFT_CAMPAIGNEE, InfusionsoftCampaigneeSource.class);
+        registerType(FeedType.INFUSIONSOFT_CAMPAIGN_STEP, InfusionsoftCampaignStep.class);
+        registerType(FeedType.INFUSIONSOFT_TAG_GROUP, InfusionsoftContactGroupCategorySource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
