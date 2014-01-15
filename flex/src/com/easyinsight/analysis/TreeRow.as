@@ -15,10 +15,18 @@ public class TreeRow {
     public var values:Object;
     public var children:ArrayCollection;
     public var groupingColumn:Value;
+    public var sortColumn:Value;
     public var groupingField:AnalysisItem;
     public var summaryColumn:Boolean;
 
     public function TreeRow() {
+    }
+
+    public function sortValue():Value {
+        if (sortColumn != null) {
+            return sortColumn;
+        }
+        return groupingColumn;
     }
 }
 }
