@@ -539,8 +539,12 @@ public class ExportService {
         CrosstabValue[][] values = crosstab.toTable(crosstabDefinition, insightRequestMetadata, conn);
         StringBuilder sb = new StringBuilder();
         AnalysisMeasure measure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
-        String headerCell = "background: #" + Integer.toHexString(crosstabDefinition.getHeaderBackgroundColor()) + ";color: #" + Integer.toHexString(crosstabDefinition.getHeaderTextColor()) + ";" + tdStyle + "left";
-        String summaryCell = "background: #" + Integer.toHexString(crosstabDefinition.getSummaryBackgroundColor()) + ";color: #" + Integer.toHexString(crosstabDefinition.getSummaryTextColor()) + ";" + tdStyle + "right";
+        String headerBackgroundColor = createHexString(crosstabDefinition.getHeaderBackgroundColor());
+        String headerTextColor = createHexString(crosstabDefinition.getHeaderTextColor());
+        String summaryBackgroundColor = createHexString(crosstabDefinition.getSummaryBackgroundColor());
+        String summaryTextColor = createHexString(crosstabDefinition.getSummaryTextColor());
+        String headerCell = "background: " + headerBackgroundColor + ";color: " + headerTextColor + ";" + tdStyle + "left";
+        String summaryCell = "background: " + summaryBackgroundColor + ";color: " + summaryTextColor + ";" + tdStyle + "right";
         String dataCell = tdStyle + "right";
         if (includeTitle && analysisDefinition.getName() != null) {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(analysisDefinition.getName()).append("</h0>").append("</div>");
@@ -2693,17 +2697,11 @@ public class ExportService {
                         if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
                             TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
                             if (textValueExtension.getColor() != 0) {
-                                String hexString = "#" + Integer.toHexString(textValueExtension.getColor());
+                                String hexString = createHexString(textValueExtension.getColor());
                                 styleString.append(";color:").append(hexString);
                             }
                             if (textValueExtension.getBackgroundColor() != TextValueExtension.WHITE) {
-                                String hexString = Integer.toHexString(textValueExtension.getBackgroundColor());
-                                if (hexString.length() == 4) {
-                                    hexString = "00" + hexString;
-                                } else if (hexString.length() == 2) {
-                                    hexString = "0000" + hexString;
-                                }
-                                hexString = "#" + hexString;
+                                String hexString = createHexString(textValueExtension.getBackgroundColor());
                                 styleString.append(";background-color:").append(hexString);
                             }
                             if (textValueExtension.isBold()) {
@@ -2833,6 +2831,16 @@ public class ExportService {
         return sb.toString();
     }
 
+    public static String createHexString(int color) {
+        String hexString = Integer.toHexString(color);
+        if (hexString.length() == 4) {
+            hexString = "00" + hexString;
+        } else if (hexString.length() == 2) {
+            hexString = "0000" + hexString;
+        }
+        return "#" + hexString;
+    }
+
     public static String dataSetToHTMLTable(Collection<AnalysisItem> fields, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
 
         try {
@@ -2878,7 +2886,7 @@ public class ExportService {
                     if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
                         TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
                         if (textValueExtension.getColor() != 0) {
-                            String hexString = "#" + Integer.toHexString(textValueExtension.getColor());
+                            String hexString = createHexString(textValueExtension.getColor());
                             styleString.append(";color:").append(hexString);
                         }
                     }
