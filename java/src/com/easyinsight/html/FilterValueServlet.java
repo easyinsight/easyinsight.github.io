@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -40,14 +42,24 @@ public class FilterValueServlet extends HttpServlet {
                     long id = filterID;
                     EIConnection conn = Database.instance().getConnection();
                     Session s = Database.instance().createSession(conn);
+                    JSONArray filters = (JSONArray) filterObject.get("parents");
+                    List<FilterDefinition> adjustedFilters = new ArrayList<FilterDefinition>();
+                    for(Object o : filters) {
+                        JSONObject filterObj = (JSONObject) o;
+                        long curID = Long.valueOf((Integer) filterObj.get("id"));
+                        FilterDefinition f = (FilterDefinition) s.createQuery("from FilterDefinition where filterID = ?").setLong(0, curID).list().get(0);
+                        FilterUtils.adjustFilter("Filter", false, f, filterObj);
+                        adjustedFilters.add(f);
+                    }
+
                     FilterDefinition f = (FilterDefinition) s.createQuery("from FilterDefinition where filterID = ?").setLong(0, id).list().get(0);
                     if (f instanceof FilterValueDefinition) {
-                        AnalysisItemResultMetadata result = new DataService().getAnalysisItemMetadataForFilter(id, offset);
+                        AnalysisItemResultMetadata result = new DataService().getAnalysisItemMetadataForFilter(id, adjustedFilters, offset);
                         AnalysisDimensionResultMetadata dimensionMetadata = (AnalysisDimensionResultMetadata) result;
                         JSONArray ja = new JSONArray();
                         for (Value v : dimensionMetadata.getValues()) {
                             if (v != null)
-                                ja.add(v.toString());
+                                ja.add(FilterUtils.toFilterString(v));
                         }
                         JSONObject jo = new JSONObject();
                         jo.put("values", ja);

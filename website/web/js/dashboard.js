@@ -635,7 +635,7 @@ $(function () {
                     data: JSON.stringify(curFilterInfo),
                     type: "POST"
                 }
-                if(f.error) {
+                if(f.error || (ff.parent_filters && ff.parent_filters.length > 0)) {
                     $(".loading-bar", e.target).show();
                     $.ajax($.extend(postData, { success: function(d) {
                         $(".loading-bar", e.target).hide();
