@@ -75,7 +75,7 @@
         }
 
         private function onMouseDown(event:MouseEvent):void {
-            var result:Boolean = hitTestPoint(event.localX, event.localY);
+            var result:Boolean = hitTestPoint(event.stageX, event.stageY);
             if (!result) {
                 if (autoCompleteManager.hasDropdown(searchInput)) {
                     var uiComp:UIComponent = autoCompleteManager.getDropdownForTarget(searchInput);
