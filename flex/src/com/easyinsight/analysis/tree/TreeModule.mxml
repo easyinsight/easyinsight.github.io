@@ -13,13 +13,10 @@
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.AggregationTypes;
-        import com.easyinsight.analysis.AnalysisCellRenderer;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisHierarchyItem;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemTypes;
-        import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.DateValue;
         import com.easyinsight.analysis.DerivedAnalysisDimension;
@@ -32,7 +29,6 @@
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.StringValue;
         import com.easyinsight.analysis.SummaryCellRenderer;
-        import com.easyinsight.analysis.TextCellRenderer;
         import com.easyinsight.analysis.TextReportFieldExtension;
         import com.easyinsight.analysis.TreeRow;
         import com.easyinsight.analysis.TreeTextCellRenderer;
@@ -44,16 +40,11 @@
 
 
         import mx.collections.ArrayCollection;
-        import mx.collections.Grouping;
-        import mx.collections.GroupingCollection;
-        import mx.collections.GroupingField;
         import mx.collections.HierarchicalCollectionView;
         import mx.collections.HierarchicalData;
         import mx.collections.ICollectionView;
         import mx.collections.Sort;
         import mx.collections.SortField;
-        import mx.collections.SummaryField;
-        import mx.collections.SummaryRow;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridRendererProvider;
         import mx.controls.advancedDataGridClasses.SortInfo;
@@ -241,7 +232,7 @@
                     }
                     columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);
                     columnHeaderObject.headerText = myHeader.display;
-                    columnHeaderObject.dataField = "groupingColumn";
+                    columnHeaderObject.dataField = myHeader.qualifiedName();
                     var headerFactory:ClassFactory = new ClassFactory(ListViewHeaderRenderer);
                     headerFactory.properties = { eiColor: treeDefinition.headerTextColor };
                     columnHeaderObject.headerRenderer = headerFactory;
@@ -297,7 +288,7 @@
             var view:ICollectionView = ICollectionView(coreGrid.dataProvider);
             var sort:Sort = view.sort;
             if (sort == null) {
-                return ObjectUtil.compare(treeRow1.groupingColumn.getValue(), treeRow2.groupingColumn.getValue());
+                return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
             }
             var fields:Array = sort.fields;
 
@@ -313,11 +304,11 @@
                     } else if (treeRow2.summaryColumn) {
                         return num;
                     } else {
-                        return ObjectUtil.compare(treeRow1.groupingColumn.getValue(), treeRow2.groupingColumn.getValue());
+                        return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
                     }
                 }
             }
-            return ObjectUtil.compare(treeRow1.groupingColumn.getValue(), treeRow2.groupingColumn.getValue());
+            return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
 
 
         }
