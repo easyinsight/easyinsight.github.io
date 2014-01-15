@@ -1897,6 +1897,15 @@ public class AnalysisService {
             session.flush();
             session.close();
             reportID = clone.getAnalysisID();
+        } catch (ReportException re) {
+            if (re.getReportFault() != null && re.getReportFault() instanceof AnalysisItemFault) {
+                AnalysisItemFault analysisItemFault = (AnalysisItemFault) re.getReportFault();
+                LogClass.error(analysisItemFault.getMessage(), re);
+            } else {
+                LogClass.error(re);
+            }
+            conn.rollback();
+            throw re;
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -2140,6 +2149,27 @@ public class AnalysisService {
         long userID = SecurityUtil.getUserID();
         if (wsAnalysisDefinition.getAnalysisID() > 0) {
             SecurityUtil.authorizeInsight(wsAnalysisDefinition.getAnalysisID());
+        }
+        try {
+            Map<Long, AnalysisItem> dupeMap = new HashMap<Long, AnalysisItem>();
+            for (JoinOverride joinOverride : wsAnalysisDefinition.getJoinOverrides()) {
+                if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getAnalysisItemID() > 0) {
+                    dupeMap.put(joinOverride.getSourceItem().getAnalysisItemID(), joinOverride.getSourceItem());
+                }
+                if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getAnalysisItemID() > 0) {
+                    dupeMap.put(joinOverride.getTargetItem().getAnalysisItemID(), joinOverride.getTargetItem());
+                }
+            }
+            for (JoinOverride joinOverride : wsAnalysisDefinition.getJoinOverrides()) {
+                if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getAnalysisItemID() > 0) {
+                    joinOverride.setSourceItem(dupeMap.get(joinOverride.getSourceItem().getAnalysisItemID()));
+                }
+                if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getAnalysisItemID() > 0) {
+                    joinOverride.setTargetItem(dupeMap.get(joinOverride.getTargetItem().getAnalysisItemID()));
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
         }
         long reportID;
         EIConnection conn = Database.instance().getConnection();
