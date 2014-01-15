@@ -599,6 +599,9 @@
 
                 } else {
                     //this.title = analysisDefinition.name;
+                    if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
+                        saveAllowed = false;
+                    }
                     if (analysisDefinition.addonReports != null && analysisDefinition.addonReports.length > 0) {
                         coreDataService.multiAddonFields.send(analysisDefinition);
                     }
@@ -931,7 +934,7 @@
                     dispatchEvent(new AnalysisCloseEvent(feedMetadata.urlKey));
                 });
             } else {
-                dispatchEvent(new AnalysisCloseEvent(feedMetadata.urlKey));
+                dispatchEvent(new AnalysisCloseEvent(feedMetadata != null ? feedMetadata.urlKey : null));
             }
         }
 
@@ -1361,6 +1364,9 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
+        [Bindable]
+        private var saveAllowed:Boolean = true;
         ]]>
     </mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
@@ -1381,7 +1387,7 @@
         <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
                    toolTip="Close" labelPlacement="right" label="Close Editor" x="10" styleName="grayButton"/>
         <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
-                   toolTip="Save" enabled="{!_previewMode &amp;&amp; !loadingReport}" label="Save"
+                   toolTip="Save" enabled="{!_previewMode &amp;&amp; !loadingReport &amp;&amp; saveAllowed}" label="Save"
                    labelPlacement="right" styleName="grayButton"/>
         <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
                    toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !loadingReport}" label="Save As"
