@@ -55,6 +55,7 @@ public class UserServiceResponse
     public var accountOverSize:Boolean;
     public var tagsAndCopyEnabled:Boolean;
     public var hourlyRefreshEnabled:Boolean;
+    public var accountReports:Boolean;
 
     public function UserServiceResponse()
         {
