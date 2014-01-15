@@ -316,9 +316,6 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 if (flatDateFilter.getStartYear() != 0) {
                     startYear = flatDateFilter.getStartYear();
                     int endYear = 2014;
-                    /*if (endYear > 2014) {
-                        endYear = 2014;
-                    }*/
                     Calendar cal = Calendar.getInstance();
 
                     cal.set(Calendar.YEAR, startYear);
