@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
+import com.easyinsight.html.FilterUtils;
 import com.easyinsight.servlet.SystemSettings;
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -528,19 +529,8 @@ public class FilterValueDefinition extends FilterDefinition {
             jo.put("type", "single");
             List<String> stringList = new ArrayList<String>();
             for (Value value : dimensionMetadata.getValues()) {
-                String valueString;
-                if (value.type() == Value.NUMBER) {
-                    int intValue = value.toDouble().intValue();
-                    double doubleValue = value.toDouble().doubleValue();
-                    if (intValue == doubleValue) {
-                        valueString = String.valueOf(intValue);
-                    } else {
-                        valueString = value.toHTMLString();
-                    }
-                } else {
-                    valueString = value.toHTMLString();
-                }
-                stringList.add(valueString);
+
+                stringList.add(FilterUtils.toFilterString(value));
             }
             Collections.sort(stringList);
             if (isAllOption()) {
@@ -566,7 +556,7 @@ public class FilterValueDefinition extends FilterDefinition {
 
             List<String> stringList = new ArrayList<String>();
             for (Value value : dimensionMetadata.getValues()) {
-                stringList.add(value.toHTMLString());
+                stringList.add(FilterUtils.toFilterString(value));
             }
             Collections.sort(stringList);
             if (isAllOption()) {
@@ -579,6 +569,9 @@ public class FilterValueDefinition extends FilterDefinition {
             if(stringList.size() > 100) {
                 jo.put("values", new JSONArray());
                 jo.put("error", "Too many values, please refine your search.");
+            } else if(getParentFilters() != null && !getParentFilters().isEmpty()) {
+                jo.put("values", new JSONArray());
+                jo.put("error", "Loading...");
             } else {
                 JSONArray arr = new JSONArray(stringList);
                 jo.put("values", arr);
@@ -591,8 +584,11 @@ public class FilterValueDefinition extends FilterDefinition {
             }
 
             jo.put("selected", existingChoices);
-
-
+            if(getParentFilters() != null && !getParentFilters().isEmpty()) {
+                String[] parentFilters = getParentFilters().split(",");
+                jo.put("parents", new JSONArray(parentFilters));
+            }
+            jo.put("name", getFilterName());
         }
         return jo;
     }

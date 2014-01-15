@@ -1,6 +1,7 @@
 package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.Value;
 import com.easyinsight.dashboard.DashboardInfo;
 import com.easyinsight.dashboard.FilterPositionKey;
 import com.easyinsight.dashboard.SavedConfiguration;
@@ -206,5 +207,21 @@ public class FilterUtils {
         } else {
             throw new ReportNotFoundException("Report not found.");
         }
+    }
+
+    public static String toFilterString(Value value) {
+        String valueString;
+        if (value.type() == Value.NUMBER) {
+            int intValue = value.toDouble().intValue();
+            double doubleValue = value.toDouble().doubleValue();
+            if (intValue == doubleValue) {
+                valueString = String.valueOf(intValue);
+            } else {
+                valueString = value.toHTMLString();
+            }
+        } else {
+            valueString = value.toHTMLString();
+        }
+        return valueString;
     }
 }

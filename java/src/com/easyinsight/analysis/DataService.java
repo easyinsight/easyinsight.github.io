@@ -271,7 +271,7 @@ public class DataService {
         return getAnalysisItemMetadata(feedID, analysisItem, utfOffset, reportID, dashboardID, report, additionalFilters, requester, null);
     }
 
-    public AnalysisItemResultMetadata getAnalysisItemMetadataForFilter(long filterID, int utcOffset) {
+    public AnalysisItemResultMetadata getAnalysisItemMetadataForFilter(long filterID, List<FilterDefinition> filters, int utcOffset) {
         EIConnection conn = Database.instance().getConnection();
         try {
             Long reportID = null;
@@ -344,7 +344,7 @@ public class DataService {
                 throw new RuntimeException();
             }
 
-            return getMetadata(dataSourceID, analysisItem, utcOffset, report, new ArrayList<FilterDefinition>(), filter, null, conn);
+            return getMetadata(dataSourceID, analysisItem, utcOffset, report, filters, filter, null, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
