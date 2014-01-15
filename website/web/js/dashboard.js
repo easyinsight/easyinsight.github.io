@@ -453,6 +453,37 @@ $(function () {
         var saveReport;
         var filtersFromLocalStorage;
 
+        var f;
+        var filterNameMap = {};
+        var createFilterNameKey = function(base, name) {
+            var s = "";
+            var c = base.split("_");
+            var n;
+            for(n in c) {
+                if(c[n] == "filter")
+                    break;
+                s = s + c[n] + "_"
+            }
+            s = s + name;
+            return s;
+        }
+        for(f in filterMap) {
+            if(filterMap[f].filter.name) {
+                var curName = createFilterNameKey(f, filterMap[f].filter.name);
+                filterNameMap[curName] = filterMap[f];
+            }
+        }
+        for(f in filterMap) {
+            if(filterMap[f].filter.parents && filterMap[f].filter.parents.length > 0) {
+                console.log(f);
+                filterMap[f].parent_filters = [];
+                var cur;
+                for(cur = 0;cur < filterMap[f].filter.parents.length;cur++) {
+                    var s = createFilterNameKey(f, filterMap[f].filter.parents[cur]);
+                    filterMap[f].parent_filters = filterMap[f].parent_filters.concat(filterNameMap[s]);
+                }
+            }
+        }
 
         $("#configuration-dropdown").html(configurationDropdownTemplate({"dashboard": dashboardJSON, "user": userJSON}))
 
@@ -592,11 +623,21 @@ $(function () {
             };
 
             $('.multi_value_modal', target).on('show.bs.modal', function (e) {
-                var f = filterMap[$(e.target).attr("id").replace(/_modal$/g, "")].filter;
+                var ff = filterMap[$(e.target).attr("id").replace(/_modal$/g, "")];
+                var f = ff.filter;
 
+                var curFilterInfo = {id: f.id, parents: _.map(ff.parent_filters ? ff.parent_filters : [], function(e, i, d) {
+                    return toFilterString(e.filter, false);
+                })};
+                var postData = {
+                    url: "/app/html/filterValue",
+                    contentType: "application/json; charset=UTF-8",
+                    data: JSON.stringify(curFilterInfo),
+                    type: "POST"
+                }
                 if(f.error) {
                     $(".loading-bar", e.target).show();
-                    $.getJSON("/app/html/filterValue?filterID=" + f.id, function(d) {
+                    $.ajax($.extend(postData, { success: function(d) {
                         $(".loading-bar", e.target).hide();
                         f.values = d.values;
                         var m = _.reduce(f.values, function(m, e) {
@@ -609,7 +650,7 @@ $(function () {
                         }
                         $(".multi-value-list", $(e.target)).html(multi_value_results({ data: { selected: selectionMap }, results: d }));
                         delete f.error;
-                    })
+                    } }))
                 } else {
                     var m = _.reduce(f.values, function(m, e) {
                                     m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
@@ -1004,6 +1045,7 @@ $(function () {
                 }
             })
         }
+        test = function() { console.log(filterMap) }
     })
 
 })

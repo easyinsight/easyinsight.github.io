@@ -579,6 +579,9 @@ public class FilterValueDefinition extends FilterDefinition {
             if(stringList.size() > 100) {
                 jo.put("values", new JSONArray());
                 jo.put("error", "Too many values, please refine your search.");
+            } else if(getParentFilters() != null && !getParentFilters().isEmpty()) {
+                jo.put("values", new JSONArray());
+                jo.put("error", "Loading...");
             } else {
                 JSONArray arr = new JSONArray(stringList);
                 jo.put("values", arr);
@@ -591,8 +594,11 @@ public class FilterValueDefinition extends FilterDefinition {
             }
 
             jo.put("selected", existingChoices);
-
-
+            if(getParentFilters() != null && !getParentFilters().isEmpty()) {
+                String[] parentFilters = getParentFilters().split(",");
+                jo.put("parents", new JSONArray(parentFilters));
+            }
+            jo.put("name", getFilterName());
         }
         return jo;
     }
