@@ -328,6 +328,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
 
             if (lastStart == null) {
                 dataStorage.insertData(dataSet);
+                dataSet = new DataSet();
             }
             zendeskCompositeSource.setComments(commentList);
         }
