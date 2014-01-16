@@ -1,9 +1,12 @@
 package com.easyinsight.analysis.charts.yaxisbased.bar {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.ChartDefinition;
+import com.easyinsight.analysis.FeedMetadata;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.yaxisbased.YAxisDefinition;
 import com.easyinsight.skin.ApplicationSkin;
+
+import mx.collections.ArrayCollection;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSBarChartDefinition")]
@@ -21,6 +24,7 @@ public class BarChartDefinition extends YAxisDefinition{
     public var labelOutsideFontColor:int = 0;
     public var useInsideLabelFontColor:Boolean = true;
     public var useOutsideLabelFontColor:Boolean = true;
+    public var multiColors:ArrayCollection;
     //public var labelFontColor:uint = 0;
     //public var useLabelFontColor:Boolean = false;
 

@@ -154,6 +154,16 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String customField1;
     private String customField2;
 
+    private boolean canSave;
+
+    public boolean isCanSave() {
+        return canSave;
+    }
+
+    public void setCanSave(boolean canSave) {
+        this.canSave = canSave;
+    }
+
     private List<FilterDefinition> filtersForDrillthrough;
 
     public boolean isPublicWithKey() {

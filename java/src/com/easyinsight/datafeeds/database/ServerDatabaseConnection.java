@@ -27,8 +27,15 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
     private int timeout = 5;
 
     private boolean rebuildFields;
+    private long copyingFromSource;
 
+    public long getCopyingFromSource() {
+        return copyingFromSource;
+    }
 
+    public void setCopyingFromSource(long copyingFromSource) {
+        this.copyingFromSource = copyingFromSource;
+    }
 
     public String validateCredentials() {
         return null;
@@ -39,7 +46,10 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
         return Account.BASIC;
     }
 
-
+    @Override
+    public boolean isMigrateRequired() {
+        return false;
+    }
 
     @NotNull
     @Override
@@ -80,6 +90,7 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                         int columnCount = rs.getMetaData().getColumnCount();
                         for (int i = 1; i <= columnCount; i++) {
                             String columnName = rs.getMetaData().getColumnName(i);
+                            String tableName = rs.getMetaData().getTableName(i);
                             AnalysisItem analysisItem = map.get(columnName);
                             if (analysisItem == null) {
                                 newField = true;

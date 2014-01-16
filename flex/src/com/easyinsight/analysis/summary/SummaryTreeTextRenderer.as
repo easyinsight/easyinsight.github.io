@@ -179,7 +179,7 @@ public class SummaryTreeTextRenderer extends UITextField implements IListItemRen
         if (_report.getFont() == "Open Sans") {
             styleName = "myFontStyle";
         }
-        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color);
+        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, null, null, false);
         hyperlinkedUTF = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, null, null, true);
         if (hyperlinked && !hasLinks) {
             hasLinks = true;

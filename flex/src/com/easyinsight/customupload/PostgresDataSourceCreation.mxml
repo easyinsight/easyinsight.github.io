@@ -48,6 +48,7 @@
             obj.feedName = nameInput.text;
             obj.rebuildFields = true;
             obj.timeout = timeoutInput.value;
+            obj.copyingFromSource = copyingFrom;
             return obj;
         }
 
@@ -86,6 +87,7 @@
             }
             obj.rebuildFields = true;
             obj.timeout = timeoutInput.value;
+            obj.copyingFromSource = copyingFrom;
         }
 
         public function validate():Boolean {
@@ -94,6 +96,9 @@
 
         [Bindable]
         private var connTimeout:int;
+
+        [Bindable]
+        private var password:String;
 
         private function gotDataSources():void {
             var sources:ArrayCollection = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
@@ -133,7 +138,11 @@
             port = String(dataSource.port);
             databaseName = dataSource.databaseName;
             userName = dataSource.dbUserName;
+            password = "not really";
+            copyingFrom = dataSource.dataFeedID;
         }
+
+        private var copyingFrom:int;
 
         private function exploreSchema():void {
             ProgressAlert.alert(this, "Retrieving schema...", null, feedService.exploreSchema);
@@ -178,7 +187,7 @@
                 <mx:TextInput id="databaseUserNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{userName}" width="350"/>
             </mx:FormItem>
             <mx:FormItem label="Database Password:" labelWidth="200">
-                <mx:TextInput id="databasePasswordInput" fontWeight="normal" fontFamily="Lucida Grande" width="350" displayAsPassword="true"/>
+                <mx:TextInput id="databasePasswordInput" fontWeight="normal" fontFamily="Lucida Grande" width="350" displayAsPassword="true" text="{password}"/>
             </mx:FormItem>
             <mx:FormItem label="Connection Timeout (minutes):" labelWidth="200">
                 <mx:NumericStepper id="timeoutInput" fontWeight="normal" fontFamily="Lucida Grande" value="{connTimeout}" maximum="30"/>

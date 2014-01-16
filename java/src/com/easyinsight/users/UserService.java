@@ -878,13 +878,7 @@ public class UserService {
             session.save(account);
             user.setAccount(account);
             session.update(user);
-
-            Group group = new Group();
-            group.setName(account.getName());
-            group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
-            account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
             session.update(account);
-
 
             session.flush();
             conn.commit();

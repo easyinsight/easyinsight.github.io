@@ -268,15 +268,13 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                             }
                         }
                     } else {
-                        if (map.get("custom_fields") != null) {
-                            List customFields = (List) map.get("custom_fields");
-                            for (Object customFieldObj : customFields) {
-                                Map customFieldMap = (Map) customFieldObj;
-                                String fieldID = customFieldMap.get("id").toString();
-                                if (customFieldMap.get("value") != null) {
-                                    String value = customFieldMap.get("value").toString();
-                                    Key key = keys.get("zd" + fieldID);
-                                    row.addValue(key, value);
+
+                        for (Map.Entry<String, Key> entry : keys.entrySet()) {
+                            if (entry.getKey().startsWith("zd")) {
+                                int customFieldID = Integer.parseInt(entry.getKey().substring(2));
+                                Object customFieldObject = map.get("field_" + customFieldID);
+                                if (customFieldObject != null) {
+                                    row.addValue(entry.getKey(), customFieldObject.toString());
                                 }
                             }
                         }

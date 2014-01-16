@@ -40,14 +40,14 @@ import com.easyinsight.analysis.Key;
 
         public function get sourceDisplay():String {
             if (sourceItem != null) {
-                return sourceItem.display;
+                return sourceItem.unqualifiedDisplay;
             }
             return sourceJoin.createString();
         }
 
         public function get targetDisplay():String {
             if (targetItem != null) {
-                return targetItem.display;
+                return targetItem.unqualifiedDisplay;
             }
             return targetJoin.createString();
         }

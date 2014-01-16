@@ -539,8 +539,12 @@ public class ExportService {
         CrosstabValue[][] values = crosstab.toTable(crosstabDefinition, insightRequestMetadata, conn);
         StringBuilder sb = new StringBuilder();
         AnalysisMeasure measure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
-        String headerCell = "background: #" + Integer.toHexString(crosstabDefinition.getHeaderBackgroundColor()) + ";color: #" + Integer.toHexString(crosstabDefinition.getHeaderTextColor()) + ";" + tdStyle + "left";
-        String summaryCell = "background: #" + Integer.toHexString(crosstabDefinition.getSummaryBackgroundColor()) + ";color: #" + Integer.toHexString(crosstabDefinition.getSummaryTextColor()) + ";" + tdStyle + "right";
+        String headerBackgroundColor = createHexString(crosstabDefinition.getHeaderBackgroundColor());
+        String headerTextColor = createHexString(crosstabDefinition.getHeaderTextColor());
+        String summaryBackgroundColor = createHexString(crosstabDefinition.getSummaryBackgroundColor());
+        String summaryTextColor = createHexString(crosstabDefinition.getSummaryTextColor());
+        String headerCell = "background: " + headerBackgroundColor + ";color: " + headerTextColor + ";" + tdStyle + "left";
+        String summaryCell = "background: " + summaryBackgroundColor + ";color: " + summaryTextColor + ";" + tdStyle + "right";
         String dataCell = tdStyle + "right";
         if (includeTitle && analysisDefinition.getName() != null) {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(analysisDefinition.getName()).append("</h0>").append("</div>");
@@ -907,10 +911,14 @@ public class ExportService {
             }
             FormattingConfiguration formattingConfiguration = headerItem.getFormattingConfiguration();
             if (formattingConfiguration.getFormattingType() == FormattingConfiguration.CURRENCY) {
-                NumberFormat currencyFormatter = new DecimalFormat(currencySymbol + "###,###.##");
+                String symbolToUse = currencySymbol;
+                if (!pdf && symbolToUse.charAt(0) == 8364) {
+                    symbolToUse = "&euro;";
+                }
+                NumberFormat currencyFormatter = new DecimalFormat("###,###.##");
                 currencyFormatter.setMaximumFractionDigits(analysisMeasure.getPrecision());
                 currencyFormatter.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
-                valueString = currencyFormatter.format(doubleValue);
+                valueString = symbolToUse + currencyFormatter.format(doubleValue);
             } else if (formattingConfiguration.getFormattingType() == FormattingConfiguration.MILLISECONDS) {
                 double absoluteValue = Math.abs(doubleValue);
                 if (absoluteValue < 60000) {
@@ -1018,6 +1026,23 @@ public class ExportService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static @Nullable DateFormat getDateFormatForAccount(int dateLevel, @Nullable String explicitDateFormat) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement accountStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            accountStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = accountStmt.executeQuery();
+            rs.next();
+            int dateFormat = rs.getInt(1);
+            accountStmt.close();
+            return getDateFormatForAccount(dateLevel, explicitDateFormat, dateFormat);
+        } catch (Exception e) {
+            return new SimpleDateFormat("yyyy-MM-dd");
         } finally {
             Database.closeConnection(conn);
         }
@@ -2672,12 +2697,15 @@ public class ExportService {
                         if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
                             TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
                             if (textValueExtension.getColor() != 0) {
-                                String hexString = "#" + Integer.toHexString(textValueExtension.getColor());
+                                String hexString = createHexString(textValueExtension.getColor());
                                 styleString.append(";color:").append(hexString);
                             }
                             if (textValueExtension.getBackgroundColor() != TextValueExtension.WHITE) {
-                                String hexString = "#" + Integer.toHexString(textValueExtension.getBackgroundColor());
+                                String hexString = createHexString(textValueExtension.getBackgroundColor());
                                 styleString.append(";background-color:").append(hexString);
+                            }
+                            if (textValueExtension.isBold()) {
+                                styleString.append(";font-weight:bold");
                             }
                         }
                         sb.append("<td style=\"").append(styleString.toString()).append("\">");
@@ -2803,6 +2831,16 @@ public class ExportService {
         return sb.toString();
     }
 
+    public static String createHexString(int color) {
+        String hexString = Integer.toHexString(color);
+        if (hexString.length() == 4) {
+            hexString = "00" + hexString;
+        } else if (hexString.length() == 2) {
+            hexString = "0000" + hexString;
+        }
+        return "#" + hexString;
+    }
+
     public static String dataSetToHTMLTable(Collection<AnalysisItem> fields, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
 
         try {
@@ -2848,7 +2886,7 @@ public class ExportService {
                     if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
                         TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
                         if (textValueExtension.getColor() != 0) {
-                            String hexString = "#" + Integer.toHexString(textValueExtension.getColor());
+                            String hexString = createHexString(textValueExtension.getColor());
                             styleString.append(";color:").append(hexString);
                         }
                     }

@@ -117,6 +117,10 @@ import mx.collections.ArrayCollection;
     public var newFieldModel:Boolean;
     public var cachePartitionFilter:String;
     public var enableLocalStorage:Boolean;
+    public var usePrimaryColor:Boolean;
+    public var useSecondaryColor:Boolean;
+    public var useTertiaryColor:Boolean;
+    public var canSave:Boolean;
 
 		public function AnalysisDefinition()
 		{

@@ -6,6 +6,8 @@
         import com.easyinsight.administration.feed.UserLinkEvent;
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.controls.Alert;
+
         import mx.managers.PopUpManager;
 
         import com.easyinsight.administration.feed.AddUserToFeedWindow;
@@ -50,13 +52,10 @@
                 groupUser.userID = userStub.userID;
                 groupUser.role = 3;
                 this.users.addItem(groupUser);
-            } else {
-                this.users.removeItemAt(this.users.getItemIndex(event.userStub));
             }
         }
 
         private function onCreation():void {
-            userGrid.addEventListener(UserLinkEvent.DELETE_USER_LINK, userChange);
             addEventListener("groupInvalidation", onChange);
             groupService.getUsers.send(_groupID);
         }
@@ -78,6 +77,30 @@
         private function savedChanges():void {
             changesIndex = 0;
         }
+
+        private function deleteSelected():void {
+
+            var selected:ArrayCollection = new ArrayCollection();
+            for each (var groupUser:GroupUser in users) {
+                if (groupUser.selected) {
+                    selected.addItem(groupUser);
+                }
+            }
+            if (selected.length == 0) {
+                Alert.show("You must select at least one user to remove from the group.");
+            }
+            for each (var gUser:GroupUser in selected) {
+                this.users.removeItemAt(this.users.getItemIndex(gUser));
+            }
+            changesIndex = 1;
+        }
+
+        [Bindable]
+        private var ownerExplanation:String = "<ul><li>Can configure or delete any data sources in the group</li><li>Can create new reports and dashboards on any data sources in the group</li><li>Can modify or delete any reports or dashboards in the group</li></ul>";
+        [Bindable]
+        private var sharerExplanation:String = "<li>Can create new reports and dashboards on any data sources in the group</li><li>Can modify any reports or dashboards in the group</li></ul>";
+        [Bindable]
+        private var viewerExplanation:String = "<ul><li>Can create new reports and dashboards on any data sources in the group</li></ul>";
 		]]>
 	</mx:Script>
 	<mx:RemoteObject destination="groupService" id="groupService">
@@ -99,28 +122,30 @@
             </mx:HBox>
         </mx:HBox>
     </mx:ViewStack>
-    <mx:ViewStack selectedIndex="{viewIndex}" resizeToContent="true">
-        <mx:Box>
-            <mx:DataGrid dataProvider="{users}">
-                <mx:columns>
-                    <mx:DataGridColumn headerText="User Name" dataField="name" width="200" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                    <mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleRenderer"
-                        headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                </mx:columns>
-            </mx:DataGrid>
-        </mx:Box>
+    <mx:HBox>
         <mx:VBox>
-            <mx:Button label="Add User..." click="addUser()" styleName="grayButton" fontSize="14"/>
+            <mx:HBox>
+                <mx:Button label="Add User..." click="addUser()" styleName="grayButton" fontSize="12"/>
+                <mx:Button label="Remove Selected from Group..." click="deleteSelected()" styleName="grayButton" fontSize="12"/>
+            </mx:HBox>
             <mx:DataGrid dataProvider="{users}" id="userGrid">
                 <mx:columns>
-                    <mx:DataGridColumn headerText="User Name" dataField="name" width="200" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    <mx:DataGridColumn headerText="" dataField="name" width="30" itemRenderer="com.easyinsight.util.GenericGridCheckbox" sortable="false"/>
+                    <mx:DataGridColumn headerText="User Name" dataField="name" width="200"/>
                     <mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleEditor"
-                        rendererIsEditor="true" editorDataField="data" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                    <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.groups.GroupUserIcons" width="50"/>
+                        rendererIsEditor="true" editorDataField="data"/>
                 </mx:columns>
             </mx:DataGrid>
         </mx:VBox>
-
-    </mx:ViewStack>
+        <mx:VBox>
+            <mx:Text text="You can configure the following levels for your users:"/>
+            <mx:Text text="Owner" styleName="boldStyle" fontWeight="bold"/>
+            <mx:Text htmlText="{ownerExplanation}" maxWidth="450"/>
+            <mx:Text text="Editor" styleName="boldStyle" fontWeight="bold"/>
+            <mx:Text htmlText="{sharerExplanation}" maxWidth="450"/>
+            <mx:Text text="Viewer" styleName="boldStyle" fontWeight="bold"/>
+            <mx:Text htmlText="{viewerExplanation}" maxWidth="450"/>
+        </mx:VBox>
+    </mx:HBox>
 
 </mx:VBox>

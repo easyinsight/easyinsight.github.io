@@ -60,6 +60,7 @@ public class User extends EventDispatcher
     public var newsDismissDate:Date;
     public var accountOverSize:Boolean;
     public var hourlyRefreshEnabled:Boolean;
+    public var accountReports:Boolean;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -156,6 +157,7 @@ public class User extends EventDispatcher
         _user.newsDismissDate = response.newsDismissDate;
         _user.accountOverSize = response.accountOverSize;
         _user.hourlyRefreshEnabled = response.hourlyRefreshEnabled;
+        _user.accountReports = response.accountReports;
         if (response.reportImage != null) {
             _user.loadBytes(response.reportImage);
         }

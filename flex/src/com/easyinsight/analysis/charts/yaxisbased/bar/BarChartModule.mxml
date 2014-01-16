@@ -9,6 +9,7 @@
         import com.easyinsight.analysis.AnalysisMeasure;
 
         import com.easyinsight.analysis.ChartDefinition;
+        import com.easyinsight.analysis.MultiColor;
 
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.charts.xaxisbased.column.BetterBoxBarRenderer;
@@ -59,6 +60,15 @@
 
         override protected function getChartColor():uint {
             return BarChartDefinition(chartDef).chartColor;
+        }
+
+        override protected function getMultiColors():ArrayCollection {
+            return BarChartDefinition(chartDef).multiColors;
+        }
+
+        override protected function useMultiColor():Boolean {
+            var def:BarChartDefinition = chartDef as BarChartDefinition;
+            return (def.multiColors != null && def.multiColors.length > 0 && MultiColor(def.multiColors.getItemAt(0)).color1StartEnabled);
         }
 
         override protected function sortData(dataSet:ArrayCollection):void {

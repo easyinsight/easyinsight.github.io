@@ -24,11 +24,22 @@ public class FlatDateFilter extends FilterDefinition {
     @Column(name = "selected_value")
     private int value;
 
+    @Column(name="start_year")
+    private int startYear;
+
     @Column(name="all_option")
     private boolean allOption;
 
     @Transient
     private AnalysisItemResultMetadata cachedValues;
+
+    public int getStartYear() {
+        return startYear;
+    }
+
+    public void setStartYear(int startYear) {
+        this.startYear = startYear;
+    }
 
     public boolean isAllOption() {
         return allOption;

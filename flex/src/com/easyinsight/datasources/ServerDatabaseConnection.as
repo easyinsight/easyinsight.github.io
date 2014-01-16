@@ -17,6 +17,7 @@ public class ServerDatabaseConnection extends ServerDataSourceDefinition {
     public var query:String;
     public var timeout:int = 5;
     public var rebuildFields:Boolean;
+    public var copyingFromSource:int;
 
     public function ServerDatabaseConnection() {
     }

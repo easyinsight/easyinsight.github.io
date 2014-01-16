@@ -480,13 +480,20 @@ public class SecurityUtil {
                 return rs.getInt(1);
             } else {
                 if (isAccountAdmin()) {
-                    PreparedStatement baseGroupStmt = conn.prepareStatement("SELECT BINDING_TYPE FROM GROUP_TO_USER_JOIN, USER WHERE " +
-                            "GROUP_TO_USER_JOIN.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? AND GROUP_ID = ?");
-                    baseGroupStmt.setLong(1, getAccountID());
-                    baseGroupStmt.setLong(2, groupID);
-                    ResultSet groupRS = baseGroupStmt.executeQuery();
-                    if (groupRS.next()) {
+                    PreparedStatement blahStmt = conn.prepareStatement("SELECT GROUP_ACCOUNT_ID FROM COMMUNITY_GROUP WHERE GROUP_ACCOUNT_ID = ?");
+                    blahStmt.setLong(1, getAccountID());
+                    ResultSet blahRS = blahStmt.executeQuery();
+                    if (blahRS.next()) {
                         return Roles.OWNER;
+                    } else {
+                        PreparedStatement baseGroupStmt = conn.prepareStatement("SELECT BINDING_TYPE FROM GROUP_TO_USER_JOIN, USER WHERE " +
+                                "GROUP_TO_USER_JOIN.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? AND GROUP_ID = ?");
+                        baseGroupStmt.setLong(1, getAccountID());
+                        baseGroupStmt.setLong(2, groupID);
+                        ResultSet groupRS = baseGroupStmt.executeQuery();
+                        if (groupRS.next()) {
+                            return Roles.OWNER;
+                        }
                     }
                 }
                 return Integer.MAX_VALUE;

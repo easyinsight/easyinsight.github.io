@@ -1,8 +1,9 @@
 package com.easyinsight.analysis.charts.xaxisbased.column {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.ChartDefinition;
+import com.easyinsight.analysis.FeedMetadata;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisDefinition;
-import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.skin.ApplicationSkin;
 
 import mx.collections.ArrayCollection;
@@ -23,6 +24,7 @@ public class ColumnChartDefinition extends XAxisDefinition{
     public var labelOutsideFontColor:int = 0;
     public var useInsideLabelFontColor:Boolean = true;
     public var useOutsideLabelFontColor:Boolean = true;
+    public var multiColors:ArrayCollection;
 
     public function ColumnChartDefinition() {
         super();

@@ -26,6 +26,33 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
     private int headerTextColor;
     private boolean autoExpandAll;
     private boolean summaryTotal;
+    private boolean headerMode;
+    private int summaryBackgroundColor;
+    private int summaryTextColor;
+
+    public int getSummaryBackgroundColor() {
+        return summaryBackgroundColor;
+    }
+
+    public void setSummaryBackgroundColor(int summaryBackgroundColor) {
+        this.summaryBackgroundColor = summaryBackgroundColor;
+    }
+
+    public int getSummaryTextColor() {
+        return summaryTextColor;
+    }
+
+    public void setSummaryTextColor(int summaryTextColor) {
+        this.summaryTextColor = summaryTextColor;
+    }
+
+    public boolean isHeaderMode() {
+        return headerMode;
+    }
+
+    public void setHeaderMode(boolean headerMode) {
+        this.headerMode = headerMode;
+    }
 
     public boolean isSummaryTotal() {
         return summaryTotal;
@@ -194,6 +221,9 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
         headerTextColor = (int) findNumberProperty(properties, "headerTextColor", 0x000000);
         autoExpandAll = findBooleanProperty(properties, "autoExpandAll", false);
         summaryTotal = findBooleanProperty(properties, "summaryTotal", false);
+        headerMode = findBooleanProperty(properties, "headerMode", false);
+        summaryTextColor = (int) findNumberProperty(properties, "summaryTextColor", 0);
+        summaryBackgroundColor = (int) findNumberProperty(properties, "summaryBackgroundColor", 0xaaaaaa);
     }
 
     public List<ReportProperty> createProperties() {
@@ -206,6 +236,9 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("headerTextColor", headerTextColor));
         properties.add(new ReportBooleanProperty("autoExpandAll", autoExpandAll));
         properties.add(new ReportBooleanProperty("summaryTotal", summaryTotal));
+        properties.add(new ReportBooleanProperty("headerMode", headerMode));
+        properties.add(new ReportNumericProperty("summaryTextColor", summaryTextColor));
+        properties.add(new ReportNumericProperty("summaryBackgroundColor", summaryBackgroundColor));
         return properties;
     }
 

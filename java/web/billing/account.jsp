@@ -6,6 +6,11 @@
 <%@ page import="com.easyinsight.users.Account" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="org.hibernate.StatelessSession" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.text.NumberFormat" %>
+<%@ page import="java.util.Locale" %>
+<%@ page import="com.easyinsight.export.ExportService" %>
+<%@ page import="com.easyinsight.analysis.AnalysisDateDimension" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -80,7 +85,12 @@
                 <% } else { %>
                 <div class="row">
                     <div class="col-md-offset-1 col-md10">
-                        You have <strong><%= accountStats.getUsedDesigners() %></strong> of <strong><%= accountStats.getCoreDesigners() + accountStats.getAddonDesigners()%></strong>, <strong><%= accountStats.getCurrentSmallBizConnections()%></strong> of <strong><%= accountStats.getAddonSmallBizConnections() + accountStats.getCoreSmallBizConnections() %></strong> small business connections, and <strong><%= accountStats.getUsedSpaceString()%></strong> of <strong><%= accountStats.getMaxSpaceString()%></strong> custom data storage used.
+                        You have <strong><%= accountStats.getUsedDesigners() %></strong> of <strong><%= accountStats.getCoreDesigners() + accountStats.getAddonDesigners()%></strong> designers, <strong><%= accountStats.getCurrentSmallBizConnections()%></strong> of <strong><%= accountStats.getAddonSmallBizConnections() + accountStats.getCoreSmallBizConnections() %></strong> small business connections, and <strong><%= accountStats.getUsedSpaceString()%></strong> of <strong><%= accountStats.getMaxSpaceString()%></strong> custom data storage used.
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-offset-1 col-md10">
+                        You will be charged again on <%= ExportService.getDateFormatForAccount(AnalysisDateDimension.DAY_LEVEL, null).format(account.getNextBillDate()) %> for <%= NumberFormat.getCurrencyInstance(Locale.US).format(account.getNextBillAmount()) %>.
                     </div>
                 </div>
                 <% } %>

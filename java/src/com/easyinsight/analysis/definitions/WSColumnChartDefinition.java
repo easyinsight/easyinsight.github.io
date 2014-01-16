@@ -2,12 +2,18 @@ package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
+import com.easyinsight.export.ExportService;
+import com.easyinsight.security.SecurityUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -29,6 +35,15 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
     private boolean useInsideLabelFontColor;
     private boolean useOutsideLabelFontColor;
     private String labelFontWeight;
+    private List<MultiColor> multiColors = new ArrayList<MultiColor>();
+
+    public List<MultiColor> getMultiColors() {
+        return multiColors;
+    }
+
+    public void setMultiColors(List<MultiColor> multiColors) {
+        this.multiColors = multiColors;
+    }
 
     public int getLabelFontSize() {
         return labelFontSize;
@@ -134,6 +149,59 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         this.useChartColor = useChartColor;
     }
 
+    /*public void applyStyling(EIConnection conn, int dataSourceType) throws SQLException {
+        if (isUsePrimaryColor() || isUseSecondaryColor() || isUseTertiaryColor()) {
+            long accountID = SecurityUtil.getAccountID(false);
+            if (accountID > 0) {
+                PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+                ps.setLong(1, accountID);
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                boolean exchangeAuthor = rs.getBoolean(1);
+                ResultSet propRS;
+                if (exchangeAuthor) {
+                    PreparedStatement propStmt = conn.prepareStatement("SELECT REPORT_NUMERIC_PROPERTY.property_value FROM APPLICATION_SKIN, " +
+                            "APPLICATION_SKIN_TO_REPORT_PROPERTY, REPORT_PROPERTY, REPORT_NUMERIC_PROPERTY WHERE APPLICATION_SKIN.connection_type = ? AND " +
+                            "application_skin.application_skin_id = application_skin_to_report_property.application_skin_id AND " +
+                            "application_skin_to_report_property.report_property_id = report_property.report_property_id AND " +
+                            "report_property.report_property_id = report_numeric_property.report_property_id AND " +
+                            "report_property.property_name = ?");
+                    propStmt.setInt(1, dataSourceType);
+                    if (isUsePrimaryColor()) {
+                        propStmt.setString(2, "customChartColor");
+                    } else if (isUseSecondaryColor()) {
+                        propStmt.setString(2, "secondaryColor");
+                    } else if (isUseTertiaryColor()) {
+                        propStmt.setString(2, "tertiaryColor");
+                    }
+                    propRS = propStmt.executeQuery();
+                } else {
+                    PreparedStatement propStmt = conn.prepareStatement("SELECT REPORT_NUMERIC_PROPERTY.property_value FROM APPLICATION_SKIN, " +
+                            "APPLICATION_SKIN_TO_REPORT_PROPERTY, REPORT_PROPERTY, REPORT_NUMERIC_PROPERTY WHERE APPLICATION_SKIN.account_id = ? AND " +
+                            "application_skin.application_skin_id = application_skin_to_report_property.application_skin_id AND " +
+                            "application_skin_to_report_property.report_property_id = report_property.report_property_id AND " +
+                            "report_property.report_property_id = report_numeric_property.report_property_id AND " +
+                            "report_property.property_name = ?");
+                    propStmt.setLong(1, accountID);
+                    if (isUsePrimaryColor()) {
+                        propStmt.setString(2, "customChartColor");
+                    } else if (isUseSecondaryColor()) {
+                        propStmt.setString(2, "secondaryColor");
+                    } else if (isUseTertiaryColor()) {
+                        propStmt.setString(2, "tertiaryColor");
+                    }
+                    propRS = propStmt.executeQuery();
+                }
+                if (propRS.next()) {
+                    int color = propRS.getInt(1);
+                    setUseChartColor(true);
+                    setChartColor(color);
+                    setGradientColor(0);
+                }
+            }
+        }
+    }*/
+
     @Override
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
@@ -146,6 +214,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         labelFontWeight = findStringProperty(properties, "labelFontWeight", "none");
         labelFontSize = (int) findNumberProperty(properties, "labelFontSize", 12);
         labelInsideFontColor = (int) findNumberProperty(properties, "labelInsideFontColor", 0);
+        multiColors = multiColorProperty(properties, "multiColors");
         labelOutsideFontColor = (int) findNumberProperty(properties, "labelOutsideFontColor", 0);
         useInsideLabelFontColor = findBooleanProperty(properties, "useInsideLabelFontColor", false);
         useOutsideLabelFontColor = findBooleanProperty(properties, "useOutsideLabelFontColor", false);
@@ -165,6 +234,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         properties.add(new ReportBooleanProperty("useOutsideLabelFontColor", useOutsideLabelFontColor));
         properties.add(new ReportNumericProperty("labelInsideFontColor", labelInsideFontColor));
         properties.add(new ReportNumericProperty("labelOutsideFontColor", labelOutsideFontColor));
+        properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         return properties;
     }
 
@@ -244,6 +314,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         JSONObject fullObject = new JSONObject();
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
+            JSONObject seriesDefaults = new JSONObject();
             if (getMeasures().size() == 1) {
                 JSONArray colorObj = new JSONArray();
 
@@ -275,14 +346,25 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
 //                colorObj.put("first", "'" + color + "'");
 //                colorObj.put("second", "'" + color2 + "'");
                 jsonParams.put("seriesColors", new JSONArray(Arrays.asList(colorObj)));
+                seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
             } else {
-                JSONArray seriesColors = getSeriesColors();
+                seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
+                JSONArray series = new JSONArray();
+                for (MultiColor multiColor : multiColors) {
+                    if (multiColor.isColor1StartEnabled()) {
+                        JSONObject colorObject = new JSONObject();
+                        colorObject.put("color", "'"+ ExportService.createHexString(multiColor.getColor1Start())+"'");
+                        series.put(colorObject);
+                    }
+                }
+                seriesDefaults.put("series", series);
+                /*JSONArray seriesColors = getSeriesColors();
                 jsonParams.put("seriesColors", seriesColors);
-                jsonParams.put("legend", getLegend());
+                jsonParams.put("legend", getLegend());*/
             }
-            JSONObject seriesDefaults = new JSONObject();
 
-            seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
+
+
             JSONObject rendererOptions = new JSONObject();
             rendererOptions.put("fillToZero", "true");
             rendererOptions.put("varyBarColor", "true");
@@ -294,6 +376,9 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             seriesDefaults.put("shadowDepth", 1);*/
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = getGrid();
+            /*grid.put("borderColor", "'#000000'");
+            grid.put("borderWidth", 1);*/
+            grid.put("drawGridLines", false);
             jsonParams.put("grid", grid);
 
             jsonParams.put("axes", getAxes());
@@ -322,6 +407,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         JSONObject axes = new JSONObject();
         JSONObject xAxis = getGroupingAxis(getXaxis());
         axes.put("xaxis", xAxis);
+
         axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
         return axes;
     }

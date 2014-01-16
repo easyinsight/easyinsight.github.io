@@ -2,7 +2,7 @@
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
            implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%" resize="onResize()">
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.AnalysisCellRenderer;
+
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisHierarchyItem;
         import com.easyinsight.analysis.AnalysisItem;
@@ -12,7 +12,6 @@
         import com.easyinsight.analysis.ListViewHeaderRenderer;
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.SummaryCellRenderer;
-        import com.easyinsight.analysis.TextCellRenderer;
         import com.easyinsight.analysis.TextReportFieldExtension;
         import com.easyinsight.analysis.TreeRow;
         import com.easyinsight.analysis.TreeTextCellRenderer;
@@ -23,7 +22,6 @@
         import mx.collections.ICollectionView;
         import mx.collections.Sort;
         import mx.collections.SortField;
-        import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.controls.advancedDataGridClasses.SortInfo;
         import mx.formatters.Formatter;
@@ -156,7 +154,7 @@
                     }
                     columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);
                     columnHeaderObject.headerText = myHeader.display;
-                    columnHeaderObject.dataField = "groupingColumn";
+                    columnHeaderObject.dataField = myHeader.qualifiedName();
                     var headerFactory:ClassFactory = new ClassFactory(ListViewHeaderRenderer);
                     headerFactory.properties = { eiColor:treeDefinition.headerTextColor };
                     columnHeaderObject.headerRenderer = headerFactory;
@@ -205,7 +203,7 @@
             var view:ICollectionView = ICollectionView(coreGrid.dataProvider);
             var sort:Sort = view.sort;
             if (sort == null) {
-                return ObjectUtil.compare(treeRow1.groupingColumn.getValue(), treeRow2.groupingColumn.getValue());
+                return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
             }
             var fields:Array = sort.fields;
 
@@ -222,11 +220,11 @@
                     } else if (treeRow2.summaryColumn) {
                         return num;
                     } else {
-                        return ObjectUtil.compare(treeRow1.groupingColumn.getValue(), treeRow2.groupingColumn.getValue());
+                        return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
                     }
                 }
             }
-            return ObjectUtil.compare(treeRow1.groupingColumn.getValue(), treeRow2.groupingColumn.getValue());
+            return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
 
 
         }
