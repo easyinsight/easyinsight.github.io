@@ -137,21 +137,23 @@ public class ColumnChartServlet extends HtmlServlet {
 
         for(int i = 0;i < measures.size();i++) {
             blahArray.put(new JSONArray());
-            JSONArray colorObj = new JSONArray();
-            JSONObject curObject = new JSONObject();
-            JSONObject colorStop = new JSONObject();
-            colorStop.put("point", 0);
-            String colorString = String.format("'#%06X'", (0xFFFFFF & colors.get(i % colors.size()).getColor1Start()));
-            colorStop.put("color", colorString);
-            colorObj.put(colorStop);
-            colorStop = new JSONObject();
-            colorStop.put("point", 1);
-            colorStop.put("color", colorString);
-            colorObj.put(colorStop);
-            JSONArray jj = new JSONArray();
-            jj.put(colorObj);
-            curObject.put("seriesColors", jj);
-            series.put(curObject);
+            if(measures.size() > 1) {
+                JSONArray colorObj = new JSONArray();
+                JSONObject curObject = new JSONObject();
+                JSONObject colorStop = new JSONObject();
+                colorStop.put("point", 0);
+                String colorString = String.format("'#%06X'", (0xFFFFFF & colors.get(i % colors.size()).getColor1Start()));
+                colorStop.put("color", colorString);
+                colorObj.put(colorStop);
+                colorStop = new JSONObject();
+                colorStop.put("point", 1);
+                colorStop.put("color", colorString);
+                colorObj.put(colorStop);
+                JSONArray jj = new JSONArray();
+                jj.put(colorObj);
+                curObject.put("seriesColors", jj);
+                series.put(curObject);
+            }
         }
         params.put("series", series);
 
