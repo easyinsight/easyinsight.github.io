@@ -2722,6 +2722,10 @@
             this.series = [];
             for (var i=0; i<this.data.length; i++) {
                 var sopts = $.extend(true, {index: i}, {seriesColors:this.seriesColors, negativeSeriesColors:this.negativeSeriesColors}, this.options.seriesDefaults, this.options.series[i], {rendererOptions:{animation:{show: this.animate}}});
+                if(this.options.series[i] && this.options.series[i].seriesColors) {
+                    // no more deep copy - just overwrite the array
+                    sopts.seriesColors = this.options.series[i].seriesColors;
+                }
                 // pass in options in case something needs set prior to initialization.
                 var temp = new Series(sopts);
                 for (var j=0; j<$.jqplot.preParseSeriesOptionsHooks.length; j++) {
