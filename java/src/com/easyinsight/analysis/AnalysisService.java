@@ -1673,6 +1673,7 @@ public class AnalysisService {
             try {
                 boolean testAccountVisible = FeedService.testAccountVisible(conn);
                 List<InsightDescriptor> reports = analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn, testAccountVisible).values();
+                List<DataSourceDescriptor> dataSources = new FeedStorage().getDataSources(userID, SecurityUtil.getAccountID(), conn, testAccountVisible);
                 PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
 
                 getTagsStmt.setLong(1, SecurityUtil.getAccountID());
@@ -1728,7 +1729,15 @@ public class AnalysisService {
                         filtered.add(insightDescriptors);
                     }
                 }
-                return new ReportResults(filtered, reportTags);
+                Collections.sort(filtered, new Comparator<InsightDescriptor>() {
+
+                    public int compare(InsightDescriptor insightDescriptor, InsightDescriptor insightDescriptor1) {
+                        return insightDescriptor.getName().compareToIgnoreCase(insightDescriptor1.getName());
+                    }
+                });
+                ReportResults reportResults = new ReportResults(filtered, reportTags);
+                reportResults.setDataSources(dataSources);
+                return reportResults;
             } catch (Exception e) {
                 LogClass.error(e);
                 throw new RuntimeException(e);
@@ -1905,7 +1914,7 @@ public class AnalysisService {
                 LogClass.error(re);
             }
             conn.rollback();
-            throw re;
+            throw new RuntimeException();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -2151,21 +2160,23 @@ public class AnalysisService {
             SecurityUtil.authorizeInsight(wsAnalysisDefinition.getAnalysisID());
         }
         try {
-            Map<Long, AnalysisItem> dupeMap = new HashMap<Long, AnalysisItem>();
-            for (JoinOverride joinOverride : wsAnalysisDefinition.getJoinOverrides()) {
-                if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getAnalysisItemID() > 0) {
-                    dupeMap.put(joinOverride.getSourceItem().getAnalysisItemID(), joinOverride.getSourceItem());
+            if (wsAnalysisDefinition.getJoinOverrides() != null) {
+                Map<Long, AnalysisItem> dupeMap = new HashMap<Long, AnalysisItem>();
+                for (JoinOverride joinOverride : wsAnalysisDefinition.getJoinOverrides()) {
+                    if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getAnalysisItemID() > 0) {
+                        dupeMap.put(joinOverride.getSourceItem().getAnalysisItemID(), joinOverride.getSourceItem());
+                    }
+                    if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getAnalysisItemID() > 0) {
+                        dupeMap.put(joinOverride.getTargetItem().getAnalysisItemID(), joinOverride.getTargetItem());
+                    }
                 }
-                if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getAnalysisItemID() > 0) {
-                    dupeMap.put(joinOverride.getTargetItem().getAnalysisItemID(), joinOverride.getTargetItem());
-                }
-            }
-            for (JoinOverride joinOverride : wsAnalysisDefinition.getJoinOverrides()) {
-                if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getAnalysisItemID() > 0) {
-                    joinOverride.setSourceItem(dupeMap.get(joinOverride.getSourceItem().getAnalysisItemID()));
-                }
-                if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getAnalysisItemID() > 0) {
-                    joinOverride.setTargetItem(dupeMap.get(joinOverride.getTargetItem().getAnalysisItemID()));
+                for (JoinOverride joinOverride : wsAnalysisDefinition.getJoinOverrides()) {
+                    if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getAnalysisItemID() > 0) {
+                        joinOverride.setSourceItem(dupeMap.get(joinOverride.getSourceItem().getAnalysisItemID()));
+                    }
+                    if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getAnalysisItemID() > 0) {
+                        joinOverride.setTargetItem(dupeMap.get(joinOverride.getTargetItem().getAnalysisItemID()));
+                    }
                 }
             }
         } catch (Exception e) {
