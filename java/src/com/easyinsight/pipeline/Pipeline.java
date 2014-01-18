@@ -10,8 +10,6 @@ import com.easyinsight.core.ReportKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.export.ExportService;
-
 import java.util.*;
 
 /**
@@ -140,7 +138,7 @@ public abstract class Pipeline {
     }
 
     public Pipeline setup(Set<AnalysisItem> analysisItems, List<AnalysisItem> allFields, InsightRequestMetadata insightRequestMetadata) {
-        pipelineData = new PipelineData(null, analysisItems, insightRequestMetadata, allFields, new HashMap<String, String>(), analysisItems, null);
+        pipelineData = new PipelineData(null, analysisItems, insightRequestMetadata, allFields, new HashMap<String, String>(), analysisItems, null, null);
         components = generatePipelineCommands(analysisItems, analysisItems, new ArrayList<FilterDefinition>(), null, allFields, insightRequestMetadata);
         return this;
     }
@@ -262,7 +260,10 @@ public abstract class Pipeline {
 
 
         pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource == null ? new HashMap<String, String>() : dataSource.getProperties(), allRequestedAnalysisItems,
-                uniqueFields);
+                uniqueFields, structure != null ? structure.getNamespaceMap() : null);
+        if (structure != null) {
+            pipelineData.setConn(structure.getConn());
+        }
         return allNeededAnalysisItems;
     }
 

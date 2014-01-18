@@ -29,7 +29,8 @@ public class CalculationLogic {
                     filter.calculationItems(displayMap);
                 }
             }
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), new NamespaceGenerator().generate(report != null ? report.getDataFeedID() : 0, report != null ? report.getAddonReports() : null, pipelineData.getConn()));
+            Map<String, UniqueKey> namespaceMap = pipelineData.getNamespaceMap();
+            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), namespaceMap);
             calculationTreeNode.accept(visitor);
 
             calculateResults(calculationTreeNode, calculationMetadata);
