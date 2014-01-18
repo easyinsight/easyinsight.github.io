@@ -102,11 +102,23 @@ public class SecurityUtil {
     }
 
     public static boolean isAccountReports() {
-        /*UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
-        if(userPrincipal == null)
-            userPrincipal = threadLocal.get();
-        return userPrincipal.isAccountReports();*/
-        return true;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT TEST_ACCOUNT_VISIBLE FROM USER WHERE USER_ID = ?");
+            ps.setLong(1, getUserID());
+            ResultSet rs = ps.executeQuery();
+            boolean ret = false;
+            if (rs.next()) {
+                ret = rs.getBoolean(1);
+            }
+            ps.close();
+            return ret;
+        } catch (Exception e) {
+            LogClass.error(e);
+            return false;
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public static boolean isAccountAdmin() {
@@ -279,7 +291,7 @@ public class SecurityUtil {
             Session session = Database.instance().createSession(conn);
 
             try {
-                User u = (User) session.createQuery("from User where user_id = ?").setLong(0, userID).list().get(0);
+                User u = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
                 jo.put("name", u.getUserName());
                 jo.put("designer", embedKey != null || u.isAnalyst());
             } finally {
@@ -507,20 +519,18 @@ public class SecurityUtil {
     }
 
     public static int authorizeInsight(long insightID) {
-        boolean feedVisibility = false;
         boolean accountVisibility = false;
         long dataFeedID = 0;
         boolean publicVisibility = false;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT FEED_VISIBILITY, ACCOUNT_VISIBLE, DATA_FEED_ID, PUBLICLY_VISIBLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT ACCOUNT_VISIBLE, DATA_FEED_ID, PUBLICLY_VISIBLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
             authorizeStmt.setLong(1, insightID);
             ResultSet rs = authorizeStmt.executeQuery();
             if (rs.next()) {
-                feedVisibility = rs.getBoolean(1);
-                accountVisibility = rs.getBoolean(2);
-                dataFeedID = rs.getLong(3);
-                publicVisibility = rs.getBoolean(4);
+                accountVisibility = rs.getBoolean(1);
+                dataFeedID = rs.getLong(2);
+                publicVisibility = rs.getBoolean(3);
             } else {
                 throw new SecurityException();
             }
@@ -543,7 +553,7 @@ public class SecurityUtil {
             }
         }
 
-        if (accountVisibility || isAccountReports()) {
+        if (accountVisibility && isAccountReports()) {
             conn = Database.instance().getConnection();
             try {
                 PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, USER_TO_ANALYSIS WHERE USER.USER_ID = " +
@@ -575,9 +585,6 @@ public class SecurityUtil {
             } finally {
                 Database.closeConnection(conn);
             }
-        } else if (feedVisibility) {
-            authorizeFeedAccess(dataFeedID);
-            return Roles.OWNER;
         } else {
             int role = getInsightRole(userPrincipal.getUserID(), insightID);
             if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
@@ -632,7 +639,7 @@ public class SecurityUtil {
                 if (userID == SecurityUtil.getUserID()) {
                     role = Math.min(Roles.OWNER, role);
                 } else if ((accountVisible  || isAccountReports()) && accountID == SecurityUtil.getAccountID()) {
-                    role = Math.min(Roles.SHARER, role);
+                    role = Math.min(Roles.SUBSCRIBER, role);
                 }
             }
             if (role != Roles.NONE) {
@@ -790,7 +797,7 @@ public class SecurityUtil {
             Database.closeConnection(conn);
         }
         if (!publiclyVisible) {
-            if (accountVisible || isAccountReports()) {
+            if (accountVisible && isAccountReports()) {
                 conn = Database.instance().getConnection();
                 try {
                     PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, UPLOAD_POLICY_USERS WHERE USER.USER_ID = " +
