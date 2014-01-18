@@ -27,7 +27,6 @@ import com.easyinsight.analysis.text.TextModule;
 import com.easyinsight.analysis.tree.TreeModule;
 import com.easyinsight.analysis.trend.TrendGridModule;
 import com.easyinsight.analysis.trend.TrendModule;
-import com.easyinsight.analysis.verticallist.CombinedVerticalListModule;
 import com.easyinsight.analysis.verticallist.VerticalListModule;
 import com.easyinsight.analysis.ytd.CompareYearsReport;
 import com.easyinsight.analysis.ytd.YTDReport;
