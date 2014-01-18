@@ -289,7 +289,7 @@
             }
         }
 
-        private function loadController(controller:IReportController, shareDataSourceSettings:Boolean = false):void {
+        private function loadController(controller:IReportController):void {
             var dataViewFactory:DataViewFactory = controller.createDataView();
             dataViewFactory.availableFields = wrappers;
             if (dataView != null) {
@@ -306,7 +306,6 @@
                 this.analysisDefinition = dataViewFactory.createNewDefinition();
                 analysisDefinition.initialConfig();
                 additionalInitialConfig(analysisDefinition);
-                analysisDefinition.visibleAtFeedLevel = shareDataSourceSettings;
                 analysisDefinition.dataFeedID = dataSourceID;
             } else {
                 analysisDefinition = dataViewFactory.fromExistingDefinition(analysisDefinition);
@@ -342,9 +341,9 @@
 
         private var viewWatcher:ChangeWatcher;
 
-        public function newAnalysis(shareDataSourceSettings:Boolean):void {
+        public function newAnalysis():void {
             var controller:IReportController = new ListController();
-            loadController(controller, shareDataSourceSettings);
+            loadController(controller);
         }
 
         private function onFieldEditorOpen(event:FieldEditorEvent):void {
@@ -588,7 +587,7 @@
 
                 if (analysisDefinition == null) {
                     saveAsEnabled = false;
-                    newAnalysis(User.getInstance().defaultReportSharing);
+                    newAnalysis();
                     if (feedMetadata.dataSourceType == DataSourceType.COMPOSITE) {
                         analysisDefinition.optimized = true;
                     }

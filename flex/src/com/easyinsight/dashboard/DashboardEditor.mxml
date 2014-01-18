@@ -21,6 +21,7 @@
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
 
@@ -170,6 +171,11 @@
         private function gotDashboard():void {
             saveAsEnabled = true;
             _dashboard = dashboardService.getDashboard.lastResult as Dashboard;
+            if (!User.getInstance().accountReports && _dashboard.role == 3) {
+                saveEnabled = false;
+            } else {
+                saveEnabled = true;
+            }
             if (!_dashboard.absoluteSizing) {
                 vbox.percentHeight = 100;
                 dashboardCanvas.percentHeight = 100;
@@ -216,6 +222,7 @@
             _dashboard = new Dashboard();
             metadata.dashboard = _dashboard;
             dataSourceID = _startDataSourceID;
+            saveEnabled = true;
             ProgressAlert.alert(this, "Retrieving reports...", null, dashboardService.getDashboardEditorMetadata);
             dashboardService.getDashboardEditorMetadata.send(dataSourceID);
             dataService.getFeedMetadata.send(dataSourceID);
@@ -541,6 +548,9 @@
 
         [Bindable]
         private var saveAsEnabled:Boolean = false;
+
+        [Bindable]
+        private var saveEnabled:Boolean = false;
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptorsForDataSource" result="gotReports()"/>
@@ -559,7 +569,7 @@
         <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="closeEditor()"
                    toolTip="Close" labelPlacement="right" label="Close Editor" styleName="grayButton"/>
         <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
-                   toolTip="Save" labelPlacement="right" label="Save" styleName="grayButton"/>
+                   toolTip="Save" labelPlacement="right" label="Save" styleName="grayButton" enabled="{saveEnabled}"/>
         <mx:Button id="saveAsButton" icon="@Embed(source='../../../../assets/save_as.png')" click="saveAs()"
                    toolTip="Save As" enabled="{saveAsEnabled}" label="Save As"
                    labelPlacement="right" styleName="grayButton"/>
