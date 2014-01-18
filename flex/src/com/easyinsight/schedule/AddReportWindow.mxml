@@ -1,4 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+<util:AddReportWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.managers.PopUpManager;
+
+        override protected function choseReport(descriptor:InsightDescriptor):void {
+            var info:DeliveryInfo = new DeliveryInfo();
+            info.type = DeliveryInfo.REPORT;
+            info.id = descriptor.id;
+            info.dataSourceID = descriptor.dataFeedID;
+            info.name = descriptor.name;
+            dispatchEvent(new DeliveryInfoEvent(DeliveryInfoEvent.ADD_REPORT, info));
+            PopUpManager.removePopUp(this);
+        }
+        ]]>
+	</mx:Script>
+</util:AddReportWindow>
+<!--
+<?xml version="1.0" encoding="utf-8"?>
 <util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
                    creationComplete="setup()">
     <mx:Script>
@@ -76,3 +97,4 @@
 
 
 </util:EISlimWindow>
+-->
