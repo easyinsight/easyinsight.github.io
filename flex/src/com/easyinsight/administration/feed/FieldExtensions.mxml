@@ -4,6 +4,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.ReportFieldExtension;
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.TagSelectionEvent;
 
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
@@ -28,12 +29,17 @@
             verticalListEditFactory = new ClassFactory(ExtensionEditButton);
             verticalListEditFactory.properties = { configType: ReportFieldExtension.VERTICAL_LIST, analysisItems: allFields};
 
-            ProgressAlert.alert(this, "Retrieving...", null, feedService.getAnalysisItemConfigurations);
+            ProgressAlert.alert(this, "Retrieving...", null, feedService.getAnalysisItemConfigurations, feedService.getFieldTags);
             feedService.getAnalysisItemConfigurations.send(dataSourceID);
+            feedService.getFieldTags.send();
         }
 
         private function gotConfigurations():void {
             fields = feedService.getAnalysisItemConfigurations.lastResult as ArrayCollection;
+            var filteredFields:ArrayCollection = new ArrayCollection(fields.toArray());
+            filteredFields.filterFunction = valuesFilterFunction;
+            filteredFields.refresh();
+            this.filteredFields = filteredFields;
         }
 
         private function saved():void {
@@ -49,17 +55,51 @@
         [Bindable]
         private var verticalListEditFactory:ClassFactory;
 
+        private var filterString:String = "";
+
+        [Bindable]
+        private var filteredFields:ArrayCollection;
+
+        private function gotTags():void {
+            tags = feedService.getFieldTags.lastResult as ArrayCollection;
+        }
+
+        private function filterBox_changeHandler(event:Event):void {
+            filterString = filterBox.text;
+            filteredFields.refresh();
+        }
+
+        private function valuesFilterFunction(o:Object):Boolean {
+            var result:Boolean = (o.display as String).toLowerCase().indexOf(filterString.toLowerCase()) != -1;
+            if (result) {
+                result = tagBox.filterObject(o);
+            }
+            return result;
+        }
+
         private function save():void {
             ProgressAlert.alert(this, "Saving...", null, feedService.updateAnalysisItemConfigurations);
-            feedService.updateAnalysisItemConfigurations.send(fields);
+            feedService.updateAnalysisItemConfigurations.send(fields, dataSourceID);
+        }
+
+        [Bindable]
+        private var tags:ArrayCollection;
+
+        private function onTagSelect(event:TagSelectionEvent):void {
+            filteredFields.refresh();
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="getAnalysisItemConfigurations" result="gotConfigurations()"/>
+        <mx:method name="getFieldTags" result="gotTags()"/>
         <mx:method name="updateAnalysisItemConfigurations" result="saved()"/>
     </mx:RemoteObject>
-
-    <mx:DataGrid dataProvider="{fields}" wordWrap="true" variableRowHeight="true" height="450">
+    <mx:HBox width="100%">
+        <mx:Image source="@Embed('../../../../../assets/icon-search-black.png')"/>
+        <mx:TextInput id="filterBox" width="100%" change="filterBox_changeHandler(event)"/>
+    </mx:HBox>
+    <util:TagBox tags="{tags}" onTagSelect="onTagSelect(event)" id="tagBox" width="100%"/>
+    <mx:DataGrid dataProvider="{filteredFields}" wordWrap="true" variableRowHeight="true" height="450">
         <mx:columns>
             <mx:DataGridColumn headerText="Field" dataField="display" width="400"/>
             <mx:DataGridColumn headerText="Text"  itemRenderer="{textEditFactory}" sortable="false"/>
