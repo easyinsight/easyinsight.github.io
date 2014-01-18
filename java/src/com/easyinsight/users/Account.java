@@ -179,9 +179,6 @@ public class Account {
     @Column(name="report_share_enabled")
     private boolean reportSharingEnabled;
 
-    @Column(name="default_reporting_sharing")
-    private boolean defaultReportSharing;
-
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="creation_date")
     private Date creationDate;
@@ -678,14 +675,6 @@ public class Account {
 
     public void setReportSharingEnabled(boolean reportSharingEnabled) {
         this.reportSharingEnabled = reportSharingEnabled;
-    }
-
-    public boolean isDefaultReportSharing() {
-        return defaultReportSharing;
-    }
-
-    public void setDefaultReportSharing(boolean defaultReportSharing) {
-        this.defaultReportSharing = defaultReportSharing;
     }
 
     public List<AccountCreditCardBillingInfo> getBillingInfo() {
