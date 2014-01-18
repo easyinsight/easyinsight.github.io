@@ -101,17 +101,8 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "update_date")
     private Date dateUpdated;
 
-    @Column(name = "views")
-    private int viewCount;
-
-    @Column(name = "rating_count")
-    private int ratingCount;
-
     @Column(name = "solution_visible")
     private boolean solutionVisible;
-
-    @Column(name = "rating_average")
-    private double ratingAverage;
 
     @Column(name = "recommended_exchange")
     private boolean recommendedExchange;
@@ -121,9 +112,6 @@ public class AnalysisDefinition implements Cloneable {
 
     @Column(name = "publicly_visible")
     private boolean publiclyVisible;
-
-    @Column(name = "feed_visibility")
-    private boolean visibleAtFeedLevel;
 
     @Column(name="auto_setup_delivery")
     private boolean autoSetupDelivery;
@@ -314,14 +302,6 @@ public class AnalysisDefinition implements Cloneable {
         this.reportStructure = reportStructure;
     }
 
-    public boolean isVisibleAtFeedLevel() {
-        return visibleAtFeedLevel;
-    }
-
-    public void setVisibleAtFeedLevel(boolean visibleAtFeedLevel) {
-        this.visibleAtFeedLevel = visibleAtFeedLevel;
-    }
-
     public boolean isRootDefinition() {
         return rootDefinition;
     }
@@ -360,30 +340,6 @@ public class AnalysisDefinition implements Cloneable {
 
     public void setDateUpdated(Date dateUpdated) {
         this.dateUpdated = dateUpdated;
-    }
-
-    public int getViewCount() {
-        return viewCount;
-    }
-
-    public void setViewCount(int viewCount) {
-        this.viewCount = viewCount;
-    }
-
-    public int getRatingCount() {
-        return ratingCount;
-    }
-
-    public void setRatingCount(int ratingCount) {
-        this.ratingCount = ratingCount;
-    }
-
-    public double getRatingAverage() {
-        return ratingAverage;
-    }
-
-    public void setRatingAverage(double ratingAverage) {
-        this.ratingAverage = ratingAverage;
     }
 
     public String getUrlKey() {
@@ -742,7 +698,6 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setUrlKey(urlKey);
         analysisDefinition.setMarketplaceVisible(marketplaceVisible);
         analysisDefinition.setPubliclyVisible(publiclyVisible);
-        analysisDefinition.setVisibleAtFeedLevel(visibleAtFeedLevel);
         analysisDefinition.setSolutionVisible(solutionVisible);
         analysisDefinition.setAccountVisible(accountVisible);
         analysisDefinition.setMarmotScript(marmotScript);
