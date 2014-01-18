@@ -21,7 +21,6 @@ import com.easyinsight.analysis.tree.TreeEmbeddedController;
 import com.easyinsight.analysis.treemap.TreeMapEmbeddedController;
 import com.easyinsight.analysis.trend.TrendEmbeddedController;
 import com.easyinsight.analysis.trend.TrendGridEmbeddedController;
-import com.easyinsight.analysis.verticallist.CombinedVerticalListEmbeddedController;
 import com.easyinsight.analysis.verticallist.VerticalListEmbeddedController;
 import com.easyinsight.analysis.ytd.CompareYearsEmbeddedController;
 import com.easyinsight.analysis.ytd.YTDEmbeddedController;
@@ -87,9 +86,6 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.VERTICAL_LIST:
                 controller = VerticalListEmbeddedController;
-                break;
-            case AnalysisDefinition.COMBINED_VERTICAL_LIST:
-                controller = CombinedVerticalListEmbeddedController;
                 break;
             case AnalysisDefinition.TREND:
                 controller = TrendEmbeddedController;
