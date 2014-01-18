@@ -22,7 +22,7 @@ public class ColumnChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report) throws Exception {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
-
+        WSChartDefinition chart = (WSChartDefinition) report;
         JSONObject object = new JSONObject();
         // need series, need ticks
         AnalysisItem xAxisItem;
@@ -43,7 +43,6 @@ public class ColumnChartServlet extends HtmlServlet {
         Comparator c = null;
 
         JSONObject axes = ((WSChartDefinition) report).getAxes();
-        List<MultiColor> colors = null;
 
         if (report instanceof WSColumnChartDefinition) {
             WSColumnChartDefinition columnChartDefinition = (WSColumnChartDefinition) report;
@@ -60,9 +59,6 @@ public class ColumnChartServlet extends HtmlServlet {
                 c = new RowComparator(measures.get(0), false);
             }
             params.put("axes", axes);
-            if(columnChartDefinition.getMultiColors() != null && columnChartDefinition.getMultiColors().size() > 0) {
-                colors = columnChartDefinition.getMultiColors();
-            }
 
             if ("auto".equals(columnChartDefinition.getLabelPosition())) {
                 seriesDefaults.put("pointLabels", pointLabels);
@@ -92,9 +88,6 @@ public class ColumnChartServlet extends HtmlServlet {
                 fontSize = columnChartDefinition.getLabelFontSize();
             }
 
-            if(columnChartDefinition.getMultiColors() != null && columnChartDefinition.getMultiColors().size() > 0) {
-                colors = columnChartDefinition.getMultiColors();
-            }
         } else if (report instanceof WSPieChartDefinition) {
             WSPieChartDefinition pieChart = (WSPieChartDefinition) report;
             xAxisItem = pieChart.getXaxis();
@@ -107,17 +100,7 @@ public class ColumnChartServlet extends HtmlServlet {
             throw new RuntimeException();
         }
 
-        if(colors != null) {
-            Iterator<MultiColor> i = colors.iterator();
-            do {
-                MultiColor cc = i.next();
-                if(!cc.isColor1StartEnabled())
-                    i.remove();
-            } while(i.hasNext());
-            if(colors.size() == 0) {
-                colors = null;
-            }
-        }
+
 
         // drillthroughs
         Link l = xAxisItem.defaultLink();
@@ -135,6 +118,8 @@ public class ColumnChartServlet extends HtmlServlet {
 
         JSONArray series = new JSONArray();
 
+        List<String> colors = chart.createMultiColors();
+
         for(int i = 0;i < measures.size();i++) {
             blahArray.put(new JSONArray());
             if(measures.size() > 1) {
@@ -142,7 +127,7 @@ public class ColumnChartServlet extends HtmlServlet {
                 JSONObject curObject = new JSONObject();
                 JSONObject colorStop = new JSONObject();
                 colorStop.put("point", 0);
-                String colorString = String.format("'#%06X'", (0xFFFFFF & colors.get(i % colors.size()).getColor1Start()));
+                String colorString = String.format(colors.get(i % colors.size()));
                 colorStop.put("color", colorString);
                 colorObj.put(colorStop);
                 colorStop = new JSONObject();

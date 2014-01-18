@@ -324,4 +324,9 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         areaChart.put("styles", htmlReportMetadata.createStyleProperties());
         return areaChart;
     }
+
+    @Override
+    protected List<MultiColor> configuredMultiColors() {
+        return multiColors;
+    }
 }

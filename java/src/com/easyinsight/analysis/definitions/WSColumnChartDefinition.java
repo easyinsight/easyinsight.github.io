@@ -395,4 +395,9 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
         return axes;
     }
+
+    @Override
+    protected List<MultiColor> configuredMultiColors() {
+        return multiColors;
+    }
 }
