@@ -97,7 +97,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
     private boolean solutionVisible;
-    private boolean visibleAtFeedLevel;
     private boolean recommendedExchange;
     private boolean autoSetupDelivery;
     private boolean cacheable;
@@ -126,6 +125,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private int generalSizeLimit;
     private boolean passThroughFilters;
     private boolean enableLocalStorage;
+    private boolean canSave;
 
     private String defaultDate;
 
@@ -154,16 +154,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String customField1;
     private String customField2;
 
-    private boolean canSave;
-
-    public boolean isCanSave() {
-        return canSave;
-    }
-
-    public void setCanSave(boolean canSave) {
-        this.canSave = canSave;
-    }
-
     private List<FilterDefinition> filtersForDrillthrough;
 
     public boolean isPublicWithKey() {
@@ -176,6 +166,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public boolean isCacheFilters() {
         return cacheFilters;
+    }
+
+    public boolean isCanSave() {
+        return canSave;
+    }
+
+    public void setCanSave(boolean canSave) {
+        this.canSave = canSave;
     }
 
     public void setCacheFilters(boolean cacheFilters) {
@@ -561,14 +559,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public void optimizeSize() {
         filterDefinitions = null;
         addedItems = null;
-    }
-
-    public boolean isVisibleAtFeedLevel() {
-        return visibleAtFeedLevel;
-    }
-
-    public void setVisibleAtFeedLevel(boolean visibleAtFeedLevel) {
-        this.visibleAtFeedLevel = visibleAtFeedLevel;
     }
 
     public boolean isPubliclyVisible() {
@@ -1289,6 +1279,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
         JSONArray filters = new JSONArray();
         for (FilterDefinition f : getFilterDefinitions()) {
             boolean found = false;
+            if (!f.isShowOnReportView()) {
+                continue;
+            }
             for (FilterDefinition ff : parentFilters) {
                 if (f.sameFilter(ff)) {
                     found = true;
@@ -1342,11 +1335,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
         FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(id);
         Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
         Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
-        Map<Long, AnalysisItem> dataSourceFieldMap = new HashMap<Long, AnalysisItem>();
         for (AnalysisItem field : dataSource.getFields()) {
             map.put(field.getAnalysisItemID(), field);
             mapByName.put(field.toDisplay(), field);
-            dataSourceFieldMap.put(field.getAnalysisItemID(), field);
         }
         if (getAddedItems() != null) {
             for (AnalysisItem item : getAddedItems()) {
@@ -1392,28 +1383,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
             EIConnection conn = Database.instance().getConnection();
 
             try {
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.analysis_item_id FROM field_to_tag, feed_to_analysis_item WHERE account_tag_id = ? AND feed_to_analysis_item.feed_id = ? AND " +
-                        "field_to_tag.analysis_item_id = feed_to_analysis_item.analysis_item_id");
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ? AND field_to_tag.data_source_id = ?");
                 for (WeNeedToReplaceHibernateTag tag : tags) {
                     queryStmt.setLong(1, tag.getTagID());
                     queryStmt.setLong(2, getDataFeedID());
                     ResultSet rs = queryStmt.executeQuery();
-                    while (rs.next()) {
-                        long fieldID = rs.getLong(1);
-                        AnalysisItem analysisItem = dataSourceFieldMap.get(fieldID);
-                        if (accepts(analysisItem)) {
-                            positions.put(analysisItem, i++);
-                            if (set.contains(analysisItem)) {
-                                set.remove(analysisItem);
-                            }
-                            set.add(analysisItem);
-                        }
-                    }
-                }
-                PreparedStatement query2Stmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ?");
-                for (WeNeedToReplaceHibernateTag tag : tags) {
-                    query2Stmt.setLong(1, tag.getTagID());
-                    ResultSet rs = query2Stmt.executeQuery();
                     while (rs.next()) {
                         String fieldName = rs.getString(1);
                         AnalysisItem analysisItem = mapByName.get(fieldName);
@@ -1446,30 +1420,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
                             positions.put(item, i++);
                         }
                     }
-                    if (item != null) {
-                        EIConnection conn = Database.instance().getConnection();
-                        try {
-                            PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
-                                    "extension_type = ?");
-                            extStmt.setLong(1, item.getAnalysisItemID());
-                            extStmt.setInt(2, extensionType());
-                            ResultSet extRS = extStmt.executeQuery();
-                            if (extRS.next()) {
-                                long extID = extRS.getLong(1);
-                                Session session = Database.instance().createSession(conn);
-                                try {
-                                    ReportFieldExtension ext = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, extID).list().get(0);
-                                    ext.afterLoad();
-                                    item.setReportFieldExtension(ext);
-                                } finally {
-                                    session.close();
-                                }
-                            }
-                            extStmt.close();
-                        } finally {
-                            Database.closeConnection(conn);
-                        }
-                    }
                 }
             }
             fields = new ArrayList<AnalysisItem>(set);
@@ -1480,7 +1430,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         try {
 
             for (AnalysisItem analysisItem : fields) {
-                long fieldID = analysisItem.getAnalysisItemID();
+                //long fieldID = analysisItem.getAnalysisItemID();
                 try {
                     analysisItem = analysisItem.clone();
                 } catch (CloneNotSupportedException e) {
@@ -1488,10 +1438,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 }
                 clones.add(analysisItem);
 
-                PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
-                        "extension_type = ?");
-                extStmt.setLong(1, fieldID);
+                PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE display_name = ? and " +
+                        "extension_type = ? AND data_source_id = ?");
+                extStmt.setString(1, analysisItem.toDisplay());
                 extStmt.setInt(2, extensionType());
+                extStmt.setLong(3, dataFeedID);
                 ResultSet extRS = extStmt.executeQuery();
                 if (extRS.next()) {
                     long extID = extRS.getLong(1);
