@@ -58,6 +58,8 @@ public class DataSourceType {
     public static const TRELLO:int = 171;
     public static const INFUSIONSOFT:int = 177;
     public static const DISTINCT_CACHED:int = 193;
+    public static const GITHUB:int = 203;
+    public static const FRESHDESK:int = 208;
 
 
 
