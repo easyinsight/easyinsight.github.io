@@ -40,7 +40,6 @@ public class UserServiceResponse {
     private String accountName;
     private long personaID;
     private int dateFormat;
-    private boolean defaultReportSharing;
     private String sessionCookie;
     private boolean cookieLogin;
     private Scenario scenario;
@@ -162,7 +161,7 @@ public class UserServiceResponse {
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                                 user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                                user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
+                                user.getPersonaID(), account.getDateFormat(), true, user.isGuestUser(),
                                 account.getCurrencySymbol(), applicationSkin, account.getFirstDayOfWeek(),
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
                     new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst(), account.getPricingModel(),
@@ -182,7 +181,7 @@ public class UserServiceResponse {
                                boolean billingInformationGiven, int accountState,
                                UISettings uiSettings, String firstName, boolean freeUpgradePossible,
                                boolean firstLogin, Date lastLoginDate, String accountName,
-                               Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
+                               Long personaID, int dateFormat, boolean cookieLogin,
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
                                String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
                                boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst, int pricingModel, boolean reportMode,
@@ -207,7 +206,6 @@ public class UserServiceResponse {
         this.accountName = accountName;
         this.personaID = personaID == null ? 0 : personaID;
         this.dateFormat = dateFormat;
-        this.defaultReportSharing = defaultReportSharing;
         this.cookieLogin = cookieLogin;
         this.guestUser = guestUser;
         this.currencySymbol = currencySymbol;
@@ -385,14 +383,6 @@ public class UserServiceResponse {
 
     public void setCurrencySymbol(String currencySymbol) {
         this.currencySymbol = currencySymbol;
-    }
-
-    public boolean isDefaultReportSharing() {
-        return defaultReportSharing;
-    }
-
-    public void setDefaultReportSharing(boolean defaultReportSharing) {
-        this.defaultReportSharing = defaultReportSharing;
     }
 
     public boolean isCookieLogin() {

@@ -43,7 +43,6 @@ public class User extends EventDispatcher
     public var renewalOptionPossible:Boolean;
     public var personaID:int;
     public var dateFormat:int;
-    public var defaultReportSharing:Boolean;
     public var currencySymbol:String;
     public var applicationSkin:ApplicationSkinTO;
     private var _guestUser:Boolean;
@@ -139,7 +138,6 @@ public class User extends EventDispatcher
         _user.nonCookieLogin = response.nonCookieLogin;
         _user.personaID = response.personaID;
         _user.dateFormat = response.dateFormat;
-        _user.defaultReportSharing = response.defaultReportSharing;
         _user.scenario = response.scenario;
         _user.currencySymbol = response.currencySymbol;
         _user.applicationSkin = response.applicationSkin;
