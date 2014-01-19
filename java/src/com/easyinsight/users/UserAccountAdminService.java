@@ -588,8 +588,8 @@ public class UserAccountAdminService {
                     user.setPassword(PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256"));
                     user.setHashType("SHA-256");
                     user.setInitialSetupDone(!requirePasswordChange);
-                    user.setUserKey(RandomTextGenerator.generateText(25));
-                    user.setUserSecretKey(RandomTextGenerator.generateText(25));
+                    user.setUserKey(RandomTextGenerator.generateText(20));
+                    user.setUserSecretKey(RandomTextGenerator.generateText(20));
                     account.addUser(user);
                     final String sso;
                     if (account.getExternalLogin() != null) {
