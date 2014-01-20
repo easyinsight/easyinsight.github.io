@@ -663,6 +663,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>JSONMeServlet</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.JSONMeServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>ReportsByTagServlet</servlet-name>
         <servlet-class>com.easyinsight.html.ReportsByTagServlet</servlet-class>
     </servlet>
@@ -670,6 +675,11 @@
     <servlet-mapping>
         <servlet-name>FieldsServlet</servlet-name>
         <url-pattern>/json/fieldList</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>JSONMeServlet</servlet-name>
+        <url-pattern>/me.json</url-pattern>
     </servlet-mapping>
     
     <servlet-mapping>
