@@ -21,7 +21,7 @@ import java.util.Date;
  */
 public class LockServlet extends JSONServlet {
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
+    protected ResponseInfo processJSON(net.minidev.json.JSONObject document, EIConnection conn, HttpServletRequest request) throws Exception {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         PreparedStatement lockStmt =  conn.prepareStatement("SELECT LOCK_NAME, LOCK_TIME FROM DISTRIBUTED_LOCK");
         JSONArray arr = new JSONArray();
