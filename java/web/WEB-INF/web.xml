@@ -453,6 +453,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>DataSourceList</servlet-name>
+        <display-name>DataSourceList</display-name>
+        <servlet-class>com.easyinsight.api.v3.DataSourceListServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>RunReportJSON</servlet-name>
         <display-name>RunReportJSON</display-name>
         <servlet-class>com.easyinsight.api.v3.RunReportJSONServlet</servlet-class>
@@ -675,6 +681,11 @@
     <servlet-mapping>
         <servlet-name>FieldsServlet</servlet-name>
         <url-pattern>/json/fieldList</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>DataSourceList</servlet-name>
+        <url-pattern>/json/dataSourceList</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
