@@ -1928,6 +1928,7 @@ public class AnalysisService {
             session.beginTransaction();
             AnalysisDefinition savedReport = analysisStorage.getPersistableReport(reportID, session);
             WSAnalysisDefinition result = savedReport.createBlazeDefinition();
+            result.setCanSave(true);
             session.getTransaction().commit();
             return result;
         } catch (Exception e) {
