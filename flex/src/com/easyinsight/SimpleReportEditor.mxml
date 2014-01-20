@@ -929,9 +929,15 @@
 
         private function close():void {
             if (analysisChanged) {
-                createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    dispatchEvent(new AnalysisCloseEvent(feedMetadata.urlKey));
-                });
+                if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
+                    createSaveAsPromptWindow("You have unsaved changes to this report.", function ():void {
+                        dispatchEvent(new AnalysisCloseEvent(feedMetadata.urlKey));
+                    });
+                } else {
+                    createPromptWindow("You have unsaved changes to this report.", function ():void {
+                        dispatchEvent(new AnalysisCloseEvent(feedMetadata.urlKey));
+                    });
+                }
             } else {
                 dispatchEvent(new AnalysisCloseEvent(feedMetadata != null ? feedMetadata.urlKey : null));
             }
@@ -952,12 +958,44 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        private function createNoDiscardSaveAsPromptWindow(prompt:String, doneHandler:Function):void {
+            var window:SavePromptWindow = new SavePromptWindow();
+            window.defineOption("Save As", PromptEvent.PROMPT_SAVE);
+            window.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
+            window.prompt = prompt;
+            window.addEventListener(PromptEvent.PROMPT_SAVE, function (event:PromptEvent):void {
+                saveAs(true, function (event:SavedAnalysisEvent):void {
+                    AnalysisUtil.updateReport(analysisDefinition, event.report);
+                    doneHandler.call();
+                });
+            }, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         private function createPromptWindow(prompt:String, doneHandler:Function):void {
             var window:SavePromptWindow = new SavePromptWindow();
             window.prompt = prompt;
             window.addEventListener(PromptEvent.PROMPT_SAVE, function (event:PromptEvent):void {
                 save(true, function (event:SavedAnalysisEvent):void {
                     AnalysisUtil.updateReport(analysisDefinition, event.report);
+                    doneHandler.call();
+                });
+            }, false, 0, true);
+            window.addEventListener(PromptEvent.PROMPT_DISCARD, function (event:PromptEvent):void {
+                doneHandler.call();
+            }, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function createSaveAsPromptWindow(prompt:String, doneHandler:Function):void {
+            var window:SavePromptWindow = new SavePromptWindow();
+            window.prompt = prompt;
+            window.saveLabel = "Save As";
+            window.addEventListener(PromptEvent.PROMPT_SAVE, function (event:PromptEvent):void {
+
+                saveAs(true, function (event:SavedAnalysisEvent):void {
                     doneHandler.call();
                 });
             }, false, 0, true);
@@ -1024,13 +1062,25 @@
 
         private function goReport():void {
             if (analysisDefinition.analysisID == 0) {
-                createNoDiscardPromptWindow("You have unsaved changes to this report.", function ():void {
-                    reportView();
-                });
+                if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
+                    createNoDiscardSaveAsPromptWindow("You have unsaved changes to this report.", function ():void {
+                        reportView();
+                    });
+                } else {
+                    createNoDiscardPromptWindow("You have unsaved changes to this report.", function ():void {
+                        reportView();
+                    });
+                }
             } else if (analysisChanged) {
-                createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    reportView();
-                });
+                if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
+                    createSaveAsPromptWindow("You have unsaved changes to this report.", function ():void {
+                        reportView();
+                    });
+                } else {
+                    createPromptWindow("You have unsaved changes to this report.", function ():void {
+                        reportView();
+                    });
+                }
             } else {
                 reportView();
             }
@@ -1038,14 +1088,25 @@
 
         private function reportNavigation(event:ReportNavigationEvent):void {
             if (analysisChanged) {
-                createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    if (event.descriptor is InsightDescriptor) {
-                        dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
-                    } else if (event.descriptor is DashboardDescriptor) {
-                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
-                            initialFilters:event.filters})));
-                    }
-                });
+                if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
+                    createSaveAsPromptWindow("You have unsaved changes to this report.", function ():void {
+                        if (event.descriptor is InsightDescriptor) {
+                            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
+                        } else if (event.descriptor is DashboardDescriptor) {
+                            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
+                                initialFilters:event.filters})));
+                        }
+                    });
+                } else {
+                    createPromptWindow("You have unsaved changes to this report.", function ():void {
+                        if (event.descriptor is InsightDescriptor) {
+                            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
+                        } else if (event.descriptor is DashboardDescriptor) {
+                            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
+                                initialFilters:event.filters})));
+                        }
+                    });
+                }
             } else {
                 if (event.descriptor is InsightDescriptor) {
                     dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
@@ -1068,9 +1129,15 @@
 
         private function newReport():void {
             if (analysisChanged) {
-                createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID, feedMetadata.urlKey)));
-                });
+                if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
+                    createSaveAsPromptWindow("You have unsaved changes to this report.", function ():void {
+                        dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID, feedMetadata.urlKey)));
+                    });
+                } else {
+                    createPromptWindow("You have unsaved changes to this report.", function ():void {
+                        dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID, feedMetadata.urlKey)));
+                    });
+                }
             } else {
                 dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID, feedMetadata.urlKey)));
             }
@@ -1078,9 +1145,15 @@
 
         private function newDashboard():void {
             if (analysisChanged) {
-                createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID, urlKey: feedMetadata.urlKey})));
-                });
+                if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
+                    createSaveAsPromptWindow("You have unsaved changes to this report.", function ():void {
+                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID, urlKey: feedMetadata.urlKey})));
+                    });
+                } else {
+                    createPromptWindow("You have unsaved changes to this report.", function ():void {
+                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID, urlKey: feedMetadata.urlKey})));
+                    });
+                }
             } else {
                 dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID, urlKey: feedMetadata.urlKey})));
             }
@@ -1188,11 +1261,16 @@
         private var shape2:Shape;
         private var shape3:Shape;
 
-        private function saveAs():void {
-            var saveDialog:SaveDialog = SaveDialog(PopUpManager.createPopUp(this, SaveDialog, true));
+        private function saveAs(closeAfterSave:Boolean = false, saveHandler:Function = null):void {
+            var saveDialog:SaveDialog = new SaveDialog();
             dataView.updateExportMetadata();
+            if (saveHandler == null) {
+                saveHandler = saveAsReport;
+            }
+            saveDialog.closeAfterSave = closeAfterSave;
             saveDialog.analysisDefinition = analysisDefinition;
-            saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saveAsReport);
+            saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saveHandler, false, 0, true);
+            PopUpManager.addPopUp(saveDialog, this, true);
             PopUpUtil.centerPopUp(saveDialog);
         }
 
@@ -1259,13 +1337,21 @@
 
         private function onViewInHTML():void {
             if (analysisDefinition.analysisID == 0) {
-                createNoDiscardPromptWindow("You have unsaved changes to this report.", function ():void {
-                    navigateToURL(new URLRequest("/app/html/report/" + analysisDefinition.urlKey), "_blank");
-                });
+                if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
+                    createNoDiscardPromptWindow("You have unsaved changes to this report.", function ():void {
+                        navigateToURL(new URLRequest("/app/html/report/" + analysisDefinition.urlKey), "_blank");
+                    });
+                }
             } else if (analysisChanged) {
-                createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    navigateToURL(new URLRequest("/app/html/report/" + analysisDefinition.urlKey), "_blank");
-                });
+                if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
+                    createSaveAsPromptWindow("You have unsaved changes to this report.", function ():void {
+                        navigateToURL(new URLRequest("/app/html/report/" + analysisDefinition.urlKey), "_blank");
+                    });
+                } else {
+                    createPromptWindow("You have unsaved changes to this report.", function ():void {
+                        navigateToURL(new URLRequest("/app/html/report/" + analysisDefinition.urlKey), "_blank");
+                    });
+                }
             } else {
                 navigateToURL(new URLRequest("/app/html/report/" + analysisDefinition.urlKey), "_blank");
             }
@@ -1273,9 +1359,15 @@
 
         private function goAdmin():void {
             if (analysisChanged) {
-                createPromptWindow("You have unsaved changes to this report.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID , urlKey: feedMetadata.urlKey})));
-                });
+                if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
+                    createSaveAsPromptWindow("You have unsaved changes to this report.", function ():void {
+                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID , urlKey: feedMetadata.urlKey})));
+                    });
+                } else {
+                    createPromptWindow("You have unsaved changes to this report.", function ():void {
+                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID , urlKey: feedMetadata.urlKey})));
+                    });
+                }
             } else {
                 dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID , urlKey: feedMetadata.urlKey})));
             }
