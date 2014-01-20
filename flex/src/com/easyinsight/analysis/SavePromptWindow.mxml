@@ -14,6 +14,8 @@
 
         private var options:ArrayCollection = new ArrayCollection();
 
+        public var saveLabel:String = "Save";
+
         public function defineOption(optionName:String, optionEvent:String):void {
             var o:Object = new Object();
             o.name = optionName;
@@ -25,7 +27,7 @@
             super.createChildren();
             if (options.length == 0) {
                 var save:Object = new Object();
-                save.name = "Save";
+                save.name = saveLabel;
                 save.event = PromptEvent.PROMPT_SAVE;
                 options.addItem(save);
                 var discard:Object = new Object();

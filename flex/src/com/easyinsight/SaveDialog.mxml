@@ -20,6 +20,12 @@
 
         private var validators:Array;
 
+        private var _closeAfterSave:Boolean = false;
+
+        public function set closeAfterSave(value:Boolean):void {
+            _closeAfterSave = value;
+        }
+
         private function save():void {
             var results:Array = Validator.validateAll(validators);
             if (results.length == 0) {
@@ -55,6 +61,7 @@
             window.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, passThrough);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+            PopUpManager.removePopUp(this);
         }
 
         private function passThrough(event:SavedAnalysisEvent):void {
