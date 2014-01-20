@@ -258,6 +258,10 @@
         <from>/dataSources/([A-Za-z0-9]+).json</from>
         <to>/json/GetDataSource?dataSourceKey=$1</to>
     </rule>
+    <rule>
+        <from>/dataSources/([A-Za-z0-9]+)/fields.json</from>
+        <to>/json/fieldList?dataSourceID=$1</to>
+    </rule>
 
     <!--<rule>
         <from>/json/reports/([0-9]+)</from>

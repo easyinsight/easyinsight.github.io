@@ -459,6 +459,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>FieldsServlet</servlet-name>
+        <display-name>FieldsServlet</display-name>
+        <servlet-class>com.easyinsight.api.v3.FieldsServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>Commit</servlet-name>
         <display-name>Commit</display-name>
         <servlet-class>com.easyinsight.api.v3.CommitServlet</servlet-class>
@@ -660,6 +666,11 @@
         <servlet-name>ReportsByTagServlet</servlet-name>
         <servlet-class>com.easyinsight.html.ReportsByTagServlet</servlet-class>
     </servlet>
+
+    <servlet-mapping>
+        <servlet-name>FieldsServlet</servlet-name>
+        <url-pattern>/json/fieldList</url-pattern>
+    </servlet-mapping>
     
     <servlet-mapping>
         <servlet-name>ReportsByTagServlet</servlet-name>

@@ -13,9 +13,12 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.UserService;
 import com.easyinsight.users.UserServiceResponse;
 import com.easyinsight.userupload.UploadPolicy;
+import net.minidev.json.parser.JSONParser;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.ParsingException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import sun.misc.BASE64Decoder;
 
 import javax.servlet.ServletException;
@@ -23,6 +26,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -42,11 +46,8 @@ public abstract class JSONServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String authHeader = req.getHeader("Authorization");
         if (authHeader == null) {
-            resp.setContentType("text/html");
-            resp.setStatus(401);
             resp.addHeader("WWW-Authenticate", "Basic realm=\"Easy Insight\"");
-            resp.getOutputStream().write("Your credentials were rejected.".getBytes());
-            resp.getOutputStream().flush();
+            sendError(401, "Your credentials were rejected.", resp);
             return;
         }
         String headerValue = authHeader.split(" ")[1];
@@ -56,7 +57,7 @@ public abstract class JSONServlet extends HttpServlet {
         UserServiceResponse userResponse = null;
         if (p != -1) {
             String userID = userPass.substring(0, p);
-            String password = userPass.substring(p+1);
+            String password = userPass.substring(p + 1);
             try {
                 userResponse = SecurityUtil.authenticateKeys(userID, password);
             } catch (com.easyinsight.security.SecurityException se) {
@@ -65,10 +66,7 @@ public abstract class JSONServlet extends HttpServlet {
         }
 
         if (userResponse == null || !userResponse.isSuccessful()) {
-            resp.setContentType("text/html");
-            resp.setStatus(401);
-            resp.getOutputStream().write("Your credentials were rejected.".getBytes());
-            resp.getOutputStream().flush();
+            sendError(401, "Your credentials were rejected.", resp);
         } else {
             try {
                 SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
@@ -77,7 +75,7 @@ public abstract class JSONServlet extends HttpServlet {
                 ResponseInfo responseInfo;
                 try {
                     conn.setAutoCommit(false);
-                    responseInfo = processXML(null, conn, req);
+                    responseInfo = processJSON(null, conn, req);
                     conn.commit();
                 } catch (ServiceRuntimeException sre) {
                     conn.rollback();
@@ -100,10 +98,7 @@ public abstract class JSONServlet extends HttpServlet {
                 resp.getOutputStream().write(responseInfo.getXml().getBytes());
                 resp.getOutputStream().flush();
             } catch (Exception e) {
-                resp.setContentType("text/html");
-                resp.setStatus(400);
-                resp.getOutputStream().write("Your request was malformed.".getBytes());
-                resp.getOutputStream().flush();
+                sendError(400, "Your request was malformed.", resp);
             }
         }
     }
@@ -111,6 +106,11 @@ public abstract class JSONServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String authHeader = req.getHeader("Authorization");
+        if (authHeader == null) {
+            resp.addHeader("WWW-Authenticate", "Basic realm=\"Easy Insight\"");
+            sendError(401, "Your credentials were rejected.", resp);
+            return;
+        }
         String headerValue = authHeader.split(" ")[1];
         BASE64Decoder decoder = new BASE64Decoder();
         String userPass = new String(decoder.decodeBuffer(headerValue));
@@ -118,7 +118,7 @@ public abstract class JSONServlet extends HttpServlet {
         UserServiceResponse userResponse = null;
         if (p != -1) {
             String userID = userPass.substring(0, p);
-            String password = userPass.substring(p+1);
+            String password = userPass.substring(p + 1);
             try {
                 userResponse = SecurityUtil.authenticateKeys(userID, password);
             } catch (com.easyinsight.security.SecurityException se) {
@@ -127,52 +127,61 @@ public abstract class JSONServlet extends HttpServlet {
         }
 
         if (userResponse == null || !userResponse.isSuccessful()) {
-            resp.setContentType("text/xml");
-            resp.setStatus(401);
-            resp.getOutputStream().write("<response><code>401</code><message>Your credentials were rejected.</message></response>".getBytes());
-            resp.getOutputStream().flush();
+            sendError(401, "Your credentials were rejected.", resp);
         } else {
             try {
                 SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
                         userResponse.getAccountType(), userResponse.isAccountAdmin(), userResponse.getFirstDayOfWeek(), userResponse.getPersonaName());
+
+                InputStream is = req.getInputStream();
+                JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+                net.minidev.json.JSONObject postObject = (net.minidev.json.JSONObject) parser.parse(is);
                 EIConnection conn = Database.instance().getConnection();
                 ResponseInfo responseInfo;
                 try {
                     conn.setAutoCommit(false);
-
-                    Document doc = new Builder().build(req.getInputStream());
-                    responseInfo = processXML(doc, conn, req);
+                    responseInfo = processJSON(postObject, conn, req);
                     conn.commit();
                 } catch (ServiceRuntimeException sre) {
                     conn.rollback();
                     LogClass.error(sre);
-                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>" + sre.getMessage() + "</message>");
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, sre.getMessage());
                 } catch (ParsingException spe) {
                     conn.rollback();
-                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>" + spe.getMessage() + "</message>");
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, spe.getMessage());
                 } catch (Exception e) {
                     conn.rollback();
                     LogClass.error(e);
-                    responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, "<message>An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.</message>");
+                    responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, "An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
                 } finally {
                     conn.setAutoCommit(true);
                     Database.closeConnection(conn);
                     SecurityUtil.clearThreadLocal();
                 }
-                resp.setContentType("text/xml");
+                resp.setContentType("application/json");
                 resp.setStatus(responseInfo.getCode());
-                resp.getOutputStream().write(responseInfo.toResponse().getBytes());
+                resp.getOutputStream().write(responseInfo.getXml().getBytes());
                 resp.getOutputStream().flush();
             } catch (Exception e) {
-                resp.setContentType("text/xml");
-                resp.setStatus(400);
-                resp.getOutputStream().write("<response><code>400</code><message>Your XML was malformed.</message></response>".getBytes());
-                resp.getOutputStream().flush();
+                sendError(400, "Your request was malformed.", resp);
             }
         }
     }
 
-    protected abstract ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception;
+    protected abstract ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception;
+
+    protected void sendError(int status, String error, HttpServletResponse resp) throws IOException {
+        try {
+            resp.setContentType("application/json");
+            resp.setStatus(status);
+            JSONObject jo = new JSONObject();
+            jo.put("message", error);
+            resp.getOutputStream().write(jo.toString().getBytes());
+            resp.getOutputStream().flush();
+        } catch (JSONException e) {
+            LogClass.error(e);
+        }
+    }
 
     protected static class CallData {
         DataStorage dataStorage;
@@ -266,8 +275,8 @@ public abstract class JSONServlet extends HttpServlet {
     protected Map<Long, Boolean> findDataSourceIDsByName(String dataSourceName, Connection conn) throws SQLException {
         Map<Long, Boolean> dataSourceIDs = new HashMap<Long, Boolean>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.UNCHECKED_API_ENABLED" +
-                    " FROM UPLOAD_POLICY_USERS, DATA_FEED, user WHERE " +
-                    "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.user_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND (DATA_FEED.FEED_NAME = ? OR " +
+                " FROM UPLOAD_POLICY_USERS, DATA_FEED, user WHERE " +
+                "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.user_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND (DATA_FEED.FEED_NAME = ? OR " +
                 "DATA_FEED.API_KEY = ?) AND DATA_FEED.VISIBLE = ?");
         queryStmt.setLong(1, SecurityUtil.getUserID());
         queryStmt.setString(2, dataSourceName);

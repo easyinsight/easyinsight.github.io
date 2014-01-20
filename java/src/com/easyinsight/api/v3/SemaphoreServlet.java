@@ -20,7 +20,7 @@ import java.util.concurrent.Semaphore;
 public class SemaphoreServlet extends JSONServlet {
 
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
+    protected ResponseInfo processJSON(net.minidev.json.JSONObject document, EIConnection conn, HttpServletRequest request) throws Exception {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         Map<Long, Semaphore> map = UserThreadMutex.summarize();
         JSONArray arr = new JSONArray();

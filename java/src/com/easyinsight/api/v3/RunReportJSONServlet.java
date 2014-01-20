@@ -20,7 +20,7 @@ import java.text.SimpleDateFormat;
  */
 public class RunReportJSONServlet extends JSONServlet {
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
+    protected ResponseInfo processJSON(net.minidev.json.JSONObject document, EIConnection conn, HttpServletRequest request) throws Exception {
         String reportIDString = request.getParameter("reportID");
         InsightResponse insightResponse;
         try {

@@ -18,8 +18,9 @@ import java.sql.Timestamp;
  * Time: 11:33 PM
  */
 public class BenchmarkServlet extends JSONServlet {
+
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
+    protected ResponseInfo processJSON(net.minidev.json.JSONObject document, EIConnection conn, HttpServletRequest request) throws Exception {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         PreparedStatement preparedStatement = conn.prepareStatement("SELECT COUNT(*), SUM(ELAPSED_TIME), CATEGORY FROM BENCHMARK WHERE BENCHMARK_DATE >= ? GROUP BY CATEGORY");
         int minutes = Integer.parseInt(request.getParameter("minutes"));
