@@ -674,9 +674,19 @@
     </servlet>
 
     <servlet>
+        <servlet-name>JSONAddRowsServlet</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.JSONAddRowServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>ReportsByTagServlet</servlet-name>
         <servlet-class>com.easyinsight.html.ReportsByTagServlet</servlet-class>
     </servlet>
+
+    <servlet-mapping>
+        <servlet-name>JSONAddRowsServlet</servlet-name>
+        <url-pattern>/json/addRows</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>FieldsServlet</servlet-name>
