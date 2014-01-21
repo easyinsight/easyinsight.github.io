@@ -69,7 +69,10 @@ public class JSONAddRowServlet extends JSONServlet {
                         curRow.addValue(analysisItem.getKey(), dateFormat.parse((String) val));
                     }
                 } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                    curRow.addValue(analysisItem.getKey(), ((Number) val).doubleValue());
+                    if(val instanceof Number)
+                        curRow.addValue(analysisItem.getKey(), ((Number) val).doubleValue());
+                    else
+                        curRow.addValue(analysisItem.getKey(), Double.parseDouble((String) val));
                 } else {
                     curRow.addValue(analysisItem.getKey(), val.toString());
                 }
