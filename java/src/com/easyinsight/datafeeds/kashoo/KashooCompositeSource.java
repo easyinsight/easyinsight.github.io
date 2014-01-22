@@ -9,6 +9,9 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.ParsingException;
@@ -18,6 +21,7 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -90,26 +94,28 @@ public class KashooCompositeSource extends CompositeServerDataSource {
         try {
             getToken(ksUserName, ksPassword);
             return null;
-        } catch (ParsingException pe) {
+        } catch (ParseException pe) {
             return "These credentials were rejected as invalid by Kashoo. Please double check your values for username and password.";
         } catch (Exception e) {
             return e.getMessage();
         }
     }
 
-    protected String getToken(String userName, String password) throws IOException, ParsingException {
+    protected String getToken(String userName, String password) throws IOException, ParseException {
         HttpClient client = new HttpClient();
         client.getParams().setAuthenticationPreemptive(true);
         Credentials defaultcreds = new UsernamePasswordCredentials(userName, password);
         client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
         // TODO: change to a post to kashoo, per https://www.kashoo.com/api-docs/
-        HttpMethod restMethod = new GetMethod("https://www.pivotaltracker.com/services/v3/tokens/active");
-        restMethod.setRequestHeader("Accept", "application/xml");
-        restMethod.setRequestHeader("Content-Type", "application/xml");
-        Document doc;
+        PostMethod restMethod = new PostMethod("https://api.kashoo.com/api/authTokens");
+        restMethod.setRequestHeader("Accept", "application/json");
+        restMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        restMethod.addParameter("duration", "90000000");
         client.executeMethod(restMethod);
-        doc = new Builder().build(restMethod.getResponseBodyAsStream());
-        return doc.query("/token/guid/text()").get(0).getValue();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object postObject = parser.parse(restMethod.getResponseBodyAsStream());
+
+        return postObject.toString();
     }
 
     @Override
@@ -127,6 +133,11 @@ public class KashooCompositeSource extends CompositeServerDataSource {
         Set<FeedType> types = new HashSet<FeedType>();
         types.add(FeedType.KASHOO_BUSINESSES);
         return types;
+    }
+
+    @Override
+    public FeedType getFeedType() {
+        return FeedType.KASHOO_COMPOSITE;
     }
 
     @Override

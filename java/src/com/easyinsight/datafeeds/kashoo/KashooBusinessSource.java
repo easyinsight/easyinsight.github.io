@@ -11,6 +11,8 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
+import net.minidev.json.JSONObject;
+import nu.xom.ParsingException;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,9 +48,17 @@ public class KashooBusinessSource extends KashooBaseSource {
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
+        System.out.println("HERE");
         Token tokenObj = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.KASHOO, parentDefinition.getDataFeedID(), false, conn);
         // TODO: change to json encoding for auth key, per https://www.kashoo.com/api-docs/
         HttpClient httpClient = getHttpClient(tokenObj.getTokenValue(), "");
+        try {
+            JSONObject resp = runRestRequest("/api/businesses", httpClient, parentDefinition);
+            System.out.println(resp.toString());
+
+        } catch (ParsingException e) {
+            throw new RuntimeException(e);
+        }
         DataSet dataSet = new DataSet();
         return dataSet;
     }

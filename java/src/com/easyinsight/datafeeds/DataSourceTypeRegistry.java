@@ -28,6 +28,8 @@ import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;*/
 import com.easyinsight.datafeeds.infusionsoft.*;
 import com.easyinsight.datafeeds.insightly.*;
 import com.easyinsight.datafeeds.json.JSONDataSource;
+import com.easyinsight.datafeeds.kashoo.KashooBusinessSource;
+import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
 import com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource;
@@ -348,6 +350,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.INFUSIONSOFT_CAMPAIGNEE, InfusionsoftCampaigneeSource.class);
         registerType(FeedType.INFUSIONSOFT_CAMPAIGN_STEP, InfusionsoftCampaignStep.class);
         registerType(FeedType.INFUSIONSOFT_TAG_GROUP, InfusionsoftContactGroupCategorySource.class);
+        registerType(FeedType.KASHOO_COMPOSITE, KashooCompositeSource.class);
+        registerType(FeedType.KASHOO_BUSINESSES, KashooBusinessSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
