@@ -84,7 +84,7 @@ public class JSONAddRowServlet extends JSONServlet {
         if ("add".equals(action) || ((action == null || "".equals(action)) && "post".equals(request.getMethod().toLowerCase()))) {
             dataStorage.insertData(ds);
             dataStorage.commit();
-        } else if("replace".equals(action) || ("".equals(action) && "put".equals(request.getMethod().toLowerCase()))) {
+        } else if("replace".equals(action) || ((action == null || "".equals(action)) && "put".equals(request.getMethod().toLowerCase()))) {
             dataStorage.truncate();
             dataStorage.insertData(ds);
             dataStorage.commit();
