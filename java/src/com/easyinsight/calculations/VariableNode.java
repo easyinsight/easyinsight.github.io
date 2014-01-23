@@ -171,6 +171,9 @@ public class VariableNode extends CalculationTreeNode {
                             }
                         }
                         if (!matched) {
+                            if (warnings == null) {
+                                warnings = new ArrayList<String>();
+                            }
                             warnings.add("We found multiple fields matching the name of " + s + ".");
                             analysisItem = analysisItems.get(0);
                         }
