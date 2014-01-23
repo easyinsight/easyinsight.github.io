@@ -22,14 +22,6 @@ public class ReportControlBar extends FlowBox {
 
     public function ReportControlBar() {
         super();
-        setStyle("verticalAlign", "middle");
-        setStyle("backgroundColor", 0xFFFFFF);
-        setStyle("borderStyle", "solid");
-        setStyle("borderThickness", 1);
-        setStyle("paddingLeft", 5);
-        setStyle("paddingTop", 5);
-        setStyle("paddingRight", 5);
-        setStyle("paddingBottom", 5);
         horizontalScrollPolicy = "off";
         verticalScrollPolicy = "off";
         addEventListener(FlexEvent.UPDATE_COMPLETE, adapterFlowBoxUpdateCompleteHandler);
