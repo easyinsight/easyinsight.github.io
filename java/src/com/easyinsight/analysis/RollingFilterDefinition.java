@@ -162,7 +162,7 @@ public class RollingFilterDefinition extends FilterDefinition {
             for (CustomRollingInterval interval : intervals) {
                 if (interval.getIntervalNumber() == this.getInterval()) {
                     if (interval.isStartDefined()) {
-                        Value value = new ReportCalculation(interval.getStartScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata,
+                        Value value = new ReportCalculation(interval.getStartScript()).filterApply(report, allFields, keyMap, displayMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata,
                                 ((AnalysisDateDimension) getField()).isTimeshift());
                         if (value.type() == Value.DATE) {
                             DateValue dateValue = (DateValue) value;
@@ -204,7 +204,7 @@ public class RollingFilterDefinition extends FilterDefinition {
                         startDate = cal.getTime();
                     }
                     if (interval.isEndDefined()) {
-                        Value value = new ReportCalculation(interval.getEndScript()).filterApply(report, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata,
+                        Value value = new ReportCalculation(interval.getEndScript()).filterApply(report, allFields, keyMap, displayMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata,
                                 ((AnalysisDateDimension) getField()).isTimeshift());
                         if (value.type() == Value.DATE) {
                             DateValue dateValue = (DateValue) value;
