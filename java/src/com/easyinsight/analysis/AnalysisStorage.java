@@ -93,7 +93,7 @@ public class AnalysisStorage {
                         if (FunctionFactory.functionRunsOnReportLoad(line)) {
                             try {
                                 new ReportCalculation(line).apply(analysisDefinition, new ArrayList<AnalysisItem>(), new HashMap<String, List<AnalysisItem>>(),
-                                    new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                                    new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
                             } catch (Exception e) {
                                 LogClass.error(e);
                             }
@@ -160,7 +160,8 @@ public class AnalysisStorage {
                         if (FunctionFactory.functionRunsOnReportLoad(line)) {
                             try {
                                 new ReportCalculation(line).apply(analysisDefinition, new ArrayList<AnalysisItem>(), new HashMap<String, List<AnalysisItem>>(),
-                                        new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                                        new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
+                                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
                             } catch (Exception e) {
                                 LogClass.error(e);
                             }
@@ -212,7 +213,8 @@ public class AnalysisStorage {
                         if (FunctionFactory.functionRunsOnReportLoad(line)) {
                             try {
                                 new ReportCalculation(line).apply(analysisDefinition, new ArrayList<AnalysisItem>(), new HashMap<String, List<AnalysisItem>>(),
-                                        new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
+                                        new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
+                                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata);
                             } catch (Exception e) {
                                 LogClass.error(e);
                             }

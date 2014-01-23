@@ -126,6 +126,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean passThroughFilters;
     private boolean enableLocalStorage;
     private boolean canSave;
+    private List<FilterSetDescriptor> filterSets;
 
     private String defaultDate;
 
@@ -174,6 +175,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setCanSave(boolean canSave) {
         this.canSave = canSave;
+    }
+
+    public List<FilterSetDescriptor> getFilterSets() {
+        return filterSets;
+    }
+
+    public void setFilterSets(List<FilterSetDescriptor> filterSets) {
+        this.filterSets = filterSets;
     }
 
     public void setCacheFilters(boolean cacheFilters) {
@@ -830,11 +839,13 @@ public abstract class WSAnalysisDefinition implements Serializable {
         KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
         Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
         Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
+        Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
+
         if (getReportRunMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
-                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allItems, keyMap, displayMap, analysisItems, false, true, structure);
+                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allItems, keyMap, displayMap, unqualifiedDisplayMap, analysisItems, false, true, structure);
                 populate(map, items, insightRequestMetadata);
             }
         }
