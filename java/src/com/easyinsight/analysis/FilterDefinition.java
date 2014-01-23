@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
@@ -56,12 +55,6 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name = "apply_before_aggregation")
     private boolean applyBeforeAggregation = true;
 
-    @Column(name="flexible_date_filter")
-    private boolean flexibleDateFilter;
-
-    @Column(name="default_date_filter")
-    private boolean defaultDateFilter;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "filter_id")
@@ -107,8 +100,38 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name = "flex_id")
     private long flexID;
 
+    // filter sets, filter assignments
+
+    // for a given report...
+    // which filters should it match up against?
+
+    // I kind of want to do tags...
+    //
+
     @Transient
     transient private String pipelineName;
+
+    @Column(name="parent_child_label")
+    private String parentChildLabel;
+
+    @Column(name="child_to_parent_label")
+    private String childToParentLabel;
+
+    public String getChildToParentLabel() {
+        return childToParentLabel;
+    }
+
+    public void setChildToParentLabel(String childToParentLabel) {
+        this.childToParentLabel = childToParentLabel;
+    }
+
+    public String getParentChildLabel() {
+        return parentChildLabel;
+    }
+
+    public void setParentChildLabel(String parentChildLabel) {
+        this.parentChildLabel = parentChildLabel;
+    }
 
     public boolean isCustomizable() {
         return customizable;
@@ -137,22 +160,6 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     public void setSection(int section) {
         this.section = section;
-    }
-
-    public boolean isFlexibleDateFilter() {
-        return flexibleDateFilter;
-    }
-
-    public void setFlexibleDateFilter(boolean flexibleDateFilter) {
-        this.flexibleDateFilter = flexibleDateFilter;
-    }
-
-    public boolean isDefaultDateFilter() {
-        return defaultDateFilter;
-    }
-
-    public void setDefaultDateFilter(boolean defaultDateFilter) {
-        this.defaultDateFilter = defaultDateFilter;
     }
 
     public String getFieldChoiceFilterLabel() {
