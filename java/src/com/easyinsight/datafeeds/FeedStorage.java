@@ -101,8 +101,9 @@ public class FeedStorage {
                 "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, " +
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, INHERIT_ACCOUNT_API_SETTINGS," +
                 "CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE, last_refresh_start, marmotscript, " +
-                "concrete_fields_editable, refresh_marmot_script, refresh_behavior, kpi_source, field_cleanup_enabled, field_lookup_enabled) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "concrete_fields_editable, refresh_marmot_script, refresh_behavior, kpi_source, field_cleanup_enabled, field_lookup_enabled," +
+                "manual_report_run, default_tag_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -145,7 +146,14 @@ public class FeedStorage {
         insertDataFeedStmt.setInt(i++, feedDefinition.getDataSourceType());
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isKpiSource());
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isFieldCleanupEnabled());
-        insertDataFeedStmt.setBoolean(i, feedDefinition.isFieldLookupEnabled());
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.isFieldLookupEnabled());
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.isManualReportRun());
+        if (feedDefinition.getDefaultFieldTag() == 0) {
+            insertDataFeedStmt.setNull(i, Types.BIGINT);
+        } else {
+            insertDataFeedStmt.setLong(i, feedDefinition.getDefaultFieldTag());
+        }
+
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
         feedDefinition.setDataFeedID(feedID);
@@ -713,7 +721,7 @@ public class FeedStorage {
                 "FEED_SIZE = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
                 "API_KEY = ?, unchecked_api_enabled = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ?," +
                 "CREATE_DATE = ?, UPDATE_DATE = ?, ACCOUNT_VISIBLE = ?, LAST_REFRESH_START = ?, MARMOTSCRIPT = ?, CONCRETE_FIELDS_EDITABLE = ?, REFRESH_MARMOT_SCRIPT = ?," +
-                "REFRESH_BEHAVIOR = ?, KPI_SOURCE = ?, field_cleanup_enabled = ?, field_lookup_enabled = ? " +
+                "REFRESH_BEHAVIOR = ?, KPI_SOURCE = ?, field_cleanup_enabled = ?, field_lookup_enabled = ?, manual_report_run = ?, default_tag_id = ? " +
                 "WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         int i = 1;
@@ -753,6 +761,12 @@ public class FeedStorage {
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isKpiSource());
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isFieldCleanupEnabled());
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isFieldLookupEnabled());
+        updateDataFeedStmt.setBoolean(i++, feedDefinition.isManualReportRun());
+        if (feedDefinition.getDefaultFieldTag() == 0) {
+            updateDataFeedStmt.setNull(i++, Types.BIGINT);
+        } else {
+            updateDataFeedStmt.setLong(i++, feedDefinition.getDefaultFieldTag());
+        }
         updateDataFeedStmt.setLong(i, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
@@ -810,7 +824,7 @@ public class FeedStorage {
                 "UPDATE_DATE, FEED_SIZE," +
                 "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, API_KEY, unchecked_api_enabled, " +
                 "VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, LAST_REFRESH_START, MARMOTSCRIPT, CONCRETE_FIELDS_EDITABLE, refresh_marmot_script, kpi_source, " +
-                "field_cleanup_enabled, field_lookup_enabled " +
+                "field_cleanup_enabled, field_lookup_enabled, manual_report_run, default_tag_id " +
                 "FROM DATA_FEED WHERE " +
                 "DATA_FEED_ID = ?");
         queryFeedStmt.setLong(1, identifier);
@@ -856,10 +870,12 @@ public class FeedStorage {
             feedDefinition.setRefreshMarmotScript(rs.getString(i++));
             feedDefinition.setKpiSource(rs.getBoolean(i++));
             feedDefinition.setFieldCleanupEnabled(rs.getBoolean(i++));
-            feedDefinition.setFieldLookupEnabled(rs.getBoolean(i));
+            feedDefinition.setFieldLookupEnabled(rs.getBoolean(i++));
             feedDefinition.setAddonReports(getAddonReports(identifier, (EIConnection) conn));
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
             feedDefinition.setDataSourceBehavior(feedDefinition.getDataSourceType());
+            feedDefinition.setManualReportRun(rs.getBoolean(i++));
+            feedDefinition.setDefaultFieldTag(rs.getLong(i));
             feedDefinition.customLoad(conn);
         } else {
             throw new RuntimeException("Could not find data source " + identifier);
@@ -1025,6 +1041,12 @@ public class FeedStorage {
         for (EIDescriptor dataSource : descriptorList.values()) {
             dataSources.add((DataSourceDescriptor) dataSource);
         }
+        Collections.sort(dataSources, new Comparator<DataSourceDescriptor>() {
+
+            public int compare(DataSourceDescriptor dataSourceDescriptor, DataSourceDescriptor dataSourceDescriptor1) {
+                return dataSourceDescriptor.getName().compareToIgnoreCase(dataSourceDescriptor1.getName());
+            }
+        });
         return dataSources;
     }
 
