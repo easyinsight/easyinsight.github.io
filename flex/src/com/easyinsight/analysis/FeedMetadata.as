@@ -26,6 +26,9 @@ import mx.collections.ArrayCollection;
     public var dataSourceType:int;
     public var allowRefactor:Boolean;
     public var defaultMaxRecords:int;
+    public var defaultManualRun:Boolean = false;
+    public var dataSourceFields:ArrayCollection;
+    public var tags:ArrayCollection;
 		
 		public function FeedMetadata()
 			{

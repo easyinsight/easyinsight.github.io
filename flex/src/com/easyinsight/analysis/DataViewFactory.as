@@ -11,10 +11,12 @@ import com.easyinsight.report.ReportCanvas;
 import com.easyinsight.report.ReportEventProcessor;
 
 import com.easyinsight.report.ReportNavigationEvent;
+import com.easyinsight.report.RunReportCanvas;
 
 import flash.display.DisplayObject;
 import flash.events.Event;
 import flash.events.EventDispatcher;
+import flash.events.MouseEvent;
 import flash.utils.getQualifiedClassName;
 
 import mx.binding.utils.BindingUtils;
@@ -22,8 +24,11 @@ import mx.binding.utils.ChangeWatcher;
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.Canvas;
+import mx.containers.HBox;
 import mx.containers.VBox;
+import mx.controls.Button;
 import mx.core.IUIComponent;
+import mx.core.UIComponent;
 import mx.core.UIComponent;
 import mx.events.DragEvent;
 import mx.managers.DragManager;
@@ -182,6 +187,22 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _dataSourceFields = value;
     }*/
 
+    private function hideControlBar(event:MouseEvent):void {
+        var button:Button = event.currentTarget as Button;
+        if (showingControlBar) {
+            button.label = "Show Fields";
+            UIComponent(_controlBar).includeInLayout = false;
+            UIComponent(_controlBar).visible = false;
+        } else {
+            button.label = "Hide";
+            UIComponent(_controlBar).includeInLayout = true;
+            UIComponent(_controlBar).visible = true;
+        }
+        showingControlBar = !showingControlBar;
+    }
+
+    private var showingControlBar:Boolean = true;
+
     override protected function createChildren():void {
         super.createChildren();
 
@@ -203,12 +224,21 @@ public class DataViewFactory extends VBox implements IRetrievable {
         if (Object(_controlBar).hasOwnProperty("feedMetadata")) {
             _controlBar["feedMetadata"] = _feedMetadata;
         }
-        var box2:Box = new Box();
+        var box2:HBox = new HBox();
+
+        box2.setStyle("verticalAlign", "middle");
+        box2.setStyle("backgroundColor", 0xFFFFFF);
+        box2.setStyle("borderStyle", "solid");
+        box2.setStyle("borderThickness", 1);
         box2.setStyle("paddingLeft", 5);
         box2.setStyle("paddingRight", 5);
         box2.setStyle("paddingBottom", 5);
         box2.setStyle("paddingTop", 5);
         box2.percentWidth = 100;
+        var collapseButton:Button = new Button();
+        collapseButton.label = "Hide";
+        collapseButton.addEventListener(MouseEvent.CLICK, hideControlBar);
+        box2.addChild(collapseButton);
         addChild(box2);
         box2.addChild(_controlBar as DisplayObject);
 
@@ -233,9 +263,16 @@ public class DataViewFactory extends VBox implements IRetrievable {
         canvas.addChild(reportCanvas);
         addChild(canvas);
         //if (overlayIndex == 0) {
+
+        if (!defaultManualRun) {
             noData = new NoData();
             currentComponent = noData;
             reportCanvas.addChildAt(noData, 0);
+        } else {
+            runReportCanvas = new RunReportCanvas();
+            currentComponent = runReportCanvas;
+            reportCanvas.addChildAt(runReportCanvas, 0);
+        }
 
         //}
         notConfigured = new NotConfigured();
@@ -285,7 +322,8 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     private var noData:NoData;
-    
+    private var runReportCanvas:RunReportCanvas;
+
     private var notConfigured:NotConfigured;
 
     private var canvas:Canvas;
@@ -456,6 +494,8 @@ public class DataViewFactory extends VBox implements IRetrievable {
         }
     }
 
+    public var defaultManualRun:Boolean;
+
     private function showNotConfigured():void {
         if (!notConfigured.parent) {
             if (currentComponent) {
@@ -616,9 +656,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.filterDefinitions = source.filterDefinitions;
         target.policy = source.policy;
         target.addedItems = source.addedItems;
-        target.viewCount = source.viewCount;
-        target.ratingCount = source.ratingCount;
-        target.ratingAverage = source.ratingAverage;
         target.canSaveDirectly = source.canSaveDirectly;
         target.description = source.description;
         target.marketplaceVisible = source.marketplaceVisible;

@@ -51,6 +51,7 @@
         import com.easyinsight.analysis.FeedNode;
         import com.easyinsight.analysis.FieldDoubleClickEvent;
         import com.easyinsight.analysis.FieldEditorEvent;
+        import com.easyinsight.analysis.FieldFilterWindow;
         import com.easyinsight.analysis.GenericDefinitionEditWindow;
         import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.IReportController;
@@ -83,6 +84,7 @@
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.listing.ReportEditorAnalyzeSource;
+        import com.easyinsight.listing.Tag;
         import com.easyinsight.report.AdditionalPropsWindow;
         import com.easyinsight.report.CustomFieldWindow;
 
@@ -99,6 +101,8 @@
         import com.easyinsight.util.ErrorReportView;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.SaveButton;
+        import com.easyinsight.util.TagSelectionEvent;
         import com.easyinsight.util.UserAudit;
 
         import mx.binding.utils.BindingUtils;
@@ -298,9 +302,9 @@
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, loadingEvent);
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, loadingEvent);
                 rightBox.removeChild(dataView);
-                //if (!defaultManualRun) {
+                if (!defaultManualRun) {
                     viewWatcher.unwatch();
-                //}
+                }
             }
             if (analysisDefinition == null) {
                 this.analysisDefinition = dataViewFactory.createNewDefinition();
@@ -320,8 +324,8 @@
                 transformContainer.addFilterDefinition(filterDefinition);
             }
             dataView = dataViewFactory;
-            //dataView.adHocMode = !defaultManualRun;
-            dataView.adHocMode = true;
+            dataView.adHocMode = !defaultManualRun;
+            //dataView.adHocMode = true;
             dataView.dataSourceID = dataSourceID;
             dataView.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             dataView.addEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
@@ -330,11 +334,12 @@
             dataView.feedMetadata = feedMetadata;
             //dataView.dataSourceFields = dataSourceFields;
 
-            //if (!defaultManualRun) {
+            if (!defaultManualRun) {
                 viewWatcher = BindingUtils.bindProperty(dataViewFactory, "adHocMode", adHocButton, "adHoc");
-            /*} else {
-                dataView.overlayIndex = 5;
-            }*/
+            } else {
+                //dataView.overlayIndex = 5;
+                dataView.defaultManualRun = true;
+            }
             rightBox.addChildAt(dataViewFactory, 1);
             dataViewFactory.refresh();
         }
@@ -522,10 +527,10 @@
 
         public var embedded:Boolean;
 
-        /*[Bindable]
+        [Bindable]
         private var defaultManualRun:Boolean;
 
-        private var dataSourceFields:ArrayCollection;*/
+        /*private var dataSourceFields:ArrayCollection;*/
 
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
             try {
@@ -540,6 +545,18 @@
                 rendererFactory = cFactory;
                 dataSourceName = this.feedMetadata.dataSourceName;
                 joinsCustomizable = this.feedMetadata.customJoinsAllowed;
+                defaultManualRun = feedMetadata.defaultManualRun;
+                if (defaultManualRun) {
+                    adHocButton.parent.removeChild(adHocButton);
+                    var runReportButton:SaveButton = new SaveButton();
+                    runReportButton.label = "Run Report";
+                    runReportButton.setStyle("fontSize", 12);
+                    runReportButton.addEventListener(MouseEvent.CLICK, runReport);
+                    reportButtonsBox.addChildAt(runReportButton, 3);
+                    var runReportSpacer:Spacer = new Spacer();
+                    runReportSpacer.percentWidth = 100;
+                    reportButtonsBox.addChildAt(runReportSpacer, 4);
+                }
                 /*defaultManualRun = feedMetadata.defaultManualRun;
                 if (defaultManualRun) {
                     adHocButton.parent.removeChild(adHocButton);
@@ -657,6 +674,9 @@
                         }
                     }
                 }
+                if (feedMetadata.tags != null && feedMetadata.tags.length > 0) {
+                    possibleTags = feedMetadata.tags;
+                }
                 loading = false;
             } catch (e:Error) {
                 var errorWindow:ErrorReportView = new ErrorReportView();
@@ -665,6 +685,26 @@
                 PopUpUtil.centerPopUp(errorWindow);
             }
         }
+
+        private function fieldConfig(event:MouseEvent):void {
+            var button:UIComponent = event.currentTarget as UIComponent;
+            var window:FieldFilterWindow = new FieldFilterWindow();
+            window.selectedTags = selectedTags;
+            window.tags = possibleTags;
+            window.addEventListener(TagSelectionEvent.TAG_SELECT, onTagSelect, false, 0, true);
+            PopUpManager.addPopUp(window, this);
+            window.x = button.x + 5;
+            window.y = button.y + 60;
+        }
+
+        private function onTagSelect(event:TagSelectionEvent):void {
+            selectedTags = event.tags;
+            fieldGrid.dataProvider.refresh();
+        }
+
+        private var possibleTags:ArrayCollection;
+
+        private var selectedTags:ArrayCollection;
 
         private function preserveOpenState():Object {
             var openState:Object = new Object();
@@ -1407,11 +1447,29 @@
             if (view == null) return false;
             var children:ICollectionView = view.getChildren(a);
             if (children == null) return false;
+            var needTags:Boolean = selectedTags != null && selectedTags.length > 0;
+            var tagsValid:Boolean = !needTags;
+
             if (a.analysisItem == null) {
                 children.filterFunction = filterFunction;
                 children.refresh();
+            } else {
+                if (needTags) {
+                    var foundTag:Boolean = false;
+                    if (a.analysisItem.tags != null) {
+                        for each (var tag:Tag in a.analysisItem.tags) {
+                            for each (var dsTag:Tag in selectedTags) {
+                                if (dsTag.id == tag.id) {
+                                    foundTag = true;
+                                }
+                            }
+                        }
+                    }
+                    tagsValid = foundTag;
+                }
             }
-            return children.length > 0 || a.unqualifiedDisplayName.toLowerCase().indexOf(searchText.toLowerCase()) != -1;
+
+            return children.length > 0 || (a.unqualifiedDisplayName.toLowerCase().indexOf(searchText.toLowerCase()) != -1 && tagsValid);
 
         }
 
@@ -1443,7 +1501,7 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        private function runReport():void {
+        private function runReport(event:Event = null):void {
             dataView.forceRetrieve();
         }
 
@@ -1520,7 +1578,7 @@
                                           backgroundAlpha="1"
                                           feedID="{dataSourceID}"
                                           analysisItems="{wrappers}" minHeight="40" backgroundColor="#FFFFFF"
-                                          report="{analysisDefinition}">
+                                          report="{analysisDefinition}" context="{TransformContainer.REPORT_EDITOR}">
                 <mx:Button icon="@Embed(source='../../../assets/funnel.png')"
                            toolTip="Create a New Filter..." click="transformContainer.addNewFilter()"
                            label="New Filter"/>
@@ -1532,18 +1590,20 @@
         <mx:HDividedBox id="hbox1" height="100%" width="100%" paddingLeft="10" paddingRight="10">
 
             <mx:Canvas height="100%" width="240" borderThickness="1" borderColor="#DCE2F8"
-                       borderStyle="solid" dropShadowEnabled="true" x="0" y="0">
+                       borderStyle="solid" dropShadowEnabled="true" x="0" y="0" id="controlsCanvas">
                 <mx:Box width="100%" backgroundColor="#333333" horizontalAlign="center" verticalAlign="middle"
                         height="28" x="0" y="0">
-                    <mx:Label text="{fieldsLabel}" color="0xFFFFFF" fontWeight="bold" maxWidth="220"/>
+                    <mx:Label text="{fieldsLabel}" color="0xFFFFFF" fontWeight="bold" maxWidth="220" id="fieldLabelBlah"/>
                 </mx:Box>
-                <mx:Box backgroundColor="#444444" y="28" width="100%" paddingTop="5" paddingBottom="5"
+                <mx:HBox backgroundColor="#444444" y="28" width="100%" paddingTop="5" paddingBottom="5"
                         horizontalAlign="center">
                     <mx:Button label="Add a Custom Field" styleName="grayButton" click="customField()"
                                id="customFieldButton"
                                icon="@Embed(source='../../../assets/code.png')"/>
-                </mx:Box>
+                    <mx:Button icon="@Embed(source='../../../assets/gear.png')" styleName="grayButton" click="fieldConfig(event)"/>
+                </mx:HBox>
                 <mx:Image source="@Embed(source='../../../assets/icon-search-black.png')" x="2" y="62"/>
+
 
                 <mx:TextInput id="searchBox" x="20" y="60" height="24" width="100%"
                               change="onSearchTextChange(event)"/>
