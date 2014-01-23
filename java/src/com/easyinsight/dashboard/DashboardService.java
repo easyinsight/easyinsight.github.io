@@ -860,11 +860,12 @@ public class DashboardService {
         KeyDisplayMapper mapper = KeyDisplayMapper.create(feed.getFields());
         Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
         Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
+        Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
         if (dashboard.getMarmotScript() != null && !"".equals(dashboard.getMarmotScript().trim())) {
             StringTokenizer toker = new StringTokenizer(dashboard.getMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
-                new ReportCalculation(line).apply(dashboard, feed.getFields(), keyMap, displayMap, feed, conn, dlsFilters);
+                new ReportCalculation(line).apply(dashboard, feed.getFields(), keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters);
             }
         }
         dashboard.visit(new AnalysisItemFilterVisitor(feed, dlsFilters, conn));
@@ -1069,6 +1070,7 @@ public class DashboardService {
         private EIConnection conn;
         private Map<String, List<AnalysisItem>> keyMap;
         private Map<String, List<AnalysisItem>> displayMap;
+        private Map<String, List<AnalysisItem>> unqualifiedDisplayMap;
 
         private AnalysisItemFilterVisitor(Feed feed, List<FilterDefinition> dlsFilters, EIConnection conn) throws SQLException {
             this.feed = feed;
@@ -1076,6 +1078,7 @@ public class DashboardService {
             this.conn = conn;
             keyMap = new HashMap<String, List<AnalysisItem>>();
             displayMap = new HashMap<String, List<AnalysisItem>>();
+            unqualifiedDisplayMap = new HashMap<String, List<AnalysisItem>>();
             for (AnalysisItem analysisItem : feed.getFields()) {
                 List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
                 if (items == null) {
@@ -1094,6 +1097,15 @@ public class DashboardService {
                 }
                 items.add(analysisItem);
             }
+
+            for (AnalysisItem analysisItem : feed.getFields()) {
+                List<AnalysisItem> items = unqualifiedDisplayMap.get(analysisItem.toUnqualifiedDisplay());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    unqualifiedDisplayMap.put(analysisItem.toUnqualifiedDisplay(), items);
+                }
+                items.add(analysisItem);
+            }
         }
 
         public void accept(DashboardElement dashboardElement) {
@@ -1105,14 +1117,14 @@ public class DashboardService {
                             StringTokenizer toker = new StringTokenizer(filterDefinition.getMarmotScript(), "\r\n");
                             while (toker.hasMoreTokens()) {
                                 String line = toker.nextToken();
-                                new ReportCalculation(line).apply(filterDefinition, feed.getFields(), keyMap, displayMap, feed, conn, dlsFilters);
+                                new ReportCalculation(line).apply(filterDefinition, feed.getFields(), keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters);
                             }
                         }
                         if (feed.getDataSource().getMarmotScript() != null) {
                             StringTokenizer toker = new StringTokenizer(feed.getDataSource().getMarmotScript(), "\r\n");
                             while (toker.hasMoreTokens()) {
                                 String line = toker.nextToken();
-                                new ReportCalculation(line).apply(filterDefinition, feed.getFields(), keyMap, displayMap, feed, conn, dlsFilters);
+                                new ReportCalculation(line).apply(filterDefinition, feed.getFields(), keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters);
                             }
                         }
                     }
