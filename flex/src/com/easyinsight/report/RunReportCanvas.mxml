@@ -6,8 +6,8 @@
             backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
             cornerRadius="10">
         <util:AutoSizeTextArea
-                text="Adjust the filters to match your desired search and click the Run the Report button to actually retrieve data for this report."
-                visible="true" fontSize="18" width="400"
+                text="Click Run Report to display data."
+                visible="true" fontSize="18" width="295"
                 editable="false" backgroundAlpha="0" verticalScrollPolicy="off" horizontalScrollPolicy="off"/>
     </mx:Box>
 </mx:Box>
