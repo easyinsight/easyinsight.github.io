@@ -174,7 +174,7 @@ TextArea {
 Button {
     fontFamily: "Lucida Grande";
     fontWeight: normal;
-   cornerRadius: 10;
+   cornerRadius: 5;
     highlightAlphas: 1, 0.32;
   fillAlphas: 1, 1, 1, 1;
    fillColors: #cccccc, #ffffff, #cccccc, #ffffff;
