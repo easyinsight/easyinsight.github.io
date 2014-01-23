@@ -32,7 +32,7 @@ create table filter_set_stub (
   constraint filter_set_stub_ibfk1 foreign key (filter_set_id) references filter_set (filter_set_id) on delete cascade
 );
 
-drop table report_to_filter_set_stub;
+drop table if exists report_to_filter_set_stub;
 create table report_to_filter_set_stub (
   report_to_filter_set_stub_id bigint(20) auto_increment not null,
   filter_set_stub_id bigint(20) not null,
