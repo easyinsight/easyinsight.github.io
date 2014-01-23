@@ -1245,14 +1245,14 @@ public class AnalysisService {
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             if (startDate != null) {
                 Value value = new ReportCalculation(startDate).filterApply(null, null, new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
-                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata, false);
+                        new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata, false);
                 filterDateTest.setStartDate(value.toString());
             } else {
                 filterDateTest.setStartDate("");
             }
             if (endDate != null) {
                 Value value = new ReportCalculation(endDate).filterApply(null, null, new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
-                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata, false);
+                        new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata, false);
                 filterDateTest.setEndDate(value.toString());
             } else {
                 filterDateTest.setEndDate("");
@@ -2063,6 +2063,7 @@ public class AnalysisService {
 
             Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+            Map<String, List<AnalysisItem>> unqualifiedDisplayMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, UniqueKey> map = new NamespaceGenerator().generate(dataSourceID, report.getAddonReports(), conn);
             try {
                 tree = CalculationHelper.createTree(calculationString, true);
@@ -2071,13 +2072,14 @@ public class AnalysisService {
                     KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
                     keyMap = mapper.getKeyMap();
                     displayMap = mapper.getDisplayMap();
+                    unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
                 }
                 if (report != null && report.getFilterDefinitions() != null) {
                     for (FilterDefinition filter : report.getFilterDefinitions()) {
                         filter.calculationItems(displayMap);
                     }
                 }
-                visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), map);
+                visitor = new ResolverVisitor(keyMap, displayMap, unqualifiedDisplayMap, new FunctionFactory(), map);
                 tree.accept(visitor);
             } catch (RecognitionException e) {
                 e.printStackTrace();
