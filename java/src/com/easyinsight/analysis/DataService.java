@@ -19,6 +19,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.StandardReportPipeline;
 //import net.spy.memcached.MemcachedClient;
+import com.easyinsight.tag.Tag;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -527,6 +528,10 @@ public class DataService {
             Collection<AnalysisItem> feedItems = feed.getFields();
             // need to apply renames from the com.easyinsight.analysis definition here?
             List<AnalysisItem> sortedList = new ArrayList<AnalysisItem>(feedItems);
+            Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+            for (AnalysisItem item : feedItems) {
+                map.put(item.toDisplay(), item);
+            }
             Collections.sort(sortedList, new Comparator<AnalysisItem>() {
 
                 public int compare(AnalysisItem o1, AnalysisItem o2) {
@@ -549,6 +554,27 @@ public class DataService {
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
             feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
+            feedMetadata.setDefaultManualRun(feed.getDataSource().isManualReportRun());
+            PreparedStatement tagStmt = conn.prepareStatement("SELECT account_tag.account_tag_id, account_tag.tag_name, field_to_tag.display_name FROM " +
+                    "field_to_tag, account_tag WHERE field_to_tag.account_tag_id = account_tag.account_tag_id AND " +
+                    "field_to_tag.data_source_id = ?");
+            tagStmt.setLong(1, feedID);
+            ResultSet tagRS = tagStmt.executeQuery();
+            Set<Tag> tags = new HashSet<Tag>();
+            while (tagRS.next()) {
+                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), false, false, false);
+                tags.add(tag);
+                String name = tagRS.getString(3);
+                AnalysisItem item = map.get(name);
+                if (item != null) {
+                    if (item.getTags() == null) {
+                        item.setTags(new ArrayList<Tag>());
+                    }
+                    item.getTags().add(tag);
+                }
+            }
+            feedMetadata.setTags(new ArrayList<Tag>(tags));
+            tagStmt.close();
             PreparedStatement ps = conn.prepareStatement("SELECT DEFAULT_MAX_RECORDS FROM ACCOUNT WHERE ACCOUNT_ID = ?");
             ps.setLong(1, SecurityUtil.getAccountID());
             ResultSet rs = ps.executeQuery();
@@ -2154,11 +2180,13 @@ public class DataService {
             }*/
 
             for (FilterDefinition filter : new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions())) {
-                if (filter.isFlexibleDateFilter()) {
+                String obj = filter.getParentChildLabel();
+                if (obj != null) {
                     Iterator<FilterDefinition> iter = analysisDefinition.getFilterDefinitions().iterator();
                     while (iter.hasNext()) {
                         FilterDefinition existingFilter = iter.next();
-                        if (existingFilter.isDefaultDateFilter()) {
+                        String child = existingFilter.getChildToParentLabel();
+                        if (child != null && child.equals(obj)) {
                             iter.remove();
                             filter.setField(existingFilter.getField());
                         }
@@ -2183,6 +2211,7 @@ public class DataService {
             KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields);
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
             Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
+            Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
 
 
             if (analysisDefinition.getMarmotScript() != null) {
@@ -2191,7 +2220,7 @@ public class DataService {
                     String line = toker.nextToken();
                     if (!FunctionFactory.functionRunsOnReportLoad(line)) {
                         try {
-                            new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                            new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters, insightRequestMetadata);
                         } catch (FunctionException fe) {
                             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + line + ".", null));
                         } catch (ReportException re) {
@@ -2217,7 +2246,7 @@ public class DataService {
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
                     try {
-                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters, insightRequestMetadata);
                     } catch (FunctionException fe) {
                         throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + line + ".", null));
                     } catch (ReportException re) {
