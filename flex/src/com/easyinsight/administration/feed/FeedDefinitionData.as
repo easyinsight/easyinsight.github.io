@@ -46,6 +46,8 @@ import mx.collections.ArrayCollection;
         public var addonReports:ArrayCollection;
         public var fieldCleanupEnabled:Boolean;
         public var fieldLookupEnabled:Boolean;
+        public var manualReportRun:Boolean;
+        public var defaultFieldTag:int;
 		
 		public function FeedDefinitionData()
 		{
