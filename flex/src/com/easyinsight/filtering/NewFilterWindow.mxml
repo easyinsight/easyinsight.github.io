@@ -58,6 +58,8 @@
 
         public var filterSource:int = REPORT_LEVEL;
 
+        public var filterMetadata:FilterMetadata;
+
         public var reportType:int;
 
         private function newFieldFilter():void {

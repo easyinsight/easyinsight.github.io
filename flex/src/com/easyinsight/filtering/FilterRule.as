@@ -1,17 +1,16 @@
 /**
  * Created with IntelliJ IDEA.
  * User: jamesboe
- * Date: 10/3/13
- * Time: 4:28 PM
+ * Date: 1/20/14
+ * Time: 3:01 PM
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.filtering {
-public class FilterMetadata {
+import mx.containers.HBox;
 
-    public var key:String;
-    public var context:int;
+public class FilterRule extends HBox {
 
-    public function FilterMetadata() {
+    public function FilterRule() {
     }
 }
 }

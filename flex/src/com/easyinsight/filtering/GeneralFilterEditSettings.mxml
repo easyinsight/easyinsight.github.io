@@ -2,6 +2,8 @@
 <util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
@@ -27,6 +29,8 @@
 
         [Bindable]
         private var showOnReportView:Boolean;
+
+        public var filterMetadata:FilterMetadata;
 
         private var _detailClass:Class;
 
@@ -62,8 +66,8 @@
             fieldFilter = _filterDefinition.fieldChoiceFilterLabel;
             section = _filterDefinition.section;
             customizable = _filterDefinition.customizable;
-            defaultDate = _filterDefinition.defaultDateFilter;
-            flexibleDate = _filterDefinition.flexibleDateFilter;
+            childParent = _filterDefinition.childToParentLabel;
+            parentChild = _filterDefinition.parentChildLabel;
             if (_filterDefinition.field != null) {
                 filterField = filterDefinition.field.display + " - " + filterDefinition.field.key.createString();
             }
@@ -81,6 +85,9 @@
             rebuild = true;
         }
 
+        [Bindable]
+        private var rules:ArrayCollection;
+
         override protected function createChildren():void {
             super.createChildren();
             if (_detailClass != null) {
@@ -93,9 +100,35 @@
                 }
                 filterDetailBox.addChild(filterDetailEditor as DisplayObject);
             }
-
+            rules = new ArrayCollection();
+            if (_filterDefinition.parentChildLabel != null && _filterDefinition.parentChildLabel != "") {
+                var drRule:FilterRuleDefinition = new FilterRuleDefinition();
+                drRule.data = { parentChildLabel: _filterDefinition.parentChildLabel};
+                drRule.type = FilterRuleDefinition.DASHBOARD_TO_REPORT_LINK;
+                drRule.label = "For any report level filter in this dashboard matching the property of " + _filterDefinition.parentChildLabel + ", apply that filter's field to this filter instead.";
+                rules.addItem(drRule);
+            } else if (_filterDefinition.childToParentLabel != null && _filterDefinition.childToParentLabel != "") {
+                var rdRule:FilterRuleDefinition = new FilterRuleDefinition();
+                rdRule.data = { parentChildLabel: _filterDefinition.childToParentLabel};
+                rdRule.type = FilterRuleDefinition.REPORT_TO_DASHBOARD_LINK;
+                rdRule.label = "Apply the field used in this filter to any dashboard or dashboard stack level filter matching the property of " + _filterDefinition.childToParentLabel + ".";
+                rules.addItem(rdRule);
+            }
 
             //coreBox.addChildAt(editor, index);
+        }
+
+        public function addRule():void {
+            var window:AddFilterRuleWindow = new AddFilterRuleWindow();
+            window.context = filterMetadata.context;
+            window.settings = this;
+            window.addEventListener(FilterRuleEvent.RULE_ADDED, onRuleAdded, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onRuleAdded(event:FilterRuleEvent):void {
+            rules.addItem(event.ruleDefinition);
         }
 
         private var editorState:State;
@@ -153,9 +186,9 @@
             _filterDefinition.customizable = customizableCheckbox.selected;
             _filterDefinition.minimumRole = int(roleComboBox.selectedItem.data);
             _filterDefinition.fieldChoiceFilterLabel = fieldFilterInput.text;
-            _filterDefinition.defaultDateFilter = defaultDateCheckbox.selected;
-            _filterDefinition.flexibleDateFilter = flexibleDateCheckbox.selected;
             _filterDefinition.section = sectionInput.value;
+            _filterDefinition.parentChildLabel = parentChild;
+            _filterDefinition.childToParentLabel = childParent;
             dispatchEvent(new FilterEditEvent(_filterDefinition, previousDefinition, null, rebuild));
             PopUpManager.removePopUp(this);
         }
@@ -182,11 +215,21 @@
         [Bindable]
         private var customizable:Boolean;
 
-        [Bindable]
-        private var flexibleDate:Boolean;
+        public var parentChild:String;
+        public var childParent:String;
 
-        [Bindable]
-        private var defaultDate:Boolean;
+        private function deleteSelected():void {
+            var selected:ArrayCollection = new ArrayCollection();
+            for each (var rule:FilterRuleDefinition in rules) {
+                if (rule.selected) {
+                    selected.addItem(rule);
+                }
+            }
+            for each (var selectedRule:FilterRuleDefinition in selected) {
+                selectedRule.clearRule(this);
+                rules.removeItemAt(rules.getItemIndex(selectedRule));
+            }
+        }
 		]]>
 	</mx:Script>
 	<mx:VBox id="coreBox">
@@ -241,14 +284,20 @@
                 <mx:FormItem label="Use Field Choice Filter:">
                     <mx:TextInput id="fieldFilterInput" text="{fieldFilter}"/>
                 </mx:FormItem>
-                <mx:FormItem label="Default Date Filter:">
-                    <mx:CheckBox id="defaultDateCheckbox" selected="{defaultDate}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Flexible Date Filter:">
-                    <mx:CheckBox id="flexibleDateCheckbox" selected="{flexibleDate}"/>
-                </mx:FormItem>
             </mx:Form>
         </mx:HBox>
+        <mx:HRule width="100%"/>
+        <mx:Label text="Filter Rules"/>
+        <mx:HBox>
+            <util:SaveButton label="Add Rule..." click="addRule()" fontSize="12"/>
+            <util:SaveButton label="Delete Selected" click="deleteSelected()" fontSize="12"/>
+        </mx:HBox>
+        <mx:DataGrid dataProvider="{rules}" variableRowHeight="true" headerHeight="0">
+            <mx:columns>
+                <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" sortable="false"/>
+                <mx:DataGridColumn dataField="label" wordWrap="true" width="600"/>
+            </mx:columns>
+        </mx:DataGrid>
         <mx:HRule width="100%"/>
         <mx:Box id="filterDetailBox"/>
         <mx:HRule width="100%"/>
