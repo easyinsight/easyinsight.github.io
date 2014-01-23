@@ -24,13 +24,14 @@ public class CalculationLogic {
             KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
             Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
+            Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
             if (report != null && report.getFilterDefinitions() != null) {
                 for (FilterDefinition filter : report.getFilterDefinitions()) {
                     filter.calculationItems(displayMap);
                 }
             }
             Map<String, UniqueKey> namespaceMap = pipelineData.getNamespaceMap();
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), namespaceMap);
+            visitor = new ResolverVisitor(keyMap, displayMap, unqualifiedDisplayMap, new FunctionFactory(), namespaceMap);
             calculationTreeNode.accept(visitor);
 
             calculateResults(calculationTreeNode, calculationMetadata);

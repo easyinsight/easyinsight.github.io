@@ -63,6 +63,7 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
 
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
         Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+        Map<String, List<AnalysisItem>> unqualifiedDisplayMap = new HashMap<String, List<AnalysisItem>>();
 
         List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
 
@@ -77,8 +78,9 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
                 KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
                 keyMap = mapper.getKeyMap();
                 displayMap = mapper.getDisplayMap();
+                unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
             }
-            visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), structure.getNamespaceMap());
+            visitor = new ResolverVisitor(keyMap, displayMap, unqualifiedDisplayMap, new FunctionFactory(), structure.getNamespaceMap());
             tree.accept(visitor);
         } catch (FunctionException fe) {
             LogClass.error("On calculating " + derivationCode, fe);

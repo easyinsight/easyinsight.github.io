@@ -10,6 +10,7 @@ import java.util.*;
 public class KeyDisplayMapper {
     private Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
     private Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+    private Map<String, List<AnalysisItem>> unqualifiedDisplayMap = new HashMap<String, List<AnalysisItem>>();
 
     private KeyDisplayMapper(Collection<AnalysisItem> allFields) {
         if (allFields != null) {
@@ -26,6 +27,14 @@ public class KeyDisplayMapper {
                 if (items == null) {
                     items = new ArrayList<AnalysisItem>(1);
                     displayMap.put(analysisItem.toDisplay(), items);
+                }
+                items.add(analysisItem);
+            }
+            for (AnalysisItem analysisItem : allFields) {
+                List<AnalysisItem> items = unqualifiedDisplayMap.get(analysisItem.toUnqualifiedDisplay());
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>(1);
+                    unqualifiedDisplayMap.put(analysisItem.toUnqualifiedDisplay(), items);
                 }
                 items.add(analysisItem);
             }
@@ -54,6 +63,10 @@ public class KeyDisplayMapper {
 
     public static KeyDisplayMapper create(Collection<AnalysisItem> allFields) {
         return new KeyDisplayMapper(allFields);
+    }
+
+    public Map<String, List<AnalysisItem>> getUnqualifiedDisplayMap() {
+        return unqualifiedDisplayMap;
     }
 
     public Map<String, List<AnalysisItem>> getKeyMap() {
