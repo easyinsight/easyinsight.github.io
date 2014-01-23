@@ -193,11 +193,13 @@ public abstract class Pipeline {
         KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields);
         Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
         Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
+        Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getDisplayMap();
         if (report.getReportRunMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(report.getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
-                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allFields, keyMap, displayMap, new HashSet<AnalysisItem>(), false, true, structure);
+                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allFields, keyMap, displayMap, unqualifiedDisplayMap,
+                        new HashSet<AnalysisItem>(), false, true, structure);
                 allNeededAnalysisItems.addAll(items);
             }
         }
