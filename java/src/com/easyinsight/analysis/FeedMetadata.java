@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.datafeeds.FeedNode;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.tag.Tag;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,6 +33,33 @@ public class FeedMetadata implements Serializable {
     private List<IntentionSuggestion> suggestions;
     private boolean allowRefactor;
     private int defaultMaxRecords;
+    private boolean defaultManualRun;
+    private List<AnalysisItem> dataSourceFields;
+    private List<Tag> tags;
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
+    public boolean isDefaultManualRun() {
+        return defaultManualRun;
+    }
+
+    public void setDefaultManualRun(boolean defaultManualRun) {
+        this.defaultManualRun = defaultManualRun;
+    }
+
+    public List<AnalysisItem> getDataSourceFields() {
+        return dataSourceFields;
+    }
+
+    public void setDataSourceFields(List<AnalysisItem> dataSourceFields) {
+        this.dataSourceFields = dataSourceFields;
+    }
 
     public int getDefaultMaxRecords() {
         return defaultMaxRecords;
