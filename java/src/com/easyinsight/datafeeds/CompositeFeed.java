@@ -696,9 +696,6 @@ public class CompositeFeed extends Feed {
             }
         }
 
-
-        postProcessFields(analysisItems, queryNodeMap, dataSet, conn);
-
         for (IJoin postJoin : postJoins) {
             QueryStateNode queryStateNode = queryNodeMap.get(postJoin.targetQueryNodeKey());
             DataSet targetSet = queryStateNode.produceDataSet(insightRequestMetadata);
@@ -738,32 +735,7 @@ public class CompositeFeed extends Feed {
         return dataSet;
     }
 
-    private void postProcessFields(Set<AnalysisItem> analysisItems, Map<QueryNodeKey, QueryStateNode> queryNodeMap, DataSet dataSet, EIConnection conn) {
-        List<PostProcessOperation> ops;
-        try {
-            ops = ReportCalculation.processOperations(analysisItems, getFeedID(), getFields(), conn);
-        } catch (RecognitionException e) {
-            throw new RuntimeException(e);
-        }
-        for (PostProcessOperation op : ops) {
-            AnalysisItem sourceItem = op.getConnection().getSourceItem();
-            AnalysisItem targetItem = op.getConnection().getTargetItem();
-            DataSet originalSet = queryNodeMap.get(new DataSourceQueryNodeKey(((DerivedKey) op.getFromField().getKey()).getFeedID())).originalDataSet;
-            Map<Value, Value> rowMap = new HashMap<Value, Value>();
-            for (IRow row : originalSet.getRows()) {
-                Value indexValue = row.getValue(targetItem);
-                Value targetValue = row.getValue(op.getFromField());
-                rowMap.put(indexValue, targetValue);
-            }
-            for (IRow row : dataSet.getRows()) {
-                Value indexValue = row.getValue(sourceItem);
-                Value value = rowMap.get(indexValue);
-                if (value != null) {
-                    row.addValue(op.getTarget().createAggregateKey(), value);
-                }
-            }
-        }
-    }
+
 
     private FilterValueDefinition createJoinFilter(QueryStateNode sourceNode, DataSet dataSet, QueryStateNode targetNode, CompositeFeedConnection connection) {
         FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
