@@ -68,6 +68,7 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
             map.put(field.getKey().toKeyString(), field);
         }
         try {
+            Calendar cal = Calendar.getInstance();
             DataSet dataSet = new DataSet();
             Connection connection = createConnection();
             Statement statement = connection.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
@@ -118,13 +119,26 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
                         case Types.DATE:
                             java.util.Date d = rs.getDate(i);
                             if(!rs.wasNull()) {
-                                row.addValue(analysisItem.getKey(), d);
+                                cal.setTime(d);
+                                int year = cal.get(Calendar.YEAR);
+                                if (year == 1752 || year == 1753) {
+
+                                } else {
+                                    row.addValue(analysisItem.getKey(), d);
+                                }
                             }
                             break;
                         case Types.TIME:
                             Time t = rs.getTime(i);
                             if(!rs.wasNull()) {
-                                row.addValue(analysisItem.getKey(), new java.util.Date(t.getTime()));
+                                java.util.Date date = new java.util.Date(t.getTime());
+                                cal.setTime(date);
+                                int year = cal.get(Calendar.YEAR);
+                                if (year == 1752 || year == 1753) {
+
+                                } else {
+                                    row.addValue(analysisItem.getKey(), date);
+                                }
                             }
                             break;
                         case Types.TIMESTAMP:
@@ -132,7 +146,13 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
                                 Timestamp timestamp = rs.getTimestamp(i);
                                 if (!rs.wasNull()) {
                                     Date date = new Date(timestamp.getTime());
-                                    row.addValue(analysisItem.getKey(), date);
+                                    cal.setTime(date);
+                                    int year = cal.get(Calendar.YEAR);
+                                    if (year == 1752 || year == 1753) {
+
+                                    } else {
+                                        row.addValue(analysisItem.getKey(), date);
+                                    }
                                 }
                             } catch (SQLException e) {
                                 // ignore
