@@ -23,7 +23,6 @@ alter table filter add child_to_parent_label varchar(255) default null;
 alter table filter drop flexible_date_filter;
 alter table filter drop default_date_filter;
 alter table data_feed add manual_report_run tinyint(4) not null default 0;
-alter table data_feed add show_tags tinyint(4) not null default 0;
 alter table data_feed add default_tag_id bigint(20) default null;
 
 create table filter_set_stub (
