@@ -13,6 +13,7 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.Pipeline;
+import com.easyinsight.tag.Tag;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
@@ -39,6 +40,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_key_id")
     private Key key;
+
+
+    @Transient
+    private List<Tag> tags;
 
     @Transient
     private transient boolean loaded;
@@ -167,6 +172,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 
     public String getUnqualifiedDisplayName() {
