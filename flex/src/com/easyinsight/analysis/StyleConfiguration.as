@@ -73,6 +73,9 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Field Cleanup Enabled", "fieldCleanupEnabled", dataSource.fieldCleanupEnabled, dataSource));
         items.addItem(new CheckBoxReportFormItem("Field Lookup Enabled", "fieldLookupEnabled", dataSource.fieldLookupEnabled, dataSource));
         items.addItem(new CheckBoxReportFormItem("Manual Report Run", "manualReportRun", dataSource.manualReportRun, dataSource));
+        var dashboardService:RemoteObject = new RemoteObject();
+        dashboardService.destination = "analysisDefinition";
+        items.addItem(new ServerLoadComboBoxReportFormItem("Preferred Tag", "defaultFieldTag", dataSource.defaultFieldTag, dataSource, dashboardService.getFieldTags));
         return items;
     }
 

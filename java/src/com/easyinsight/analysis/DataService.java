@@ -555,6 +555,7 @@ public class DataService {
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
             feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
             feedMetadata.setDefaultManualRun(feed.getDataSource().isManualReportRun());
+            long defaultTag = feed.getDataSource().getDefaultFieldTag();
             PreparedStatement tagStmt = conn.prepareStatement("SELECT account_tag.account_tag_id, account_tag.tag_name, field_to_tag.display_name FROM " +
                     "field_to_tag, account_tag WHERE field_to_tag.account_tag_id = account_tag.account_tag_id AND " +
                     "field_to_tag.data_source_id = ?");
@@ -563,7 +564,12 @@ public class DataService {
             Set<Tag> tags = new HashSet<Tag>();
             while (tagRS.next()) {
                 Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), false, false, false);
-                tags.add(tag);
+                if (!tags.contains(tag)) {
+                    tags.add(tag);
+                    if (tag.getId() == defaultTag) {
+                        feedMetadata.setTagDefault(tag);
+                    }
+                }
                 String name = tagRS.getString(3);
                 AnalysisItem item = map.get(name);
                 if (item != null) {

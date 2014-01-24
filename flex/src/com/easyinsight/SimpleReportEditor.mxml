@@ -663,9 +663,17 @@
                     }
                 }
                 dataView.availableFields = wrappers;
-                var f:FixedHierarchicalCollectionView = new FixedHierarchicalCollectionView(new HierarchicalData(availableFields));
+                if (feedMetadata.tags != null && feedMetadata.tags.length > 0) {
+                    possibleTags = feedMetadata.tags;
+                }
+                if (feedMetadata.tagDefault != null) {
+                    selectedTags = new ArrayCollection();
+                    selectedTags.addItem(feedMetadata.tagDefault);
+                }
+                f = new FixedHierarchicalCollectionView(new HierarchicalData(availableFields));
                 f.filterFunction = filterFunction;
                 fieldGrid.dataProvider = f;
+                f.refresh();
                 if (openState != null) {
                     for each (var availableWrapper:AnalysisItemWrapper in availableFields) {
                         var open:Boolean = openState[availableWrapper.unqualifiedDisplayName];
@@ -674,9 +682,8 @@
                         }
                     }
                 }
-                if (feedMetadata.tags != null && feedMetadata.tags.length > 0) {
-                    possibleTags = feedMetadata.tags;
-                }
+
+
                 loading = false;
             } catch (e:Error) {
                 var errorWindow:ErrorReportView = new ErrorReportView();
@@ -685,6 +692,8 @@
                 PopUpUtil.centerPopUp(errorWindow);
             }
         }
+
+        private var f:FixedHierarchicalCollectionView;
 
         private function fieldConfig(event:MouseEvent):void {
             var button:UIComponent = event.currentTarget as UIComponent;
@@ -1443,7 +1452,8 @@
             var a:AnalysisItemWrapper = item as AnalysisItemWrapper;
             if (a == null) return false;
             if (a.unqualifiedDisplayName == null) return false;
-            var view:IHierarchicalCollectionView = fieldGrid.dataProvider as IHierarchicalCollectionView;
+
+            var view:IHierarchicalCollectionView = f as IHierarchicalCollectionView;
             if (view == null) return false;
             var children:ICollectionView = view.getChildren(a);
             if (children == null) return false;
@@ -1468,6 +1478,7 @@
                     tagsValid = foundTag;
                 }
             }
+
 
             return children.length > 0 || (a.unqualifiedDisplayName.toLowerCase().indexOf(searchText.toLowerCase()) != -1 && tagsValid);
 

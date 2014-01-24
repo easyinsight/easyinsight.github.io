@@ -36,6 +36,15 @@ public class FeedMetadata implements Serializable {
     private boolean defaultManualRun;
     private List<AnalysisItem> dataSourceFields;
     private List<Tag> tags;
+    private Tag tagDefault;
+
+    public Tag getTagDefault() {
+        return tagDefault;
+    }
+
+    public void setTagDefault(Tag tagDefault) {
+        this.tagDefault = tagDefault;
+    }
 
     public List<Tag> getTags() {
         return tags;
