@@ -144,7 +144,7 @@ public class GroupService {
         }
     }
 
-    public void updateGroupUsers(long groupID, List<GroupUser> users) {
+    public void updateGroupUsers(long groupID, List<GroupUser> users, boolean reportMode) {
         SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
         Connection conn = Database.instance().getConnection();
         try {
@@ -157,6 +157,9 @@ public class GroupService {
             for (GroupUser user : users) {
                 groupStorage.addUserToGroup(user.getUserID(), groupID, user.getRole(), conn);
             }
+            Group group = groupStorage.getGroup(groupID, conn);
+            group.setDataSourcesAutoIncludeChildren(reportMode);
+            groupStorage.updateGroup(group, conn);
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);

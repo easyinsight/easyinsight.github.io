@@ -398,13 +398,14 @@ public class SecurityUtil {
     public static int getInsightRole(long userID, long insightID) {
         Connection conn = Database.instance().getConnection();
         try {
+            int role;
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT RELATIONSHIP_TYPE FROM USER_TO_ANALYSIS WHERE " +
                     "USER_ID = ? AND ANALYSIS_ID = ?");
             existingLinkQuery.setLong(1, userID);
             existingLinkQuery.setLong(2, insightID);
             ResultSet rs = existingLinkQuery.executeQuery();
             if (rs.next()) {
-                return Roles.OWNER;
+                role = Roles.OWNER;
             } else {
                 PreparedStatement groupQueryStmt = conn.prepareStatement("select group_to_user_join.binding_type from group_to_insight, group_to_user_join where " +
                         "group_to_user_join.group_id = group_to_insight.group_id and group_to_user_join.user_id = ? and group_to_insight.insight_id = ?");
@@ -412,11 +413,28 @@ public class SecurityUtil {
                 groupQueryStmt.setLong(2, insightID);
                 ResultSet groupRS = groupQueryStmt.executeQuery();
                 if (groupRS.next()) {
-                    return Roles.SUBSCRIBER;
+                    role = Roles.SUBSCRIBER;
                 } else {
-                    return Integer.MAX_VALUE;
+                    PreparedStatement lastChanceStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID FROM ANALYSIS, group_to_user_join," +
+                            "community_group, upload_policy_groups WHERE " +
+                            "analysis.analysis_id = ? AND analysis.data_feed_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
+                            "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id and group_to_user_join.user_id = ?");
+                    lastChanceStmt.setLong(1, insightID);
+                    lastChanceStmt.setBoolean(2, true);
+                    lastChanceStmt.setLong(3, userID);
+                    ResultSet lastChanceRS = lastChanceStmt.executeQuery();
+                    if (lastChanceRS.next()) {
+                        role = Roles.SUBSCRIBER;
+                    } else {
+                        role = Integer.MAX_VALUE;
+                    }
+                    lastChanceStmt.close();
+                    return role;
                 }
+                groupQueryStmt.close();
             }
+            existingLinkQuery.close();
+            return role;
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);

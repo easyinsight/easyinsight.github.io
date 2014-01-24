@@ -441,6 +441,33 @@ public class AnalysisStorage {
                     new Date(groupRS.getTimestamp(11).getTime())));
         }
         userGroupStmt.close();
+        PreparedStatement lastChanceGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, ANALYSIS.URL_KEY, " +
+                "group_to_user_join.binding_type, create_date, account_visible, folder, analysis.description, analysis.update_date FROM ANALYSIS, group_to_user_join," +
+                "community_group, upload_policy_groups WHERE " +
+                "analysis.data_feed_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
+                "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? " +
+                "and analysis.temporary_report = ?");
+        lastChanceGroupStmt.setBoolean(1, true);
+        lastChanceGroupStmt.setLong(2, userID);
+        lastChanceGroupStmt.setBoolean(3, false);
+        ResultSet lastChanceGroupRS = lastChanceGroupStmt.executeQuery();
+        while (lastChanceGroupRS.next()) {
+            ownerStmt.setLong(1, lastChanceGroupRS.getLong(1));
+            ownerStmt.setInt(2, Roles.OWNER);
+            ResultSet ownerRS = ownerStmt.executeQuery();
+            String ownerName;
+            if (ownerRS.next()) {
+                String ownerFirstName = ownerRS.getString(1);
+                String ownerLastName = ownerRS.getString(2);
+                ownerName = ownerFirstName != null ? ownerFirstName + " " + ownerLastName : ownerLastName;
+            } else {
+                ownerName = "";
+            }
+            descriptors.add(new InsightDescriptor(lastChanceGroupRS.getLong(1), lastChanceGroupRS.getString(2), lastChanceGroupRS.getLong(3), lastChanceGroupRS.getInt(4), lastChanceGroupRS.getString(5),
+                    new Date(lastChanceGroupRS.getTimestamp(7).getTime()), ownerName, lastChanceGroupRS.getInt(6), lastChanceGroupRS.getBoolean(8), lastChanceGroupRS.getInt(9), lastChanceGroupRS.getString(10),
+                    new Date(lastChanceGroupRS.getTimestamp(11).getTime())));
+        }
+        lastChanceGroupStmt.close();
         ownerStmt.close();
         return descriptors;
     }
