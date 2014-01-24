@@ -27,9 +27,12 @@
 
         [Bindable]
         private var saveLabel:String = "Add";
+
         ]]></mx:Script>
     <mx:Text text=""/>
+    <mx:Text text="When a dashboard filter is applied to this report with a rule name of "/>
     <mx:TextInput text="{parentChildLabel}" id="parentChildLabelInput"/>
+    <mx:Text text="the dashboard filter will be applied on this filter's field instead."/>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="{saveLabel}" click="save()"/>
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

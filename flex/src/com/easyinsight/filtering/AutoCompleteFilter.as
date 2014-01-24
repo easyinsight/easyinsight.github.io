@@ -94,6 +94,7 @@ public class AutoCompleteFilter extends HBox implements IFilter {
 
     private function edit(event:MouseEvent):void {
         var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
+        window.filterMetadata = filterMetadata;
         window.feedID = _feedID;
         window.detailClass = AutoCompleteFilterWindow;
         window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);

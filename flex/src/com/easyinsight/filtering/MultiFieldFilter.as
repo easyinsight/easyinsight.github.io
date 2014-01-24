@@ -77,6 +77,7 @@ public class MultiFieldFilter extends HBox implements IFilter {
     public function edit(event:MouseEvent):void {
         if (_filterEditable) {
             var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
+            window.filterMetadata = filterMetadata;
             window.feedID = _feedID;
             window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
             window.detailClass = MultiFieldFilterEditor;

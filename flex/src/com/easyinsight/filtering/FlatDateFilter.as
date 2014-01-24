@@ -229,6 +229,7 @@ import mx.rpc.events.ResultEvent;
 		
 		private function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
+            window.filterMetadata = filterMetadata;
             window.detailClass = FlatDateFilterEditor;
 			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
 			window.analysisItems = _analysisItems;

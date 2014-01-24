@@ -29,8 +29,9 @@
         private var saveLabel:String = "Add";
 
         ]]></mx:Script>
-    <mx:Text text=""/>
+    <mx:Text text="When this filter is applied to any report and the report has a rule name of "/>
     <mx:TextInput text="{parentChildLabel}" id="parentChildLabelInput"/>
+    <mx:Text text="on a filter, this filter will be applied to the report's field."/>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="{saveLabel}" click="save()"/>
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

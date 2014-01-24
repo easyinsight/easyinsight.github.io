@@ -58,6 +58,7 @@ import mx.managers.PopUpManager;
 		
 		public function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
+            window.filterMetadata = filterMetadata;
             window.feedID = _feedID;
 			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
             window.detailClass = PatternFilterWindow;

@@ -52,7 +52,7 @@
             dispatchEvent(event);
         }
         ]]></mx:Script>
-    <mx:Button label="Create a link between dashboard and report filters." click="createDashboardReportLink()" id="dashboardReportButton"/>
-    <mx:Button label="Create a link between report and dashboard filters." click="createReportDashboardLink()" id="reportDashboardButton"/>
+    <mx:Button label="Create a link between this filter and report level filters used in the dashboard." click="createDashboardReportLink()" id="dashboardReportButton"/>
+    <mx:Button label="Create a link between this report level filter and dashboard level filters." click="createReportDashboardLink()" id="reportDashboardButton"/>
     <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
 </util:EISlimWindow>

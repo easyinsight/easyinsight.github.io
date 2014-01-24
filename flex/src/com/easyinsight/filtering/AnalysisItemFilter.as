@@ -75,6 +75,7 @@ public class AnalysisItemFilter extends HBox implements IFilter {
 
     private function edit(event:MouseEvent):void {
         var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
+        window.filterMetadata = filterMetadata;
         window.detailClass = AnalysisItemFilterEditor;
         window.feedID = _feedID;
         window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
