@@ -1842,6 +1842,32 @@ public class AnalysisService {
         }
     }
 
+    public List<Tag> getFieldTags() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet tagRS = getTagsStmt.executeQuery();
+
+            List<Tag> reportTags = new ArrayList<Tag>();
+            while (tagRS.next()) {
+                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5));
+                if (tag.isField()) {
+                    reportTags.add(tag);
+                }
+            }
+
+            return reportTags;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public Collection<InsightDescriptor> getInsightDescriptors() {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
@@ -2539,8 +2565,17 @@ public class AnalysisService {
         return userCapabilities;
     }
 
-    public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report, EIConnection conn) throws SQLException {
+    public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+        List<String> warnings = insightRequestMetadata.getWarnings();
+        if (warnings != null) {
+            Collection<String> uniques = new LinkedHashSet<String>(insightRequestMetadata.getWarnings());
+            for (String warningMessage : uniques) {
+                IntentionSuggestion warning = new IntentionSuggestion(warningMessage, warningMessage, IntentionSuggestion.SCOPE_REPORT,
+                        IntentionSuggestion.WARNING_MESSAGE, IntentionSuggestion.WARNING, false);
+                suggestions.add(warning);
+            }
+        }
         Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID());
         suggestions.addAll(commonIntentions());
         DataSourceInfo dataSourceInfo = feed.createSourceInfo(conn);
@@ -2567,22 +2602,10 @@ public class AnalysisService {
         return suggestions;
     }
 
-    public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report) {
+    public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
-            Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID());
-            DataSourceInfo dataSourceInfo = feed.createSourceInfo(conn);
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID(), conn);
-            suggestions.addAll(dataSource.suggestIntentions(report, dataSourceInfo));
-            suggestions.addAll(report.suggestIntentions(report));
-            Collections.sort(suggestions, new Comparator<IntentionSuggestion>() {
-
-                public int compare(IntentionSuggestion intentionSuggestion, IntentionSuggestion intentionSuggestion1) {
-                    return intentionSuggestion.getPriority().compareTo(intentionSuggestion1.getPriority());
-                }
-            });
-            return suggestions;
+            return generatePossibleIntentions(report, conn, insightRequestMetadata);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
