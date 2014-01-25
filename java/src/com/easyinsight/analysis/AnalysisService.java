@@ -2602,6 +2602,10 @@ public class AnalysisService {
         return suggestions;
     }
 
+    public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report) {
+        return generatePossibleIntentions(report, new InsightRequestMetadata());
+    }
+
     public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();
         try {
