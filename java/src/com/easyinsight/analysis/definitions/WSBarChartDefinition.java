@@ -276,8 +276,8 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
             rendererOptions.put("fillToZero", "true");
             rendererOptions.put("barDirection", "'horizontal'");
             rendererOptions.put("varyBarColor", "true");
-            rendererOptions.put("shadowDepth", 2);
-            rendererOptions.put("barMargin", 10);
+            rendererOptions.put("shadowDepth", 1);
+            rendererOptions.put("barMargin", 3);
             rendererOptions.put("barPadding", 0);
             seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
