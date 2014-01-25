@@ -58,6 +58,16 @@ public class TransformContainer extends HBox
 
     private var _filterDefinitions:ArrayCollection;
 
+    public static const REPORT_EDITOR:int = 1;
+    public static const DASHBOARD_EDITOR:int = 2;
+    public static const DASHBOARD_STACK_EDITOR:int = 3;
+
+    private var _context:int;
+
+    public function set context(value:int):void {
+        _context = value;
+    }
+
     private var _retrievalState:IRetrievalState;
 
     private var showingFeedback:Boolean = false;
@@ -248,6 +258,7 @@ public class TransformContainer extends HBox
         var filter:IFilter;
         var filterMetadata:FilterMetadata = new FilterMetadata();
         filterMetadata.key = _filterStorageKey;
+        filterMetadata.context = _context;
         if (filterDefinition.getType() == FilterDefinition.VALUE) {
             var filterValueDefinition:FilterValueDefinition = filterDefinition as FilterValueDefinition;
             if (filterValueDefinition.singleValue) {
@@ -359,6 +370,10 @@ public class TransformContainer extends HBox
         if (_report != null) {
             window.reportType = _report.reportType;
         }
+        var filterMetadata:FilterMetadata = new FilterMetadata();
+        filterMetadata.key = _filterStorageKey;
+        filterMetadata.context = _context;
+        window.filterMetadata = filterMetadata;
         window.filterSource = _filterSource;
         window.availableFields = new ArrayCollection(this._analysisItems.toArray());
         window.advancedAvailable = advancedAvailable;
@@ -408,8 +423,12 @@ public class TransformContainer extends HBox
 
     public function createNewFilter(analysisItem:AnalysisItem, stageX:int, stageY:int):void {
         analysisItem = analysisItem.copy();
+        var filterMetadata:FilterMetadata = new FilterMetadata();
+        filterMetadata.key = _filterStorageKey;
+        filterMetadata.context = _context;
         if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
             var window:DateFilterWindow = new DateFilterWindow();
+            window.filterMetadata = filterMetadata;
             window.report = _report;
             window.feedID = _feedID;
             window.item = analysisItem;
@@ -425,13 +444,12 @@ public class TransformContainer extends HBox
                 window.y = stageY - 35;
             }
         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-            var filterMetadata:FilterMetadata = new FilterMetadata();
-            filterMetadata.key = _filterStorageKey;
             var sliderMeasureFilter:SliderMeasureFilter = new SliderMeasureFilter(_feedID, analysisItem, _retrievalState, filterMetadata);
             initializeFilter(sliderMeasureFilter, true);
         } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
             var dimWindow:GroupingFilterWindow = new GroupingFilterWindow();
             dimWindow.item = analysisItem;
+            dimWindow.filterMetadata = filterMetadata;
             dimWindow.report = _report;
             dimWindow.feedID = _feedID;
             dimWindow.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);

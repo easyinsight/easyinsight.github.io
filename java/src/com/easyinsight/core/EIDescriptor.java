@@ -25,6 +25,7 @@ public abstract class EIDescriptor implements Serializable {
     public static final int FILTER = 13;
     public static final int KEY = 14;
     public static final int FOLDER = 15;
+    public static final int FILTER_SET = 16;
 
     public static final int MAIN_VIEW = 1;
     public static final int OTHER_VIEW = 2;

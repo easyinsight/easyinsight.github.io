@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
+
+        public var settings:GeneralFilterEditSettings;
+
+        public var context:int;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (context == TransformContainer.DASHBOARD_EDITOR || context == TransformContainer.DASHBOARD_STACK_EDITOR) {
+                removeChild(reportDashboardButton);
+                if (settings.parentChild) {
+                    removeChild(dashboardReportButton);
+                }
+            }
+            if (context == TransformContainer.REPORT_EDITOR) {
+                removeChild(dashboardReportButton);
+                if (settings.childParent) {
+                    removeChild(reportDashboardButton);
+                }
+            }
+
+        }
+
+        private function parentFilter():void {
+
+        }
+
+        private function createDashboardReportLink():void {
+            var window:AddDashboardReportLinkWindow = new AddDashboardReportLinkWindow();
+            window.settings = settings;
+            window.addEventListener(FilterRuleEvent.RULE_ADDED, passThrough);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function createReportDashboardLink():void {
+            var window:AddReportDashboardLinkWindow = new AddReportDashboardLinkWindow();
+            window.settings = settings;
+            window.addEventListener(FilterRuleEvent.RULE_ADDED, passThrough);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function passThrough(event:FilterRuleEvent):void {
+            dispatchEvent(event);
+        }
+        ]]></mx:Script>
+    <mx:Button label="Create a link between this filter and report level filters used in the dashboard." click="createDashboardReportLink()" id="dashboardReportButton"/>
+    <mx:Button label="Create a link between this report level filter and dashboard level filters." click="createReportDashboardLink()" id="reportDashboardButton"/>
+    <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+</util:EISlimWindow>

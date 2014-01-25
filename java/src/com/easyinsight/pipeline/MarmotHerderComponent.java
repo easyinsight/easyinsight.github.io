@@ -29,12 +29,13 @@ public class MarmotHerderComponent implements IComponent {
             KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
             Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
+            Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
             StringTokenizer toker = new StringTokenizer(pipelineData.getReport().getReportRunMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 for (IRow row : dataSet.getRows()) {
                     try {
-                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), allItems, keyMap, displayMap, row, namespaceMap);
+                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), allItems, keyMap, displayMap, unqualifiedDisplayMap, row, namespaceMap);
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {

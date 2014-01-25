@@ -21,7 +21,6 @@ import com.easyinsight.analysis.tree.TreeController;
 import com.easyinsight.analysis.treemap.TreeMapController;
 import com.easyinsight.analysis.trend.TrendController;
 import com.easyinsight.analysis.trend.TrendGridController;
-import com.easyinsight.analysis.verticallist.CombinedVerticalListController;
 import com.easyinsight.analysis.verticallist.VerticalListController;
 import com.easyinsight.analysis.ytd.CompareYearsController;
 import com.easyinsight.analysis.ytd.YTDController;
@@ -102,9 +101,6 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.VERTICAL_LIST:
                 controller = VerticalListController;
-                break;
-            case AnalysisDefinition.COMBINED_VERTICAL_LIST:
-                controller = CombinedVerticalListController;
                 break;
             case AnalysisDefinition.TREND:
                 controller = TrendController;

@@ -58,6 +58,7 @@ public class GenericFilter extends HBox implements IFilter {
 
 		private function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
+            window.filterMetadata = filterMetadata;
             window.feedID = _feedID;
             if (_filterDefinition is LastValueFilterDefinition) {
                 window.detailClass = LastValueFilterEditor;

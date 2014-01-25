@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<filtering:FilterRule xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*">
+    <mx:Script><![CDATA[
+        [Bindable]
+        public var parentChild:String;
+        ]]></mx:Script>
+    <mx:Text text="For any report level filter in this dashboard matching the property of "/>
+    <mx:TextInput id="parentChildInput" text="{parentChild}"/>
+    <mx:Text text="apply that filter field's to this filter instead."/>
+</filtering:FilterRule>

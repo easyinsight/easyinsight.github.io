@@ -43,6 +43,7 @@ public class AnalysisItem {
     public var reloadFromDataSource:Boolean;
     public var parentItemID:int;
     public var basedOnReportField:int;
+    public var tags:ArrayCollection;
 
     //public var fieldListField:Boolean;
 

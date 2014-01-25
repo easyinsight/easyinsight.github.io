@@ -52,7 +52,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title><%= insightResponse.getInsightDescriptor().getName() %></title>
+    <title><%= reportID != null ? insightResponse.getInsightDescriptor().getName() : "Easy Insight" %></title>
     <jsp:include page="html/bootstrapHeader.jsp"/>
 
     <style type="text/css">

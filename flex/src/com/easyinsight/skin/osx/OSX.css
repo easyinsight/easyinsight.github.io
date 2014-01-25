@@ -174,7 +174,7 @@ TextArea {
 Button {
     fontFamily: "Lucida Grande";
     fontWeight: normal;
-   cornerRadius: 10;
+   cornerRadius: 5;
     highlightAlphas: 1, 0.32;
   fillAlphas: 1, 1, 1, 1;
    fillColors: #cccccc, #ffffff, #cccccc, #ffffff;
@@ -719,4 +719,18 @@ TransformContainer {
     borderThickness: 1;
     backgroundColor: #4499FF;
     cornerRadius: 3px;
+}
+
+.boldErrorButton {
+    fontWeight: bold;
+    font-family: "Helvetica Neue", "Helvetica";
+    color: #880000;
+    font-size: 14px;
+}
+
+.boldWarningButton {
+    fontWeight: bold;
+    font-family: "Helvetica Neue", "Helvetica";
+    color: #847f03;
+    font-size: 14px;
 }

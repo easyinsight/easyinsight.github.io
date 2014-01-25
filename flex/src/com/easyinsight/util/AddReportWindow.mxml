@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+                    xmlns:suggestion="com.easyinsight.suggestion.*" layout="absolute"
+                    creationComplete="analysisService.getReportsWithTags.send()" backgroundColor="#FFFFFF">
+	<mx:Script>
+		<![CDATA[
+        import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var descriptors:ArrayCollection;
+
+        private function chose():void {
+            if (reportBox.selectedItem == null) {
+                return;
+            }
+            choseReport(reportBox.selectedItem as InsightDescriptor);
+
+        }
+
+        protected function showDataSourceOption():Boolean {
+            return true;
+        }
+
+        protected function additionalFilter(descriptor:InsightDescriptor):Boolean {
+            return true;
+        }
+
+        protected function choseReport(descriptor:InsightDescriptor):void {
+
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private var validReports:ArrayCollection;
+
+        [Bindable]
+        private var nextLevelReports:ArrayCollection;
+
+        [Bindable]
+        private var selectedID:int;
+
+        private function gotReports():void {
+            var results:ReportResults = analysisService.getReportsWithTags.lastResult as ReportResults;
+            validReports = results.reports;
+            tags = results.reportTags;
+            validReports.filterFunction = filterFunction;
+            validReports.refresh();
+            nextLevelReports = new ArrayCollection(validReports.toArray());
+            var dataSources:ArrayCollection = results.dataSources;
+            var none:Object = { name:"[ All Data Sources ]", id:0};
+            dataSources.addItemAt(none, 0);
+            this.dataSources = dataSources;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (!showDataSourceOption()) {
+                form.removeChild(dataSourceFormItem);
+            }
+        }
+
+        [Bindable]
+        private var tags:ArrayCollection;
+
+        private function filterFunction(object:Object):Boolean {
+            var report:InsightDescriptor = object as InsightDescriptor;
+            if (dataSourceID > 0) {
+                if (report.dataFeedID != dataSourceID) {
+                    return false;
+                }
+            }
+            var valid:Boolean = additionalFilter(report);
+            if (!valid) {
+                return false;
+            }
+            return tagBox.filterObject(report);
+        }
+
+        private function onTagSelect(event:TagSelectionEvent):void {
+            validReports.refresh();
+            nextLevelReports = new ArrayCollection(validReports.toArray());
+            reportBox.closeDropdown();
+        }
+
+        private function onChange(event:Event):void {
+            var dataSource:EIDescriptor = dataSourceBox.selectedItem as EIDescriptor;
+            if (dataSource == null) {
+                dataSourceID = 0;
+            } else {
+                dataSourceID = dataSource.id;
+            }
+            validReports.refresh();
+            nextLevelReports = new ArrayCollection(validReports.toArray());
+            reportBox.closeDropdown();
+        }
+
+        [Bindable]
+        private var dataSources:ArrayCollection;
+
+        private var dataSourceID:int;
+        ]]>
+	</mx:Script>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="getReportsWithTags" result="gotReports()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <mx:Form id="form">
+            <mx:FormItem label="Data Source:" labelWidth="120" id="dataSourceFormItem">
+                <mx:ComboBox dataProvider="{dataSources}" labelField="name" id="dataSourceBox" change="onChange(event)" maxWidth="300" rowCount="10"/>
+            </mx:FormItem>
+            <mx:FormItem label="Filter by Tags:" labelWidth="120">
+                <util:TagBox tags="{tags}" onTagSelect="onTagSelect(event)" id="tagBox" width="300"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:HRule width="100%"/>
+        <mx:Form>
+            <mx:FormItem label="Choose a Report:" labelWidth="120">
+                <suggestion:Reports dataProvider="{nextLevelReports}" labelField="name" id="reportBox"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:HRule width="100%"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+                <util:SaveButton label="OK" click="chose()"/>
+                <util:CancelButton label="Cancel" click="cancel()"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

@@ -194,6 +194,28 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         return grid;
     }
 
+    protected List<MultiColor> configuredMultiColors() {
+        return null;
+    }
+
+    public List<String> createMultiColors() {
+        List<MultiColor> multiColors = configuredMultiColors();
+        List<String> resultColors = new ArrayList<String>();
+        if (multiColors != null && !multiColors.isEmpty()) {
+            MultiColor testColor = multiColors.get(0);
+            if (testColor.isColor1StartEnabled()) {
+                for (MultiColor color : multiColors) {
+                    if (color.isColor1StartEnabled()) {
+                        resultColors.add(String.format("'#%06X'", (0xFFFFFF & color.getColor1Start())));
+                    }
+                }
+                return resultColors;
+            }
+        }
+        return Arrays.asList("'#a6bc59'", "'#597197'", "'#d6ab2a'", "'#d86068'", "'#5d9942'",
+                "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'");
+    }
+
     protected JSONArray getSeriesColors() {
         return new JSONArray(Arrays.asList("'#a6bc59'", "'#597197'", "'#d6ab2a'", "'#d86068'", "'#5d9942'",
                 "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'"));
@@ -202,7 +224,7 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
     protected JSONObject getMeasureAxis(AnalysisItem analysisItem) throws JSONException {
         JSONObject yAxis = new JSONObject();
         yAxis.put("pad", 1.05);
-        yAxis.put("label", "'"+analysisItem.toDisplay()+"'");
+        yAxis.put("label", "'"+analysisItem.toUnqualifiedDisplay()+"'");
         yAxis.put("labelRenderer", "$.jqplot.CanvasAxisLabelRenderer");
         yAxis.put("min", 0);
         yAxis.put("numberTicks", 8);
@@ -225,10 +247,11 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
 
         xAxis.put("tickRenderer", "$.jqplot.CanvasAxisTickRenderer");
         xAxis.put("labelRenderer", "$.jqplot.CanvasAxisLabelRenderer");
-        xAxis.put("label", "'"+analysisItem.toDisplay()+"'");
+        xAxis.put("label", "'"+analysisItem.toUnqualifiedDisplay()+"'");
 
         JSONObject xAxisTicketOptions = new JSONObject();
         xAxisTicketOptions.put("angle", 0);
+        xAxisTicketOptions.put("showGridline", "false");
         xAxis.put("tickOptions", xAxisTicketOptions);
         return xAxis;
     }

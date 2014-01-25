@@ -1,11 +1,14 @@
 package test;
 
 import com.easyinsight.analysis.ReportCache;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.goals.InstallationSystem;
+import com.easyinsight.logging.LogClass;
+import com.easyinsight.servlet.SystemSettings;
 import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.util.ServiceUtil;
@@ -21,6 +24,13 @@ public abstract class DataSourceTesting {
         Database.initialize();
         ReportCache.initialize();
         ServiceUtil.initialize();
+        SystemSettings.initialize();
+        try {
+            MemCachedManager.initialize();
+            MemCachedManager.flush();
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
         if (userName == null) {
             TestUtil.getIndividualTestUser();
         } else {

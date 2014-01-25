@@ -4,6 +4,8 @@ import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
 import nu.xom.*;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
@@ -34,27 +36,25 @@ public abstract class KashooBaseSource extends ServerDataSourceDefinition {
             return null;
     }
 
-    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, FeedDefinition parentDefinition) throws ParsingException, ReportException {
-        HttpMethod restMethod = new GetMethod(url + path);
-        restMethod.setRequestHeader("Accept", "application/xml");
-        restMethod.setRequestHeader("Content-Type", "application/xml");
-        Document doc;
+    protected static JSONObject runRestRequest(String path, HttpClient client, FeedDefinition parentDefinition) throws ParsingException, ReportException {
+        HttpMethod restMethod = new GetMethod("https://api.kashoo.com" + path);
+        restMethod.setRequestHeader("Accept", "application/json");
+        restMethod.setRequestHeader("Content-Type", "application/json");
 
         try {
             client.executeMethod(restMethod);
-            doc = builder.build(restMethod.getResponseBodyAsStream());
-            return doc;
-        } catch (ParsingException pe) {
+            JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+            JSONObject postObject = (JSONObject) parser.parse(restMethod.getResponseBodyAsStream());
+            return postObject;
+        } catch (Exception pe) {
             String statusLine = restMethod.getStatusLine().toString();
             if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
-                    throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Kashoo instance at " + url, parentDefinition));
+                    throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Kashoo instance.", parentDefinition));
             } else if (statusLine.contains("401")) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
             } else {
                 throw new RuntimeException(pe);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 }

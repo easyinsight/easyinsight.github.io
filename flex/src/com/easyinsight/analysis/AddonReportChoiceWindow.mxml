@@ -1,49 +1,31 @@
-<?xml version="1.0"?>
-<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="analysisService.getInsightDescriptorsForDataSource.send(dataSourceID)">
-    <mx:Script><![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+<util:AddReportWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script>
+		<![CDATA[
         import com.easyinsight.solutions.InsightDescriptor;
 
         import mx.collections.ArrayCollection;
-        import mx.collections.Sort;
-        import mx.collections.SortField;
+
         import mx.managers.PopUpManager;
-
-        [Bindable]
-        private var availableReports:ArrayCollection = new ArrayCollection();
-
-        private function useReport():void {
-            dispatchEvent(new AddonReportEvent(AddonReportEvent.ADD_REPORT, InsightDescriptor(choiceBox.selectedItem)));
-            PopUpManager.removePopUp(this);
-        }
-
-        private function gotReports():void {
-            var reports:ArrayCollection = analysisService.getInsightDescriptorsForDataSource.lastResult as ArrayCollection;
-            var validReports:ArrayCollection = new ArrayCollection();
-            for each (var desc:InsightDescriptor in reports) {
-                if (desc.id != reportFrom && reportsExisting.getItemIndex(desc.id) == -1) {
-                    validReports.addItem(desc);
-                }
-            }
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("name", true) ];
-
-            validReports.sort = sort;
-            validReports.refresh();
-            availableReports = validReports;
-        }
 
         public var reportFrom:int;
 
         public var reportsExisting:ArrayCollection = new ArrayCollection();
 
         public var dataSourceID:int;
-        ]]></mx:Script>
-    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
-        <mx:method name="getInsightDescriptorsForDataSource" result="gotReports()"/>
-    </mx:RemoteObject>
-    <mx:ComboBox id="choiceBox" dataProvider="{availableReports}" labelField="name"/>
-    <mx:HBox width="100%" horizontalAlign="center">
-        <util:SaveButton label="Use This Report" click="useReport()"/>
-        <util:CancelButton click="PopUpManager.removePopUp(this)" label="Cancel"/>
-    </mx:HBox>
-</util:EISlimWindow>
+
+        override protected function additionalFilter(descriptor:InsightDescriptor):Boolean {
+            return (descriptor.dataFeedID == dataSourceID && descriptor.id != reportFrom && reportsExisting.getItemIndex(descriptor.id) == -1);
+        }
+
+        override protected function showDataSourceOption():Boolean {
+            return false;
+        }
+
+        override protected function choseReport(descriptor:InsightDescriptor):void {
+            dispatchEvent(new AddonReportEvent(AddonReportEvent.ADD_REPORT, descriptor));
+            PopUpManager.removePopUp(this);
+        }
+        ]]>
+	</mx:Script>
+</util:AddReportWindow>

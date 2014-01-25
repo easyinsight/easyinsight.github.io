@@ -60,6 +60,16 @@ public class TextInputWithArrow extends Canvas {
         autoCompleteManager.openDropdownForTarget(textInput);
     }
 
+    public function closeDropdown():void {
+        autoCompleteManager.closeDropdownForTarget(textInput);
+    }
+
+    private function onChange(event:Event):void {
+        if (selectedItem != null) {
+            dispatchEvent(new Event(Event.CHANGE));
+        }
+    }
+
     override protected function createChildren():void {
         super.createChildren();
         autoCompleteManager = new AutoCompleteManager();
@@ -70,6 +80,7 @@ public class TextInputWithArrow extends Canvas {
         autoCompleteManager.target = textInput;
         textInput.width = 300;
         textInput.addEventListener(MouseEvent.CLICK, onClick);
+        textInput.addEventListener(Event.CHANGE, onChange);
         addEventListener(MouseEvent.CLICK, onClick);
         addChild(textInput);
         var shape:Shape = new Shape();

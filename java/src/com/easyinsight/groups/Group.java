@@ -14,6 +14,15 @@ public class Group {
     private String description;
     private List<GroupUser> groupUsers = new ArrayList<GroupUser>();
     private String urlKey;
+    private boolean dataSourcesAutoIncludeChildren;
+
+    public boolean isDataSourcesAutoIncludeChildren() {
+        return dataSourcesAutoIncludeChildren;
+    }
+
+    public void setDataSourcesAutoIncludeChildren(boolean dataSourcesAutoIncludeChildren) {
+        this.dataSourcesAutoIncludeChildren = dataSourcesAutoIncludeChildren;
+    }
 
     public String getUrlKey() {
         return urlKey;

@@ -22,7 +22,7 @@ public class ColumnChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report) throws Exception {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
-
+        WSChartDefinition chart = (WSChartDefinition) report;
         JSONObject object = new JSONObject();
         // need series, need ticks
         AnalysisItem xAxisItem;
@@ -87,6 +87,7 @@ public class ColumnChartServlet extends HtmlServlet {
                 fontColor = columnChartDefinition.getLabelOutsideFontColor();
                 fontSize = columnChartDefinition.getLabelFontSize();
             }
+
         } else if (report instanceof WSPieChartDefinition) {
             WSPieChartDefinition pieChart = (WSPieChartDefinition) report;
             xAxisItem = pieChart.getXaxis();
@@ -98,6 +99,8 @@ public class ColumnChartServlet extends HtmlServlet {
         } else {
             throw new RuntimeException();
         }
+
+
 
         // drillthroughs
         Link l = xAxisItem.defaultLink();
@@ -113,9 +116,31 @@ public class ColumnChartServlet extends HtmlServlet {
             object.put("drillthrough", drillthrough);
         }
 
-        for (AnalysisItem measure : measures) {
+        JSONArray series = new JSONArray();
+
+        List<String> colors = chart.createMultiColors();
+
+        for(int i = 0;i < measures.size();i++) {
             blahArray.put(new JSONArray());
+            if(measures.size() > 1) {
+                JSONArray colorObj = new JSONArray();
+                JSONObject curObject = new JSONObject();
+                JSONObject colorStop = new JSONObject();
+                colorStop.put("point", 0);
+                String colorString = String.format(colors.get(i % colors.size()));
+                colorStop.put("color", colorString);
+                colorObj.put(colorStop);
+                colorStop = new JSONObject();
+                colorStop.put("point", 1);
+                colorStop.put("color", colorString);
+                colorObj.put(colorStop);
+                JSONArray jj = new JSONArray();
+                jj.put(colorObj);
+                curObject.put("seriesColors", jj);
+                series.put(curObject);
+            }
         }
+        params.put("series", series);
 
         List<String> ticks = new ArrayList<String>();
 

@@ -88,11 +88,13 @@
                         You have <strong><%= accountStats.getUsedDesigners() %></strong> of <strong><%= accountStats.getCoreDesigners() + accountStats.getAddonDesigners()%></strong> designers, <strong><%= accountStats.getCurrentSmallBizConnections()%></strong> of <strong><%= accountStats.getAddonSmallBizConnections() + accountStats.getCoreSmallBizConnections() %></strong> small business connections, and <strong><%= accountStats.getUsedSpaceString()%></strong> of <strong><%= accountStats.getMaxSpaceString()%></strong> custom data storage used.
                     </div>
                 </div>
+                <% if (account.getNextBillDate() != null && ExportService.getDateFormatForAccount(AnalysisDateDimension.DAY_LEVEL, null) != null) { %>
                 <div class="row">
                     <div class="col-md-offset-1 col-md10">
                         You will be charged again on <%= ExportService.getDateFormatForAccount(AnalysisDateDimension.DAY_LEVEL, null).format(account.getNextBillDate()) %> for <%= NumberFormat.getCurrencyInstance(Locale.US).format(account.getNextBillAmount()) %>.
                     </div>
                 </div>
+                <% } %>
                 <% } %>
                 <div class="row">
                     <div class="col-md-offset-1 col-md10">

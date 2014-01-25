@@ -70,6 +70,24 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean fieldCleanupEnabled;
     private boolean fieldLookupEnabled;
     private long defaultFieldTag;
+    private boolean manualReportRun;
+    private boolean showTags;
+
+    public boolean isShowTags() {
+        return showTags;
+    }
+
+    public void setShowTags(boolean showTags) {
+        this.showTags = showTags;
+    }
+
+    public boolean isManualReportRun() {
+        return manualReportRun;
+    }
+
+    public void setManualReportRun(boolean manualReportRun) {
+        this.manualReportRun = manualReportRun;
+    }
 
     public boolean isMigrateRequired() {
         return true;

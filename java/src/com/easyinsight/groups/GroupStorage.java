@@ -26,12 +26,13 @@ public class GroupStorage {
 
     public long addGroup(Group group, long userID, long accountID, Connection conn) throws SQLException {
         PreparedStatement insertGroupStmt = conn.prepareStatement("INSERT INTO COMMUNITY_GROUP " +
-                    "(NAME, DESCRIPTION, URL_KEY, GROUP_ACCOUNT_ID)" +
-                    "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "(NAME, DESCRIPTION, URL_KEY, GROUP_ACCOUNT_ID, data_source_include_report)" +
+                    "VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         insertGroupStmt.setString(1, group.getName());
         insertGroupStmt.setString(2, group.getDescription());
         insertGroupStmt.setString(3, group.getUrlKey());
         insertGroupStmt.setLong(4, accountID);
+        insertGroupStmt.setBoolean(5, group.isDataSourcesAutoIncludeChildren());
         insertGroupStmt.execute();
         long groupID = Database.instance().getAutoGenKey(insertGroupStmt);
         addUserToGroup(userID, groupID, GroupToUserBinding.OWNER, conn);
@@ -61,22 +62,29 @@ public class GroupStorage {
         Group group = null;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT NAME, DESCRIPTION, URL_KEY FROM " +
-                    "COMMUNITY_GROUP WHERE COMMUNITY_GROUP_ID = ?");
-            queryStmt.setLong(1, groupID);
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                String name = rs.getString(1);
-                String description = rs.getString(2);
-                String urlKey = rs.getString(3);
-                group = new Group();
-                group.setName(name);
-                group.setGroupID(groupID);
-                group.setDescription(description);
-                group.setUrlKey(urlKey);
-            }
+            group = getGroup(groupID, conn);
         } finally {
             Database.closeConnection(conn);
+        }
+        return group;
+    }
+
+    public Group getGroup(long groupID, Connection conn) throws SQLException {
+        Group group = null;
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT NAME, DESCRIPTION, URL_KEY, data_source_include_report FROM " +
+                "COMMUNITY_GROUP WHERE COMMUNITY_GROUP_ID = ?");
+        queryStmt.setLong(1, groupID);
+        ResultSet rs = queryStmt.executeQuery();
+        if (rs.next()) {
+            String name = rs.getString(1);
+            String description = rs.getString(2);
+            String urlKey = rs.getString(3);
+            group = new Group();
+            group.setName(name);
+            group.setGroupID(groupID);
+            group.setDescription(description);
+            group.setUrlKey(urlKey);
+            group.setDataSourcesAutoIncludeChildren(rs.getBoolean(4));
         }
         return group;
     }
@@ -84,11 +92,13 @@ public class GroupStorage {
     public void updateGroup(Group group, Connection conn) {
         try {
             PreparedStatement updateGroupStmt = conn.prepareStatement("UPDATE COMMUNITY_GROUP " +
-                    "SET NAME = ?, DESCRIPTION = ?, GROUP_ACCOUNT_ID = ? WHERE COMMUNITY_GROUP_ID = ?");
+                    "SET NAME = ?, DESCRIPTION = ?, GROUP_ACCOUNT_ID = ?, data_source_include_report = ? WHERE COMMUNITY_GROUP_ID = ?");
             updateGroupStmt.setString(1, group.getName());
             updateGroupStmt.setString(2, group.getDescription());
-            updateGroupStmt.setLong(3, group.getGroupID());
-            updateGroupStmt.setLong(4, SecurityUtil.getAccountID());
+
+            updateGroupStmt.setLong(3, SecurityUtil.getAccountID());
+            updateGroupStmt.setBoolean(4, group.isDataSourcesAutoIncludeChildren());
+            updateGroupStmt.setLong(5, group.getGroupID());
             int rows = updateGroupStmt.executeUpdate();
             if (rows != 1) {
                 throw new RuntimeException("Update failed");
@@ -130,7 +140,7 @@ public class GroupStorage {
         List<GroupDescriptor> descriptors = new ArrayList<GroupDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.COMMUNITY_GROUP_ID, NAME, DESCRIPTION FROM COMMUNITY_GROUP, GROUP_TO_USER_JOIN WHERE " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.COMMUNITY_GROUP_ID, NAME, DESCRIPTION, data_source_include_report FROM COMMUNITY_GROUP, GROUP_TO_USER_JOIN WHERE " +
                     "USER_ID = ? AND GROUP_TO_USER_JOIN.GROUP_ID = COMMUNITY_GROUP.COMMUNITY_GROUP_ID");
             queryStmt.setLong(1, userID);
             ResultSet rs = queryStmt.executeQuery();
@@ -147,7 +157,7 @@ public class GroupStorage {
         Set<GroupDescriptor> descriptors = new HashSet<GroupDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.COMMUNITY_GROUP_ID, COMMUNITY_GROUP.NAME, COMMUNITY_GROUP.DESCRIPTION FROM COMMUNITY_GROUP, GROUP_TO_USER_JOIN, USER WHERE " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.COMMUNITY_GROUP_ID, COMMUNITY_GROUP.NAME, COMMUNITY_GROUP.DESCRIPTION, data_source_include_report FROM COMMUNITY_GROUP, GROUP_TO_USER_JOIN, USER WHERE " +
                     "USER.ACCOUNT_ID = ? AND GROUP_TO_USER_JOIN.GROUP_ID = COMMUNITY_GROUP.COMMUNITY_GROUP_ID AND " +
                     "GROUP_TO_USER_JOIN.USER_ID = USER.USER_ID");
             queryStmt.setLong(1, accountID);
@@ -156,7 +166,7 @@ public class GroupStorage {
                 descriptors.add(new GroupDescriptor(rs.getString(2), rs.getLong(1), 0, rs.getString(3)));
             }
             queryStmt.close();
-            PreparedStatement accountStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.COMMUNITY_GROUP_ID, COMMUNITY_GROUP.NAME, COMMUNITY_GROUP.DESCRIPTION FROM COMMUNITY_GROUP WHERE " +
+            PreparedStatement accountStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.COMMUNITY_GROUP_ID, COMMUNITY_GROUP.NAME, COMMUNITY_GROUP.DESCRIPTION, data_source_include_report FROM COMMUNITY_GROUP WHERE " +
                     "COMMUNITY_GROUP.GROUP_ACCOUNT_ID = ?");
             accountStmt.setLong(1, accountID);
             rs = accountStmt.executeQuery();

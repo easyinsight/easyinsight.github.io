@@ -46,11 +46,11 @@ import mx.utils.ObjectUtil;
     public var parentFilters:String;
     public var fieldChoiceFilterLabel:String;
     public var customizable:Boolean;
-    public var flexibleDateFilter:Boolean;
-    public var defaultDateFilter:Boolean;
     public var section:int;
     public var flexID:int = flexIDCtr++;
-		
+    public var parentChildLabel:String;
+    public var childToParentLabel:String;
+
 		public function FilterDefinition()
 			{
 			super();

@@ -102,46 +102,66 @@ public class FeedService {
         try {
             FeedDefinition dataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
             List<AnalysisItemConfiguration> configurations = new ArrayList<AnalysisItemConfiguration>();
-            PreparedStatement ps = conn.prepareStatement("SELECT field_to_tag.account_tag_id, account_tag.tag_name FROM field_to_tag, account_tag WHERE analysis_item_id = ? AND " +
-                    "field_to_tag.account_tag_id = account_tag.account_tag_id");
-            PreparedStatement byName = conn.prepareStatement("SELECT field_to_tag.account_tag_id, account_tag.tag_name FROM field_to_tag, account_tag WHERE field_to_tag.display_name = ? AND " +
-                    "field_to_tag.account_tag_id = account_tag.account_tag_id");
-            PreparedStatement loadFormatting = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ?");
 
+            // what should these be linked by...
+
+            PreparedStatement ps = conn.prepareStatement("SELECT field_to_tag.account_tag_id, account_tag.tag_name, field_to_tag.display_name FROM " +
+                    "field_to_tag, account_tag WHERE data_source_id = ? AND " +
+                    "field_to_tag.account_tag_id = account_tag.account_tag_id");
+            PreparedStatement loadFormatting = conn.prepareStatement("SELECT report_field_extension_id, display_name FROM analysis_item_to_report_field_extension WHERE data_source_id = ?");
+
+            Map<String, List<Tag>> tagMap = new HashMap<String, List<Tag>>();
+            ps.setLong(1, dataSourceID);
+            ResultSet tagRS = ps.executeQuery();
+            while (tagRS.next()) {
+                long tagID = tagRS.getLong(1);
+                String tagName = tagRS.getString(2);
+                String fieldName = tagRS.getString(3);
+                List<Tag> tags = tagMap.get(fieldName);
+                if (tags == null) {
+                    tags = new ArrayList<Tag>();
+                    tagMap.put(fieldName, tags);
+                }
+                tags.add(new Tag(tagID, tagName, false, false, false));
+            }
+            Map<String, List<Long>> extensionMap = new HashMap<String, List<Long>>();
+            loadFormatting.setLong(1, dataSourceID);
+            ResultSet formatRS = loadFormatting.executeQuery();
+            while (formatRS.next()) {
+                long extensionID = formatRS.getLong(1);
+                String name = formatRS.getString(2);
+                List<Long> extensions = extensionMap.get(name);
+                if (extensions == null) {
+                    extensions = new ArrayList<Long>();
+                    extensionMap.put(name, extensions);
+                }
+                extensions.add(extensionID);
+            }
             for (AnalysisItem field : dataSource.getFields()) {
                 AnalysisItemConfiguration configuration = new AnalysisItemConfiguration();
                 configuration.setAnalysisItem(field);
-                ps.setLong(1, field.getAnalysisItemID());
-                ResultSet rs = ps.executeQuery();
-                Set<Tag> tags = new HashSet<Tag>();
-                while (rs.next()) {
-                    long tagID = rs.getLong(1);
-                    String tagName = rs.getString(2);
-                    tags.add(new Tag(tagID, tagName, false, false, false));
+                List<Tag> tags = tagMap.get(field.toDisplay());
+                if (tags == null) {
+                    tags = new ArrayList<Tag>();
                 }
-                byName.setString(1, field.toDisplay());
-                ResultSet byNameRS = byName.executeQuery();
-                while (byNameRS.next()) {
-                    long tagID = byNameRS.getLong(1);
-                    String tagName = byNameRS.getString(2);
-                    tags.add(new Tag(tagID, tagName, false, false, false));
-                }
-                configuration.setTags(new ArrayList<Tag>(tags));
-                loadFormatting.setLong(1, field.getAnalysisItemID());
-                ResultSet formattingRS = loadFormatting.executeQuery();
-                while (formattingRS.next()) {
-                    long formattingID = formattingRS.getLong(1);
-                    Session session = Database.instance().createSession(conn);
-                    try {
-                        ReportFieldExtension extension = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, formattingID).list().get(0);
-                        extension.afterLoad();
-                        if (extension instanceof TextReportFieldExtension) {
-                            configuration.setTextExtension((TextReportFieldExtension) extension);
-                        } else if (extension instanceof YTDReportFieldExtension) {
-                            configuration.setYtdExtension((YTDReportFieldExtension) extension);
+                configuration.setTags(tags);
+                List<Long> extensions = extensionMap.get(field.toDisplay());
+                if (extensions != null) {
+                    for (Long formattingID : extensions) {
+                        Session session = Database.instance().createSession(conn);
+                        try {
+                            ReportFieldExtension extension = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, formattingID).list().get(0);
+                            extension.afterLoad();
+                            if (extension instanceof TextReportFieldExtension) {
+                                configuration.setTextExtension((TextReportFieldExtension) extension);
+                            } else if (extension instanceof YTDReportFieldExtension) {
+                                configuration.setYtdExtension((YTDReportFieldExtension) extension);
+                            } else if (extension instanceof VerticalListReportExtension) {
+                                configuration.setVerticalListExtension((VerticalListReportExtension) extension);
+                            }
+                        } finally {
+                            session.close();
                         }
-                    } finally {
-                        session.close();
                     }
                 }
                 configurations.add(configuration);
@@ -157,14 +177,14 @@ public class FeedService {
         }
     }
 
-    public void updateAnalysisItemConfigurations(List<AnalysisItemConfiguration> configurations) {
+    public void updateAnalysisItemConfigurations(List<AnalysisItemConfiguration> configurations, long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM field_to_tag WHERE analysis_item_id = ?");
             PreparedStatement clearExtStmt = conn.prepareStatement("DELETE FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ?");
-            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO field_to_tag (account_tag_id, analysis_item_id, display_name) values (?, ?, ?)");
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO field_to_tag (account_tag_id, display_name, data_source_id) values (?, ?, ?)");
             PreparedStatement saveExtStmt = conn.prepareStatement("INSERT INTO analysis_item_to_report_field_extension (report_field_extension_id, " +
-                    "analysis_item_id, extension_type) values (?, ?, ?)");
+                    "display_name, extension_type, data_source_id) values (?, ?, ?, ?)");
             for (AnalysisItemConfiguration configuration : configurations) {
                 clearStmt.setLong(1, configuration.getAnalysisItem().getAnalysisItemID());
                 clearStmt.executeUpdate();
@@ -172,12 +192,12 @@ public class FeedService {
                 clearExtStmt.executeUpdate();
                 for (Tag tag : configuration.getTags()) {
                     saveStmt.setLong(1, tag.getId());
-                    saveStmt.setLong(2, configuration.getAnalysisItem().getAnalysisItemID());
-                    saveStmt.setString(3, configuration.getAnalysisItem().toDisplay());
+                    saveStmt.setString(2, configuration.getAnalysisItem().toDisplay());
+                    saveStmt.setLong(3, dataSourceID);
                     saveStmt.execute();
                 }
-                saveExtension(conn, saveExtStmt, configuration, configuration.getTextExtension(), ReportFieldExtension.TEXT);
-                saveExtension(conn, saveExtStmt, configuration, configuration.getYtdExtension(), ReportFieldExtension.YTD);
+                saveExtension(conn, saveExtStmt, configuration, configuration.getTextExtension(), ReportFieldExtension.TEXT, dataSourceID);
+                saveExtension(conn, saveExtStmt, configuration, configuration.getYtdExtension(), ReportFieldExtension.YTD, dataSourceID);
             }
             clearStmt.close();
             clearExtStmt.close();
@@ -191,15 +211,17 @@ public class FeedService {
         }
     }
 
-    private void saveExtension(EIConnection conn, PreparedStatement saveExtStmt, AnalysisItemConfiguration configuration, ReportFieldExtension extension, int type) throws SQLException {
+    private void saveExtension(EIConnection conn, PreparedStatement saveExtStmt, AnalysisItemConfiguration configuration, ReportFieldExtension extension,
+                               int type, long dataSourceID) throws SQLException {
         Session session = Database.instance().createSession(conn);
         try {
             if (extension != null) {
                 extension.reportSave(session);
                 session.saveOrUpdate(extension);
                 saveExtStmt.setLong(1, extension.getReportFieldExtensionID());
-                saveExtStmt.setLong(2, configuration.getAnalysisItem().getAnalysisItemID());
+                saveExtStmt.setString(2, configuration.getAnalysisItem().toDisplay());
                 saveExtStmt.setInt(3, type);
+                saveExtStmt.setLong(4, dataSourceID);
                 saveExtStmt.execute();
             }
             session.flush();
@@ -837,6 +859,26 @@ public class FeedService {
             throw new RuntimeException(e);
         }
         return compositeResponse;
+    }
+
+    public List<DataSourceDescriptor> addonDataSources(long dataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT data_feed.data_feed_id, data_feed.feed_name FROM distinct_cached_addon_report_source, analysis, data_feed WHERE " +
+                    "distinct_cached_addon_report_source.report_id = analysis.analysis_id AND analysis.data_feed_id = ? AND distinct_cached_addon_report_source.data_source_id = data_feed.data_feed_id");
+            queryStmt.setLong(1, dataSourceID);
+            ResultSet rs = queryStmt.executeQuery();
+            List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
+            while (rs.next()) {
+                dataSources.add(new DataSourceDescriptor(rs.getString(2), rs.getLong(1), 0, false, 0));
+            }
+            return dataSources;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public List<DataSourceDescriptor> searchForSubscribedFeeds() {

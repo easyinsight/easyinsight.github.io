@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class GetDataSourceServlet extends JSONServlet {
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
+    protected ResponseInfo processJSON(net.minidev.json.JSONObject document, EIConnection conn, HttpServletRequest request) throws Exception {
         JSONObject jsonObject = new JSONObject();
         String key = request.getParameter("dataSourceKey");
         FeedResponse feedResponse = new FeedService().openFeedIfPossible(key);

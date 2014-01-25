@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
+
+        [Bindable]
+        public var parentChildLabel:String;
+
+        public var settings:GeneralFilterEditSettings;
+
+        public function save():void {
+            var results:Array = Validator.validateAll([validator]);
+            if (results.length == 0) {
+                settings.parentChild = parentChildLabelInput.text;
+                var drRule:FilterRuleDefinition = new FilterRuleDefinition();
+                drRule.data = { parentChildLabel: parentChildLabelInput.text};
+                drRule.type = FilterRuleDefinition.DASHBOARD_TO_REPORT_LINK;
+                drRule.label = "For any report level filter in this dashboard matching the property of " + parentChildLabelInput.text + ", apply that filter's field to this filter instead.";
+                dispatchEvent(new FilterRuleEvent(FilterRuleEvent.RULE_ADDED, drRule));
+                PopUpManager.removePopUp(this);
+            } else {
+                Alert.show("You need to define a name for the parent child link.");
+            }
+        }
+
+        [Bindable]
+        private var saveLabel:String = "Add";
+
+        ]]></mx:Script>
+    <mx:Text text="When this filter is applied to any report and the report has a rule name of "/>
+    <mx:TextInput text="{parentChildLabel}" id="parentChildLabelInput"/>
+    <mx:Text text="on a filter, this filter will be applied to the report's field."/>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="{saveLabel}" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+    <mx:StringValidator id="validator" source="{parentChildLabelInput}" property="text" minLength="1"/>
+</util:EISlimWindow>

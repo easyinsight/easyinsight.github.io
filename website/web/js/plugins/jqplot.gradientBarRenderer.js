@@ -145,7 +145,6 @@
 
     function createGradientFill(color, point1, point2, ctx) {
         var g = ctx.createLinearGradient(point1[0], point1[1], point2[0], point2[1]);
-
         var i;
         var c = color;
         if (typeof(c) === "string" || typeof(c) === "undefined") {
@@ -431,8 +430,11 @@
                         p2 = points[1];
                     }
 
-                    if (opts.fillStyle)
+                    if (opts.fillStyle) {
+                        this._dataColors.push(opts.fillStyle[0]["color"]);
                         opts.fillStyle = createGradientFill(opts.fillStyle, p1, p2, ctx);
+                    }
+
                     this._barPoints.push(points);
                     // now draw the shadows if not stacked.
                     // for stacked plots, they are predrawn by drawShadow
@@ -442,7 +444,6 @@
                         this.renderer.shadowRenderer.draw(ctx, points, sopts);
                     }
                     var clr = opts.fillStyle || this.color[0]["color"];
-                    this._dataColors.push(this.color[0]["color"]);
                     opts.fillStyle = opts.fillStyle || createGradientFill(this.color, p1, p2, ctx);
                     this.renderer.shapeRenderer.draw(ctx, points, opts);
                 }

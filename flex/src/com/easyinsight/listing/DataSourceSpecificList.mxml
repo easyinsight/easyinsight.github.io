@@ -926,6 +926,10 @@
                     var folder:DataFolder = activity as DataFolder;
                     for each (var desc:EIDescriptor in folder.children) {
                         if (desc.selected) {
+                            if (desc.role == 3) {
+                                Alert.show("You don't have permission to delete " + desc.name + ".");
+                                return;
+                            }
                             activityList.addItem(desc);
                         }
                     }

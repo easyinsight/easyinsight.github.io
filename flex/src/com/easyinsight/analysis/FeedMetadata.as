@@ -1,6 +1,7 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.datasources.DataSourceInfo;
+import com.easyinsight.listing.Tag;
 
 import mx.collections.ArrayCollection;
 
@@ -26,6 +27,10 @@ import mx.collections.ArrayCollection;
     public var dataSourceType:int;
     public var allowRefactor:Boolean;
     public var defaultMaxRecords:int;
+    public var defaultManualRun:Boolean = false;
+    public var dataSourceFields:ArrayCollection;
+    public var tags:ArrayCollection;
+    public var tagDefault:Tag;
 		
 		public function FeedMetadata()
 			{

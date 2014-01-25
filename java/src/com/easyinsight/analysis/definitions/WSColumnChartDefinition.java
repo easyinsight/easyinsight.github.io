@@ -304,7 +304,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         String color2;
         if (useChartColor) {
             color = String.format("'#%06X'", (0xFFFFFF & chartColor));
-            color2 = String.format("'#%06X'", (0xFFFFFF & gradientColor));
+            color2 = getMeasures().size() > 1 ? color : String.format("'#%06X'", (0xFFFFFF & gradientColor));
         } else {
             color = "'#FF0000'";
             color2 = "'#990000'";
@@ -315,7 +315,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         try {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
             JSONObject seriesDefaults = new JSONObject();
-            if (getMeasures().size() == 1) {
+            seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
                 JSONArray colorObj = new JSONArray();
 
                 JSONObject colorStop = new JSONObject();
@@ -346,22 +346,6 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
 //                colorObj.put("first", "'" + color + "'");
 //                colorObj.put("second", "'" + color2 + "'");
                 jsonParams.put("seriesColors", new JSONArray(Arrays.asList(colorObj)));
-                seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
-            } else {
-                seriesDefaults.put("renderer", "$.jqplot.BarRenderer");
-                JSONArray series = new JSONArray();
-                for (MultiColor multiColor : multiColors) {
-                    if (multiColor.isColor1StartEnabled()) {
-                        JSONObject colorObject = new JSONObject();
-                        colorObject.put("color", "'"+ ExportService.createHexString(multiColor.getColor1Start())+"'");
-                        series.put(colorObject);
-                    }
-                }
-                seriesDefaults.put("series", series);
-                /*JSONArray seriesColors = getSeriesColors();
-                jsonParams.put("seriesColors", seriesColors);
-                jsonParams.put("legend", getLegend());*/
-            }
 
 
 
@@ -369,7 +353,8 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             rendererOptions.put("fillToZero", "true");
             rendererOptions.put("varyBarColor", "true");
             rendererOptions.put("shadowDepth", 2);
-            rendererOptions.put("barMargin", 5);
+            rendererOptions.put("barMargin", 10);
+            rendererOptions.put("barPadding", 0);
             seriesDefaults.put("rendererOptions", rendererOptions);
             /*seriesDefaults.put("shadow", true);
             seriesDefaults.put("shadowOffset", 1537573);
@@ -393,7 +378,6 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
                 labels.put("location", "'n'");
                 labels.put("show", "true");
                 labels.put("edgetolerance", -15);
-//                labels.put("ypadding", 50);
                 seriesDefaults.put("pointLabels", labels);
             }
         } catch (JSONException e) {
@@ -410,5 +394,10 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
 
         axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
         return axes;
+    }
+
+    @Override
+    protected List<MultiColor> configuredMultiColors() {
+        return multiColors;
     }
 }

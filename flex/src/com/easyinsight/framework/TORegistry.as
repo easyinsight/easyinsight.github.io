@@ -66,7 +66,6 @@ import com.easyinsight.analysis.summary.SummaryDefinition;
 import com.easyinsight.analysis.text.TextReport;
 import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
-import com.easyinsight.analysis.verticallist.CombinedVerticalListDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListRenderer;
 import com.easyinsight.analysis.verticallist.VerticalListRowHeaderRenderer;
@@ -89,6 +88,8 @@ import com.easyinsight.datasources.ConstantContactDataSource;
 import com.easyinsight.datasources.DatabaseConnection;
 import com.easyinsight.datasources.DistinctCachedSource;
 import com.easyinsight.datasources.FreshbooksDataSource;
+import com.easyinsight.datasources.FreshdeskDataSource;
+import com.easyinsight.datasources.GithubCompositeSource;
 import com.easyinsight.datasources.HarvestDataSource;
 import com.easyinsight.datasources.HighRiseDataSource;
 import com.easyinsight.datasources.HighriseAdditionalToken;
@@ -287,7 +288,6 @@ public class TORegistry {
         var stackedColumn:StackedColumnChartDefinition;
         var stackedBar:StackedBarChartDefinition;
         var vert:VerticalListDefinition;
-        var combVert:CombinedVerticalListDefinition;
         var text1:TextReport;
         var summary:SummaryDefinition;
         var gauge:GaugeDefinition;
@@ -320,6 +320,8 @@ public class TORegistry {
         var trello:TrelloCompositeSource;
         var infusion:InfusionsoftCompositeSource;
         var distinct:DistinctCachedSource;
+        var git:GithubCompositeSource;
+        var fresh:FreshdeskDataSource;
     }
 }
 }

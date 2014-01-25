@@ -1245,14 +1245,14 @@ public class AnalysisService {
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             if (startDate != null) {
                 Value value = new ReportCalculation(startDate).filterApply(null, null, new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
-                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata, false);
+                        new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata, false);
                 filterDateTest.setStartDate(value.toString());
             } else {
                 filterDateTest.setStartDate("");
             }
             if (endDate != null) {
                 Value value = new ReportCalculation(endDate).filterApply(null, null, new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
-                        null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata, false);
+                        new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata, false);
                 filterDateTest.setEndDate(value.toString());
             } else {
                 filterDateTest.setEndDate("");
@@ -1673,6 +1673,7 @@ public class AnalysisService {
             try {
                 boolean testAccountVisible = FeedService.testAccountVisible(conn);
                 List<InsightDescriptor> reports = analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn, testAccountVisible).values();
+                List<DataSourceDescriptor> dataSources = new FeedStorage().getDataSources(userID, SecurityUtil.getAccountID(), conn, testAccountVisible);
                 PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
 
                 getTagsStmt.setLong(1, SecurityUtil.getAccountID());
@@ -1728,7 +1729,15 @@ public class AnalysisService {
                         filtered.add(insightDescriptors);
                     }
                 }
-                return new ReportResults(filtered, reportTags);
+                Collections.sort(filtered, new Comparator<InsightDescriptor>() {
+
+                    public int compare(InsightDescriptor insightDescriptor, InsightDescriptor insightDescriptor1) {
+                        return insightDescriptor.getName().compareToIgnoreCase(insightDescriptor1.getName());
+                    }
+                });
+                ReportResults reportResults = new ReportResults(filtered, reportTags);
+                reportResults.setDataSources(dataSources);
+                return reportResults;
             } catch (Exception e) {
                 LogClass.error(e);
                 throw new RuntimeException(e);
@@ -1833,6 +1842,32 @@ public class AnalysisService {
         }
     }
 
+    public List<Tag> getFieldTags() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet tagRS = getTagsStmt.executeQuery();
+
+            List<Tag> reportTags = new ArrayList<Tag>();
+            while (tagRS.next()) {
+                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5));
+                if (tag.isField()) {
+                    reportTags.add(tag);
+                }
+            }
+
+            return reportTags;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public Collection<InsightDescriptor> getInsightDescriptors() {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
@@ -1905,7 +1940,7 @@ public class AnalysisService {
                 LogClass.error(re);
             }
             conn.rollback();
-            throw re;
+            throw new RuntimeException();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -1919,6 +1954,7 @@ public class AnalysisService {
             session.beginTransaction();
             AnalysisDefinition savedReport = analysisStorage.getPersistableReport(reportID, session);
             WSAnalysisDefinition result = savedReport.createBlazeDefinition();
+            result.setCanSave(true);
             session.getTransaction().commit();
             return result;
         } catch (Exception e) {
@@ -2053,6 +2089,7 @@ public class AnalysisService {
 
             Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+            Map<String, List<AnalysisItem>> unqualifiedDisplayMap = new HashMap<String, List<AnalysisItem>>();
             Map<String, UniqueKey> map = new NamespaceGenerator().generate(dataSourceID, report.getAddonReports(), conn);
             try {
                 tree = CalculationHelper.createTree(calculationString, true);
@@ -2061,13 +2098,14 @@ public class AnalysisService {
                     KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
                     keyMap = mapper.getKeyMap();
                     displayMap = mapper.getDisplayMap();
+                    unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
                 }
                 if (report != null && report.getFilterDefinitions() != null) {
                     for (FilterDefinition filter : report.getFilterDefinitions()) {
                         filter.calculationItems(displayMap);
                     }
                 }
-                visitor = new ResolverVisitor(keyMap, displayMap, new FunctionFactory(), map);
+                visitor = new ResolverVisitor(keyMap, displayMap, unqualifiedDisplayMap, new FunctionFactory(), map);
                 tree.accept(visitor);
             } catch (RecognitionException e) {
                 e.printStackTrace();
@@ -2151,21 +2189,23 @@ public class AnalysisService {
             SecurityUtil.authorizeInsight(wsAnalysisDefinition.getAnalysisID());
         }
         try {
-            Map<Long, AnalysisItem> dupeMap = new HashMap<Long, AnalysisItem>();
-            for (JoinOverride joinOverride : wsAnalysisDefinition.getJoinOverrides()) {
-                if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getAnalysisItemID() > 0) {
-                    dupeMap.put(joinOverride.getSourceItem().getAnalysisItemID(), joinOverride.getSourceItem());
+            if (wsAnalysisDefinition.getJoinOverrides() != null) {
+                Map<Long, AnalysisItem> dupeMap = new HashMap<Long, AnalysisItem>();
+                for (JoinOverride joinOverride : wsAnalysisDefinition.getJoinOverrides()) {
+                    if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getAnalysisItemID() > 0) {
+                        dupeMap.put(joinOverride.getSourceItem().getAnalysisItemID(), joinOverride.getSourceItem());
+                    }
+                    if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getAnalysisItemID() > 0) {
+                        dupeMap.put(joinOverride.getTargetItem().getAnalysisItemID(), joinOverride.getTargetItem());
+                    }
                 }
-                if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getAnalysisItemID() > 0) {
-                    dupeMap.put(joinOverride.getTargetItem().getAnalysisItemID(), joinOverride.getTargetItem());
-                }
-            }
-            for (JoinOverride joinOverride : wsAnalysisDefinition.getJoinOverrides()) {
-                if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getAnalysisItemID() > 0) {
-                    joinOverride.setSourceItem(dupeMap.get(joinOverride.getSourceItem().getAnalysisItemID()));
-                }
-                if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getAnalysisItemID() > 0) {
-                    joinOverride.setTargetItem(dupeMap.get(joinOverride.getTargetItem().getAnalysisItemID()));
+                for (JoinOverride joinOverride : wsAnalysisDefinition.getJoinOverrides()) {
+                    if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getAnalysisItemID() > 0) {
+                        joinOverride.setSourceItem(dupeMap.get(joinOverride.getSourceItem().getAnalysisItemID()));
+                    }
+                    if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getAnalysisItemID() > 0) {
+                        joinOverride.setTargetItem(dupeMap.get(joinOverride.getTargetItem().getAnalysisItemID()));
+                    }
                 }
             }
         } catch (Exception e) {
@@ -2525,8 +2565,17 @@ public class AnalysisService {
         return userCapabilities;
     }
 
-    public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report, EIConnection conn) throws SQLException {
+    public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+        List<String> warnings = insightRequestMetadata.getWarnings();
+        if (warnings != null) {
+            Collection<String> uniques = new LinkedHashSet<String>(insightRequestMetadata.getWarnings());
+            for (String warningMessage : uniques) {
+                IntentionSuggestion warning = new IntentionSuggestion(warningMessage, warningMessage, IntentionSuggestion.SCOPE_REPORT,
+                        IntentionSuggestion.WARNING_MESSAGE, IntentionSuggestion.WARNING, false);
+                suggestions.add(warning);
+            }
+        }
         Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID());
         suggestions.addAll(commonIntentions());
         DataSourceInfo dataSourceInfo = feed.createSourceInfo(conn);
@@ -2554,21 +2603,13 @@ public class AnalysisService {
     }
 
     public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report) {
+        return generatePossibleIntentions(report, new InsightRequestMetadata());
+    }
+
+    public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
-            Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID());
-            DataSourceInfo dataSourceInfo = feed.createSourceInfo(conn);
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID(), conn);
-            suggestions.addAll(dataSource.suggestIntentions(report, dataSourceInfo));
-            suggestions.addAll(report.suggestIntentions(report));
-            Collections.sort(suggestions, new Comparator<IntentionSuggestion>() {
-
-                public int compare(IntentionSuggestion intentionSuggestion, IntentionSuggestion intentionSuggestion1) {
-                    return intentionSuggestion.getPriority().compareTo(intentionSuggestion1.getPriority());
-                }
-            });
-            return suggestions;
+            return generatePossibleIntentions(report, conn, insightRequestMetadata);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

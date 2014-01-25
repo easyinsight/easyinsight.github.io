@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="center" width="100%" verticalAlign="middle" horizontalGap="0"
+        backgroundColor="#FEFEFE">
+    <mx:Script><![CDATA[
+        import com.easyinsight.SimpleReportEditor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.controls.LinkButton;
+        import mx.managers.PopUpManager;
+
+        public var problems:ArrayCollection;
+        public var warnings:ArrayCollection;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (problems.length > 0) {
+                var p1Button:LinkButton = new LinkButton();
+                p1Button.addEventListener(MouseEvent.CLICK, problemClick);
+                p1Button.styleName = "boldErrorButton";
+                p1Button.label = problems.length + "" + ((problems.length > 1) ? " problems" : "problem");
+                addChild(p1Button);
+            }
+            if (warnings.length > 0) {
+                var w1Button:LinkButton = new LinkButton();
+                w1Button.styleName = "boldWarningButton";
+                w1Button.addEventListener(MouseEvent.CLICK, warningClick);
+                w1Button.label = warnings.length + "" + ((warnings.length > 1) ? " warnings" : "warning");
+                addChild(w1Button);
+            }
+        }
+
+        private function problemClick(event:MouseEvent):void {
+            if (problems.length == 1) {
+                var suggestion:IntentionSuggestion = problems.getItemAt(0) as IntentionSuggestion;
+                if (suggestion.type == IntentionSuggestion.WARNING) {
+                    Alert.show(suggestion.description);
+                } else {
+                    new SuggestionFactory(simpleReportEditor).argh(suggestion.type, fields, dataSourceID);
+                }
+            } else {
+                var window:IntentionListWindow = new IntentionListWindow();
+                window.windowLabel = "We found the following errors:";
+                window.suggestions = problems;
+                window.simpleReportEditor = simpleReportEditor;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
+        }
+
+        private function warningClick(event:MouseEvent):void {
+            if (warnings.length == 1) {
+                var suggestion:IntentionSuggestion = warnings.getItemAt(0) as IntentionSuggestion;
+                if (suggestion.type == IntentionSuggestion.WARNING) {
+                    Alert.show(suggestion.description);
+                } else {
+                    new SuggestionFactory(simpleReportEditor).argh(suggestion.type, fields, dataSourceID);
+                }
+            } else {
+                var window:IntentionListWindow = new IntentionListWindow();
+                window.windowLabel = "We found the following warnings:";
+                window.suggestions = warnings;
+                window.simpleReportEditor = simpleReportEditor;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
+        }
+
+        public var simpleReportEditor:SimpleReportEditor;
+
+        public var fields:ArrayCollection;
+
+        public var dataSourceID:int;
+        ]]></mx:Script>
+</mx:HBox>

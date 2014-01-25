@@ -71,11 +71,21 @@
         private var viewIndex:int;
 
         private function saveChanges():void {
-            groupService.updateGroupUsers.send(_groupID, users);
+            groupService.updateGroupUsers.send(_groupID, users, reportIncludeCheckBox.selected);
         }
 
         private function savedChanges():void {
             changesIndex = 0;
+        }
+
+        private var _communityGroup:Group;
+
+
+        public function set communityGroup(value:Group):void {
+            _communityGroup = value;
+            if (value != null) {
+                reportInclude = _communityGroup.dataSourcesAutoIncludeChildren;
+            }
         }
 
         private function deleteSelected():void {
@@ -101,7 +111,10 @@
         private var sharerExplanation:String = "<li>Can create new reports and dashboards on any data sources in the group</li><li>Can modify any reports or dashboards in the group</li></ul>";
         [Bindable]
         private var viewerExplanation:String = "<ul><li>Can create new reports and dashboards on any data sources in the group</li></ul>";
-		]]>
+
+        [Bindable]
+        public var reportInclude:Boolean;
+        ]]>
 	</mx:Script>
 	<mx:RemoteObject destination="groupService" id="groupService">
 		<mx:method name="getUsers" result="gotUsers()"/>
@@ -122,6 +135,11 @@
             </mx:HBox>
         </mx:HBox>
     </mx:ViewStack>
+    <mx:Form>
+        <mx:FormItem label="Should reports included in data sources automatically be included with Viewer access?">
+            <mx:CheckBox id="reportIncludeCheckBox" selected="{reportInclude}" change="onChange(event)"/>
+        </mx:FormItem>
+    </mx:Form>
     <mx:HBox>
         <mx:VBox>
             <mx:HBox>

@@ -9,6 +9,7 @@ package com.easyinsight.filtering {
 public class FilterMetadata {
 
     public var key:String;
+    public var context:int;
 
     public function FilterMetadata() {
     }

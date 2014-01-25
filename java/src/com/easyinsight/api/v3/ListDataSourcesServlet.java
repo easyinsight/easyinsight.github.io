@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class ListDataSourcesServlet extends JSONServlet {
     @Override
-    protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {
+    protected ResponseInfo processJSON(net.minidev.json.JSONObject document, EIConnection conn, HttpServletRequest request) throws Exception {
         String customField1 = request.getParameter("customField1");
         String customField2 = request.getParameter("customField2");
         String dataSourceTag = request.getParameter("dataSourceTag");

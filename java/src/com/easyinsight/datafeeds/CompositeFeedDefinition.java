@@ -416,7 +416,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 Iterator<AnalysisItem> testIter = fields.iterator();
                 while (testIter.hasNext()) {
                     AnalysisItem test = testIter.next();
-                    if (test.getKey() instanceof DerivedKey) {
+                    if (test.getKey() instanceof DerivedKey || test.getKey().getClass().getName().equals("com.easyinsight.core.Key")) {
                         testIter.remove();
                     }
                 }

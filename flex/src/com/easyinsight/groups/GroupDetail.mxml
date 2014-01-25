@@ -160,7 +160,7 @@
                 <groups:GroupMyData groupID="{groupID}" label="Data Sources and Reports"
                                     groupAdmin="{editorEnabled}" id="groupData"/>
                 <groups:ManageGroupUsers groupID="{groupID}" id="manageUsers" label="Members"
-                                         groupAdmin="{adminEnabled}"/>
+                                         groupAdmin="{adminEnabled}" communityGroup="{_group}"/>
             </mx:ViewStack>
         <mx:Button styleName="grayButton" click="PopUpManager.removePopUp(this)" label="Close" fontSize="14"/>
     </mx:VBox>

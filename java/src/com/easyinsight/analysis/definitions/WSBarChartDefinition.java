@@ -276,8 +276,9 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
             rendererOptions.put("fillToZero", "true");
             rendererOptions.put("barDirection", "'horizontal'");
             rendererOptions.put("varyBarColor", "true");
-            rendererOptions.put("shadowDepth", 2);
-            rendererOptions.put("barMargin", 5);
+            rendererOptions.put("shadowDepth", 1);
+            rendererOptions.put("barMargin", 3);
+            rendererOptions.put("barPadding", 0);
             seriesDefaults.put("rendererOptions", rendererOptions);
             jsonParams.put("seriesDefaults", seriesDefaults);
             JSONObject grid = getGrid();
@@ -322,5 +323,10 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         areaChart.put("parameters", getJsonObject(htmlReportMetadata));
         areaChart.put("styles", htmlReportMetadata.createStyleProperties());
         return areaChart;
+    }
+
+    @Override
+    protected List<MultiColor> configuredMultiColors() {
+        return multiColors;
     }
 }

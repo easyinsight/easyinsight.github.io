@@ -8,16 +8,20 @@
 package com.easyinsight.util {
 import flash.events.Event;
 
+import mx.collections.ArrayCollection;
+
 public class TagSelectionEvent extends Event {
 
     public static const TAG_SELECT:String = "onTagSelect";
+    public var tags:ArrayCollection;
 
-    public function TagSelectionEvent(type:String) {
+    public function TagSelectionEvent(type:String, tags:ArrayCollection = null) {
         super(type);
+        this.tags = tags;
     }
 
     override public function clone():Event {
-        return new TagSelectionEvent(type);
+        return new TagSelectionEvent(type, tags);
     }
 }
 }

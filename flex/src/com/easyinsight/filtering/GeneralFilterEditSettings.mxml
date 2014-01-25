@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
-	<mx:Script>
+    <mx:Script>
 		<![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
 
         import com.easyinsight.analysis.AnalysisItem;
-       
+
         import mx.states.State;
 
         [Bindable]
@@ -27,6 +29,8 @@
 
         [Bindable]
         private var showOnReportView:Boolean;
+
+        public var filterMetadata:FilterMetadata;
 
         private var _detailClass:Class;
 
@@ -62,8 +66,8 @@
             fieldFilter = _filterDefinition.fieldChoiceFilterLabel;
             section = _filterDefinition.section;
             customizable = _filterDefinition.customizable;
-            defaultDate = _filterDefinition.defaultDateFilter;
-            flexibleDate = _filterDefinition.flexibleDateFilter;
+            childParent = _filterDefinition.childToParentLabel;
+            parentChild = _filterDefinition.parentChildLabel;
             if (_filterDefinition.field != null) {
                 filterField = filterDefinition.field.display + " - " + filterDefinition.field.key.createString();
             }
@@ -81,6 +85,9 @@
             rebuild = true;
         }
 
+        [Bindable]
+        private var rules:ArrayCollection;
+
         override protected function createChildren():void {
             super.createChildren();
             if (_detailClass != null) {
@@ -93,9 +100,35 @@
                 }
                 filterDetailBox.addChild(filterDetailEditor as DisplayObject);
             }
-
+            rules = new ArrayCollection();
+            if (_filterDefinition.parentChildLabel != null && _filterDefinition.parentChildLabel != "") {
+                var drRule:FilterRuleDefinition = new FilterRuleDefinition();
+                drRule.data = { parentChildLabel:_filterDefinition.parentChildLabel};
+                drRule.type = FilterRuleDefinition.DASHBOARD_TO_REPORT_LINK;
+                drRule.label = "For any report level filter in this dashboard matching the property of " + _filterDefinition.parentChildLabel + ", apply that filter's field to this filter instead.";
+                rules.addItem(drRule);
+            } else if (_filterDefinition.childToParentLabel != null && _filterDefinition.childToParentLabel != "") {
+                var rdRule:FilterRuleDefinition = new FilterRuleDefinition();
+                rdRule.data = { parentChildLabel:_filterDefinition.childToParentLabel};
+                rdRule.type = FilterRuleDefinition.REPORT_TO_DASHBOARD_LINK;
+                rdRule.label = "Apply the field used in this filter to any dashboard or dashboard stack level filter matching the property of " + _filterDefinition.childToParentLabel + ".";
+                rules.addItem(rdRule);
+            }
 
             //coreBox.addChildAt(editor, index);
+        }
+
+        public function addRule():void {
+            var window:AddFilterRuleWindow = new AddFilterRuleWindow();
+            window.context = filterMetadata.context;
+            window.settings = this;
+            window.addEventListener(FilterRuleEvent.RULE_ADDED, onRuleAdded, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onRuleAdded(event:FilterRuleEvent):void {
+            rules.addItem(event.ruleDefinition);
         }
 
         private var editorState:State;
@@ -141,8 +174,8 @@
                 _filterDefinition = filterDetailEditor.makeUpdates();
             }
             /*if (currentState == "editorState") {
-                _filterDefinition.field = editor.save(_feedID);
-            }*/
+             _filterDefinition.field = editor.save(_feedID);
+             }*/
             _filterDefinition.applyBeforeAggregation = aggregationCheckbox.selected;
             _filterDefinition.parentFilters = parentNamesInput.text;
             _filterDefinition.notCondition = inverseCheckbox.selected;
@@ -150,12 +183,10 @@
             _filterDefinition.filterName = filterNameInput.text;
             _filterDefinition.templateFilter = parameterFilterCheckbox.selected;
             _filterDefinition.toggleEnabled = toggleCheckbox.selected;
-            _filterDefinition.customizable = customizableCheckbox.selected;
             _filterDefinition.minimumRole = int(roleComboBox.selectedItem.data);
-            _filterDefinition.fieldChoiceFilterLabel = fieldFilterInput.text;
-            _filterDefinition.defaultDateFilter = defaultDateCheckbox.selected;
-            _filterDefinition.flexibleDateFilter = flexibleDateCheckbox.selected;
             _filterDefinition.section = sectionInput.value;
+            _filterDefinition.parentChildLabel = parentChild;
+            _filterDefinition.childToParentLabel = childParent;
             dispatchEvent(new FilterEditEvent(_filterDefinition, previousDefinition, null, rebuild));
             PopUpManager.removePopUp(this);
         }
@@ -182,47 +213,74 @@
         [Bindable]
         private var customizable:Boolean;
 
-        [Bindable]
-        private var flexibleDate:Boolean;
+        public var parentChild:String;
+        public var childParent:String;
 
-        [Bindable]
-        private var defaultDate:Boolean;
-		]]>
+        private function deleteSelected():void {
+            var selected:ArrayCollection = new ArrayCollection();
+            for each (var rule:FilterRuleDefinition in rules) {
+                if (rule.selected) {
+                    selected.addItem(rule);
+                }
+            }
+            for each (var selectedRule:FilterRuleDefinition in selected) {
+                selectedRule.clearRule(this);
+                rules.removeItemAt(rules.getItemIndex(selectedRule));
+            }
+        }
+        ]]>
 	</mx:Script>
-	<mx:VBox id="coreBox">
-        <mx:HBox>
+    <mx:TabNavigator creationPolicy="all" resizeToContent="true" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <mx:VBox id="coreBox" label="Main Filter Options">
+            <mx:HBox>
+                <mx:Form>
+                    <mx:FormItem label="Which field is this filter based on?">
+                        <mx:Label fontWeight="normal" fontFamily="Lucida Grande" text="{filterField}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Should this filter be applied before data is aggregated?">
+                        <mx:CheckBox selected="{beforeAgg}" id="aggregationCheckbox"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Should this filter be shown on the end user view?">
+                        <mx:CheckBox selected="{showOnReportView}" id="reportViewCheckbox"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="What do you want this filter to be labeled as?">
+                        <mx:TextInput id="filterNameInput" text="{filterName}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Parent Filter Names:">
+                        <mx:TextInput id="parentNamesInput" text="{parentNames}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Should users be able to toggle this filter on or off?">
+                        <mx:CheckBox id="toggleCheckbox" selected="{toggle}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Make This a 'Not' Filter:">
+                        <mx:CheckBox id="inverseCheckbox" selected="{inverse}"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:HBox>
+            <mx:HRule width="100%"/>
+            <mx:Box id="filterDetailBox"/>
+        </mx:VBox>
+        <mx:VBox label="Filter Rules">
+            <mx:Text text="Filter rules enable you to connect filters. For example, you can connect a Region and Branch filter so that when the Region filter is updated, the Branch options adjust accordingly." width="300"/>
+            <mx:HBox>
+                <util:SaveButton label="Add Rule..." click="addRule()" fontSize="12"/>
+                <util:SaveButton label="Delete Selected" click="deleteSelected()" fontSize="12"/>
+            </mx:HBox>
+            <mx:DataGrid dataProvider="{rules}" variableRowHeight="true" headerHeight="0">
+                <mx:columns>
+                    <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30"
+                                       sortable="false"/>
+                    <mx:DataGridColumn dataField="label" wordWrap="true" width="600"/>
+                </mx:columns>
+            </mx:DataGrid>
+        </mx:VBox>
+        <mx:VBox id="advancedBox" label="Advanced Filter Options">
             <mx:Form>
-                <mx:FormItem label="Filter Field:">
-                    <mx:Label fontWeight="normal" fontFamily="Lucida Grande" text="{filterField}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Row Level:">
-                    <mx:CheckBox selected="{beforeAgg}" id="aggregationCheckbox"/>
-                </mx:FormItem>
-                <mx:FormItem label="Show on Report View:">
-                    <mx:CheckBox selected="{showOnReportView}" id="reportViewCheckbox"/>
-                </mx:FormItem>
-                <mx:FormItem label="Customizable on Toggle:">
-                    <mx:CheckBox selected="{customizable}" id="customizableCheckbox"/>
-                </mx:FormItem>
-                <mx:FormItem label="Filter Name:">
-                    <mx:TextInput id="filterNameInput" text="{filterName}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Parent Filter Names:">
-                    <mx:TextInput id="parentNamesInput" text="{parentNames}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Section:">
-                    <mx:NumericStepper id="sectionInput" value="{section}"/>
-                </mx:FormItem>
-            </mx:Form>
-            <mx:Form>
-                <mx:FormItem label="Make This a 'Not' Filter:">
-                    <mx:CheckBox id="inverseCheckbox" selected="{inverse}"/>
-                </mx:FormItem>
                 <mx:FormItem label="Parameter Filter:">
                     <mx:CheckBox id="parameterFilterCheckbox" selected="{parameterFilter}"/>
                 </mx:FormItem>
-                <mx:FormItem label="Hide Toggle:">
-                    <mx:CheckBox id="toggleCheckbox" selected="{toggle}"/>
+                <mx:FormItem label="Section:">
+                    <mx:NumericStepper id="sectionInput" value="{section}"/>
                 </mx:FormItem>
                 <mx:FormItem label="Required Role:">
                     <util:SmartComboBox id="roleComboBox" selectedProperty="data" selectedValue="{role}">
@@ -238,24 +296,12 @@
                         </util:dataProvider>
                     </util:SmartComboBox>
                 </mx:FormItem>
-                <mx:FormItem label="Use Field Choice Filter:">
-                    <mx:TextInput id="fieldFilterInput" text="{fieldFilter}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Default Date Filter:">
-                    <mx:CheckBox id="defaultDateCheckbox" selected="{defaultDate}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Flexible Date Filter:">
-                    <mx:CheckBox id="flexibleDateCheckbox" selected="{flexibleDate}"/>
-                </mx:FormItem>
             </mx:Form>
-        </mx:HBox>
-        <mx:HRule width="100%"/>
-        <mx:Box id="filterDetailBox"/>
-        <mx:HRule width="100%"/>
-		<mx:HBox width="100%" horizontalAlign="center">
-			<util:SaveButton label="Save" click="save()"/>
-			<util:CancelButton label="Cancel" click="cancel()"/>
-		</mx:HBox>	
-	</mx:VBox>
-	
+        </mx:VBox>
+    </mx:TabNavigator>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="cancel()"/>
+    </mx:HBox>
+
 </util:EISlimWindow>

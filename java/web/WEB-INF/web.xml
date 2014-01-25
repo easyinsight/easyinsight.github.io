@@ -453,9 +453,21 @@
     </servlet>
 
     <servlet>
+        <servlet-name>DataSourceList</servlet-name>
+        <display-name>DataSourceList</display-name>
+        <servlet-class>com.easyinsight.api.v3.DataSourceListServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>RunReportJSON</servlet-name>
         <display-name>RunReportJSON</display-name>
         <servlet-class>com.easyinsight.api.v3.RunReportJSONServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>FieldsServlet</servlet-name>
+        <display-name>FieldsServlet</display-name>
+        <servlet-class>com.easyinsight.api.v3.FieldsServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -657,9 +669,39 @@
     </servlet>
 
     <servlet>
+        <servlet-name>JSONMeServlet</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.JSONMeServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>JSONAddRowsServlet</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.JSONAddRowServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>ReportsByTagServlet</servlet-name>
         <servlet-class>com.easyinsight.html.ReportsByTagServlet</servlet-class>
     </servlet>
+
+    <servlet-mapping>
+        <servlet-name>JSONAddRowsServlet</servlet-name>
+        <url-pattern>/json/addRows</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>FieldsServlet</servlet-name>
+        <url-pattern>/json/fieldList</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>DataSourceList</servlet-name>
+        <url-pattern>/json/dataSourceList</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>JSONMeServlet</servlet-name>
+        <url-pattern>/me.json</url-pattern>
+    </servlet-mapping>
     
     <servlet-mapping>
         <servlet-name>ReportsByTagServlet</servlet-name>

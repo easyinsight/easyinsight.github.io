@@ -140,7 +140,7 @@
 
         private function save():void {
             ProgressAlert.alert(this, "Saving...", null, feedService.updateAnalysisItemConfigurations);
-            feedService.updateAnalysisItemConfigurations.send(fields);
+            feedService.updateAnalysisItemConfigurations.send(fields, dataSourceID);
         }
         ]]></mx:Script>
     <mx:Style>

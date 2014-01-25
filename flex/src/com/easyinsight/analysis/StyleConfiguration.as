@@ -72,6 +72,10 @@ public class StyleConfiguration {
         var items:ArrayCollection = new ArrayCollection();
         items.addItem(new CheckBoxReportFormItem("Field Cleanup Enabled", "fieldCleanupEnabled", dataSource.fieldCleanupEnabled, dataSource));
         items.addItem(new CheckBoxReportFormItem("Field Lookup Enabled", "fieldLookupEnabled", dataSource.fieldLookupEnabled, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Manual Report Run", "manualReportRun", dataSource.manualReportRun, dataSource));
+        var dashboardService:RemoteObject = new RemoteObject();
+        dashboardService.destination = "analysisDefinition";
+        items.addItem(new ServerLoadComboBoxReportFormItem("Preferred Tag", "defaultFieldTag", dataSource.defaultFieldTag, dataSource, dashboardService.getFieldTags));
         return items;
     }
 
@@ -147,6 +151,16 @@ public class StyleConfiguration {
             limitsFormItem.allFields = allFields;
             items.addItem(limitsFormItem);
         }
+        return items;
+    }
+
+    public static function getCachingItems(report:AnalysisDefinition):ArrayCollection {
+        var items:ArrayCollection = new ArrayCollection();
+        items.addItem(new NumericReportFormItem("Cache Minutes", "cacheMinutes", report.cacheMinutes, report, 0, 50000));
+        items.addItem(new TextReportFormItem("Cache Partition Filter", "cachePartitionFilter", report.cachePartitionFilter, report));
+        items.addItem(new CheckBoxReportFormItem("Cache Persistence", "persistedCache", report.persistedCache, report));
+        items.addItem(new CheckBoxReportFormItem("Cache Filters", "cacheFilters", report.cacheFilters, report));
+        items.addItem(new CheckBoxReportFormItem("Cacheable", "cacheable", report.cacheable, report));
         return items;
     }
 
@@ -387,10 +401,9 @@ public class StyleConfiguration {
         }
         items.addItem(new TextReportFormItem("Custom Field 1", "customField1", report.customField1, report));
         items.addItem(new TextReportFormItem("Custom Field 2", "customField2", report.customField2, report));
-        items.addItem(new TextReportFormItem("Cache Partition Filter", "cachePartitionFilter", report.cachePartitionFilter, report));
+
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
-        items.addItem(new CheckBoxReportFormItem("Cache Persistence", "persistedCache", report.persistedCache, report));
-        items.addItem(new CheckBoxReportFormItem("Cache Filters", "cacheFilters", report.cacheFilters, report));
+
         items.addItem(new CheckBoxReportFormItem("Aggregate Query if Possible", "aggregateQueryIfPossible", report.aggregateQueryIfPossible, report));
         items.addItem(new CheckBoxReportFormItem("No Data on No Join", "noDataOnNoJoin", report.noDataOnNoJoin, report));
         items.addItem(new CheckBoxReportFormItem("Filter Optimization", "lookupTableOptimization", report.lookupTableOptimization, report));
@@ -398,9 +411,9 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Log Report", "logReport", report.logReport, report));
         items.addItem(new CheckBoxReportFormItem("Data Source Fields", "dataSourceFields", report.dataSourceFields, report));
         items.addItem(new CheckBoxReportFormItem("Report Runs Manually", "adHocExecution", report.adHocExecution, report));
-        items.addItem(new CheckBoxReportFormItem("Cacheable", "cacheable", report.cacheable, report));
+
         items.addItem(new CheckBoxReportFormItem("Run Before Manual", "manualButRunFirst", report.manualButRunFirst, report));
-        items.addItem(new NumericReportFormItem("Cache Minutes", "cacheMinutes", report.cacheMinutes, report, 0, 50000));
+
         items.addItem(new NumericReportFormItem("Fetch Size", "fetchSize", report.fetchSize, report, 0, 5000));
         items.addItem(new CheckBoxReportFormItem("Filter Strategy", "newFilterStrategy", report.newFilterStrategy, report));
         var sort:Sort = new Sort();

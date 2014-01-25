@@ -11,6 +11,7 @@
         import com.easyinsight.solutions.InsightDescriptor;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.core.UIComponent;
         import mx.events.FlexEvent;
 
@@ -21,9 +22,24 @@
             addEventListener(TagEvent.TAG_UNSELECTED, onUnTag);
         }
 
+        public function initialSelected(tags:ArrayCollection):void {
+            if (tags != null) {
+                selectedTags = tags;
+                for each (var b:TagButton in getChildren()) {
+                    if (selectedTags.getItemIndex(b.tag) != -1) {
+                        b.selectionState = true;
+                    }
+                }
+            }
+        }
+
         private function onTag(event:TagEvent):void {
             selectedTags.addItem(event.tag);
             dispatchEvent(new TagSelectionEvent(TagSelectionEvent.TAG_SELECT));
+        }
+
+        public function getSelectedTags():ArrayCollection {
+            return selectedTags;
         }
 
         private function onUnTag(event:TagEvent):void {
@@ -31,10 +47,10 @@
             dispatchEvent(new TagSelectionEvent(TagSelectionEvent.TAG_SELECT));
         }
 
-        public function filterReport(insightDescriptor:InsightDescriptor):Boolean {
+        public function filterObject(object:Object, property:String = "tags"):Boolean {
             if (selectedTags != null && selectedTags.length > 0) {
-                if (insightDescriptor.tags != null) {
-                    for each (var tag:Tag in insightDescriptor.tags) {
+                if (object[property] != null) {
+                    for each (var tag:Tag in object[property]) {
                         for each (var dsTag:Tag in selectedTags) {
                             if (dsTag.id == tag.id) {
                                 return true;

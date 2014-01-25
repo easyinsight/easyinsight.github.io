@@ -14,6 +14,8 @@ public class ReportResults {
 
     public var reports:ArrayCollection;
     public var reportTags:ArrayCollection;
+    public var dataSources:ArrayCollection;
+    public var dashboards:ArrayCollection;
 
     public function ReportResults() {
     }

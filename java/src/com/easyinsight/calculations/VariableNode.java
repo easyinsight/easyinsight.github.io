@@ -6,10 +6,11 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.ReportKey;
 import org.antlr.runtime.Token;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class VariableNode extends CalculationTreeNode {
+
+    private List<String> warnings;
 
     public VariableNode(Token t) {
         super(t);
@@ -18,6 +19,10 @@ public class VariableNode extends CalculationTreeNode {
     /*public KeySpecification getVariableKey() {
         return variableKey;
     }*/
+
+    public List<String> getWarnings() {
+        return warnings;
+    }
 
     public AnalysisItem getAnalysisItem() {
         return analysisItem;
@@ -31,7 +36,8 @@ public class VariableNode extends CalculationTreeNode {
         return analysisItem.toDisplay();
     }
     
-    public void resolveVariableKey(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems, Map<String, UniqueKey> namespaces) {
+    public void resolveVariableKey(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems,
+                                   Map<String, List<AnalysisItem>> unqualifiedDisplayItems, Map<String, UniqueKey> namespaces) {
         String s;
 
 
@@ -57,100 +63,138 @@ public class VariableNode extends CalculationTreeNode {
         //variableKey = new NamedKeySpecification(s);
         List<AnalysisItem> analysisItems = keyItems.get(s);
 
-        if (analysisItems != null) {
-            if (analysisItems.size() > 1) {
-                if (namespace != null) {
+        if (namespace != null) {
 
-                    UniqueKey uniqueKey = namespaces.get(namespace);
-                    if (uniqueKey == null) {
-                        throw new FunctionException("Could not resolve namespace " + namespace + ".");
-                    }
+            UniqueKey uniqueKey = namespaces.get(namespace);
+            if (uniqueKey == null) {
+                throw new FunctionException("Could not resolve namespace " + namespace + ".");
+            }
 
-                    AnalysisItem matchedTo = null;
-                    for (AnalysisItem testItem : analysisItems) {
-                        Key key = testItem.getKey();
-                        if (key instanceof DerivedKey) {
-                            DerivedKey derivedKey = (DerivedKey) key;
-                            UniqueKey testKey = new UniqueKey(derivedKey.getFeedID(), UniqueKey.DERIVED);
-                            if (testKey.equals(uniqueKey)) {
-                                matchedTo = testItem;
-                                break;
-                            }
-                        } else if (key instanceof ReportKey) {
-                            ReportKey reportKey = (ReportKey) key;
-                            UniqueKey testKey = new UniqueKey(reportKey.getReportID(), UniqueKey.REPORT);
-                            if (testKey.equals(uniqueKey)) {
-                                matchedTo = testItem;
-                                break;
-                            }
+            List<AnalysisItem> subKeyItems = keyItems.get(s);
+            List<AnalysisItem> subDisplayItems = displayItems.get(s);
+            List<AnalysisItem> subUnqualifiedDisplayItems = unqualifiedDisplayItems.get(s);
+
+            List<AnalysisItem> matchedByKey = new ArrayList<AnalysisItem>();
+            Set<Key> matchedKeys = new HashSet<Key>();
+            if (subKeyItems != null) {
+                for (AnalysisItem testItem : subKeyItems) {
+                    Key key = testItem.getKey();
+                    if (key instanceof DerivedKey) {
+                        DerivedKey derivedKey = (DerivedKey) key;
+
+                        UniqueKey testKey = new UniqueKey(derivedKey.getFeedID(), UniqueKey.DERIVED);
+                        if (testKey.equals(uniqueKey)) {
+                            matchedKeys.add(key);
+                            matchedByKey.add(testItem);
+                            /*matchedTo = testItem;
+                            break;*/
+                        }
+                    } else if (key instanceof ReportKey) {
+                        ReportKey reportKey = (ReportKey) key;
+                        UniqueKey testKey = new UniqueKey(reportKey.getReportID(), UniqueKey.REPORT);
+                        if (testKey.equals(uniqueKey)) {
+                            matchedKeys.add(key);
+                            matchedByKey.add(testItem);
+                            //matchedTo = testItem;
+                            //break;
                         }
                     }
+                }
+            }
+            if (subDisplayItems != null) {
+                for (AnalysisItem testItem : subDisplayItems) {
+                    Key key = testItem.getKey();
+                    if (key instanceof DerivedKey) {
+                        DerivedKey derivedKey = (DerivedKey) key;
 
-                    if (matchedTo == null) {
-                        analysisItem = analysisItems.get(0);
-                    } else {
-                        analysisItem = matchedTo;
+                        UniqueKey testKey = new UniqueKey(derivedKey.getFeedID(), UniqueKey.DERIVED);
+                        if (testKey.equals(uniqueKey) && !matchedKeys.contains(key)) {
+                            matchedKeys.add(key);
+                            matchedByKey.add(testItem);
+                        }
+                    } else if (key instanceof ReportKey) {
+                        ReportKey reportKey = (ReportKey) key;
+                        UniqueKey testKey = new UniqueKey(reportKey.getReportID(), UniqueKey.REPORT);
+                        if (testKey.equals(uniqueKey) && !matchedKeys.contains(key)) {
+                            matchedKeys.add(key);
+                            matchedByKey.add(testItem);
+                        }
+                    }
+                }
+            }
+            if (subUnqualifiedDisplayItems != null) {
+                for (AnalysisItem testItem : subUnqualifiedDisplayItems) {
+                    Key key = testItem.getKey();
+                    if (key instanceof DerivedKey) {
+                        DerivedKey derivedKey = (DerivedKey) key;
+
+                        UniqueKey testKey = new UniqueKey(derivedKey.getFeedID(), UniqueKey.DERIVED);
+                        if (testKey.equals(uniqueKey) && !matchedKeys.contains(key)) {
+                            matchedByKey.add(testItem);
+                        }
+                    } else if (key instanceof ReportKey) {
+                        ReportKey reportKey = (ReportKey) key;
+                        UniqueKey testKey = new UniqueKey(reportKey.getReportID(), UniqueKey.REPORT);
+                        if (testKey.equals(uniqueKey) && !matchedKeys.contains(key)) {
+                            matchedByKey.add(testItem);
+                        }
+                    }
+                }
+            }
+            if (matchedByKey.size() > 1) {
+                for (AnalysisItem testItem : matchedByKey) {
+                    if (s.equals(testItem.toUnqualifiedDisplay())) {
+                        analysisItem = testItem;
+                        break;
                     }
                 }
                 if (analysisItem == null) {
-                    boolean matched = false;
-                    for (AnalysisItem testItem : analysisItems) {
-                        if (s.equals(testItem.toDisplay())) {
-                            analysisItem = testItem;
-                            matched = true;
-                            break;
-                        }
+                    if (warnings == null) {
+                        warnings = new ArrayList<String>();
                     }
-                    if (!matched) {
-                        analysisItem = analysisItems.get(0);
-                    }
+
+                    analysisItem = matchedByKey.get(0);
+                    warnings.add("we found multiple fields matching the name of <b>" + s + "</b> and chose <b>" + analysisItem.toDisplay() + "</b>.");
                 }
-            } else {
-                analysisItem = analysisItems.get(0);
+            } else if (matchedByKey.size() == 1) {
+                analysisItem = matchedByKey.get(0);
             }
         } else {
-            analysisItems = displayItems.get(s);
             if (analysisItems != null) {
                 if (analysisItems.size() > 1) {
-                    if (namespace != null) {
-
-
-                        UniqueKey uniqueKey = namespaces.get(namespace);
-                        if (uniqueKey == null) {
-                            throw new FunctionException("Could not resolve namespace " + namespace + ".");
-                        }
-
-                        AnalysisItem matchedTo = null;
+                    if (analysisItem == null) {
+                        boolean matched = false;
                         for (AnalysisItem testItem : analysisItems) {
-                            Key key = testItem.getKey();
-                            if (key instanceof DerivedKey) {
-                                DerivedKey derivedKey = (DerivedKey) key;
-                                UniqueKey testKey = new UniqueKey(derivedKey.getFeedID(), UniqueKey.DERIVED);
-                                if (testKey.equals(uniqueKey)) {
-                                    matchedTo = testItem;
-                                    break;
-                                }
-                            } else if (key instanceof ReportKey) {
-                                ReportKey reportKey = (ReportKey) key;
-                                UniqueKey testKey = new UniqueKey(reportKey.getReportID(), UniqueKey.REPORT);
-                                if (testKey.equals(uniqueKey)) {
-                                    matchedTo = testItem;
-                                    break;
-                                }
+                            if (s.equals(testItem.toDisplay())) {
+                                analysisItem = testItem;
+                                matched = true;
+                                break;
                             }
                         }
-                        if (matchedTo == null) {
+                        if (!matched) {
+                            if (warnings == null) {
+                                warnings = new ArrayList<String>();
+                            }
                             analysisItem = analysisItems.get(0);
+                            warnings.add("we found multiple fields matching the name of <b>" + s + "</b> and chose <b>" + analysisItem.toDisplay() + "</b>.");
                         }
                     }
-
-
-                }
-                if (analysisItem == null) {
+                } else {
                     analysisItem = analysisItems.get(0);
+                }
+            } else {
+                analysisItems = displayItems.get(s);
+                if (analysisItems != null) {
+                    if (analysisItems.size() > 1) {
+                    }
+                    if (analysisItem == null) {
+                        analysisItem = analysisItems.get(0);
+                    }
                 }
             }
         }
+
+
         if (analysisItem == null) {
             throw new FunctionException("We could not find a field named " + s + ".");
         }

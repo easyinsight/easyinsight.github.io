@@ -5,6 +5,8 @@ import com.easyinsight.analysis.UniqueKey;
 import com.easyinsight.calculations.functions.CastFunction;
 import com.easyinsight.core.Value;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -19,21 +21,38 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
     //private List<AnalysisItem> analysisItems;
     private Map<String, List<AnalysisItem>> keyItems;
     private Map<String, List<AnalysisItem>> displayItems;
+    private Map<String, List<AnalysisItem>> unqualifiedDisplayItems;
     private Map<String, UniqueKey> uniqueKeyMap;
     private FunctionFactory functionResolver;
     private int aggregationType;
+    private Collection<String> warnings = new LinkedHashSet<String>();
 
-    public ResolverVisitor(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems, FunctionFactory f, Map<String, UniqueKey> uniqueKeyMap) {
+    public ResolverVisitor(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems, Map<String, List<AnalysisItem>> unqualifiedDisplayItems,
+                           FunctionFactory f, Map<String, UniqueKey> uniqueKeyMap) {
         this.keyItems = keyItems;
         this.displayItems = displayItems;
         this.uniqueKeyMap = uniqueKeyMap;
+        this.unqualifiedDisplayItems = unqualifiedDisplayItems;
         functionResolver = f;
         aggregationType = 0;
     }
 
-    public ResolverVisitor(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems, FunctionFactory f, int aggregationType) {
+    public ResolverVisitor(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems, Map<String, List<AnalysisItem>> unqualifiedDisplayItems,
+                           FunctionFactory f, Map<String, UniqueKey> uniqueKeyMap, Collection<String> warnings) {
         this.keyItems = keyItems;
         this.displayItems = displayItems;
+        this.uniqueKeyMap = uniqueKeyMap;
+        this.unqualifiedDisplayItems = unqualifiedDisplayItems;
+        functionResolver = f;
+        aggregationType = 0;
+        this.warnings = warnings;
+    }
+
+    public ResolverVisitor(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems,
+                           Map<String, List<AnalysisItem>> unqualifiedDisplayItems, FunctionFactory f, int aggregationType) {
+        this.keyItems = keyItems;
+        this.displayItems = displayItems;
+        this.unqualifiedDisplayItems = unqualifiedDisplayItems;
         functionResolver = f;
         this.aggregationType = aggregationType;
     }
@@ -42,7 +61,7 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
     private void visitChildren(CalculationTreeNode node) {
         for(int i = 0;i < node.getChildCount();i++) {
             if (node.getChild(i) instanceof CalculationTreeNode) {
-                ((CalculationTreeNode) node.getChild(i)).accept(new ResolverVisitor(keyItems, displayItems, functionResolver, uniqueKeyMap));
+                ((CalculationTreeNode) node.getChild(i)).accept(new ResolverVisitor(keyItems, displayItems, unqualifiedDisplayItems, functionResolver, uniqueKeyMap, warnings));
             }
         }
     }
@@ -117,9 +136,16 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
 
     public void visit(VariableNode node) {
         if(aggregationType == 0)
-            node.resolveVariableKey(keyItems, displayItems, uniqueKeyMap);
+            node.resolveVariableKey(keyItems, displayItems, unqualifiedDisplayItems, uniqueKeyMap);
         else
             node.resolveVariableKey(keyItems, displayItems, aggregationType);
+        if (node.getWarnings() != null) {
+            warnings.addAll(node.getWarnings());
+        }
+    }
+
+    public Collection<String> getWarnings() {
+        return warnings;
     }
 
     public void visit(FunctionNode node) {
@@ -133,7 +159,7 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
                 throw new FunctionException("Incorrect number of parameters passed to cast function.");
             }
             else {
-                ((CalculationTreeNode) node.getChild(1)).accept(new ResolverVisitor(keyItems, displayItems, functionResolver, f.getAggregationType()));
+                ((CalculationTreeNode) node.getChild(1)).accept(new ResolverVisitor(keyItems, displayItems, unqualifiedDisplayItems, functionResolver, f.getAggregationType()));
             }
         }
         else {
@@ -142,7 +168,7 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
                 throw new FunctionException(node.getChild(0).toString() + " requires " + parameters + " parameters.");
             }
             for(int i = 1;i < node.getChildCount();i++) {
-                ((CalculationTreeNode) node.getChild(i)).accept(new ResolverVisitor(keyItems, displayItems, functionResolver, uniqueKeyMap));
+                ((CalculationTreeNode) node.getChild(i)).accept(new ResolverVisitor(keyItems, displayItems, unqualifiedDisplayItems, functionResolver, uniqueKeyMap));
             }
         }
     }

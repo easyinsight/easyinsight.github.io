@@ -102,11 +102,23 @@ public class SecurityUtil {
     }
 
     public static boolean isAccountReports() {
-        /*UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
-        if(userPrincipal == null)
-            userPrincipal = threadLocal.get();
-        return userPrincipal.isAccountReports();*/
-        return true;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT TEST_ACCOUNT_VISIBLE FROM USER WHERE USER_ID = ?");
+            ps.setLong(1, getUserID());
+            ResultSet rs = ps.executeQuery();
+            boolean ret = false;
+            if (rs.next()) {
+                ret = rs.getBoolean(1);
+            }
+            ps.close();
+            return ret;
+        } catch (Exception e) {
+            LogClass.error(e);
+            return false;
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public static boolean isAccountAdmin() {
@@ -279,7 +291,7 @@ public class SecurityUtil {
             Session session = Database.instance().createSession(conn);
 
             try {
-                User u = (User) session.createQuery("from User where user_id = ?").setLong(0, userID).list().get(0);
+                User u = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
                 jo.put("name", u.getUserName());
                 jo.put("designer", embedKey != null || u.isAnalyst());
             } finally {
@@ -386,13 +398,14 @@ public class SecurityUtil {
     public static int getInsightRole(long userID, long insightID) {
         Connection conn = Database.instance().getConnection();
         try {
+            int role;
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT RELATIONSHIP_TYPE FROM USER_TO_ANALYSIS WHERE " +
                     "USER_ID = ? AND ANALYSIS_ID = ?");
             existingLinkQuery.setLong(1, userID);
             existingLinkQuery.setLong(2, insightID);
             ResultSet rs = existingLinkQuery.executeQuery();
             if (rs.next()) {
-                return Roles.OWNER;
+                role = Roles.OWNER;
             } else {
                 PreparedStatement groupQueryStmt = conn.prepareStatement("select group_to_user_join.binding_type from group_to_insight, group_to_user_join where " +
                         "group_to_user_join.group_id = group_to_insight.group_id and group_to_user_join.user_id = ? and group_to_insight.insight_id = ?");
@@ -400,11 +413,28 @@ public class SecurityUtil {
                 groupQueryStmt.setLong(2, insightID);
                 ResultSet groupRS = groupQueryStmt.executeQuery();
                 if (groupRS.next()) {
-                    return Roles.SUBSCRIBER;
+                    role = Roles.SUBSCRIBER;
                 } else {
-                    return Integer.MAX_VALUE;
+                    PreparedStatement lastChanceStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID FROM ANALYSIS, group_to_user_join," +
+                            "community_group, upload_policy_groups WHERE " +
+                            "analysis.analysis_id = ? AND analysis.data_feed_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
+                            "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id and group_to_user_join.user_id = ?");
+                    lastChanceStmt.setLong(1, insightID);
+                    lastChanceStmt.setBoolean(2, true);
+                    lastChanceStmt.setLong(3, userID);
+                    ResultSet lastChanceRS = lastChanceStmt.executeQuery();
+                    if (lastChanceRS.next()) {
+                        role = Roles.SUBSCRIBER;
+                    } else {
+                        role = Integer.MAX_VALUE;
+                    }
+                    lastChanceStmt.close();
+                    return role;
                 }
+                groupQueryStmt.close();
             }
+            existingLinkQuery.close();
+            return role;
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -507,20 +537,18 @@ public class SecurityUtil {
     }
 
     public static int authorizeInsight(long insightID) {
-        boolean feedVisibility = false;
         boolean accountVisibility = false;
         long dataFeedID = 0;
         boolean publicVisibility = false;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT FEED_VISIBILITY, ACCOUNT_VISIBLE, DATA_FEED_ID, PUBLICLY_VISIBLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT ACCOUNT_VISIBLE, DATA_FEED_ID, PUBLICLY_VISIBLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
             authorizeStmt.setLong(1, insightID);
             ResultSet rs = authorizeStmt.executeQuery();
             if (rs.next()) {
-                feedVisibility = rs.getBoolean(1);
-                accountVisibility = rs.getBoolean(2);
-                dataFeedID = rs.getLong(3);
-                publicVisibility = rs.getBoolean(4);
+                accountVisibility = rs.getBoolean(1);
+                dataFeedID = rs.getLong(2);
+                publicVisibility = rs.getBoolean(3);
             } else {
                 throw new SecurityException();
             }
@@ -543,7 +571,7 @@ public class SecurityUtil {
             }
         }
 
-        if (accountVisibility || isAccountReports()) {
+        if (accountVisibility && isAccountReports()) {
             conn = Database.instance().getConnection();
             try {
                 PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, USER_TO_ANALYSIS WHERE USER.USER_ID = " +
@@ -575,9 +603,6 @@ public class SecurityUtil {
             } finally {
                 Database.closeConnection(conn);
             }
-        } else if (feedVisibility) {
-            authorizeFeedAccess(dataFeedID);
-            return Roles.OWNER;
         } else {
             int role = getInsightRole(userPrincipal.getUserID(), insightID);
             if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
@@ -632,7 +657,7 @@ public class SecurityUtil {
                 if (userID == SecurityUtil.getUserID()) {
                     role = Math.min(Roles.OWNER, role);
                 } else if ((accountVisible  || isAccountReports()) && accountID == SecurityUtil.getAccountID()) {
-                    role = Math.min(Roles.SHARER, role);
+                    role = Math.min(Roles.SUBSCRIBER, role);
                 }
             }
             if (role != Roles.NONE) {
@@ -790,7 +815,7 @@ public class SecurityUtil {
             Database.closeConnection(conn);
         }
         if (!publiclyVisible) {
-            if (accountVisible || isAccountReports()) {
+            if (accountVisible && isAccountReports()) {
                 conn = Database.instance().getConnection();
                 try {
                     PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, UPLOAD_POLICY_USERS WHERE USER.USER_ID = " +

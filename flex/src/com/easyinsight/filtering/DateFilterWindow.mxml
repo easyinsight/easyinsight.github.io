@@ -7,39 +7,40 @@
 
         import mx.managers.PopUpManager;
 
+        public var filterMetadata:FilterMetadata;
 
         private function addLastValue():void {
-            var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.LAST_VALUE, null, null);
+            var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.LAST_VALUE, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(filter));
             PopUpManager.removePopUp(this);
         }
 
         private function addFirstValue():void {
-            var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.FIRST_VALUE, null, null);
+            var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.FIRST_VALUE, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(filter));
             PopUpManager.removePopUp(this);
         }
 
         private function addNullValue():void {
-            var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.NULL_VALUE, null, null);
+            var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.NULL_VALUE, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(filter));
             PopUpManager.removePopUp(this);
         }
 
         private function addFlatValue():void {
-            var filter:FlatDateFilter = new FlatDateFilter(_feedID, _item, 0, 0, null, null);
+            var filter:FlatDateFilter = new FlatDateFilter(_feedID, _item, 0, 0, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(filter));
             PopUpManager.removePopUp(this);
         }
 
         private function addFlatMonthValue():void {
-            var filter:FlatMonthDateFilter = new FlatMonthDateFilter(_feedID, _item, 0, 0, null, null);
+            var filter:FlatMonthDateFilter = new FlatMonthDateFilter(_feedID, _item, 0, 0, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(filter));
             PopUpManager.removePopUp(this);
         }
 
         private function addMultiFlatValue():void {
-            var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item, null, null);
+            var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(filter));
             PopUpManager.removePopUp(this);
         }

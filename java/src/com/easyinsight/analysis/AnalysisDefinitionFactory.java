@@ -202,7 +202,6 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setMarketplaceVisible(wsAnalysisDefinition.isMarketplaceVisible());
         analysisDefinition.setTemporaryReport(wsAnalysisDefinition.isTemporaryReport());
         analysisDefinition.setSolutionVisible(wsAnalysisDefinition.isSolutionVisible());
-        analysisDefinition.setVisibleAtFeedLevel(wsAnalysisDefinition.isVisibleAtFeedLevel());
         return analysisDefinition;
     }
 }

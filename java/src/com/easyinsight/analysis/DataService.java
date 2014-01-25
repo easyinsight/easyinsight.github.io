@@ -19,6 +19,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.StandardReportPipeline;
 //import net.spy.memcached.MemcachedClient;
+import com.easyinsight.tag.Tag;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,7 +48,6 @@ public class DataService {
                 report = reportEditorReport;
                 dataSourceID = reportEditorReport.getDataFeedID();
             } else if (dashboardEditorDashboard != null) {
-                dashboardID = dashboardEditorDashboard.getId();
                 dataSourceID = dashboardEditorDashboard.getDataSourceID();
             } else {
                 EIConnection conn = Database.instance().getConnection();
@@ -61,7 +61,7 @@ public class DataService {
                         dataSourceID = report.getDataFeedID();
                     } else {
                         PreparedStatement dashboardStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, dashboard.DASHBOARD_ID FROM dashboard_to_filter, dashboard WHERE " +
-                                "dashboard_to_filter.filter_id = ? and dashboard_to_filter.dashboard_id = dashboard.dashboard_id");
+                                "dashboard_to_filter.filter_id = ? AND dashboard_to_filter.dashboard_id = dashboard.dashboard_id");
                         dashboardStmt.setLong(1, filter.getFilterID());
                         ResultSet dashboardRS = dashboardStmt.executeQuery();
                         if (dashboardRS.next()) {
@@ -104,7 +104,6 @@ public class DataService {
             Map<AnalysisItem, AnalysisItemHandle> selectedMap = new HashMap<AnalysisItem, AnalysisItemHandle>();
 
 
-
             Set<AnalysisItem> set = new HashSet<AnalysisItem>();
             int i = 0;
             if (!filter.excludeReportFields() && report != null && report instanceof WSListDefinition) {
@@ -128,28 +127,22 @@ public class DataService {
                 }
             }
 
-            Map<Long, AnalysisItem> dataSourceFieldMap = new HashMap<Long, AnalysisItem>();
-            for (AnalysisItem field : dataSource.getFields()) {
-                dataSourceFieldMap.put(field.getAnalysisItemID(), field);
-            }
-
             List<WeNeedToReplaceHibernateTag> tags = filter.getAvailableTags();
 
             EIConnection conn = Database.instance().getConnection();
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.analysis_item_id FROM field_to_tag, feed_to_analysis_item WHERE account_tag_id = ? AND feed_to_analysis_item.feed_id = ? AND " +
-                    "field_to_tag.analysis_item_id = feed_to_analysis_item.analysis_item_id");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ? AND field_to_tag.data_source_id = ?");
             try {
                 for (WeNeedToReplaceHibernateTag tag : tags) {
                     queryStmt.setLong(1, tag.getTagID());
                     queryStmt.setLong(2, dataSourceID);
                     ResultSet rs = queryStmt.executeQuery();
                     while (rs.next()) {
-                        long fieldID = rs.getLong(1);
-                        AnalysisItem analysisItem = dataSourceFieldMap.get(fieldID);
+                        String fieldName = rs.getString(1);
+                        AnalysisItem analysisItem = mapByName.get(fieldName);
                         //if (report == null || report.accepts(analysisItem)) {
-                            positions.put(analysisItem, i++);
-                            set.add(analysisItem);
-                            PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
+                        positions.put(analysisItem, i++);
+                        set.add(analysisItem);
+                            /*PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
                                     "extension_type = ?");
                             extStmt.setLong(1, fieldID);
                             extStmt.setInt(2, report.extensionType());
@@ -165,29 +158,13 @@ public class DataService {
                                     session.close();
                                 }
                             }
-                            extStmt.close();
-                        }
+                            extStmt.close();*/
+                    }
                     //}
                 }
-                PreparedStatement query2Stmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ?");
 
-                for (WeNeedToReplaceHibernateTag tag : tags) {
-                    query2Stmt.setLong(1, tag.getTagID());
-                    ResultSet rs = query2Stmt.executeQuery();
-                    while (rs.next()) {
-                        String fieldName = rs.getString(1);
-                        AnalysisItem analysisItem = mapByName.get(fieldName);
-                        if (analysisItem != null) {
-                            positions.put(analysisItem, i++);
-                            if (set.contains(analysisItem)) {
-                                set.remove(analysisItem);
-                            }
-                            set.add(analysisItem);
-                        }
-                    }
-                }
 
-                query2Stmt.close();
+                queryStmt.close();
 
             } finally {
                 Database.closeConnection(conn);
@@ -298,7 +275,7 @@ public class DataService {
                 if (dashboardRS.next()) {
                     dashboardID = dashboardRS.getLong(1);
                 } else {
-                    PreparedStatement dashboardElementPS = conn.prepareStatement("SELECT dashboard_element.dashboard_element_id from " +
+                    PreparedStatement dashboardElementPS = conn.prepareStatement("SELECT dashboard_element.dashboard_element_id FROM " +
                             "dashboard_element_to_filter, dashboard_element WHERE filter_id = ?");
                     dashboardElementPS.setLong(1, filterID);
                     ResultSet dashboardElementRS = dashboardElementPS.executeQuery();
@@ -551,6 +528,10 @@ public class DataService {
             Collection<AnalysisItem> feedItems = feed.getFields();
             // need to apply renames from the com.easyinsight.analysis definition here?
             List<AnalysisItem> sortedList = new ArrayList<AnalysisItem>(feedItems);
+            Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+            for (AnalysisItem item : feedItems) {
+                map.put(item.toDisplay(), item);
+            }
             Collections.sort(sortedList, new Comparator<AnalysisItem>() {
 
                 public int compare(AnalysisItem o1, AnalysisItem o2) {
@@ -573,6 +554,33 @@ public class DataService {
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
             feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
+            feedMetadata.setDefaultManualRun(feed.getDataSource().isManualReportRun());
+            long defaultTag = feed.getDataSource().getDefaultFieldTag();
+            PreparedStatement tagStmt = conn.prepareStatement("SELECT account_tag.account_tag_id, account_tag.tag_name, field_to_tag.display_name FROM " +
+                    "field_to_tag, account_tag WHERE field_to_tag.account_tag_id = account_tag.account_tag_id AND " +
+                    "field_to_tag.data_source_id = ?");
+            tagStmt.setLong(1, feedID);
+            ResultSet tagRS = tagStmt.executeQuery();
+            Set<Tag> tags = new HashSet<Tag>();
+            while (tagRS.next()) {
+                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), false, false, false);
+                if (!tags.contains(tag)) {
+                    tags.add(tag);
+                    if (tag.getId() == defaultTag) {
+                        feedMetadata.setTagDefault(tag);
+                    }
+                }
+                String name = tagRS.getString(3);
+                AnalysisItem item = map.get(name);
+                if (item != null) {
+                    if (item.getTags() == null) {
+                        item.setTags(new ArrayList<Tag>());
+                    }
+                    item.getTags().add(tag);
+                }
+            }
+            feedMetadata.setTags(new ArrayList<Tag>(tags));
+            tagStmt.close();
             PreparedStatement ps = conn.prepareStatement("SELECT DEFAULT_MAX_RECORDS FROM ACCOUNT WHERE ACCOUNT_ID = ?");
             ps.setLong(1, SecurityUtil.getAccountID());
             ResultSet rs = ps.executeQuery();
@@ -604,7 +612,7 @@ public class DataService {
             WSListDefinition tempList = new WSListDefinition();
             tempList.setDataFeedID(feedID);
             tempList.setColumns(new ArrayList<AnalysisItem>());
-            feedMetadata.setSuggestions(new AnalysisService().generatePossibleIntentions(tempList, conn));
+            feedMetadata.setSuggestions(new AnalysisService().generatePossibleIntentions(tempList, conn, new InsightRequestMetadata()));
             feedMetadata.setLookupTables(lookupTables);
             return feedMetadata;
         } catch (Exception e) {
@@ -638,7 +646,7 @@ public class DataService {
     }
 
     private static DataSet retrieveDataSet(Feed feed, Set<AnalysisItem> validQueryItems, Collection<FilterDefinition> filters,
-                                      InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> fields, EIConnection conn) {
+                                           InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> fields, EIConnection conn) {
         return feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, fields, false, conn);
     }
 
@@ -756,7 +764,7 @@ public class DataService {
                 } else {
                     keyLabel = "";
                 }
-                String fullKey =  keyLabel + fieldSourcing;
+                String fullKey = keyLabel + fieldSourcing;
                 List<AnalysisMeasure> measures = trendMap.get(fullKey);
                 if (measures == null) {
                     measures = new ArrayList<AnalysisMeasure>();
@@ -983,9 +991,9 @@ public class DataService {
 
             List<FilterDefinition> dlsFilters = new ArrayList<FilterDefinition>();
             {
-                PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
-                                    "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
-                                    "user_dls.user_id = ?");
+                PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls WHERE " +
+                        "user_dls_to_filter.user_dls_id = user_dls.user_dls_id AND user_dls.dls_id = dls.dls_id AND dls.data_source_id = ? AND " +
+                        "user_dls.user_id = ?");
                 dlsStmt.setLong(1, dataSourceID);
                 dlsStmt.setLong(2, SecurityUtil.getUserID());
                 ResultSet dlsRS = dlsStmt.executeQuery();
@@ -1008,9 +1016,9 @@ public class DataService {
             }
 
             {
-                PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls, composite_node, composite_feed where " +
-                        "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and " +
-                        "user_dls.user_id = ? and composite_node.data_feed_id = ? and composite_node.composite_feed_id = composite_feed.composite_feed_id and " +
+                PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls, composite_node, composite_feed WHERE " +
+                        "user_dls_to_filter.user_dls_id = user_dls.user_dls_id AND user_dls.dls_id = dls.dls_id AND " +
+                        "user_dls.user_id = ? AND composite_node.data_feed_id = ? AND composite_node.composite_feed_id = composite_feed.composite_feed_id AND " +
                         "composite_feed.data_feed_id = dls.data_source_id");
                 dlsStmt.setLong(1, SecurityUtil.getUserID());
                 dlsStmt.setLong(2, dataSourceID);
@@ -1033,9 +1041,9 @@ public class DataService {
                 dlsStmt.close();
             }
             {
-                PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls, composite_node, composite_feed where " +
-                        "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and " +
-                        "user_dls.user_id = ? and composite_node.data_feed_id = dls.data_source_id and composite_node.composite_feed_id = composite_feed.composite_feed_id and " +
+                PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls, composite_node, composite_feed WHERE " +
+                        "user_dls_to_filter.user_dls_id = user_dls.user_dls_id AND user_dls.dls_id = dls.dls_id AND " +
+                        "user_dls.user_id = ? AND composite_node.data_feed_id = dls.data_source_id AND composite_node.composite_feed_id = composite_feed.composite_feed_id AND " +
                         "composite_feed.data_feed_id = ?");
                 dlsStmt.setLong(1, SecurityUtil.getUserID());
                 dlsStmt.setLong(2, dataSourceID);
@@ -1080,7 +1088,7 @@ public class DataService {
     }
 
     public EmbeddedDataResults moreEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
-                                              InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters, String uid) {
+                                                   InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters, String uid) {
         /*MemcachedClient client = MemCachedManager.instance();
         EmbeddedDataResults results = (EmbeddedDataResults) client.get(uid);*/
         EmbeddedDataResults results = simpleEmbeddedCache.get(uid);
@@ -1341,7 +1349,7 @@ public class DataService {
         //trendOutcomes = targetOutcomes;
         TrendDataResults trendDataResults = new TrendDataResults();
         trendDataResults.setTrendOutcomes(trendOutcomes);
-        trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+        trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
         trendDataResults.setDataSourceInfo(dataSourceInfo);
         return trendDataResults;
     }
@@ -1390,7 +1398,7 @@ public class DataService {
     }
 
     public EmbeddedCompareYearsDataResults getEmbeddedCompareYearsResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
-                                                        List<FilterDefinition> drillthroughFilters) {
+                                                                          List<FilterDefinition> drillthroughFilters) {
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
@@ -1664,7 +1672,7 @@ public class DataService {
             trendOutcomes = targetOutcomes;
             TrendDataResults trendDataResults = new TrendDataResults();
             trendDataResults.setTrendOutcomes(trendOutcomes);
-            trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+            trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
             trendDataResults.setDataSourceInfo(dataSourceInfo);
             if (!insightRequestMetadata.isNoLogging()) {
                 reportEditorBenchmark(analysisDefinition, System.currentTimeMillis() - insightRequestMetadata.getDatabaseTime() - start, insightRequestMetadata.getDatabaseTime(), conn);
@@ -1705,7 +1713,7 @@ public class DataService {
             List<TreeRow> rows = treeData.toTreeRows(reportRetrieval.getPipeline().getPipelineData());
             TreeDataResults crossTabDataResults = new TreeDataResults();
             crossTabDataResults.setTreeRows(rows);
-            crossTabDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+            crossTabDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
             crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             if (!insightRequestMetadata.isNoLogging()) {
                 reportEditorBenchmark(analysisDefinition, System.currentTimeMillis() - insightRequestMetadata.getDatabaseTime() - start, insightRequestMetadata.getDatabaseTime(), conn);
@@ -1767,7 +1775,7 @@ public class DataService {
             CrossTabDataResults crossTabDataResults = new CrossTabDataResults();
             crossTabDataResults.setDataSet(resultData);
             crossTabDataResults.setColumnCount((crosstab.getColumnSections().size() * analysisDefinition.getMeasures().size()) + analysisDefinition.getRows().size() + 1);
-            crossTabDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+            crossTabDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
             crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             if (!insightRequestMetadata.isNoLogging()) {
                 reportEditorBenchmark(analysisDefinition, System.currentTimeMillis() - insightRequestMetadata.getDatabaseTime() - start, insightRequestMetadata.getDatabaseTime(), conn);
@@ -1901,7 +1909,7 @@ public class DataService {
                 results.setReportLog(reportRetrieval.getPipeline().toLogString());
             }
             results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
-            suggestions.addAll(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+            suggestions.addAll(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
             if (tooManyResults) {
                 cacheReportResults(analysisDefinition.getAnalysisID(), results);
                 results = truncateResults(results, analysisDefinition.getGeneralSizeLimit());
@@ -2178,18 +2186,19 @@ public class DataService {
             }*/
 
             for (FilterDefinition filter : new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions())) {
-                if (filter.isFlexibleDateFilter()) {
+                String obj = filter.getParentChildLabel();
+                if (obj != null) {
                     Iterator<FilterDefinition> iter = analysisDefinition.getFilterDefinitions().iterator();
                     while (iter.hasNext()) {
                         FilterDefinition existingFilter = iter.next();
-                        if (existingFilter.isDefaultDateFilter()) {
+                        String child = existingFilter.getChildToParentLabel();
+                        if (child != null && child.equals(obj)) {
                             iter.remove();
                             filter.setField(existingFilter.getField());
                         }
                     }
                 }
             }
-
 
 
             feed.getDataSource().decorateLinks(new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values()));
@@ -2208,6 +2217,7 @@ public class DataService {
             KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields);
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
             Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
+            Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
 
 
             if (analysisDefinition.getMarmotScript() != null) {
@@ -2216,7 +2226,7 @@ public class DataService {
                     String line = toker.nextToken();
                     if (!FunctionFactory.functionRunsOnReportLoad(line)) {
                         try {
-                            new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                            new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters, insightRequestMetadata);
                         } catch (FunctionException fe) {
                             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + line + ".", null));
                         } catch (ReportException re) {
@@ -2242,7 +2252,7 @@ public class DataService {
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
                     try {
-                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters, insightRequestMetadata);
                     } catch (FunctionException fe) {
                         throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + line + ".", null));
                     } catch (ReportException re) {
@@ -2334,7 +2344,6 @@ public class DataService {
             for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
                 filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
             }
-
 
 
             boolean aggregateQuery = analysisDefinition.isAggregateQueryIfPossible();

@@ -21,18 +21,28 @@ public class PipelineData implements  Cloneable {
     private Map<String, String> dataSourceProperties;
     private Set<AnalysisItem> allRequestedItems;
     private Map<UniqueKey, AnalysisItem> uniqueItems;
+    private Map<String, UniqueKey> namespaceMap;
     private EIConnection conn;
 
     public PipelineData(WSAnalysisDefinition report, Collection<AnalysisItem> reportItems, InsightRequestMetadata insightRequestMetadata,
                         List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems,
-                        Map<UniqueKey, AnalysisItem> uniqueItems) {
+                        Map<UniqueKey, AnalysisItem> uniqueItems, Map<String, UniqueKey> namespaceMap) {
         this.report = report;
         this.reportItems = reportItems;
         this.insightRequestMetadata = insightRequestMetadata;
+        this.namespaceMap = namespaceMap;
         this.allItems = allItems;
         this.dataSourceProperties = dataSourceProperties;
         this.allRequestedItems = allRequestedItems;
         this.uniqueItems = uniqueItems;
+    }
+
+    public Map<String, UniqueKey> getNamespaceMap() {
+        return namespaceMap;
+    }
+
+    public void setNamespaceMap(Map<String, UniqueKey> namespaceMap) {
+        this.namespaceMap = namespaceMap;
     }
 
     public EIConnection getConn() {

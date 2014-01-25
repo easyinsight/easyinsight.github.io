@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FieldTagging;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.TagSelectionEvent;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        private function onCreation():void {
+            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
+            tagBox.initialSelected(selectedTags);
+        }
+
+        private function onMouseDown(event:MouseEvent):void {
+            var result:Boolean = hitTestPoint(event.stageX, event.stageY);
+            if (!result) {
+                if (stage) {
+                    stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+                }
+                close();
+            }
+        }
+
+        override public function close():void {
+            if (stage) {
+                stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+            }
+            super.close();
+        }
+
+        public var tags:ArrayCollection;
+        public var selectedTags:ArrayCollection;
+
+        public var dataSourceID:int;
+
+        private function onTagSelect(event:TagSelectionEvent):void {
+            var selectedTags:ArrayCollection = tagBox.getSelectedTags();
+            dispatchEvent(new TagSelectionEvent(TagSelectionEvent.TAG_SELECT, selectedTags));
+        }
+
+        private function configureTags():void {
+            var window:FieldTagging = new FieldTagging();
+            window.dataSourceID = dataSourceID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+            PopUpManager.removePopUp(this);
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (!User.getInstance().accountAdmin) {
+                removeChild(configButton);
+            }
+        }
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Filter by Tags:">
+            <util:TagBox tags="{tags}" onTagSelect="onTagSelect(event)" id="tagBox" width="100%"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:LinkButton label="Configure Tags" click="configureTags()" id="configButton"/>
+</util:EISlimWindow>

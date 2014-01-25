@@ -333,7 +333,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         WSListDefinition wsListDefinition = (WSListDefinition) report;
         if (!wsListDefinition.isSummaryTotal()) {
             suggestions.add(new IntentionSuggestion("Add a Summary Row",
-                    "This action will add a summary row to the bottom of your report.",
+                    "Add a summary row to the bottom of your report.",
                     IntentionSuggestion.SCOPE_REPORT, IntentionSuggestion.ADD_SUMMARY_ROW, IntentionSuggestion.OTHER));
         }
         return suggestions;

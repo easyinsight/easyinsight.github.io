@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+                    xmlns:suggestion="com.easyinsight.suggestion.*" layout="absolute"
+                    creationComplete="dashboardService.getDashboardWithTags.send()" backgroundColor="#FFFFFF">
+	<mx:Script>
+		<![CDATA[
+        import com.easyinsight.dashboard.DashboardDescriptor;
+        import com.easyinsight.quicksearch.EIDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var descriptors:ArrayCollection;
+
+        private function chose():void {
+            if (reportBox.selectedItem == null) {
+                return;
+            }
+            choseReport(reportBox.selectedItem as DashboardDescriptor);
+
+        }
+
+        protected function choseReport(descriptor:DashboardDescriptor):void {
+
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private var validReports:ArrayCollection;
+
+        [Bindable]
+        private var nextLevelReports:ArrayCollection;
+
+        [Bindable]
+        private var selectedID:int;
+
+        private function gotReports():void {
+            var results:ReportResults = dashboardService.getDashboardWithTags.lastResult as ReportResults;
+            validReports = results.dashboards;
+            tags = results.reportTags;
+            validReports.filterFunction = filterFunction;
+            nextLevelReports = new ArrayCollection(validReports.toArray());
+            var dataSources:ArrayCollection = results.dataSources;
+            var none:Object = { name:"[ All Data Sources ]", id:0};
+            dataSources.addItemAt(none, 0);
+            this.dataSources = dataSources;
+        }
+
+        [Bindable]
+        private var tags:ArrayCollection;
+
+        private function filterFunction(object:Object):Boolean {
+            var report:DashboardDescriptor = object as DashboardDescriptor;
+            if (dataSourceID > 0) {
+                if (report.dataSourceID != dataSourceID) {
+                    return false;
+                }
+            }
+            return tagBox.filterObject(report);
+        }
+
+        private function onTagSelect(event:TagSelectionEvent):void {
+            validReports.refresh();
+            nextLevelReports = new ArrayCollection(validReports.toArray());
+            reportBox.closeDropdown();
+        }
+
+        private function onChange(event:Event):void {
+            var dataSource:EIDescriptor = dataSourceBox.selectedItem as EIDescriptor;
+            if (dataSource == null) {
+                dataSourceID = 0;
+            } else {
+                dataSourceID = dataSource.id;
+            }
+            validReports.refresh();
+            nextLevelReports = new ArrayCollection(validReports.toArray());
+            reportBox.closeDropdown();
+        }
+
+        [Bindable]
+        private var dataSources:ArrayCollection;
+
+        private var dataSourceID:int;
+        ]]>
+	</mx:Script>
+    <mx:RemoteObject id="dashboardService" destination="dashboardService">
+        <mx:method name="getDashboardWithTags" result="gotReports()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <mx:Form>
+            <mx:FormItem label="Data Source:" labelWidth="120">
+                <mx:ComboBox dataProvider="{dataSources}" labelField="name" id="dataSourceBox" change="onChange(event)" maxWidth="300" rowCount="10"/>
+            </mx:FormItem>
+            <mx:FormItem label="Filter by Tags:" labelWidth="120">
+                <util:TagBox tags="{tags}" onTagSelect="onTagSelect(event)" id="tagBox" width="300"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:HRule width="100%"/>
+        <mx:Form>
+            <mx:FormItem label="Choose a Dashboard:" labelWidth="120">
+                <suggestion:Reports dataProvider="{nextLevelReports}" labelField="name" id="reportBox"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:HRule width="100%"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+                <util:SaveButton label="OK" click="chose()"/>
+                <util:CancelButton label="Cancel" click="cancel()"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>
