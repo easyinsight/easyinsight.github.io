@@ -358,6 +358,11 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         } else {
             //if (node.ready()) {
             result = row.getValue(node.createAggregateKey());
+            if (calculationMetadata != null && node.getWarnings() != null) {
+                for (String warning : node.getWarnings()) {
+                    calculationMetadata.addWarning(warning);
+                }
+            }
             /*} else {
                 if (analysisItem == null) {
                     throw new ReportException(new GenericReportFault("A calculation depending on " + node.toDisplay() + " is running before " + node.toDisplay() + " was actually calculated."));
@@ -406,7 +411,6 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
 
     @Nullable
     private IRow row;
-    private Map<Key, List<Value>> columnSlicedData;
     @Nullable
     private AnalysisItem analysisItem;
 }

@@ -5,6 +5,8 @@ import com.easyinsight.analysis.UniqueKey;
 import com.easyinsight.calculations.functions.CastFunction;
 import com.easyinsight.core.Value;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +25,7 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
     private Map<String, UniqueKey> uniqueKeyMap;
     private FunctionFactory functionResolver;
     private int aggregationType;
+    private Collection<String> warnings = new LinkedHashSet<String>();
 
     public ResolverVisitor(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems, Map<String, List<AnalysisItem>> unqualifiedDisplayItems,
                            FunctionFactory f, Map<String, UniqueKey> uniqueKeyMap) {
@@ -32,6 +35,17 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
         this.unqualifiedDisplayItems = unqualifiedDisplayItems;
         functionResolver = f;
         aggregationType = 0;
+    }
+
+    public ResolverVisitor(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems, Map<String, List<AnalysisItem>> unqualifiedDisplayItems,
+                           FunctionFactory f, Map<String, UniqueKey> uniqueKeyMap, Collection<String> warnings) {
+        this.keyItems = keyItems;
+        this.displayItems = displayItems;
+        this.uniqueKeyMap = uniqueKeyMap;
+        this.unqualifiedDisplayItems = unqualifiedDisplayItems;
+        functionResolver = f;
+        aggregationType = 0;
+        this.warnings = warnings;
     }
 
     public ResolverVisitor(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems,
@@ -47,7 +61,7 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
     private void visitChildren(CalculationTreeNode node) {
         for(int i = 0;i < node.getChildCount();i++) {
             if (node.getChild(i) instanceof CalculationTreeNode) {
-                ((CalculationTreeNode) node.getChild(i)).accept(new ResolverVisitor(keyItems, displayItems, unqualifiedDisplayItems, functionResolver, uniqueKeyMap));
+                ((CalculationTreeNode) node.getChild(i)).accept(new ResolverVisitor(keyItems, displayItems, unqualifiedDisplayItems, functionResolver, uniqueKeyMap, warnings));
             }
         }
     }
@@ -125,6 +139,13 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
             node.resolveVariableKey(keyItems, displayItems, unqualifiedDisplayItems, uniqueKeyMap);
         else
             node.resolveVariableKey(keyItems, displayItems, aggregationType);
+        if (node.getWarnings() != null) {
+            warnings.addAll(node.getWarnings());
+        }
+    }
+
+    public Collection<String> getWarnings() {
+        return warnings;
     }
 
     public void visit(FunctionNode node) {

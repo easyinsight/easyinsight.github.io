@@ -612,7 +612,7 @@ public class DataService {
             WSListDefinition tempList = new WSListDefinition();
             tempList.setDataFeedID(feedID);
             tempList.setColumns(new ArrayList<AnalysisItem>());
-            feedMetadata.setSuggestions(new AnalysisService().generatePossibleIntentions(tempList, conn));
+            feedMetadata.setSuggestions(new AnalysisService().generatePossibleIntentions(tempList, conn, new InsightRequestMetadata()));
             feedMetadata.setLookupTables(lookupTables);
             return feedMetadata;
         } catch (Exception e) {
@@ -1349,7 +1349,7 @@ public class DataService {
         //trendOutcomes = targetOutcomes;
         TrendDataResults trendDataResults = new TrendDataResults();
         trendDataResults.setTrendOutcomes(trendOutcomes);
-        trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+        trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
         trendDataResults.setDataSourceInfo(dataSourceInfo);
         return trendDataResults;
     }
@@ -1672,7 +1672,7 @@ public class DataService {
             trendOutcomes = targetOutcomes;
             TrendDataResults trendDataResults = new TrendDataResults();
             trendDataResults.setTrendOutcomes(trendOutcomes);
-            trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+            trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
             trendDataResults.setDataSourceInfo(dataSourceInfo);
             if (!insightRequestMetadata.isNoLogging()) {
                 reportEditorBenchmark(analysisDefinition, System.currentTimeMillis() - insightRequestMetadata.getDatabaseTime() - start, insightRequestMetadata.getDatabaseTime(), conn);
@@ -1713,7 +1713,7 @@ public class DataService {
             List<TreeRow> rows = treeData.toTreeRows(reportRetrieval.getPipeline().getPipelineData());
             TreeDataResults crossTabDataResults = new TreeDataResults();
             crossTabDataResults.setTreeRows(rows);
-            crossTabDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+            crossTabDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
             crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             if (!insightRequestMetadata.isNoLogging()) {
                 reportEditorBenchmark(analysisDefinition, System.currentTimeMillis() - insightRequestMetadata.getDatabaseTime() - start, insightRequestMetadata.getDatabaseTime(), conn);
@@ -1775,7 +1775,7 @@ public class DataService {
             CrossTabDataResults crossTabDataResults = new CrossTabDataResults();
             crossTabDataResults.setDataSet(resultData);
             crossTabDataResults.setColumnCount((crosstab.getColumnSections().size() * analysisDefinition.getMeasures().size()) + analysisDefinition.getRows().size() + 1);
-            crossTabDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+            crossTabDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
             crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
             if (!insightRequestMetadata.isNoLogging()) {
                 reportEditorBenchmark(analysisDefinition, System.currentTimeMillis() - insightRequestMetadata.getDatabaseTime() - start, insightRequestMetadata.getDatabaseTime(), conn);
@@ -1909,7 +1909,7 @@ public class DataService {
                 results.setReportLog(reportRetrieval.getPipeline().toLogString());
             }
             results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
-            suggestions.addAll(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn));
+            suggestions.addAll(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
             if (tooManyResults) {
                 cacheReportResults(analysisDefinition.getAnalysisID(), results);
                 results = truncateResults(results, analysisDefinition.getGeneralSizeLimit());

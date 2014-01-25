@@ -152,8 +152,9 @@ public class VariableNode extends CalculationTreeNode {
                     if (warnings == null) {
                         warnings = new ArrayList<String>();
                     }
-                    warnings.add("We found multiple fields matching the name of " + s + ".");
+
                     analysisItem = matchedByKey.get(0);
+                    warnings.add("we found multiple fields matching the name of <b>" + s + "</b> and chose <b>" + analysisItem.toDisplay() + "</b>.");
                 }
             } else if (matchedByKey.size() == 1) {
                 analysisItem = matchedByKey.get(0);
@@ -174,8 +175,8 @@ public class VariableNode extends CalculationTreeNode {
                             if (warnings == null) {
                                 warnings = new ArrayList<String>();
                             }
-                            warnings.add("We found multiple fields matching the name of " + s + ".");
                             analysisItem = analysisItems.get(0);
+                            warnings.add("we found multiple fields matching the name of <b>" + s + "</b> and chose <b>" + analysisItem.toDisplay() + "</b>.");
                         }
                     }
                 } else {

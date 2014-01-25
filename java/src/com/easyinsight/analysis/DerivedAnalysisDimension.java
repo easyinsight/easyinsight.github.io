@@ -82,7 +82,7 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         CalculationTreeNode tree;
-        ICalculationTreeVisitor visitor;
+        ResolverVisitor visitor;
 
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
         Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
@@ -112,6 +112,13 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
             tree = CalculationHelper.createTree(derivationCode, false);
             visitor = new ResolverVisitor(keyMap, displayMap, unqualifiedDisplayMap, new FunctionFactory(), structure.getNamespaceMap());
             tree.accept(visitor);
+            if (visitor.getWarnings() != null && structure.getInsightRequestMetadata() != null) {
+                Collection<String> warnings = visitor.getWarnings();
+                for (String warning : warnings) {
+                    warning = "In calculating <b>" + toDisplay() + "</b>, " + warning;
+                    structure.getInsightRequestMetadata().getWarnings().add(warning);
+                }
+            }
         } catch (FunctionException fe) {
             LogClass.error("On calculating " + derivationCode, fe);
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));

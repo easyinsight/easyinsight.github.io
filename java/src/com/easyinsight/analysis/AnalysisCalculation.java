@@ -137,15 +137,22 @@ public class AnalysisCalculation extends AnalysisMeasure {
         }
 
         CalculationTreeNode tree;
-        Set<KeySpecification> specs;
 
-        ICalculationTreeVisitor visitor;
+        ResolverVisitor visitor;
 
         try {
             tree = CalculationHelper.createTree(calculationString, false);
 
             visitor = new ResolverVisitor(keyMap, displayMap, unqualifiedDisplayMap, new FunctionFactory(), structure.getNamespaceMap());
             tree.accept(visitor);
+            if (visitor.getWarnings() != null && structure.getInsightRequestMetadata() != null) {
+                Collection<String> warnings = visitor.getWarnings();
+                for (String warning : warnings) {
+                    warning = "In calculating <b>" + toDisplay() + "</b>, " + warning;
+                    structure.getInsightRequestMetadata().getWarnings().add(warning);
+                }
+            }
+
         }  catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
         } catch (ReportException re) {
