@@ -1,4 +1,8 @@
 package com.easyinsight.analysis {
+import com.easyinsight.genredata.AnalyzeEvent;
+import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
+import com.easyinsight.report.ReportAnalyzeSource;
+import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.ContextMenuEvent;
@@ -109,6 +113,16 @@ public class AvailableFieldTextRenderer extends UITextField implements IListItem
             }
 
             PopupMenuFactory.assignMenu(this, items);
+        } else {
+            var folderItems:Array = [];
+            if (wrapper.feedNode.addonReportID > 0) {
+                var reportNavItem:ContextMenuItem = new ContextMenuItem("Navigate to Addon Report");
+                reportNavItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+                    dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(wrapper.feedNode.addonReportDescriptor)));
+                });
+                folderItems.push(reportNavItem);
+            }
+            PopupMenuFactory.assignMenu(this, folderItems);
         }
     }
 }

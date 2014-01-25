@@ -13,19 +13,14 @@ import flash.events.MouseEvent;
 import mx.containers.HBox;
 import mx.controls.Button;
 import mx.controls.Label;
+import mx.controls.Text;
 import mx.controls.TextArea;
 
-public class IntentionRenderer extends HBox {
+public class IntentionRenderer extends Text {
 
     private var suggestion:IntentionSuggestion;
 
-    private var titleLabel:Label;
-    private var descriptionArea:TextArea;
-    private var button:Button;
-
     public function IntentionRenderer() {
-        titleLabel = new Label();
-        descriptionArea = new AutoSizeTextArea();
     }
 
     private function onClick(event:MouseEvent):void {
@@ -34,29 +29,14 @@ public class IntentionRenderer extends HBox {
 
     override protected function createChildren():void {
         super.createChildren();
-        setStyle("horizontalGap", 20);
-        titleLabel.width = 200;
-        descriptionArea.editable = false;
-        descriptionArea.selectable = false;
-        descriptionArea.verticalScrollPolicy = "off";
-        descriptionArea.horizontalScrollPolicy = "off";
-        descriptionArea.width = 300;
-        button = new Button();
-        button.styleName = "grayButton";
-        button.label = "Apply Suggestion";
-        button.addEventListener(MouseEvent.CLICK, onClick);
-        setStyle("paddingRight", 10);
-        setStyle("verticalAlign", "middle");
-        addChild(titleLabel);
-        addChild(descriptionArea);
-        addChild(button);
+        styleName = "fallThroughFonts";
+        addEventListener(MouseEvent.CLICK, onClick);
     }
 
     override public function set data(val:Object):void {
         suggestion = val as IntentionSuggestion;
         if (suggestion != null) {
-            titleLabel.text = suggestion.headline;
-            descriptionArea.text = suggestion.description;
+            htmlText = suggestion.description;
         }
     }
 

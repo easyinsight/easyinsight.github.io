@@ -82,8 +82,10 @@
             if (event.suggestion.requiresServerCallback) {
                 analysisService.getIntentions.send(_report, _fields, event.suggestion.scope, event.suggestion.type);
             } else {
-                new SuggestionFactory(simpleReportEditor).argh(event.suggestion.type, _fields, _report.dataFeedID);
-                PopUpManager.removePopUp(this);
+                if (_report != null) {
+                    new SuggestionFactory(simpleReportEditor).argh(event.suggestion.type, _fields, _report.dataFeedID);
+                    PopUpManager.removePopUp(this);
+                }
             }
         }
 
@@ -94,18 +96,25 @@
                 intention.addEventListener(IntentionTriggerEvent.INTENTION_TRIGGER, onIntentionEvent);
                 intention.apply(metadata);
             }
-            _dataView.refresh();
+            if (_dataView != null) {
+                _dataView.refresh();
+            }
             PopUpManager.removePopUp(this);
         }
 
         private function onIntentionEvent(event:IntentionTriggerEvent):void {
             dispatchEvent(event);
         }
+
+        [Bindable]
+        public var windowLabel:String = "Suggestions";
         ]]></mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="getIntentions" result="gotIntentions()"/>
     </mx:RemoteObject>
+    <mx:Text text="{windowLabel}"/>
+    <mx:HRule width="100%"/>
     <mx:List dataProvider="{suggestions}" itemRenderer="com.easyinsight.suggestion.IntentionRenderer" selectable="false" variableRowHeight="true"
-            id="suggestionList" width="700"/>
+            id="suggestionList" width="700" borderStyle="none"/>
     <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
 </util:EISlimWindow>

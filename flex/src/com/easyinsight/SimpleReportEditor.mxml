@@ -96,6 +96,7 @@
         import com.easyinsight.suggestion.IntentionSuggestion;
         import com.easyinsight.suggestion.IntentionTriggerEvent;
         import com.easyinsight.suggestion.MajorProblemBar;
+        import com.easyinsight.suggestion.MultiProblemBar;
         import com.easyinsight.util.ActionDataSourceLog;
         import com.easyinsight.util.ActionReportLog;
         import com.easyinsight.util.ErrorReportView;
@@ -232,34 +233,57 @@
         }
 
         private var majorProblemBar:MajorProblemBar;
+        private var multiProblemBar:MultiProblemBar;
 
         private function assignSuggestions(suggests:ArrayCollection):void {
-            var suggestions:ArrayCollection = new ArrayCollection();
+            var errors:ArrayCollection = new ArrayCollection();
+            var warnings:ArrayCollection = new ArrayCollection();
             var quickActions:ArrayCollection = new ArrayCollection();
             if (suggests != null) {
 
                 for each (var intentionSuggestion:IntentionSuggestion in suggests) {
-                    if (intentionSuggestion.priority == IntentionSuggestion.PROBLEM || intentionSuggestion.priority == IntentionSuggestion.WARNING) {
-                        suggestions.addItem(intentionSuggestion);
+                    if (intentionSuggestion.priority == IntentionSuggestion.PROBLEM) {
+                        errors.addItem(intentionSuggestion);
+                    } else if (intentionSuggestion.priority == IntentionSuggestion.WARNING) {
+                        warnings.addItem(intentionSuggestion);
                     } else {
                         quickActions.addItem(intentionSuggestion);
                     }
                 }
             }
-            if (suggestions.length == 1) {
-                if (majorProblemBar == null) {
-                    majorProblemBar = new MajorProblemBar();
-                    majorProblemBar.simpleReportEditor = this;
-                    majorProblemBar.intentionSuggestion = suggestions.getItemAt(0) as IntentionSuggestion;
-                    majorProblemBar.fields = getWrappers();
-                    majorProblemBar.dataSourceID = dataService.dataFeedID;
-                    rightBox.addChildAt(majorProblemBar, 0);
+
+            if (majorProblemBar) {
+                majorProblemBar.parent.removeChild(majorProblemBar);
+                majorProblemBar = null;
+            }
+
+            if (multiProblemBar) {
+                multiProblemBar.parent.removeChild(multiProblemBar);
+                multiProblemBar = null;
+            }
+
+            if ((errors.length + warnings.length) > 1) {
+                multiProblemBar = new MultiProblemBar();
+                multiProblemBar.simpleReportEditor = this;
+                multiProblemBar.warnings = warnings;
+                multiProblemBar.problems = errors;
+                multiProblemBar.dataSourceID = dataService.dataFeedID;
+                multiProblemBar.simpleReportEditor = this;
+                multiProblemBar.fields = getWrappers();
+                rightBox.addChildAt(multiProblemBar, 0);
+            }
+            else if (errors.length == 1 || warnings.length == 1) {
+                majorProblemBar = new MajorProblemBar();
+                majorProblemBar.simpleReportEditor = this;
+                if (errors.length == 1) {
+                    majorProblemBar.intentionSuggestion = errors.getItemAt(0) as IntentionSuggestion;
+                } else {
+                    majorProblemBar.intentionSuggestion = warnings.getItemAt(0) as IntentionSuggestion;
                 }
-            } else if (suggestions.length == 0) {
-                if (majorProblemBar) {
-                    majorProblemBar.parent.removeChild(majorProblemBar);
-                    majorProblemBar = null;
-                }
+
+                majorProblemBar.fields = getWrappers();
+                majorProblemBar.dataSourceID = dataService.dataFeedID;
+                rightBox.addChildAt(majorProblemBar, 0);
             }
             //this.suggestions = suggestions;
             this.quickActions = quickActions;
@@ -557,13 +581,6 @@
                     runReportSpacer.percentWidth = 100;
                     reportButtonsBox.addChildAt(runReportSpacer, 4);
                 }
-                /*defaultManualRun = feedMetadata.defaultManualRun;
-                if (defaultManualRun) {
-                    adHocButton.parent.removeChild(adHocButton);
-                } else {
-                    runReportButton.parent.removeChild(runReportButton);
-                    runReportSpacer.parent.removeChild(runReportSpacer);
-                }*/
 
                 fieldsLabel = this.feedMetadata.dataSourceName + " Fields";
                 availableFields = new ArrayCollection();
@@ -665,6 +682,11 @@
                 dataView.availableFields = wrappers;
                 if (feedMetadata.tags != null && feedMetadata.tags.length > 0) {
                     possibleTags = feedMetadata.tags;
+                    showTagButton = true;
+                } else {
+                    if (tagButton && tagButton.parent) {
+                        tagButton.parent.removeChild(tagButton);
+                    }
                 }
                 if (feedMetadata.tagDefault != null) {
                     selectedTags = new ArrayCollection();
@@ -698,6 +720,7 @@
         private function fieldConfig(event:MouseEvent):void {
             var button:UIComponent = event.currentTarget as UIComponent;
             var window:FieldFilterWindow = new FieldFilterWindow();
+            window.dataSourceID = dataService.dataFeedID;
             window.selectedTags = selectedTags;
             window.tags = possibleTags;
             window.addEventListener(TagSelectionEvent.TAG_SELECT, onTagSelect, false, 0, true);
@@ -1527,6 +1550,9 @@
 
         [Bindable]
         private var saveAllowed:Boolean = true;
+
+        [Bindable]
+        private var showTagButton:Boolean = false;
         ]]>
     </mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
@@ -1611,7 +1637,8 @@
                     <mx:Button label="Add a Custom Field" styleName="grayButton" click="customField()"
                                id="customFieldButton"
                                icon="@Embed(source='../../../assets/code.png')"/>
-                    <mx:Button icon="@Embed(source='../../../assets/gear.png')" styleName="grayButton" click="fieldConfig(event)"/>
+                    <mx:Button icon="@Embed(source='../../../assets/gear.png')" styleName="grayButton" click="fieldConfig(event)" id="tagButton" toolTip="Filter by tags..."
+                            visible="{showTagButton}"/>
                 </mx:HBox>
                 <mx:Image source="@Embed(source='../../../assets/icon-search-black.png')" x="2" y="62"/>
 

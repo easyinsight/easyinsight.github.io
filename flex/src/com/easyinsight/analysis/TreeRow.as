@@ -22,11 +22,11 @@ public class TreeRow {
     public function TreeRow() {
     }
 
-    public function sortValue():Value {
-        if (sortColumn != null) {
-            return sortColumn;
+    public function sortValue():Object {
+        if (sortColumn != null && sortColumn.type() != Value.EMPTY) {
+            return sortColumn.getValue();
         }
-        return groupingColumn;
+        return groupingColumn.getValue();
     }
 }
 }
