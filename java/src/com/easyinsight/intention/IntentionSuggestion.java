@@ -35,6 +35,7 @@ public class IntentionSuggestion {
     public static final int WARNING_JOIN_FAILURE = 17;
     public static final int FILTERED_FIELD = 18;
     public static final int DISTINCT_COUNT = 19;
+    public static final int WARNING_MESSAGE = 20;
 
     private String headline;
     private String description;
