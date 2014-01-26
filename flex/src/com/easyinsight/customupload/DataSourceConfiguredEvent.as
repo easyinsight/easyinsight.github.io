@@ -10,15 +10,17 @@ public class DataSourceConfiguredEvent extends Event{
 
     public var descriptor:DataSourceDescriptor;
     public var requiresFieldSetup:Boolean;
+    public var customSetup:Boolean;
 
-    public function DataSourceConfiguredEvent(descriptor:DataSourceDescriptor, requiresFieldSetup:Boolean = false) {
+    public function DataSourceConfiguredEvent(descriptor:DataSourceDescriptor, requiresFieldSetup:Boolean = false, customSetup:Boolean = false) {
         super(DATA_SOURCE_CONFIGURED);
         this.descriptor = descriptor;
         this.requiresFieldSetup = requiresFieldSetup;
+        this.customSetup = customSetup;
     }
 
     override public function clone():Event {
-        return new DataSourceConfiguredEvent(descriptor, requiresFieldSetup);
+        return new DataSourceConfiguredEvent(descriptor, requiresFieldSetup, customSetup);
     }
 }
 }

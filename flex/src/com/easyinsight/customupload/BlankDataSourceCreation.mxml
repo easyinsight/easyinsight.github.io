@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.BlankDataSource;
+
+        import mx.controls.Button;
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var obj:BlankDataSource = new BlankDataSource();
+            obj.feedName = nameInput.text;
+            return obj;
+        }
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:BlankDataSource = feedDefinition as BlankDataSource;
+
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:BlankDataSource = feedDefinition as BlankDataSource;
+            ds.feedName = nameInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:Text width="400" text="This connection enables you to create a data source for use with Zapier. After clicking Create, you'll be able to define the fields on the data source. Once created, the data source will then be available for you as a Zapier endpoint."/>
+    <mx:Form>
+        <mx:FormItem label="Data Source Name:">
+            <mx:TextInput id="nameInput"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:VBox>

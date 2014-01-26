@@ -53,6 +53,18 @@ public class BaseFieldEditButton extends UIComponent implements IListItemRendere
 
     private var _deleteVisible:Boolean;
 
+    private var _fullEditable:Boolean;
+
+    [Bindable(event="fullEditableChanged")]
+    public function get fullEditable():Boolean {
+        return _fullEditable;
+    }
+
+    public function set fullEditable(value:Boolean):void {
+        if (_fullEditable == value) return;
+        _fullEditable = value;
+        dispatchEvent(new Event("fullEditableChanged"));
+    }
 
     [Bindable(event="editVisibleChanged")]
     public function get editVisible():Boolean {

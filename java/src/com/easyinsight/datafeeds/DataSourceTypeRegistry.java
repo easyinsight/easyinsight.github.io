@@ -5,6 +5,7 @@ import com.easyinsight.datafeeds.basecamp.*;
 import com.easyinsight.datafeeds.basecampnext.*;
 import com.easyinsight.datafeeds.batchbook.*;
 import com.easyinsight.datafeeds.batchbook2.*;
+import com.easyinsight.datafeeds.blank.BlankDataSource;
 import com.easyinsight.datafeeds.campaignmonitor.CMClientSource;
 import com.easyinsight.datafeeds.campaignmonitor.CampaignMonitorDataSource;
 import com.easyinsight.datafeeds.cleardb.ClearDBCompositeSource;
@@ -352,6 +353,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.INFUSIONSOFT_TAG_GROUP, InfusionsoftContactGroupCategorySource.class);
         registerType(FeedType.KASHOO_COMPOSITE, KashooCompositeSource.class);
         registerType(FeedType.KASHOO_BUSINESSES, KashooBusinessSource.class);
+        registerType(FeedType.BLANK, BlankDataSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

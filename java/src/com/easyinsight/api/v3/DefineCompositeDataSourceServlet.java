@@ -6,6 +6,7 @@ import com.easyinsight.api.ServiceRuntimeException;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.userupload.UploadPolicy;
@@ -76,15 +77,45 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
 
             for (int i = 0; i < connectionNodes.size(); i++) {
                 Node connectionNode = connectionNodes.get(i);
+
                 String sourceDataSource;
                 String targetDataSource;
                 String sourceDataSourceField;
                 String targetDataSourceField;
+                int sourceCardinality = IJoin.ONE;
+                int targetCardinality = IJoin.ONE;
+                int outerJoin = 0;
+
+                try {
+                    Element connectionElement = (Element) connectionNode;
+                    Attribute outerJoinAttribute = connectionElement.getAttribute("outerJoin");
+                    if (outerJoinAttribute != null) {
+                        String value = outerJoinAttribute.getValue();
+                        if ("true".equals(value)) {
+                            outerJoin = 1;
+                        }
+                    }
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
+
                 Nodes sourceDateSourceNodes = connectionNode.query("sourceDataSource/text()");
                 if (sourceDateSourceNodes.size() == 0) {
                     throw new ServiceRuntimeException("You need to specify a source data source for each connection.");
                 }
                 sourceDataSource = sourceDateSourceNodes.get(0).getValue();
+                try {
+                    Element sourceElement = (Element) sourceDateSourceNodes.get(0);
+                    Attribute attribute = sourceElement.getAttribute("cardinality");
+                    if (attribute != null) {
+                        String cardinality = attribute.getValue();
+                        if ("many".equals(cardinality.toLowerCase())) {
+                            sourceCardinality = IJoin.MANY;
+                        }
+                    }
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
 
                 Nodes targetDataSourceNodes = connectionNode.query("targetDataSource/text()");
                 if (targetDataSourceNodes.size() == 0) {
@@ -103,9 +134,27 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                     throw new ServiceRuntimeException("You need to specify a target data source field for each connection.</message></response>");
                 }
                 targetDataSourceField = targetDataSourceFieldNodes.get(0).getValue();
+                try {
+                    Element targetElement = (Element) targetDataSourceFieldNodes.get(0);
+                    Attribute attribute = targetElement.getAttribute("cardinality");
+                    if (attribute != null) {
+                        String cardinality = attribute.getValue();
+                        if ("many".equals(cardinality.toLowerCase())) {
+                            targetCardinality = IJoin.MANY;
+                        }
+                    }
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
 
                 CompositeFeedNode source = compositeNodes.get(sourceDataSource);
                 CompositeFeedNode target = compositeNodes.get(targetDataSource);
+                if (source == null) {
+                    throw new ServiceRuntimeException("We couldn't find a data source by the name of " + source + ".");
+                }
+                if (target == null) {
+                    throw new ServiceRuntimeException("We couldn't find a data source by the name of " + target + ".");
+                }
                 FeedDefinition sourceFeed = new FeedStorage().getFeedDefinitionData(source.getDataFeedID(), conn);
                 FeedDefinition targetFeed = new FeedStorage().getFeedDefinitionData(target.getDataFeedID(), conn);
                 Key sourceKey = findKey(sourceDataSourceField, sourceFeed);
@@ -116,8 +165,12 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 if (targetKey == null) {
                     throw new ServiceRuntimeException("We couldn't find a field by the name of " + targetKey + " in " + targetDataSource + ".");
                 }
-                compositeConnections.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(),
-                        sourceKey, targetKey, sourceFeed.getFeedName(), targetFeed.getFeedName(), false, false, false, false));
+                CompositeFeedConnection connection = new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(),
+                        sourceKey, targetKey, sourceFeed.getFeedName(), targetFeed.getFeedName(), false, false, false, false);
+                connection.setSourceCardinality(sourceCardinality);
+                connection.setTargetCardinality(targetCardinality);
+                connection.setForceOuterJoin(outerJoin);
+                compositeConnections.add(connection);
             }
 
             compositeFeedDefinition.setCompositeFeedNodes(new ArrayList<CompositeFeedNode>(compositeNodes.values()));
@@ -143,6 +196,15 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
     private Key findKey(String fieldName, FeedDefinition dataSource) {
         for (AnalysisItem field : dataSource.getFields()) {
             if (fieldName.equals(field.getKey().toKeyString())) {
+                return field.getKey();
+            }
+        }
+        return findByDisplayName(fieldName, dataSource);
+    }
+
+    private Key findByDisplayName(String fieldName, FeedDefinition dataSource) {
+        for (AnalysisItem field : dataSource.getFields()) {
+            if (fieldName.equals(field.toOriginalDisplayName())) {
                 return field.getKey();
             }
         }

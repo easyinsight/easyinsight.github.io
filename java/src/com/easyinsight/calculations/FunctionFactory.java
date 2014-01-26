@@ -281,6 +281,10 @@ public class FunctionFactory {
             return new Rank();
         } else if (s.equals("aggregate")) {
             return new Aggregate();
+        } else if (s.equals("businessdaysinmonth")) {
+            return new BusinessDaysInMonth();
+        } else if (s.equals("businessdayofmonth")) {
+            return new BusinessDayOfMonth();
         } else {
             return null;
         }

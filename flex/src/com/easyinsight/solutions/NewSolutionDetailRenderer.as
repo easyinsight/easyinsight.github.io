@@ -3,6 +3,7 @@ package com.easyinsight.solutions {
 import com.easyinsight.account.UpgradeEvent;
 import com.easyinsight.administration.feed.BulkFieldWindow;
 import com.easyinsight.administration.feed.FeedDefinitionData;
+import com.easyinsight.administration.feed.InitialFieldWindow;
 import com.easyinsight.analysis.PromptEvent;
 import com.easyinsight.analysis.SavePromptWindow;
 import com.easyinsight.customupload.ConfigureDataSource;
@@ -15,6 +16,7 @@ import com.easyinsight.listing.DescriptorAnalyzeSource;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.schedule.DailyScheduleType;
 import com.easyinsight.schedule.DataSourceRefreshActivity;
+import com.easyinsight.skin.ApplicationSkin;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
 
@@ -65,6 +67,12 @@ public class NewSolutionDetailRenderer extends EventDispatcher {
             bulkFieldWindow.addEventListener(Event.COMPLETE, onComplete);
             PopUpManager.addPopUp(bulkFieldWindow, DisplayObject(Application.application), true);
             PopUpUtil.centerPopUp(bulkFieldWindow);
+        } else if (event.customSetup) {
+            var window:InitialFieldWindow = new InitialFieldWindow();
+            window.dataSourceID = event.descriptor.id;
+            window.addEventListener(Event.COMPLETE, onComplete);
+            PopUpManager.addPopUp(window, DisplayObject(Application.application), true);
+            PopUpUtil.centerPopUp(window);
         } else {
             connectionInstalled();
         }

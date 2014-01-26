@@ -108,10 +108,13 @@
                     event.solution.dataSourceType == DataSourceType.BASECAMP ||
                     event.solution.dataSourceType == DataSourceType.BASECAMP_NEXT ||
                     event.solution.dataSourceType == DataSourceType.CONSTANT_CONTACT ||
+                    event.solution.dataSourceType == DataSourceType.GITHUB ||
                     event.solution.dataSourceType == DataSourceType.FRESHBOOKS ||
                     event.solution.dataSourceType == DataSourceType.HARVEST_COMPOSITE ||
                     event.solution.dataSourceType == DataSourceType.PIVOTAL_TRACKER ||
                     event.solution.dataSourceType == DataSourceType.DISTINCT_CACHED ||
+                    event.solution.dataSourceType == DataSourceType.FRESHDESK ||
+                    event.solution.dataSourceType == DataSourceType.BLANK ||
                     event.solution.dataSourceType == DataSourceType.SENDGRID ||
                     event.solution.dataSourceType == DataSourceType.TRELLO ||
                     event.solution.dataSourceType == DataSourceType.BATCHBOOK2 ||

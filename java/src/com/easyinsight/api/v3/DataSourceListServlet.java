@@ -26,11 +26,20 @@ public class DataSourceListServlet extends JSONServlet {
         boolean zapierFilter = "zapier".equals(filter);
         java.util.List<DataSourceDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
         for(DataSourceDescriptor ds : dataSources) {
-            if(!zapierFilter || (zapierFilter && (ds.getDataSourceType() == FeedType.STATIC.getType() || ds.getDataSourceType() == FeedType.DEFAULT.getType()))) {
-                JSONObject dsObject = new JSONObject();
-                dsObject.put("name", ds.getName());
-                dsObject.put("url_key", ds.getUrlKey());
-                array.add(dsObject);
+            if (zapierFilter) {
+                if (ds.getDataSourceType() == FeedType.BLANK.getType()) {
+                    JSONObject dsObject = new JSONObject();
+                    dsObject.put("name", ds.getName());
+                    dsObject.put("url_key", ds.getUrlKey());
+                    array.add(dsObject);
+                }
+            } else {
+                if(ds.getDataSourceType() == FeedType.STATIC.getType() || ds.getDataSourceType() == FeedType.DEFAULT.getType()) {
+                    JSONObject dsObject = new JSONObject();
+                    dsObject.put("name", ds.getName());
+                    dsObject.put("url_key", ds.getUrlKey());
+                    array.add(dsObject);
+                }
             }
 
         }

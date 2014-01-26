@@ -239,6 +239,7 @@ public class FeedType implements Serializable {
     public static final FeedType INFUSIONSOFT_CAMPAIGN_STEP = new FeedType(211);
     public static final FeedType INFUSIONSOFT_REFERRAL = new FeedType(212);
     public static final FeedType INFUSIONSOFT_TAG_GROUP = new FeedType(213);
+    public static final FeedType BLANK = new FeedType(214);
 
     public FeedType() {
     }

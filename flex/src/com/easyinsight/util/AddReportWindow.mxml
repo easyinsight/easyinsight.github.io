@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
                     xmlns:suggestion="com.easyinsight.suggestion.*" layout="absolute"
-                    creationComplete="analysisService.getReportsWithTags.send()" backgroundColor="#FFFFFF">
+                    creationComplete="onCreation()" backgroundColor="#FFFFFF">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.quicksearch.EIDescriptor;
@@ -12,6 +12,18 @@
 
         [Bindable]
         private var descriptors:ArrayCollection;
+
+        private function onCreation():void {
+            if (useAlt()) {
+                analysisService.getReportsForDataSourceWithTags.send(getDataSourceID());
+            } else {
+                analysisService.getReportsWithTags.send();
+            }
+        }
+
+        protected function getDataSourceID():int {
+            return 0;
+        }
 
         private function chose():void {
             if (reportBox.selectedItem == null) {
@@ -45,6 +57,21 @@
         [Bindable]
         private var selectedID:int;
 
+        private function gotReportsWithTags():void {
+            var results:ReportResults = analysisService.getReportsForDataSourceWithTags.lastResult as ReportResults;
+            validReports = results.reports;
+            tags = results.reportTags;
+            validReports.filterFunction = filterFunction;
+            validReports.refresh();
+            nextLevelReports = new ArrayCollection(validReports.toArray());
+            if (results.dataSources != null) {
+                var dataSources:ArrayCollection = results.dataSources;
+                var none:Object = { name:"[ All Data Sources ]", id:0};
+                dataSources.addItemAt(none, 0);
+                this.dataSources = dataSources;
+            }
+        }
+
         private function gotReports():void {
             var results:ReportResults = analysisService.getReportsWithTags.lastResult as ReportResults;
             validReports = results.reports;
@@ -67,6 +94,10 @@
 
         [Bindable]
         private var tags:ArrayCollection;
+
+        protected function useAlt():Boolean {
+            return false;
+        }
 
         private function filterFunction(object:Object):Boolean {
             var report:InsightDescriptor = object as InsightDescriptor;
@@ -108,6 +139,7 @@
 	</mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="getReportsWithTags" result="gotReports()"/>
+        <mx:method name="getReportsForDataSourceWithTags" result="gotReportsWithTags()"/>
     </mx:RemoteObject>
     <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:Form id="form">

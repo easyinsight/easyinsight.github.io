@@ -1615,6 +1615,59 @@ public class AnalysisService {
         }
     }
 
+    public ReportResults getReportsForDataSourceWithTags(long dataSourceID) {
+        long userID = SecurityUtil.getUserID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            List<InsightDescriptor> reports = analysisStorage.getInsightDescriptorsForDataSource(userID, SecurityUtil.getAccountID(), dataSourceID, conn, true);
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+            PreparedStatement getTagsToReportsStmt = conn.prepareStatement("SELECT REPORT_TO_TAG.TAG_ID, REPORT_ID FROM report_to_tag, account_tag WHERE " +
+                    "account_tag.account_tag_id = report_to_tag.tag_id and account_tag.account_id = ?");
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet tagRS = getTagsStmt.executeQuery();
+            Map<Long, Tag> tags = new HashMap<Long, Tag>();
+            while (tagRS.next()) {
+                tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5)));
+            }
+
+            getTagsToReportsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet dsTagRS = getTagsToReportsStmt.executeQuery();
+            Map<Long, List<Tag>> reportToTagMap = new HashMap<Long, List<Tag>>();
+            while (dsTagRS.next()) {
+                long reportID = dsTagRS.getLong(2);
+                long tagID = dsTagRS.getLong(1);
+                Tag tag = tags.get(tagID);
+                List<Tag> t = reportToTagMap.get(reportID);
+                if (t == null) {
+                    t = new ArrayList<Tag>();
+                    reportToTagMap.put(reportID, t);
+                }
+                t.add(tag);
+            }
+            getTagsStmt.close();
+            getTagsToReportsStmt.close();
+
+            Set<Tag> validTags = new HashSet<Tag>();
+            for (InsightDescriptor insightDescriptors : reports) {
+                List<Tag> tagList = reportToTagMap.get(insightDescriptors.getId());
+                if (tagList == null) {
+                    tagList = new ArrayList<Tag>();
+                }
+                insightDescriptors.setTags(tagList);
+                validTags.addAll(tagList);
+            }
+            ReportResults reportResults = new ReportResults();
+            reportResults.setReports(reports);
+            reportResults.setReportTags(new ArrayList<Tag>(validTags));
+            return reportResults;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public List<InsightDescriptor> getInsightDescriptorsForDataSource(long dataSourceID) {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();

@@ -180,16 +180,16 @@ public class FeedService {
     public void updateAnalysisItemConfigurations(List<AnalysisItemConfiguration> configurations, long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM field_to_tag WHERE analysis_item_id = ?");
-            PreparedStatement clearExtStmt = conn.prepareStatement("DELETE FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ?");
+            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM field_to_tag WHERE data_source_id = ?");
+            PreparedStatement clearExtStmt = conn.prepareStatement("DELETE FROM analysis_item_to_report_field_extension WHERE data_source_id = ?");
             PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO field_to_tag (account_tag_id, display_name, data_source_id) values (?, ?, ?)");
             PreparedStatement saveExtStmt = conn.prepareStatement("INSERT INTO analysis_item_to_report_field_extension (report_field_extension_id, " +
                     "display_name, extension_type, data_source_id) values (?, ?, ?, ?)");
+            clearStmt.setLong(1, dataSourceID);
+            clearStmt.executeUpdate();
+            clearExtStmt.setLong(1, dataSourceID);
+            clearExtStmt.executeUpdate();
             for (AnalysisItemConfiguration configuration : configurations) {
-                clearStmt.setLong(1, configuration.getAnalysisItem().getAnalysisItemID());
-                clearStmt.executeUpdate();
-                clearExtStmt.setLong(1, configuration.getAnalysisItem().getAnalysisItemID());
-                clearExtStmt.executeUpdate();
                 for (Tag tag : configuration.getTags()) {
                     saveStmt.setLong(1, tag.getId());
                     saveStmt.setString(2, configuration.getAnalysisItem().toDisplay());
@@ -686,7 +686,11 @@ public class FeedService {
     }
 
     public List<EIDescriptor> getDescriptorsForDataSource(long dataSourceID) {
+
         List<EIDescriptor> descriptorList = new ArrayList<EIDescriptor>();
+        if (dataSourceID == 0) {
+            return descriptorList;
+        }
         long userID = SecurityUtil.getUserID();
         long accountID = SecurityUtil.getAccountID();
         EIConnection conn = Database.instance().getConnection();

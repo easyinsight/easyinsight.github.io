@@ -73,5 +73,9 @@ import mx.collections.ArrayCollection;
         public function moreSetup():IPostOAuth {
             return null;
         }
+
+        public function additionalSetup():Boolean {
+            return false;
+        }
     }
 }

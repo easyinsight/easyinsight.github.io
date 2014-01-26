@@ -9,12 +9,18 @@ public class BaseEditorFieldControlsFactory extends UIComponent implements IFact
 
     private var _fields:ArrayCollection;
     private var _concreteFieldsEditable:Boolean;
+    private var _fullEditable:Boolean;
 
     public function BaseEditorFieldControlsFactory() {
     }
 
     public function set concreteFieldsEditable(value:Boolean):void {
         _concreteFieldsEditable = value;
+    }
+
+
+    public function set fullEditable(value:Boolean):void {
+        _fullEditable = value;
     }
 
     [Bindable(event="fieldsChanged")]
@@ -32,6 +38,7 @@ public class BaseEditorFieldControlsFactory extends UIComponent implements IFact
         var controls:BaseFieldEditButton = new BaseFieldEditButton();
         controls.analysisItems = fields;
         controls.concreteFieldsEditable = _concreteFieldsEditable;
+        controls.fullEditable = _fullEditable;
         return controls;
     }
 }
