@@ -485,6 +485,9 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     private function showNoData():void {
+        if (noData == null) {
+            noData = new NoData();
+        }
         if (!noData.parent) {
             if (currentComponent) {
                 reportCanvas.removeChild(currentComponent);
@@ -497,6 +500,9 @@ public class DataViewFactory extends VBox implements IRetrievable {
     public var defaultManualRun:Boolean;
 
     private function showNotConfigured():void {
+        if (notConfigured == null) {
+            notConfigured = new NotConfigured();
+        }
         if (!notConfigured.parent) {
             if (currentComponent) {
                 reportCanvas.removeChild(currentComponent);
