@@ -289,14 +289,17 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         Map<String, Key> keyMap = migrationResult.getKeyMap();
 
         conn.commit();
-        conn.setAutoCommit(true);
-        String tempTable = tempLoad(keyMap, now, this, callDataID, lastRefreshTime, conn, fullRefresh, refreshProperties);
+        if (getFields().size() != 0) {
+            conn.setAutoCommit(true);
+            String tempTable = tempLoad(keyMap, now, this, callDataID, lastRefreshTime, conn, fullRefresh, refreshProperties);
 
-        conn.setAutoCommit(false);
-        applyTempLoad(conn, accountID, null, lastRefreshTime, tempTable, fullRefresh, warnings, refreshProperties);
+            conn.setAutoCommit(false);
+            applyTempLoad(conn, accountID, null, lastRefreshTime, tempTable, fullRefresh, warnings, refreshProperties);
 
-        refreshDone();
-        CachedAddonDataSource.triggerUpdates(getDataFeedID());
+            refreshDone();
+            CachedAddonDataSource.triggerUpdates(getDataFeedID());
+        }
+
         return changed;
     }
 
