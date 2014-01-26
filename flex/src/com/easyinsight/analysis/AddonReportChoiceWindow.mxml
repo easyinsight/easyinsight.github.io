@@ -14,6 +14,15 @@
 
         public var dataSourceID:int;
 
+        override protected function getDataSourceID():int {
+            return dataSourceID;
+        }
+
+
+        override protected function useAlt():Boolean {
+            return true;
+        }
+
         override protected function additionalFilter(descriptor:InsightDescriptor):Boolean {
             return (descriptor.dataFeedID == dataSourceID && descriptor.id != reportFrom && reportsExisting.getItemIndex(descriptor.id) == -1);
         }
