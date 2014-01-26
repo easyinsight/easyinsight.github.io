@@ -21,6 +21,7 @@ public class ListSummaryComponent implements IComponent {
         Set<AnalysisItem> reportItems = new HashSet<AnalysisItem>(pipelineData.getReportItems());
         AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
         structure.setReport(pipelineData.getReport());
+        structure.setConn(pipelineData.getConn());
         List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, structure);
 
         Iterator<IComponent> iter = components.iterator();
