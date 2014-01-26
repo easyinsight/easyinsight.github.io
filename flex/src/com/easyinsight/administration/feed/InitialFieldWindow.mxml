@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                   xmlns:feed="com.easyinsight.administration.feed.*" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.datasources.BlankDataSource;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.controls.Alert;
+
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var blankDataSource:BlankDataSource;
+
+        public var dataSourceID:int;
+
+        private function onCreation():void {
+            ProgressAlert.alert(this, "Retrieving...", null, feedService.getFeedDefinition);
+            feedService.getFeedDefinition.send(dataSourceID);
+        }
+
+        private function gotFeedDefinition():void {
+            blankDataSource = feedService.getFeedDefinition.lastResult as BlankDataSource;
+        }
+
+        private function updated():void {
+            dispatchEvent(new Event(Event.COMPLETE));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function save():void {
+            blankFields.updateDataSource(blankDataSource);
+            if (blankDataSource.fields.length == 0) {
+                Alert.show("You need to define at least one field.");
+            } else {
+                ProgressAlert.alert(this, "Saving...", null, feedService.updateFeedDefinition);
+                feedService.updateFeedDefinition.send(blankDataSource);
+            }
+        }
+
+        ]]></mx:Script>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="getFeedDefinition" result="gotFeedDefinition()"/>
+        <mx:method name="updateFeedDefinition" result="updated()"/>
+    </mx:RemoteObject>
+    <mx:Text text="Set up your fields on this data source for what you'll want to receive from Zapier:"/>
+    <feed:BlankDataSourceFields id="blankFields" dataSourceDefinition="{blankDataSource}" height="400"/>
+    <mx:Text text="Upon saving the data source, it will be available as as an Action Service for you to use in Zapier."/>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

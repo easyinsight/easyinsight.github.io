@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDateDimension;
+        import com.easyinsight.analysis.AnalysisDimension;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.AnalysisText;
+        import com.easyinsight.analysis.NamedKey;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.controls.Alert;
+
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
+
+        private function selectType(event:MouseEvent):void {
+            var item:AnalysisItem;
+            if (event.currentTarget == groupingButton) {
+                item = new AnalysisDimension();
+            } else if (event.currentTarget == measureButton) {
+                item = new AnalysisMeasure();
+            } else if (event.currentTarget == textButton) {
+                item = new AnalysisText();
+            } else if (event.currentTarget == dateButton) {
+                item = new AnalysisDateDimension();
+                AnalysisDateDimension(item).dateOnlyField = true;
+            } else if (event.currentTarget == dateTimeButton) {
+                item = new AnalysisDateDimension();
+                AnalysisDateDimension(item).dateOnlyField = false;
+            }
+            item.concrete = true;
+            this.item = item;
+            index++;
+        }
+
+        public var fields:ArrayCollection;
+
+        private function save():void {
+            var results:Array = Validator.validateAll([ keyValidator, nameValidator]);
+            if (results.length > 0) {
+                Alert.show("Please fix the shown errors before adding this field.");
+                return;
+            }
+            var keyName:String = keyInput.text;
+            var displayName:String = displayInput.text;
+            for each (var a:AnalysisItemWrapper in fields) {
+                if (NamedKey(a.analysisItem.key).name == keyName) {
+                    Alert.show("You already have a field using the key of " + keyName + " in the data source.");
+                    return;
+                }
+                if (a.analysisItem.display == displayName) {
+                    Alert.show("You already have a field using the name of " + displayName + " in the data source.");
+                    return;
+                }
+            }
+            var key:NamedKey = new NamedKey();
+            key.name = keyInput.text;
+            item.key = key;
+            item.displayName = displayInput.text;
+            dispatchEvent(new AddBlankFieldEvent(item));
+            PopUpManager.removePopUp(this);
+        }
+
+        private var item:AnalysisItem;
+
+        private var displayChanged:Boolean = false;
+
+        private function onDisplayChange(event:Event):void {
+            displayChanged = true;
+        }
+
+        private function onKeyChange(event:Event):void {
+            if (!displayChanged) {
+                displayInput.text = keyInput.text;
+            }
+        }
+
+        [Bindable]
+        private var index:int = 0;
+        ]]></mx:Script>
+    <mx:ViewStack selectedIndex="{index}" resizeToContent="true" updateComplete="PopUpUtil.centerPopUp(this)">
+        <mx:VBox styleName="fallThroughFonts" horizontalAlign="center">
+            <mx:Text text="Select a field type to add" fontSize="16"/>
+
+                <mx:HBox>
+                    <mx:VBox>
+                        <mx:Text text="Grouping" fontWeight="bold"/>
+                        <mx:Text
+                                text="A text field limited to 250 characters. For example, 'Project Name', 'Customer ID', or 'Region' would be typical groupings."
+                                width="200"/>
+                    </mx:VBox>
+                    <mx:LinkButton id="groupingButton" label="Select >>" click="selectType(event)"/>
+                </mx:HBox>
+            <mx:HRule/>
+                <mx:HBox>
+                    <mx:VBox>
+                        <mx:Text text="Measure" fontWeight="bold"/>
+                        <mx:Text
+                                text="A numeric metric field. For example, 'Amount', 'Revenue', or 'Count' would be typical measures."
+                                width="200"/>
+                    </mx:VBox>
+                    <mx:LinkButton id="measureButton" label="Select >>" click="selectType(event)"/>
+                </mx:HBox>
+            <mx:HRule/>
+                <mx:HBox>
+                    <mx:VBox>
+                        <mx:Text text="Date" fontWeight="bold"/>
+                        <mx:Text text="Year, month, day." width="200"/>
+                    </mx:VBox>
+                    <mx:LinkButton id="dateButton" label="Select >>" click="selectType(event)"/>
+                </mx:HBox>
+            <mx:HRule/>
+                <mx:HBox>
+                    <mx:VBox>
+                        <mx:Text text="Date Time" fontWeight="bold"/>
+                        <mx:Text text="Year, month, day, hour, minute." width="200"/>
+                    </mx:VBox>
+                    <mx:LinkButton id="dateTimeButton" label="Select >>" click="selectType(event)"/>
+                </mx:HBox>
+            <mx:HRule/>
+                <mx:HBox>
+                    <mx:VBox>
+                        <mx:Text text="Text" fontWeight="bold"/>
+                        <mx:Text text="Longer notes or descriptions." width="200"/>
+                    </mx:VBox>
+                    <mx:LinkButton id="textButton" label="Select >>" click="selectType(event)"/>
+                </mx:HBox>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Form>
+                <mx:FormItem label="What should the underlying key of the field be called?">
+                    <mx:TextInput id="keyInput" change="onKeyChange(event)"/>
+                </mx:FormItem>
+                <mx:FormItem label="What should the display name be?">
+                    <mx:TextInput id="displayInput"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:HBox>
+                <util:SaveButton label="Add This Field" click="save()"/>
+                <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            </mx:HBox>
+        </mx:VBox>
+    </mx:ViewStack>
+    <mx:StringValidator id="keyValidator" source="{keyInput}" property="text" minLength="1"/>
+    <mx:StringValidator id="nameValidator" source="{displayInput}" property="text" minLength="1"/>
+</util:EISlimWindow>

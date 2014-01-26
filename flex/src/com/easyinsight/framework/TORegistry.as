@@ -83,6 +83,7 @@ import com.easyinsight.datasources.BaseCampDataSource;
 import com.easyinsight.datasources.BasecampNextCompositeSource;
 import com.easyinsight.datasources.Batchbook2DataSource;
 import com.easyinsight.datasources.BatchbookDataSource;
+import com.easyinsight.datasources.BlankDataSource;
 import com.easyinsight.datasources.CloudWatchDataSource;
 import com.easyinsight.datasources.ConstantContactDataSource;
 import com.easyinsight.datasources.DatabaseConnection;
@@ -322,6 +323,7 @@ public class TORegistry {
         var distinct:DistinctCachedSource;
         var git:GithubCompositeSource;
         var fresh:FreshdeskDataSource;
+        var blank:BlankDataSource;
     }
 }
 }

@@ -120,7 +120,7 @@
                 var descriptor:DataSourceDescriptor = new DataSourceDescriptor();
                 descriptor.id = dataSourceDefinition.dataFeedID;
                 descriptor.name = dataSourceDefinition.feedName;
-                dispatchEvent(new DataSourceConfiguredEvent(descriptor, newFields && dataSourceDefinition.allowFieldEdit()));
+                dispatchEvent(new DataSourceConfiguredEvent(descriptor, newFields && dataSourceDefinition.allowFieldEdit(), dataSourceDefinition.additionalSetup()));
                 stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
                 PopUpManager.removePopUp(this);
             } else if (callData.status == CallData.FAILED) {
