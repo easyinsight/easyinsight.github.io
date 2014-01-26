@@ -24,6 +24,30 @@ public abstract class Function implements IFunction {
 
     private FunctionNode functionNode;
 
+    public boolean equals(Value value1, Value value2) {
+        try {
+            if (value1.type() == value2.type()) {
+                return value1.equals(value2);
+            }
+            if (value1.type() == Value.STRING && value2.type() == Value.EMPTY) {
+                return value1.toString().equals("") || value1.toString().equals("(Empty)");
+            } else if (value2.type() == Value.STRING && value1.type() == Value.EMPTY) {
+                return value2.toString().equals("") || value2.toString().equals("(Empty)");
+            } else if (value1.type() == Value.STRING && value2.type() == Value.NUMBER) {
+                Double double1 = Double.parseDouble(value1.toString());
+                Double double2 = value2.toDouble();
+                return ((double2 - double1) < .00001);
+            } else if (value1.type() == Value.NUMBER && value2.type() == Value.STRING) {
+                Double double1 = Double.parseDouble(value2.toString());
+                Double double2 = value1.toDouble();
+                return ((double2 - double1) < .00001);
+            }
+            return value1.equals(value2);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     protected AnalysisItem findReportItem(int parameter, List<AnalysisItem> fields) {
         Value value = params.get(parameter);
         String string = value.toString();
