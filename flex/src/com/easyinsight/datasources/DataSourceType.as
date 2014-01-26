@@ -60,6 +60,7 @@ public class DataSourceType {
     public static const DISTINCT_CACHED:int = 193;
     public static const GITHUB:int = 203;
     public static const FRESHDESK:int = 208;
+    public static const BLANK:int = 214;
 
 
 
