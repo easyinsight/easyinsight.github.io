@@ -1,0 +1,1 @@
+alter table community_group add data_source_include_report tinyint(4) not null default 0;
