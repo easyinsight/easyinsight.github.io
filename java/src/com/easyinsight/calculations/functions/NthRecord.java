@@ -58,10 +58,18 @@ public class NthRecord extends Function {
         Value instanceValue = getParameter(1);
         int n = (int) Math.round(getParameter(0).toDouble());
         List<IRow> rows = processCalculationCache.rowsForValue(instanceValue);
-        if (rows.size() < n) {
-            return new EmptyValue();
+        if(n < 0) {
+            n = -n;
+            if(rows.size() < (n + 1)) {
+                return new EmptyValue();
+            }
+            return rows.get(rows.size() - n - 1).getValue(targetField);
+        } else {
+            if (rows.size() < n) {
+                return new EmptyValue();
+            }
+            return rows.get(n - 1).getValue(targetField);
         }
-        return rows.get(n - 1).getValue(targetField);
     }
 
     @Override
