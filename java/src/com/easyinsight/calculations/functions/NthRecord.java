@@ -60,10 +60,10 @@ public class NthRecord extends Function {
         List<IRow> rows = processCalculationCache.rowsForValue(instanceValue);
         if(n < 0) {
             n = -n;
-            if(rows.size() < (n + 1)) {
+            if(rows.size() < n) {
                 return new EmptyValue();
             }
-            return rows.get(rows.size() - n - 1).getValue(targetField);
+            return rows.get(rows.size() - n).getValue(targetField);
         } else {
             if (rows.size() < n) {
                 return new EmptyValue();
