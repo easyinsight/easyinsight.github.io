@@ -132,6 +132,7 @@ public class KashooCompositeSource extends CompositeServerDataSource {
     protected Set<FeedType> getFeedTypes() {
         Set<FeedType> types = new HashSet<FeedType>();
         types.add(FeedType.KASHOO_BUSINESSES);
+        types.add(FeedType.KASHOO_RECORDS);
         return types;
     }
 

@@ -171,6 +171,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public AnalysisItem(Key key) {
+        if(key == null)
+            throw new RuntimeException("OOPS");
         this.key = key;
     }
 

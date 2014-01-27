@@ -241,6 +241,8 @@ public class FeedType implements Serializable {
     public static final FeedType INFUSIONSOFT_TAG_GROUP = new FeedType(213);
     public static final FeedType BLANK = new FeedType(214);
 
+    public static final FeedType KASHOO_RECORDS = new FeedType(215);
+
     public FeedType() {
     }
 
