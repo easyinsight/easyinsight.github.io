@@ -103,8 +103,6 @@ public class KashooCompositeSource extends CompositeServerDataSource {
 
                 JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
                 Object postObject = parser.parse(restMethod.getResponseBodyAsStream());
-
-                System.out.println(postObject);
                 tokenObj = new Token();
                 tokenObj.setTokenValue(postObject.toString());
                 tokenObj.setTokenType(TokenStorage.KASHOO);
