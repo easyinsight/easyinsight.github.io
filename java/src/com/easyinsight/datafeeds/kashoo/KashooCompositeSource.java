@@ -28,10 +28,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -90,6 +87,38 @@ public class KashooCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
+    protected void beforeRefresh(Date lastRefreshTime) {
+        super.beforeRefresh(lastRefreshTime);
+        try {
+            Token tokenObj = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.KASHOO, getDataFeedID(), false);
+            if (ksPassword == null || ksUserName == null && tokenObj != null) {
+                HttpClient client = new HttpClient();
+                PostMethod restMethod = new PostMethod("https://api.kashoo.com/api/authTokens");
+                restMethod.setRequestHeader("Accept", "application/json");
+                restMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                restMethod.setRequestHeader("Authorization", "TOKEN json:" + tokenObj.getTokenValue());
+                restMethod.addParameter("duration", "90000000");
+
+                client.executeMethod(restMethod);
+
+                JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+                Object postObject = parser.parse(restMethod.getResponseBodyAsStream());
+
+                System.out.println(postObject);
+                tokenObj = new Token();
+                tokenObj.setTokenValue(postObject.toString());
+                tokenObj.setTokenType(TokenStorage.KASHOO);
+                tokenObj.setUserID(SecurityUtil.getUserID());
+                new TokenStorage().saveToken(tokenObj, getDataFeedID());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (ParseException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    }
+
+    @Override
     public String validateCredentials() {
         try {
             getToken(ksUserName, ksPassword);
@@ -133,7 +162,14 @@ public class KashooCompositeSource extends CompositeServerDataSource {
         Set<FeedType> types = new HashSet<FeedType>();
         types.add(FeedType.KASHOO_BUSINESSES);
         types.add(FeedType.KASHOO_RECORDS);
+        types.add(FeedType.KASHOO_ACCOUNTS);
         return types;
+    }
+
+    @Override
+    protected Collection<ChildConnection> getLiveChildConnections() {
+        return Arrays.asList(new ChildConnection(FeedType.KASHOO_BUSINESSES, FeedType.KASHOO_ACCOUNTS, KashooBusinessSource.BUSINESS_ID, KashooAccountSource.BUSINESS_ID),
+                new ChildConnection(FeedType.KASHOO_ACCOUNTS, FeedType.KASHOO_RECORDS, KashooAccountSource.ACCOUNT_ID, KashooRecordSource.ACCOUNT));
     }
 
     @Override

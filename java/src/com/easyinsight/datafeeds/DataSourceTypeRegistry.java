@@ -29,6 +29,7 @@ import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;*/
 import com.easyinsight.datafeeds.infusionsoft.*;
 import com.easyinsight.datafeeds.insightly.*;
 import com.easyinsight.datafeeds.json.JSONDataSource;
+import com.easyinsight.datafeeds.kashoo.KashooAccountSource;
 import com.easyinsight.datafeeds.kashoo.KashooBusinessSource;
 import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;
 import com.easyinsight.datafeeds.kashoo.KashooRecordSource;
@@ -356,6 +357,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.KASHOO_BUSINESSES, KashooBusinessSource.class);
         registerType(FeedType.KASHOO_RECORDS, KashooRecordSource.class);
         registerType(FeedType.BLANK, BlankDataSource.class);
+        registerType(FeedType.KASHOO_ACCOUNTS, KashooAccountSource.class);
+
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
