@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.KashooCompositeDataSource;
+        import com.easyinsight.datasources.PivotalTrackerBaseSource;
+        import com.easyinsight.framework.Credentials;
+
+        import mx.controls.Button;
+
+        [Bindable]
+        private var url:String;
+        [Bindable]
+        private var usernameInputText:String;
+        [Bindable]
+        private var password:String;
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            return new KashooCompositeDataSource();
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:KashooCompositeDataSource = feedDefinition as KashooCompositeDataSource;
+
+        }
+
+        public function get savesCredentials():Boolean {
+            return false;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:KashooCompositeDataSource = feedDefinition as KashooCompositeDataSource;
+            ds.ksUserName = userNameInput.text;
+            ds.ksPassword = passwordInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }]]></mx:Script>
+    <mx:Form>
+		<mx:FormItem label="Kashoo Email" direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
+		</mx:FormItem>
+        <mx:FormItem label="Kashoo Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="passwordInput" displayAsPassword="true" fontWeight="normal" fontFamily="Lucida Grande" text="{password}"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:HBox>

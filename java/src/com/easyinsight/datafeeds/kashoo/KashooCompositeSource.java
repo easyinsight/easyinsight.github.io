@@ -121,10 +121,8 @@ public class KashooCompositeSource extends CompositeServerDataSource {
         try {
             getToken(ksUserName, ksPassword);
             return null;
-        } catch (ParseException pe) {
+        } catch(Exception e) {
             return "These credentials were rejected as invalid by Kashoo. Please double check your values for username and password.";
-        } catch (Exception e) {
-            return e.getMessage();
         }
     }
 
@@ -140,8 +138,7 @@ public class KashooCompositeSource extends CompositeServerDataSource {
         restMethod.addParameter("duration", "90000000");
         client.executeMethod(restMethod);
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        Object postObject = parser.parse(restMethod.getResponseBodyAsStream());
-
+        JSONObject postObject = (JSONObject) parser.parse(restMethod.getResponseBodyAsStream());
         return postObject.toString();
     }
 
