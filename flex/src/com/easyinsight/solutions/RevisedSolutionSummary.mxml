@@ -123,7 +123,8 @@
                     event.solution.dataSourceType == DataSourceType.WUFOO ||
                     event.solution.dataSourceType == DataSourceType.INSIGHTLY ||
                     event.solution.dataSourceType == DataSourceType.INFUSIONSOFT ||
-                    event.solution.dataSourceType == DataSourceType.ZENDESK) {
+                    event.solution.dataSourceType == DataSourceType.ZENDESK ||
+                    event.solution.dataSourceType == DataSourceType.KASHOO) {
                 var renderer:NewSolutionDetailRenderer = new NewSolutionDetailRenderer();
                 renderer.solution = event.solution;
                 renderer.installSolution();

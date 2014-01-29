@@ -1,3 +1,4 @@
+drop table if exists filter_set;
 create table filter_set (
   filter_set_id bigint(20) auto_increment not null,
   user_id bigint(20) not null,
@@ -9,6 +10,7 @@ create table filter_set (
   constraint filter_set_ibfk1 foreign key (data_source_id) references data_feed (data_feed_id) on delete cascade
 );
 
+drop table if exists filter_set_to_filter;
 create table filter_set_to_filter (
   filter_set_to_filter_id bigint(20) auto_increment not null,
   filter_set_id bigint(20) not null,
@@ -25,6 +27,7 @@ alter table filter drop default_date_filter;
 alter table data_feed add manual_report_run tinyint(4) not null default 0;
 alter table data_feed add default_tag_id bigint(20) default null;
 
+drop table if exists filter_set_stub;
 create table filter_set_stub (
   filter_set_stub_id bigint(20) auto_increment not null,
   filter_set_id bigint(20) not null,

@@ -20,6 +20,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
  * Time: 10:42 PM
  */
 public abstract class KashooBaseSource extends ServerDataSourceDefinition {
+    public static int PAGE_LIMIT = 100;
+
     protected static HttpClient getHttpClient() {
         HttpClient client = new HttpClient();
         return client;
