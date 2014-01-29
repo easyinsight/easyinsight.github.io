@@ -24,7 +24,7 @@
         }
 
         override protected function additionalFilter(descriptor:InsightDescriptor):Boolean {
-            return (descriptor.dataFeedID == dataSourceID && descriptor.id != reportFrom && reportsExisting.getItemIndex(descriptor.id) == -1);
+            return (descriptor.id != reportFrom && reportsExisting.getItemIndex(descriptor.id) == -1);
         }
 
         override protected function showDataSourceOption():Boolean {
