@@ -51,6 +51,10 @@ import com.easyinsight.datafeeds.sendgrid.SendGridDataSource;
 import com.easyinsight.datafeeds.solve360.Solve360CompositeSource;
 import com.easyinsight.datafeeds.solve360.Solve360ContactsSource;
 import com.easyinsight.datafeeds.solve360.Solve360OpportunitiesSource;*/
+import com.easyinsight.datafeeds.solve360.Solve360ActivitiesSource;
+import com.easyinsight.datafeeds.solve360.Solve360CompositeSource;
+import com.easyinsight.datafeeds.solve360.Solve360ContactsSource;
+import com.easyinsight.datafeeds.solve360.Solve360OpportunitiesSource;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
@@ -358,6 +362,10 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.KASHOO_RECORDS, KashooRecordSource.class);
         registerType(FeedType.BLANK, BlankDataSource.class);
         registerType(FeedType.KASHOO_ACCOUNTS, KashooAccountSource.class);
+        registerType(FeedType.SOLVE360_COMPOSITE, Solve360CompositeSource.class);
+        registerType(FeedType.SOLVE360_CONTACTS, Solve360ContactsSource.class);
+        registerType(FeedType.SOLVE360_OPPORTUNITIES, Solve360OpportunitiesSource.class);
+        registerType(FeedType.SOLVE360_ACTIVITIES, Solve360ActivitiesSource.class);
 
     }
 
