@@ -171,8 +171,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public AnalysisItem(Key key) {
-        if(key == null)
-            throw new RuntimeException("OOPS");
         this.key = key;
     }
 
@@ -828,7 +826,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             fromField = (AnalysisItem) Database.deproxy(fromField);
             fromField.afterLoad();
         }
-    }
+            }
 
     public String toKeySQL() {
         if (isDerived()) {
