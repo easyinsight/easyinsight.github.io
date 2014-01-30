@@ -20,11 +20,10 @@ import org.apache.commons.httpclient.methods.GetMethod;
  * Time: 10:42 PM
  */
 public abstract class KashooBaseSource extends ServerDataSourceDefinition {
-    protected static HttpClient getHttpClient(String username, String password) {
+    public static int PAGE_LIMIT = 100;
+
+    protected static HttpClient getHttpClient() {
         HttpClient client = new HttpClient();
-        client.getParams().setAuthenticationPreemptive(true);
-        Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
-        client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
         return client;
     }
 
@@ -36,15 +35,15 @@ public abstract class KashooBaseSource extends ServerDataSourceDefinition {
             return null;
     }
 
-    protected static JSONObject runRestRequest(String path, HttpClient client, FeedDefinition parentDefinition) throws ParsingException, ReportException {
+    protected static Object runRestRequest(String path, HttpClient client, FeedDefinition parentDefinition, String token) throws ParsingException, ReportException {
         HttpMethod restMethod = new GetMethod("https://api.kashoo.com" + path);
         restMethod.setRequestHeader("Accept", "application/json");
         restMethod.setRequestHeader("Content-Type", "application/json");
-
+        restMethod.setRequestHeader("Authorization", "TOKEN json:" + token);
         try {
             client.executeMethod(restMethod);
             JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-            JSONObject postObject = (JSONObject) parser.parse(restMethod.getResponseBodyAsStream());
+            Object postObject = parser.parse(restMethod.getResponseBodyAsStream());
             return postObject;
         } catch (Exception pe) {
             String statusLine = restMethod.getStatusLine().toString();

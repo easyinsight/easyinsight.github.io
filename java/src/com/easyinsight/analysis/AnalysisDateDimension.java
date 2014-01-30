@@ -130,6 +130,12 @@ public class AnalysisDateDimension extends AnalysisDimension {
         this.customDateFormat = customDateFormat;
     }
 
+    public AnalysisDateDimension(Key key, boolean dateOnlyField) {
+        super(key, true);
+        this.dateLevel = DAY_LEVEL;
+        this.dateOnlyField = dateOnlyField;
+    }
+
     public AnalysisDateDimension(Key key, boolean group, int dateLevel, String customDateFormat, boolean dateOnly) {
         super(key, group);
         this.dateLevel = dateLevel;

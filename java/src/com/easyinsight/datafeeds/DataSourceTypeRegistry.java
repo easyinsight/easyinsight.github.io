@@ -29,8 +29,10 @@ import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;*/
 import com.easyinsight.datafeeds.infusionsoft.*;
 import com.easyinsight.datafeeds.insightly.*;
 import com.easyinsight.datafeeds.json.JSONDataSource;
+import com.easyinsight.datafeeds.kashoo.KashooAccountSource;
 import com.easyinsight.datafeeds.kashoo.KashooBusinessSource;
 import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;
+import com.easyinsight.datafeeds.kashoo.KashooRecordSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
 import com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource;
@@ -49,6 +51,10 @@ import com.easyinsight.datafeeds.sendgrid.SendGridDataSource;
 import com.easyinsight.datafeeds.solve360.Solve360CompositeSource;
 import com.easyinsight.datafeeds.solve360.Solve360ContactsSource;
 import com.easyinsight.datafeeds.solve360.Solve360OpportunitiesSource;*/
+import com.easyinsight.datafeeds.solve360.Solve360ActivitiesSource;
+import com.easyinsight.datafeeds.solve360.Solve360CompositeSource;
+import com.easyinsight.datafeeds.solve360.Solve360ContactsSource;
+import com.easyinsight.datafeeds.solve360.Solve360OpportunitiesSource;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
@@ -353,7 +359,14 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.INFUSIONSOFT_TAG_GROUP, InfusionsoftContactGroupCategorySource.class);
         registerType(FeedType.KASHOO_COMPOSITE, KashooCompositeSource.class);
         registerType(FeedType.KASHOO_BUSINESSES, KashooBusinessSource.class);
+        registerType(FeedType.KASHOO_RECORDS, KashooRecordSource.class);
         registerType(FeedType.BLANK, BlankDataSource.class);
+        registerType(FeedType.KASHOO_ACCOUNTS, KashooAccountSource.class);
+        registerType(FeedType.SOLVE360_COMPOSITE, Solve360CompositeSource.class);
+        registerType(FeedType.SOLVE360_CONTACTS, Solve360ContactsSource.class);
+        registerType(FeedType.SOLVE360_OPPORTUNITIES, Solve360OpportunitiesSource.class);
+        registerType(FeedType.SOLVE360_ACTIVITIES, Solve360ActivitiesSource.class);
+
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

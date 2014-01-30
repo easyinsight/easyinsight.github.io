@@ -61,6 +61,7 @@ public class DataSourceType {
     public static const GITHUB:int = 203;
     public static const FRESHDESK:int = 208;
     public static const BLANK:int = 214;
+    public static const KASHOO:int = 120;
 
 
 

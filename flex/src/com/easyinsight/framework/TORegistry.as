@@ -97,6 +97,7 @@ import com.easyinsight.datasources.HighriseAdditionalToken;
 import com.easyinsight.datasources.InfusionsoftCompositeSource;
 import com.easyinsight.datasources.InsightlyCompositeSource;
 import com.easyinsight.datasources.JSONDataSource;
+import com.easyinsight.datasources.KashooCompositeDataSource;
 import com.easyinsight.datasources.LinkedInDataSource;
 import com.easyinsight.datasources.MySQLDatabaseConnection;
 import com.easyinsight.datasources.OracleDatabaseConnection;
@@ -324,6 +325,7 @@ public class TORegistry {
         var git:GithubCompositeSource;
         var fresh:FreshdeskDataSource;
         var blank:BlankDataSource;
+        var kashoo:KashooCompositeDataSource;
     }
 }
 }
