@@ -2,8 +2,6 @@ package com.easyinsight.calculations.functions;
 
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.MaterializedFilterPatternDefinition;
-import com.easyinsight.analysis.ReaggregateAnalysisMeasure;
-import com.easyinsight.analysis.definitions.WSVerticalListDefinition;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.core.EmptyValue;
@@ -52,10 +50,6 @@ public class CopyFields extends Function {
     private AnalysisItem fromTemplate(AnalysisItem template, AnalysisItem target, String copyString) {
         try {
             AnalysisItem clone = template.clone();
-            if (clone instanceof ReaggregateAnalysisMeasure) {
-                ReaggregateAnalysisMeasure reaggregateAnalysisMeasure = (ReaggregateAnalysisMeasure) clone;
-                reaggregateAnalysisMeasure.setWrappedMeasure(target);
-            }
             String name = MessageFormat.format(copyString, target.toDisplay());
             //name = name.replaceAll("/", "t").replaceAll("-", "d");
             clone.setDisplayName(name);
