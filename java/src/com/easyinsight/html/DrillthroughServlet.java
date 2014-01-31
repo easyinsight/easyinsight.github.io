@@ -66,7 +66,7 @@ public class DrillthroughServlet extends HtmlServlet {
         } else if (report.getReportType() == WSAnalysisDefinition.STACKED_COLUMN) {
             altKey = request.getParameter("f" + String.valueOf(((WSStackedColumnChartDefinition) report).getStackItem().getAnalysisItemID()));
         }
-        DrillThroughResponse drillThroughResponse = new AnalysisService().drillThrough(drillThrough, data, linkItem, report, altKey);
+        DrillThroughResponse drillThroughResponse = new AnalysisService().drillThrough(drillThrough, data, linkItem, report, altKey, null);
         // return a URL for response redirect?
         JSONObject result = new JSONObject();
 
