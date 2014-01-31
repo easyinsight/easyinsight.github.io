@@ -51,6 +51,7 @@ import com.easyinsight.datafeeds.sendgrid.SendGridDataSource;
 import com.easyinsight.datafeeds.solve360.Solve360CompositeSource;
 import com.easyinsight.datafeeds.solve360.Solve360ContactsSource;
 import com.easyinsight.datafeeds.solve360.Solve360OpportunitiesSource;*/
+import com.easyinsight.datafeeds.smartsheet.SmartsheetTableSource;
 import com.easyinsight.datafeeds.solve360.Solve360ActivitiesSource;
 import com.easyinsight.datafeeds.solve360.Solve360CompositeSource;
 import com.easyinsight.datafeeds.solve360.Solve360ContactsSource;
@@ -366,6 +367,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.SOLVE360_CONTACTS, Solve360ContactsSource.class);
         registerType(FeedType.SOLVE360_OPPORTUNITIES, Solve360OpportunitiesSource.class);
         registerType(FeedType.SOLVE360_ACTIVITIES, Solve360ActivitiesSource.class);
+        registerType(FeedType.SMARTSHEET_TABLE, SmartsheetTableSource.class);
 
     }
 
