@@ -124,7 +124,7 @@
             analysisItemEditor.originalWrapper = wrapper;
             analysisItemEditor.analysisItems = this.allFields;
             analysisItemEditor.analysisItem = analysisItem;
-            analysisItemEditor.kpiSource = _kpiSource;
+            //analysisItemEditor.kpiSource = _kpiSource;
             PopUpManager.addPopUp(analysisItemEditor, this, true);
             PopUpUtil.centerPopUp(analysisItemEditor);
             analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, handler, false, 0, true);
