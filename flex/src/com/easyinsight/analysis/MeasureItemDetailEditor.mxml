@@ -4,13 +4,12 @@
                                    xmlns:formatter="com.easyinsight.analysis.formatter.*"
                                    xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
         import mx.collections.ArrayCollection;
 
 
         [Bindable]
-        private var formattingConfiguration:FormattingConfiguration;
+        private var formattingConfiguration:int;
 
         override public function createAnalysisItem(aggregation:String):AnalysisItem {
             var analysisMeasure:AnalysisMeasure;
@@ -92,7 +91,7 @@
                     analysisMeasure.aggregation = AggregationTypes.COUNT_DISTINCT;
                     break;
             }
-            analysisMeasure.formattingConfiguration = formattingSetup.formattingConfiguration;
+            analysisMeasure.formattingType = formattingSetup.formattingConfiguration;
             analysisMeasure.precision = precisionInput.value;
             analysisMeasure.underline = underlineCheckbox.selected;
             analysisMeasure.minPrecision = minPrecisionInput.value;
@@ -129,7 +128,7 @@
             if (val is AnalysisMeasure) {
                 var analysisMeasure:AnalysisMeasure = val as AnalysisMeasure;
                 this.analysisMeasure = analysisMeasure;
-                formattingConfiguration = analysisMeasure.formattingConfiguration;
+                formattingConfiguration = analysisMeasure.formattingType;
                 precision = analysisMeasure.precision;
                 minPrecision = analysisMeasure.minPrecision;
                 underline = analysisMeasure.underline;

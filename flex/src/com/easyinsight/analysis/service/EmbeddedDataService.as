@@ -11,7 +11,6 @@ import com.easyinsight.framework.InsightRequestMetadata;
 import flash.events.EventDispatcher;
 
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -60,6 +59,9 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
                         for (var linkKey:String in value.links) {
                             endObject[linkKey + "_link"] = value.links[linkKey];
                         }
+                    }
+                    if (value.drillThroughValues != null) {
+                        endObject[key + "_drill"] = value.drillThroughValues;
                     }
                 }
                 data.push(endObject);

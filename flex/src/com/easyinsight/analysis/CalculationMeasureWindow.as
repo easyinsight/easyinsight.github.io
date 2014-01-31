@@ -18,7 +18,7 @@ public class CalculationMeasureWindow extends CalculationWindow {
             calcText = analysisCalculation.calculationString;
             calcName = analysisCalculation.unqualifiedDisplay;
             aggregation = analysisCalculation.aggregation;
-            formattingConfiguration = analysisCalculation.formattingConfiguration;
+            formattingConfiguration = analysisCalculation.formattingType;
             applyBefore = analysisCalculation.applyBeforeAggregation;
             summaryRecalc = analysisCalculation.recalculateSummary;
             underline = analysisCalculation.underline;
@@ -56,7 +56,7 @@ public class CalculationMeasureWindow extends CalculationWindow {
         analysisCalculation.applyBeforeAggregation = rowLevelCheckbox.selected;
         analysisCalculation.aggregation = measureAggregationBox.selectedItem.value;
         analysisCalculation.calculationString = calculationInput.text;
-        analysisCalculation.formattingConfiguration = formattingSetup.formattingConfiguration;
+        analysisCalculation.formattingType = formattingSetup.formattingConfiguration;
         analysisCalculation.recalculateSummary = summaryCheckbox.selected;
         analysisCalculation.precision = precisionInput.value;
         analysisCalculation.underline = underlineCheckbox.selected;

@@ -13,7 +13,6 @@ import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.analysis.ReportPropertiesEvent;
-import com.easyinsight.analysis.charts.ChartRotationEvent;
 
 
 import flash.events.MouseEvent;
@@ -124,11 +123,6 @@ public class XAxisControlBar extends ReportControlBar implements IReportControlB
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {
-        if (event is ChartRotationEvent) {
-            var chartEvent:ChartRotationEvent = event as ChartRotationEvent;
-            xAxisDefinition.elevationAngle = chartEvent.elevation;
-            xAxisDefinition.rotationAngle = chartEvent.rotation;
-        }
     }
 }
 }

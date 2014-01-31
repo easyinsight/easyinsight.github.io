@@ -13,7 +13,6 @@
 
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.ChartDefinition;
-        import com.easyinsight.analysis.ClickUtil;
         import com.easyinsight.analysis.CustomChangeEvent;
 
         import com.easyinsight.analysis.FillProvider;
@@ -22,7 +21,6 @@
 
         import com.easyinsight.analysis.Value;
         import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartDefinition;
-        import com.easyinsight.analysis.charts.xaxisbased.column.ContextMenuBoxItemRenderer;
         import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
 
 
@@ -42,7 +40,6 @@
 
         import mx.charts.events.ChartItemEvent;
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
 
         import mx.formatters.Formatter;
         import mx.graphics.GradientEntry;
@@ -53,13 +50,13 @@
         private var graphData:ArrayCollection = new ArrayCollection();
 
         [Bindable]
-        private var dimensionAxisItem:AnalysisItem;
+        protected var dimensionAxisItem:AnalysisItem;
 
         protected var measureFormatter:Formatter;
 
         protected var dimensionFormatter:Formatter;
 
-        private var chart:ChartBase;
+        protected var chart:ChartBase;
 
         private var dimensionAxis:CategoryAxis;
         private var measureAxis:NumericAxis;
@@ -78,8 +75,7 @@
             return null;
         }
 
-        private function onChartClick(event:ChartItemEvent):void {
-            ClickUtil.doStuff(defaultLink, event.hitData.item, dimensionAxisItem, this, chartDef, null, chart);
+        protected function onChartClick(event:ChartItemEvent):void {
         }
 
         protected function direction():String {
@@ -170,7 +166,7 @@
 
         }
 
-        private var defaultLink:Link;
+        protected var defaultLink:Link;
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             chartDef = analysisDefinition as ChartDefinition;

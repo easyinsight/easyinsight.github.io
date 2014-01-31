@@ -181,7 +181,7 @@
                 var strokes:Array = [];
                 var useCustomColors:Boolean;
                 var colors:Array;
-                useCustomColors = (lineChartDef.multiColors != null && lineChartDef.multiColors.length && MultiColor(lineChartDef.multiColors.getItemAt(0)).color1StartEnabled);
+                useCustomColors = (lineChartDef.multiColors != null && lineChartDef.multiColors.length > 0 && MultiColor(lineChartDef.multiColors.getItemAt(0)).color1StartEnabled);
                 if (useCustomColors) {
                     colors = [];
                     for each (var mc:MultiColor in lineChartDef.multiColors) {

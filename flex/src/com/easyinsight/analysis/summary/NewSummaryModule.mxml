@@ -1,0 +1,582 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
+           implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%" resize="onResize()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisHierarchyItem;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.DerivedAnalysisDimension;
+        import com.easyinsight.analysis.ListViewHeaderRenderer;
+        import com.easyinsight.analysis.NewTreeTextCellRenderer;
+        import com.easyinsight.analysis.TextReportFieldExtension;
+        import com.easyinsight.analysis.TreeRow;
+
+        import mx.collections.ArrayCollection;
+        import mx.collections.ICollectionView;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
+        import mx.controls.advancedDataGridClasses.SortInfo;
+        import mx.formatters.Formatter;
+        import mx.utils.ObjectUtil;
+
+        [Bindable]
+        private var myData:ArrayCollection;
+
+
+        private var treeDef:SummaryDefinition;
+
+        private var fieldLength:int;
+
+
+        private static function rowColor(item:Object, color:uint):uint {
+            var treeRow:NewSummaryRow = item as NewSummaryRow;
+            return treeRow.backgroundColor;
+        }
+
+        private function onResize():void {
+            coreGrid.minHeight = this.height;
+            coreGrid.maxHeight = this.height;
+        }
+
+        private static function treeRowIntoReportRow(treeRow:TreeRow, depth:int):ArrayCollection {
+            var rows:ArrayCollection = new ArrayCollection();
+            if (treeRow.newSummaryRow == null) {
+                var newRow:NewSummaryRow = new NewSummaryRow();
+                treeRow.newSummaryRow = newRow;
+                newRow.values = treeRow.values;
+                newRow.backgroundColor = treeRow.backgroundColor;
+                newRow.textColor = treeRow.textColor;
+                newRow.groupingColumn = treeRow.groupingColumn;
+                newRow.groupingField = treeRow.groupingField;
+                newRow.depth = depth;
+                newRow.summaryRow = treeRow.summaryColumn;
+                rows.addItem(newRow);
+            } else {
+                rows.addItem(treeRow.newSummaryRow);
+            }
+
+            for each (var childRow:TreeRow in treeRow.children) {
+                var newRows:ArrayCollection = treeRowIntoReportRow(childRow, depth + 1);
+                for each (var newChildRow:NewSummaryRow in newRows) {
+                    rows.addItem(newChildRow);
+                }
+            }
+            return rows;
+        }
+
+        private var originalSet:ArrayCollection;
+
+        private function blah():void {
+            var fields:Array = coreGrid.dataProvider.sort.fields;
+
+            var descending:Boolean = false;
+            if (fields != null && fields.length == 1) {
+                var sortField:SortField = fields[0];
+                if (sortField.descending) {
+                    descending = true;
+                }
+            }
+            var sort:Sort = new Sort();
+            sort.compareFunction = initSortCompare2;
+            originalSet.sort = sort;
+            for each (var c:TreeRow in originalSet) {
+                c.children.sort = sort;
+                c.children.refresh();
+            }
+            originalSet.refresh();
+
+            var endSet:ArrayCollection = new ArrayCollection();
+
+            for each (var tRow:TreeRow in originalSet) {
+                var newRows:ArrayCollection = treeRowIntoReportRow(tRow, 0);
+                for each (var newSummaryRow:NewSummaryRow in newRows) {
+                    endSet.addItem(newSummaryRow);
+                }
+            }
+
+
+            for (var i:int = 0; i < endSet.length; i++) {
+                var row:NewSummaryRow = endSet.getItemAt(i) as NewSummaryRow;
+                if (descending) {
+                    row.stupidFlex = (endSet.length - i);
+                } else {
+                    row.stupidFlex = i;
+                }
+                /*if (row.summaryRow) {
+                    Alert.show("summary row at " + row.stupidFlex);
+                } else if (row.groupingColumn != null) {
+                    Alert.show("g " + row.groupingColumn.getValue() + " at " + row.stupidFlex);
+                }*/
+            }
+            coreGrid.dataProvider.refresh();
+        }
+
+        private var map:Object = new Object();
+
+        private function onChange(event:Event):void {
+            callLater(blah);
+        }
+
+        private var eSet:ArrayCollection;
+
+        private var firstLoad:Boolean = true;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+            var treeDefinition:SummaryDefinition = analysisDefinition as SummaryDefinition;
+            /*if (eSet != null) {
+                eSet.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onChange);
+            }*/
+            if (dataSet.length > 0) {
+                originalSet = dataSet;
+                treeDef = treeDefinition;
+                var sort:Sort = new Sort();
+                if (firstLoad) {
+                    if (treeDefinition.hierarchy.sort > 0) {
+                        sortItem = treeDefinition.hierarchy;
+                    } else {
+                        for each (var xItem:AnalysisItem in treeDef.items) {
+                            if (xItem.sort > 0) {
+                                sortItem = xItem;
+                            }
+                        }
+                    }
+                    firstLoad = false;
+                    if (sortItem == null) {
+                        sort.compareFunction = initSortCompare;
+                    } else {
+                        sort.compareFunction = initSortCompare3;
+                    }
+                } else {
+                    sort.compareFunction = initSortCompare;
+                }
+                dataSet.sort = sort;
+                for each (var c:TreeRow in dataSet) {
+                    c.children.sort = sort;
+                    c.children.refresh();
+                }
+                dataSet.refresh();
+
+                var endSet:ArrayCollection = new ArrayCollection();
+
+                for each (var tRow:TreeRow in dataSet) {
+                    var newRows:ArrayCollection = treeRowIntoReportRow(tRow, 0);
+                    for each (var newSummaryRow:NewSummaryRow in newRows) {
+                        endSet.addItem(newSummaryRow);
+                    }
+                }
+
+
+
+                for (var i:int = 0; i < endSet.length; i++) {
+                    var row:NewSummaryRow = endSet.getItemAt(i) as NewSummaryRow;
+                    row.stupidFlex = i;
+                }
+
+                var fieldsChanged:Boolean = false;
+                if (treeDef != null) {
+                    fieldsChanged = fieldLength != treeDefinition.items.length;
+                }
+                this.fieldLength = treeDefinition.items.length;
+                //coreGrid.setStyle("fontFamily", "Lucida Grande");
+
+                coreGrid.setStyle("fontSize", treeDefinition.fontSize);
+                coreGrid.setStyle("color", treeDefinition.textColor);
+                coreGrid.setStyle("alternatingItemColors", [ treeDefinition.rowColor1, treeDefinition.rowColor2 ]);
+                coreGrid.setStyle("headerColors", [ treeDefinition.headerColor1, treeDefinition.headerColor2 ]);
+                this.treeDef = treeDefinition;
+                var explicitWidth:Boolean = true;
+                for each (var treeItem:AnalysisItem in treeDef.getFields()) {
+                    if (treeItem.width == 0) {
+                        explicitWidth = false;
+                    }
+                }
+                var hierarchy:AnalysisHierarchyItem = treeDefinition.hierarchy as AnalysisHierarchyItem;
+
+                if (myData != null) {
+                    dataSet.sort = myData.sort;
+                    dataSet.refresh();
+                }
+
+                var columns:Array = [];
+                var analysisItems:Array = [];
+                for each (var item:AnalysisItem in treeDefinition.items) {
+                    analysisItems.push(item);
+                }
+
+                var hierarchyColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                hierarchyColumn.headerText = hierarchy.unqualifiedDisplay;
+                hierarchyColumn.sortCompareFunction = doNothingSort;
+                var headerHierarchyFactor:ClassFactory = new ClassFactory(NewSummaryOtherCellRenderer);
+                headerHierarchyFactor.properties = { report:treeDef };
+                hierarchyColumn.itemRenderer = headerHierarchyFactor;
+                /*hierarchyColumn.labelFunction = function (item:Object, column:AdvancedDataGridColumn):String {
+                    var treeRow:NewSummaryRow = item as NewSummaryRow;
+                    if (treeRow.groupingField != null) {
+                        var formatter:Formatter = treeRow.groupingField.getFormatter();
+                        return formatter.format(treeRow.groupingColumn);
+                    } else {
+                        return "";
+                    }
+                };*/
+                hierarchyColumn.dataField = "groupingColumn";
+                var existingHierarchyIndex:int = findColumnIndex(hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName());
+                if (hierarchy.reportFieldExtension != null && hierarchy.reportFieldExtension is TextReportFieldExtension &&
+                        TextReportFieldExtension(hierarchy.reportFieldExtension).fixedWidth > 0) {
+                    var ext1:TextReportFieldExtension = hierarchy.reportFieldExtension as TextReportFieldExtension;
+                    hierarchyColumn.width = ext1.fixedWidth;
+                } else if (!fieldsChanged && existingHierarchyIndex != -1) {
+                    var existingHierarchyColumn:AdvancedDataGridColumn = coreGrid.columns[0];
+                    hierarchyColumn.width = existingHierarchyColumn.width;
+                } else if (explicitWidth) {
+                    hierarchyColumn.width = hierarchy.width;
+                }
+                if (hierarchy.reportFieldExtension != null && hierarchy.reportFieldExtension is TextReportFieldExtension) {
+                    hierarchyColumn.sortable = TextReportFieldExtension(hierarchy.reportFieldExtension).sortable;
+                }
+                var hierarchyHeaderFactory:ClassFactory = new ClassFactory(ListViewHeaderRenderer);
+                hierarchyHeaderFactory.properties = { eiColor:treeDefinition.headerTextColor };
+                hierarchyColumn.headerRenderer = hierarchyHeaderFactory;
+                columns[0] = hierarchyColumn;
+                for (var k:int = 0; k < analysisItems.length; k++) {
+                    var myHeader:AnalysisItem = analysisItems[k] as AnalysisItem;
+
+                    var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                    var existingIndex:int = findColumnIndex(myHeader.qualifiedName());
+                    if (!fieldsChanged && existingIndex != -1) {
+                        var existingColumn:AdvancedDataGridColumn = coreGrid.columns[existingIndex];
+                        columnHeaderObject.width = existingColumn.width;
+                        columnHeaderObject.sortDescending = existingColumn.sortDescending;
+                    } else if (explicitWidth) {
+                        columnHeaderObject.width = myHeader.width;
+                    }
+                    columnHeaderObject.sortCompareFunction = doNothingSort;
+                    columnHeaderObject.headerText = myHeader.display;
+                    columnHeaderObject.dataField = myHeader.qualifiedName();
+                    var headerFactory:ClassFactory = new ClassFactory(ListViewHeaderRenderer);
+                    headerFactory.properties = { eiColor:treeDefinition.headerTextColor };
+                    columnHeaderObject.headerRenderer = headerFactory;
+
+                    var factory:ClassFactory = new ClassFactory(getCellRendererClass(myHeader));
+                    var ext:TextReportFieldExtension = myHeader.reportFieldExtension as TextReportFieldExtension;
+                    if (ext != null) {
+                        if (ext.fixedWidth > 0) {
+                            columnHeaderObject.width = ext.fixedWidth;
+                            columnHeaderObject.resizable = false;
+                        }
+                        if (!ext.sortable) {
+                            columnHeaderObject.sortable = false;
+                        }
+                    }
+                    if (treeDef.headerMode) {
+                        columnHeaderObject.sortable = false;
+                    }
+                    factory.properties = { analysisItem:myHeader, report:treeDef };
+                    columnHeaderObject.itemRenderer = factory;
+
+
+                    columns[k + 1] = columnHeaderObject;
+                }
+                /*if (rendererProviders.length > 0) {
+                    coreGrid.rendererProviders = rendererProviders;
+                }*/
+
+                myData = dataSet;
+                //endSet.refresh();
+                eSet = endSet;
+                //endSet.addEventListener(CollectionEvent.COLLECTION_CHANGE, onChange);
+                coreGrid.dataProvider = endSet;
+                /*groupingColl.refresh();
+                 coreGrid.dataProvider = groupingColl;*/
+                coreGrid.clearRenderers();
+                coreGrid.columns = columns;
+                /*if (treeDefinition.autoExpandAll) {
+                 coreGrid.validateNow();
+                 coreGrid.expandAll();
+                 }*/
+            } else {
+                coreGrid.columns = [];
+                myData = new ArrayCollection();
+            }
+        }
+
+        private static function doNothingSort( a:Object, b:Object ):int {
+            var treeRow1:NewSummaryRow = a as NewSummaryRow;
+            var treeRow2:NewSummaryRow = b as NewSummaryRow;
+            return ObjectUtil.numericCompare(treeRow1.stupidFlex, treeRow2.stupidFlex);
+        }
+
+        private var sortItem:AnalysisItem;
+
+        private function initSortCompare3(obj1:Object, obj2:Object, params:Array = null):int {
+            var treeRow1:TreeRow = obj1 as TreeRow;
+            var treeRow2:TreeRow = obj2 as TreeRow;
+
+            var num:int;
+            if (sortItem == treeDef.hierarchy) {
+                num = 1;
+                if (sortItem.sort == 2) {
+                    if (treeRow1.summaryColumn) {
+                        return 1;
+                    } else if (treeRow2.summaryColumn) {
+                        return -1;
+                    }
+                    num = -1;
+                }
+                if (treeRow1.summaryColumn) {
+                    return num;
+                } else if (treeRow2.summaryColumn) {
+                    return -num;
+                } else {
+                    return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue()) * num;
+                }
+            } else {
+                num = 1;
+                if (sortItem.sort == 2) {
+                    num = -1;
+                }
+                if (treeRow1.summaryColumn) {
+                    return num;
+                } else if (treeRow2.summaryColumn) {
+                    return -num;
+                } else {
+                    var val1:Object;
+                    var val2:Object;
+                    if (treeRow1.values[sortItem.qualifiedName()] != null) {
+                        val1 = treeRow1.values[sortItem.qualifiedName()].getValue();
+                    } else {
+                        val1 = "";
+                    }
+                    if (treeRow2.values[sortItem.qualifiedName()] != null) {
+                        val2 = treeRow2.values[sortItem.qualifiedName()].getValue();
+                    } else {
+                        val2 = "";
+                    }
+                    return ObjectUtil.compare(val1, val2) * num;
+                }
+            }
+        }
+
+        private function initSortCompare(obj1:Object, obj2:Object, params:Array = null):int {
+            var treeRow1:TreeRow = obj1 as TreeRow;
+            var treeRow2:TreeRow = obj2 as TreeRow;
+            if (coreGrid.dataProvider == null) {
+                return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
+            }
+            var view:ICollectionView = ICollectionView(coreGrid.dataProvider);
+            var sort:Sort = view.sort;
+            if (sort == null) {
+                return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
+            }
+
+            var fields:Array = sort.fields;
+
+            if (fields != null && fields.length == 1) {
+                var num:int = 1;
+                var sortField:SortField = fields[0];
+                if (sortField.name == "groupingColumn") {
+                    if (sortField.descending) {
+                        if (treeRow1.summaryColumn) {
+                            return 1;
+                        } else if (treeRow2.summaryColumn) {
+                            return -1;
+                        }
+                        num = -1;
+                    }
+                    if (treeRow1.summaryColumn) {
+                        return num;
+                    } else if (treeRow2.summaryColumn) {
+                        return -num;
+                    } else {
+                        return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue()) * num;
+                    }
+                } else {
+                    if (sortField.descending) {
+                        num = -1;
+                    }
+                    var val1:Object;
+                    var val2:Object;
+                    if (treeRow1.summaryColumn) {
+                        return num;
+                    } else if (treeRow2.summaryColumn) {
+                        return -num;
+                    } else {
+                        if (treeRow1.values[sortField.name] != null) {
+                            val1 = treeRow1.values[sortField.name].getValue();
+                        } else {
+                            val1 = "";
+                        }
+                        if (treeRow2.values[sortField.name] != null) {
+                            val2 = treeRow2.values[sortField.name].getValue();
+                        } else {
+                            val2 = "";
+                        }
+                        return ObjectUtil.compare(val1, val2) * num;
+                    }
+                }
+            }
+            return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
+        }
+
+        private function initSortCompare2(obj1:Object, obj2:Object, params:Array = null):int {
+            var treeRow1:TreeRow = obj1 as TreeRow;
+            var treeRow2:TreeRow = obj2 as TreeRow;
+            if (coreGrid.dataProvider == null) {
+                return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
+            }
+            var view:ICollectionView = ICollectionView(coreGrid.dataProvider);
+            var sort:Sort = view.sort;
+            if (sort == null) {
+                return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
+            }
+
+
+
+            var fields:Array = sort.fields;
+
+            if (fields != null && fields.length == 1) {
+                var sortField:SortField = fields[0];
+                if (sortField.name == "groupingColumn") {
+                    var num:int = 1;
+
+                    // if descending...
+
+                    if (sortField.descending) {
+                        if (treeRow1.summaryColumn) {
+                            return 1;
+                        } else if (treeRow2.summaryColumn) {
+                            return -1;
+                        }
+                        num = -1;
+                    }
+                    if (treeRow1.summaryColumn) {
+                        return num;
+                    } else if (treeRow2.summaryColumn) {
+                        return -num;
+                    } else {
+                        return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue()) * num;
+                    }
+                } else {
+                    var mNum:int = 1;
+                    if (sortField.descending) {
+                        mNum = -1;
+                    }
+                    if (treeRow1.summaryColumn) {
+                        return mNum;
+                    } else if (treeRow2.summaryColumn) {
+                        return -mNum;
+                    } else {
+                        var val1:Object;
+                        var val2:Object;
+                        if (treeRow1.values[sortField.name] != null) {
+                            val1 = treeRow1.values[sortField.name].getValue();
+                        } else {
+                            val1 = "";
+                        }
+                        if (treeRow2.values[sortField.name] != null) {
+                            val2 = treeRow2.values[sortField.name].getValue();
+                        } else {
+                            val2 = "";
+                        }
+                        return ObjectUtil.compare(val1, val2) * mNum;
+                    }
+                }
+            }
+
+            return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
+
+
+        }
+
+        private static function getCellRendererClass(item:AnalysisItem):Class {
+            if (item.hasType(AnalysisItemTypes.TEXT)) {
+                return NewTreeTextCellRenderer;
+            } else {
+                if (item.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
+                    var d:DerivedAnalysisDimension = item as DerivedAnalysisDimension;
+                    return d.wordWrap ? NewTreeTextCellRenderer : NewSummaryCellRenderer;
+                }
+                var ext:TextReportFieldExtension = item.reportFieldExtension as TextReportFieldExtension;
+                if (ext != null && ext.wordWrap) {
+                    return NewTreeTextCellRenderer;
+                }
+                return NewSummaryCellRenderer;
+            }
+        }
+
+        public function updateExportMetadata():void {
+            var hierarchy:AnalysisHierarchyItem = treeDef.hierarchy as AnalysisHierarchyItem;
+            var hierarchyIndex:int = 0;
+            updateItem(hierarchy, hierarchyIndex);
+            for (var i:int = 0; i < treeDef.items.length; i++) {
+                var item:AnalysisItem = treeDef.items.getItemAt(i) as AnalysisItem;
+                var columnIndex:int = findColumnIndex(item.qualifiedName());
+                updateItem(item, columnIndex);
+            }
+        }
+
+        private function onStretch(event:Event):void {
+            var hierarchy:AnalysisHierarchyItem = treeDef.hierarchy as AnalysisHierarchyItem;
+            var hierarchyIndex:int = findColumnIndex(hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName());
+            updateItem(hierarchy, hierarchyIndex);
+            for (var i:int = 0; i < treeDef.items.length; i++) {
+                var item:AnalysisItem = treeDef.items.getItemAt(i) as AnalysisItem;
+                var columnIndex:int = findColumnIndex(item.qualifiedName());
+                updateItem(item, columnIndex);
+            }
+        }
+
+        private function findColumnIndex(qualifiedName:String):int {
+            for (var i:int = 0; i < coreGrid.columns.length; i++) {
+                var column:AdvancedDataGridColumn = coreGrid.columns[i];
+                if (column.dataField == qualifiedName) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public function preserveValues():Boolean {
+            return true;
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }
+
+        private function updateItem(item:AnalysisItem, columnIndex:int):void {
+            item.itemPosition = columnIndex;
+            var column:AdvancedDataGridColumn = coreGrid.columns[columnIndex];
+
+            if (column != null) {
+                item.width = column.width;
+                var sortInfo:SortInfo = coreGrid.getFieldSortInfo(column);
+                if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
+                    item.sortSequence = sortInfo.sequenceNumber;
+                    if (sortInfo.descending) {
+                        item.sort = 2;
+                    } else {
+                        item.sort = 1;
+                    }
+                } else {
+                    item.sort = 0;
+                }
+            }
+        }
+
+        override protected function measure():void {
+            super.measure();
+            coreGrid.maxHeight = this.height;
+        }
+        ]]></mx:Script>
+
+        <analysis:SummaryViewGrid id="coreGrid" width="100%" visible="true" columnStretch="onStretch(event)"
+                                  variableRowHeight="true" rowColorFunction="rowColor" fontFamily="Lucida Grande"
+                                  horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
+                                  verticalGridLines="true"
+                                  borderStyle="solid" borderColor="#DDDDDD" selectable="false" displayItemsExpanded="true"
+                headerRelease="onChange(event)"/>
+
+
+</mx:Module>

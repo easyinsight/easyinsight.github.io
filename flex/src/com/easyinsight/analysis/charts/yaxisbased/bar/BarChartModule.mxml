@@ -9,18 +9,19 @@
         import com.easyinsight.analysis.AnalysisMeasure;
 
         import com.easyinsight.analysis.ChartDefinition;
+        import com.easyinsight.analysis.ClickUtil;
         import com.easyinsight.analysis.MultiColor;
 
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.charts.xaxisbased.column.BetterBoxBarRenderer;
 
-        import mx.charts.AxisRenderer;
+
 
         import mx.charts.BarChart;
         import mx.charts.CategoryAxis;
         import mx.charts.ChartItem;
         import mx.charts.HitData;
-        import mx.charts.LinearAxis;
+
         import mx.charts.chartClasses.CartesianChart;
         import mx.charts.chartClasses.CartesianTransform;
         import mx.charts.chartClasses.ChartBase;
@@ -28,11 +29,11 @@
         import mx.charts.chartClasses.IAxisRenderer;
         import mx.charts.chartClasses.NumericAxis;
         import mx.charts.chartClasses.Series;
+        import mx.charts.events.ChartItemEvent;
         import mx.charts.series.BarSeries;
         import mx.charts.series.items.BarSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
-        import mx.core.ClassFactory;
 
         override protected function getDimensionItem():AnalysisItem {
             return BarChartDefinition(chartDef).yaxis;
@@ -64,6 +65,19 @@
 
         override protected function getMultiColors():ArrayCollection {
             return BarChartDefinition(chartDef).multiColors;
+        }
+
+        override protected function onChartClick(event:ChartItemEvent):void {
+            var columnSeriesItem:BarSeriesItem = event.hitData.chartItem as BarSeriesItem;
+            var series:Series = columnSeriesItem.element as Series;
+            var altKey:String = null;
+            for each (var m:AnalysisMeasure in BarChartDefinition(chartDef).measures) {
+                if (m.display == series.displayName) {
+                    altKey = m.qualifiedName();
+                }
+            }
+            //Alert.show(series.displayName);
+            ClickUtil.doStuff(defaultLink, event.hitData.item, dimensionAxisItem, this, chartDef, altKey, chart);
         }
 
         override protected function useMultiColor():Boolean {

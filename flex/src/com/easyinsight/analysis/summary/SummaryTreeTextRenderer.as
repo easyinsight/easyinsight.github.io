@@ -174,8 +174,8 @@ public class SummaryTreeTextRenderer extends UITextField implements IListItemRen
                 depth = i;
             }
         }
-
-        var color:uint = depth == 0 ? 0xFFFFFF : 0x000000;
+        Alert.show("...");
+        var color:uint = treeDef.summaryTextColor;
         if (_report.getFont() == "Open Sans") {
             styleName = "myFontStyle";
         }
