@@ -77,7 +77,7 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
             folderKey = new NamedKey(FreshbooksClientSource.FOLDER);
         }
         items.add(new AnalysisDimension(folderKey, true));
-        items.add(new AnalysisZipCode(keys.get(FreshbooksClientSource.POSTAL), true));
+        items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.POSTAL), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.ORGANIZATION), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.WORK_PHONE), true));
         items.add(new AnalysisMeasure(keys.get(FreshbooksClientSource.COUNT), AggregationTypes.SUM));
