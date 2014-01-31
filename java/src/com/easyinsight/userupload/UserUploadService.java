@@ -20,6 +20,7 @@ import com.easyinsight.datafeeds.database.ServerDatabaseConnection;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.json.JSONDataSource;
 import com.easyinsight.datafeeds.json.JSONSetup;
+import com.easyinsight.datafeeds.smartsheet.SmartsheetTableSource;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.scorecard.DataSourceRefreshEvent;
@@ -868,6 +869,23 @@ public class UserUploadService {
                     if (feedDescriptor != null) {
                         lookupTableDescriptor.setRole(feedDescriptor.getRole());
                         feedDescriptor.getChildren().add(lookupTableDescriptor);
+                    }
+                }
+                PreparedStatement filterSetStmt = conn.prepareStatement("SELECT FILTER_SET_ID, FILTER_SET_NAME, FILTER_SET_DESCRIPTION, " +
+                        "URL_KEY, DATA_SOURCE_ID FROM FILTER_SET, USER WHERE FILTER_SET.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ?");
+                filterSetStmt.setLong(1, SecurityUtil.getAccountID());
+                ResultSet filterSetRS = filterSetStmt.executeQuery();
+                while (filterSetRS.next()) {
+                    FilterSetDescriptor filterSetDescriptor = new FilterSetDescriptor();
+                    filterSetDescriptor.setId(filterSetRS.getLong(1));
+                    filterSetDescriptor.setName(filterSetRS.getString(2));
+                    filterSetDescriptor.setDescription(filterSetRS.getString(3));
+                    filterSetDescriptor.setUrlKey(filterSetRS.getString(4));
+                    filterSetDescriptor.setDataSourceID(filterSetRS.getLong(5));
+                    DataSourceDescriptor feedDescriptor = descriptorMap.get(filterSetDescriptor.getDataSourceID());
+                    if (feedDescriptor != null) {
+                        filterSetDescriptor.setRole(feedDescriptor.getRole());
+                        feedDescriptor.getChildren().add(filterSetDescriptor);
                     }
                 }
             }
@@ -1850,6 +1868,15 @@ public class UserUploadService {
     public Collection<BasecampNextAccount> getBasecampAccounts(BasecampNextCompositeSource dataSource) {
         try {
             return dataSource.getBasecampAccounts();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Collection<BasecampNextAccount> getSmartsheetTables(SmartsheetTableSource dataSource) {
+        try {
+            return dataSource.getTables();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
