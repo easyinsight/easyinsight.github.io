@@ -221,6 +221,9 @@ public class DataSet implements Serializable, Cloneable {
         for (int i = 0; i < rows.size(); i++) {
             IRow row = rows.get(i);
             String key = keys.get(i);
+            if (row.getPassthroughRow() != null) {
+                listTransform.add(key, row.getPassthroughRow());
+            }
             for (AnalysisItem column : paredDownColumns) {
                 if (column.hasType(AnalysisItemTypes.MEASURE)) {
                     AnalysisMeasure measure = (AnalysisMeasure) column;
@@ -251,6 +254,7 @@ public class DataSet implements Serializable, Cloneable {
 
     public DataResults toListDataResults(List<AnalysisItem> columns, Map<AnalysisItem, AnalysisItem> aliases, WSAnalysisDefinition report) {
         ListRow[] listRows = new ListRow[getRows().size()];
+
         int rowCount = 0;
         for (IRow row : getRows()) {
             int columnCount = 0;
@@ -264,7 +268,9 @@ public class DataSet implements Serializable, Cloneable {
             }
             rowCount++;
         }
+
         ListDataResults listDataResults = new ListDataResults();
+
         AnalysisItem[] headers = new AnalysisItem[columns.size()];
         int i = 0;
         for (AnalysisItem analysisItem : columns) {
