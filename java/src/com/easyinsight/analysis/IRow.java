@@ -7,6 +7,7 @@ import com.easyinsight.dataset.DataSet;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * User: jboe
@@ -14,6 +15,16 @@ import java.util.Date;
 * Time: 10:35:33 AM
 */
 public interface IRow {
+
+    Map<String, Set<Value>> getPassthroughRow();
+
+    void incrementJoinCount();
+
+    int getJoinCount();
+
+    void resetJoinCount();
+
+    void setPassthroughRow(Map<String, Set<Value>> passthroughRow);
 
     public Row clone() throws CloneNotSupportedException;
 
@@ -24,6 +35,8 @@ public interface IRow {
     void setDataSetKeys(DataSetKeys dataSetKeys);
 
     Value getValue(AnalysisItem analysisItem);
+
+    public Value getValueNoAdd(Key rowName);
 
     void addValue(Key tag, Value value);
 
