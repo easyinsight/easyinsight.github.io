@@ -13,6 +13,7 @@ public class EIDescriptor {
     public static const LOOKUP_TABLE:int = 10;
     public static const DASHBOARD:int = 11;
     public static const FOLDER:int = 12;
+    public static const FILTER_SET:int = 16;
 
     public static const MAIN_VIEWS_FOLDER:int = 1;
     public static const OTHER_VIEWS_FOLDER:int = 2;

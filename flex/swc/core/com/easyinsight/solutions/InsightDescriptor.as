@@ -10,6 +10,7 @@ public class InsightDescriptor extends EIDescriptor {
     public var reportType:int;
     public var tags:ArrayCollection;
     public var configs:ArrayCollection;
+    public var dataSourceReport:Boolean;
 
     public var size:int = 0;
     public var lastDataTime:Date = null;
