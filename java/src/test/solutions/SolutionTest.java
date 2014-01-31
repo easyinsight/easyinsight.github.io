@@ -51,7 +51,6 @@ public class SolutionTest extends TestCase {
         AnalysisDimension customer = new AnalysisDimension("customer", true);
         AnalysisDimension region = new AnalysisDimension("region", true);
         AnalysisMeasure amount = new AnalysisMeasure("amount", AggregationTypes.SUM);
-        AnalysisRangeDimension range = new AnalysisRangeDimension(new NamedKey("Range"), true);
         AnalysisList list = new AnalysisList(new NamedKey("List"), true, ",");
         AnalysisDateDimension startDate = new AnalysisDateDimension("Start", true, AnalysisDateDimension.DAY_LEVEL);
         AnalysisDateDimension endDate = new AnalysisDateDimension("End", true, AnalysisDateDimension.DAY_LEVEL);
@@ -64,7 +63,7 @@ public class SolutionTest extends TestCase {
         hierarchyItem.setHierarchyLevel(customerLevel);
         hierarchyItem.setHierarchyLevels(Arrays.asList(regionLevel, customerLevel));
         hierarchyItem.setKey(new NamedKey("Hierarchy"));
-        feedDefinition.setFields(Arrays.asList(customer, amount, region, range, list, startDate, endDate, step));
+        feedDefinition.setFields(Arrays.asList(customer, amount, region, list, startDate, endDate, step));
         new FeedService().updateFeedDefinition(feedDefinition);
         ValidatingPublishService validatingPublishService = new ValidatingPublishService() {
 
