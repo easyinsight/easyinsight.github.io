@@ -1,8 +1,6 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.analysis.definitions.WSTimeline;
-import com.easyinsight.analysis.definitions.WSXAxisDefinition;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
@@ -58,13 +56,7 @@ public class MinMaxComponent implements IComponent {
     }
 
     private List<AnalysisMeasure> getMeasures(WSAnalysisDefinition baseReport) {
-        WSAnalysisDefinition coreReport;
-        if (baseReport instanceof WSTimeline) {
-            WSTimeline timeline = (WSTimeline) baseReport;
-            coreReport = timeline.getReport();
-        } else {
-            coreReport = baseReport;
-        }
+        WSAnalysisDefinition coreReport = baseReport;
         Map<String, AnalysisItem> items = new HashMap<String, AnalysisItem>();
         coreReport.createReportStructure(items);
         List<AnalysisMeasure> measures = new ArrayList<AnalysisMeasure>();

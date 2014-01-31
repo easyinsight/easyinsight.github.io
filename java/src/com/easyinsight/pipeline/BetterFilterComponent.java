@@ -44,6 +44,7 @@ public class BetterFilterComponent implements IComponent {
             if (valid) {
                 IRow newRow = resultDataSet.createRow();
                 newRow.addValues(row);
+                newRow.setPassthroughRow(row.getPassthroughRow());
             }
         }
         return resultDataSet;

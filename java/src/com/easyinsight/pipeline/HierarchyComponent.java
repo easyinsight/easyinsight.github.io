@@ -52,8 +52,15 @@ public class HierarchyComponent implements INestedComponent {
             WSTreeDefinition tree = (WSTreeDefinition) pipelineData.getReport();
             for (AnalysisItem analysisItem : tree.getItems()) {
                 if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-                    pipelineData1.getAllRequestedItems().remove(analysisItem);
-                    pipelineData1.getReportItems().remove(analysisItem);
+                    boolean remove = true;
+                    if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                        TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+                        remove = !textReportFieldExtension.isForceToSummary();
+                    }
+                    if (remove) {
+                        pipelineData1.getAllRequestedItems().remove(analysisItem);
+                        pipelineData1.getReportItems().remove(analysisItem);
+                    }
                 }
             }
             for (IComponent component : components) {
