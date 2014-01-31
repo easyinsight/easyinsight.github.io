@@ -62,9 +62,7 @@ public class AmazonEC2Source extends ServerDataSourceDefinition {
         standardItems.add(new AnalysisDimension(keys.get(GROUP_NAME), "Security Group"));
         standardItems.add(new AnalysisDimension(keys.get(HOST_NAME), "Host Name"));
         AnalysisMeasure analysisMeasure = new AnalysisMeasure(keys.get(CPU_UTILIZATION), "CPU Utilization %", AggregationTypes.AVERAGE);
-        FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
-        formattingConfiguration.setFormattingType(FormattingConfiguration.PERCENTAGE);
-        analysisMeasure.setFormattingConfiguration(formattingConfiguration);
+        analysisMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
         standardItems.add(analysisMeasure);
         standardItems.add(new AnalysisMeasure(keys.get(NETWORK_IN), "Network Bytes Received", AggregationTypes.SUM, true, FormattingConfiguration.BYTES));
         standardItems.add(new AnalysisMeasure(keys.get(NETWORK_OUT), "Network Bytes Sent", AggregationTypes.SUM, true, FormattingConfiguration.BYTES));
