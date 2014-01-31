@@ -567,9 +567,6 @@ public class FeedStorage {
                 analysisItems.add(item);
 
                 item.afterLoad(true);
-                HibernateProxy hibernateProxy = (HibernateProxy) item.getFormattingConfiguration();
-                Serializable id = hibernateProxy.getHibernateLazyInitializer().getIdentifier();
-                formattingConfigurationIDs.put((Long) id, analysisItem);
                 HibernateProxy keyProxy = (HibernateProxy) item.getKey();
                 Serializable keyID = keyProxy.getHibernateLazyInitializer().getIdentifier();
                 List<AnalysisItem> analysisItemList1 = keyIDs.get((Long) keyID);
@@ -585,11 +582,7 @@ public class FeedStorage {
             }
             sb.deleteCharAt(sb.length() - 1);
 
-            List formattingConfigs = session.createQuery("from FormattingConfiguration where formattingConfigurationID in (" + sb.toString() + ")").list();
-            for (Object obj : formattingConfigs) {
-                FormattingConfiguration formattingConfiguration = (FormattingConfiguration) Database.deproxy(obj);
-                formattingConfigurationIDs.get(formattingConfiguration.getFormattingConfigurationID()).setFormattingConfiguration(formattingConfiguration);
-            }
+
 
             sb = new StringBuilder();
             Iterator<Long> iter = keyIDs.keySet().iterator();
