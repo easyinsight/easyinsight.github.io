@@ -17,24 +17,21 @@ public class AnalysisItem {
     public var key:Key;
     public var analysisItemID:int;
     public var hidden:Boolean = false;
-    public var formattingConfiguration:FormattingConfiguration = new FormattingConfiguration();
+    public var formattingType:int;
     public var sort:int = 0;
     public var sortSequence:int = 0;
     public var displayName:String;
     public var width:int = 0;
     public var concrete:Boolean;
     public var links:ArrayCollection = new ArrayCollection();
-    public var highIsGood:Boolean = true;
     public var itemPosition:int = 0;
     public var filters:ArrayCollection = new ArrayCollection();
     public var lookupTableID:int = 0;
     public var originalDisplayName:String;
     public var tooltip:String;
     public var reportFieldExtension:ReportFieldExtension;
-    public var marmotScript:String;
     public var sortItem:AnalysisItem;
     public var keyColumn:Boolean;
-    public var labelColumn:Boolean;
     public var fromField:AnalysisItem;
     public var unqualifiedDisplayName:String;
     public var kpi:Boolean;
@@ -125,7 +122,7 @@ public class AnalysisItem {
     }
 
     public function getFormatter():Formatter {
-        return formattingConfiguration.getFormatter(2, 0);
+        return FormattingConfiguration.getFormatter(2, 0, formattingType);
     }
 
     public function getSortFunction():Function {
