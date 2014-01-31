@@ -72,14 +72,10 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(AUTHOR), true));
         analysisItems.add(new AnalysisDimension(keys.get(CURRENCY), true));
         AnalysisMeasure priceMeasure = new AnalysisMeasure(PRICE, AggregationTypes.SUM);
-        FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
-        formattingConfiguration.setFormattingType(FormattingConfiguration.CURRENCY);
-        priceMeasure.setFormattingConfiguration(formattingConfiguration);
+        priceMeasure.setFormattingType(FormattingConfiguration.CURRENCY);
         analysisItems.add(priceMeasure);
         AnalysisMeasure dealValueMeasure = new AnalysisMeasure(TOTAL_DEAL_VALUE, AggregationTypes.SUM);
-        FormattingConfiguration dealFormattingConfiguration = new FormattingConfiguration();
-        dealFormattingConfiguration.setFormattingType(FormattingConfiguration.CURRENCY);
-        dealValueMeasure.setFormattingConfiguration(dealFormattingConfiguration);
+        dealValueMeasure.setFormattingType(FormattingConfiguration.CURRENCY);
         analysisItems.add(dealValueMeasure);
         analysisItems.add(new AnalysisDimension(keys.get(DURATION), true));
         analysisItems.add(new AnalysisDimension(keys.get(PRICE_TYPE), true));
