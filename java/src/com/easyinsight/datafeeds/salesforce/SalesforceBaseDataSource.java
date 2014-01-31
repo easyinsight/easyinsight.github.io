@@ -316,15 +316,11 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                 items.add(new AnalysisMeasure(new NamedKey(fieldName), friendlyName, AggregationTypes.SUM));
             } else if ("CURRENCY".equals(type)) {
                 AnalysisMeasure analysisMeasure = new AnalysisMeasure(new NamedKey(fieldName), friendlyName, AggregationTypes.SUM);
-                FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
-                formattingConfiguration.setFormattingType(FormattingConfiguration.CURRENCY);
-                analysisMeasure.setFormattingConfiguration(formattingConfiguration);
+                analysisMeasure.setFormattingType(FormattingConfiguration.CURRENCY);
                 items.add(analysisMeasure);
             } else if ("PERCENT".equals(type)) {
                 AnalysisMeasure analysisMeasure = new AnalysisMeasure(new NamedKey(fieldName), friendlyName, AggregationTypes.AVERAGE);
-                FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
-                formattingConfiguration.setFormattingType(FormattingConfiguration.PERCENTAGE);
-                analysisMeasure.setFormattingConfiguration(formattingConfiguration);
+                analysisMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
                 items.add(analysisMeasure);
             } else if ("DATE".equals(type)) {
                 AnalysisDateDimension dateDim = new AnalysisDateDimension(new NamedKey(fieldName), friendlyName, AnalysisDateDimension.DAY_LEVEL);
