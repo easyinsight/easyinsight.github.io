@@ -28,17 +28,7 @@ import mx.collections.ArrayCollection;
         public static const GAUGE:int = 16;
         public static const TREE:int = 17;
         public static const TREEMAP:int = 18;
-        public static const MMLINE:int = 19;
-
-        public static const MAP_WORLD:int = 20;
-        public static const MAP_USA:int = 21;
-        public static const MAP_ASIA:int = 22;
-        public static const MAP_AMERICAS:int = 23;
-        public static const MAP_EUROPE:int = 24;
-        public static const MAP_MIDDLE_EAST:int = 25;
-        public static const TIMELINE:int = 26;
         public static const HEATMAP:int = 27;
-        public static const MAP_AFRICA:int = 28;
         public static const GANTT:int = 29;
         public static const FORM:int = 30;
         public static const STACKED_COLUMN:int = 31;
@@ -57,6 +47,7 @@ import mx.collections.ArrayCollection;
         public var urlKey:String;
 		public var name:String;
         public var addonReports:ArrayCollection = new ArrayCollection();
+    public var dataSourceFieldReport:Boolean;
 		public var analysisID:int;
 		public var filterDefinitions:ArrayCollection = new ArrayCollection();
         public var filtersForDrillthrough:ArrayCollection;
@@ -69,12 +60,8 @@ import mx.collections.ArrayCollection;
 		public var policy:int = 2;
 		public var dateCreated:Date;
 		public var dateUpdated:Date;
-		public var viewCount:int;
-		public var ratingCount:int;
-		public var ratingAverage:Number = 0;
 		public var addedItems:ArrayCollection;
 		public var canSaveDirectly:Boolean;
-		public var visibleAtFeedLevel:Boolean;
 		public var publiclyVisible:Boolean;
 		public var marketplaceVisible:Boolean;
         public var reportStateID:int;
@@ -121,6 +108,7 @@ import mx.collections.ArrayCollection;
     public var useSecondaryColor:Boolean;
     public var useTertiaryColor:Boolean;
     public var canSave:Boolean;
+    public var filterSets:ArrayCollection;
 
 		public function AnalysisDefinition()
 		{
