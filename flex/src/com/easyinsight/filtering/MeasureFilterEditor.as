@@ -50,7 +50,7 @@ import mx.controls.Text;
 			lowInput = new TextInput();
 			hbox.addChild(lowInput);
 
-            if (measure.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
+            if (measure.formattingType == FormattingConfiguration.MILLISECONDS) {
                 lowDropdown = new ComboBox();
                 lowDropdown.dataProvider = new ArrayCollection([ "Days", "Hours"]);
                 addChild(lowDropdown);
@@ -78,14 +78,14 @@ import mx.controls.Text;
 			highInput = new TextInput();
             hbox.addChild(highInput);
 
-            if (measure.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
+            if (measure.formattingType == FormattingConfiguration.MILLISECONDS) {
                 highDropdown = new ComboBox();
                 highDropdown.dataProvider = new ArrayCollection([ "Days", "Hours"]);
                 hbox.addChild(highDropdown);
             }
 			
 			if (_filterDefinition.startValueDefined) {
-                if (measure.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
+                if (measure.formattingType == FormattingConfiguration.MILLISECONDS) {
                     var hours:int = _filterDefinition.startValue / 60 / 60 / 1000;
                     if (hours >= 24) {
                         lowInput.text = String(hours / 24);
@@ -100,7 +100,7 @@ import mx.controls.Text;
 				lowInput.text = "";
 			}
 			if (_filterDefinition.endValueDefined) {
-                if (measure.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
+                if (measure.formattingType == FormattingConfiguration.MILLISECONDS) {
                     var endHours:int = _filterDefinition.endValue / 60 / 60 / 1000;
                     if (endHours >= 24) {
                         highInput.text = String(endHours / 24);

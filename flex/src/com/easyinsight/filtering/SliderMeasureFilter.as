@@ -11,7 +11,6 @@ import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.HSlider;
@@ -138,7 +137,7 @@ public class SliderMeasureFilter extends HBox implements IFilter
         var measureFilter:FilterRangeDefinition = event.filterDefinition as FilterRangeDefinition;
         if (measureFilter.startValueDefined) {
             var lowString:String;
-            if (measureFilter.field.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
+            if (measureFilter.field.formattingType == FormattingConfiguration.MILLISECONDS) {
                 var hours:int = _filterDefinition.startValue / 60 / 60 / 1000;
                 if (hours >= 24) {
                     lowString = String(hours / 24) + " days";
@@ -152,7 +151,7 @@ public class SliderMeasureFilter extends HBox implements IFilter
         }
         if (measureFilter.endValueDefined) {
             var highString:String;
-            if (measureFilter.field.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
+            if (measureFilter.field.formattingType == FormattingConfiguration.MILLISECONDS) {
                 var highHours:int = _filterDefinition.endValue / 60 / 60 / 1000;
                 if (highHours >= 24) {
                     highString = String(highHours / 24) + " days";
@@ -343,7 +342,7 @@ public class SliderMeasureFilter extends HBox implements IFilter
         } else {
             if (_filterDefinition.startValueDefined) {
                 var lowString:String;
-                if (_filterDefinition.field.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
+                if (_filterDefinition.field.formattingType == FormattingConfiguration.MILLISECONDS) {
                     var hours:int = _filterDefinition.startValue / 60 / 60 / 1000;
                     if (hours >= 24) {
                         lowString = String(hours / 24) + " days";
@@ -357,7 +356,7 @@ public class SliderMeasureFilter extends HBox implements IFilter
             }
             if (_filterDefinition.endValueDefined) {
                 var highString:String;
-                if (_filterDefinition.field.formattingConfiguration.formattingType == FormattingConfiguration.MILLISECONDS) {
+                if (_filterDefinition.field.formattingType == FormattingConfiguration.MILLISECONDS) {
                     var highHours:int = _filterDefinition.endValue / 60 / 60 / 1000;
                     if (highHours >= 24) {
                         highString = String(highHours / 24) + " days";

@@ -25,5 +25,6 @@
             new SuggestionFactory(simpleReportEditor).argh(intentionSuggestion.type, fields, dataSourceID);
         }
         ]]></mx:Script>
-    <mx:LinkButton label="{problemText}" click="resolve()" textDecoration="underline" color="#FFFFFF" fontSize="14" styleName="fallThroughFonts"/>
+    <mx:Text htmlText="{problemText}" click="resolve()" textDecoration="underline" color="#FFFFFF" fontSize="14" styleName="fallThroughFonts" useHandCursor="true" buttonMode="true"
+            selectable="false" mouseEnabled="true" mouseChildren="false" maxWidth="600"/>
 </mx:HBox>

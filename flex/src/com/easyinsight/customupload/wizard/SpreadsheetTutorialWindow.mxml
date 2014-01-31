@@ -8,16 +8,11 @@
         import com.easyinsight.analysis.AnalysisDimension;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemTypes;
-        import com.easyinsight.analysis.AnalysisLatitude;
         import com.easyinsight.analysis.AnalysisList;
-        import com.easyinsight.analysis.AnalysisLongitude;
         import com.easyinsight.analysis.AnalysisMeasure;
-        import com.easyinsight.analysis.AnalysisZipCode;
         import com.easyinsight.analysis.formatter.FormattingConfiguration;
-        import com.easyinsight.framework.User;
         import com.easyinsight.util.ProgressAlert;
 
-        import mx.formatters.DateFormatter;
 
         [Bindable]
         private var labeledText:String;
@@ -86,18 +81,12 @@
                 type = "date";
                 selectedDateLevel = AnalysisDateDimension(item).dateLevel;
                 dateFormatEntry = AnalysisDateDimension(item).customDateFormat;
-            } else if (item.hasType(AnalysisItemTypes.LATITUDE)) {
-                type = "latitude coordinate";
-            } else if (item.hasType(AnalysisItemTypes.LONGITUDE)) {
-                type = "longitude coordinate";
             } else if (item.hasType(AnalysisItemTypes.LIST)) {
                 type = "tag list";
             } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                 type = "measure";
                 selectedAggregation = AnalysisMeasure(item).aggregation;
-                selectedFormatting = AnalysisMeasure(item).formattingConfiguration.formattingType;
-            } else if (item.hasType(AnalysisItemTypes.ZIP_CODE)) {
-                type = "zip code";
+                selectedFormatting = AnalysisMeasure(item).formattingType;
             } else {
                 type = "grouping";
             }
@@ -116,12 +105,6 @@
                 stackIndex = 2;
             } else if (type == (AnalysisItemTypes.LIST | AnalysisItemTypes.DIMENSION)) {
                 stackIndex = 3;
-            } else if (type == (AnalysisItemTypes.ZIP_CODE | AnalysisItemTypes.DIMENSION)) {
-                stackIndex = 4;
-            } else if (type == (AnalysisItemTypes.LONGITUDE | AnalysisItemTypes.DIMENSION)) {
-                stackIndex = 5;
-            } else if (type == (AnalysisItemTypes.LATITUDE | AnalysisItemTypes.DIMENSION)) {
-                stackIndex = 6;
             }
         }
 
@@ -141,7 +124,7 @@
             } else if (type == AnalysisItemTypes.MEASURE) {
                 item = new AnalysisMeasure();
                 AnalysisMeasure(item).aggregation = aggregationBox.selectedItem.data;
-                AnalysisMeasure(item).formattingConfiguration.formattingType = formatBox.selectedItem.data;
+                AnalysisMeasure(item).formattingType = formatBox.selectedItem.data;
             } else if (type == (AnalysisItemTypes.DATE | AnalysisItemTypes.DIMENSION)) {
                 item = new AnalysisDateDimension();
                 if (dateFormat != null) {
@@ -151,12 +134,6 @@
                 AnalysisDateDimension(item).dateOnlyField = true;
             } else if (type == (AnalysisItemTypes.LIST | AnalysisItemTypes.DIMENSION)) {
                 item = new AnalysisList();
-            } else if (type == (AnalysisItemTypes.ZIP_CODE | AnalysisItemTypes.DIMENSION)) {
-                item = new AnalysisZipCode();
-            } else if (type == (AnalysisItemTypes.LONGITUDE | AnalysisItemTypes.DIMENSION)) {
-                item = new AnalysisLongitude();
-            } else if (type == (AnalysisItemTypes.LATITUDE | AnalysisItemTypes.DIMENSION)) {
-                item = new AnalysisLatitude();
             }
             item.concrete = _analysisItem.concrete;
             item.key = _analysisItem.key;
@@ -364,12 +341,6 @@
         </mx:VBox>
         <mx:VBox>
 
-        </mx:VBox>
-        <mx:VBox>
-        </mx:VBox>
-        <mx:VBox>
-        </mx:VBox>
-        <mx:VBox>
         </mx:VBox>
     </mx:ViewStack>
 </mx:VBox>
