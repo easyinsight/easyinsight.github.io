@@ -30,3 +30,5 @@ alter table analysis_item drop marmotscript;
 alter table analysis_item add formatting_type tinyint(4) not null default 1;
 update analysis_item, formatting_configuration set analysis_item.formatting_type = formatting_configuration.formatting_type WHERE analysis_item.formatting_configuration_id = formatting_configuration.formatting_configuration_id;
 alter table analysis_item drop formatting_configuration_id;
+
+alter table drill_through add pass_through_field_id bigint(20) default null;
