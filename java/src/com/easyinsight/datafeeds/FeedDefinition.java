@@ -416,6 +416,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         }
         Feed feed = createFeedObject(parentSource);
 
+        // load from report
         List<AnalysisItem> kpis = new ArrayList<AnalysisItem>();
         if (!isKpiSource()) {
             loadKPIs(kpis, conn);
@@ -437,19 +438,29 @@ public class FeedDefinition implements Cloneable, Serializable {
     protected void loadKPIs(List<AnalysisItem> kpis, EIConnection conn) {
         Session session = Database.instance().createSession(conn);
         try {
-            PreparedStatement query = conn.prepareStatement("SELECT ANALYSIS_ITEM.ANALYSIS_ITEM_ID FROM ANALYSIS_ITEM, FEED_TO_ANALYSIS_ITEM, DATA_FEED WHERE " +
-                    "DATA_FEED.FEED_TYPE = ? AND ANALYSIS_ITEM.KPI = ? AND DATA_FEED.DATA_FEED_ID = FEED_TO_ANALYSIS_ITEM.FEED_ID AND " +
-                    "FEED_TO_ANALYSIS_ITEM.ANALYSIS_ITEM_ID = ANALYSIS_ITEM.ANALYSIS_ITEM_ID");
-            query.setInt(1, getFeedType().getType());
-            query.setBoolean(2, true);
-            ResultSet kpiRS = query.executeQuery();
-            while (kpiRS.next()) {
-                long fieldID = kpiRS.getLong(1);
-                AnalysisItem kpi = (AnalysisItem) session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, fieldID).list().get(0);
-                kpi.afterLoad();
-                kpis.add(kpi);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM ANALYSIS WHERE DATA_FEED_ID = ? AND data_source_field_report = ?");
+            PreparedStatement fieldStmt = conn.prepareStatement("SELECT analysis_item.ANALYSIS_ITEM_ID FROM report_structure, analysis_item WHERE analysis_id = ? AND " +
+                    "report_structure.analysis_item_id = analysis_item.analysis_item_id and analysis_item.kpi = ?");
+            queryStmt.setLong(1, getDataFeedID());
+            queryStmt.setBoolean(2, true);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long reportID = rs.getLong(1);
+                fieldStmt.setLong(1, reportID);
+                fieldStmt.setBoolean(2, true);
+                ResultSet fieldRS = fieldStmt.executeQuery();
+                while (fieldRS.next()) {
+                    long fieldID = fieldRS.getLong(1);
+                    // get field
+
+                        AnalysisItem analysisItem = (AnalysisItem) session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, fieldID).list().get(0);
+                        analysisItem.afterLoad();
+                        kpis.add(analysisItem);
+
+                }
             }
-            query.close();
+            queryStmt.close();
+            fieldStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
@@ -480,7 +491,7 @@ public class FeedDefinition implements Cloneable, Serializable {
                 } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                     AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
                     AnalysisMeasure measure = new AnalysisMeasure();
-                    measure.setFormattingConfiguration(item.getFormattingConfiguration());
+                    measure.setFormattingType(item.getFormattingType());
                     if (report.isPersistedCache()) {
                         measure.setAggregation(AggregationTypes.SUM);
                     } else {
