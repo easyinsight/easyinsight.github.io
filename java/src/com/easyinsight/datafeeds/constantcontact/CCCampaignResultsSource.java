@@ -72,25 +72,19 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
         AnalysisCalculation openRate = new AnalysisCalculation();
         openRate.setKey(keys.get(OPEN_RATE));
         openRate.setCalculationString("([Open Count] / [Sent Count]) * 100");
-        FormattingConfiguration openConfiguration = openRate.getFormattingConfiguration();
-        openConfiguration.setFormattingType(FormattingConfiguration.PERCENTAGE);
-        openRate.setFormattingConfiguration(openConfiguration);
+        openRate.setFormattingType(FormattingConfiguration.PERCENTAGE);
         items.add(openRate);
 
         AnalysisCalculation clickRate = new AnalysisCalculation();
         clickRate.setKey(keys.get(CLICK_RATE));
         clickRate.setCalculationString("([Click Count] / [Sent Count]) * 100");
-        FormattingConfiguration clickConfiguration = clickRate.getFormattingConfiguration();
-        clickConfiguration.setFormattingType(FormattingConfiguration.PERCENTAGE);
-        clickRate.setFormattingConfiguration(clickConfiguration);
+        clickRate.setFormattingType(FormattingConfiguration.PERCENTAGE);
         items.add(clickRate);
 
         AnalysisCalculation forwardRate = new AnalysisCalculation();
         forwardRate.setKey(keys.get(FORWARD_RATE));
         forwardRate.setCalculationString("([Forward Count] / [Sent Count]) * 100");
-        FormattingConfiguration forwardConfiguration = forwardRate.getFormattingConfiguration();
-        forwardConfiguration.setFormattingType(FormattingConfiguration.PERCENTAGE);
-        forwardRate.setFormattingConfiguration(forwardConfiguration);
+        forwardRate.setFormattingType(FormattingConfiguration.PERCENTAGE);
         items.add(forwardRate);
 
         return items;
