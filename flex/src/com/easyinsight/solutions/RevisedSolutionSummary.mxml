@@ -112,6 +112,7 @@
                     event.solution.dataSourceType == DataSourceType.FRESHBOOKS ||
                     event.solution.dataSourceType == DataSourceType.HARVEST_COMPOSITE ||
                     event.solution.dataSourceType == DataSourceType.PIVOTAL_TRACKER ||
+                    event.solution.dataSourceType == DataSourceType.SMARTSHEET ||
                     event.solution.dataSourceType == DataSourceType.DISTINCT_CACHED ||
                     event.solution.dataSourceType == DataSourceType.FRESHDESK ||
                     event.solution.dataSourceType == DataSourceType.BLANK ||
