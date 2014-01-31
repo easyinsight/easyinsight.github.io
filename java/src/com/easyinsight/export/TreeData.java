@@ -2,12 +2,15 @@ package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.pipeline.PipelineData;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -135,8 +138,9 @@ public class TreeData {
         private AnalysisHierarchyItem hierarchy;
         private int index;
         private Value value;
-        private String backgroundColor;
-        private String textColor;
+        private Value sortValue;
+        private int backgroundColor;
+        private int textColor;
         private IRow aggregateLevel;
         private HigherLevel parent;
 
@@ -144,18 +148,19 @@ public class TreeData {
             this.level = level;
             this.hierarchy = hierarchy;
             this.index = index;
-            int value = 256 / (hierarchy.getHierarchyLevels().size() - index);
-            backgroundColor = rgbToString(value, value, value);
-            if (value < 148) {
-                textColor = "#FFFFFF";
-            } else {
-                textColor = "#000000";
-            }
+
+                //int value = 256 / (hierarchy.getHierarchyLevels().size() - index);
+            backgroundColor = treeDefinition.getSummaryBackgroundColor();
+            textColor = treeDefinition.getSummaryTextColor();
+
             this.parent = parent;
         }
 
         public void addRow(IRow row) {
             this.value = row.getValue(level);
+            if (level.getSortItem() != null) {
+                this.sortValue = row.getValue(level.getSortItem());
+            }
             AnalysisItem nextItem = hierarchy.getHierarchyLevels().get(index + 1).getAnalysisItem();
             Value value = row.getValue(nextItem);
             Map<String, Value> keyMap = new HashMap<String, Value>();
@@ -195,9 +200,11 @@ public class TreeData {
         public TreeRow toTreeRow(PipelineData pipelineData) {
 
             TreeRow treeRow = new TreeRow();
+            treeRow.setSortColumn(sortValue);
             treeRow.setBackgroundColor(backgroundColor);
             treeRow.setTextColor(textColor);
             treeRow.setGroupingField(level);
+
             treeRow.setGroupingColumn(this.value);
 
             for (Argh argh : map.values()) {
@@ -205,7 +212,8 @@ public class TreeData {
                 treeRow.getChildren().add(childRow);
             }
 
-            if (treeDefinition instanceof WSSummaryDefinition) {
+            boolean addSummaryRow = (treeDefinition instanceof WSSummaryDefinition) && treeDefinition.isHeaderMode();
+            if (addSummaryRow) {
                 TreeRow summaryRow = new TreeRow();
 
                 for (AnalysisItem reportItem : treeDefinition.getItems()) {
@@ -214,7 +222,10 @@ public class TreeData {
                     }
                 }
 
-                summaryRow.setBackgroundColor("AAAAAA");
+                Color color = new Color(backgroundColor);
+                int summaryRowBackgroundColor = color.brighter().getRGB();
+                summaryRow.setBackgroundColor(summaryRowBackgroundColor);
+                summaryRow.setTextColor(textColor);
                 summaryRow.setGroupingColumn(new StringValue(""));
                 summaryRow.setSummaryColumn(true);
                 /*for (Map.Entry<AnalysisItem, Aggregation> entry : sumMap.entrySet()) {
@@ -226,6 +237,18 @@ public class TreeData {
                     if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                         if (aggregateLevel != null) {
                             treeRow.getValues().put(analysisItem.qualifiedName(), aggregateLevel.getValue(analysisItem.createAggregateKey()));
+                        }
+                    } else {
+                        boolean remove = true;
+                        if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                            TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+                            remove = !textReportFieldExtension.isForceToSummary();
+                        }
+                        if (!remove) {
+                            Value value = aggregateLevel.getValue(analysisItem.createAggregateKey());
+                            if (value.type() != Value.EMPTY) {
+                                treeRow.getValues().put(analysisItem.qualifiedName(), aggregateLevel.getValue(analysisItem.createAggregateKey()));
+                            }
                         }
                     }
                 }
@@ -246,13 +269,61 @@ public class TreeData {
                     return value.toString().compareTo(value1.toString());
                 }
             });*/
+            boolean addSummaryRow = (treeDefinition instanceof WSSummaryDefinition) && treeDefinition.isHeaderMode();
             StringBuilder sb = new StringBuilder();
-            sb.append("<tr style=\"").append(trStyle).append("\">");
-            String tableStyle = "color:" + textColor + ";background-color:#" + backgroundColor + ";" + tdStyle;
-            sb.append("<td style=\"").append(tableStyle).append("left\" colspan=\"").append(treeDefinition.getItems().size() + 1).append("\">");
-            sb.append(this.value.toString());
-            sb.append("</td>");
-            sb.append("</tr>");
+            if (addSummaryRow && aggregateLevel != null) {
+
+                sb.append("<tr style=\"").append(trStyle).append("\">");
+                String tableStyle = "color:" + textColor + ";background-color:#" + backgroundColor + ";" + tdStyle;
+                sb.append("<td style=\"").append(tableStyle).append("left\" colspan=\"").append(treeDefinition.getItems().size() + 1).append("\">");
+                sb.append(this.value.toString());
+                sb.append("</td>");
+                sb.append("</tr>");
+
+            } else {
+                sb.append("<tr style=\"").append(trStyle).append("\">");
+                String tableStyle = "color:" + textColor + ";background-color:#" + backgroundColor + ";" + tdStyle;
+                sb.append("<td style=\"").append(tableStyle).append("left\">");
+                sb.append(this.value.toString());
+                sb.append("</td>");
+                for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+                    StringBuilder styleString = new StringBuilder(tdStyle);
+                    String align = "left";
+                    if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                        TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+                        if (textReportFieldExtension.getAlign() != null) {
+                            if ("Left".equals(textReportFieldExtension.getAlign())) {
+                                align = "left";
+                            } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                                align = "center";
+                            } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                                align = "right";
+                            }
+                        }
+                        styleString.append(align);
+                        if (textReportFieldExtension.getFixedWidth() > 0) {
+                            styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
+                        }
+                    } else {
+                        styleString.append(align);
+                    }
+                    com.easyinsight.core.Value value = aggregateLevel.getValue(analysisItem);
+                    if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
+                        TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
+                        if (textValueExtension.getColor() != 0) {
+                            String hexString = "#" + Integer.toHexString(textValueExtension.getColor());
+                            styleString.append(";color:").append(hexString);
+                        }
+                    }
+                    sb.append("<td style=\"").append(styleString.toString()).append("\">");
+
+                    sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+
+                    sb.append("</td>");
+                }
+                sb.append("</tr>");
+
+            }
             for (Argh argh : map.values()) {
                 sb.append(argh.toHTML());
             }
@@ -279,6 +350,14 @@ public class TreeData {
             sb.append("<tr style=\"").append(trStyle).append("\">");
             sb.append("<td style=\"").append(tdStyle).append("left\">").append(row.getValue(analysisItem)).append("</td>");
             for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+                boolean remove = true;
+                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                    TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+                    remove = textReportFieldExtension.isForceToSummary();
+                }
+                if (remove) {
+                    continue;
+                }
                 StringBuilder styleString = new StringBuilder(tdStyle);
                 String align = "left";
                 if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
@@ -321,10 +400,33 @@ public class TreeData {
         public TreeRow toTreeRow(PipelineData pipelineData) {
             TreeRow treeRow = new TreeRow();
             treeRow.setGroupingField(analysisItem);
+            treeRow.setBackgroundColor(0xFFFFFF);
+            treeRow.setTextColor(0x0);
             for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+                boolean remove = false;
+                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                    TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+                    remove = textReportFieldExtension.isForceToSummary();
+                }
+                if (remove) {
+                    continue;
+                }
                 treeRow.getValues().put(analysisItem.qualifiedName(), row.getValue(analysisItem));
             }
-            treeRow.setGroupingColumn(row.getValue(analysisItem));
+            if (analysisItem.getSortItem() != null) {
+                treeRow.setSortColumn(row.getValue(analysisItem.getSortItem()));
+            }
+            boolean matched = false;
+            for (AnalysisItem reportItem : treeDefinition.getItems()) {
+                if (analysisItem.qualifiedName().equals(reportItem.qualifiedName())) {
+                    matched = true;
+                }
+            }
+            if (matched) {
+                treeRow.setGroupingColumn(new EmptyValue());
+            } else {
+                treeRow.setGroupingColumn(row.getValue(analysisItem));
+            }
             return treeRow;
         }
     }

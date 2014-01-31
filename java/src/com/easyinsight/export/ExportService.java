@@ -909,17 +909,16 @@ public class ExportService {
             if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
                 doubleValue = 0.;
             }
-            FormattingConfiguration formattingConfiguration = headerItem.getFormattingConfiguration();
-            if (formattingConfiguration.getFormattingType() == FormattingConfiguration.CURRENCY) {
+            if (analysisMeasure.getFormattingType() == FormattingConfiguration.CURRENCY) {
                 String symbolToUse = currencySymbol;
-                if (!pdf && symbolToUse.charAt(0) == 8364) {
+                if (!pdf && symbolToUse.length() > 0 && symbolToUse.charAt(0) == 8364) {
                     symbolToUse = "&euro;";
                 }
                 NumberFormat currencyFormatter = new DecimalFormat("###,###.##");
                 currencyFormatter.setMaximumFractionDigits(analysisMeasure.getPrecision());
                 currencyFormatter.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
                 valueString = symbolToUse + currencyFormatter.format(doubleValue);
-            } else if (formattingConfiguration.getFormattingType() == FormattingConfiguration.MILLISECONDS) {
+            } else if (analysisMeasure.getFormattingType() == FormattingConfiguration.MILLISECONDS) {
                 double absoluteValue = Math.abs(doubleValue);
                 if (absoluteValue < 60000) {
                     int seconds = (int) (absoluteValue / 1000);
@@ -941,7 +940,7 @@ public class ExportService {
                 if (doubleValue < 0) {
                     valueString = "(" + valueString + ")";
                 }
-            } else if (formattingConfiguration.getFormattingType() == FormattingConfiguration.SECONDS) {
+            } else if (analysisMeasure.getFormattingType() == FormattingConfiguration.SECONDS) {
                 doubleValue = doubleValue * 1000;
                 if (doubleValue < 60000) {
                     int seconds = (int) (doubleValue / 1000);
@@ -960,7 +959,7 @@ public class ExportService {
                     int hours = (int) (doubleValue / (60000 * 60) % 24);
                     valueString = days + "d:" + hours + "h";
                 }
-            } else if (formattingConfiguration.getFormattingType() == FormattingConfiguration.PERCENTAGE) {
+            } else if (analysisMeasure.getFormattingType() == FormattingConfiguration.PERCENTAGE) {
                 NumberFormat numberFormat = NumberFormat.getNumberInstance();
                 numberFormat.setMaximumFractionDigits(analysisMeasure.getPrecision());
                 numberFormat.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
@@ -1231,89 +1230,6 @@ public class ExportService {
         return bytes;
     }
 
-    private static VListInfo getCombinedVListInfo(WSCombinedVerticalListDefinition verticalList, List<DataSet> dataSets) {
-        List<Map<String, Object>> dColl = new ArrayList<Map<String, Object>>();
-        Set<SortInfo> columnSet = new HashSet<SortInfo>();
-        WSVerticalListDefinition vertReport = (WSVerticalListDefinition) verticalList.getReports().get(0);
-        for (AnalysisItem measureItem : vertReport.getMeasures()) {
-            AnalysisMeasure analysisMeasure = (AnalysisMeasure) measureItem;
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("Label", analysisMeasure.toUnqualifiedDisplay());
-            map.put("baseMeasure", analysisMeasure);
-            boolean atLeastOneValue = false;
-            for (int i = 0; i < verticalList.getReports().size(); i++) {
-                WSVerticalListDefinition vert = (WSVerticalListDefinition) verticalList.getReports().get(i);
-                AnalysisMeasure applyMeasure = null;
-                for (AnalysisItem measure : vert.getMeasures()) {
-                    if (measure.toUnqualifiedDisplay().equals(analysisMeasure.toUnqualifiedDisplay())) {
-                        applyMeasure = (AnalysisMeasure) measure;
-                    }
-                }
-                if (applyMeasure == null) {
-                    continue;
-                }
-                DataSet dataSet = dataSets.get(i);
-                List<Map<String, Value>> valueList = new ArrayList<Map<String, Value>>();
-                for (IRow row : dataSet.getRows()) {
-                    Map<String, Value> valueMap = new HashMap<String, Value>();
-                    for (AnalysisItem aItem : vert.getAllAnalysisItems()) {
-                        Value value = row.getValue(aItem);
-                        valueMap.put(aItem.toUnqualifiedDisplay(), value);
-                    }
-                    valueList.add(valueMap);
-                }
-                for (Map<String, Value> row : valueList) {
-                    String columnValue;
-                    Value value = null;
-                    Value sortValue;
-                    if (vert.getColumn() == null) {
-                        sortValue = new StringValue(vert.getName());
-                        columnValue = vert.getName();
-                    } else {
-                        value = row.get(vert.getColumn().toUnqualifiedDisplay());
-                        if (value.getSortValue() != null) {
-                            sortValue = value.getSortValue();
-                        } else {
-                            sortValue = value;
-                        }
-                        columnValue = value.toString();
-                    }
-                    //if (firstRow) {
-                    columnSet.add(new SortInfo(i, sortValue, columnValue));
-                    //}
-                    if (value != null && value.type() == Value.EMPTY) {
-                        continue;
-                    }
-                    Value measureValue = row.get(applyMeasure.toUnqualifiedDisplay());
-                    if (measureValue.toDouble() != 0) {
-                        atLeastOneValue = true;
-                    }
-                    map.put(columnValue, measureValue);
-                    map.put(columnValue + "measure", applyMeasure);
-                }
-            }
-            if (atLeastOneValue) {
-                dColl.add(map);
-            }
-        }
-        List<SortInfo> columns = new ArrayList<SortInfo>(columnSet);
-        Collections.sort(columns, new Comparator<SortInfo>() {
-
-            public int compare(SortInfo sortInfo, SortInfo sortInfo1) {
-                if (sortInfo.firstSort != sortInfo1.firstSort) {
-                    return new Integer(sortInfo.firstSort).compareTo(sortInfo1.firstSort);
-                }
-                if (sortInfo.secondSort.type() == Value.STRING && sortInfo1.secondSort.type() == Value.STRING) {
-                    return sortInfo.secondSort.toString().compareTo(sortInfo1.secondSort.toString());
-                } else if (sortInfo.secondSort.type() == Value.NUMBER && sortInfo1.secondSort.type() == Value.NUMBER) {
-                    return sortInfo.secondSort.toDouble().compareTo(sortInfo1.secondSort.toDouble());
-                }
-                return 0;
-            }
-        });
-        return new VListInfo(dColl, columns);
-    }
-
     private static String vListToTable(VListInfo vListInfo, ExportMetadata exportMetadata, WSVerticalListDefinition verticalList) {
         StringBuilder sb = new StringBuilder();
         String cellStyle;
@@ -1498,7 +1414,7 @@ public class ExportService {
         sb.append("<th style=\"width:120px;" + thStyle + "\">Previous Value</th>");
         sb.append("<th style=\"width:120px;" + thStyle + "\">Percent Change</th>");
         AnalysisMeasure percentMeasure = new AnalysisMeasure();
-        percentMeasure.getFormattingConfiguration().setFormattingType(FormattingConfiguration.PERCENTAGE);
+        percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (TrendOutcome trendOutcome : outcomes) {
@@ -1570,7 +1486,7 @@ public class ExportService {
         sb.append("</tr>");
 
         AnalysisMeasure percentMeasure = new AnalysisMeasure();
-        percentMeasure.getFormattingConfiguration().setFormattingType(FormattingConfiguration.PERCENTAGE);
+        percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (CompareYearsRow ytdValue : ytdStuff.getRows()) {
@@ -1658,7 +1574,7 @@ public class ExportService {
         }
         sb.append("</tr>");
         AnalysisMeasure percentMeasure = new AnalysisMeasure();
-        percentMeasure.getFormattingConfiguration().setFormattingType(FormattingConfiguration.PERCENTAGE);
+        percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
 
@@ -1848,7 +1764,7 @@ public class ExportService {
         }
         int j = 1;
         AnalysisMeasure percentMeasure = new AnalysisMeasure();
-        percentMeasure.getFormattingConfiguration().setFormattingType(FormattingConfiguration.PERCENTAGE);
+        percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (TrendOutcome trendOutcome : outcomes) {
@@ -1957,7 +1873,7 @@ public class ExportService {
 
         int j = 1;
         AnalysisMeasure percentMeasure = new AnalysisMeasure();
-        percentMeasure.getFormattingConfiguration().setFormattingType(FormattingConfiguration.PERCENTAGE);
+        percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (CompareYearsRow ytdValue : ytdStuff.getRows()) {
@@ -2019,7 +1935,7 @@ public class ExportService {
         }
         int j = 1;
         AnalysisMeasure percentMeasure = new AnalysisMeasure();
-        percentMeasure.getFormattingConfiguration().setFormattingType(FormattingConfiguration.PERCENTAGE);
+        percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (YTDValue ytdValue : ytdStuff.getValues()) {
@@ -2240,9 +2156,9 @@ public class ExportService {
                 if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
                     doubleValue = 0;
                 }
-                if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.MILLISECONDS || analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.SECONDS) {
+                if (analysisItem.getFormattingType() == FormattingConfiguration.MILLISECONDS || analysisItem.getFormattingType() == FormattingConfiguration.SECONDS) {
                     String result;
-                    if(analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.SECONDS) {
+                    if(analysisItem.getFormattingType() == FormattingConfiguration.SECONDS) {
                         doubleValue = doubleValue * 1000;
                     }
                     double unsigned = Math.abs(doubleValue);
@@ -2250,7 +2166,7 @@ public class ExportService {
                         int seconds = (int) (unsigned / 1000);
                         int milliseconds = (int) (unsigned % 1000);
                         result = seconds + "s:";
-                        if(analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.MILLISECONDS)
+                        if(analysisItem.getFormattingType() == FormattingConfiguration.MILLISECONDS)
                             result = result + milliseconds + "ms";
                     } else if (unsigned < (60000 * 60)) {
                         int minutes = (int) (unsigned / 60000);
@@ -2269,7 +2185,7 @@ public class ExportService {
                         result = "(" + result + ")";
                     }
                     cell.setCellValue(result);
-                } else if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.PERCENTAGE) {
+                } else if (analysisItem.getFormattingType() == FormattingConfiguration.PERCENTAGE) {
                     doubleValue = doubleValue / 100;
                     cell.setCellValue(doubleValue);
                 } else {
@@ -2389,8 +2305,8 @@ public class ExportService {
         }
         if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
-            FormattingConfiguration formattingConfiguration = analysisItem.getFormattingConfiguration();
-            switch (formattingConfiguration.getFormattingType()) {
+
+            switch (analysisMeasure.getFormattingType()) {
                 case FormattingConfiguration.CURRENCY:
                     CellStyle currencyStyle = workbook.createCellStyle();
                     String formatString = exportMetadata.currencySymbol + "##,##0";
@@ -2949,7 +2865,7 @@ public class ExportService {
                 kpiChangeCell.setCellStyle(cellStyle);
             }
             AnalysisMeasure percentMeasure = new AnalysisMeasure();
-            percentMeasure.getFormattingConfiguration().setFormattingType(FormattingConfiguration.PERCENTAGE);
+            percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
             percentMeasure.setMinPrecision(1);
             percentMeasure.setPrecision(1);
             int i = 1;

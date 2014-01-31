@@ -23,7 +23,7 @@ public class ComplexTest extends TestCase implements ITestConstants {
     public void testAttentionScenario() throws Exception {
         EIConnection conn = Database.instance().getConnection();
         try {
-            DataSourceWrapper todos = DataSourceWrapper.createDataSource("Todo", conn, "Todo - Project Name", GROUPING, "Milestone", GROUPING);
+            DataSourceWrapper todos = DataSourceWrapper.createDataSource("Todo", conn, "Todo - Project Name", GROUPING, "Milestone", GROUPING, "Milestone Completed On", DATE);
             DataSourceWrapper basecamp = DataSourceWrapper.createJoinedSource("Basecamp", conn, todos);
             DataSourceWrapper users = DataSourceWrapper.createDataSource("Users", conn, "User Full Name", GROUPING, "User Default Hourly Rate", MEASURE);
             DataSourceWrapper projects = DataSourceWrapper.createDataSource("Projects", conn, "Project Name", GROUPING, "Budget", MEASURE);
@@ -33,9 +33,10 @@ public class ComplexTest extends TestCase implements ITestConstants {
             harvest.join(users, timeTracking, "User Full Name", "Time Tracking User");
             harvest.join(timeTracking, projects, "Time Tracking Project", "Project Name");
             warehouse.join(harvest, basecamp, "Project Name", "Todo - Project Name");
-            todos.addRow("Shivano Consulting", "Milestone 1 [50]");
-            todos.addRow("Shivano Consulting", "Milestone 2 [25]");
-            todos.addRow("Another Project", "");
+            todos.addRow("Shivano Consulting", "Milestone 1 [40]", "2012-06-01");
+            todos.addRow("Shivano Consulting", "Milestone 2 [20]", "2012-07-01");
+            todos.addRow("Shivano Consulting", "Milestone 3 [20]", 0);
+            todos.addRow("Another Project", "", 0);
             users.addRow("James Boe", 100);
             users.addRow("Jim Bob", 75);
             projects.addRow("Shivano Consulting", 1000);
@@ -52,17 +53,24 @@ public class ComplexTest extends TestCase implements ITestConstants {
                     "createnamedpipeline(\"Harvest\", \"onJoins\", \"Harvest\")\n" +
                     "assignpipeline(\"Spent\", \"Harvest\")\n" +
                     "createnamedpipeline(\"Basecamp\", \"onJoins\", \"Basecamp\")\n" +
-                    "assignpipeline(\"Milestone Time\", \"Basecamp\")");
+                    "assignpipeline(\"Milestone Time\", \"Basecamp\")\n"+
+                    "assignpipeline(\"Milestone Done\", \"Basecamp\")\n"+
+                    "assignpipeline(\"Milestone Remaining\", \"Basecamp\")");
             report.addCalculation("Spent", "notnull([User Full Name], User Default Hourly Rate * Hours)");
             report.addCalculation("Milestone Time", "bracketvalue([Milestone])");
+            report.addCalculation("Milestone Done", "greaterthan(Milestone Completed On, 0, bracketvalue(Milestone))").getAnalysisItem();
+            report.addCalculation("Milestone Remaining", "greaterthan(1, Milestone Completed On, bracketvalue(Milestone), 0)").getAnalysisItem();
+            report.addCalculation("Project Progress", "Milestone Done / (Milestone Remaining + Milestone Done) * 100").getAnalysisItem();
             report.addCalculation("Budget Remaining", "Budget - Spent");
             report.addField("Project Name");
             report.addField("Budget");
             report.addField("Spent");
             report.addField("Budget Remaining");
-            report.addField("Milestone Time");
+            report.addField("Milestone Done");
+            report.addField("Milestone Remaining");
+            report.addField("Project Progress");
             Results results = report.runReport(conn);
-            results.verifyRow("Shivano Consulting", 1000, 725, 275, 75);
+            results.verifyRow("Shivano Consulting", 1000, 725, 275, 60, 20, 75);
         } finally {
             Database.closeConnection(conn);
         }
