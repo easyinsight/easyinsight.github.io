@@ -3,6 +3,7 @@ package com.easyinsight.core;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: James Boe
@@ -41,11 +42,29 @@ public abstract class Value implements Serializable, Comparable<Value>, Cloneabl
     }
 
     private Map<String, String> links;
+    private Map<String, List<Value>> drillThroughs;
+    private Set<Value> drillThroughValues;
 
     private Value originalValue;
     private List<Value> otherValues;
     private Value sortValue;
     private ValueExtension valueExtension;
+
+    public Set<Value> getDrillThroughValues() {
+        return drillThroughValues;
+    }
+
+    public void setDrillThroughValues(Set<Value> drillThroughValues) {
+        this.drillThroughValues = drillThroughValues;
+    }
+
+    public Map<String, List<Value>> getDrillThroughs() {
+        return drillThroughs;
+    }
+
+    public void setDrillThroughs(Map<String, List<Value>> drillThroughs) {
+        this.drillThroughs = drillThroughs;
+    }
 
     public List<Value> getOtherValues() {
         return otherValues;

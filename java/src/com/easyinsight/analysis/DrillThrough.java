@@ -3,10 +3,14 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardStorage;
+import com.easyinsight.database.Database;
 import nu.xom.Attribute;
 import nu.xom.Element;
+import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,6 +42,25 @@ public class DrillThrough extends Link {
 
     @Column(name="filter_row_groupings")
     private boolean filterRowGroupings;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="pass_through_field_id")
+    private AnalysisItemHandle passThroughField;
+
+    public void afterLoad() {
+        super.afterLoad();
+        if (passThroughField != null) {
+            passThroughField = (AnalysisItemHandle) Database.deproxy(passThroughField);
+        }
+    }
+
+    public AnalysisItemHandle getPassThroughField() {
+        return passThroughField;
+    }
+
+    public void setPassThroughField(AnalysisItemHandle passThroughField) {
+        this.passThroughField = passThroughField;
+    }
 
     public boolean isShowDrillThroughFilters() {
         return showDrillThroughFilters;
@@ -88,15 +111,25 @@ public class DrillThrough extends Link {
     }
 
     @Override
-    public void beforeSave() {
-        super.beforeSave();
+    public void beforeSave(Session session) {
+        super.beforeSave(session);
         if (reportID != null && reportID == 0) {
             reportID = null;
         }
         if (dashboardID != null && dashboardID == 0) {
             dashboardID = null;
         }
+        if (passThroughField != null) {
+            passThroughField.save();
+            if (passThroughField.getHandleID() == null || passThroughField.getHandleID() == 0) {
+                session.save(passThroughField);
+            } else {
+                session.update(passThroughField);
+            }
+        }
     }
+
+
 
     public boolean isMiniWindow() {
         return miniWindow;
@@ -128,5 +161,23 @@ public class DrillThrough extends Link {
             element.addAttribute(new Attribute("dashbordID", xmlMetadata.urlKeyForDashboardID(dashboardID)));
         }
         return element;
+    }
+
+    public List<AnalysisItem> getFields(List<AnalysisItem> allItems) {
+        List<AnalysisItem> retItems = new ArrayList<AnalysisItem>();
+
+        if (passThroughField != null) {
+            // reconcile item from allItems
+            // return the field
+            for (AnalysisItem field : allItems) {
+                if ((passThroughField.getAnalysisItemID() != null && passThroughField.getAnalysisItemID() > 0 && field.getAnalysisItemID() == passThroughField.getAnalysisItemID()) ||
+                        passThroughField.getName().equals(field.toDisplay())) {
+                    retItems.add(field);
+                    break;
+                }
+            }
+        }
+
+        return retItems;
     }
 }

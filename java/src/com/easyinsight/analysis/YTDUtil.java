@@ -241,7 +241,10 @@ public class YTDUtil {
             }
 
         }
-        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, new AnalysisItemRetrievalStructure(null));
+        AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
+        structure.setReport(wsytdDefinition);
+        structure.setConn(conn);
+        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, structure);
         Iterator<IComponent> iter = components.iterator();
         while (iter.hasNext()) {
             IComponent component = iter.next();

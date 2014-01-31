@@ -229,11 +229,11 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         yAxis.put("min", 0);
         yAxis.put("numberTicks", 8);
         JSONObject tickOptions = new JSONObject();
-        if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.CURRENCY) {
+        if (analysisItem.getFormattingType() == FormattingConfiguration.CURRENCY) {
             tickOptions.put("formatter", "$.jqplot.currencyTickNumberFormatter");
-        } else if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.MILLISECONDS || analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.SECONDS) {
+        } else if (analysisItem.getFormattingType() == FormattingConfiguration.MILLISECONDS || analysisItem.getFormattingType() == FormattingConfiguration.SECONDS) {
             tickOptions.put("formatter", "millisecondFormatter");
-            tickOptions.put("formatString", analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.MILLISECONDS ? "'ms'" : "'s'");
+            tickOptions.put("formatString", analysisItem.getFormattingType() == FormattingConfiguration.MILLISECONDS ? "'ms'" : "'s'");
         } else {
             tickOptions.put("formatter", "$.jqplot.tickNumberFormatter");
         }

@@ -4,8 +4,7 @@ import com.easyinsight.analysis.AggregationTypes;
 import com.easyinsight.core.Value;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -59,5 +58,18 @@ public abstract class Aggregation extends Value {
 
     public int compareTo(Value value) {
         return 0;
+    }
+
+    private List<Map<String, List<Value>>> drills;
+
+    public void addDrillThroughs(Map<String, List<Value>> drillThroughs) {
+        if (drills == null) {
+            drills = new ArrayList<Map<String, List<Value>>>();
+        }
+        drills.add(drillThroughs);
+    }
+
+    public List<Map<String, List<Value>>> getDrills() {
+        return drills;
     }
 }

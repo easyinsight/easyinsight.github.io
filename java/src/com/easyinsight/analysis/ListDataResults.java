@@ -2,8 +2,6 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 
-import java.util.Map;
-
 import java.io.Serializable;
 
 public class ListDataResults extends DataResults implements Serializable {

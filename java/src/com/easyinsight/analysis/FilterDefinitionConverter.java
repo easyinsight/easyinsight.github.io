@@ -21,14 +21,12 @@ public class FilterDefinitionConverter {
     }
 
     public static List<FilterDefinition> fromFilters(List<FilterDefinition> filterDefinitions) {
-        /*List<FilterDefinition> persistableFilterDefinitions = new ArrayList<FilterDefinition>();
-        if (filterDefinitions != null) {
-            for (FilterDefinition filterDefinition : filterDefinitions) {
-                filterDefinition.beforeSave(session);
-                persistableFilterDefinitions.add(filterDefinition);
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        for (FilterDefinition filter : filterDefinitions) {
+            if (filter.getFromFilterSet() == 0) {
+                filters.add(filter);
             }
         }
-        return persistableFilterDefinitions;*/
-        return filterDefinitions;
+        return filters;
     }
 }

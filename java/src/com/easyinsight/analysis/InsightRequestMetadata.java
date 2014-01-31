@@ -32,6 +32,7 @@ public class InsightRequestMetadata implements Serializable {
     private transient Map<AnalysisItem, Set<String>> pipelineAssignmentMap = new HashMap<AnalysisItem, Set<String>>();
     private transient Map<AnalysisItem, String> derivedFieldAssignmentMap = new HashMap<AnalysisItem, String>();
 
+    private transient List<ReportAuditEvent> auditEvents = new ArrayList<ReportAuditEvent>();
     private transient List<String> warnings = new ArrayList<String>();
 
     private transient Collection<FilterDefinition> reportFilters;
@@ -47,6 +48,14 @@ public class InsightRequestMetadata implements Serializable {
     private boolean noDataOnNoJoin;
     private String ip;
     private transient boolean noLogging;
+
+    public List<ReportAuditEvent> getAuditEvents() {
+        return auditEvents;
+    }
+
+    public void setAuditEvents(List<ReportAuditEvent> auditEvents) {
+        this.auditEvents = auditEvents;
+    }
 
     public Collection<FilterDefinition> getReportFilters() {
         return reportFilters;

@@ -18,6 +18,7 @@ public class InsightDescriptor extends EIDescriptor {
     private Date lastDataTime;
     private List<Tag> tags;
     private List<SavedConfiguration> configs;
+    private boolean dataSourceReport;
 
     @Override
     public int getType() {
@@ -66,6 +67,14 @@ public class InsightDescriptor extends EIDescriptor {
         setFolder(folder);
         setDescription(description);
         setModifiedDate(dateModified);
+    }
+
+    public boolean isDataSourceReport() {
+        return dataSourceReport;
+    }
+
+    public void setDataSourceReport(boolean dataSourceReport) {
+        this.dataSourceReport = dataSourceReport;
     }
 
     public List<SavedConfiguration> getConfigs() {

@@ -5,6 +5,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.scorecard.Scorecard;
 import org.hibernate.Session;
 import org.json.JSONArray;
@@ -207,9 +208,42 @@ public class DashboardStack extends DashboardElement {
                 session.close();
             }
             dashboardGrid.setFilters(filters);
+            PreparedStatement filterSetStmt = conn.prepareStatement("SELECT filter_set.filter_set_id, filter_set.filter_set_name FROM dashboard_element_to_filter_set, filter_set " +
+                    "WHERE dashboard_element_id = ? AND dashboard_element_to_filter_set.filter_set_id = filter_set.filter_set_id");
+            filterSetStmt.setLong(1, elementID);
+            ResultSet filterSetRS = filterSetStmt.executeQuery();
+            List<FilterSetDescriptor> filterSetDescriptors = new ArrayList<FilterSetDescriptor>();
+            while (filterSetRS.next()) {
+                long filterSetID = filterSetRS.getLong(1);
+                String name = filterSetRS.getString(2);
+                FilterSetDescriptor filterSetDescriptor = new FilterSetDescriptor();
+                filterSetDescriptor.setName(name);
+                filterSetDescriptor.setId(filterSetID);
+                filterSetDescriptors.add(filterSetDescriptor);
+            }
+            filterSetStmt.close();
+
+            dashboardGrid.setFilterSets(filterSetDescriptors);
+
+            try {
+                for (FilterSetDescriptor filterSetDescriptor : filterSetDescriptors) {
+                    FilterSet filterSet = loadFilterSet(filterSetDescriptor, conn);
+                    for (FilterDefinition filterDefinition : filterSet.getFilters()) {
+                        FilterDefinition clone = filterDefinition.clone();
+                        clone.setFromFilterSet(filterSetDescriptor.getId());
+                        filters.add(clone);
+                    }
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
         }
         queryStmt.close();
         return dashboardGrid;
+    }
+
+    private static FilterSet loadFilterSet(FilterSetDescriptor filterSetDescriptor, EIConnection conn) {
+        return new FilterSetStorage().getFilterSet(filterSetDescriptor.getId(), conn);
     }
 
     @Override

@@ -41,7 +41,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @JoinColumn(name = "item_key_id")
     private Key key;
 
-
     @Transient
     private List<Tag> tags;
 
@@ -71,9 +70,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name = "original_display_name")
     private String originalDisplayName;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "formatting_configuration_id")
-    private FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
+    @Column(name="formatting_type")
+    private int formattingType = FormattingConfiguration.NUMBER;
 
     @Column(name = "hidden")
     private boolean hidden = false;
@@ -105,14 +103,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             inverseJoinColumns = @JoinColumn(name = "filter_id", nullable = false))
     private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
 
-    @Column(name = "high_is_good")
-    private boolean highIsGood;
-
     @Column(name = "key_column")
     private boolean keyColumn;
-
-    @Column(name = "label_column")
-    private boolean labelColumn;
 
     @Column(name = "item_position")
     private int itemPosition;
@@ -130,9 +122,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "report_field_extension_id")
     private ReportFieldExtension reportFieldExtension;
-
-    @Column(name = "marmotscript")
-    private String marmotScript;
 
     @Transient
     private AnalysisItem reportTemporaryItem;
@@ -172,6 +161,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public int getFormattingType() {
+        return formattingType;
+    }
+
+    public void setFormattingType(int formattingType) {
+        this.formattingType = formattingType;
     }
 
     public List<Tag> getTags() {
@@ -281,14 +278,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.pipelineSections = pipelineSections;
     }*/
 
-    public boolean isLabelColumn() {
-        return labelColumn;
-    }
-
-    public void setLabelColumn(boolean labelColumn) {
-        this.labelColumn = labelColumn;
-    }
-
     public boolean isKeyColumn() {
         return keyColumn;
     }
@@ -299,14 +288,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void setSortItem(AnalysisItem sortItem) {
         this.sortItem = sortItem;
-    }
-
-    public String getMarmotScript() {
-        return marmotScript;
-    }
-
-    public void setMarmotScript(String marmotScript) {
-        this.marmotScript = marmotScript;
     }
 
     public ReportFieldExtension getReportFieldExtension() {
@@ -418,14 +399,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
     }
 
-    public boolean isHighIsGood() {
-        return highIsGood;
-    }
-
-    public void setHighIsGood(boolean highIsGood) {
-        this.highIsGood = highIsGood;
-    }
-
     public int getWidth() {
         return width;
     }
@@ -525,19 +498,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.analysisItemID = 0;
     }
 
-    public FormattingConfiguration getFormattingConfiguration() {
-        return formattingConfiguration;
-    }
-
-    public void setFormattingConfiguration(FormattingConfiguration formattingConfiguration) {
-        this.formattingConfiguration = formattingConfiguration;
-    }
-
     public AnalysisItem clone() throws CloneNotSupportedException {
         AnalysisItem clonedItem = (AnalysisItem) super.clone();
         clonedItem.cachedKey = null;
         clonedItem.setAnalysisItemID(0);
-        clonedItem.setFormattingConfiguration(formattingConfiguration.clone());
         List<Link> clonedLinks = new ArrayList<Link>();
         for (Link link : getLinks()) {
             clonedLinks.add(link.clone());
@@ -803,7 +767,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                     filterDefinition.afterLoad();
                 }
                 setLinks(new ArrayList<Link>(getLinks()));
-                formattingConfiguration = (FormattingConfiguration) Database.deproxy(formattingConfiguration);
                 key = (Key) Database.deproxy(key);
                 key.afterLoad();
             }
@@ -870,7 +833,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
         if (getLinks() != null) {
             for (Link link : getLinks()) {
-                link.beforeSave();
+                link.beforeSave(session);
             }
         }
         if (sortItem != null) {
@@ -911,7 +874,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         root.addAttribute(new Attribute("type", String.valueOf(actualType())));
         root.addAttribute(new Attribute("key", key.urlKeyString(xmlMetadata)));
         root.addAttribute(new Attribute("concrete", String.valueOf(concrete)));
-        root.appendChild(formattingConfiguration.toXML());
         Element filters = new Element("filters");
         root.appendChild(filters);
         for (FilterDefinition filterDefinition : getFilters()) {
@@ -949,9 +911,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             case AnalysisItemTypes.CALCULATION:
                 analysisItem = new AnalysisCalculation();
                 break;
-            case AnalysisItemTypes.COMPLEX_MEASURE:
-                analysisItem = new ComplexAnalysisMeasure();
-                break;
             case AnalysisItemTypes.DATE_DIMENSION:
                 analysisItem = new AnalysisDateDimension();
                 break;
@@ -964,32 +923,17 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             case AnalysisItemTypes.HIERARCHY:
                 analysisItem = new AnalysisHierarchyItem();
                 break;
-            case AnalysisItemTypes.LATITUDE:
-                analysisItem = new AnalysisLatitude();
-                break;
-            case AnalysisItemTypes.LONGITUDE:
-                analysisItem = new AnalysisLongitude();
-                break;
             case AnalysisItemTypes.LISTING:
                 analysisItem = new AnalysisList();
                 break;
             case AnalysisItemTypes.MEASURE:
                 analysisItem = new AnalysisMeasure();
                 break;
-            case AnalysisItemTypes.RANGE_DIMENSION:
-                analysisItem = new AnalysisRangeDimension();
-                break;
-            case AnalysisItemTypes.REAGGREGATE_MEASURE:
-                analysisItem = new ReaggregateAnalysisMeasure();
-                break;
             case AnalysisItemTypes.STEP:
                 analysisItem = new AnalysisStep();
                 break;
             case AnalysisItemTypes.TEXT:
                 analysisItem = new AnalysisText();
-                break;
-            case AnalysisItemTypes.ZIP_CODE:
-                analysisItem = new AnalysisZipCode();
                 break;
             default:
                 throw new RuntimeException("Unknown type " + type);
@@ -1000,7 +944,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             analysisItem.setDisplayName(displayName);
         }
         analysisItem.setConcrete(Boolean.parseBoolean(fieldNode.getAttribute("concrete").getValue()));
-        analysisItem.setFormattingConfiguration(FormattingConfiguration.fromXML(fieldNode));
 
         // so a derived key is going to be XXXXX:Blah or XXXXX:YYYYY:Blah
 

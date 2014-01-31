@@ -79,11 +79,11 @@ public class DefineDataSourceServlet extends APIServlet {
                 } else if ("tags".equals(typeString)) {
                     analysisItem = new AnalysisList(new NamedKey(key), displayName, true, ",");
                 } else if ("postal".equals(typeString)) {
-                    analysisItem = new AnalysisZipCode(new NamedKey(key), displayName);
+                    analysisItem = new AnalysisDimension(new NamedKey(key), displayName);
                 } else if ("longitude".equals(typeString)) {
-                    analysisItem = new AnalysisLongitude(new NamedKey(key), true, displayName);
+                    analysisItem = new AnalysisDimension(new NamedKey(key), displayName);
                 } else if ("latitude".equals(typeString)) {
-                    analysisItem = new AnalysisLatitude(new NamedKey(key), true, displayName);
+                    analysisItem = new AnalysisDimension(new NamedKey(key), displayName);
                 } else if ("date".equals(typeString)) {
                     analysisItem = new AnalysisDateDimension(new NamedKey(key), displayName, AnalysisDateDimension.DAY_LEVEL);
                 } else {

@@ -60,11 +60,6 @@ public class AggregationFactory {
             case AggregationTypes.COUNT_DISTINCT:
                 aggregation = new CountAggregation();
                 break;
-            case AggregationTypes.NORMALS:
-                ComplexAnalysisMeasure complexAnalysisMeasure = (ComplexAnalysisMeasure) analysisMeasure;
-                aggregation = new NormalsAggregation(aggregationState, getAggregation(complexAnalysisMeasure.getWrappedAggregation()));
-                aggregationState.addAggregation(aggregation);
-                break;
             case AggregationTypes.LAST_VALUE:
                 aggregation = new SumAggregation();
                 break;

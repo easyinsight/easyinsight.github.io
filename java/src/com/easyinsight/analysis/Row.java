@@ -15,11 +15,35 @@ public class Row implements IRow, Serializable, Cloneable {
 
     private Value[] valueMap;
 
+    private int joinCount;
+
     private DataSetKeys dataSetKeys;
 
     private long rowID;
 
     private boolean marked;
+
+    private Map<String, Set<Value>> passthroughRow;
+
+    public Map<String, Set<Value>> getPassthroughRow() {
+        return passthroughRow;
+    }
+
+    public void incrementJoinCount() {
+        joinCount++;
+    }
+
+    public int getJoinCount() {
+        return joinCount;
+    }
+
+    public void resetJoinCount() {
+        joinCount = 0;
+    }
+
+    public void setPassthroughRow(Map<String, Set<Value>> passthroughRow) {
+        this.passthroughRow = passthroughRow;
+    }
 
     public Row clone() throws CloneNotSupportedException {
         Row row = (Row) super.clone();
@@ -70,6 +94,21 @@ public class Row implements IRow, Serializable, Cloneable {
 
     public Value getValue(Key rowName) {
         Short key = dataSetKeys.getKey(rowName);
+        if (key >= valueMap.length) {
+            return EmptyValue.EMPTY_VALUE;
+        }
+        Value value = valueMap[key];
+        if (value == null) {
+            return EmptyValue.EMPTY_VALUE;
+        }
+        return value;
+    }
+
+    public Value getValueNoAdd(Key rowName) {
+        Short key = dataSetKeys.getKeyNoAdd(rowName);
+        if (key == null) {
+            return EmptyValue.EMPTY_VALUE;
+        }
         if (key >= valueMap.length) {
             return EmptyValue.EMPTY_VALUE;
         }

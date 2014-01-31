@@ -16,7 +16,6 @@ public interface AnalysisItemTypes {
     public static final int TEXT = 128;
     public static final int LOOKUP_TABLE = 256;
     public static final int TEMPORAL_MEASURE = 512;
-    public static final int COMPLEX_MEASURE = 1024;
     public static final int HIERARCHY = 2048;
     public static final int SIX_SIGMA_MEASURE = 4096;
     public static final int STEP = 8192;
@@ -25,5 +24,4 @@ public interface AnalysisItemTypes {
     public static final int ZIP_CODE = 65536;
     public static final int DERIVED_DIMENSION = 131072;
     public static final int DERIVED_DATE = 262144;
-    public static final int REAGGREGATE_MEASURE = 524288;
 }

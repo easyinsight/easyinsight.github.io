@@ -219,7 +219,7 @@ public class DashboardStorage {
         if (dashboard.getDefaultDrillthrough() != null) {
             Session session = Database.instance().createSession(conn);
             try {
-                dashboard.getDefaultDrillthrough().beforeSave();
+                dashboard.getDefaultDrillthrough().beforeSave(session);
                 session.saveOrUpdate(dashboard.getDefaultDrillthrough());
                 session.flush();
             } finally {

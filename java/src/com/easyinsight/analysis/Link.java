@@ -4,6 +4,7 @@ import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.Dashboard;
 import nu.xom.Element;
+import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -81,11 +82,15 @@ public class Link implements Cloneable, Serializable {
         return new ArrayList<AnalysisItem>();
     }
 
+    public void afterLoad() {
+
+    }
+
     public boolean generatesURL() {
         return false;
     }
 
-    public void beforeSave() {
+    public void beforeSave(Session session) {
 
     }
 
@@ -103,5 +108,9 @@ public class Link implements Cloneable, Serializable {
 
     public static Link fromXML(Element element, XMLImportMetadata xmlMetadata) {
         return null;
+    }
+
+    public List<AnalysisItem> getFields(List<AnalysisItem> allItems) {
+        return new ArrayList<AnalysisItem>();
     }
 }
