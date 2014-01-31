@@ -6,6 +6,8 @@ import com.easyinsight.util.ProgressAlert;
 import flash.display.DisplayObject;
 import flash.events.EventDispatcher;
 
+import mx.collections.ArrayCollection;
+
 
 import mx.controls.Alert;
 import mx.core.Application;
@@ -21,13 +23,16 @@ public class DrillThroughExecutor extends EventDispatcher {
     private var analysisItem:AnalysisItem;
     private var report:AnalysisDefinition;
     private var altKey:String;
+    private var altValues:ArrayCollection;
 
-    public function DrillThroughExecutor(drillThrough:DrillThrough, data:Object, analysisItem:AnalysisItem, report:AnalysisDefinition, altKey:String = null) {
+    public function DrillThroughExecutor(drillThrough:DrillThrough, data:Object, analysisItem:AnalysisItem, report:AnalysisDefinition, altKey:String = null,
+            altValues:ArrayCollection = null) {
         this.drillThrough = drillThrough;
         this.data = data;
         this.analysisItem = analysisItem;
         this.report = report;
         this.altKey = altKey;
+        this.altValues = altValues;
         analysisService = new RemoteObject();
         analysisService.destination = "analysisDefinition";
         analysisService.drillThrough.addEventListener(ResultEvent.RESULT, onResult);
@@ -35,7 +40,7 @@ public class DrillThroughExecutor extends EventDispatcher {
 
     public function send():void {
         ProgressAlert.alert(Application.application as UIComponent, "Retrieving report information...", null, analysisService.drillThrough);
-        analysisService.drillThrough.send(drillThrough, data, analysisItem, report, altKey);
+        analysisService.drillThrough.send(drillThrough, data, analysisItem, report, altKey, altValues);
     }
 
     private function onResult(event:ResultEvent):void {
