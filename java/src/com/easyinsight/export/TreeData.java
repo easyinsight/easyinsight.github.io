@@ -151,6 +151,16 @@ public class TreeData {
 
                 //int value = 256 / (hierarchy.getHierarchyLevels().size() - index);
             backgroundColor = treeDefinition.getSummaryBackgroundColor();
+            if (index > 0) {
+                Color color = new Color(backgroundColor);
+                int green = color.getGreen() / 7;
+                int red = color.getRed() / 7;
+                int blue = color.getBlue() / 7;
+                for (int i = 0; i < index; i++) {
+                    color = new Color(Math.min(color.getRed() + red, 255), Math.min(color.getGreen() + green, 255), Math.min(color.getBlue() + blue, 255));
+                }
+                backgroundColor = color.getRGB();
+            }
             textColor = treeDefinition.getSummaryTextColor();
 
             this.parent = parent;
@@ -223,7 +233,13 @@ public class TreeData {
                 }
 
                 Color color = new Color(backgroundColor);
-                int summaryRowBackgroundColor = color.brighter().getRGB();
+                int green = color.getGreen() / 7;
+                int red = color.getRed() / 7;
+                int blue = color.getBlue() / 7;
+                for (int i = 0; i < index; i++) {
+                    color = new Color(Math.min(color.getRed() + red, 255), Math.min(color.getGreen() + green, 255), Math.min(color.getBlue() + blue, 255));
+                }
+                int summaryRowBackgroundColor = color.getRGB();
                 summaryRow.setBackgroundColor(summaryRowBackgroundColor);
                 summaryRow.setTextColor(textColor);
                 summaryRow.setGroupingColumn(new StringValue(""));
