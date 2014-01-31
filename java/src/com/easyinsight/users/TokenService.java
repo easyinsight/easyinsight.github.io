@@ -5,9 +5,11 @@ import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
 import com.easyinsight.datafeeds.constantcontact.ConstantContactCompositeSource;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksCompositeSource;
+import com.easyinsight.datafeeds.github.GithubCompositeSource;
 import com.easyinsight.datafeeds.harvest.HarvestCompositeSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 //import com.easyinsight.datafeeds.xero.XeroCompositeSource;
+import com.easyinsight.datafeeds.smartsheet.SmartsheetBaseSource;
 import com.easyinsight.datafeeds.trello.TrelloCompositeSource;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
@@ -45,6 +47,7 @@ public class TokenService {
     public static final int CONNECTION_SETUP = 1;
     public static final int NO_CONNECTION = 2;
     public static final int USER_SOURCE = 3;
+    public static final int HTML_SETUP = 4;
 
     public static final String SALESFORCE_CONSUMER_KEY = "3MVG9VmVOCGHKYBQUAbz7d7kk6x2g29kEbyFhTBt7u..yutNvp7evoFyWTm2q4tZfWRdxekrK6fhhwf5BN4Tq";
 
@@ -56,7 +59,7 @@ public class TokenService {
         return getOAuthResponse(type, redirect, null, redirectType, session);
     }
 
-    private OAuthResponse getOAuthResponse(int type, boolean redirect, FeedDefinition dataSource, int redirectType, HttpSession session) {
+    public OAuthResponse getOAuthResponse(int type, boolean redirect, FeedDefinition dataSource, int redirectType, HttpSession session) {
         try {
             OAuthConsumer consumer;
             OAuthProvider provider;
@@ -148,6 +151,27 @@ public class TokenService {
                 session.setAttribute("redirectTarget", redirectType);
                 session.setAttribute("dataSourceID", dataSource.getApiKey());
                 return new OAuthResponse(request.getLocationUri(), true);
+            } else if (type == FeedType.GITHUB_COMPOSITE.getType()) {
+                GithubCompositeSource githubSource = (GithubCompositeSource) dataSource;
+                OAuthClientRequest request;
+                if (ConfigLoader.instance().isProduction()) {
+                    request = OAuthClientRequest
+                            .authorizationLocation("https://github.com/login/oauth/authorize")
+                            .setClientId("57a7af824803bc0fe694")
+                            .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
+                            .buildQueryMessage();
+                } else {
+                    request = OAuthClientRequest
+                            .authorizationLocation("https://github.com/login/oauth/authorize")
+                            .setClientId("57a7af824803bc0fe694")
+                            .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
+                            .buildQueryMessage();
+                }
+                session.setAttribute("redirectTarget", redirectType);
+                session.setAttribute("dataSourceID", dataSource.getApiKey());
+                String uri = request.getLocationUri();
+                uri = uri + "&scope=user,repo";
+                return new OAuthResponse(uri, true);
             } else if (type == FeedType.BASECAMP_NEXT_COMPOSITE.getType()) {
                 OAuthClientRequest request;
                 if (ConfigLoader.instance().isProduction()) {
@@ -186,6 +210,30 @@ public class TokenService {
                 provider = new CommonsHttpOAuthProvider(
                         "https://trello.com/1/OAuthGetRequestToken", "https://trello.com/1/OAuthGetAccessToken", "https://trello.com/1/OAuthAuthorizeToken?name=EasyInsight&expiration=never");
                 //return new OAuthResponse("https://trello.com/1/authorize?key="+TrelloCompositeSource.KEY+"&name=EasyInsight&expiration=never&response_type=token", true);
+            } else if (type == FeedType.SMARTSHEET_TABLE.getType()) {
+                OAuthClientRequest request;
+                if (ConfigLoader.instance().isProduction()) {
+                    request = OAuthClientRequest
+                            .authorizationLocation("https://www.smartsheet.com/b/authorize")
+                            .setClientId(SmartsheetBaseSource.CLIENT_ID)
+                            .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
+                            .buildQueryMessage();
+                } else {
+                    request = OAuthClientRequest
+                            .authorizationLocation("https://www.smartsheet.com/b/authorize")
+                            .setClientId(SmartsheetBaseSource.CLIENT_ID)
+                            .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
+                            .buildQueryMessage();
+                }
+                session.setAttribute("redirectTarget", redirectType);
+                session.setAttribute("dataSourceID", dataSource.getApiKey());
+                String uri = request.getLocationUri();
+                uri = uri + "&scope=READ_SHEETS&state=blah";
+                return new OAuthResponse(uri, true);
+                // https://www.smartsheet.com/b/authorize?response_type=code&client_id=dheu3dmkd32fhxme&redirect_uri=https%3A%2F%2Fmyapp.smartsheet.com%2Ftarget&scope=READ_SHEETS,WRITE_SHEETS&state=MY_STATE
+                // https://app.smartsheet.com/b/authorize?formName=fn_authorize&formAction=fa_loadAuthorize&response_type=code&client_id=ykzjc8ug4gz2wl85ct&redirect_uri=https%3A%2F%2Fwww.easy-insight.com%2Fapp%2Foauth&scope=READ_SHEETS
+
+                // https://www.smartsheet.com/b/authorize?response_type=code&redirect_uri=https%3A%2F%2Fwww.easy-insight.com%2Fapp%2Foauth&client_id=ykzjc8ug4gz2wl85ct&scope=READ_SHEETS
             } else {
                 throw new RuntimeException();
             }
@@ -205,9 +253,9 @@ public class TokenService {
                 } else {
                     //requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
                     if(dataSourceId != null) {
-                        requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget=" + redirectType + "&dataSourceID=" + dataSourceId);
+                        requestToken = provider.retrieveRequestToken(consumer, "https://localhost:4443/app/oauth?redirectTarget=" + redirectType + "&dataSourceID=" + dataSourceId);
                     } else {
-                        requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget=" + redirectType + "&type=googleProvider");
+                        requestToken = provider.retrieveRequestToken(consumer, "https://localhost:4443/app/oauth?redirectTarget=" + redirectType + "&type=googleProvider");
                     }
                 }
             } else {
