@@ -42,6 +42,8 @@ public class MultiFieldFilter extends HBox implements IFilter {
 
     private var filterMetadata:FilterMetadata;
 
+    private var _filterSet:FilterSet;
+
     public function MultiFieldFilter(feedID:int, reportID:int, dashboardID:int, report:AnalysisDefinition,
                                         dashboard:Dashboard, retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
         super();
@@ -52,6 +54,7 @@ public class MultiFieldFilter extends HBox implements IFilter {
         _dashboard = dashboard;
         _retrievalState = retrievalState;
         this.filterMetadata = filterMetadata;
+        _filterSet = filterMetadata.filterSet;
         filterValues = new Button();
         filterValues.styleName = "multiFilterButton";
         setStyle("verticalAlign", "middle");
@@ -90,6 +93,7 @@ public class MultiFieldFilter extends HBox implements IFilter {
             window2.reportID = _reportID;
             window2.dashboardID = _dashboardID;
             window2.embeddedFilter = _filterDefinition;
+            window2.filterSet = _filterSet;
             window2.dataSourceID = _feedID;
             window2.report = _report;
             window2.otherFilters = _otherFilters;
@@ -188,6 +192,7 @@ public class MultiFieldFilter extends HBox implements IFilter {
         window2.dashboardID = _dashboardID;
         window2.embeddedFilter = _filterDefinition;
         window2.dataSourceID = _feedID;
+        window2.filterSet = _filterSet;
         window2.report = _report;
         window2.otherFilters = _otherFilters;
         window2.dashboard = _dashboard;

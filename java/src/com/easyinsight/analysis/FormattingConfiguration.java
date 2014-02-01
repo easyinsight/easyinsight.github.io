@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.XMLImportMetadata;
 import nu.xom.Attribute;
 import nu.xom.Element;
 
@@ -45,7 +44,7 @@ public class FormattingConfiguration implements Serializable, Cloneable {
         return formattingConfigurationID;
     }
 
-    public NumberFormat createFormatter() {
+    public static NumberFormat createFormatter(int formattingType) {
         NumberFormat nf = null;
 
         switch(formattingType) {
@@ -99,7 +98,7 @@ public class FormattingConfiguration implements Serializable, Cloneable {
         return formattingConfiguration;
     }
 
-    class PercentNumberFormat extends NumberFormat {
+    static class PercentNumberFormat extends NumberFormat {
 
         private NumberFormat format = NumberFormat.getPercentInstance();
 

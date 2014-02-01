@@ -126,6 +126,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean passThroughFilters;
     private boolean enableLocalStorage;
     private boolean canSave;
+    private boolean dataSourceFieldReport;
     private List<FilterSetDescriptor> filterSets;
 
     private String defaultDate;
@@ -154,6 +155,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private String customField1;
     private String customField2;
+
+    public boolean isDataSourceFieldReport() {
+        return dataSourceFieldReport;
+    }
+
+    public void setDataSourceFieldReport(boolean dataSourceFieldReport) {
+        this.dataSourceFieldReport = dataSourceFieldReport;
+    }
 
     private List<FilterDefinition> filtersForDrillthrough;
 
@@ -640,7 +649,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                         AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
                         AnalysisMeasure measure = new AnalysisMeasure();
-                        measure.setFormattingConfiguration(item.getFormattingConfiguration());
+                        measure.setFormattingType(item.getFormattingType());
                         if (report.isPersistedCache()) {
                             measure.setAggregation(AggregationTypes.SUM);
                         } else {

@@ -78,13 +78,6 @@ public class AnalysisDefinitionFactory {
             FormDefinitionState formDefinitionState = new FormDefinitionState();
             formDefinitionState.setFormID(wsForm.getFormID());
             analysisDefinitionState = formDefinitionState;
-        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TIMELINE)) {
-            WSTimeline wsTimeline = (WSTimeline) wsAnalysisDefinition;
-            TimelineDefinitionState timelineDefinitionState = new TimelineDefinitionState();
-            timelineDefinitionState.setDefinitionID(wsTimeline.getTimelineID());
-            timelineDefinitionState.setFilter(wsTimeline.getSequence());
-            timelineDefinitionState.setContainedReport(AnalysisDefinitionFactory.fromWSDefinition(wsTimeline.getReport()));
-            analysisDefinitionState = timelineDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.HEATMAP)) {
             WSHeatMap heatMap = (WSHeatMap) wsAnalysisDefinition;
             HeatMapDefinitionState heatMapDefinitionState = new HeatMapDefinitionState();
@@ -119,16 +112,6 @@ public class AnalysisDefinitionFactory {
             CompareYearsDefinitionState ytdDefinitionState = new CompareYearsDefinitionState();
             ytdDefinitionState.setYtdID(ytdReport.getYtdID());
             analysisDefinitionState = ytdDefinitionState;
-        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.COMBINED_VERTICAL_LIST)) {
-            WSCombinedVerticalListDefinition verticalListDefinition = (WSCombinedVerticalListDefinition) wsAnalysisDefinition;
-            CombinedVerticalListDefinitionState verticalListDefinitionState = new CombinedVerticalListDefinitionState();
-            verticalListDefinitionState.setCombinedVerticalListID(verticalListDefinition.getCombinedVerticalListDefinitionID());
-            List<AnalysisDefinition> reports = new ArrayList<AnalysisDefinition>();
-            for (WSAnalysisDefinition child : verticalListDefinition.getReports()) {
-                reports.add(AnalysisDefinitionFactory.fromWSDefinition(child));
-            }
-            verticalListDefinitionState.setChildReports(reports);
-            analysisDefinitionState = verticalListDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TREND)) {
             WSTrendDefinition wsTrendDefinition = (WSTrendDefinition) wsAnalysisDefinition;
             TrendDefinitionState trendDefinitionState = new TrendDefinitionState();
@@ -176,6 +159,15 @@ public class AnalysisDefinitionFactory {
             }
         }
         analysisDefinition.setReportStubs(reportStubs);
+        List<FilterSetStub> filterSetStubs = new ArrayList<FilterSetStub>();
+        if (wsAnalysisDefinition.getFilterSets() != null) {
+            for (FilterSetDescriptor filterSetDescriptor : wsAnalysisDefinition.getFilterSets()) {
+                FilterSetStub stub = new FilterSetStub();
+                stub.setFilterSetID(filterSetDescriptor.getId());
+                filterSetStubs.add(stub);
+            }
+        }
+        analysisDefinition.setFilterSets(filterSetStubs);
         analysisDefinition.setUrlKey(wsAnalysisDefinition.getUrlKey());
         analysisDefinition.setJoinOverrides(wsAnalysisDefinition.getJoinOverrides());
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);
@@ -202,6 +194,7 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setMarketplaceVisible(wsAnalysisDefinition.isMarketplaceVisible());
         analysisDefinition.setTemporaryReport(wsAnalysisDefinition.isTemporaryReport());
         analysisDefinition.setSolutionVisible(wsAnalysisDefinition.isSolutionVisible());
+        analysisDefinition.setDataSourceFieldReport(wsAnalysisDefinition.isDataSourceFieldReport());
         return analysisDefinition;
     }
 }

@@ -89,6 +89,8 @@
                     extraLabel = "Day of Month";
                     selectedDayOfMonth = String(MonthlyScheduleType(_activity.scheduleType).dayOfMonth);
                     scheduleIndex = 2;
+                } else if (_activity.scheduleType is NeverScheduleType) {
+                    scheduleType = "Never (Disabled)";
                 }
             }
             var fontSize:int = getStyle("fontSize");
@@ -119,6 +121,8 @@
                     return false;
                 }
                 MonthlyScheduleType(_activity.scheduleType).dayOfMonth = int(dayInput.text);
+            } else if (scheduleBox.selectedItem == "Never (Disabled)") {
+                _activity.scheduleType = new NeverScheduleType();
             }
             _activity.scheduleType.hour = hourStepper.value;
             _activity.scheduleType.minute = minuteStepper.value;
@@ -136,6 +140,7 @@
                         <mx:String>Tuesday/Thursday</mx:String>
                         <mx:String>Weekly</mx:String>
                         <mx:String>Monthly</mx:String>
+                        <mx:String>Never (Disabled)</mx:String>
                     </mx:Array>
                 </mx:ArrayCollection>
             </mx:dataProvider>

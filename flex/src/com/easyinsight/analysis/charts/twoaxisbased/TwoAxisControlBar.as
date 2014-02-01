@@ -12,7 +12,6 @@ import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.analysis.ReportPropertiesEvent;
-import com.easyinsight.analysis.charts.ChartRotationEvent;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -22,7 +21,6 @@ import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
-import mx.controls.Alert;
 import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.controls.RadioButton;
@@ -246,11 +244,6 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {
-        if (event is ChartRotationEvent) {
-            var chartEvent:ChartRotationEvent = event as ChartRotationEvent;
-            xAxisDefinition.elevationAngle = chartEvent.elevation;
-            xAxisDefinition.rotationAngle = chartEvent.rotation;
-        }
     }
 }
 }

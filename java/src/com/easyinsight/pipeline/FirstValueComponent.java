@@ -90,7 +90,9 @@ public class FirstValueComponent implements IComponent, DescribableComponent {
             for (List<IRow> rows : aggregationMap.values()) {
                 for (int i = 0; i < threshold; i++) {
                     if (i < rows.size()) {
-                        resultSet.createRow().addValues(rows.get(i));
+                        IRow resultRow = resultSet.createRow();
+                        resultRow.setPassthroughRow(rows.get(i).getPassthroughRow());
+                        resultRow.addValues(rows.get(i));
                     }
                 }
             }

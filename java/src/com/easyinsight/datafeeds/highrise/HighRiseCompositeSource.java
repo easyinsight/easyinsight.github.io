@@ -5,6 +5,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.ReportKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
@@ -498,6 +499,9 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     public void decorateLinks(List<AnalysisItem> analysisItems) {
         for (AnalysisItem analysisItem : analysisItems) {
+            if (analysisItem.getKey() instanceof ReportKey) {
+                continue;
+            }
             if (analysisItem.getLinks() == null) {
                 analysisItem.setLinks(new ArrayList<Link>());
             }
@@ -804,9 +808,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             daysToDue.setKey(new NamedKey("Days to Due"));
             daysToDue.setConcrete(false);
             daysToDue.setDisplayName("Days to Due");
-            FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
-            formattingConfiguration.setFormattingType(FormattingConfiguration.MILLISECONDS);
-            daysToDue.setFormattingConfiguration(formattingConfiguration);
+            daysToDue.setFormattingType(FormattingConfiguration.MILLISECONDS);
             daysToDue.setCalculationString("[Task Due At] - now()");
             intentions.add(new CustomFieldIntention(daysToDue));
             Set<AnalysisItem> items = report.getAllAnalysisItems();

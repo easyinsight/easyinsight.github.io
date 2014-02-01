@@ -38,6 +38,10 @@ public class DataSetKeys implements Cloneable, Serializable {
         return position;
     }
 
+    public Short getKeyNoAdd(Key key) {
+        return keyMap.get(key);
+    }
+
     public Short getKey(AnalysisItem analysisItem) {
         Short position = keyMap.get(analysisItem.getKey());
         if (position == null) {

@@ -156,13 +156,13 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
     public void beforeSave(Session session) {
         super.beforeSave(session);
         for (AnalysisItemHandle analysisItem : availableHandles) {
-            analysisItem.save(session);
+            analysisItem.save();
         }
         for (AnalysisItemHandle analysisItem : selectedItems) {
-            analysisItem.save(session);
+            analysisItem.save();
         }
         for (AnalysisItemHandle analysisItem : fieldOrdering) {
-            analysisItem.save(session);
+            analysisItem.save();
         }
     }
 
@@ -180,9 +180,12 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
 
         List<WeNeedToReplaceHibernateTag> replaceTags = new ArrayList<WeNeedToReplaceHibernateTag>();
         for (WeNeedToReplaceHibernateTag tag : availableTags) {
-            WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
-            newTag.setTagID(newTag.getTagID());
-            replaceTags.add(tag);
+            WeNeedToReplaceHibernateTag newTag = replacementMap.findReplacementTag(tag.getTagID());
+            if (newTag == null) {
+                newTag = new WeNeedToReplaceHibernateTag();
+                newTag.setTagID(tag.getTagID());
+            }
+            replaceTags.add(newTag);
         }
         this.availableTags = replaceTags;
 
@@ -220,7 +223,7 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
     @Override
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
         JSONObject jo = super.toJSON(filterHTMLMetadata);
-        List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, null, null);
+        List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, null, null, null);
 
         jo.put("type", "multi_field_filter");
         jo.put("count", itemsAvailable.size());

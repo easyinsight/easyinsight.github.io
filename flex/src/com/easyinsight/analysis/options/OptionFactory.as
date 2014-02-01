@@ -15,11 +15,7 @@ package com.easyinsight.analysis.options
 			var option:String;
 			if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
 				var analysisMeasure:AnalysisMeasure = analysisItem as AnalysisMeasure;
-                if (analysisMeasure.hasType(AnalysisItemTypes.SIX_SIGMA_MEASURE)) {
-                    option = OptionTypeNames.SIXSIGMA;
-                } else if (analysisMeasure.hasType(AnalysisItemTypes.REAGGREGATE_MEASURE)) {
-                    option = OptionTypeNames.REAGGREGATE;
-                } else if (analysisMeasure.aggregation == AggregationTypes.SUM) {
+                if (analysisMeasure.aggregation == AggregationTypes.SUM) {
 					option = OptionTypeNames.SUM;
 				} else if (analysisMeasure.aggregation == AggregationTypes.AVERAGE) {
 					option = OptionTypeNames.AVERAGE;
@@ -51,16 +47,8 @@ package com.easyinsight.analysis.options
 					option = OptionTypeNames.STEP;
 				} else if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
 					option = OptionTypeNames.DATE;
-				} else if (analysisItem.hasType(AnalysisItemTypes.RANGE)) {
-					option = OptionTypeNames.RANGE;
 				} else if (analysisItem.hasType(AnalysisItemTypes.LIST)) {
 					option = OptionTypeNames.LIST;
-                } else if (analysisItem.hasType(AnalysisItemTypes.LATITUDE)) {
-                    option = OptionTypeNames.LATITUDE;
-                } else if (analysisItem.hasType(AnalysisItemTypes.LONGITUDE)) {
-                    option = OptionTypeNames.LONGITUDE;
-                } else if (analysisItem.hasType(AnalysisItemTypes.ZIP_CODE)) {
-                    option = OptionTypeNames.ZIP_CODE;
                 } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
                     option = OptionTypeNames.TEXT;
 				} else {

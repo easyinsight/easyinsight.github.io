@@ -1,7 +1,6 @@
 package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.AnalysisDimension;
-import com.easyinsight.analysis.AnalysisZipCode;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
@@ -23,7 +22,7 @@ public class HighRiseCompany1To2 extends DataSourceMigration {
     @Override
     public void migrate(Map<String, Key> keys, EIConnection conn) throws Exception {
         addAnalysisItem(new AnalysisDimension(new NamedKey(HighRiseCompanySource.BACKGROUND), true));
-        addAnalysisItem(new AnalysisZipCode(new NamedKey(HighRiseCompanySource.ZIP_CODE), true));
+        addAnalysisItem(new AnalysisDimension(new NamedKey(HighRiseCompanySource.ZIP_CODE), true));
     }
 
     @Override

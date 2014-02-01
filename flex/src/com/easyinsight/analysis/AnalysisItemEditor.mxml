@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:range="com.easyinsight.analysis.range.*"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:analysis="com.easyinsight.analysis.*"
          creationComplete="initStuff()" creationPolicy="all"
          implements="com.easyinsight.analysis.IAnalysisItemEditor" horizontalAlign="center" paddingLeft="10">
@@ -23,14 +23,6 @@
                                                measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
-
-        <mx:State name="Range">
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <range:RangeDetailEditor addedToStage="detailEditor = rangeDetailEditor" id="rangeDetailEditor"
-                                         dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                                         measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
-            </mx:AddChild>
-        </mx:State>
         <mx:State name="Tags">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:ListDetailEditor addedToStage="detailEditor = listDetailEditor" id="listDetailEditor"
@@ -43,32 +35,6 @@
                 <analysis:TextDetailEditor addedToStage="detailEditor = textDetailEditor" id="textDetailEditor"
                                            dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
                                            measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="Latitude">
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:LatitudeDetailEditor addedToStage="detailEditor = latitudeDetailEditor"
-                                               id="latitudeDetailEditor"
-                                               dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                                               measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="Longitude">
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:LongitudeDetailEditor addedToStage="detailEditor = longitudeDetailEditor"
-                                                id="longitudeDetailEditor"
-                                                dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                                                measureObjects="{measureObjects}"
-                                                analysisItem="{startingAnalysisItem}"/>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="ZipCode">
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:ZipCodeDetailEditor addedToStage="detailEditor = zipCodeEditor"
-                                                id="zipCodeEditor"
-                                                dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                                                measureObjects="{measureObjects}"
-                                                analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Date">
@@ -218,7 +184,7 @@
         }
 
         protected static function getGroupingOptions():ArrayCollection {
-            return new ArrayCollection(["Grouping", "Range", "Date", "Tags", "Latitude", "Longitude", "Zip Code", "Text"]);
+            return new ArrayCollection(["Grouping", "Date", "Tags", "Text"]);
         }
 
         protected static function getMeasureOptions():ArrayCollection {
@@ -288,9 +254,6 @@
                 case "Grouping":
                     currentState = "Grouping";
                     break;
-                case "Range":
-                    currentState = "Range";
-                    break;
                 case "Tags":
                     currentState = "Tags";
                     break;
@@ -299,15 +262,6 @@
                     break;
                 case "Date":
                     currentState = "Date";
-                    break;
-                case "Latitude":
-                    currentState = "Latitude";
-                    break;
-                case "Longitude":
-                    currentState = "Longitude";
-                    break;
-                case "Zip Code":
-                    currentState = "ZipCode";
                     break;
                 case "Text":
                     currentState = "Text";
@@ -395,12 +349,8 @@
                         <mx:dataProvider>
                             <mx:Array>
                                 <mx:String>Grouping</mx:String>
-                                <mx:String>Range</mx:String>
                                 <mx:String>Date</mx:String>
                                 <mx:String>Tags</mx:String>
-                                <mx:String>Latitude</mx:String>
-                                <mx:String>Longitude</mx:String>
-                                <mx:String>Zip Code</mx:String>
                                 <mx:String>Text</mx:String>
                             </mx:Array>
                         </mx:dataProvider>

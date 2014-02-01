@@ -10,6 +10,7 @@ public class FilterMetadata {
 
     public var key:String;
     public var context:int;
+    public var filterSet:FilterSet;
 
     public function FilterMetadata() {
     }

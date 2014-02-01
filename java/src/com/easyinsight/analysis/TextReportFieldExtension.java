@@ -34,6 +34,17 @@ public class TextReportFieldExtension extends ReportFieldExtension {
     @Column(name="ignore_on_summary")
     private boolean ignoreOnSummary = false;
 
+    @Column(name="force_to_summary")
+    private boolean forceToSummary = false;
+
+    public boolean isForceToSummary() {
+        return forceToSummary;
+    }
+
+    public void setForceToSummary(boolean forceToSummary) {
+        this.forceToSummary = forceToSummary;
+    }
+
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
         Element element = new Element("fieldExtension");

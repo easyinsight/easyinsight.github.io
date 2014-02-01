@@ -48,11 +48,7 @@
 
         private static function rowColor(item:Object, color:uint):uint {
             var treeRow:TreeRow = item as TreeRow;
-            if (treeRow.summaryColumn) {
-                return 0xCCCCCC;
-            } else {
-                return color;
-            }
+            return treeRow.backgroundColor;
         }
 
         private function onResize():void {

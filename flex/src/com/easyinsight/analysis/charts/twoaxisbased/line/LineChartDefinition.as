@@ -1,8 +1,9 @@
 package com.easyinsight.analysis.charts.twoaxisbased.line {
+import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.FeedMetadata;
 import com.easyinsight.analysis.MultiColor;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
-import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.skin.ApplicationSkin;
 
 import mx.collections.ArrayCollection;

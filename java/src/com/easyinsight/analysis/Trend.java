@@ -91,7 +91,7 @@ public class Trend {
                     } else {
                         direction = KPIOutcome.NO_DIRECTION;
                     }
-                    int outcome = populateOutcome(analysisMeasure.isHighIsGood() ? KPI.GOOD : KPI.BAD, delta, newValue, 0);
+                    int outcome = populateOutcome(KPI.GOOD, delta, newValue, 0);
                     trendOutcome.setDirection(direction);
                     trendOutcome.setOutcome(outcome);
                 }

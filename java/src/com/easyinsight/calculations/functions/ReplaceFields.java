@@ -2,7 +2,7 @@ package com.easyinsight.calculations.functions;
 
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.MaterializedFilterPatternDefinition;
-import com.easyinsight.analysis.ReaggregateAnalysisMeasure;
+
 import com.easyinsight.analysis.definitions.WSCompareYearsDefinition;
 import com.easyinsight.analysis.definitions.WSVerticalListDefinition;
 import com.easyinsight.analysis.definitions.WSYTDDefinition;
@@ -75,10 +75,6 @@ public class ReplaceFields extends Function {
     private AnalysisItem fromTemplate(AnalysisItem template, AnalysisItem target) {
         try {
             AnalysisItem clone = template.clone();
-            if (clone instanceof ReaggregateAnalysisMeasure) {
-                ReaggregateAnalysisMeasure reaggregateAnalysisMeasure = (ReaggregateAnalysisMeasure) clone;
-                reaggregateAnalysisMeasure.setWrappedMeasure(target);
-            }
             clone.setDisplayName(target.getDisplayName());
             clone.setKey(target.getKey());
             return clone;

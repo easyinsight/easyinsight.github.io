@@ -9,9 +9,12 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.exchange.ExchangeItem;
 import com.easyinsight.export.*;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.preferences.ApplicationSkin;
+import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.security.Roles;
@@ -22,6 +25,7 @@ import com.easyinsight.goals.*;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DataSourceDescriptor;
+import com.easyinsight.tag.Tag;
 import com.easyinsight.users.Account;
 
 import java.text.SimpleDateFormat;
@@ -558,28 +562,29 @@ public class SolutionService {
         return dashboardDescriptor;
     }
     
-    public static void recurseDashboard(Map<Long, AnalysisDefinition> reports, Map<Long, Dashboard> dashboards, Dashboard dashboard, Session session, EIConnection conn) throws Exception {
+    public static void recurseDashboard(Map<Long, AnalysisDefinition> reports, Map<Long, Dashboard> dashboards, Dashboard dashboard, Session session, EIConnection conn, Set<Long> tags) throws Exception {
         if (!dashboards.containsKey(dashboard.getId())) {
             dashboards.put(dashboard.getId(), dashboard);
             Set<Long> reportIDs = dashboard.containedReports();
             for (Long reportID : reportIDs) {
                 AnalysisDefinition report = new AnalysisStorage().getPersistableReport(reportID, session);
-                recurseReport(reports, dashboards, report, session, conn);
+                recurseReport(reports, dashboards, report, session, conn, tags);
             }
         }
     }
 
-    public static void recurseReport(Map<Long, AnalysisDefinition> reports, Map<Long, Dashboard> dashboards, AnalysisDefinition report, Session session, EIConnection conn) throws Exception {
+    public static void recurseReport(Map<Long, AnalysisDefinition> reports, Map<Long, Dashboard> dashboards, AnalysisDefinition report, Session session, EIConnection conn, Set<Long> tags) throws Exception {
         if (!reports.containsKey(report.getAnalysisID())) {
             reports.put(report.getAnalysisID(), report);
+            tags.addAll(report.findTags());
             Set<EIDescriptor> containedReportIDs = report.containedReportIDs();
             for (EIDescriptor descriptor : containedReportIDs) {
                 if (descriptor.getType() == EIDescriptor.REPORT) {
                     AnalysisDefinition child = new AnalysisStorage().getPersistableReport(descriptor.getId(), session);
-                    recurseReport(reports, dashboards, child, session, conn);
+                    recurseReport(reports, dashboards, child, session, conn, tags);
                 } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
                     Dashboard dashboard = new DashboardStorage().getDashboard(descriptor.getId(), conn);
-                    recurseDashboard(reports, dashboards, dashboard, session, conn);
+                    recurseDashboard(reports, dashboards, dashboard, session, conn, tags);
                 }
             }
         }
@@ -592,7 +597,10 @@ public class SolutionService {
         Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
         Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
         Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
-        recurseDashboard(reports, dashboards, dashboard, session, conn);
+        Set<Long> tags = new HashSet<Long>();
+        recurseDashboard(reports, dashboards, dashboard, session, conn, tags);
+
+        Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap = createTagReplacements(conn, tags);
 
         /*for (Long containedReportID : reportIDs) {
             AnalysisDefinition report = new AnalysisStorage().getPersistableReport(containedReportID, session);
@@ -628,7 +636,7 @@ public class SolutionService {
             AnalysisDefinition alreadyInstalled = alreadyInstalledMap.get(childReport.getAnalysisID());
             if (alreadyInstalled == null) {
                 childReport.createBlazeDefinition();
-                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, childReport, new ArrayList<AnalysisItem>(map.values()));
+                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, childReport, new ArrayList<AnalysisItem>(map.values()), tagReplacementMap);
                 copyReport.setFolder(toFolder);
                 reportReplacementMap.put(childReport.getAnalysisID(), copyReport);
                 reportList.add(copyReport);
@@ -711,6 +719,64 @@ public class SolutionService {
         return new DashboardDescriptor(copiedDashboard.getName(), copiedDashboard.getId(), copiedDashboard.getUrlKey(), 0, Roles.NONE, null, false);
     }
 
+    private Map<Long, WeNeedToReplaceHibernateTag> createTagReplacements(EIConnection conn, Set<Long> tags) throws SQLException {
+        Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap = new HashMap<Long, WeNeedToReplaceHibernateTag>();
+        for (Long tagID : tags) {
+            PreparedStatement ps = conn.prepareStatement("SELECT TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_TAG_ID = ?");
+            ps.setLong(1, tagID);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            String tagName = rs.getString(1);
+            PreparedStatement findInAccountStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID FROM ACCOUNT_TAG WHERE TAG_NAME = ? AND ACCOUNT_ID = ?");
+            findInAccountStmt.setString(1, tagName);
+            findInAccountStmt.setLong(2, SecurityUtil.getAccountID());
+            ResultSet inAccountRS = findInAccountStmt.executeQuery();
+            long replaceID;
+            if (inAccountRS.next()) {
+                replaceID = inAccountRS.getLong(1);
+            } else {
+                PreparedStatement saveTagStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG) VALUES (?, ?, ?, ?, ?)",
+                        Statement.RETURN_GENERATED_KEYS);
+                saveTagStmt.setString(1, tagName);
+                saveTagStmt.setLong(2, SecurityUtil.getAccountID());
+                saveTagStmt.setBoolean(3, false);
+                saveTagStmt.setBoolean(4, false);
+                saveTagStmt.setBoolean(5, true);
+                saveTagStmt.execute();
+                replaceID = Database.instance().getAutoGenKey(saveTagStmt);
+
+                // also need to assign the appropriate tags here...
+            }
+            WeNeedToReplaceHibernateTag weNeedToReplaceHibernateTag = new WeNeedToReplaceHibernateTag();
+            weNeedToReplaceHibernateTag.setTagID(replaceID);
+            tagReplacementMap.put(tagID, weNeedToReplaceHibernateTag);
+        }
+        return tagReplacementMap;
+    }
+
+    public void regenerateTags(Set<Long> tagIDs, long fromDataSourceID, FeedDefinition toDataSource, EIConnection conn, Map<Long, WeNeedToReplaceHibernateTag> tags) throws SQLException {
+        Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+        for (AnalysisItem existing : toDataSource.getFields()) {
+            map.put(existing.toDisplay(), existing);
+        }
+        List<AnalysisItemConfiguration> configurations = new FeedService().getAnalysisItemConfigurations(fromDataSourceID);
+        for (AnalysisItemConfiguration config : configurations) {
+            AnalysisItem target = map.get(config.getAnalysisItem().qualifiedName());
+            AnalysisItemConfiguration config1 = new AnalysisItemConfiguration();
+            config1.setAnalysisItem(target);
+            if (config.getTags() != null && config.getTags().size() > 0) {
+                List<Tag> newTags = new ArrayList<Tag>();
+                for (Tag tag : config.getTags()) {
+                    WeNeedToReplaceHibernateTag copy = tags.get(tag.getId());
+                    Tag copyTag = new Tag();
+                    copyTag.setId(copy.getTagID());
+                    newTags.add(copyTag);
+                }
+                config1.setTags(newTags);
+            }
+        }
+    }
+
     public InsightDescriptor installReport(long reportID, long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -736,16 +802,14 @@ public class SolutionService {
     public InsightDescriptor installReport(long reportID, long dataSourceID, EIConnection conn, Session session,
                                             boolean keepTemporary, boolean makeAccountVisible, Map<Long, AnalysisDefinition> alreadyInstalledMap) throws Exception {
         AnalysisDefinition originalBaseReport = new AnalysisStorage().getPersistableReport(reportID, session);
-        //FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
-        // okay, we might have multiple reports here...
-        // find all the other reports in the dependancy graph here
-        //List<AnalysisDefinition> reports = originalBaseReport.containedReports(session);
         Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
         Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
-        recurseReport(reports, dashboards, originalBaseReport, session, conn);
-        //reports.add(originalBaseReport);
+        Set<Long> tags = new HashSet<Long>();
+        recurseReport(reports, dashboards, originalBaseReport, session, conn, tags);
+        Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap = createTagReplacements(conn, tags);
         FeedStorage feedStorage = new FeedStorage();
         FeedDefinition originalSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
+
         FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
         Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
         for (AnalysisItem field : originalSource.getFields()) {
@@ -762,7 +826,7 @@ public class SolutionService {
             AnalysisDefinition alreadyInstalled = alreadyInstalledMap.get(child.getAnalysisID());
             if (alreadyInstalled == null) {
                 child.createBlazeDefinition();
-                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child, new ArrayList<AnalysisItem>(map.values()));
+                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child, new ArrayList<AnalysisItem>(map.values()), tagReplacementMap);
                 if (child.getAnalysisID() != reportID) {
                     copyReport.setFolder(EIDescriptor.OTHER_VIEW);
                 }
@@ -803,6 +867,7 @@ public class SolutionService {
 
         for (AnalysisDefinition copiedReport : reportList) {
             new AnalysisStorage().saveAnalysis(copiedReport, session);
+
         }
 
         for (Dashboard copiedDashboard : dashboardList) {
@@ -898,12 +963,13 @@ public class SolutionService {
         return clonedDashboard;
     }
 
-    private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report, List<AnalysisItem> additionalDataSourceFields) throws CloneNotSupportedException {
-        AnalysisDefinition clonedReport = report.clone(localDefinition, localDefinition.getFields(), true, additionalDataSourceFields);
+    private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report, List<AnalysisItem> additionalDataSourceFields,
+                                                      Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap) throws CloneNotSupportedException {
+        AnalysisDefinition clonedReport = report.clone(localDefinition, localDefinition.getFields(), true, additionalDataSourceFields, tagReplacementMap);
         clonedReport.setSolutionVisible(false);
         clonedReport.setRecommendedExchange(false);
         clonedReport.setAutoSetupDelivery(false);
-        clonedReport.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
+        //clonedReport.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
         clonedReport.setDataFeedID(localDefinition.getDataFeedID());
 
         // what to do here...

@@ -102,7 +102,7 @@ public class DistinctCachedSource extends ServerDataSourceDefinition {
             } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                 AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
                 AnalysisMeasure measure = new AnalysisMeasure();
-                measure.setFormattingConfiguration(item.getFormattingConfiguration());
+                measure.setFormattingType(item.getFormattingType());
                 measure.setAggregation(baseMeasure.getAggregation());
                 measure.setPrecision(baseMeasure.getPrecision());
                 measure.setMinPrecision(baseMeasure.getMinPrecision());

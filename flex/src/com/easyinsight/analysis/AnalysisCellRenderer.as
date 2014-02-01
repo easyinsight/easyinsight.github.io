@@ -64,8 +64,12 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
                     Alert.show(e.message);
                 }
             } else if (defaultLink is DrillThrough) {
+                var values:ArrayCollection = null;
+                if (DrillThrough(defaultLink).passThroughField != null) {
+                    values = data[analysisItem.qualifiedName() + "_drill"];
+                }
                 var drillThrough:DrillThrough = defaultLink as DrillThrough;
-                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, _report);
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, _report, null, values);
                 executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();
             }

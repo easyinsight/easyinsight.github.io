@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.analysis.ReportAuditEvent;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.Arrays;
@@ -12,8 +13,15 @@ import java.util.List;
  */
 public class MergeAudit {
     private List<String> mergeStrings;
+    private List<ReportAuditEvent> auditEvents;
     private DataSet dataSet;
     private int operations;
+
+    public MergeAudit(String mergeString, DataSet dataSet, List<ReportAuditEvent> auditEvents) {
+        this.mergeStrings = Arrays.asList(mergeString);
+        this.dataSet = dataSet;
+        this.auditEvents = auditEvents;
+    }
 
     public MergeAudit(String mergeString, DataSet dataSet) {
         this.mergeStrings = Arrays.asList(mergeString);
@@ -23,6 +31,10 @@ public class MergeAudit {
     public MergeAudit(List<String> mergeStrings, DataSet dataSet) {
         this.mergeStrings = mergeStrings;
         this.dataSet = dataSet;
+    }
+
+    public List<ReportAuditEvent> getAuditEvents() {
+        return auditEvents;
     }
 
     public int getOperations() {

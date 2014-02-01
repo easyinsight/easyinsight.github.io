@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var filterSets:ArrayCollection;
+
+        public var dataSourceID:int;
+
+        private function onCreation():void {
+            ProgressAlert.alert(this, "Retrieving filter sets...", null, analysisService.getFilterSetsForDataSource);
+            analysisService.getFilterSetsForDataSource.send(dataSourceID);
+        }
+
+        private function gotFilterSets():void {
+            filterSets = analysisService.getFilterSetsForDataSource.lastResult as ArrayCollection;
+        }
+
+        private function choose():void {
+            var set:FilterSetDescriptor = filterSetBox.selectedItem as FilterSetDescriptor;
+            dispatchEvent(new FilterSetReportEvent(FilterSetReportEvent.ADD_FILTER_SET, set));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="getFilterSetsForDataSource" result="gotFilterSets()"/>
+    </mx:RemoteObject>
+    <mx:Form>
+        <mx:FormItem label="Choose a Filter Set:">
+            <mx:ComboBox id="filterSetBox" labelField="name" dataProvider="{filterSets}"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Add" click="choose()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

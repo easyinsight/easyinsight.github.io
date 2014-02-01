@@ -28,7 +28,7 @@ public class DashboardElement {
     public var forceScrollingOff:Boolean;
     public var htmlWidth:int;
     public var dashboardFilterOverrides:ArrayCollection;
-
+    public var filterSets:ArrayCollection;
     public var dashboardLevel:int;
 
     public function DashboardElement() {

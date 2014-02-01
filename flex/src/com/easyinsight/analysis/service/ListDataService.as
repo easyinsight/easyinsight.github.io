@@ -15,7 +15,10 @@ import com.easyinsight.framework.InvalidFieldsEvent;
 
 import flash.events.EventDispatcher;
 
+
+
 import mx.collections.ArrayCollection;
+
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -58,6 +61,7 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
             var row:Object = rows.getItemAt(i);
             var values:Array = row.values as Array;
             var endObject:Object = new Object();
+            //endObject["drillThroughField"] = row.drillThroughData;
             for (var j:int = 0; j < headers.length; j++) {
                 var headerDimension:AnalysisItem = headers[j];
 
@@ -74,6 +78,13 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
                         endObject[linkKey + "_link"] = value.links[linkKey];
                     }
                 }
+                if (value.drillThroughValues != null) {
+                    endObject[key + "_drill"] = value.drillThroughValues;
+                }
+                /*if (value.drillThroughValue != null) {
+                    value.drillThroughValue = "blah";
+                }*/
+
                 var aliasItem:AnalysisItem = map[headerDimension.qualifiedName()] as AnalysisItem;
                 if (aliasItem != null) {
                     if (_preserveValues) {

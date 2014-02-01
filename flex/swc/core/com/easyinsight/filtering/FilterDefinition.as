@@ -50,6 +50,7 @@ import mx.utils.ObjectUtil;
     public var flexID:int = flexIDCtr++;
     public var parentChildLabel:String;
     public var childToParentLabel:String;
+    public var fromFilterSet:int;
 
 		public function FilterDefinition()
 			{

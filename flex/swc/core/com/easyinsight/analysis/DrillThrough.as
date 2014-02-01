@@ -10,6 +10,7 @@ public class DrillThrough extends Link{
     public var addAllFilters:Boolean;
     public var showDrillThroughFilters:Boolean;
     public var filterRowGroupings:Boolean;
+    public var passThroughField:AnalysisItemHandle;
 
     public function DrillThrough() {
         super();

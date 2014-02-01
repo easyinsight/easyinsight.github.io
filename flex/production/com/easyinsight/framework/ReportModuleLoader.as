@@ -22,7 +22,7 @@ import com.easyinsight.analysis.diagram.DiagramModule;
 import com.easyinsight.analysis.form.FormModule;
 import com.easyinsight.analysis.gauge.GaugeModule;
 import com.easyinsight.analysis.list.ListModule;
-import com.easyinsight.analysis.summary.SummaryModule;
+import com.easyinsight.analysis.summary.NewSummaryModule;
 import com.easyinsight.analysis.text.TextModule;
 import com.easyinsight.analysis.tree.TreeModule;
 import com.easyinsight.analysis.trend.TrendGridModule;
@@ -138,7 +138,7 @@ public class ReportModuleLoader extends EventDispatcher {
             } else if (moduleName == "PieChartModule.swf") {
                 return new PieChartModule();
             } else if (moduleName == "SummaryModule.swf") {
-                return new SummaryModule();
+                return new NewSummaryModule();
             } else if (moduleName == "BubbleChartModule.swf") {
                 return new BubbleChartModule();
             } else if (moduleName == "PlotChartModule.swf") {

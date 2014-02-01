@@ -1,9 +1,6 @@
 package com.easyinsight.dashboard;
 
-import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.analysis.FilterHTMLMetadata;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -43,6 +40,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     private boolean forceScrollingOff;
     private String label;
     private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+    private List<FilterSetDescriptor> filterSets = new ArrayList<FilterSetDescriptor>();
     private String filterBorderStyle = "solid";
     private int filterBorderColor;
     private int filterBackgroundColor;
@@ -64,6 +62,14 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     private int preferredHeight;
 
     private int htmlWidth;
+
+    public List<FilterSetDescriptor> getFilterSets() {
+        return filterSets;
+    }
+
+    public void setFilterSets(List<FilterSetDescriptor> filterSets) {
+        this.filterSets = filterSets;
+    }
 
     public String getUrlKey() {
         return urlKey;
@@ -416,9 +422,11 @@ public abstract class DashboardElement implements Cloneable, Serializable {
 
         PreparedStatement filterStmt = conn.prepareStatement("INSERT INTO dashboard_element_to_filter (dashboard_element_id, FILTER_ID) VALUES (?, ?)");
         for (FilterDefinition filterDefinition : getFilters()) {
-            filterStmt.setLong(1, getElementID());
-            filterStmt.setLong(2, filterDefinition.getFilterID());
-            filterStmt.execute();
+            if (filterDefinition.getFromFilterSet() == 0) {
+                filterStmt.setLong(1, getElementID());
+                filterStmt.setLong(2, filterDefinition.getFilterID());
+                filterStmt.execute();
+            }
         }
         filterStmt.close();
 
@@ -439,6 +447,17 @@ public abstract class DashboardElement implements Cloneable, Serializable {
                 filterOverrideStmt.setLong(3, getElementID());
                 filterOverrideStmt.execute();
             }
+            filterOverrideStmt.close();
+        }
+
+        if (getFilterSets() != null) {
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO dashboard_element_to_filter_set (dashboard_element_id, filter_set_id) values (?, ?)");
+            for (FilterSetDescriptor filterSetDescriptor : getFilterSets()) {
+                saveStmt.setLong(1, getElementID());
+                saveStmt.setLong(2, filterSetDescriptor.getId());
+                saveStmt.execute();
+            }
+            saveStmt.close();
         }
 
         return elementID;

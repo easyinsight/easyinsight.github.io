@@ -2,6 +2,7 @@ package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.ReportKey;
 import com.easyinsight.pipeline.*;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.CycleDetector;
@@ -64,8 +65,6 @@ public class CalcGraph {
                     components.add(new DerivedGroupingComponent((DerivedAnalysisDimension) calcNode));
                 } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DATE)) {
                     components.add(new DerivedDateComponent((DerivedAnalysisDateDimension) calcNode));
-                } else if (calcNode.hasType(AnalysisItemTypes.REAGGREGATE_MEASURE)) {
-                    components.add(new ReaggregateComponent((ReaggregateAnalysisMeasure) calcNode));
                 }
             }
             FieldFilterComponent fieldFilterComponent = new FieldFilterComponent();

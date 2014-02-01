@@ -8,9 +8,7 @@ import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.servlet.SystemSettings;
-import com.easyinsight.users.Account;
 import org.hibernate.Session;
 
 import java.sql.Connection;
@@ -525,33 +523,25 @@ public class CompositeFeedConnection implements Serializable, IJoin {
         Collection<IRow> unjoinedRows = new ArrayList<IRow>();
         List<IRow> sourceSetRows = sourceSet.getRows();
         List<IRow> targetSetRows = dataSet.getRows();
-        int accountType;
-        try {
-            accountType = SecurityUtil.getAccountTier();
-        } catch (Exception e) {
-            accountType = Account.BASIC;
-        }
-        Iterator<IRow> sourceIter = sourceSetRows.iterator();
-        while (sourceIter.hasNext()) {
-            IRow row = sourceIter.next();
+        for (IRow row : sourceSetRows) {
             Value joinDimensionValue = row.getValue(myJoinDimension);
             if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
                 if (!sourceOuterJoin) {
                     operations++;
                     if (operations % 100000 == 0) {
-                        validateOperation(operations, accountType);
+                        validateOperation(operations);
                     }
                     unjoinedRows.add(row);
                 }
             } else {
                 List<IRow> rows = index.get(joinDimensionValue);
-                if (rows == null){
+                if (rows == null) {
                     rows = new ArrayList<IRow>(1);
                     index.put(joinDimensionValue, rows);
                 }
                 operations++;
                 if (operations % 100000 == 0) {
-                    validateOperation(operations, accountType);
+                    validateOperation(operations);
                 }
                 rows.add(row);
             }
@@ -560,26 +550,33 @@ public class CompositeFeedConnection implements Serializable, IJoin {
         result.getAudits().addAll(sourceSet.getAudits());
         result.getAudits().addAll(dataSet.getAudits());
         Map<Value, List<IRow>> indexCopy = new HashMap<Value, List<IRow>>(index);
-        Iterator<IRow> targetIter = targetSetRows.iterator();
-        while (targetIter.hasNext()) {
-            IRow row = targetIter.next();
+
+        // for each row in target set...
+
+
+        for (IRow row : targetSetRows) {
+            // retrieve the join value from the target row
+
             Value joinDimensionValue = row.getValue(fromJoinDimension);
             if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
                 if (!targetOuterJoin) {
                     operations++;
                     if (operations % 100000 == 0) {
-                        validateOperation(operations, accountType);
+                        validateOperation(operations);
                     }
                     unjoinedRows.add(row);
                 }
             } else {
                 indexCopy.remove(joinDimensionValue);
+
+                // find all rows in source indexed by the join value
+
                 List<IRow> sourceRows = index.get(joinDimensionValue);
                 if (sourceRows == null) {
                     if (!targetOuterJoin) {
                         operations++;
                         if (operations % 100000 == 0) {
-                            validateOperation(operations, accountType);
+                            validateOperation(operations);
                         }
                         unjoinedRows.add(row);
                     }
@@ -587,13 +584,98 @@ public class CompositeFeedConnection implements Serializable, IJoin {
                     for (IRow sourceRow : sourceRows) {
                         operations++;
                         if (operations % 100000 == 0) {
-                            validateOperation(operations, accountType);
+                            validateOperation(operations);
                         }
+
+                        // for each project in source row, increment the count
+
+                        sourceRow.incrementJoinCount();
+                        row.incrementJoinCount();
+
                         sourceRow.merge(row, result);
                     }
                 }
             }
         }
+
+        int sourceTotal = 0;
+
+        for (IRow row : sourceSet.getRows()) {
+            sourceTotal += row.getJoinCount();
+            row.resetJoinCount();
+        }
+
+        boolean hasSourceMeasure = false;
+        for (AnalysisItem item : sourceFields) {
+            if (item.hasType(AnalysisItemTypes.MEASURE)) {
+                hasSourceMeasure = true;
+                break;
+            }
+        }
+
+        List<ReportAuditEvent> auditEvents = new ArrayList<ReportAuditEvent>();
+        auditEvents.add(new ReportAuditEvent(ReportAuditEvent.JOIN, mergeString));
+
+        if (hasSourceMeasure && sourceTotal > sourceSet.getRows().size() && getTargetCardinality() != IJoin.MANY) {
+            StringBuilder sb = new StringBuilder();
+            List<String> fields = new ArrayList<String>();
+            for (AnalysisItem item : sourceFields) {
+                if (item.hasType(AnalysisItemTypes.MEASURE)) {
+                    fields.add(item.toOriginalDisplayName());
+                }
+            }
+            for (int i = 0; i < fields.size(); i++) {
+                String name = fields.get(i);
+                sb.append("<b>").append(name).append("</b>");
+                if (fields.size() == 1) {
+                    // nothing else
+                } else if (i == (fields.size() - 2)) {
+                    sb.append(" and ");
+                } else {
+                    sb.append(", ");
+                }
+            }
+            auditEvents.add(new ReportAuditEvent(ReportAuditEvent.WARNING, "The join between <b>" + sourceName + "</b> and <b>" + targetName + "</b> " +
+                    "may have incorrectly multiplied the values of " + sb.toString() + ". We suggest changing the target join cardinality to be <b>Many</b>."));
+        }
+
+        int targetTotal = 0;
+
+        for (IRow row : dataSet.getRows()) {
+            targetTotal += row.getJoinCount();
+            row.resetJoinCount();
+        }
+
+        boolean hasTargetMeasure = false;
+        for (AnalysisItem item : targetFields) {
+            if (item.hasType(AnalysisItemTypes.MEASURE)) {
+                hasTargetMeasure = true;
+                break;
+            }
+        }
+        if (hasTargetMeasure && targetTotal > dataSet.getRows().size() && getSourceCardinality() != IJoin.MANY) {
+            StringBuilder sb = new StringBuilder();
+            List<String> fields = new ArrayList<String>();
+            for (AnalysisItem item : sourceFields) {
+                if (item.hasType(AnalysisItemTypes.MEASURE)) {
+                    fields.add(item.toOriginalDisplayName());
+                }
+            }
+            for (int i = 0; i < fields.size(); i++) {
+                String name = fields.get(i);
+                sb.append("<b>").append(name).append("</b>");
+                if (fields.size() == 1) {
+                    // nothing else
+                } else if (i == (fields.size() - 2)) {
+                    sb.append(" and ");
+                } else {
+                    sb.append(", ");
+                }
+            }
+            auditEvents.add(new ReportAuditEvent(ReportAuditEvent.WARNING, "The join between <b>" + sourceName + "</b> and <b>" + targetName + "</b> " +
+                    "may have incorrectly multiplied the values of " + sb.toString() + ". We suggest changing the source join cardinality to be <b>Many</b>."));
+        }
+
         for (List<IRow> rows : indexCopy.values()) {
             for (IRow row : rows) {
                 result.createRow().addValues(row);
@@ -602,12 +684,12 @@ public class CompositeFeedConnection implements Serializable, IJoin {
         for (IRow row : unjoinedRows) {
             result.createRow().addValues(row);
         }
-        MergeAudit mergeAudit = new MergeAudit(mergeString, result);
+        MergeAudit mergeAudit = new MergeAudit(mergeString, result, auditEvents);
         mergeAudit.setOperations(operations);
         return mergeAudit;
     }
 
-    private void validateOperation(int operationCount, int accountType) {
+    private void validateOperation(int operationCount) {
         if (operationCount > SystemSettings.instance().getMaxOperations()) {
             throw new ReportException(new GenericReportFault("The query requesting data was too complex."));
         }

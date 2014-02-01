@@ -98,15 +98,12 @@ public class AnalysisMeasure extends AnalysisItem {
     public AnalysisMeasure(Key key, String displayName, int aggregation, boolean highIsGood) {
         this(key, displayName, aggregation);
         this.aggregation = aggregation;
-        setHighIsGood(highIsGood);
     }
 
     public AnalysisMeasure(Key key, String displayName, int aggregation, boolean highIsGood, int formattingType) {
         this(key, displayName, aggregation, highIsGood);
         this.aggregation = aggregation;
-        FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
-        formattingConfiguration.setFormattingType(formattingType);
-        setFormattingConfiguration(formattingConfiguration);
+        setFormattingType(formattingType);
     }
 
     @Override

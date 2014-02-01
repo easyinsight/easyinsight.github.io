@@ -2,8 +2,8 @@
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml">
 	<mx:Script>
 		<![CDATA[
-			public function set formattingConfiguration(formatConfig:FormattingConfiguration):void {
-				switch (formatConfig.formattingType) {
+			public function set formattingConfiguration(formatType:int):void {
+				switch (formatType) {
 					case FormattingConfiguration.NUMBER:
 						formattingType.selectedIndex = 0;
 						break;
@@ -25,10 +25,8 @@
 				}				
 			}		
 		
-			public function get formattingConfiguration():FormattingConfiguration {
-				var formattingConfiguration:FormattingConfiguration = new FormattingConfiguration();
-				formattingConfiguration.formattingType = formattingType.selectedIndex + 1;
-				return formattingConfiguration;
+			public function get formattingConfiguration():int {
+                return formattingType.selectedIndex + 1;
 			}
 		]]>
 	</mx:Script>

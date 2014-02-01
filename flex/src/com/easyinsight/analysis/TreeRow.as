@@ -6,6 +6,8 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.analysis {
+import com.easyinsight.analysis.summary.NewSummaryRow;
+
 import mx.collections.ArrayCollection;
 
 [Bindable]
@@ -18,6 +20,10 @@ public class TreeRow {
     public var sortColumn:Value;
     public var groupingField:AnalysisItem;
     public var summaryColumn:Boolean;
+    public var stupidFlex:int;
+    public var newSummaryRow:NewSummaryRow;
+    public var backgroundColor:uint;
+    public var textColor:uint;
 
     public function TreeRow() {
     }

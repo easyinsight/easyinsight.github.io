@@ -49,7 +49,7 @@ public class SampleCustomerDataSource extends ServerDataSourceDefinition {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(CUSTOMER)));
         items.add(new AnalysisDimension(keys.get(INDUSTRY)));
-        items.add(new AnalysisZipCode(keys.get(POSTAL_CODE), true));
+        items.add(new AnalysisDimension(keys.get(POSTAL_CODE), true));
         return items;
     }
 

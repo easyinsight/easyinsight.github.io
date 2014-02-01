@@ -11,8 +11,6 @@
 
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.controls.Alert;
-
         import mx.core.Application;
 
         import mx.core.Container;
@@ -38,13 +36,7 @@
         [Bindable]
         public var report:AnalysisDefinition;
 
-        private var _kpiSource:Boolean;
-
         private var _dataSourceID:int;
-
-        public function set kpiSource(value:Boolean):void {
-            _kpiSource = value;
-        }
 
         public static const BASE:int = 1;
         public static const LINKS:int = 2;
@@ -225,7 +217,7 @@
                     lastTab = tabNavigator.getChildIndex(DisplayObject(_reportEditor));
                     tabNavigator.selectedChild = _reportEditor as Container;
                 }
-                if (_kpiSource) {
+                if (report != null && report.dataSourceFieldReport) {
                     fieldAdminWindow = new FieldAdminWindow();
                     fieldAdminWindow.analysisItem = _analysisItem;
                     tabNavigator.addChild(fieldAdminWindow);
@@ -375,7 +367,7 @@
                         <mx:Label text="You haven't defined a link from this field yet." fontSize="14"/>
                         <mx:Button label="Create a link" click="addLink()" fontSize="14"/>
                     </mx:VBox>
-                    <analysis:NewLinkPanel id="newLinkPanel" link="{link}" dataSourceID="{dataSourceID}"/>
+                    <analysis:NewLinkPanel id="newLinkPanel" link="{link}" dataSourceID="{dataSourceID}" analysisItems="{analysisItems}"/>
                     <mx:VBox>
                         <mx:Button label="Add Link..." click="addLink()"/>
                         <mx:DataGrid dataProvider="{links}" width="100%" rowHeight="28">

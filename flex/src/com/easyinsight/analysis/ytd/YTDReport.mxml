@@ -136,9 +136,7 @@
             if (hasBenchmark) {
                 columns.addItem(createColumn("BK"));
                 columns.addItem(createColumn("Variation"));
-                var variationConfig:FormattingConfiguration = new FormattingConfiguration();
-                variationConfig.formattingType = FormattingConfiguration.PERCENTAGE;
-                var variationFormatter:Formatter = variationConfig.getFormatter(1, 1);
+                var variationFormatter:Formatter = FormattingConfiguration.getFormatter(1, 1, FormattingConfiguration.PERCENTAGE);
             }
 
             var a:int = 0;

@@ -42,6 +42,9 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "data_feed_id")
     private long dataFeedID;
 
+    @Column(name="data_source_field_report")
+    private boolean dataSourceFieldReport;
+
     @Column(name = "root_definition")
     private boolean rootDefinition;
 
@@ -135,6 +138,12 @@ public class AnalysisDefinition implements Cloneable {
     private List<ReportStub> reportStubs = new ArrayList<ReportStub>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "report_to_filter_set_stub",
+            joinColumns = @JoinColumn(name = "report_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "filter_set_stub_id", nullable = false))
+    private List<FilterSetStub> filterSets = new ArrayList<FilterSetStub>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "report_to_report_property",
             joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "report_property_id", nullable = false))
@@ -174,6 +183,14 @@ public class AnalysisDefinition implements Cloneable {
         }
     }
 
+    public List<FilterSetStub> getFilterSets() {
+        return filterSets;
+    }
+
+    public void setFilterSets(List<FilterSetStub> filterSets) {
+        this.filterSets = filterSets;
+    }
+
     public boolean isPublicWithKey() {
         return publicWithKey;
     }
@@ -204,6 +221,14 @@ public class AnalysisDefinition implements Cloneable {
 
     public void setFolder(int folder) {
         this.folder = folder;
+    }
+
+    public boolean isDataSourceFieldReport() {
+        return dataSourceFieldReport;
+    }
+
+    public void setDataSourceFieldReport(boolean dataSourceFieldReport) {
+        this.dataSourceFieldReport = dataSourceFieldReport;
     }
 
     public boolean isRecommendedExchange() {
@@ -422,10 +447,25 @@ public class AnalysisDefinition implements Cloneable {
     }
 
     public AnalysisDefinition clone(FeedDefinition target, List<AnalysisItem> allFields, boolean changingDataSource) throws CloneNotSupportedException {
-        return clone(target, allFields, changingDataSource, null);
+        return clone(target, allFields, changingDataSource, null, null);
     }
 
-    public AnalysisDefinition clone(FeedDefinition target, List<AnalysisItem> allFields, boolean changingDataSource, List<AnalysisItem> additionalDataSourceFields) throws CloneNotSupportedException {
+    public Set<Long> findTags() {
+        Set<Long> tags = new HashSet<Long>();
+        for (FilterDefinition filterDefinition : filterDefinitions) {
+            if (filterDefinition instanceof AnalysisItemFilterDefinition ||
+                    filterDefinition instanceof MultiFieldFilterDefinition) {
+                IFieldChoiceFilter fieldChoiceFilter = (IFieldChoiceFilter) filterDefinition;
+                for (WeNeedToReplaceHibernateTag tag : fieldChoiceFilter.getAvailableTags()) {
+                    tags.add(tag.getTagID());
+                }
+            }
+        }
+        return tags;
+    }
+
+    public AnalysisDefinition clone(FeedDefinition target, List<AnalysisItem> allFields, boolean changingDataSource, List<AnalysisItem> additionalDataSourceFields,
+                                    Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap) throws CloneNotSupportedException {
         AnalysisDefinition analysisDefinition = (AnalysisDefinition) super.clone();
 
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState.clone(allFields));
@@ -433,6 +473,7 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setAnalysisID(null);
         //Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         ReplacementMap replacementMap = new ReplacementMap();
+        replacementMap.setTagReplacementMap(tagReplacementMap);
 
         allFields = new ArrayList<AnalysisItem>(allFields);
         Map<String, AnalysisItem> set = new HashMap<String, AnalysisItem>();
@@ -463,7 +504,7 @@ public class AnalysisDefinition implements Cloneable {
                     } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                         AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
                         AnalysisMeasure measure = new AnalysisMeasure();
-                        measure.setFormattingConfiguration(item.getFormattingConfiguration());
+                        measure.setFormattingType(item.getFormattingType());
                         if (report.isPersistedCache()) {
                             measure.setAggregation(AggregationTypes.SUM);
                         } else {
@@ -690,6 +731,7 @@ public class AnalysisDefinition implements Cloneable {
         }
         analysisDefinition.populateFromReportStructure(reportStructure);
         analysisDefinition.setDescription(getDescription());
+        analysisDefinition.setDataSourceFieldReport(isDataSourceFieldReport());
         analysisDefinition.setCanSaveDirectly(isOwner(SecurityUtil.getUserID(false)));
         analysisDefinition.setAuthorName(getAuthorName());
         analysisDefinition.setDateCreated(getDateCreated());
@@ -735,6 +777,28 @@ public class AnalysisDefinition implements Cloneable {
             }
         }
         analysisDefinition.setAddonReports(addonReports);
+        List<FilterSetDescriptor> filterSetList = new ArrayList<FilterSetDescriptor>();
+        if (filterSets != null && filterSets.size() > 0) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                PreparedStatement stmt = conn.prepareStatement("SELECT FILTER_SET_NAME FROM FILTER_SET WHERE FILTER_SET_ID = ?");
+                for (FilterSetStub filterStub : filterSets) {
+                    FilterSetDescriptor filterSetDescriptor = new FilterSetDescriptor();
+                    filterSetDescriptor.setId(filterStub.getFilterSetID());
+                    stmt.setLong(1, filterStub.getFilterSetID());
+                    ResultSet rs = stmt.executeQuery();
+                    rs.next();
+                    filterSetDescriptor.setName(rs.getString(1));
+                    filterSetList.add(filterSetDescriptor);
+                }
+                stmt.close();
+            } catch (Exception e) {
+                LogClass.error(e);
+            } finally {
+                Database.closeConnection(conn);
+            }
+        }
+        analysisDefinition.setFilterSets(filterSetList);
         return analysisDefinition;
     }
 

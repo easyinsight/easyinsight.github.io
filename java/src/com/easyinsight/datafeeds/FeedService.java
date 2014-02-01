@@ -31,16 +31,9 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
-import com.easyinsight.groups.GroupDescriptor;
-import com.easyinsight.email.UserStub;
-import com.easyinsight.notifications.UserToDataSourceNotification;
-import com.easyinsight.notifications.NotificationBase;
-import com.easyinsight.notifications.DataSourceToGroupNotification;
-import com.easyinsight.users.User;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
@@ -57,6 +50,60 @@ public class FeedService {
 
     public FeedService() {
         // this goes into a different data provider        
+    }
+
+    public List<InsightDescriptor> getDataSourceReports(long dataSourceID) {
+        List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE, REPORT_TYPE, URL_KEY, data_source_field_report " +
+                    "FROM ANALYSIS WHERE DATA_FEED_ID = ? AND TEMPORARY_REPORT = ?");
+            ps.setLong(1, dataSourceID);
+            ps.setBoolean(2, false);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                long reportID = rs.getLong(1);
+                String title = rs.getString(2);
+                int reportType = rs.getInt(3);
+                String urlKey = rs.getString(4);
+                boolean dataSourceReport = rs.getBoolean(5);
+                InsightDescriptor insightDescriptor = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, 0, false);
+                insightDescriptor.setDataSourceReport(dataSourceReport);
+                reports.add(insightDescriptor);
+            }
+            ps.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return reports;
+    }
+
+    public void updateDataSourceReports(long dataSourceID, List<InsightDescriptor> reports, List<InsightDescriptor> removed) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET data_source_field_report = ? WHERE analysis_id = ?");
+            for (InsightDescriptor r : reports) {
+                if (r.isDataSourceReport()) {
+                    updateStmt.setBoolean(1, true);
+                    updateStmt.setLong(2, r.getId());
+                    updateStmt.executeUpdate();
+                }
+            }
+            for (InsightDescriptor r : removed) {
+                updateStmt.setBoolean(1, false);
+                updateStmt.setLong(2, r.getId());
+                updateStmt.executeUpdate();
+            }
+            updateStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public FeedDefinition convertDataSource(FeedDefinition dataSource, int toType) {
@@ -337,7 +384,7 @@ public class FeedService {
             analysisCalculation.setAggregation(AggregationTypes.SUM);
             analysisCalculation.setFilters(analysisItem.getFilters());
             analysisCalculation.setLinks(analysisItem.getLinks());
-            analysisCalculation.getFormattingConfiguration().setFormattingType(analysisItem.getFormattingConfiguration().getFormattingType());
+            analysisCalculation.setFormattingType(analysisItem.getFormattingType());
             analysisCalculation.setUnderline(analysisItem.isUnderline());
             analysisCalculation.setMinPrecision(analysisItem.getMinPrecision());
             analysisCalculation.setPrecision(analysisItem.getPrecision());
@@ -1104,57 +1151,6 @@ public class FeedService {
             Database.closeConnection(conn);
         }
         return null;
-    }
-
-
-
-    private void notifyNewViewers(FeedDefinition feedDefinition, FeedDefinition existingFeed, Session session) throws SQLException {
-        List<FeedConsumer> viewers = new ArrayList<FeedConsumer>(feedDefinition.getUploadPolicy().getViewers());
-        List<FeedConsumer> oldViewers = new ArrayList<FeedConsumer>(existingFeed.getUploadPolicy().getViewers());
-        viewers.removeAll(existingFeed.getUploadPolicy().getViewers());
-        oldViewers.removeAll(feedDefinition.getUploadPolicy().getViewers());
-        processViewers(feedDefinition, session, viewers, NotificationBase.ADD, NotificationBase.VIEWER);
-        processViewers(feedDefinition, session, oldViewers, NotificationBase.REMOVE, NotificationBase.VIEWER);
-    }
-
-    private void processViewers(FeedDefinition feedDefinition, Session session, List<FeedConsumer> viewers, int action, int role) {
-        for(FeedConsumer viewer : viewers) {
-            switch(viewer.type()) {
-                case FeedConsumer.USER:
-                    UserToDataSourceNotification userToDataSourceNotification = new UserToDataSourceNotification();
-                    userToDataSourceNotification.setActingUser((User) session.get(User.class, SecurityUtil.getUserID()));
-                    userToDataSourceNotification.setUser((User) session.get(User.class, ((UserStub) viewer).getUserID()));
-                    userToDataSourceNotification.setFeedAction(action);
-                    userToDataSourceNotification.setFeedRole(role);
-                    userToDataSourceNotification.setNotificationDate(new Date());
-                    userToDataSourceNotification.setFeedID(feedDefinition.getDataFeedID());
-                    userToDataSourceNotification.setNotificationType(NotificationBase.USER_TO_DATA_SOURCE);
-                    session.save(userToDataSourceNotification);
-                    break;
-                case FeedConsumer.GROUP:
-                    DataSourceToGroupNotification dataSourceToGroupNotification = new DataSourceToGroupNotification();
-                    dataSourceToGroupNotification.setActingUser((User) session.get(User.class, SecurityUtil.getUserID()));
-                    dataSourceToGroupNotification.setGroupID(((GroupDescriptor) viewer).getGroupID());
-                    dataSourceToGroupNotification.setFeedAction(action);
-                    dataSourceToGroupNotification.setFeedRole(role);
-                    dataSourceToGroupNotification.setNotificationDate(new Date());
-                    dataSourceToGroupNotification.setFeedID(feedDefinition.getDataFeedID());
-                    dataSourceToGroupNotification.setNotificationType(NotificationBase.DATA_SOURCE_TO_GROUP);
-                    session.save(dataSourceToGroupNotification);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    private void notifyNewOwners(FeedDefinition feedDefinition, FeedDefinition existingFeed, Session session) {
-        List<FeedConsumer> owners= new ArrayList<FeedConsumer>(feedDefinition.getUploadPolicy().getOwners());
-        List<FeedConsumer> oldOwners = new ArrayList<FeedConsumer>(existingFeed.getUploadPolicy().getOwners());
-        owners.removeAll(existingFeed.getUploadPolicy().getOwners());
-        oldOwners.removeAll(feedDefinition.getUploadPolicy().getOwners());
-        processViewers(feedDefinition, session, owners, NotificationBase.ADD,  NotificationBase.OWNER);
-        processViewers(feedDefinition, session, oldOwners, NotificationBase.REMOVE,  NotificationBase.OWNER);
     }
 
     public List<FeedDefinition> getDataSourcesForFederated(long federatedDataSourceID) {

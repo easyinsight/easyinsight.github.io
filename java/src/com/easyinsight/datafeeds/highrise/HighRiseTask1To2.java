@@ -1,7 +1,6 @@
 package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.AnalysisDimension;
-import com.easyinsight.analysis.AnalysisZipCode;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;

@@ -230,17 +230,19 @@
 
 
         private function addDescriptorToGraph(descriptor:DataSourceDescriptor, xPosition:int, yPosition:int):void {
-            var item:Item = new Item(String(descriptor.id));
-            item.data = new Object();
-            if (xPosition > 0) {
-                item.initialX = xPosition;
-                item.initialY = yPosition;
+            if (descriptor != null) {
+                var item:Item = new Item(String(descriptor.id));
+                item.data = new Object();
+                if (xPosition > 0) {
+                    item.initialX = xPosition;
+                    item.initialY = yPosition;
+                }
+                item.data["feedID"] = String(descriptor.id);
+                item.data["feedName"] = descriptor.name;
+                graph.add(item);
+                dataSources.addItem(descriptor);
+                visibleDataSources.addItem(descriptor);
             }
-            item.data["feedID"] = String(descriptor.id);
-            item.data["feedName"] = descriptor.name;
-            graph.add(item);
-            dataSources.addItem(descriptor);
-            visibleDataSources.addItem(descriptor);
         }
 
         private var queuedExistings:ArrayCollection;

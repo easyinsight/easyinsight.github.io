@@ -86,7 +86,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
         analysisitems.add(new AnalysisDimension(keys.get(TODO_URL)));
         analysisitems.add(new AnalysisMeasure(TODO_COUNT, AggregationTypes.SUM));
         AnalysisCalculation timeToDue = new AnalysisCalculation();
-        timeToDue.getFormattingConfiguration().setFormattingType(FormattingConfiguration.MILLISECONDS);
+        timeToDue.setFormattingType(FormattingConfiguration.MILLISECONDS);
         timeToDue.setKey(new NamedKey("Time to Due"));
         timeToDue.setCalculationString("equalto([Todo Completed], \"Completed\", 0, [Todo Due At] - now())");
         AnalysisCalculation overdueTodoCount = new AnalysisCalculation();

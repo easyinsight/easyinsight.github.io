@@ -30,7 +30,6 @@
         <mapping class="com.easyinsight.users.User"/>
         <mapping class="com.easyinsight.users.ReactivatableUser" />
         <mapping class="com.easyinsight.analysis.AnalysisDefinition"/>
-        <mapping class="com.easyinsight.analysis.RangeOption"/>
         <mapping class="com.easyinsight.analysis.FormattingConfiguration"/>
         <mapping class="com.easyinsight.analysis.FilterDefinition"/>
         <mapping class="com.easyinsight.analysis.FilterValueDefinition"/>
@@ -39,25 +38,16 @@
         <mapping class="com.easyinsight.analysis.FilterPatternDefinition"/>
         <mapping class="com.easyinsight.analysis.RollingFilterDefinition"/>
         <mapping class="com.easyinsight.analysis.FilterDefinitionValue"/>
-        <mapping class="com.easyinsight.sequence.Sequence"/>
-        <mapping class="com.easyinsight.sequence.DateSequence"/>
         <mapping class="com.easyinsight.analysis.AnalysisItem"/>
         <mapping class="com.easyinsight.analysis.AnalysisItemHandle"/>
         <mapping class="com.easyinsight.analysis.AnalysisDimension"/>
-        <mapping class="com.easyinsight.analysis.AnalysisRangeDimension"/>
-        <mapping class="com.easyinsight.analysis.AnalysisCoordinate"/>
-        <mapping class="com.easyinsight.analysis.AnalysisLongitude"/>
-        <mapping class="com.easyinsight.analysis.AnalysisLatitude"/>
         <mapping class="com.easyinsight.analysis.AnalysisMeasure"/>
         <mapping class="com.easyinsight.analysis.AnalysisDateDimension"/>
-        <mapping class="com.easyinsight.analysis.ReaggregateAnalysisMeasure"/>
         <mapping class="com.easyinsight.analysis.AnalysisList"/>
         <mapping class="com.easyinsight.analysis.AnalysisText"/>
-        <mapping class="com.easyinsight.analysis.AnalysisZipCode"/>
         <mapping class="com.easyinsight.analysis.AnalysisCalculation"/>
         <mapping class="com.easyinsight.analysis.DerivedAnalysisDimension"/>
         <mapping class="com.easyinsight.analysis.DerivedAnalysisDateDimension"/>
-        <mapping class="com.easyinsight.analysis.ComplexAnalysisMeasure"/>
         <mapping class="com.easyinsight.analysis.AnalysisHierarchyItem"/>
         <mapping class="com.easyinsight.analysis.HierarchyLevel"/>
         <mapping class="com.easyinsight.analysis.UserToAnalysisBinding"/>
@@ -65,7 +55,6 @@
         <mapping class="com.easyinsight.analysis.ListLimitsMetadata"/>
         <mapping class="com.easyinsight.analysis.ListDefinitionState"/>
         <mapping class="com.easyinsight.analysis.ChartDefinitionState"/>
-        <mapping class="com.easyinsight.analysis.TimelineDefinitionState"/>
         <mapping class="com.easyinsight.analysis.GanttChartDefinitionState"/>
         <mapping class="com.easyinsight.analysis.SummaryDefinitionState"/>
         <mapping class="com.easyinsight.analysis.AnalysisDefinitionState"/>
@@ -75,7 +64,6 @@
         <mapping class="com.easyinsight.analysis.FormDefinitionState"/>
         <mapping class="com.easyinsight.analysis.VerticalListDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TextDefinitionState"/>
-        <mapping class="com.easyinsight.analysis.CombinedVerticalListDefinitionState"/>
         <mapping class="com.easyinsight.analysis.CompareYearsDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TrendDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TrendGridDefinitionState"/>
@@ -118,6 +106,8 @@
         <mapping class="com.easyinsight.analysis.DiagramLink"/>
         <mapping class="com.easyinsight.analysis.ReportStub"/>
         <mapping class="com.easyinsight.analysis.WeNeedToReplaceHibernateTag"/>
+        <mapping class="com.easyinsight.analysis.FilterSetStub"/>
+        <!--<mapping class="com.easyinsight.analysis.MeasureFilterFilterDefinition"/>-->
 
         <mapping class="com.easyinsight.preferences.ApplicationSkinSettings"/>
 
@@ -146,9 +136,6 @@
         <mapping class="com.easyinsight.core.PersistableEmptyValue"/>
         <mapping class="com.easyinsight.core.PersistableNumericValue"/>
 
-        <mapping class="com.easyinsight.conditions.MeasureConditionRange"/>
-        <mapping class="com.easyinsight.conditions.MeasureCondition"/>
-
         <mapping class="com.easyinsight.core.Key"/>
         <mapping class="com.easyinsight.core.NamedKey"/>
         <mapping class="com.easyinsight.core.DerivedKey"/>
@@ -157,15 +144,6 @@
         <mapping class="com.easyinsight.users.BandwidthUsage" />
         <mapping class="com.easyinsight.users.AccountCreditCardBillingInfo" />
 
-        <mapping class="com.easyinsight.notifications.NotificationBase" />
-        <mapping class="com.easyinsight.notifications.UserNotification" />
-        <mapping class="com.easyinsight.notifications.GroupNotification" />
-        <mapping class="com.easyinsight.notifications.UserToGroupNotification" />
-        <mapping class="com.easyinsight.notifications.DataSourceToGroupNotification" />
-        <mapping class="com.easyinsight.notifications.ReportToGroupNotification" />
-        <mapping class="com.easyinsight.notifications.GroupCommentNotification" />
-        <mapping class="com.easyinsight.notifications.UserToDataSourceNotification" />
-        <mapping class="com.easyinsight.notifications.UserToReportNotification" />
         <mapping class="com.easyinsight.audit.ActionLog" />
         <mapping class="com.easyinsight.audit.ActionReportLog" />
         <mapping class="com.easyinsight.audit.ActionDashboardLog" />

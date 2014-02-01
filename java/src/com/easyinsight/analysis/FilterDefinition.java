@@ -74,6 +74,9 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name = "minimum_role")
     private int minimumRole = 4;
 
+    @Transient
+    private long fromFilterSet;
+
     @Column(name="customizable")
     private boolean customizable;
 
@@ -100,14 +103,6 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name = "flex_id")
     private long flexID;
 
-    // filter sets, filter assignments
-
-    // for a given report...
-    // which filters should it match up against?
-
-    // I kind of want to do tags...
-    //
-
     @Transient
     transient private String pipelineName;
 
@@ -116,6 +111,14 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     @Column(name="child_to_parent_label")
     private String childToParentLabel;
+
+    public long getFromFilterSet() {
+        return fromFilterSet;
+    }
+
+    public void setFromFilterSet(long fromFilterSet) {
+        this.fromFilterSet = fromFilterSet;
+    }
 
     public String getChildToParentLabel() {
         return childToParentLabel;

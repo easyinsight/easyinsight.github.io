@@ -9,6 +9,7 @@ import com.easyinsight.dashboard.DashboardView;
 import com.easyinsight.etl.LookupTableEditor;
 import com.easyinsight.feedassembly.NewCompositeFeedWorkspace;
 import com.easyinsight.feedassembly.NewFederatedWindow;
+import com.easyinsight.filtering.FilterSetEditor;
 import com.easyinsight.genredata.Exchange;
 import com.easyinsight.listing.MyData;
 import com.easyinsight.report.ReportView;
@@ -80,6 +81,9 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 break;
             case PerspectiveInfo.FEDERATED_EDITOR:
                 perspective = new DirectUIComponent(new NewFederatedWindow());
+                break;
+            case PerspectiveInfo.FILTER_SET_EDITOR:
+                perspective = new DirectUIComponent(new FilterSetEditor());
                 break;
         }
         return perspective;

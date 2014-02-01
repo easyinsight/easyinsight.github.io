@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" paddingBottom="10" paddingLeft="10"
+        paddingRight="10" paddingTop="10">
+    <mx:Script><![CDATA[
+        import com.easyinsight.dashboard.DashboardElement;
+        import com.easyinsight.filtering.FilterSet;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var filterSets:ArrayCollection;
+
+        private var removedFilterSets:ArrayCollection = new ArrayCollection();
+
+        private function save():void {
+            var newFilterSets:ArrayCollection = new ArrayCollection();
+            for each (var filterSet:FilterSetDescriptor in filterSets) {
+                if (report != null) {
+                    if (report.filterSets.getItemIndex(filterSet) == -1) {
+                        newFilterSets.addItem(filterSet);
+                    }
+                } else {
+                    if (dashboardElement.filterSets.getItemIndex(filterSet) == -1) {
+                        newFilterSets.addItem(filterSet);
+                    }
+                }
+            }
+            if (report != null) {
+                report.filterSets = filterSets;
+            } else {
+                dashboardElement.filterSets = filterSets;
+            }
+            dispatchEvent(new FilterSetReportEvent(FilterSetReportEvent.NEW_FILTER_SETS, null, newFilterSets, removedFilterSets));
+            PopUpManager.removePopUp(this);
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (report != null) {
+                if (report.filterSets == null) {
+                    report.filterSets = new ArrayCollection();
+                }
+                filterSets = new ArrayCollection(report.filterSets.toArray());
+            } else {
+                if (dashboardElement.filterSets == null) {
+                    dashboardElement.filterSets = new ArrayCollection();
+                }
+                filterSets = new ArrayCollection(dashboardElement.filterSets.toArray());
+            }
+        }
+
+        public var report:AnalysisDefinition;
+        public var dashboardElement:DashboardElement;
+
+        public var dataSourceID:int;
+
+        private function addReport():void {
+            var window:FilterSetChoiceWindow = new FilterSetChoiceWindow();
+            if (report != null) {
+                window.dataSourceID = dataSourceID;
+                //window.reportFrom = report.analysisID;
+            } else {
+                window.dataSourceID = dataSourceID;
+            }
+            window.addEventListener(FilterSetReportEvent.ADD_FILTER_SET, onAdd);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onAdd(event:FilterSetReportEvent):void {
+            filterSets.addItem(event.filterSet);
+        }
+
+        private function deleteSelected():void {
+            for each (var filterSet:FilterSet in filterSets) {
+                if (filterSet.selected) {
+                    filterSets.removeItemAt(filterSets.getItemIndex(filterSet));
+                    removedFilterSets.addItem(filterSet);
+                }
+            }
+        }
+        ]]></mx:Script>
+    <!--<mx:Text width="330" text="You can add the fields of another report to this report through this window. For example, you might have a report with a set of complex calculations. Rather than trying to replicate the same calculations inside this report, you can refer directly to the other report and reuse the same fields."/>-->
+    <mx:HBox>
+        <util:SaveButton label="Add Filter Set..." click="addReport()" fontSize="12"/>
+        <util:SaveButton label="Delete Selected" click="deleteSelected()" fontSize="12"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{filterSets}">
+        <mx:columns>
+            <mx:DataGridColumn headerText="" itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" sortable="false" fontSize="12"/>
+            <mx:DataGridColumn headerText="Filter Set" dataField="name" width="300" fontSize="12"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

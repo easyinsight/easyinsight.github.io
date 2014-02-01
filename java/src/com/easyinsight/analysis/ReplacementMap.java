@@ -16,6 +16,15 @@ public class ReplacementMap {
 
     private Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
     private Map<String, AnalysisItem> qualifiedNameReplacementMap = new HashMap<String, AnalysisItem>();
+    private Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap = new HashMap<Long, WeNeedToReplaceHibernateTag>();
+
+    public WeNeedToReplaceHibernateTag findReplacementTag(long tagID) {
+        return tagReplacementMap.get(tagID);
+    }
+
+    public void setTagReplacementMap(Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap) {
+        this.tagReplacementMap = tagReplacementMap;
+    }
 
     public static ReplacementMap fromMap(Map<Long, AnalysisItem> fields) {
         ReplacementMap replacementMap = new ReplacementMap();

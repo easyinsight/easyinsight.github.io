@@ -125,9 +125,12 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
 
         List<WeNeedToReplaceHibernateTag> replaceTags = new ArrayList<WeNeedToReplaceHibernateTag>();
         for (WeNeedToReplaceHibernateTag tag : availableTags) {
-            WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
-            newTag.setTagID(newTag.getTagID());
-            replaceTags.add(tag);
+            WeNeedToReplaceHibernateTag newTag = replacementMap.findReplacementTag(tag.getTagID());
+            if (newTag == null) {
+                newTag = new WeNeedToReplaceHibernateTag();
+                newTag.setTagID(tag.getTagID());
+            }
+            replaceTags.add(newTag);
         }
         this.availableTags = replaceTags;
     }
@@ -203,7 +206,7 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
             }
         }
         for (AnalysisItemHandle analysisItem : availableHandles) {
-            analysisItem.save(session);
+            analysisItem.save();
         }
     }
 
@@ -276,7 +279,7 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
     @Override
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
         JSONObject jo = super.toJSON(filterHTMLMetadata);
-        List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, null, null);
+        List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, null, null, null);
         jo.put("type", "field_filter");
         jo.put("selected", String.valueOf(targetItem.getAnalysisItemID()));
         JSONArray available = new JSONArray();

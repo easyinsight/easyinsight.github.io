@@ -540,7 +540,7 @@ public class DashboardService {
             Dashboard dashboard = getDashboard(dashboardID);
             Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
             Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
-            SolutionService.recurseDashboard(reports, dashboards, dashboard, session, conn);
+            SolutionService.recurseDashboard(reports, dashboards, dashboard, session, conn, new HashSet<Long>());
 
             for (AnalysisDefinition report : reports.values()) {
                 report.setTemporaryReport(false);

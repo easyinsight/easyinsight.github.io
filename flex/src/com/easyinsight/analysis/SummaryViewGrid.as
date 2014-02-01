@@ -123,13 +123,15 @@ public class SummaryViewGrid extends AdvancedDataGrid {
         //if (this.dataProvider is ArrayCollection) {
             if (this.rowColorFunction != null)
             {
-                var item:Object = listItems[rowIndex][0].data;
+                if (listItems[rowIndex] != null && listItems[rowIndex][0] != null) {
+                    var item:Object = listItems[rowIndex][0].data;
 
-                /*if (dataIndex < (this.dataProvider as ArrayCollection).length)
-                {*/
-                    //var item:Object = (this.dataProvider as ArrayCollection).getItemAt(dataIndex);
-                    color = this.rowColorFunction.call(this, item, color);
-                //}
+                    /*if (dataIndex < (this.dataProvider as ArrayCollection).length)
+                    {*/
+                        //var item:Object = (this.dataProvider as ArrayCollection).getItemAt(dataIndex);
+                        color = this.rowColorFunction.call(this, item, color);
+                    //}
+                }
             }
         //}
 

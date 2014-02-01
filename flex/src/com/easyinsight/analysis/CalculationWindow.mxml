@@ -6,7 +6,7 @@
            creationComplete="onCreation()">
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.analysis.formatter.FormattingConfiguration;
+
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
@@ -103,7 +103,7 @@
         </functions>));
 
         [Bindable]
-        protected var formattingConfiguration:FormattingConfiguration;
+        protected var formattingConfiguration:int;
 
 
         private var _applyBefore:Boolean;

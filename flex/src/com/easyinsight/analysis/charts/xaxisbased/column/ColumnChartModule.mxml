@@ -8,6 +8,7 @@
         import com.easyinsight.analysis.AnalysisMeasure;
 
         import com.easyinsight.analysis.ChartDefinition;
+        import com.easyinsight.analysis.ClickUtil;
         import com.easyinsight.analysis.MultiColor;
 
         import com.easyinsight.analysis.SortFunctionFactory;
@@ -26,6 +27,7 @@
         import mx.charts.chartClasses.IAxisRenderer;
         import mx.charts.chartClasses.NumericAxis;
         import mx.charts.chartClasses.Series;
+        import mx.charts.events.ChartItemEvent;
         import mx.charts.series.ColumnSeries;
         import mx.charts.series.items.ColumnSeriesItem;
         import mx.collections.ArrayCollection;
@@ -54,6 +56,19 @@
         override protected function useMultiColor():Boolean {
             var def:ColumnChartDefinition = chartDef as ColumnChartDefinition;
             return (def.multiColors != null && def.multiColors.length > 0 && MultiColor(def.multiColors.getItemAt(0)).color1StartEnabled);
+        }
+
+        override protected function onChartClick(event:ChartItemEvent):void {
+            var columnSeriesItem:ColumnSeriesItem = event.hitData.chartItem as ColumnSeriesItem;
+            var series:Series = columnSeriesItem.element as Series;
+            var altKey:String = null;
+            for each (var m:AnalysisMeasure in ColumnChartDefinition(chartDef).measures) {
+                if (m.display == series.displayName) {
+                    altKey = m.qualifiedName();
+                }
+            }
+            //Alert.show(series.displayName);
+            ClickUtil.doStuff(defaultLink, event.hitData.item, dimensionAxisItem, this, chartDef, altKey, chart);
         }
 
         override protected function getGradientColor():uint {

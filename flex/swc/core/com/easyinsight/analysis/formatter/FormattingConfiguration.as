@@ -17,16 +17,12 @@ import mx.formatters.NumberBaseRoundType;
         public static const MILLISECONDS:int = 4;
         public static const SECONDS:int = 5;
         public static const BYTES:int = 6;
-
-		public var formattingConfigurationID:int;
-		public var formattingType:int;
-		public var textUom:String;
 		
 		public function FormattingConfiguration()
 		{
 		}
 
-		public function getFormatter(precision:int, minPrecision:int):Formatter {
+		public static function getFormatter(precision:int, minPrecision:int, formattingType:int):Formatter {
 			var formatter:Formatter;
 			switch (formattingType) {
 				case NUMBER:

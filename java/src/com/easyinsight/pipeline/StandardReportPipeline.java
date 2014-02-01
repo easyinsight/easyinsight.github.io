@@ -30,6 +30,19 @@ public class StandardReportPipeline extends Pipeline {
 
         //components.add(new ReportPreHandleComponent());
 
+        for (AnalysisItem analysisItem : reportItems) {
+            if (analysisItem.getLinks() != null) {
+                for (Link link : analysisItem.getLinks()) {
+                    if (link instanceof DrillThrough) {
+                        DrillThrough drillThrough = (DrillThrough) link;
+                        if (drillThrough.getPassThroughField() != null) {
+                            components.add(new DrillthroughComponent(drillThrough.getPassThroughField()));
+                        }
+                    }
+                }
+            }
+        }
+
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
@@ -86,9 +99,6 @@ public class StandardReportPipeline extends Pipeline {
             }
         }
 
-        for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
-            components.add(new RangeComponent((AnalysisRangeDimension) range));
-        }
         components.add(new TypeTransformComponent());
 
         if (report.getFilterDefinitions() != null) {
@@ -256,6 +266,7 @@ public class StandardReportPipeline extends Pipeline {
                 }
             }
             endComponent.add(new LimitsComponent());
+            endComponent.add(new DrillThroughDecorationComponent());
             components.addAll(report.createComponents());
             endComponent.add(new MarmotHerderComponent());
             endComponent.add(new SortComponent());

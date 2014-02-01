@@ -13,6 +13,7 @@ import flash.net.URLRequest;
 import flash.net.navigateToURL;
 
 import mx.charts.chartClasses.ChartBase;
+import mx.collections.ArrayCollection;
 
 import mx.collections.ArrayCollection;
 import mx.core.UIComponent;
@@ -45,9 +46,16 @@ public class ClickUtil {
                 var url:String = data[key + urlLink.label + "_link"];
                 navigateToURL(new URLRequest(url), "_blank");
             } else if (defaultLink is DrillThrough) {
+                var values:ArrayCollection = null;
+                if (altKey != null) {
+                    values = data[altKey + "_drill"];
+                }
+                if (values == null && DrillThrough(defaultLink).passThroughField != null) {
+                    values = data[analysisItem.qualifiedName() + "_drill"];
+                }
                 utils.addItem(this);
                 var drillThrough:DrillThrough = defaultLink as DrillThrough;
-                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, report, altKey);
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, report, altKey, values);
                 executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();
             }

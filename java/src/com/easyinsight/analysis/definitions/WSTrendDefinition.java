@@ -123,7 +123,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
                         sb.append(clickEvent);
                         sb.append("'>");
                     }
-                    sb.append(c.createFormatter().format(v));
+                    sb.append(FormattingConfiguration.createFormatter(c.getFormattingType()).format(v));
                     if (!clickEvent.isEmpty()) {
                         sb.append("</a>");
                     }

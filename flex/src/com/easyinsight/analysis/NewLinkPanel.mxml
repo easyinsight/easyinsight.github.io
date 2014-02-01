@@ -7,8 +7,9 @@
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
-        import mx.controls.Alert;
         import mx.validators.Validator;
+
+        public var analysisItems:ArrayCollection;
 
         private function gotDescriptors():void {
             var descriptors:ArrayCollection = feedService.getDescriptorsForDataSource.lastResult as ArrayCollection;
@@ -24,6 +25,16 @@
             reportList.sort = sort;
             reportList.refresh();
             this.reports = reportList;
+            var fields:ArrayCollection = new ArrayCollection();
+            for each (var item:AnalysisItemWrapper in analysisItems) {
+                var handle:AnalysisItemHandle = new AnalysisItemHandle();
+                handle.name = item.analysisItem.display;
+                handle.analysisItemID = item.analysisItem.analysisItemID;
+                fields.addItem(handle);
+            }
+            var none:Object = { name: "[ No Selection ]"};
+            fields.addItemAt(none, 0);
+            this.fields = fields;
         }
 
         private var _link:Link;
@@ -78,11 +89,19 @@
                     } else if (drillthrough.dashboardID > 0) {
                         qualifiedName = EIDescriptor.DASHBOARD + "-" + drillthrough.dashboardID;
                     }
+                    if (drillthrough.passThroughField != null) {
+                        selectedRadioValue = "basedOnField";
+                        dtIndex = 0;
+                    } else {
+                        selectedRadioValue = "basedOnFilters";
+                        dtIndex = 1;
+                    }
                     allFilters = drillthrough.addAllFilters;
                     script = drillthrough.marmotScript;
                     miniWindow = drillthrough.miniWindow;
                     showFilters = drillthrough.showDrillThroughFilters;
                     createFiltersOnGroupings = drillthrough.filterRowGroupings;
+                    filterFieldValue = drillthrough.passThroughField != null ? drillthrough.passThroughField.name : null;
                 }
             }
         }
@@ -142,28 +161,31 @@
                 }
 
                 var drillThrough:DrillThrough = new DrillThrough();
-                drillThrough.defaultLink = drillthroughDefaultLinkCheckbox.selected;
-                drillThrough.label = "";
-                drillThrough.addAllFilters = allCheckbox.selected;
-                drillThrough.showDrillThroughFilters = showFiltersCheckbox.selected;
-                drillThrough.filterRowGroupings = createFiltersOnRowGroupingsCheckbox.selected;
+
                 var desc:EIDescriptor = reportChooser.selectedItem as EIDescriptor;
                 if (desc.getType() == EIDescriptor.REPORT) {
                     drillThrough.reportID = desc.id;
                 } else if (desc.getType() == EIDescriptor.DASHBOARD) {
                     drillThrough.dashboardID = desc.id;
                 }
-                drillThrough.miniWindow = miniWindowCheckbox.selected;
-                drillThrough.marmotScript = scriptArea.text;
+                drillThrough.defaultLink = drillthroughDefaultLinkCheckbox.selected;
+                drillThrough.label = "";
+                drillThrough.showDrillThroughFilters = showFiltersCheckbox.selected;
+                if (radioGroup.selectedValue == "basedOnField") {
+                    var handle:AnalysisItemHandle = filterOnFieldCheckbox.selectedItem as AnalysisItemHandle;
+                    if (handle != null) {
+                        drillThrough.passThroughField = handle;
+                    }
+                } else {
+                    drillThrough.addAllFilters = allCheckbox.selected;
+                    drillThrough.filterRowGroupings = createFiltersOnRowGroupingsCheckbox.selected;
+                    drillThrough.passThroughField = null;
+                }
+
                 _link = drillThrough;
 
             }
             if (valid) {
-                /*if (!typeChanged) {
-                 Alert.show("type didn't change, assigning to " + linkID);
-                 _link.linkID = linkID;
-                 }*/
-
                 if (firstLink == null) {
                     dispatchEvent(new LinkMetadataEvent(LinkMetadataEvent.LINK_DEFINED, _link));
                 } else {
@@ -184,6 +206,22 @@
 
         [Bindable]
         private var script:String;
+
+        [Bindable]
+        private var filterFieldValue:String;
+
+        [Bindable]
+        private var fields:ArrayCollection;
+
+        [Bindable]
+        private var dtIndex:int;
+
+        private function drillThroughTo(index:int):void {
+            dtIndex = index;
+        }
+
+        [Bindable]
+        private var selectedRadioValue:String = "basedOnField";
         ]]></mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="getDescriptorsForDataSource" result="gotDescriptors()"/>
@@ -208,37 +246,48 @@
             </mx:HBox>
         </mx:VBox>
         <mx:VBox>
+            <mx:Text text="You can define drillthroughs based on a single field or based on filters."/>
+            <mx:RadioButtonGroup id="radioGroup" selectedValue="{selectedRadioValue}"/>
+            <mx:HBox>
+                <mx:RadioButton id="basedOnField" label="Based on Field" value="basedOnField" groupName="radioGroup" click="drillThroughTo(0)"/>
+                <mx:RadioButton id="basedOnFilters" label="Based on Filters" value="basedOnFilters" groupName="radioGroup" click="drillThroughTo(1)"/>
+            </mx:HBox>
             <mx:HBox>
                 <mx:Label text="Target Report:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
                 <util:SmartComboBox id="reportChooser" dataProvider="{reports}" labelField="name"
                                     selectedProperty="qualifiedName"
                                     selectedValue="{qualifiedName}" rowCount="12" maxWidth="400" />
             </mx:HBox>
-            <mx:HBox>
-                <mx:Label text="Use Popup Window:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
-                <mx:CheckBox label="" id="miniWindowCheckbox" selected="{miniWindow}"/>
-            </mx:HBox>
-            <mx:HBox width="100%">
-                <mx:Label text="Default Link:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
-                <mx:CheckBox id="drillthroughDefaultLinkCheckbox" selected="{defaultLink}"/>
-            </mx:HBox>
-            <mx:HBox width="100%">
-                <mx:Label text="Pass Through All Report Filters:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
-                <mx:CheckBox id="allCheckbox" selected="{allFilters}"/>
-            </mx:HBox>
             <mx:HBox width="100%">
                 <mx:Label text="Show Filters On Target Report:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
                 <mx:CheckBox id="showFiltersCheckbox" selected="{showFilters}"/>
             </mx:HBox>
             <mx:HBox width="100%">
-                <mx:Label text="Create Filters on Row Groupings:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
-                <mx:CheckBox id="createFiltersOnRowGroupingsCheckbox" selected="{createFiltersOnGroupings}"/>
+                <mx:Label text="Default Link:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:CheckBox id="drillthroughDefaultLinkCheckbox" selected="{defaultLink}"/>
             </mx:HBox>
-            <mx:HBox>
-                <mx:Label text="Scripting:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
-                <mx:TextArea text="{script}" width="450" height="70" editable="true" id="scriptArea" borderStyle="inset"
-                             borderThickness="1"/>
-            </mx:HBox>
+            <mx:ViewStack selectedIndex="{dtIndex}" width="600" height="85">
+                <mx:VBox>
+                    <mx:HBox width="100%">
+                        <mx:Label text="Filter on Field:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
+                        <util:SmartComboBox id="filterOnFieldCheckbox" dataProvider="{fields}" selectedProperty="name" selectedValue="{filterFieldValue}"
+                                            labelField="name"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:VBox>
+                    <mx:HBox width="100%">
+                        <mx:Label text="Pass Through All Report Filters:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
+                        <mx:CheckBox id="allCheckbox" selected="{allFilters}"/>
+                    </mx:HBox>
+
+                    <mx:HBox width="100%">
+                        <mx:Label text="Create Filters on Row Groupings:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
+                        <mx:CheckBox id="createFiltersOnRowGroupingsCheckbox" selected="{createFiltersOnGroupings}"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:ViewStack>
+
+
         </mx:VBox>
     </mx:ViewStack>
     <mx:Spacer height="100%"/>

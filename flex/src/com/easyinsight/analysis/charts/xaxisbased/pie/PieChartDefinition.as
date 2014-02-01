@@ -1,8 +1,8 @@
 package com.easyinsight.analysis.charts.xaxisbased.pie {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.MultiColor;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisDefinition;
-import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.skin.ApplicationSkin;
 
 import mx.collections.ArrayCollection;

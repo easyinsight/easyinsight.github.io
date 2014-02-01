@@ -65,7 +65,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_NAME), true));
-        analysisItems.add(new AnalysisZipCode(keys.get(ZIP_CODE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(ZIP_CODE), true));
         analysisItems.add(new AnalysisDimension(keys.get(BACKGROUND), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(COUNTRY), true));

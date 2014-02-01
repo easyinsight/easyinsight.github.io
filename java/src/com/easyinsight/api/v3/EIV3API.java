@@ -388,13 +388,13 @@ public abstract class EIV3API implements IEIV3API {
                 } else if (fieldDefinition.getFieldType() == FieldType.DATE) {
                     analysisItem = new AnalysisDateDimension(new NamedKey(fieldDefinition.getInternalName()), fieldDefinition.getDisplayName(), AnalysisDateDimension.DAY_LEVEL);
                 } else if (fieldDefinition.getFieldType() == FieldType.LATITUDE) {
-                    analysisItem = new AnalysisLatitude(new NamedKey(fieldDefinition.getInternalName()), true, fieldDefinition.getDisplayName());
+                    analysisItem = new AnalysisDimension(new NamedKey(fieldDefinition.getInternalName()), fieldDefinition.getDisplayName());
                 } else if (fieldDefinition.getFieldType() == FieldType.LONGITUDE) {
-                    analysisItem = new AnalysisLongitude(new NamedKey(fieldDefinition.getInternalName()), true, fieldDefinition.getDisplayName());
+                    analysisItem = new AnalysisDimension(new NamedKey(fieldDefinition.getInternalName()), fieldDefinition.getDisplayName());
                 } else if (fieldDefinition.getFieldType() == FieldType.TAGS) {
                     analysisItem = new AnalysisList(new NamedKey(fieldDefinition.getInternalName()), true, ",");
                 } else if (fieldDefinition.getFieldType() == FieldType.POSTAL_CODE) {
-                    analysisItem = new AnalysisZipCode(new NamedKey(fieldDefinition.getInternalName()), true);
+                    analysisItem = new AnalysisDimension(new NamedKey(fieldDefinition.getInternalName()), true);
                 } else if (fieldDefinition.getFieldType() == FieldType.MEASURE) {
                     int aggregation = AggregationTypes.SUM;
                     if (fieldDefinition.getMeasureAggregationType() != null) {

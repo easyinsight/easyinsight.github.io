@@ -108,7 +108,7 @@ public class CCContactSource extends ConstantContactBaseSource {
         items.add(new AnalysisDateDimension(keys.get(CONTACT_OPT_IN_DATE), true, AnalysisDateDimension.DAY_LEVEL));
         items.add(new AnalysisDateDimension(keys.get(CONTACT_UPDATED_ON), true, AnalysisDateDimension.DAY_LEVEL));
         items.add(new AnalysisDateDimension(keys.get(CONTACT_CREATED_ON), true, AnalysisDateDimension.DAY_LEVEL));
-        items.add(new AnalysisZipCode(keys.get(CONTACT_POSTAL), true));
+        items.add(new AnalysisDimension(keys.get(CONTACT_POSTAL), true));
         items.add(new AnalysisMeasure(keys.get(CONTACT_COUNT), AggregationTypes.SUM));
         items.add(AnalysisDimension.withFolder(keys.get(CONTACT_CUSTOM_FIELD1), "Custom Fields"));
         items.add(AnalysisDimension.withFolder(keys.get(CONTACT_CUSTOM_FIELD2), "Custom Fields"));

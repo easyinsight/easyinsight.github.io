@@ -8,10 +8,13 @@ package com.easyinsight.analysis;
 public class ReportAuditEvent {
 
     public static final String JOIN_FILTER = "Join Filter";
+    public static final String JOIN = "Join";
+    public static final String QUERY = "Query";
+    public static final String WARNING = "Warning";
 
     private String auditType;
     private String eventLabel;
-    public static final String QUERY = "Query";
+
 
     public ReportAuditEvent() {
     }

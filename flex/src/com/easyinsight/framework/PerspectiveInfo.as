@@ -30,6 +30,7 @@ public class PerspectiveInfo {
     public static const FEDERATED_EDITOR:int = 33;
     public static const DATA_SOURCE_SPECIFIC:int = 34;
     public static const SPREADSHEET_UPDATE:int = 35;
+    public static const FILTER_SET_EDITOR:int = 36;
 
     public var perspectiveType:int;
     public var properties:Object = null;

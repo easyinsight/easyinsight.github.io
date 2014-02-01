@@ -1,0 +1,173 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+         xmlns:filtering="com.easyinsight.filtering.*" xmlns:easyinsight="com.easyinsight.*"
+         implements="com.easyinsight.listing.IPerspective" width="100%" height="100%"
+         horizontalAlign="center" styleName="screenBackground" creationComplete="setup()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemNode;
+
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.FeedMetadata;
+
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.managers.BrowserManager;
+        import mx.managers.PopUpManager;
+        import mx.utils.URLUtil;
+
+        [Bindable]
+        private var _filterSet:FilterSet;
+        private var _filterSetID:int;
+
+        public function set filterSetID(value:int):void {
+            _filterSetID = value;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_filterSetID > 0) {
+                ProgressAlert.alert(this, "Retrieving details...", null, analysisService.getFilterSet);
+                analysisService.getFilterSet.send(_filterSetID);
+            } else {
+                _filterSet = new FilterSet();
+                _filterSet.dataSourceID = _dataSourceID;
+                ProgressAlert.alert(this, "Retrieving fields...", null, dataService.getFeedMetadata);
+                //dataService.getAnalysisItemMetadata.send(_lookupTable.dataSourceID, _lookupTable.sourceField, CredentialsCache.getCache().createCredentials(), 0);
+                dataService.getFeedMetadata.send(_dataSourceID);
+            }
+        }
+
+        private function setup():void {
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
+        }
+
+        private var commandProcessor:CommandProcessor;
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
+        }
+
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        private function gotFilterSet():void {
+            _filterSet = analysisService.getFilterSet.lastResult as FilterSet;
+            _dataSourceID = _filterSet.dataSourceID;
+
+
+            tableName = _filterSet.name;
+
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.filterSetID = _filterSet.urlKey;
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + _filterSet.name);
+            ProgressAlert.alert(this, "Retrieving fields...", null, dataService.getFeedMetadata);
+            //dataService.getAnalysisItemMetadata.send(_lookupTable.dataSourceID, _lookupTable.sourceField, CredentialsCache.getCache().createCredentials(), 0);
+            dataService.getFeedMetadata.send(_dataSourceID);
+        }
+
+        private var changed:Boolean = false;
+
+        [Bindable]
+        private var tableName:String;
+
+        [Bindable]
+        private var _dataSourceID:int;
+        [Bindable]
+        private var allFields:ArrayCollection;
+
+
+        private function gotDefinition():void {
+            var feedDefinition:FeedMetadata = dataService.getFeedMetadata.lastResult as FeedMetadata;
+
+
+            allFields = new ArrayCollection();
+            for each (var analysisItem:AnalysisItem in feedDefinition.fields) {
+                var aNode:AnalysisItemNode = new AnalysisItemNode();
+                aNode.analysisItem = analysisItem;
+                allFields.addItem(new AnalysisItemWrapper(aNode));
+            }
+
+            if (_filterSet != null) {
+                transformContainer.existingFilters = _filterSet.filters;
+            }
+        }
+
+        private function cancel():void {
+            dispatchEvent(new AnalysisCloseEvent());
+        }
+
+        private function onSave(event:FilterSetSaveEvent):void {
+            tableName = event.filterSet.name;
+        }
+
+        private function save():void {
+            var window:FilterSetSaveWindow = new FilterSetSaveWindow();
+            _filterSet.filters = transformContainer.getFilterDefinitions();
+            window.dashboard = _filterSet;
+            window.addEventListener(FilterSetSaveEvent.FILTER_SET_SAVE, onSave, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function retrieve():void {
+
+        }
+
+
+        public function gotFocus():void {
+        }
+
+        public function cleanup():void {
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="getFilterSet" result="gotFilterSet()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="data" id="dataService">
+        <!--<mx:method name="getAnalysisItemMetadata" result="gotMetadata()"/>-->
+        <mx:method name="getFeedMetadata" result="gotDefinition()"/>
+    </mx:RemoteObject>
+    <mx:HBox width="100%" styleName="topButtonBar">
+        <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
+                   toolTip="Close" labelPlacement="right" label="Close Editor" styleName="grayButton"/>
+        <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
+                   toolTip="Save" labelPlacement="right" label="Save" styleName="grayButton"/>
+        <mx:Spacer width="100%"/>
+        <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
+    </mx:HBox>
+    <mx:Box width="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" paddingTop="10">
+        <mx:VBox width="100%" paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10" verticalGap="0"
+                 borderStyle="solid"
+                 borderThickness="1"
+                 cornerRadius="8" dropShadowEnabled="true" backgroundColor="#FFFFFF" backgroundAlpha="1">
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Label text="Filter Set Name:" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Label text="{tableName}"/>
+            </mx:HBox>
+            <filtering:TransformContainer id="transformContainer" width="100%"
+                                          borderColor="#aaaaaa"
+                                          borderStyle="solid"
+                                          borderThickness="1" backgroundColor="#ffffff"
+                                          backgroundAlpha=".1" feedID="{_dataSourceID}"
+                                          analysisItems="{allFields}"
+                                          paddingBottom="5" paddingLeft="5" paddingRight="5"
+                                          paddingTop="5" context="{TransformContainer.FILTER_SET}" filterSet="{_filterSet}">
+                <mx:Button icon="@Embed(source='../../../../assets/funnel.png')"
+                           toolTip="Create a Filter to Restrict Values..." click="transformContainer.addNewFilter()"
+                           label="New Filter"/>
+           </filtering:TransformContainer>
+        </mx:VBox>
+    </mx:Box>
+</mx:VBox>

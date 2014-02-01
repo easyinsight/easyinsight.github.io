@@ -16,6 +16,7 @@
             ext.wordWrap = wordWrapCheckbox.selected;
             ext.sortable = sortableCheckbox.selected;
             ext.ignoreOnSummary = ignoreSummaryCheckBox.selected;
+            ext.forceToSummary = forceSummaryCheckbox.selected;
             analysisItem.reportFieldExtension = ext;
         }
 
@@ -29,6 +30,7 @@
                 fixedWidth = String(ext.fixedWidth);
                 sortable = ext.sortable;
                 ignoreOnSummary = ext.ignoreOnSummary;
+                forceToSummary = ext.forceToSummary;
             }
         }
 
@@ -52,6 +54,9 @@
         
         [Bindable]
         private var sortable:Boolean = true;
+
+        [Bindable]
+        private var forceToSummary:Boolean = false;
         ]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="Align:">
@@ -79,6 +84,9 @@
         </mx:FormItem>
         <mx:FormItem label="Ignore on Summary:">
             <mx:CheckBox id="ignoreSummaryCheckBox" selected="{ignoreOnSummary}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Force to Summary:">
+            <mx:CheckBox id="forceSummaryCheckbox" selected="{forceToSummary}"/>
         </mx:FormItem>
     </mx:Form>
 </mx:VBox>

@@ -62,6 +62,34 @@ public class AnalysisService {
         }
     }*/
 
+    public List<FilterSetDescriptor> getFilterSetsForDataSource(long dataSourceID) {
+        try {
+            return new FilterSetStorage().getFilterSetsForDataSource(dataSourceID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public FilterSet saveFilterSet(FilterSet filterSet) {
+        try {
+            new FilterSetStorage().saveFilterSet(filterSet);
+            return filterSet;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public FilterSet getFilterSet(long id) {
+        try {
+            return new FilterSetStorage().getFilterSet(id);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public String saveReportLink(long reportID, DashboardStackPositions dashboardStackPositions) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -523,15 +551,6 @@ public class AnalysisService {
             analysisItem = analysisItem.clone();
         }
         return analysisItem;
-    }
-
-    private AnalysisItem findLabelItem(List<AnalysisItem> items) {
-        for (AnalysisItem item : items) {
-            if (item.isLabelColumn()) {
-                return item;
-            }
-        }
-        return null;
     }
 
     private AnalysisItem findTargetItem(CompositeFeedConnection connection, List<AnalysisItem> items) throws CloneNotSupportedException {
@@ -1265,8 +1284,35 @@ public class AnalysisService {
     }
 
     public DrillThroughResponse drillThrough(DrillThrough drillThrough, Object dataObj, AnalysisItem analysisItem,
-                                             WSAnalysisDefinition report, String altKey) {
+                                             WSAnalysisDefinition report, String altKey, List altValues) {
         try {
+            List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+            if (drillThrough.getPassThroughField() != null) {
+                FilterValueDefinition multi = new FilterValueDefinition();
+                multi.setField(drillThrough.getPassThroughField().reconcileToAnalysisItem(report.getDataFeedID()));
+                multi.setFilteredValues(altValues);
+                multi.setInclusive(true);
+                multi.setNewType(true);
+                multi.setSingleValue(false);
+                multi.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                multi.setToggleEnabled(true);
+                filters.add(multi);
+                DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
+                EIDescriptor descriptor;
+                if (drillThrough.getReportID() != null && drillThrough.getReportID() != 0) {
+                    InsightResponse insightResponse = openAnalysisIfPossibleByID(drillThrough.getReportID());
+                    descriptor = insightResponse.getInsightDescriptor();
+                } else {
+                    DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
+                    String urlKey = new DashboardStorage().urlKeyForID(drillThrough.getDashboardID());
+                    dashboardDescriptor.setId(drillThrough.getDashboardID());
+                    dashboardDescriptor.setUrlKey(urlKey);
+                    descriptor = dashboardDescriptor;
+                }
+                drillThroughResponse.setDescriptor(descriptor);
+                drillThroughResponse.setFilters(filters);
+                return drillThroughResponse;
+            }
             Map<String, Object> data;
             if (dataObj instanceof Map) {
                 data = (Map<String, Object>) dataObj;
@@ -1278,7 +1324,7 @@ public class AnalysisService {
             } else {
                 throw new RuntimeException();
             }
-            List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+
 
             List<AnalysisItem> additionalAnalysisItems = new ArrayList<AnalysisItem>();
             Set<AnalysisItem> used = new HashSet<AnalysisItem>();
@@ -2072,7 +2118,7 @@ public class AnalysisService {
             AnalysisDefinition baseReport = analysisStorage.getPersistableReport(reportID, session);
             Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
             Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
-            SolutionService.recurseReport(reports, dashboards, baseReport, session, conn);
+            SolutionService.recurseReport(reports, dashboards, baseReport, session, conn, new HashSet<Long>());
 
             for (AnalysisDefinition report : reports.values()) {
                 report.setTemporaryReport(false);
@@ -2464,6 +2510,10 @@ public class AnalysisService {
         }
     }
 
+    private FilterSet loadFilterSet(FilterSetDescriptor filterSetDescriptor) {
+        return new FilterSetStorage().getFilterSet(filterSetDescriptor.getId());
+    }
+
     public WSAnalysisDefinition openAnalysisDefinition(long analysisID) {
         try {
             int role = SecurityUtil.authorizeInsight(analysisID);
@@ -2472,6 +2522,20 @@ public class AnalysisService {
                 report.setCanSave(false);
             } else {
                 report.setCanSave(true);
+            }
+            try {
+                if (report.getFilterSets() != null) {
+                    for (FilterSetDescriptor filterSetDescriptor : report.getFilterSets()) {
+                        FilterSet filterSet = loadFilterSet(filterSetDescriptor);
+                        for (FilterDefinition filterDefinition : filterSet.getFilters()) {
+                            FilterDefinition clone = filterDefinition.clone();
+                            clone.setFromFilterSet(filterSetDescriptor.getId());
+                            report.getFilterDefinitions().add(clone);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
             }
             return report;
         } catch (Exception e) {
@@ -2564,58 +2628,6 @@ public class AnalysisService {
             return null;
         }
         return insightResponse;
-    }
-
-    public UserCapabilities getUserCapabilitiesForFeed(long feedID) {
-        if (SecurityUtil.getUserID(false) == 0) {
-            return new UserCapabilities(Roles.NONE, Roles.NONE, false, false);
-        }
-        long userID = SecurityUtil.getUserID();
-        int feedRole = Integer.MAX_VALUE;
-        boolean groupMember = false;
-        boolean hasReports = false;
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT ROLE FROM UPLOAD_POLICY_USERS WHERE " +
-                    "USER_ID = ? AND FEED_ID = ?");
-            existingLinkQuery.setLong(1, userID);
-            existingLinkQuery.setLong(2, feedID);
-            ResultSet rs = existingLinkQuery.executeQuery();
-            if (rs.next()) {
-                feedRole = rs.getInt(1);
-            }
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT COUNT(COMMUNITY_GROUP.COMMUNITY_GROUP_ID) FROM COMMUNITY_GROUP, GROUP_TO_USER_JOIN WHERE " +
-                    "USER_ID = ? AND GROUP_TO_USER_JOIN.GROUP_ID = COMMUNITY_GROUP.COMMUNITY_GROUP_ID");
-            queryStmt.setLong(1, userID);
-            ResultSet groupRS = queryStmt.executeQuery();
-            groupRS.next();
-            groupMember = groupRS.getInt(1) > 0;
-            PreparedStatement analysisCount = conn.prepareStatement("SELECT COUNT(analysis_id) from analysis WHERE data_feed_id = ?");
-            analysisCount.setLong(1, feedID);
-            ResultSet analysisCountRS = analysisCount.executeQuery();
-            analysisCountRS.next();
-            hasReports = analysisCountRS.getInt(1) > 0;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return new UserCapabilities(Integer.MAX_VALUE, feedRole, groupMember, hasReports);
-    }
-
-    public UserCapabilities getUserCapabilitiesForInsight(long feedID, long insightID) {
-        if (SecurityUtil.getUserID(false) == 0) {
-            return new UserCapabilities(Roles.NONE, Roles.NONE, false, false);
-        }
-        UserCapabilities userCapabilities = getUserCapabilitiesForFeed(feedID);
-        try {
-            SecurityUtil.authorizeInsight(insightID);
-            userCapabilities.setAnalysisRole(Roles.OWNER);
-        } catch (SecurityException se) {
-            userCapabilities.setAnalysisRole(Roles.NONE);
-        }
-        return userCapabilities;
     }
 
     public List<IntentionSuggestion> generatePossibleIntentions(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {

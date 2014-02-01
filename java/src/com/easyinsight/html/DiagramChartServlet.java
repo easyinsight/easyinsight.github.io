@@ -60,7 +60,7 @@ public class DiagramChartServlet extends HtmlServlet {
                         double d = (((o.getNow().toDouble() / o.getHistorical().toDouble()) - 1.0) * 100.0);
                         FormattingConfiguration c = new FormattingConfiguration();
                         c.setFormattingType(FormattingConfiguration.PERCENTAGE);
-                        node.put("change", c.createFormatter().format(d));
+                        node.put("change", FormattingConfiguration.createFormatter(c.getFormattingType()).format(d));
                         node.put("trendIcon", ExportService.getIconImage(o));
                     }
                 } else {
@@ -73,7 +73,7 @@ public class DiagramChartServlet extends HtmlServlet {
                 }
 
                 node.put("image", nodeValues.getIconImage());
-                node.put("value", i.getFormattingConfiguration().createFormatter().format(o.getNow().toDouble()));
+                node.put("value", FormattingConfiguration.createFormatter(i.getFormattingType()).format(o.getNow().toDouble()));
 
                 lookup.put(i, String.valueOf(i.getAnalysisItemID()));
                 nodes.put(String.valueOf(i.getAnalysisItemID()), node);

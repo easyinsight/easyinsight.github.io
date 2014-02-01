@@ -13,6 +13,8 @@ import mx.collections.ArrayCollection;
         public static const EMPTY:int = 4;
 
         public var links:Object;
+        //public var drillThroughs:Object;
+        public var drillThroughValues:Object;
         public var sortValue:Value;
         public var originalValue:Value;
         public var otherValues:ArrayCollection;

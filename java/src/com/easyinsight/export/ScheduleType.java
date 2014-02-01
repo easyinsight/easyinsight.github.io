@@ -28,6 +28,7 @@ public abstract class ScheduleType {
     public static final int TR = 4;
     public static final int WEEKLY = 5;
     public static final int MONTHLY = 6;
+    public static final int NEVER = 7;
 
     public abstract int retrieveType();
 

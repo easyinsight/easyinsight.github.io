@@ -6,6 +6,7 @@ package com.easyinsight.feedassembly
 	public class CompositeFeedNode
 	{
 		public var dataFeedID:int;
+        public var selected:Boolean;
         public var x:int;
         public var y:int;
         public var dataSourceName:String;

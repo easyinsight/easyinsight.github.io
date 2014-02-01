@@ -1,9 +1,13 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
 import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -78,12 +82,25 @@ public class AnalysisItemHandle implements Cloneable, Serializable {
         this.analysisItemID = analysisItemID;
     }
 
-    public void save(Session session) {
+    public void save() {
         if (handleID != null && handleID == 0) {
             handleID = null;
         }
         if (analysisItemID != null && analysisItemID == 0) {
             analysisItemID = null;
         }
+    }
+
+    public AnalysisItem reconcileToAnalysisItem(long dataSourceID) throws SQLException {
+        // get data source
+        FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID);
+        List<AnalysisItem> fields = dataSource.getFields();
+        for (AnalysisItem field : fields) {
+            if ((getAnalysisItemID() != null && getAnalysisItemID() > 0 && field.getAnalysisItemID() == getAnalysisItemID()) ||
+                    name.equals(field.toDisplay())) {
+                return field;
+            }
+        }
+        return null;
     }
 }

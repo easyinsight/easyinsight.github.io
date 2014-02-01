@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+        import mx.rpc.events.FaultEvent;
+        import mx.validators.Validator;
+
+        private var _filterSet:FilterSet;
+
+        public function set dashboard(value:FilterSet):void {
+            _filterSet = value;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            dashboardName = _filterSet.name;
+            dashboardDescription = _filterSet.description;
+        }
+
+        [Bindable]
+        private var stackIndex:int;
+
+        [Bindable]
+        private var dashboardName:String;
+
+        [Bindable]
+        private var dashboardDescription:String;
+
+        [Bindable]
+        private var errorText:String;
+
+        private function nextFromName():void {
+            var results:Array = Validator.validateAll([dashboardNameValidator]);
+            if (results.length > 0) {
+                reportNameInput.setFocus();
+                reportNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            } else {
+                dashboardName = reportNameInput.text;
+                dashboardDescription = reportDescriptionInput.text;
+                save();
+            }
+        }
+
+        private function save():void {
+            _filterSet.name = dashboardName;
+            _filterSet.description = dashboardDescription;
+            stackIndex = 1;
+            analysisService.saveFilterSet.send(_filterSet);
+        }
+
+        private function savedFilterSet():void {
+            var ret:FilterSet = analysisService.saveFilterSet.lastResult as FilterSet;
+            _filterSet.id = ret.id;
+            _filterSet.urlKey = ret.urlKey;
+            dispatchEvent(new FilterSetSaveEvent(_filterSet));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function updatedVisibility():void {
+
+        }
+
+        private function onFault(event:FaultEvent):void {
+            errorText = event.fault.faultString;
+            stackIndex = 2;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="saveFilterSet" result="savedFilterSet()" fault="onFault(event)"/>
+    </mx:RemoteObject>
+    <mx:Canvas width="600" height="400" backgroundColor="#FFFFFF" styleName="fallThroughFonts">
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ViewStack selectedIndex="{stackIndex}" width="550" height="350" backgroundColor="#FFFFFF">
+                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <!-- what do you want to call this report? -->
+                    <mx:Label text="What do you want to name this filter set?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextInput text="{dashboardName}" id="reportNameInput" width="530" fontSize="14"/>
+                    <mx:Spacer height="20"/>
+                    <mx:Label text="How do you want to describe this filter set?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextArea width="530" height="75" id="reportDescriptionInput"
+                                         text="{dashboardDescription}" fontSize="14" borderStyle="inset" borderThickness="1"/>
+                    <mx:Spacer height="100%"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <util:SaveButton label="Save" click="nextFromName()" fontSize="14"/>
+                        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:ProgressBar label="Saving the filter set..." indeterminate="true"/>
+                </mx:Box>
+                <mx:VBox width="100%" height="100%" horizontalAlign="center" paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10">
+                    <mx:Label text="We're sorry, but something went wrong in saving the filter set." fontSize="14"/>
+                    <mx:TextArea borderStyle="none" backgroundAlpha="0" text="{errorText}" width="400" height="200" editable="false"/>
+                    <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+                </mx:VBox>
+            </mx:ViewStack>
+        </mx:Box>
+    </mx:Canvas>
+    <mx:StringValidator id="dashboardNameValidator" source="{reportNameInput}" property="text" minLength="3" maxLength="100"/>
+</util:EITitleWindow>
