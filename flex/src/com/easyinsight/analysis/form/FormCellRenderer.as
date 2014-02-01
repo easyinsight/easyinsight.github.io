@@ -11,6 +11,8 @@ import flash.events.MouseEvent;
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
 
+import mx.collections.ArrayCollection;
+
 import mx.containers.Box;
 import mx.controls.Alert;
 import mx.controls.Label;
@@ -51,7 +53,11 @@ public class FormCellRenderer extends Box
                 }
             } else if (defaultLink is DrillThrough) {
                 var drillThrough:DrillThrough = defaultLink as DrillThrough;
-                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, _report);
+                var values:ArrayCollection = null;
+                if (DrillThrough(defaultLink).passThroughField != null) {
+                    values = data[DrillThrough(defaultLink).passThroughField.name + "_drill"];
+                }
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, _report, null, values);
                 executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();
             }
