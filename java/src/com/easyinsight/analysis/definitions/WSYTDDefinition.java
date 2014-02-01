@@ -164,6 +164,7 @@ public class WSYTDDefinition extends WSAnalysisDefinition {
 
     protected void assignResults(List<AnalysisItem> fields) {
         Map<String, List<AnalysisItem>> map = new LinkedHashMap<String, List<AnalysisItem>>();
+        boolean firstPH = true;
         for (AnalysisItem field : fields) {
             boolean defined = false;
             if (field.getReportFieldExtension() != null && field.getReportFieldExtension() instanceof YTDReportFieldExtension) {
@@ -180,6 +181,11 @@ public class WSYTDDefinition extends WSAnalysisDefinition {
                         placeHolder.setReportFieldExtension(ext);
                         items.add(placeHolder);
                         map.put(section, items);
+                        if (firstPH) {
+                            firstPH = false;
+                        } else {
+                            ext.setLineAbove(true);
+                        }
                     }
                     items.add(field);
                 }
