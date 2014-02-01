@@ -18,6 +18,7 @@
     </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.FilterSetDescriptor;
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.datasources.DataSourceBehavior;
@@ -293,6 +294,9 @@
                     var lookupTablesFolder:DataFolder = new DataFolder("Lookup Tables", 3);
                     var lookupTablesChildren:ArrayCollection = new ArrayCollection();
                     lookupTablesFolder.children = lookupTablesChildren;
+                    var filterSetFolder:DataFolder = new DataFolder("Filter Sets", 4);
+                    var filterSetFolderChildren:ArrayCollection = new ArrayCollection();
+                    filterSetFolder.children = filterSetFolderChildren;
                     var folderMap:Object = new Object();
                     for each (var customFolder:CustomFolder in _dataSourceDescriptor.customFolders) {
                         var customViewFolder:DataFolder = new DataFolder(customFolder.name, customFolder.id);
@@ -302,6 +306,8 @@
                     for each (var desc:EIDescriptor in dataSourceChildren) {
                         if (desc.getType() == EIDescriptor.LOOKUP_TABLE) {
                             lookupTablesChildren.addItem(desc);
+                        } else if (desc.getType() == EIDescriptor.FILTER_SET) {
+                            filterSetFolderChildren.addItem(desc);
                         } else {
                             var targetFolder:DataFolder = folderMap[desc.folder] as DataFolder;
                             if (targetFolder == null) {
@@ -323,6 +329,9 @@
                     folders.addItem(otherViewsFolder);
                     if (lookupTablesChildren.length > 0) {
                         folders.addItem(lookupTablesFolder);
+                    }
+                    if (filterSetFolderChildren.length > 0) {
+                        folders.addItem(filterSetFolder);
                     }
                     nameColumnFactory = new ClassFactory(ReportRolloverLabel);
                     nameColumnFactory.properties = {folders: folders };
@@ -494,6 +503,8 @@
                 return "Dashboard";
             } else if (object is LookupTableDescriptor) {
                 return "Lookup Table";
+            } else if (object is FilterSetDescriptor) {
+                return "Filter Set";
             }
             return "";
         }
@@ -717,6 +728,8 @@
                 return crosstabIcon;
             } else if (item is LookupTableDescriptor) {
                 return tablesIcon;
+            } else if (item is FilterSetDescriptor) {
+                return filterIcon;
             } else if (item is DashboardDescriptor) {
                 return dashboardIcon;
             } else if (item is ScorecardDescriptor) {
@@ -739,6 +752,9 @@
 
         [Embed(source="../../../../assets/data_blue_x16.png")]
         private var listIcon:Class;
+
+        [Embed(source="../../../../assets/funnel.png")]
+        private var filterIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/presentation_chart.png")]
@@ -820,6 +836,10 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        private function newFilterSet():void {
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.FILTER_SET_EDITOR, { dataSourceID:dataSourceID})));
+        }
+
         private function onAnalyze(event:AnalyzeEvent):void {
             preserveOpenState();
             dispatchEvent(event);
@@ -855,6 +875,8 @@
             } else if (selectedObject is InsightDescriptor) {
                 analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
+            } else if (selectedObject is FilterSetDescriptor) {
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.FILTER_SET_EDITOR, {filterSetID:selectedObject.id})));
             }
         }
 
@@ -967,6 +989,8 @@
                 customizeMyData();
             } else if (target == "organizeFolders") {
                 manageFolders();
+            } else if (target == "newFilterSet") {
+                newFilterSet();
             }
         }
 
@@ -1180,7 +1204,8 @@
         private var createOptions:ArrayCollection = new ArrayCollection([ {label: "New Report", data: "newReport"},
             {label: "New Dashboard", data: "newDashboard"},
             {label: "New Folder", data: "newFolder"},
-            {label: "New Lookup Table", data: "newLookupTable"}
+            {label: "New Lookup Table", data: "newLookupTable"},
+            {label: "New Filter Set", data: "newFilterSet"}
         ]);
 
         [Bindable]

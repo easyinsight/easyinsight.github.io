@@ -137,6 +137,8 @@
                 currentState = "advancedField";
             } else if (filterSource == DASHBOARD_LEVEL) {
                 currentState = "advancedDashboard";
+            } else {
+                currentState = "advancedReportWithMulti";
             }
 
         }

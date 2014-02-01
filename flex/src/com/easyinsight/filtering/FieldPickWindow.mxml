@@ -78,6 +78,12 @@
 
         private var _dashboard:Dashboard;
 
+        private var _filterSet:FilterSet;
+
+        public function set filterSet(value:FilterSet):void {
+            _filterSet = value;
+        }
+
         public function set report(value:AnalysisDefinition):void {
             _report = value;
         }
@@ -91,7 +97,7 @@
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.possibleFields.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.possibleFields.send(_filterValueDefinition, _report, _dashboard);
+            dataService.possibleFields.send(_filterValueDefinition, _report, _dashboard, _filterSet);
         }
 
         /*private static function compare(obj1:Object, obj2:Object, fields:Array = null):int {

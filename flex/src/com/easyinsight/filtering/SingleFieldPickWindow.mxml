@@ -62,6 +62,12 @@
 
         private var _dashboard:Dashboard;
 
+        private var _filterSet:FilterSet;
+
+        public function set filterSet(value:FilterSet):void {
+            _filterSet = value;
+        }
+
         public function set report(value:AnalysisDefinition):void {
             _report = value;
         }
@@ -83,7 +89,7 @@
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.possibleFields.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.possibleFields.send(_filterValueDefinition, _report, _dashboard);
+            dataService.possibleFields.send(_filterValueDefinition, _report, _dashboard, _filterSet);
         }
 
         private function gotMetadata(event:ResultEvent):void {
@@ -169,11 +175,11 @@
 
             valueFilter.targetItem = FilterStringRadioButton(radioGroup.selection.parent).data.analysisItem;
             /*for each (var o:Object in a) {
-                if (o.selected) {
-                    valueFilter.targetItem = o.analysisItem;
-                    break;
-                }
-            }*/
+             if (o.selected) {
+             valueFilter.targetItem = o.analysisItem;
+             break;
+             }
+             }*/
 
             return _filterValueDefinition;
         }
@@ -222,7 +228,7 @@
             filterTileList = new List();
             filterTileList.id = "solutionGrid";
             var cf:ClassFactory = new ClassFactory(FilterStringRadioButton);
-            cf.properties = { radioGroup: radioGroup };
+            cf.properties = { radioGroup:radioGroup };
             filterTileList.itemRenderer = cf;
             filterTileList.dragEnabled = true;
             filterTileList.dropEnabled = true;

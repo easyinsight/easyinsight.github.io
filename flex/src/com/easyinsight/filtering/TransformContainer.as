@@ -61,6 +61,7 @@ public class TransformContainer extends HBox
     public static const REPORT_EDITOR:int = 1;
     public static const DASHBOARD_EDITOR:int = 2;
     public static const DASHBOARD_STACK_EDITOR:int = 3;
+    public static const FILTER_SET:int = 4;
 
     private var _context:int;
 
@@ -259,6 +260,7 @@ public class TransformContainer extends HBox
         var filterMetadata:FilterMetadata = new FilterMetadata();
         filterMetadata.key = _filterStorageKey;
         filterMetadata.context = _context;
+        filterMetadata.filterSet = _filterSet;
         if (filterDefinition.getType() == FilterDefinition.VALUE) {
             var filterValueDefinition:FilterValueDefinition = filterDefinition as FilterValueDefinition;
             if (filterValueDefinition.singleValue) {
@@ -365,12 +367,21 @@ public class TransformContainer extends HBox
         _filterSource = value;
     }
 
+    private var _filterSet:FilterSet;
+
+    public function set filterSet(value:FilterSet):void {
+        _filterSet = value;
+    }
+
     public function addNewFilter(advancedAvailable:Boolean = true):void {
         var window:NewFilterWindow = new NewFilterWindow();
         if (_report != null) {
             window.reportType = _report.reportType;
+        } else if (_context == FILTER_SET) {
+            window.reportType = AnalysisDefinition.LIST;
         }
         var filterMetadata:FilterMetadata = new FilterMetadata();
+        filterMetadata.filterSet = _filterSet;
         filterMetadata.key = _filterStorageKey;
         filterMetadata.context = _context;
         window.filterMetadata = filterMetadata;
@@ -426,6 +437,7 @@ public class TransformContainer extends HBox
         var filterMetadata:FilterMetadata = new FilterMetadata();
         filterMetadata.key = _filterStorageKey;
         filterMetadata.context = _context;
+        filterMetadata.filterSet = _filterSet;
         if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
             var window:DateFilterWindow = new DateFilterWindow();
             window.filterMetadata = filterMetadata;
@@ -632,7 +644,7 @@ public class TransformContainer extends HBox
             addFilter(filter);
         }
 
-        if (filter.filterDefinition != null && filter.filterDefinition.filterID == 0) {
+        if (filter.filterDefinition != null && filter.filterDefinition.filterID == 0 && filter.filterDefinition.fromFilterSet == 0) {
             dispatchEvent(new AnalysisChangedEvent());
         }
     }
