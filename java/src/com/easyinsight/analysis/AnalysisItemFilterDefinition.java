@@ -279,7 +279,7 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
     @Override
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
         JSONObject jo = super.toJSON(filterHTMLMetadata);
-        List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, null, null);
+        List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, null, null, null);
         jo.put("type", "field_filter");
         jo.put("selected", String.valueOf(targetItem.getAnalysisItemID()));
         JSONArray available = new JSONArray();

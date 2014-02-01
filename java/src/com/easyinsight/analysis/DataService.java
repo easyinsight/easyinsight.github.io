@@ -39,7 +39,8 @@ public class DataService {
 
     private FeedRegistry feedRegistry = FeedRegistry.instance();
 
-    public List<AnalysisItemSelection> possibleFields(IFieldChoiceFilter filter, @Nullable WSAnalysisDefinition reportEditorReport, @Nullable Dashboard dashboardEditorDashboard) {
+    public List<AnalysisItemSelection> possibleFields(IFieldChoiceFilter filter, @Nullable WSAnalysisDefinition reportEditorReport, @Nullable Dashboard dashboardEditorDashboard,
+                                                      @Nullable FilterSet filterSet) {
         WSAnalysisDefinition report = null;
         long dashboardID = 0;
         try {
@@ -49,6 +50,8 @@ public class DataService {
                 dataSourceID = reportEditorReport.getDataFeedID();
             } else if (dashboardEditorDashboard != null) {
                 dataSourceID = dashboardEditorDashboard.getDataSourceID();
+            } else if (filterSet != null) {
+                dataSourceID = filterSet.getDataSourceID();
             } else {
                 EIConnection conn = Database.instance().getConnection();
 

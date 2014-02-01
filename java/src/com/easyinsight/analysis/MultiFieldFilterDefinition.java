@@ -223,7 +223,7 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
     @Override
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
         JSONObject jo = super.toJSON(filterHTMLMetadata);
-        List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, null, null);
+        List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, null, null, null);
 
         jo.put("type", "multi_field_filter");
         jo.put("count", itemsAvailable.size());

@@ -77,7 +77,7 @@ public class FilterUtils {
             String value = curFilter != null ? (String) curFilter.get("selected") : null;
             if (value != null) {
                 long fieldID = Long.parseLong(value);
-                List<AnalysisItemSelection> possibles = new DataService().possibleFields(analysisItemFilterDefinition, null, null);
+                List<AnalysisItemSelection> possibles = new DataService().possibleFields(analysisItemFilterDefinition, null, null, null);
                 for (AnalysisItemSelection possible : possibles) {
                     if (possible.getAnalysisItem().getAnalysisItemID() == fieldID) {
                         analysisItemFilterDefinition.setTargetItem(possible.getAnalysisItem());

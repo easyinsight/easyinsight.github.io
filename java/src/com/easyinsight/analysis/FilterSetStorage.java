@@ -40,6 +40,7 @@ public class FilterSetStorage {
                 stmt.setString(1, filterSet.getName());
                 stmt.setString(2, filterSet.getDescription());
                 stmt.setString(3, filterSet.getUrlKey());
+                stmt.setLong(4, filterSet.getId());
                 stmt.executeUpdate();
                 stmt.close();
             }
