@@ -25,6 +25,9 @@ public class SummaryDefinition extends TreeDefinition {
     }
 
     override public function getFont():String {
+        if (customFontFamily != null && customFontFamily != "" && useCustomFontFamily) {
+            return customFontFamily;
+        }
         if (fontName == "Lucida Grande" || fontName == "Open Sans") {
             return fontName;
         } else {
