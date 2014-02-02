@@ -77,7 +77,7 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
         DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
         try {
-            Document doc = runRestRequest("https://secure.solve360.com/report/nextactions?start=2011-01-01&end=2011-11-20", httpClient, new Builder(), solve360CompositeSource);
+            Document doc = runRestRequest("https://secure.solve360.com/report/activities/?start=2014-01-01&end=2014-02-03&last=created", httpClient, new Builder(), solve360CompositeSource);
             System.out.println(doc.toXML());
             DataSet dataSet = new DataSet();
             /*Nodes oppNodes = doc.query("/response/opportunities/opportunity");

@@ -244,6 +244,7 @@ public class FeedType implements Serializable {
     public static final FeedType KASHOO_RECORDS = new FeedType(215);
     public static final FeedType KASHOO_ACCOUNTS = new FeedType(216);
     public static final FeedType SMARTSHEET_TABLE = new FeedType(217);
+    public static final FeedType SOLVE360_COMPANIES = new FeedType(218);
 
     public FeedType() {
     }
