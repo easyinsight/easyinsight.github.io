@@ -497,6 +497,7 @@ public class FeedStorage {
         try {
             analysisItems = optimizedRetrieval(conn, feedID, analysisItemIDs);
         } catch (Exception e) {
+            LogClass.error(e);
             analysisItems = slowRetrieval(conn, analysisItemIDs);
         }
         return analysisItems;
@@ -576,12 +577,6 @@ public class FeedStorage {
                 }
                 analysisItemList1.add(analysisItem);
             }
-            sb = new StringBuilder();
-            for (Long id : formattingConfigurationIDs.keySet()) {
-                sb.append(id).append(",");
-            }
-            sb.deleteCharAt(sb.length() - 1);
-
 
 
             sb = new StringBuilder();
