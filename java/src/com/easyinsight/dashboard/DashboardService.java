@@ -1030,10 +1030,31 @@ public class DashboardService {
                 }
             }*/
             for (Map.Entry<AnalysisItem, List<FlatDateFilter>> entry : flatDateFilters.entrySet()) {
-                AnalysisDateDimensionResultMetadata metadata = (AnalysisDateDimensionResultMetadata) new DataService().getAnalysisItemMetadata(dataSourceID, entry.getKey(), 0, 0, dashboardID);
-                metadata.setLatestDate(new Date());
+                int startYearFound = 0;
                 for (FlatDateFilter filterDefinition : entry.getValue()) {
-                    filterDefinition.setCachedValues(metadata);
+                    if (filterDefinition.getStartYear() > 0) {
+                        startYearFound = filterDefinition.getStartYear();
+                    }
+                }
+                if (startYearFound > 0) {
+                    System.out.println("loading with cache");
+                    Calendar cal = Calendar.getInstance();
+                    cal.set(Calendar.YEAR, startYearFound);
+
+                    AnalysisDateDimensionResultMetadata metadata = new AnalysisDateDimensionResultMetadata();
+                    metadata.setEarliestDate(cal.getTime());
+                    metadata.setLatestDate(new Date());
+
+                    for (FlatDateFilter filterDefinition : entry.getValue()) {
+                        filterDefinition.setCachedValues(metadata);
+                    }
+                } else {
+                    System.out.println("loading without cache");
+                    AnalysisDateDimensionResultMetadata metadata = (AnalysisDateDimensionResultMetadata) new DataService().getAnalysisItemMetadata(dataSourceID, entry.getKey(), 0, 0, dashboardID);
+                    metadata.setLatestDate(new Date());
+                    for (FlatDateFilter filterDefinition : entry.getValue()) {
+                        filterDefinition.setCachedValues(metadata);
+                    }
                 }
             }
         }
