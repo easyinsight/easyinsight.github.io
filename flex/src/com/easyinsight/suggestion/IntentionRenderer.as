@@ -21,6 +21,10 @@ public class IntentionRenderer extends Text {
     private var suggestion:IntentionSuggestion;
 
     public function IntentionRenderer() {
+        buttonMode = true;
+        useHandCursor = true;
+        mouseEnabled = true;
+        mouseChildren = false;
     }
 
     private function onClick(event:MouseEvent):void {

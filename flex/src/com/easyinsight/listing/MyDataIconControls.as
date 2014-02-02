@@ -1,6 +1,7 @@
 package com.easyinsight.listing
 {
 
+import com.easyinsight.analysis.FilterSetDescriptor;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.datasources.DataSourceType;
 import com.easyinsight.etl.LookupTableDescriptor;
@@ -192,6 +193,8 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(obj).id})));
         } else if (obj is ScorecardDescriptor ){
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID: ScorecardDescriptor(obj).id})));
+        } else if (obj is FilterSetDescriptor) {
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.FILTER_SET_EDITOR, {filterSetID:FilterSetDescriptor(obj).id})));
         }
     }
 

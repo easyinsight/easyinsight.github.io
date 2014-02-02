@@ -660,6 +660,13 @@ public class AnalysisDefinition implements Cloneable {
             clonedStubs.add(reportStub.clone());
         }
         analysisDefinition.setReportStubs(clonedStubs);
+        if (filterSets != null) {
+            List<FilterSetStub> filterSetStubs = new ArrayList<FilterSetStub>();
+            for (FilterSetStub stub : this.filterSets) {
+                filterSetStubs.add(stub.clone());
+            }
+            analysisDefinition.setFilterSets(filterSetStubs);
+        }
         for (AnalysisItem analysisItem : replacementMap.getFields()) {
             if (target != null) {
                 target.updateLinks(analysisItem);

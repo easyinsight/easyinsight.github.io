@@ -7,7 +7,6 @@
  */
 package com.easyinsight.analysis.summary {
 import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DrillThrough;
 import com.easyinsight.analysis.DrillThroughEvent;
 import com.easyinsight.analysis.DrillThroughExecutor;
@@ -17,11 +16,9 @@ import com.easyinsight.analysis.TextReportFieldExtension;
 import com.easyinsight.analysis.TextValueExtension;
 import com.easyinsight.analysis.URLLink;
 import com.easyinsight.analysis.Value;
-import com.easyinsight.pseudocontext.StandardContextWindow;
 import com.easyinsight.report.ReportNavigationEvent;
 import com.easyinsight.solutions.InsightDescriptor;
 
-import flash.events.Event;
 import flash.events.MouseEvent;
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
@@ -35,7 +32,6 @@ import mx.formatters.Formatter;
 
 public class NewSummaryOtherCellRenderer extends UITextField implements IListItemRenderer {
     private var _data:Object;
-    private var _selectionEnabled:Boolean;
     private var _report:AnalysisDefinition;
 
     private var hyperlinked:Boolean;
@@ -50,7 +46,7 @@ public class NewSummaryOtherCellRenderer extends UITextField implements IListIte
     }
 
     private function onClick(event:MouseEvent):void {
-        /*if (defaultLink != null) {
+        if (defaultLink != null) {
             if (defaultLink is URLLink) {
                 var urlLink:URLLink = defaultLink as URLLink;
                 var url:String = data[urlLink.label + "_link"];
@@ -65,11 +61,11 @@ public class NewSummaryOtherCellRenderer extends UITextField implements IListIte
                 if (DrillThrough(defaultLink).passThroughField != null) {
                     values = data[DrillThrough(defaultLink).passThroughField.name + "_drill"];
                 }
-                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, _report, null, values);
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, NewSummaryRow(_data).groupingField , _report, null, values);
                 executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();
             }
-        }*/
+        }
     }
 
     private function onDrill(event:DrillThroughEvent):void {
@@ -101,10 +97,6 @@ public class NewSummaryOtherCellRenderer extends UITextField implements IListIte
                 invalidateProperties();
             }
         }
-    }
-
-    private function passThrough(event:Event):void {
-        dispatchEvent(event);
     }
 
     private var defaultLink:Link;
@@ -179,17 +171,31 @@ public class NewSummaryOtherCellRenderer extends UITextField implements IListIte
             text = "";
         }
 
+        if (treeRow != null) {
+            if (treeRow.depth == 0) {
+            } else if (treeRow.depth == 1) {
+                text = "   " + text;
+            } else if (treeRow.depth == 2) {
+                text = "      " + text;
+            } else {
+                text = "          " + text;
+            }
+        }
+
         _valText = text;
 
-        //var rext:TextReportFieldExtension = analysisItem.reportFieldExtension as TextReportFieldExtension;
+        var rext:TextReportFieldExtension = treeRow.groupingField.reportFieldExtension as TextReportFieldExtension;
         var align:String = "left";
-        /*if (rext != null && rext.align != null) {
+        if (rext != null && rext.align != null) {
             align = rext.align.toLowerCase();
-        }*/
+        }
+        var fontName:String = _report.getFont();
         if (_report.getFont() == "Open Sans" && !bold) {
             styleName = "myFontStyle";
         } else if (_report.getFont() == "Open Sans" && bold) {
             styleName = "boldStyle";
+        } else if (_report.useCustomFontFamily) {
+            fontName = null;
         }
         if (hyperlinked && !hasLinks) {
             hasLinks = true;
@@ -202,10 +208,10 @@ public class NewSummaryOtherCellRenderer extends UITextField implements IListIte
             removeEventListener(MouseEvent.ROLL_OUT, onRollOut);
             removeEventListener(MouseEvent.CLICK, onClick);
         }
-        utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, bold, null, false);
+        utf = new UITextFormat(this.systemManager, fontName, _report.fontSize, color, bold, null, false);
         utf.align = align;
         if (hyperlinked) {
-            hyperlinkedUTF = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color, bold, null, true);
+            hyperlinkedUTF = new UITextFormat(this.systemManager, fontName, _report.fontSize, color, bold, null, true);
             hyperlinkedUTF.align = align;
         }
         _format = utf;
@@ -214,7 +220,6 @@ public class NewSummaryOtherCellRenderer extends UITextField implements IListIte
             this.backgroundColor = backgroundColor;
             this.background = true;
         }
-        //new StandardContextWindow(analysisItem, passThrough, this, value, _report);
         invalidateProperties();
         invalidateSize();
     }

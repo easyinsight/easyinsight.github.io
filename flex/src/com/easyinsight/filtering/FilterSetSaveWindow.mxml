@@ -1,11 +1,6 @@
 <?xml version="1.0"?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.SavePromptWindow;
-        import com.easyinsight.util.PopUpUtil;
-        import com.easyinsight.util.ProgressAlert;
-
-        import mx.core.UIComponent;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
         import mx.validators.Validator;
@@ -81,12 +76,7 @@
                     <mx:Label text="What do you want to name this filter set?" fontSize="14" fontWeight="bold"/>
                     <mx:TextInput text="{dashboardName}" id="reportNameInput" width="530" fontSize="14"/>
                     <mx:Spacer height="20"/>
-                    <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:RadioButton label="Yes" value="yes" groupName="sharingGroup" fontSize="14" tabIndex="0"/>
-                        <mx:RadioButton label="No" value="no" groupName="sharingGroup" fontSize="14" tabIndex="1"/>
-                    </mx:HBox>
-                    <mx:Spacer height="20"/>
-                    <mx:Label text="How do you want to describe this dashboard?" fontSize="14" fontWeight="bold"/>
+                    <mx:Label text="How do you want to describe this filter set?" fontSize="14" fontWeight="bold"/>
                     <mx:TextArea width="530" height="75" id="reportDescriptionInput"
                                          text="{dashboardDescription}" fontSize="14" borderStyle="inset" borderThickness="1"/>
                     <mx:Spacer height="100%"/>

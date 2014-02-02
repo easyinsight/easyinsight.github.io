@@ -126,6 +126,9 @@
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var treeDefinition:SummaryDefinition = analysisDefinition as SummaryDefinition;
+            if (treeDefinition.useCustomFontFamily) {
+                coreGrid.setStyle("fontFamily", treeDefinition.getFont());
+            }
             /*if (eSet != null) {
                 eSet.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onChange);
             }*/

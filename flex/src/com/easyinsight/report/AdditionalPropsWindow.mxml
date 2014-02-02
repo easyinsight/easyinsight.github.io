@@ -145,6 +145,11 @@
             _dataView.refresh();
         }
 
+        private function filterSets():void {
+            _reportEditor.filterSetStuff();
+            PopUpManager.removePopUp(this);
+        }
+
         private function addonReports():void {
             _reportEditor.addonReportStuff();
             PopUpManager.removePopUp(this);
@@ -225,6 +230,23 @@
                 <mx:Text text="Add on Reports" fontSize="14" selectable="false"/>
                 <mx:TextArea
                         text="Add another report as a source of fields for this report"
+                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                        height="60"
+                        width="130" textAlign="center"/>
+            </mx:VBox>
+        </mx:HBox>
+        <mx:HBox id="hbox3">
+            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                     backgroundColor="#FFFFFF" height="120"
+                     width="150" cornerRadius="8" buttonMode="true" id="filterSetBox"
+                     mouseOver="filterSetBox.setStyle('backgroundColor', 0xDDDDDD)"
+                     mouseOut="filterSetBox.setStyle('backgroundColor', 0xFFFFFF)"
+                     click="filterSets()"
+                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                <mx:Image source="@Embed(source='../../../../assets/funnel.png')"/>
+                <mx:Text text="Manage Filter Sets" fontSize="14" selectable="false"/>
+                <mx:TextArea
+                        text="Use filter sets to reduce common filters across reports"
                         fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
                         height="60"
                         width="130" textAlign="center"/>

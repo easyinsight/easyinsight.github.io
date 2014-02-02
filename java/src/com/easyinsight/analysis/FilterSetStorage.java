@@ -40,6 +40,7 @@ public class FilterSetStorage {
                 stmt.setString(1, filterSet.getName());
                 stmt.setString(2, filterSet.getDescription());
                 stmt.setString(3, filterSet.getUrlKey());
+                stmt.setLong(4, filterSet.getId());
                 stmt.executeUpdate();
                 stmt.close();
             }
@@ -133,7 +134,7 @@ public class FilterSetStorage {
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement stmt = conn.prepareStatement("SELECT FILTER_SET_NAME, FILTER_SET_DESCRIPTION, URL_KEY, DATA_SOURCE_ID FROM " +
-                    "FILTER_SET, USER WHERE USER.ACCOUNT_ID = ? AND FILTER_SET_ID = ? AND FILTER_SET.USER_ID = USER.USER_ID");
+                    "FILTER_SET WHERE FILTER_SET.USER_ID = ? AND FILTER_SET_ID = ?");
             stmt.setLong(1, SecurityUtil.getAccountID());
             stmt.setLong(2, id);
             ResultSet rs = stmt.executeQuery();
@@ -177,7 +178,7 @@ public class FilterSetStorage {
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement stmt = conn.prepareStatement("SELECT FILTER_SET_ID, FILTER_SET_NAME, FILTER_SET_DESCRIPTION, URL_KEY, DATA_SOURCE_ID FROM " +
-                    "FILTER_SET, USER WHERE USER.ACCOUNT_ID = ? AND FILTER_SET.USER_ID = USER.USER_ID AND FILTER_SET.DATA_SOURCE_ID = ?");
+                    "FILTER_SET WHERE FILTER_SET.USER_ID = ? AND FILTER_SET.DATA_SOURCE_ID = ?");
             stmt.setLong(1, SecurityUtil.getAccountID());
             stmt.setLong(2, dataSourceID);
             ResultSet rs = stmt.executeQuery();

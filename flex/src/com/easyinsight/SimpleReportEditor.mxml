@@ -52,6 +52,8 @@
         import com.easyinsight.analysis.FieldDoubleClickEvent;
         import com.easyinsight.analysis.FieldEditorEvent;
         import com.easyinsight.analysis.FieldFilterWindow;
+        import com.easyinsight.analysis.FilterSetManageWindow;
+        import com.easyinsight.analysis.FilterSetReportEvent;
         import com.easyinsight.analysis.GenericDefinitionEditWindow;
         import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.IReportController;
@@ -364,7 +366,7 @@
                 //dataView.overlayIndex = 5;
                 dataView.defaultManualRun = true;
             }
-            rightBox.addChildAt(dataViewFactory, 1);
+            rightBox.addChildAt(dataViewFactory, rightBox.getChildren().length);
             dataViewFactory.refresh();
         }
 
@@ -453,8 +455,19 @@
             dataView.addItem(event.analysisItem);
         }
 
+        public function filterSetStuff():void {
+            var window:FilterSetManageWindow = new FilterSetManageWindow();
+
+            window.addEventListener(FilterSetReportEvent.NEW_FILTER_SETS, onNewFilterSets, false, 0, true);
+            window.report = analysisDefinition;
+            window.dataSourceID = dataService.dataFeedID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         public function addonReportStuff():void {
             var window:AddonReportWindow = new AddonReportWindow();
+
             window.addEventListener(AddonReportEvent.NEW_ADDONS, onNewAddons, false, 0, true);
             window.report = analysisDefinition;
             PopUpManager.addPopUp(window, this, true);
@@ -466,6 +479,13 @@
 
         private var newAddonReports:ArrayCollection;
         private var removedAddonReports:ArrayCollection;
+
+        private var newFilterSets:ArrayCollection;
+        private var removedFilterSets:ArrayCollection;
+
+        private function onNewFilterSets(event:FilterSetReportEvent):void {
+
+        }
 
         private function onNewAddons(event:AddonReportEvent):void {
             neededAddonCount = event.addonReports.length;

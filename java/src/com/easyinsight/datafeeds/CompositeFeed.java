@@ -576,6 +576,9 @@ public class CompositeFeed extends Feed {
                             sourceQueryData.neededItems, targetQueryData.neededItems,
                             sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID, operations);
                 }
+                if (mergeAudit.getAuditEvents() != null) {
+                    auditStrings.addAll(mergeAudit.getAuditEvents());
+                }
                 dataSet = mergeAudit.getDataSet();
                 operations = mergeAudit.getOperations();
 
@@ -681,6 +684,9 @@ public class CompositeFeed extends Feed {
                     MergeAudit mergeAudit = last.connection.merge(sourceQueryData.dataSet, targetQueryData.dataSet,
                             sourceQueryData.neededItems, targetQueryData.neededItems,
                             sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID, operations);
+                    if (mergeAudit.getAuditEvents() != null) {
+                        auditStrings.addAll(mergeAudit.getAuditEvents());
+                    }
                     operations = mergeAudit.getOperations();
                     dataSet = mergeAudit.getDataSet();
                     //auditStrings.addAll(mergeAudit.getMergeStrings());

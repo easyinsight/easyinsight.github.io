@@ -22,6 +22,7 @@
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
 
+        [Bindable]
         private var _filterSet:FilterSet;
         private var _filterSetID:int;
 
@@ -162,7 +163,7 @@
                                           backgroundAlpha=".1" feedID="{_dataSourceID}"
                                           analysisItems="{allFields}"
                                           paddingBottom="5" paddingLeft="5" paddingRight="5"
-                                          paddingTop="5">
+                                          paddingTop="5" context="{TransformContainer.FILTER_SET}" filterSet="{_filterSet}">
                 <mx:Button icon="@Embed(source='../../../../assets/funnel.png')"
                            toolTip="Create a Filter to Restrict Values..." click="transformContainer.addNewFilter()"
                            label="New Filter"/>

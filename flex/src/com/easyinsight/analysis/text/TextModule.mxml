@@ -30,8 +30,10 @@
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             blah();
             textReport = analysisDefinition as TextReport;
+            fontFamily = textReport.getFont();
             fontSize = textReport.fontSize;
             fontColor = textReport.fontColor;
+
             var str:String = "";
             for each (var obj:Object in dataSet) {
                 for (var i:int = 0; i < textReport.columns.length; i++) {
@@ -55,6 +57,9 @@
         [Bindable]
         private var fontColor:uint;
 
+        [Bindable]
+        private var fontFamily:String;
+
         public function updateExportMetadata():void {
         }
 
@@ -65,5 +70,5 @@
             return true;
         }
         ]]></mx:Script>
-    <mx:Text htmlText="{text}" id="reportText" fontSize="{fontSize}" color="{fontColor}" styleName="fallThroughFonts"/>
+    <mx:Text htmlText="{text}" id="reportText" fontSize="{fontSize}" color="{fontColor}" fontFamily="{fontFamily}"/>
 </mx:Canvas>
