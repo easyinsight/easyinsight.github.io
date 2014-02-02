@@ -362,7 +362,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
         Map<String, AnalysisItem> structure = report.createStructure();
         for (AnalysisItem reportItem : structure.values()) {
             for (AnalysisItem field : getFields()) {
-                if (field.getBasedOnReportField() == reportItem.getAnalysisItemID()) {
+                if (field.getBasedOnReportField() != null && field.getBasedOnReportField() == reportItem.getAnalysisItemID()) {
                     map.put(reportItem, field);
                     break;
                 }
