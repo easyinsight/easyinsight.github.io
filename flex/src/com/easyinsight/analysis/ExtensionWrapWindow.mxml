@@ -40,7 +40,7 @@
                 ytdEditor.analysisItem = fakeAnalysisItem;
             } else if (reportType == ReportFieldExtension.VERTICAL_LIST) {
                 var verticalListEditor:VertExtensionWindow = new VertExtensionWindow();
-                fakeAnalysisItem.reportFieldExtension = config.ytdExtension;
+                fakeAnalysisItem.reportFieldExtension = config.verticalListExtension;
                 verticalListEditor.analysisItems = _analysisItems;
                 editor = verticalListEditor;
                 verticalListEditor.analysisItem = fakeAnalysisItem;
