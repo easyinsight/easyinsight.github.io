@@ -115,6 +115,6 @@
     <mx:Text text="{windowLabel}"/>
     <mx:HRule width="100%"/>
     <mx:List dataProvider="{suggestions}" itemRenderer="com.easyinsight.suggestion.IntentionRenderer" selectable="false" variableRowHeight="true"
-            id="suggestionList" width="700" borderStyle="none"/>
+            id="suggestionList" width="700" borderStyle="none" maxHeight="500"/>
     <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
 </util:EISlimWindow>
