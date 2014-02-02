@@ -872,7 +872,7 @@ public class UserUploadService {
                     }
                 }
                 PreparedStatement filterSetStmt = conn.prepareStatement("SELECT FILTER_SET_ID, FILTER_SET_NAME, FILTER_SET_DESCRIPTION, " +
-                        "URL_KEY, DATA_SOURCE_ID FROM FILTER_SET, USER WHERE FILTER_SET.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ?");
+                        "URL_KEY, DATA_SOURCE_ID FROM FILTER_SET WHERE FILTER_SET.USER_ID = ?");
                 filterSetStmt.setLong(1, SecurityUtil.getAccountID());
                 ResultSet filterSetRS = filterSetStmt.executeQuery();
                 while (filterSetRS.next()) {
