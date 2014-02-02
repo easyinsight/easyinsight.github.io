@@ -149,59 +149,6 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         this.useChartColor = useChartColor;
     }
 
-    /*public void applyStyling(EIConnection conn, int dataSourceType) throws SQLException {
-        if (isUsePrimaryColor() || isUseSecondaryColor() || isUseTertiaryColor()) {
-            long accountID = SecurityUtil.getAccountID(false);
-            if (accountID > 0) {
-                PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-                ps.setLong(1, accountID);
-                ResultSet rs = ps.executeQuery();
-                rs.next();
-                boolean exchangeAuthor = rs.getBoolean(1);
-                ResultSet propRS;
-                if (exchangeAuthor) {
-                    PreparedStatement propStmt = conn.prepareStatement("SELECT REPORT_NUMERIC_PROPERTY.property_value FROM APPLICATION_SKIN, " +
-                            "APPLICATION_SKIN_TO_REPORT_PROPERTY, REPORT_PROPERTY, REPORT_NUMERIC_PROPERTY WHERE APPLICATION_SKIN.connection_type = ? AND " +
-                            "application_skin.application_skin_id = application_skin_to_report_property.application_skin_id AND " +
-                            "application_skin_to_report_property.report_property_id = report_property.report_property_id AND " +
-                            "report_property.report_property_id = report_numeric_property.report_property_id AND " +
-                            "report_property.property_name = ?");
-                    propStmt.setInt(1, dataSourceType);
-                    if (isUsePrimaryColor()) {
-                        propStmt.setString(2, "customChartColor");
-                    } else if (isUseSecondaryColor()) {
-                        propStmt.setString(2, "secondaryColor");
-                    } else if (isUseTertiaryColor()) {
-                        propStmt.setString(2, "tertiaryColor");
-                    }
-                    propRS = propStmt.executeQuery();
-                } else {
-                    PreparedStatement propStmt = conn.prepareStatement("SELECT REPORT_NUMERIC_PROPERTY.property_value FROM APPLICATION_SKIN, " +
-                            "APPLICATION_SKIN_TO_REPORT_PROPERTY, REPORT_PROPERTY, REPORT_NUMERIC_PROPERTY WHERE APPLICATION_SKIN.account_id = ? AND " +
-                            "application_skin.application_skin_id = application_skin_to_report_property.application_skin_id AND " +
-                            "application_skin_to_report_property.report_property_id = report_property.report_property_id AND " +
-                            "report_property.report_property_id = report_numeric_property.report_property_id AND " +
-                            "report_property.property_name = ?");
-                    propStmt.setLong(1, accountID);
-                    if (isUsePrimaryColor()) {
-                        propStmt.setString(2, "customChartColor");
-                    } else if (isUseSecondaryColor()) {
-                        propStmt.setString(2, "secondaryColor");
-                    } else if (isUseTertiaryColor()) {
-                        propStmt.setString(2, "tertiaryColor");
-                    }
-                    propRS = propStmt.executeQuery();
-                }
-                if (propRS.next()) {
-                    int color = propRS.getInt(1);
-                    setUseChartColor(true);
-                    setChartColor(color);
-                    setGradientColor(0);
-                }
-            }
-        }
-    }*/
-
     @Override
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);

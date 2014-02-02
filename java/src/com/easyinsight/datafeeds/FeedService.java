@@ -245,6 +245,7 @@ public class FeedService {
                 }
                 saveExtension(conn, saveExtStmt, configuration, configuration.getTextExtension(), ReportFieldExtension.TEXT, dataSourceID);
                 saveExtension(conn, saveExtStmt, configuration, configuration.getYtdExtension(), ReportFieldExtension.YTD, dataSourceID);
+                saveExtension(conn, saveExtStmt, configuration, configuration.getVerticalListExtension(), ReportFieldExtension.VERTICAL_LIST, dataSourceID);
             }
             clearStmt.close();
             clearExtStmt.close();
