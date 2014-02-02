@@ -15,7 +15,7 @@ public class Solve360Test extends DataSourceTesting {
     protected void configure(FeedDefinition dataSource) {
         Solve360CompositeSource solve360CompositeSource = (Solve360CompositeSource) dataSource;
         solve360CompositeSource.setUserEmail("jboe@easy-insight.com");
-        solve360CompositeSource.setAuthKey("GcT9Lekc47BbQ7U1u8f5HaI2v5+c44207cJeZ8W5");
+        solve360CompositeSource.setAuthKey("ffX9jaK6s2f2q9zeudWfGdSfJ590n5nei5eb3bGf");
     }
 
     @Override
@@ -25,6 +25,6 @@ public class Solve360Test extends DataSourceTesting {
 
     public static void main(String[] args) throws Exception {
         Solve360Test test = new Solve360Test();
-        test.testDataSource("jboe");
+        test.testDataSource("jaolen@gmail.com");
     }
 }

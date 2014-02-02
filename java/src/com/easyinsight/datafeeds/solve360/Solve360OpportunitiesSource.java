@@ -78,18 +78,12 @@ public class Solve360OpportunitiesSource extends Solve360BaseSource {
         DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
         try {
             Document doc = runRestRequest("https://secure.solve360.com/report/opportunities", httpClient, new Builder(), solve360CompositeSource);
-            System.out.println(doc.toXML());
             DataSet dataSet = new DataSet();
             Nodes oppNodes = doc.query("/response/opportunities/opportunity");
             for (int i = 0; i < oppNodes.size(); i++) {
                 Node dealNode = oppNodes.get(i);
                 IRow row = dataSet.createRow();
-                Nodes responsibleNodes = dealNode.query("/responsible");
-                if (responsibleNodes.size() > 0) {
-                    Element responsibleNode = (Element) responsibleNodes.get(0);
-                    String responsibleParty = responsibleNode.getAttribute("cn").getValue();
-                    row.addValue(keys.get(RESPONSIBLE), responsibleParty);
-                }
+                row.addValue(keys.get(RESPONSIBLE), queryField(dealNode, "responsible/@cn"));
                 row.addValue(keys.get(OPPORTUNITY_ID), queryField(dealNode, "id/text()"));
                 row.addValue(keys.get(DESCRIPTION), queryField(dealNode, "description/text()"));
                 row.addValue(keys.get(STATUS), queryField(dealNode, "status/text()"));

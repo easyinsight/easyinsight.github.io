@@ -52,10 +52,7 @@ import com.easyinsight.datafeeds.solve360.Solve360CompositeSource;
 import com.easyinsight.datafeeds.solve360.Solve360ContactsSource;
 import com.easyinsight.datafeeds.solve360.Solve360OpportunitiesSource;*/
 import com.easyinsight.datafeeds.smartsheet.SmartsheetTableSource;
-import com.easyinsight.datafeeds.solve360.Solve360ActivitiesSource;
-import com.easyinsight.datafeeds.solve360.Solve360CompositeSource;
-import com.easyinsight.datafeeds.solve360.Solve360ContactsSource;
-import com.easyinsight.datafeeds.solve360.Solve360OpportunitiesSource;
+import com.easyinsight.datafeeds.solve360.*;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
@@ -368,6 +365,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.SOLVE360_OPPORTUNITIES, Solve360OpportunitiesSource.class);
         registerType(FeedType.SOLVE360_ACTIVITIES, Solve360ActivitiesSource.class);
         registerType(FeedType.SMARTSHEET_TABLE, SmartsheetTableSource.class);
+        registerType(FeedType.SOLVE360_COMPANIES, Solve360CompanySource.class);
 
     }
 
