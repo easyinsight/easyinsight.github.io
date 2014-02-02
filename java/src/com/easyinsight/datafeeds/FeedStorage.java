@@ -497,7 +497,7 @@ public class FeedStorage {
         try {
             analysisItems = optimizedRetrieval(conn, feedID, analysisItemIDs);
         } catch (Exception e) {
-            LogClass.error(e);
+            //LogClass.error(e);
             analysisItems = slowRetrieval(conn, analysisItemIDs);
         }
         return analysisItems;
