@@ -97,6 +97,10 @@ public class ReportCache {
     public void storeAddonReport(long dataSourceID, CacheKey cacheKey, DataSet results, int cacheTime) {
 
         String cacheKeyString = "addonResults" + cacheKey.toString();
+        if (cacheKeyString.length() > 10000) {
+            System.out.println("Cache key on " + cacheKey.getReportID() + " too long");
+            return;
+        }
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement ps = conn.prepareStatement("INSERT INTO REPORT_CACHE (cache_key, data_source_id, report_id) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
