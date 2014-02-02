@@ -44,6 +44,8 @@ public class ExtensionEditButton extends LinkButton {
             hasData = true;
         } else if (configType == ReportFieldExtension.YTD && config.ytdExtension) {
             hasData = true;
+        } else if (configType == ReportFieldExtension.VERTICAL_LIST && config.verticalListExtension) {
+            hasData = true;
         }
         if (hasData) {
             this.label = "Edit...";
