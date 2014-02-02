@@ -3,6 +3,8 @@
                    xmlns:filtering="com.easyinsight.filtering.*" xmlns:dashboard="com.easyinsight.dashboard.*"
                    creationComplete="populateData()">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.FilterSetManageWindow;
+        import com.easyinsight.analysis.FilterSetReportEvent;
         import com.easyinsight.analysis.ReportFormItem;
         import com.easyinsight.analysis.StyleConfiguration;
         import com.easyinsight.commands.CommandEvent;
@@ -109,6 +111,20 @@
                 //
             }
         }
+
+        private function onNewFilterSets(event:FilterSetReportEvent):void {
+
+        }
+
+        private function manageFilterSets():void {
+            var window:FilterSetManageWindow = new FilterSetManageWindow();
+
+            window.addEventListener(FilterSetReportEvent.NEW_FILTER_SETS, onNewFilterSets, false, 0, true);
+            window.dashboardElement = _dashboardStack;
+            window.dataSourceID = dataSourceID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
         ]]></mx:Script>
     <mx:VBox horizontalAlign="center">
         <mx:TabNavigator resizeToContent="true" id="tabNavigator" creationPolicy="all">
@@ -148,6 +164,7 @@
                          height="100%"/>
                 <mx:Canvas width="70%" height="100%">
                     <mx:VBox width="100%" height="100%">
+                        <mx:Button label="Manage Filter Sets..." click="manageFilterSets()"/>
                             <mx:Button label="New Filter..." click="transformContainer.addNewFilter()"/>
                     <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
                                                   borderStyle="solid"
