@@ -157,6 +157,30 @@ public class Utils {
         return request.getHeader("User-Agent").toLowerCase().contains("ipad");
     }
 
+    public static UIData createUIData(EIConnection conn) {
+        Session hibernateSession = Database.instance().createSession(conn);
+        ApplicationSkin applicationSkin = null;
+        String headerStyle = "";
+        try {
+            long userID = SecurityUtil.getUserID(false);
+            if (userID > 0) {
+                applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), hibernateSession, SecurityUtil.getAccountID());
+                headerStyle = "width:100%;overflow: hidden;";
+            }
+        } finally {
+            hibernateSession.close();
+        }
+        ImageDescriptor headerImageDescriptor = null;
+        String headerTextStyle = "width: 100%;text-align: center;font-size: 18px;padding-top:15px;font-weight:bold;";
+        if (applicationSkin != null && applicationSkin.isReportHeader()) {
+            headerImageDescriptor = applicationSkin.getReportHeaderImage();
+            int reportBackgroundColor = applicationSkin.getReportBackgroundColor();
+            headerStyle += "background-color: " + String.format("#%06X", (0xFFFFFF & reportBackgroundColor));
+            headerTextStyle += "color: " + String.format("#%06X", (0xFFFFFF & applicationSkin.getReportTextColor()));
+        }
+        return new UIData(applicationSkin, headerStyle, headerTextStyle, headerImageDescriptor);
+    }
+
     public static UIData createUIData() {
         Session hibernateSession = Database.instance().createSession();
         ApplicationSkin applicationSkin = null;
