@@ -80,43 +80,47 @@ public class XSSFExcelUploadFormat extends UploadFormat {
             rit.next();
             for (; rit.hasNext(); ) {
                 Row row = rit.next();
-                Value[] values = new Value[row.getLastCellNum()];
-                boolean foundAtLeastOneValue = false;
-                Iterator<Cell> cit = row.cellIterator();
+                try {
+                    Value[] values = new Value[row.getLastCellNum()];
+                    boolean foundAtLeastOneValue = false;
+                    Iterator<Cell> cit = row.cellIterator();
 
-                for (; cit.hasNext(); ) {
+                    for (; cit.hasNext(); ) {
 
-                    Cell cell = cit.next();
-                    if (cell.toString().length() > 0) {
-                        foundAtLeastOneValue = true;
+                        Cell cell = cit.next();
+                        if (cell.toString().length() > 0) {
+                            foundAtLeastOneValue = true;
+                        }
+                        Value cellValue = getCellValue(cell);
+                        values[cell.getColumnIndex()] = cellValue;
                     }
-                    Value cellValue = getCellValue(cell);
-                    values[cell.getColumnIndex()] = cellValue;
-                }
-                if (!foundAtLeastOneValue) {
-                    continue;
-                }
-                gridList.add(values);
+                    if (!foundAtLeastOneValue) {
+                        continue;
+                    }
+                    gridList.add(values);
 
-                if (dataTypeGuesser != null) {
-                    for (int headerKeyCounter = 0; headerKeyCounter < headerColumns.length; headerKeyCounter++) {
-                        if (headerKeyCounter < values.length) {
-                            Value value = values[headerKeyCounter];
-                            if (value != null) {
-                                String headerColumn = headerColumns[headerKeyCounter];
-                                if (headerColumn == null) {
-                                    headerColumn = String.valueOf(headerKeyCounter);
+                    if (dataTypeGuesser != null) {
+                        for (int headerKeyCounter = 0; headerKeyCounter < headerColumns.length; headerKeyCounter++) {
+                            if (headerKeyCounter < values.length) {
+                                Value value = values[headerKeyCounter];
+                                if (value != null) {
+                                    String headerColumn = headerColumns[headerKeyCounter];
+                                    if (headerColumn == null) {
+                                        headerColumn = String.valueOf(headerKeyCounter);
+                                    }
+                                    Key key;
+                                    if (keyMap == null) {
+                                        key = new NamedKey(createName(headerColumn, headerKeyCounter));
+                                    } else {
+                                        key = keyMap.get(createName(headerColumn, headerKeyCounter));
+                                    }
+                                    dataTypeGuesser.addValue(key, value);
                                 }
-                                Key key;
-                                if (keyMap == null) {
-                                    key = new NamedKey(createName(headerColumn, headerKeyCounter));
-                                } else {
-                                    key = keyMap.get(createName(headerColumn, headerKeyCounter));
-                                }
-                                dataTypeGuesser.addValue(key, value);
                             }
                         }
                     }
+                } catch (Exception e) {
+                    LogClass.debug(e.getMessage());
                 }
             }
 

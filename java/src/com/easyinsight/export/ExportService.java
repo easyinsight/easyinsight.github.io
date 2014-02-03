@@ -15,9 +15,13 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.email.SendGridEmail;
+import com.easyinsight.html.UIData;
+import com.easyinsight.html.Utils;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIOutcome;
 import com.easyinsight.pipeline.PipelineData;
+import com.easyinsight.preferences.ImageDescriptor;
+import com.easyinsight.preferences.PreferencesService;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.scorecard.ScorecardService;
 import com.easyinsight.scorecard.ScorecardStorage;
@@ -30,6 +34,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.util.RandomTextGenerator;
 import com.itextpdf.text.*;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfPCell;
 
 import com.itextpdf.text.pdf.PdfPTable;
@@ -45,6 +50,7 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.io.*;
 
 import java.net.URLEncoder;
@@ -382,13 +388,6 @@ public class ExportService {
         }
     }
 
-    // 1,969,225,728
-
-    // project completed on time, project completed late for last week and last month
-    // number of completed projects for last week, for last full month
-    // projects in the queue (projects not yet completed)
-    // new projects creation (line chart of creation over time)
-
     /*public long exportDataSourceToCSV(long dataSourceID) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         try {
@@ -594,11 +593,27 @@ public class ExportService {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
 
-        Document document = new Document(PageSize.A4.rotate());
+        Document document = new Document(PageSize.A4.rotate(), 0, 0, 5, 5);
         //Document document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, baos);
         document.open();
         analysisDefinition.updateMetadata();
+
+        // if we have a header...
+
+        try {
+            UIData uiData = Utils.createUIData(conn);
+            if (uiData.getApplicationSkin() != null && uiData.getApplicationSkin().isReportHeader() && uiData.getHeaderImageDescriptor() != null) {
+                ImageDescriptor imageDescriptor = uiData.getHeaderImageDescriptor();
+                byte[] bytes = new PreferencesService().getImage(imageDescriptor.getId());
+                Image image = Image.getInstance(bytes);
+                image.setAlignment(Element.ALIGN_CENTER);
+                document.add(image);
+
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
 
         if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
             crosstabToPDFTable(analysisDefinition, conn, insightRequestMetadata, document, exportMetadata);
@@ -621,7 +636,7 @@ public class ExportService {
         ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
         PdfPTable table = new PdfPTable(listDataResults.getHeaders().length);
         table.setSpacingBefore(20);
-        table.getDefaultCell().setPadding(5);
+        table.getDefaultCell().setPadding(3);
         List<AnalysisItem> items = new ArrayList<AnalysisItem>(analysisDefinition.getAllAnalysisItems());
         items.remove(null);
         Collections.sort(items, new Comparator<AnalysisItem>() {
@@ -630,13 +645,70 @@ public class ExportService {
                 return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
             }
         });
+        int fontSize;
+        Color color;
+        Color headerTextColor;
+        if (analysisDefinition instanceof WSListDefinition) {
+            WSListDefinition list = (WSListDefinition) analysisDefinition;
+            fontSize = list.getFontSize();
+            color = new Color(list.getHeaderColor1());
+            headerTextColor = new Color(list.getHeaderTextColor());
+        } else {
+            fontSize = 10;
+            color = new Color(200, 200, 200);
+            headerTextColor = new Color(0, 0, 0);
+        }
+
+        if (fontSize < 4) {
+            fontSize = 10;
+        } else {
+            fontSize -= 2;
+        }
+        int minimumSize = fontSize + 5;
+
+        int totalWidth = 0;
+        for (AnalysisItem analysisItem : items) {
+            int widthToUse = analysisItem.getWidth();
+            if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                TextReportFieldExtension ext = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+                if (ext.getFixedWidth() > 0) {
+                    widthToUse = ext.getFixedWidth();
+                }
+            }
+            totalWidth += widthToUse;
+        }
+
+        if (totalWidth > 0) {
+            float[] widths = new float[items.size()];
+            int wCtr = 0;
+            for (AnalysisItem analysisItem : items) {
+                int widthToUse = analysisItem.getWidth();
+                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                    TextReportFieldExtension ext = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+                    if (ext.getFixedWidth() > 0) {
+                        widthToUse = ext.getFixedWidth();
+                    }
+                }
+                float percent = (float) widthToUse / (float) totalWidth;
+                if (percent < .01f) {
+                    percent = .1f;
+                }
+                widths[wCtr++] = percent;
+            }
+            table.setWidths(widths);
+        }
+
+
+
         for (AnalysisItem analysisItem : items) {
             for (AnalysisItem headerItem : listDataResults.getHeaders()) {
                 if (headerItem == analysisItem) {
-                    PdfPCell cell = new PdfPCell(new Phrase(analysisItem.toUnqualifiedDisplay()));
-                    //cell.setFixedHeight(20f);
-                    cell.setMinimumHeight(20f);
-                    cell.setBackgroundColor(new BaseColor(180, 180, 180));
+                    com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, com.itextpdf.text.Font.BOLD,
+                            new BaseColor(headerTextColor.getRed(), headerTextColor.getGreen(), headerTextColor.getBlue()));
+                    PdfPCell cell = new PdfPCell(new Phrase(analysisItem.toUnqualifiedDisplay(), boldFont));
+                    cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    cell.setMinimumHeight(minimumSize);
+                    cell.setBackgroundColor(new BaseColor(color.getRed(), color.getGreen(), color.getBlue()));
                     table.addCell(cell);
                 }
             }
@@ -649,7 +721,7 @@ public class ExportService {
                     AnalysisItem headerItem = listDataResults.getHeaders()[i];
                     if (headerItem == analysisItem) {
                         PdfPCell valueCell = new PdfPCell(new Phrase(""));
-                        valueCell.setMinimumHeight(20f);
+                        valueCell.setMinimumHeight(minimumSize);
                         table.addCell(valueCell);
                     }
                 }
@@ -666,8 +738,34 @@ public class ExportService {
                         AnalysisItem headerItem = listDataResults.getHeaders()[i];
                         if (headerItem == analysisItem) {
                             Value value = listRow.getValues()[i];
+                            com.itextpdf.text.Font.FontFamily fontFamily = com.itextpdf.text.Font.FontFamily.HELVETICA;
+                            int fontStyle = 0;
+                            BaseColor pdfTextColor = null;
+                            BaseColor pdfBackgroundColor = null;
+                            if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
+                                TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
+                                boolean isBold = textValueExtension.isBold();
+                                if (isBold) {
+                                    fontStyle = com.itextpdf.text.Font.BOLD;
+                                }
+                                int foregroundColor = textValueExtension.getColor();
+                                if (foregroundColor != 0) {
+                                    Color c = new Color(foregroundColor);
+                                    pdfTextColor = new BaseColor(c.getRed(), c.getGreen(), c.getBlue());
+                                }
+                                int backgroundColor = textValueExtension.getBackgroundColor();
+                                if (backgroundColor != 0) {
+                                    Color c = new Color(backgroundColor);
+                                    pdfBackgroundColor = new BaseColor(c.getRed(), c.getGreen(), c.getBlue());
+                                }
+                            }
+                            com.itextpdf.text.Font cellFont = new com.itextpdf.text.Font(fontFamily, fontSize, fontStyle, pdfTextColor);
                             String valueString = createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, true);
-                            PdfPCell valueCell = new PdfPCell(new Phrase(valueString));
+                            Phrase phrase = new Phrase(valueString, cellFont);
+                            PdfPCell valueCell = new PdfPCell(phrase);
+                            if (pdfBackgroundColor != null) {
+                                valueCell.setBackgroundColor(pdfBackgroundColor);
+                            }
                             if (ext != null) {
                                 if ("Left".equals(ext.getAlign())) {
                                     valueCell.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -677,10 +775,8 @@ public class ExportService {
                                     valueCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
                                 }
                             }
-                            valueCell.setMinimumHeight(20f);
-                            //valueCell.setFixedHeight(20f);
+                            valueCell.setMinimumHeight(minimumSize);
                             table.addCell(valueCell);
-                            //cells[j] = valueCell;
                         }
                     }
                 }
