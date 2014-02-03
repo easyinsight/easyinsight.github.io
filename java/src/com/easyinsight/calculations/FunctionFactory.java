@@ -285,6 +285,8 @@ public class FunctionFactory {
             return new BusinessDaysInMonth();
         } else if (s.equals("businessdayofmonth")) {
             return new BusinessDayOfMonth();
+        } else if (s.equals("json")) {
+            return new JSONParse();
         } else {
             return null;
         }
