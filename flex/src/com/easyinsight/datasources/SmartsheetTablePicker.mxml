@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        creationComplete="uploadService.getBasecampAccounts.send(dataSource)">
+        creationComplete="uploadService.getSmartsheetTables.send(dataSource)">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;

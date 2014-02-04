@@ -61,6 +61,11 @@ public class BlankDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
+        return null;
+    }
+
+    @Override
     public String validateCredentials() {
         return null;
     }

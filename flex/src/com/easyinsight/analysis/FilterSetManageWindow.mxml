@@ -3,7 +3,6 @@
         paddingRight="10" paddingTop="10">
     <mx:Script><![CDATA[
         import com.easyinsight.dashboard.DashboardElement;
-        import com.easyinsight.filtering.FilterSet;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -74,7 +73,7 @@
         }
 
         private function deleteSelected():void {
-            for each (var filterSet:FilterSet in filterSets) {
+            for each (var filterSet:FilterSetDescriptor in filterSets) {
                 if (filterSet.selected) {
                     filterSets.removeItemAt(filterSets.getItemIndex(filterSet));
                     removedFilterSets.addItem(filterSet);

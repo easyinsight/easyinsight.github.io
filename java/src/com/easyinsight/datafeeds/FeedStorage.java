@@ -497,7 +497,7 @@ public class FeedStorage {
         try {
             analysisItems = optimizedRetrieval(conn, feedID, analysisItemIDs);
         } catch (Exception e) {
-            LogClass.error(e);
+            //LogClass.error(e);
             analysisItems = slowRetrieval(conn, analysisItemIDs);
         }
         return analysisItems;
@@ -550,10 +550,11 @@ public class FeedStorage {
         for (Long id : analysisItemIDs) {
             sb.append(id).append(",");
         }
-        sb.deleteCharAt(sb.length() - 1);
-        StringBuilder aIDs = new StringBuilder(sb.toString());
+        if (sb.length() > 0) {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        //StringBuilder aIDs = new StringBuilder(sb.toString());
         Session session = Database.instance().createSession(conn);
-        Map<Long, AnalysisItem> formattingConfigurationIDs = new HashMap<Long, AnalysisItem>(analysisItemIDs.size());
         Map<Long, List<AnalysisItem>> keyIDs = new HashMap<Long, List<AnalysisItem>>(analysisItemIDs.size());
         Map<Long, AnalysisItem> coreLookup = new HashMap<Long, AnalysisItem>(analysisItemIDs.size());
         try {

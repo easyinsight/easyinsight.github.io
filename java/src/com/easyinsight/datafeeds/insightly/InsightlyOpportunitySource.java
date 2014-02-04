@@ -129,8 +129,25 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
             Map<String, String> userMap = new HashMap<String, String>();
             for (Object userObject : userList) {
                 Map user = (Map) userObject;
-                userMap.put(user.get("USER_ID").toString(), user.get("FIRST_NAME").toString() + " " + user.get("LAST_NAME").toString());
-                System.out.println("blah");
+                if (user.get("USER_ID") != null) {
+                    String userID = user.get("USER_ID").toString();
+                    Object firstNameObj = user.get("FIRST_NAME");
+                    Object lastNameObj = user.get("LAST_NAME");
+                    String name;
+                    if (firstNameObj == null && lastNameObj == null) {
+                        name = null;
+                    } else if (firstNameObj != null && lastNameObj == null) {
+                        name = firstNameObj.toString();
+                    } else if (firstNameObj == null && lastNameObj != null) {
+                        name = lastNameObj.toString();
+                    } else {
+                        name = firstNameObj.toString() + " " + lastNameObj.toString();
+                    }
+                    if (name != null) {
+                        userMap.put(userID, name);
+                    }
+
+                }
             }
 
             Map<String, String> pipelineMap = new HashMap<String, String>();
