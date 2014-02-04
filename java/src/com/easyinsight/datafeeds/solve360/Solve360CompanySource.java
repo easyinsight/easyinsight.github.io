@@ -21,7 +21,7 @@ import java.util.*;
 public class Solve360CompanySource extends Solve360BaseSource {
 
     public static final String COMPANY_ID = "Company ID";
-    private static final String NAME = "Name";
+    public static final String NAME = "Name";
     private static final String RELATED_COMPANIES = "Related Companies";
     private static final String BILLING_ADDRESS = "Billing Address";
     private static final String PHONE = "Phone #";

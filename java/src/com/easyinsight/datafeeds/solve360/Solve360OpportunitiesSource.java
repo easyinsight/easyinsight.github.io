@@ -36,6 +36,8 @@ public class Solve360OpportunitiesSource extends Solve360BaseSource {
     public static final String UPDATED = "Opportunity Updated On";
     public static final String COUNT = "Opportunity Count";
     public static final String RESPONSIBLE = "Opportunity Responsible Party";
+    public static final String RELATED_COMPANY = "Related Company";
+    public static final String RELATED_CONTACT = "Related Contact";
 
     public Solve360OpportunitiesSource() {
         setFeedName("Opportunities");
@@ -50,7 +52,7 @@ public class Solve360OpportunitiesSource extends Solve360BaseSource {
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(OPPORTUNITY_ID, DESCRIPTION, DOLLARS, STATUS, RELATED_TO, CLOSING_DATE, PROBABILITY,
-                CREATED, UPDATED, COUNT, RESPONSIBLE, STAGE);
+                CREATED, UPDATED, COUNT, RESPONSIBLE, STAGE, RELATED_COMPANY, RELATED_CONTACT);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -67,6 +69,8 @@ public class Solve360OpportunitiesSource extends Solve360BaseSource {
         analysisItems.add(new AnalysisMeasure(keys.get(DOLLARS), DOLLARS, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
         analysisItems.add(new AnalysisMeasure(keys.get(PROBABILITY), PROBABILITY, AggregationTypes.SUM, true, FormattingConfiguration.PERCENTAGE));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
+        analysisItems.add(new AnalysisDimension(keys.get(RELATED_COMPANY)));
+        analysisItems.add(new AnalysisDimension(keys.get(RELATED_CONTACT)));
         return analysisItems;
     }
 
@@ -96,6 +100,12 @@ public class Solve360OpportunitiesSource extends Solve360BaseSource {
                 String closedDate = queryField(dealNode, "closingdate/text()");
                 if (closedDate != null) {
                     row.addValue(keys.get(CLOSING_DATE), df2.parse(closedDate));
+                }
+                String relatedType = queryField(dealNode, "itemtype/text()");
+                if("40".equals(relatedType)) {
+                    row.addValue(keys.get(RELATED_COMPANY), queryField(dealNode, "itemid/text()"));
+                } else if("1".equals(relatedType)) {
+                    row.addValue(keys.get(RELATED_CONTACT), queryField(dealNode, "itemid/text()"));
                 }
                 row.addValue(keys.get(COUNT), 1);
             }

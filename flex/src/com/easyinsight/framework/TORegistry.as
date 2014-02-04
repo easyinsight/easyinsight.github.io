@@ -92,6 +92,7 @@ import com.easyinsight.datasources.OracleDatabaseConnection;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.PostgresDatabaseConnection;
 import com.easyinsight.datasources.SmartsheetTableSource;
+import com.easyinsight.datasources.Solve360CompositeDataSource;
 import com.easyinsight.datasources.TrelloCompositeSource;
 import com.easyinsight.filtering.MultiFieldFilterDefinition;
 
@@ -304,6 +305,7 @@ public class TORegistry {
         var blank:BlankDataSource;
         var kashoo:KashooCompositeDataSource;
         var smart:SmartsheetTableSource;
+        var s360:Solve360CompositeDataSource;
     }
 }
 }

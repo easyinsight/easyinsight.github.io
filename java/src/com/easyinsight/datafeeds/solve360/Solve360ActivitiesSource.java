@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.solve360;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.api.v3.MeasureFormattingType;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -8,6 +9,8 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
+import com.easyinsight.storage.IWhere;
+import com.easyinsight.storage.StringWhere;
 import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
@@ -24,18 +27,23 @@ import java.util.*;
  */
 public class Solve360ActivitiesSource extends Solve360BaseSource {
 
-    public static final String OPPORTUNITY_ID = "Opportunity ID";
-    public static final String DESCRIPTION = "Opportunity Description";
-    public static final String DOLLARS = "Opportunity Value";
-    public static final String STATUS = "Opportunity Status";
-    public static final String RELATED_TO = "Opportunity Related To";
-    public static final String CLOSING_DATE = "Opportunity Closing Date";
-    public static final String PROBABILITY = "Opportunity Probability";
-    public static final String STAGE = "Opportunity Probability";
-    public static final String CREATED = "Opportunity Created On";
-    public static final String UPDATED = "Opportunity Updated On";
-    public static final String COUNT = "Opportunity Count";
-    public static final String RESPONSIBLE = "Opportunity Responsible Party";
+    public static final String ID = "Activity ID";
+    private static final String TYPE = "Activity Type";
+    private static final String COMMENTS = "Comments";
+    private static final String DURATION = "Duration";
+    private static final String LOCATION = "Location";
+    private static final String DATE_OCCURED = "Date Occured";
+    private static final String TIME_START = "Start Time";
+    private static final String TIME_END = "End Time";
+    private static final String EVENT_TYPE = "Event Type";
+    private static final String REMIND_STATUS = "Reminder Status";
+    private static final String PRIORITY = "Priority";
+    private static final String TITLE = "Title";
+    private static final String COMPLETED = "Completed";
+    private static final String REPEAT_INTERVAL = "Repeat Interval";
+    public static final String PARENT_COMPANY = "Parent Company";
+    public static final String PARENT_CONTACT = "Parent Contact";
+    private static final String DETAILS = "Details";
 
     public Solve360ActivitiesSource() {
         setFeedName("Activities");
@@ -49,61 +57,102 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(OPPORTUNITY_ID, DESCRIPTION, DOLLARS, STATUS, RELATED_TO, CLOSING_DATE, PROBABILITY,
-                CREATED, UPDATED, COUNT, RESPONSIBLE, STAGE);
+        return Arrays.asList(ID, TYPE, COMMENTS, DURATION, LOCATION, DATE_OCCURED, TIME_START, TIME_END, EVENT_TYPE, REMIND_STATUS, PRIORITY, TITLE, COMPLETED, REPEAT_INTERVAL, PARENT_COMPANY, PARENT_CONTACT, DETAILS);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        analysisItems.add(new AnalysisDimension(keys.get(OPPORTUNITY_ID)));
-        analysisItems.add(new AnalysisDimension(keys.get(DESCRIPTION)));
-        analysisItems.add(new AnalysisDimension(keys.get(STAGE)));
-        analysisItems.add(new AnalysisDimension(keys.get(STATUS)));
-        analysisItems.add(new AnalysisDimension(keys.get(RELATED_TO)));
-        analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLE)));
-        analysisItems.add(new AnalysisDateDimension(keys.get(CREATED), true, AnalysisDateDimension.DAY_LEVEL));
-        analysisItems.add(new AnalysisDateDimension(keys.get(UPDATED), true, AnalysisDateDimension.DAY_LEVEL));
-        analysisItems.add(new AnalysisDateDimension(keys.get(CLOSING_DATE), true, AnalysisDateDimension.DAY_LEVEL));
-        analysisItems.add(new AnalysisMeasure(keys.get(DOLLARS), DOLLARS, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
-        analysisItems.add(new AnalysisMeasure(keys.get(PROBABILITY), PROBABILITY, AggregationTypes.SUM, true, FormattingConfiguration.PERCENTAGE));
-        analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
+        analysisItems.add(new AnalysisDimension(keys.get(ID)));
+        analysisItems.add(new AnalysisDimension(keys.get(TYPE)));
+        analysisItems.add(new AnalysisDimension(keys.get(COMMENTS)));
+        analysisItems.add(new AnalysisMeasure(keys.get(DURATION), DURATION, AggregationTypes.SUM, true, FormattingConfiguration.MILLISECONDS));
+        analysisItems.add(new AnalysisDimension(keys.get(LOCATION)));
+        analysisItems.add(new AnalysisDateDimension(keys.get(DATE_OCCURED), true, AnalysisDateDimension.MINUTE_LEVEL));
+        analysisItems.add(new AnalysisDateDimension(keys.get(TIME_START), true, AnalysisDateDimension.MINUTE_LEVEL));
+        analysisItems.add(new AnalysisDateDimension(keys.get(TIME_END), true, AnalysisDateDimension.MINUTE_LEVEL));
+        analysisItems.add(new AnalysisDimension(keys.get(EVENT_TYPE)));
+        analysisItems.add(new AnalysisDimension(keys.get(REMIND_STATUS)));
+        analysisItems.add(new AnalysisDimension(keys.get(PRIORITY)));
+        analysisItems.add(new AnalysisDimension(keys.get(TITLE)));
+        analysisItems.add(new AnalysisDimension(keys.get(COMPLETED)));
+        analysisItems.add(new AnalysisDimension(keys.get(REPEAT_INTERVAL)));
+        analysisItems.add(new AnalysisDimension(keys.get(PARENT_COMPANY)));
+        analysisItems.add(new AnalysisDimension(keys.get(PARENT_CONTACT)));
+        analysisItems.add(new AnalysisDimension(keys.get(DETAILS)));
         return analysisItems;
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
+    protected String getUpdateKeyName() {
+        return ID;
+    }
+
+    @Override
+    protected boolean clearsData(FeedDefinition parentSource) {
+        return false;
+    }
+
+    @Override
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         Solve360CompositeSource solve360CompositeSource = (Solve360CompositeSource) parentDefinition;
         HttpClient httpClient = getHttpClient(solve360CompositeSource.getUserEmail(), solve360CompositeSource.getAuthKey());
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
         DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
         try {
-            Document doc = runRestRequest("https://secure.solve360.com/report/activities/?start=2014-01-01&end=2014-02-03&last=created", httpClient, new Builder(), solve360CompositeSource);
-            System.out.println(doc.toXML());
-            DataSet dataSet = new DataSet();
-            /*Nodes oppNodes = doc.query("/response/opportunities/opportunity");
+            String startDate = "2011-01-01";
+            if(lastRefreshDate != null) {
+                startDate = df2.format(lastRefreshDate);
+            }
+            Document doc = runRestRequest("https://secure.solve360.com/report/activities/?start=" + startDate + "&end=" + df2.format(new Date()) + "&last=created&types=3,4,6,14,23,24,73,88", httpClient, new Builder(), solve360CompositeSource);            DataSet dataSet = new DataSet();
+            Nodes oppNodes = doc.query("/response/activities/activity");
             for (int i = 0; i < oppNodes.size(); i++) {
-                Node dealNode = oppNodes.get(i);
+                Node activityNode = oppNodes.get(i);
                 IRow row = dataSet.createRow();
-                Element responsibleNode = (Element) dealNode.query("/responsible").get(0);
-                String responsibleParty = responsibleNode.getAttribute("cn").getValue();
-                row.addValue(keys.get(RESPONSIBLE), responsibleParty);
-                row.addValue(keys.get(OPPORTUNITY_ID), queryField(dealNode, "id/text()"));
-                row.addValue(keys.get(DESCRIPTION), queryField(dealNode, "description/text()"));
-                row.addValue(keys.get(STATUS), queryField(dealNode, "status/text()"));
-                row.addValue(keys.get(STAGE), queryField(dealNode, "stage/text()"));
-                row.addValue(keys.get(RELATED_TO), queryField(dealNode, "owner/text()"));
-                row.addValue(keys.get(DOLLARS), queryField(dealNode, "valueunit/text()"));
-                row.addValue(keys.get(PROBABILITY), queryField(dealNode, "probability/text()"));
-                row.addValue(keys.get(CREATED), df.parse(queryField(dealNode, "created/text()")));
-                row.addValue(keys.get(UPDATED), df.parse(queryField(dealNode, "modified/text()")));
-                String closedDate = queryField(dealNode, "closingdate/text()");
-                if (closedDate != null) {
-                    row.addValue(keys.get(CLOSING_DATE), df2.parse(closedDate));
-                }
-                row.addValue(keys.get(COUNT), 1);
-            }*/
+                String id =  queryField(activityNode, "id/text()");
+                row.addValue(keys.get(ID), id);
+                row.addValue(keys.get(TYPE), queryField(activityNode, "typeid/text()"));
+                row.addValue(keys.get(COMMENTS), queryField(activityNode, "comments/text()"));
+                String durationStr = queryField(activityNode, "fields/duration/text()");
+                if(durationStr != null && !"?".equals(durationStr))
+                    row.addValue(keys.get(DURATION), Integer.parseInt(durationStr) * 60 * 1000);
+                row.addValue(keys.get(LOCATION), queryField(activityNode, "fields/location/text()"));
 
-            return dataSet;
+                row.addValue(keys.get(DETAILS), queryField(activityNode, "fields/details/text()"));
+                String dateOccured = queryField(activityNode, "fields/dateoccured/text()");
+                if(dateOccured != null) {
+                    row.addValue(keys.get(DATE_OCCURED), df.parse(dateOccured));
+                }
+
+                String parentType = queryField(activityNode, "parenttypeid/text()");
+                if("40".equals(parentType)) {
+                    row.addValue(keys.get(PARENT_COMPANY), queryField(activityNode, "parent/text()"));
+                } else if("1".equals(parentType)) {
+                    row.addValue(keys.get(PARENT_CONTACT), queryField(activityNode, "parent/text()"));
+                }
+
+                String startTime = queryField(activityNode, "fields/timestart/text()");
+                if(startTime != null)
+                    row.addValue(keys.get(TIME_START), df.parse(startTime));
+
+                String endTime = queryField(activityNode, "fields/timeend/text()");
+                if(endTime != null)
+                    row.addValue(keys.get(TIME_END), df.parse(endTime));
+                row.addValue(keys.get(EVENT_TYPE), queryField(activityNode, "fields/eventtype/text()"));
+                row.addValue(keys.get(REMIND_STATUS), queryField(activityNode, "fields/remindstatus/text()"));
+                row.addValue(keys.get(PRIORITY), queryField(activityNode, "fields/priority/text()"));
+                row.addValue(keys.get(TITLE), queryField(activityNode, "fields/title/text()"));
+                row.addValue(keys.get(COMPLETED), queryField(activityNode, "fields/completed/text()"));
+                row.addValue(keys.get(REPEAT_INTERVAL), queryField(activityNode, "fields/repeatinterval/text()"));
+                if(lastRefreshDate != null) {
+                    StringWhere userWhere = new StringWhere(keys.get(ID), id);
+                    dataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
+                    dataSet = new DataSet();
+                }
+            }
+            if(lastRefreshDate == null) {
+                dataStorage.insertData(dataSet);
+            }
+            return null;
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
