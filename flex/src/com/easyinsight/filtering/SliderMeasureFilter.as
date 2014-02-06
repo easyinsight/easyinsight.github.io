@@ -148,6 +148,8 @@ public class SliderMeasureFilter extends HBox implements IFilter
                 lowString =  _filterDefinition.field.getFormatter().format(_filterDefinition.startValue);
             }
             lowValueString = lowString;
+        } else {
+            lowValueString = "";
         }
         if (measureFilter.endValueDefined) {
             var highString:String;
@@ -162,6 +164,8 @@ public class SliderMeasureFilter extends HBox implements IFilter
                 highString =  _filterDefinition.field.getFormatter().format(_filterDefinition.endValue);
             }
             highValueString = highString;
+        } else {
+            highValueString = "";
         }
 
         if (measureFilter.startValueDefined || measureFilter.endValueDefined) {

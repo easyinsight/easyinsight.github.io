@@ -125,7 +125,6 @@ import mx.controls.Text;
 		
 		public function makeUpdates():FilterDefinition {
 			if (lowInput.text != "") {
-				_filterDefinition.startValueDefined = true;
                 var lowValue:Number;
                 if (lowDropdown) {
                     var lowNum:Number = Number(lowInput.text);
@@ -137,13 +136,19 @@ import mx.controls.Text;
                 } else {
                     lowValue = Number(lowInput.text);
                 }
-				_filterDefinition.startValue = lowValue;
+                if (!isNaN(lowValue) && isFinite(lowValue)) {
+                    _filterDefinition.startValue = lowValue;
+                    _filterDefinition.startValueDefined = true;
+                } else {
+                    _filterDefinition.startValueDefined = false;
+                    _filterDefinition.startValue = 0;
+                }
 			} else {
 				_filterDefinition.startValueDefined = false;
 				_filterDefinition.startValue = 0;
 			}
 			if (highInput.text != "") {
-				_filterDefinition.endValueDefined = true;
+
                 var highValue:Number;
                 if (lowDropdown) {
                     var highNum:Number = Number(highInput.text);
@@ -155,7 +160,13 @@ import mx.controls.Text;
                 } else {
                     highValue = Number(highInput.text);
                 }
-				_filterDefinition.endValue = highValue;
+                if (!isNaN(highValue) && isFinite(highValue)) {
+                    _filterDefinition.endValueDefined = true;
+                    _filterDefinition.endValue = highValue;
+                } else {
+                    _filterDefinition.endValueDefined = false;
+                    _filterDefinition.endValue = 0;
+                }
 			} else {
 				_filterDefinition.endValueDefined = false;
 				_filterDefinition.endValue = 0;
