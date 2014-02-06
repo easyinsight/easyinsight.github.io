@@ -49,7 +49,7 @@ public class DayOfYear extends Function {
                 calendar.set(Calendar.DAY_OF_YEAR, dayToSet);
                 return new DateValue(calendar.getTime());
             } else {
-                return new NumericValue(calendar.get(Calendar.DAY_OF_MONTH));
+                return new NumericValue(calendar.get(Calendar.DAY_OF_YEAR));
             }
         } else {
             return new EmptyValue();
