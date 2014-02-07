@@ -343,12 +343,12 @@ public class CompositeFeedConnection implements Serializable, IJoin {
         targetJoins = Arrays.asList(targetJoin);
     }
 
-    public void store(Connection conn, long feedID) throws SQLException {
+    public long store(Connection conn, long feedID) throws SQLException {
         if (sourceItem != null && targetItem != null) {
             PreparedStatement connInsertStmt = conn.prepareStatement("INSERT INTO COMPOSITE_CONNECTION (" +
                     "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, source_item_id, target_item_id, COMPOSITE_FEED_ID, " +
                     "left_join, right_join, left_join_on_original, right_join_on_original, marmot_script, source_report_id, target_report_id) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             if (sourceFeedID == null || sourceFeedID == 0) {
                 connInsertStmt.setNull(1, Types.BIGINT);
             } else {
@@ -379,7 +379,11 @@ public class CompositeFeedConnection implements Serializable, IJoin {
                 }
             }
             connInsertStmt.setLong(4, targetItem.getAnalysisItemID());
-            connInsertStmt.setLong(5, feedID);
+            if (feedID > 0) {
+                connInsertStmt.setLong(5, feedID);
+            } else {
+                connInsertStmt.setNull(5, Types.BIGINT);
+            }
             connInsertStmt.setBoolean(6, sourceOuterJoin);
             connInsertStmt.setBoolean(7, targetOuterJoin);
             connInsertStmt.setBoolean(8, sourceJoinOnOriginal);
@@ -396,12 +400,14 @@ public class CompositeFeedConnection implements Serializable, IJoin {
                 connInsertStmt.setLong(12, targetReportID);
             }
             connInsertStmt.execute();
+            long id = Database.instance().getAutoGenKey(connInsertStmt);
             connInsertStmt.close();
+            return id;
         } else {
             PreparedStatement connInsertStmt = conn.prepareStatement("INSERT INTO COMPOSITE_CONNECTION (" +
                     "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, SOURCE_JOIN, TARGET_JOIN, COMPOSITE_FEED_ID, " +
                     "left_join, right_join, left_join_on_original, right_join_on_original, marmot_script, source_report_id, target_report_id) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             if (sourceFeedID == null) {
                 connInsertStmt.setNull(1, Types.BIGINT);
             } else {
@@ -414,7 +420,12 @@ public class CompositeFeedConnection implements Serializable, IJoin {
             }
             connInsertStmt.setLong(3, sourceJoin.getKeyID());
             connInsertStmt.setLong(4, targetJoin.getKeyID());
-            connInsertStmt.setLong(5, feedID);
+            if (feedID > 0) {
+                connInsertStmt.setLong(5, feedID);
+            } else {
+                connInsertStmt.setNull(5, Types.BIGINT);
+            }
+
             connInsertStmt.setBoolean(6, sourceOuterJoin);
             connInsertStmt.setBoolean(7, targetOuterJoin);
             connInsertStmt.setBoolean(8, sourceJoinOnOriginal);
@@ -431,7 +442,9 @@ public class CompositeFeedConnection implements Serializable, IJoin {
                 connInsertStmt.setLong(12, targetReportID);
             }
             connInsertStmt.execute();
+            long id = Database.instance().getAutoGenKey(connInsertStmt);
             connInsertStmt.close();
+            return id;
         }
     }
 
@@ -631,7 +644,7 @@ public class CompositeFeedConnection implements Serializable, IJoin {
                     // nothing else
                 } else if (i == (fields.size() - 2)) {
                     sb.append(" and ");
-                } else {
+                } else if (i < (fields.size() - 2)) {
                     sb.append(", ");
                 }
             }
