@@ -90,6 +90,7 @@ import com.easyinsight.datasources.LinkedInDataSource;
 import com.easyinsight.datasources.MySQLDatabaseConnection;
 import com.easyinsight.datasources.OracleDatabaseConnection;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
+import com.easyinsight.datasources.PivotalTrackerV5CompositeSource;
 import com.easyinsight.datasources.PostgresDatabaseConnection;
 import com.easyinsight.datasources.SmartsheetTableSource;
 import com.easyinsight.datasources.Solve360CompositeDataSource;
@@ -306,6 +307,7 @@ public class TORegistry {
         var kashoo:KashooCompositeDataSource;
         var smart:SmartsheetTableSource;
         var s360:Solve360CompositeDataSource;
+        var piv:PivotalTrackerV5CompositeSource;
     }
 }
 }
