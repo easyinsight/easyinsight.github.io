@@ -37,6 +37,32 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         return false;
     }
 
+    protected class FieldBuilder {
+
+        private Map<String, Key> keyMap;
+        private List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
+
+        public void addField(String keyName, AnalysisItem analysisItem) {
+            Key key = keyMap.get(keyName);
+            if (key == null) {
+                key = new NamedKey(keyName);
+            }
+            analysisItem.setKey(key);
+            analysisItems.add(analysisItem);
+        }
+    }
+
+    public List<AnalysisItem> createAnalysisItemsNew(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
+        FieldBuilder fieldBuilder = new FieldBuilder();
+        fieldBuilder.keyMap = keys;
+        createFields(fieldBuilder, conn, parentDefinition);
+        return fieldBuilder.analysisItems;
+    }
+
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        throw new UnsupportedOperationException();
+    }
+
     public void loadingProgress(int current, int total, String message, String callDataID) {
         if (callDataID != null) {
             DataSourceRefreshEvent info = new DataSourceRefreshEvent();
@@ -62,7 +88,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
     }
 
-    public long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems, FeedDefinition parentDefinition) throws Exception {
+    public long create(EIConnection conn, @Nullable List<AnalysisItem> externalAnalysisItems, @Nullable FeedDefinition parentDefinition) throws Exception {
         DataStorage metadata = null;
         try {
             if (externalAnalysisItems == null) {
@@ -122,7 +148,9 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
      * @param parentDefinition blah
      */
     @NotNull
-    protected abstract List<String> getKeys(FeedDefinition parentDefinition);
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
+        return new ArrayList<String>();
+    }
 
     public Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition) {
         Map<String, Key> keyMap = new HashMap<String, Key>();
