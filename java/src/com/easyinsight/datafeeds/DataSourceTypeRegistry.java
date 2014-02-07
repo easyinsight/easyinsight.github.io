@@ -36,6 +36,7 @@ import com.easyinsight.datafeeds.kashoo.KashooRecordSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
 import com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource;
+import com.easyinsight.datafeeds.pivotaltrackerv5.*;
 import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseDatabaseSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseUserSource;
@@ -366,6 +367,13 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.SOLVE360_ACTIVITIES, Solve360ActivitiesSource.class);
         registerType(FeedType.SMARTSHEET_TABLE, SmartsheetTableSource.class);
         registerType(FeedType.SOLVE360_COMPANIES, Solve360CompanySource.class);
+        registerType(FeedType.PIVOTAL_V5_COMPOSITE, PivotalTrackerV5CompositeSource.class);
+        registerType(FeedType.PIVOTAL_V5_PROJECT, PivotalTrackerV5ProjectSource.class);
+        registerType(FeedType.PIVOTAL_V5_EPIC, PivotalTrackerV5EpicSource.class);
+        registerType(FeedType.PIVOTAL_V5_STORY, PivotalTrackerV5StorySource.class);
+        registerType(FeedType.PIVOTAL_V5_LABEL, PivotalTrackerV5LabelSource.class);
+        registerType(FeedType.PIVOTAL_V5_ITERATION, PivotalTrackerV5IterationSource.class);
+        registerType(FeedType.PIVOTAL_V5_STORY_TO_LABEL, PivotalTrackerV5StoryToLabelSource.class);
 
     }
 
