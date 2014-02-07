@@ -303,7 +303,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
     }
     
-    private Key getKey(Connection conn, long targetJoinID) {
+    protected Key getKey(Connection conn, long targetJoinID) {
         Session session = Database.instance().createSession(conn);
         Key key = null;
         try {
@@ -316,7 +316,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         return key;
     }
 
-    private AnalysisItem getItem(Connection conn, long itemID) {
+    protected AnalysisItem getItem(Connection conn, long itemID) {
         Session session = Database.instance().createSession(conn);
         AnalysisItem analysisItem = null;
         try {
