@@ -6,8 +6,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
-import com.easyinsight.kpi.KPI;
-import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.users.Account;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
@@ -207,7 +205,7 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
 
     private transient Map<String, String> timeEntryToInvoiceLineItem;
 
-    protected void sortSources(List<IServerDataSourceDefinition> children) {
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
         Collections.sort(children, new Comparator<IServerDataSourceDefinition>() {
 
             public int compare(IServerDataSourceDefinition feedDefinition, IServerDataSourceDefinition feedDefinition1) {
@@ -220,6 +218,7 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
                 return 0;
             }
         });
+        return null;
     }
 
     public Map<String, String> timeEntryToInvoiceLines() {
