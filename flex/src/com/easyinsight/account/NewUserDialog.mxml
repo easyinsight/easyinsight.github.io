@@ -207,7 +207,7 @@
                     dlsVBox.removeAllChildren();
                 } else {
                     dlsVBox = new VBox();
-                    dlsVBox.label = "DLS";
+                    dlsVBox.label = "Data Level Security";
                     tabNavigator.addChild(dlsVBox);
                 }
                 for each (var userDLS:UserDLS in dlsList) {

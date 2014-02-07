@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -100,6 +101,7 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
                     Element contactNode = (Element) response.getChild(i);
                     if (!"count".equals(contactNode.getLocalName()) && !"status".equals(contactNode.getLocalName())) {
                         Contact c = new Contact();
+                        System.out.println(contactNode.toXML());
                         String s = Solve360BaseSource.queryField(contactNode, "id/text()");
                         c.setId(Integer.parseInt(s));
                         c.setName(Solve360BaseSource.queryField(contactNode, "name/text()"));
@@ -146,6 +148,18 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
     }
 
     @Override
+    public void customLoad(Connection conn) throws SQLException {
+        super.customLoad(conn);
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT USER_EMAIL, AUTH_KEY from SOLVE360 where DATA_SOURCE_ID = ?");
+        loadStmt.setLong(1, getDataFeedID());
+        ResultSet rs = loadStmt.executeQuery();
+        if(rs.next()) {
+            userEmail = rs.getString(1);
+            authKey = rs.getString(2);
+        }
+    }
+
+    @Override
     public String validateCredentials() {
         /*try {
             getToken(ksUserName, ksPassword);
@@ -185,6 +199,11 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
 
     @Override
     protected Collection<ChildConnection> getChildConnections() {
-        return new ArrayList<ChildConnection>();
+        return Arrays.asList(new ChildConnection(FeedType.SOLVE360_COMPANIES, FeedType.SOLVE360_ACTIVITIES, Solve360CompanySource.COMPANY_ID, Solve360ActivitiesSource.PARENT_COMPANY),
+                new ChildConnection(FeedType.SOLVE360_COMPANIES, FeedType.SOLVE360_OPPORTUNITIES, Solve360CompanySource.COMPANY_ID, Solve360OpportunitiesSource.RELATED_COMPANY),
+                new ChildConnection(FeedType.SOLVE360_CONTACTS, FeedType.SOLVE360_ACTIVITIES, Solve360ContactsSource.CONTACT_ID, Solve360ActivitiesSource.PARENT_CONTACT),
+                new ChildConnection(FeedType.SOLVE360_CONTACTS, FeedType.SOLVE360_OPPORTUNITIES, Solve360ContactsSource.CONTACT_ID, Solve360OpportunitiesSource.RELATED_CONTACT),
+                new ChildConnection(FeedType.SOLVE360_COMPANIES, FeedType.SOLVE360_CONTACTS, Solve360CompanySource.NAME, Solve360ContactsSource.COMPANY)
+                );
     }
 }

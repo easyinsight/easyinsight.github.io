@@ -156,6 +156,7 @@
                 user.firstName = firstNameInput.text;
                 user.fixedDashboardID = singleViewComboBox.selectedItem.id;
                 user.testAccountVisible = reportVisibilityCheckbox.selected;
+                user.invoiceRecipient = invoiceCheckbox.selected;
                 if (showPersonaOption) {
                     var persona:Object = personaComboBox.selectedItem;
                     if (persona != Persona.EMPTY_PERSONA) {
@@ -206,7 +207,7 @@
                     dlsVBox.removeAllChildren();
                 } else {
                     dlsVBox = new VBox();
-                    dlsVBox.label = "DLS";
+                    dlsVBox.label = "Data Level Security";
                     tabNavigator.addChild(dlsVBox);
                 }
                 for each (var userDLS:UserDLS in dlsList) {
@@ -310,6 +311,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="Send Newsletter to User:" labelWidth="180">
                     <mx:CheckBox id="newsletterCheckbox" selected="{newsletterSelected}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Invoice Recipient:" labelWidth="180">
+                    <mx:CheckBox id="invoiceCheckbox" selected="{invoiceRecipient}"/>
                 </mx:FormItem>
             </mx:Form>
             <mx:HRule width="100%"/>

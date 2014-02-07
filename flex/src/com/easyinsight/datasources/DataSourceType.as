@@ -63,13 +63,11 @@ public class DataSourceType {
     public static const BLANK:int = 214;
     public static const KASHOO:int = 120;
     public static const SMARTSHEET:int = 217;
-
-
-
+    public static const SOLVE360:int = 122;
     public static const OWNER:int = 1;
     public static const EDITOR:int = 2;
-    public static const SUBSCRIBER:int = 3;
 
+    public static const SUBSCRIBER:int = 3;
     public function DataSourceType() {
     }
 }
