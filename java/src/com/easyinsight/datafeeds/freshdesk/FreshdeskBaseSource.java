@@ -82,7 +82,7 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
     }
 
     protected static List runRestRequestForList(String path, HttpClient client, FreshdeskCompositeSource parentDefinition) throws ReportException {
-        String url = parentDefinition.getUrl() + "/helpdesk/";
+        String url = parentDefinition.generateURL(parentDefinition.getUrl(), "freshdesk.com") + "/helpdesk/";
         HttpMethod restMethod = new GetMethod(url + path);
         restMethod.setRequestHeader("Accept", "application/json");
         restMethod.setRequestHeader("Content-Type", "application/json");

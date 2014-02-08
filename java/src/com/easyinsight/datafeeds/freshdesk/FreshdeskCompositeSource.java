@@ -34,11 +34,13 @@ public class FreshdeskCompositeSource extends CompositeServerDataSource {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM FRESHDESK WHERE DATA_SOURCE_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
+        clearStmt.close();
         PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO FRESHDESK (DATA_SOURCE_ID, URL, API_TOKEN) VALUES (?, ?, ?)");
         saveStmt.setLong(1, getDataFeedID());
         saveStmt.setString(2, url);
         saveStmt.setString(3, freshdeskApiKey);
         saveStmt.execute();
+        saveStmt.close();
     }
 
     @Override
@@ -51,6 +53,7 @@ public class FreshdeskCompositeSource extends CompositeServerDataSource {
             url = rs.getString(1);
             freshdeskApiKey = rs.getString(2);
         }
+        queryStmt.close();
     }
 
     @Override

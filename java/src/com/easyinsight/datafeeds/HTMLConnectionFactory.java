@@ -93,7 +93,7 @@ public class HTMLConnectionFactory {
                 servletResponse.sendRedirect(response.getRequestToken());
             } else {
                 new FeedStorage().updateDataFeedConfiguration(dataSource);
-                servletResponse.sendRedirect(RedirectUtil.getURL(request, "/app/html/dataSources/ "+ dataSource.getApiKey() + "/createConnection"));
+                servletResponse.sendRedirect(RedirectUtil.getURL(request, "/app/html/dataSources/"+ dataSource.getApiKey() + "/createConnection"));
             }
         } catch (Exception e) {
             LogClass.error(e);

@@ -30,6 +30,11 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
     public static final String CONSUMER_KEY = "easyinsight";
     public static final String CONSUMER_SECRET = "3gKm7ivgkPCeQZChh7ig9CDMBGratLg6yS";
 
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("FreshBooks URL", "url", "Your Highrise URL is the browser URL you normally use to connect to Highrise. For example, if you access Highrise as yourcompanyname.highrisehq.com, put yourcompanyname in as the Highrise URL.");
+        factory.type(HTMLConnectionFactory.TYPE_OAUTH);
+    }
+
     public FreshbooksCompositeSource() {
         setFeedName("FreshBooks");
     }
