@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<easyinsight:EmbeddedBase xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="*" preloader="com.easyinsight.preloader.EIPreloader">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.PerspectiveFactory;
+        import com.easyinsight.framework.PerspectiveFactoryHolder;
+        import com.easyinsight.skin.ApplicationSkin;
+
+
+        import mx.core.Application;
+        import mx.core.UIComponent;
+
+        public static const REPORT_EDITOR:int = 1;
+        public static const CONFIGURE_DATA_SOURCE:int = 2;
+        public static const DASHBOARD_EDITOR:int = 3;
+
+        public var embedded:int;
+
+        public var comp:IEasyInsightComponent;
+
+        override protected function createView():UIComponent {
+            return comp.createView();
+        }
+
+        override protected function go():void {
+            comp.go();
+        }
+
+        override protected function childSetup():void {
+            ApplicationSkin.initialize();
+            this.embedded = int(Application.application.parameters.embedded);
+            if (embedded == REPORT_EDITOR) {
+                comp = new EmbeddedReportEditor();
+                EmbeddedReportEditor(comp).embeddedBase = this;
+            } else if (embedded == CONFIGURE_DATA_SOURCE) {
+                comp = new EmbeddedConfigureDataSource();
+                EmbeddedConfigureDataSource(comp).embeddedBase = this;
+            } else if (embedded == DASHBOARD_EDITOR) {
+                comp = new EmbeddedDashboardEditor();
+                EmbeddedDashboardEditor(comp).embeddedBase = this;
+            }
+            PerspectiveFactoryHolder.factory = new PerspectiveFactory();
+            comp.childSetup();
+        }
+        ]]></mx:Script>
+    <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
+</easyinsight:EmbeddedBase>

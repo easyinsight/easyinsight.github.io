@@ -33,11 +33,11 @@
         [Embed(source="/com/easyinsight/skin/osx/opensansbold.swf", fontName="Open Sans Bold", fontWeight="bold")]
         private var openSansBold:Class;
 
-        protected function onClose(event:AnalysisCloseEvent):void {
+        public function onClose(event:AnalysisCloseEvent):void {
             navigateToURL(new URLRequest("/app/html/reports/" + event.urlKey), "_self");
         }
 
-        protected function onAnalyzeEvent(event:AnalyzeEvent):void {
+        public function onAnalyzeEvent(event:AnalyzeEvent):void {
             var info:PerspectiveInfo = event.perspectiveInfo;
             switch (info.perspectiveType) {
                 case PerspectiveInfo.REPORT_VIEW:
@@ -156,11 +156,11 @@
             go();
         }
 
-        protected function toLogin():void {
+        public function toLogin():void {
 
         }
 
-        protected function toView():void {
+        public function toView():void {
             stack.addChild(createView());
             stackIndex = 2;
         }
