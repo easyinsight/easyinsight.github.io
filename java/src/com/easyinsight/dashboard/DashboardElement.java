@@ -451,10 +451,12 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         }
 
         if (getFilterSets() != null) {
-            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO dashboard_element_to_filter_set (dashboard_element_id, filter_set_id) values (?, ?)");
+            int positionIndex = 0;
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO dashboard_element_to_filter_set (dashboard_element_id, filter_set_id, position_index) values (?, ?, ?)");
             for (FilterSetDescriptor filterSetDescriptor : getFilterSets()) {
                 saveStmt.setLong(1, getElementID());
                 saveStmt.setLong(2, filterSetDescriptor.getId());
+                saveStmt.setInt(3, positionIndex++);
                 saveStmt.execute();
             }
             saveStmt.close();

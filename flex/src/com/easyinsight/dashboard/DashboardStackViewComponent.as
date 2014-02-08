@@ -139,132 +139,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             horizontalScrollPolicy = "off";
         }
         buildEffects();
-        if (dashboardStack.consolidateHeaderElements) {
-            var headerHBox:HBox = new HBox();
-            headerHBox.setStyle("verticalAlign", "middle");
-            headerHBox.percentWidth = 100;
-            var myFiltersBox:HBox = new HBox();
-            //myFiltersBox.percentWidth = 100;
-            childFilterBox = new HBox();
-            childFilterBox.percentWidth = 100;
-            buttonsBox = new HBox();
-            headerHBox.addChild(myFiltersBox);
-            headerHBox.addChild(childFilterBox);
-            headerHBox.addChild(buttonsBox);
-            addChild(headerHBox);
-        } else {
-            var headerArea:Canvas;
-            if (dashboardStack.headerBackground == null && !dashboardStack.consolidateHeaderElements && dashboardEditorMetadata.dashboard.fillStackHeaders && dashboardStack.dashboardLevel == 0 && dashboardStack.gridItems.length > 1) {
-                headerArea = new HeaderCanvas();
-                headerArea.setStyle("fillColors", [dashboardEditorMetadata.dashboard.stackFill1Start, dashboardEditorMetadata.dashboard.stackFill1SEnd]);
-                headerArea.height = 30;
-            } else if (dashboardStack.headerBackground == null && !dashboardStack.consolidateHeaderElements && dashboardEditorMetadata.dashboard.fillStackHeaders && dashboardStack.dashboardLevel == 1 && dashboardStack.gridItems.length > 1) {
-                headerArea = new HeaderCanvas2();
-                headerArea.setStyle("fillColors", [dashboardEditorMetadata.dashboard.stackFill2Start, dashboardEditorMetadata.dashboard.stackFill2End]);
-                headerArea.height = 30;
-            } else {
-                headerArea = new Canvas();
-            }
-
-            if (dashboardStack.headerBackground == null) {
-                defaultButtonsBox = styleHeaderArea(headerArea);
-            } else {
-                defaultButtonsBox = imagedHeaderArea(headerArea);
-            }
-            addChild(headerArea);
+        if (this is DashboardStackEditorComponent) {
+            buildContents();
         }
-        viewStack = new ViewStack();
-        viewStack.setStyle("paddingLeft", 0);
-        viewStack.setStyle("paddingTop", 0);
-        viewStack.setStyle("paddingRight", 0);
-        viewStack.setStyle("paddingBottom", 0);
-        if (dashboardEditorMetadata.dashboard.absoluteSizing) {
-            this.percentWidth = 100;
-            viewStack.percentWidth = 100;
-            viewStack.resizeToContent = true;
-        } else {
-            if (dashboardStack.preferredHeight > 0) {
-                this.height = dashboardStack.preferredHeight;
-                this.percentWidth = 100;
-                viewStack.percentHeight = 100;
-                viewStack.percentWidth = 100;
-            } else {
-                this.percentWidth = 100;
-                this.percentHeight = 100;
-                viewStack.percentHeight = 100;
-                viewStack.percentWidth = 100;
-            }
-        }
-        /*viewStack.percentHeight = 100;
-        viewStack.percentWidth = 100;*/
-        viewChildren = new ArrayCollection();
-        createStackContents();
-        var transformContainer:TransformContainer = createTransformContainer();
-        if (transformContainer != null) {
-            if (dashboardStack.consolidateHeaderElements) {
-                if (dashboardStack.filters != null && dashboardStack.filters.length > 1) {
-                    myFiltersBox.percentWidth = 100;
-                }
-                myFiltersBox.addChild(transformContainer);
-            } else {
-                if (_consolidateHeader) {
-                    if (dashboardStack.filters != null && dashboardStack.filters.length > 0) {
-                        _consolidateHeader.percentWidth = 100;
-                    }
-                    _consolidateHeader.addChild(transformContainer);
-                } else {
-                    addChild(transformContainer);
-                }
-            }
-        }
-
-        try {
-            if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null && viewStack != null && dashboardStack.urlKey != null) {
-                var index:int = dashboardEditorMetadata.retrievalState.getStackPosition(dashboardStack.urlKey);
-                if (index != -1) {
-                    viewStack.selectedIndex = index;
-                    if (dashboardHeaderButtons != null && index != -1 && dashboardHeaderButtons.length > index) {
-                        if (selectedButton != null) {
-                            selectedButton.selected = false;
-                        }
-                        if (dashboardHeaderButtons.getItemAt(index) is DashboardButton) {
-                            DashboardButton(dashboardHeaderButtons.getItemAt(index)).selected = true;
-                            selectedButton = DashboardButton(dashboardHeaderButtons.getItemAt(index));
-                        }
-                    }
-                }
-            }
-        } catch (e:Error) {
-        }
-        /*if (positionAsIs == -1) {
-            try {
-                var so:SharedObject = SharedObject.getLocal("d" + dashboardEditorMetadata.dashboard.urlKey);
-                if (so.size > 0) {
-                    var savedVersion:int = so.data.version;
-                    if (savedVersion == dashboardEditorMetadata.dashboard.version) {
-                        var stackPosition:int = so.data["de" + dashboardStack.urlKey];
-                        if (stackPosition > 0) {
-                            viewStack.selectedIndex = stackPosition;
-                            if (dashboardHeaderButtons != null && index != -1 && dashboardHeaderButtons.length > stackPosition) {
-                                if (selectedButton != null) {
-                                    selectedButton.selected = false;
-                                }
-                                if (dashboardHeaderButtons.getItemAt(stackPosition) is DashboardButton) {
-                                    DashboardButton(dashboardHeaderButtons.getItemAt(stackPosition)).selected = true;
-                                    selectedButton = DashboardButton(dashboardHeaderButtons.getItemAt(stackPosition));
-                                }
-                            }
-                        }
-                    } else {
-                        so.clear();
-                    }
-                }
-                so.flush();
-            } catch (e:Error) {
-            }
-        }*/
-        addChild(viewStack);
-
     }
 
     private var dashboardHeaderButtons:ArrayCollection;
@@ -398,6 +275,9 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
 
     public function reportCount():ArrayCollection {
+        if (!built) {
+            buildContents();
+        }
         var activeChild:IDashboardViewComponent = IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex));
         return activeChild.reportCount();
     }
@@ -680,7 +560,117 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).refresh();
     }
 
+    private function buildContents():void {
+        if (built) {
+            return;
+        }
+        built = true;
+        if (dashboardStack.consolidateHeaderElements) {
+            var headerHBox:HBox = new HBox();
+            headerHBox.setStyle("verticalAlign", "middle");
+            headerHBox.percentWidth = 100;
+            var myFiltersBox:HBox = new HBox();
+            //myFiltersBox.percentWidth = 100;
+            childFilterBox = new HBox();
+            childFilterBox.percentWidth = 100;
+            buttonsBox = new HBox();
+            headerHBox.addChild(myFiltersBox);
+            headerHBox.addChild(childFilterBox);
+            headerHBox.addChild(buttonsBox);
+            addChild(headerHBox);
+        } else {
+            var headerArea:Canvas;
+            if (dashboardStack.headerBackground == null && !dashboardStack.consolidateHeaderElements && dashboardEditorMetadata.dashboard.fillStackHeaders && dashboardStack.dashboardLevel == 0 && dashboardStack.gridItems.length > 1) {
+                headerArea = new HeaderCanvas();
+                headerArea.setStyle("fillColors", [dashboardEditorMetadata.dashboard.stackFill1Start, dashboardEditorMetadata.dashboard.stackFill1SEnd]);
+                headerArea.height = 30;
+            } else if (dashboardStack.headerBackground == null && !dashboardStack.consolidateHeaderElements && dashboardEditorMetadata.dashboard.fillStackHeaders && dashboardStack.dashboardLevel == 1 && dashboardStack.gridItems.length > 1) {
+                headerArea = new HeaderCanvas2();
+                headerArea.setStyle("fillColors", [dashboardEditorMetadata.dashboard.stackFill2Start, dashboardEditorMetadata.dashboard.stackFill2End]);
+                headerArea.height = 30;
+            } else {
+                headerArea = new Canvas();
+            }
+
+            if (dashboardStack.headerBackground == null) {
+                defaultButtonsBox = styleHeaderArea(headerArea);
+            } else {
+                defaultButtonsBox = imagedHeaderArea(headerArea);
+            }
+            addChild(headerArea);
+        }
+        viewStack = new ViewStack();
+        viewStack.setStyle("paddingLeft", 0);
+        viewStack.setStyle("paddingTop", 0);
+        viewStack.setStyle("paddingRight", 0);
+        viewStack.setStyle("paddingBottom", 0);
+        if (dashboardEditorMetadata.dashboard.absoluteSizing) {
+            this.percentWidth = 100;
+            viewStack.percentWidth = 100;
+            viewStack.resizeToContent = true;
+        } else {
+            if (dashboardStack.preferredHeight > 0) {
+                this.height = dashboardStack.preferredHeight;
+                this.percentWidth = 100;
+                viewStack.percentHeight = 100;
+                viewStack.percentWidth = 100;
+            } else {
+                this.percentWidth = 100;
+                this.percentHeight = 100;
+                viewStack.percentHeight = 100;
+                viewStack.percentWidth = 100;
+            }
+        }
+        /*viewStack.percentHeight = 100;
+         viewStack.percentWidth = 100;*/
+        viewChildren = new ArrayCollection();
+        createStackContents();
+        var transformContainer:TransformContainer = createTransformContainer();
+        if (transformContainer != null) {
+            if (dashboardStack.consolidateHeaderElements) {
+                if (dashboardStack.filters != null && dashboardStack.filters.length > 1) {
+                    myFiltersBox.percentWidth = 100;
+                }
+                myFiltersBox.addChild(transformContainer);
+            } else {
+                if (_consolidateHeader) {
+                    if (dashboardStack.filters != null && dashboardStack.filters.length > 0) {
+                        _consolidateHeader.percentWidth = 100;
+                    }
+                    _consolidateHeader.addChild(transformContainer);
+                } else {
+                    addChild(transformContainer);
+                }
+            }
+        }
+
+        try {
+            if (dashboardEditorMetadata != null && dashboardEditorMetadata.retrievalState != null && viewStack != null && dashboardStack.urlKey != null) {
+                var index:int = dashboardEditorMetadata.retrievalState.getStackPosition(dashboardStack.urlKey);
+                if (index != -1) {
+                    viewStack.selectedIndex = index;
+                    if (dashboardHeaderButtons != null && index != -1 && dashboardHeaderButtons.length > index) {
+                        if (selectedButton != null) {
+                            selectedButton.selected = false;
+                        }
+                        if (dashboardHeaderButtons.getItemAt(index) is DashboardButton) {
+                            DashboardButton(dashboardHeaderButtons.getItemAt(index)).selected = true;
+                            selectedButton = DashboardButton(dashboardHeaderButtons.getItemAt(index));
+                        }
+                    }
+                }
+            }
+        } catch (e:Error) {
+        }
+        addChild(viewStack);
+    }
+
+    private var built:Boolean = false;
+
     public function initialRetrieve():void {
+        if (!built) {
+            buildContents();
+        }
         var changed:Boolean = false;
         if (transformContainer != null) {
             changed = transformContainer.updateState() || changed;
