@@ -81,4 +81,9 @@ public class Tag implements Serializable {
     public int hashCode() {
         return (int) (id ^ (id >>> 32));
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
