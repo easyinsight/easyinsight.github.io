@@ -15,9 +15,9 @@
 
         String dataSourceID = request.getParameter("dataSourceID");
 
-        String swf = "EmbeddedConfigureDataSource";
+            String swf = "EmbeddedComponentApplication";
 
-        String flashVars = "dataSourceURLKey=" + dataSourceID;
+            String flashVars = "embedded=2&" + "dataSourceURLKey=" + dataSourceID;
 
 
         FeedResponse insightResponse = new FeedService().openFeedIfPossible(dataSourceID);

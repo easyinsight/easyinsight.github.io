@@ -15,13 +15,13 @@
         String reportID = request.getParameter("reportID");
         String dataSourceID = request.getParameter("dataSourceID");
 
-        String swf = "EmbeddedReportEditor";
+        String swf = "EmbeddedComponentApplication";
 
-        String flashVars = null;
+        String flashVars = "embedded=1&";
         if (reportID != null) {
-            flashVars = "analysisID=" + reportID;
+            flashVars += "analysisID=" + reportID;
         } else if (dataSourceID != null) {
-            flashVars = "dataSourceURLKey=" + dataSourceID;
+            flashVars += "dataSourceURLKey=" + dataSourceID;
         }
 
             InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossible(reportID);
