@@ -51,9 +51,17 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
         DataSet dataSet = new DataSet();
         HttpClient httpClient = new HttpClient();
         Map<String, String> iterationToStoryMap = new HashMap<String, String>();
+        Map<String, String> userMap = new HashMap<String, String>();
         List<Map> projects = runRequestForList("projects", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
         for (Map project : projects) {
             String projectID = getJSONValue(project, "id");
+            List<Map> memberships = runRequestForList("/projects/" + projectID + "/memberships", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
+            for (Map membership : memberships) {
+                Map person = (Map) membership.get("person");
+                String name = person.get("name").toString();
+                String id = person.get("id").toString();
+                userMap.put(id, name);
+            }
             List<Map> iterations = runRequestForList("/projects/" + projectID  + "/iterations", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
             for (Map story : iterations) {
 
@@ -75,6 +83,7 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
 
         }
         ((PivotalTrackerV5CompositeSource) parentDefinition).setIterationToStoryMap(iterationToStoryMap);
+        ((PivotalTrackerV5CompositeSource) parentDefinition).setUserMap(userMap);
         return dataSet;
     }
 }

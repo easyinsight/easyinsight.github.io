@@ -89,6 +89,22 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
         storyIDToLabelMap = null;
         epicIDToLabelMap = null;
         iterationToStoryMap = null;
+        userMap = null;
+    }
+
+    public String getUser(String userID) {
+        if (userID == null) {
+            return null;
+        }
+        return userMap.get(userID);
+    }
+
+    public Map<String, String> getUserMap() {
+        return userMap;
+    }
+
+    public void setUserMap(Map<String, String> userMap) {
+        this.userMap = userMap;
     }
 
     public Map<String, List<String>> getStoryIDToLabelMap() {
@@ -115,6 +131,7 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
         this.iterationToStoryMap = iterationToStoryMap;
     }
 
+    private Map<String, String> userMap = new HashMap<String, String>();
     private Map<String, List<String>> storyIDToLabelMap = new HashMap<String, List<String>>();
     private Map<String, List<String>> epicIDToLabelMap = new HashMap<String, List<String>>();
     private Map<String, String> iterationToStoryMap = new HashMap<String, String>();
