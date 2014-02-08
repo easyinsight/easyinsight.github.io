@@ -76,6 +76,10 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean manualReportRun;
     private boolean showTags;
 
+    public void configureFactory(HTMLConnectionFactory factory) {
+
+    }
+
     public boolean isShowTags() {
         return showTags;
     }
