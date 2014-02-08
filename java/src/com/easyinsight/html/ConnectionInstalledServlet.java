@@ -1,7 +1,9 @@
 package com.easyinsight.html;
 
+import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedService;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.solutions.SolutionKPIData;
 import com.easyinsight.solutions.SolutionService;
@@ -26,18 +28,19 @@ public class ConnectionInstalledServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
         SecurityUtil.populateThreadLocalFromSession(req);
         try {
-            long dataSourceID = Long.parseLong(req.getParameter("dataSourceID"));
+            String dataSourceKey = req.getParameter("dataSourceID");
+            long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
             FeedDefinition dataSource = new FeedService().getFeedDefinition(dataSourceID);
             SolutionKPIData solutionKPIData = new SolutionKPIData();
             solutionKPIData.setDataSourceID(dataSourceID);
             new SolutionService().addKPIData(solutionKPIData);
-            String endURL = "reports/" + dataSource.getApiKey();
+            String endURL = RedirectUtil.getURL(req, "/app/html/reports/" + dataSource.getApiKey());
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("url", endURL);
             response.setContentType("application/json");
             response.getOutputStream().write(jsonObject.toString().getBytes());
             response.getOutputStream().flush();
-        } catch (JSONException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             SecurityUtil.clearThreadLocal();

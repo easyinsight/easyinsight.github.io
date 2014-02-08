@@ -274,7 +274,7 @@
     </rule>
 
     <rule>
-        <from>/html/connection/([A-Za-z0-9]+)</from>
+        <from>/html/connections/([A-Za-z0-9]+)</from>
         <to>/html/connectionCreation.jsp?connectionID=$1</to>
     </rule>
 
