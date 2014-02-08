@@ -45,5 +45,6 @@ public class DashboardStackItem implements Cloneable, Serializable {
         insertStmt.setLong(2, dashboardElement.getElementID());
         insertStmt.setLong(3, dashboardGridID);
         insertStmt.execute();
+        insertStmt.close();
     }
 }

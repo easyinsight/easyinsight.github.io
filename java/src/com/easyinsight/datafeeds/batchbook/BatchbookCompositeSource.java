@@ -128,7 +128,7 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
         }
     }
 
-    protected void sortSources(List<IServerDataSourceDefinition> children) {
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
         Collections.sort(children, new Comparator<IServerDataSourceDefinition>() {
 
             public int compare(IServerDataSourceDefinition feedDefinition, IServerDataSourceDefinition feedDefinition1) {
@@ -138,6 +138,7 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
                 return 0;
             }
         });
+        return null;
     }
 
     private BatchbookCommunicationsCache batchbookCommunicationsCache;

@@ -45,37 +45,26 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         setFeedName("Tickets");
     }
 
-    @NotNull
-    @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(ID, DESCRIPTION, REQUESTER_NAME, DUE_BY, STATUS, PRIORITY, CREATED_AT, SOURCE_NAME, TRAINED, TICKET_TYPE,
-                URGENT, GROUP_ID, REQUESTER_STATUS, DELETED, ESCALATED, UPDATED_AT, OWNER_ID, RESPONDER_NAME, SPAM, COUNT);
-    }
-
-    @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
-        items.add(new AnalysisDimension(keys.get(ID), true));
-        items.add(new AnalysisText(keys.get(DESCRIPTION)));
-        items.add(new AnalysisDimension(keys.get(STATUS)));
-        items.add(new AnalysisDimension(keys.get(PRIORITY)));
-        items.add(new AnalysisDimension(keys.get(SOURCE_NAME)));
-        items.add(new AnalysisDimension(keys.get(TRAINED)));
-        items.add(new AnalysisDimension(keys.get(TICKET_TYPE)));
-        items.add(new AnalysisDimension(keys.get(URGENT)));
-        items.add(new AnalysisDimension(keys.get(GROUP_ID)));
-        items.add(new AnalysisDimension(keys.get(REQUESTER_NAME)));
-        items.add(new AnalysisDimension(keys.get(REQUESTER_STATUS)));
-        items.add(new AnalysisDimension(keys.get(DELETED)));
-        items.add(new AnalysisDimension(keys.get(ESCALATED)));
-        items.add(new AnalysisDimension(keys.get(OWNER_ID)));
-        items.add(new AnalysisDimension(keys.get(SPAM)));
-        items.add(new AnalysisDimension(keys.get(RESPONDER_NAME)));
-        items.add(new AnalysisDateDimension(keys.get(DUE_BY), true, AnalysisDateDimension.DAY_LEVEL));
-        items.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
-        items.add(new AnalysisDateDimension(keys.get(UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
-        items.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
-        return items;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(ID, new AnalysisDimension());
+        fieldBuilder.addField(DESCRIPTION, new AnalysisText());
+        fieldBuilder.addField(STATUS, new AnalysisDimension());
+        fieldBuilder.addField(PRIORITY, new AnalysisDimension());
+        fieldBuilder.addField(TRAINED, new AnalysisDimension());
+        fieldBuilder.addField(TICKET_TYPE, new AnalysisDimension());
+        fieldBuilder.addField(URGENT, new AnalysisDimension());
+        fieldBuilder.addField(GROUP_ID, new AnalysisDimension());
+        fieldBuilder.addField(REQUESTER_NAME, new AnalysisDimension());
+        fieldBuilder.addField(REQUESTER_STATUS, new AnalysisDimension());
+        fieldBuilder.addField(DELETED, new AnalysisDimension());
+        fieldBuilder.addField(ESCALATED, new AnalysisDimension());
+        fieldBuilder.addField(OWNER_ID, new AnalysisDimension());
+        fieldBuilder.addField(SPAM, new AnalysisDimension());
+        fieldBuilder.addField(RESPONDER_NAME, new AnalysisDimension());
+        fieldBuilder.addField(DUE_BY, new AnalysisDateDimension());
+        fieldBuilder.addField(CREATED_AT, new AnalysisDateDimension());
+        fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
+        fieldBuilder.addField(COUNT, new AnalysisMeasure());
     }
 
     @Override
@@ -107,21 +96,21 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
 
     private void createTicket(Map<String, Key> keys, Map map, String id, IRow row) {
         row.addValue(keys.get(ID), id);
-        row.addValue(keys.get(DESCRIPTION), getValue(map, "description"));
-        row.addValue(keys.get(REQUESTER_NAME), getValue(map, "requester_name"));
+        row.addValue(keys.get(DESCRIPTION), getJSONValue(map, "description"));
+        row.addValue(keys.get(REQUESTER_NAME), getJSONValue(map, "requester_name"));
         row.addValue(keys.get(DUE_BY), getDate(map, "due_by"));
-        row.addValue(keys.get(STATUS), getValue(map, "status_name"));
-        row.addValue(keys.get(PRIORITY), getValue(map, "priority_name"));
+        row.addValue(keys.get(STATUS), getJSONValue(map, "status_name"));
+        row.addValue(keys.get(PRIORITY), getJSONValue(map, "priority_name"));
         row.addValue(keys.get(CREATED_AT), getDate(map, "created_at"));
         row.addValue(keys.get(UPDATED_AT), getDate(map, "updated_at"));
-        row.addValue(keys.get(SOURCE_NAME), getValue(map, "source_name"));
-        row.addValue(keys.get(TRAINED), getValue(map, "trained"));
-        row.addValue(keys.get(TICKET_TYPE), getValue(map, "ticket_type"));
-        row.addValue(keys.get(GROUP_ID), getValue(map, "group_id"));
-        row.addValue(keys.get(REQUESTER_STATUS), getValue(map, "requester_status_name"));
-        row.addValue(keys.get(DELETED), getValue(map, "deleted"));
-        row.addValue(keys.get(OWNER_ID), getValue(map, "owner_id"));
-        row.addValue(keys.get(RESPONDER_NAME), getValue(map, "responder_name"));
+        row.addValue(keys.get(SOURCE_NAME), getJSONValue(map, "source_name"));
+        row.addValue(keys.get(TRAINED), getJSONValue(map, "trained"));
+        row.addValue(keys.get(TICKET_TYPE), getJSONValue(map, "ticket_type"));
+        row.addValue(keys.get(GROUP_ID), getJSONValue(map, "group_id"));
+        row.addValue(keys.get(REQUESTER_STATUS), getJSONValue(map, "requester_status_name"));
+        row.addValue(keys.get(DELETED), getJSONValue(map, "deleted"));
+        row.addValue(keys.get(OWNER_ID), getJSONValue(map, "owner_id"));
+        row.addValue(keys.get(RESPONDER_NAME), getJSONValue(map, "responder_name"));
         row.addValue(keys.get(SPAM), getValue(map, "spam"));
         row.addValue(keys.get(COUNT), 1);
     }

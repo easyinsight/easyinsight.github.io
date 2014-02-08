@@ -1,4 +1,4 @@
-package com.easyinsight.datafeeds.freshdesk;
+package com.easyinsight.datafeeds.pivotaltrackerv5;
 
 import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
@@ -7,11 +7,9 @@ import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import net.minidev.json.parser.JSONParser;
-import org.apache.commons.httpclient.Credentials;
+import nu.xom.Builder;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -22,33 +20,18 @@ import java.util.Map;
 
 /**
  * User: jamesboe
- * Date: 1/10/14
- * Time: 11:45 AM
+ * Date: 2/6/14
+ * Time: 4:47 PM
  */
-public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
-    protected static HttpClient getHttpClient(String username) {
-        HttpClient client = new HttpClient();
-        client.getParams().setAuthenticationPreemptive(true);
-        Credentials defaultcreds = new UsernamePasswordCredentials(username, "X");
-        client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
-        return client;
-    }
+public abstract class PivotalTrackerV5BaseSource extends ServerDataSourceDefinition {
 
-    protected static String getValue(Map n, String key) {
-        Object obj = n.get(key);
-        if(obj != null)
-            return obj.toString();
-        else
-            return null;
-    }
-
-    private transient DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+    private transient DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     protected Value getDate(Map n, String key) {
         if (df == null) {
-            df = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+            df = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
         }
-        String value = getValue(n, key);
+        String value = getJSONValue(n, key);
         if (value != null) {
             try {
                 Date date = df.parseDateTime(value).toDate();
@@ -60,16 +43,18 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
         return new EmptyValue();
     }
 
-    protected static Map runRestRequestForMap(String path, HttpClient client, FreshdeskCompositeSource parentDefinition) throws ReportException {
-        String url = parentDefinition.getUrl() + "/helpdesk/";
-        HttpMethod restMethod = new GetMethod(url + path);
+    public Map runRequest(String url, PivotalTrackerV5CompositeSource parentDefinition, HttpClient client) {
+
+        String target = "https://www.pivotaltracker.com/services/v5/" + url;
+        HttpMethod restMethod = new GetMethod(target);
         restMethod.setRequestHeader("Accept", "application/json");
         restMethod.setRequestHeader("Content-Type", "application/json");
+        restMethod.setRequestHeader("X-TrackerToken", parentDefinition.getToken());
 
         try {
             client.executeMethod(restMethod);
             if (restMethod.getStatusCode() == 404) {
-                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Freshdesk instance at " + url, parentDefinition));
+                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Pivotal Tracker instance at " + url, parentDefinition));
             } else if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
             }
@@ -81,21 +66,22 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    protected static List runRestRequestForList(String path, HttpClient client, FreshdeskCompositeSource parentDefinition) throws ReportException {
-        String url = parentDefinition.generateURL(parentDefinition.getUrl(), "freshdesk.com") + "/helpdesk/";
-        HttpMethod restMethod = new GetMethod(url + path);
+    public List<Map> runRequestForList(String url, PivotalTrackerV5CompositeSource parentDefinition, HttpClient client) {
+
+        String target = "https://www.pivotaltracker.com/services/v5/" + url;
+        HttpMethod restMethod = new GetMethod(target);
         restMethod.setRequestHeader("Accept", "application/json");
         restMethod.setRequestHeader("Content-Type", "application/json");
+        restMethod.setRequestHeader("X-TrackerToken", parentDefinition.getToken());
 
         try {
             client.executeMethod(restMethod);
             if (restMethod.getStatusCode() == 404) {
-                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Freshdesk instance at " + url, parentDefinition));
+                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Pivotal Tracker instance at " + url, parentDefinition));
             } else if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
             }
-            Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
-            return (List) o;
+            return (List) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {

@@ -53,6 +53,12 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private String token;
     private List<HighriseAdditionalToken> additionalTokens = new ArrayList<HighriseAdditionalToken>();
 
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Highrise URL", "url", "Your Highrise URL is the browser URL you normally use to connect to Highrise. For example, if you access Highrise as yourcompanyname.highrisehq.com, put yourcompanyname in as the Highrise URL.");
+        factory.addField("Highrise API Authentication Token:", "token", "You can find the token on your Highrise page under My Info - API Token.");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
+
     @Override
     public void beforeSave(EIConnection conn) throws Exception {
         super.beforeSave(conn);
@@ -74,7 +80,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         }
     }
 
-    protected void sortSources(List<IServerDataSourceDefinition> children) {
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
         Collections.sort(children, new Comparator<IServerDataSourceDefinition>() {
 
             public int compare(IServerDataSourceDefinition feedDefinition, IServerDataSourceDefinition feedDefinition1) {
@@ -87,6 +93,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 return 0;
             }
         });
+        return null;
     }
 
     public HighRiseCompositeSource() {

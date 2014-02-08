@@ -143,22 +143,26 @@ public class DashboardStack extends DashboardElement {
         long gridID = Database.instance().getAutoGenKey(insertStmt);
         int position = 0;
 
+        insertStmt.close();
+
         for (DashboardStackItem gridItem : gridItems) {
             gridItem.setPosition(position++);
             gridItem.save(conn, gridID);
         }
-        insertStmt.close();
+
         return id;
     }
 
     public static DashboardElement loadGrid(long elementID, EIConnection conn) throws SQLException {
         DashboardStack dashboardGrid = null;
+        long gridID = 0;
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_STACK_ID, STACK_SIZE, EFFECT, EFFECT_DURATION, STACK_CONTROL, CONSOLIDATE_HEADER_ELEMENTS, SELECTION_TYPE, STACK_FONT_SIZE FROM DASHBOARD_STACK WHERE DASHBOARD_ELEMENT_ID = ?");
         queryStmt.setLong(1, elementID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             dashboardGrid = new DashboardStack();
-            long gridID = rs.getLong(1);
+
+            gridID = rs.getLong(1);
             //dashboardGrid.setCount(rs.getInt(2));
             dashboardGrid.setEffectType(rs.getInt(3));
             dashboardGrid.setEffectDuration(rs.getInt(4));
@@ -167,6 +171,10 @@ public class DashboardStack extends DashboardElement {
             dashboardGrid.setSelectionType(rs.getString(7));
             dashboardGrid.setStackFontSize(rs.getInt(8));
             dashboardGrid.loadElement(elementID, conn);
+        } else {
+        }
+        queryStmt.close();
+        if (dashboardGrid != null) {
             PreparedStatement gridItemStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, DASHBOARD_ELEMENT.element_type, " +
                     "ITEM_POSITION FROM DASHBOARD_STACK_ITEM, DASHBOARD_ELEMENT WHERE DASHBOARD_STACK_ID = ? AND DASHBOARD_STACK_ITEM.dashboard_element_id = dashboard_element.dashboard_element_id");
             gridItemStmt.setLong(1, gridID);
@@ -209,7 +217,7 @@ public class DashboardStack extends DashboardElement {
             }
             dashboardGrid.setFilters(filters);
             PreparedStatement filterSetStmt = conn.prepareStatement("SELECT filter_set.filter_set_id, filter_set.filter_set_name FROM dashboard_element_to_filter_set, filter_set " +
-                    "WHERE dashboard_element_id = ? AND dashboard_element_to_filter_set.filter_set_id = filter_set.filter_set_id");
+                    "WHERE dashboard_element_id = ? AND dashboard_element_to_filter_set.filter_set_id = filter_set.filter_set_id order by dashboard_element_to_filter_set.position_index");
             filterSetStmt.setLong(1, elementID);
             ResultSet filterSetRS = filterSetStmt.executeQuery();
             List<FilterSetDescriptor> filterSetDescriptors = new ArrayList<FilterSetDescriptor>();
@@ -238,7 +246,6 @@ public class DashboardStack extends DashboardElement {
                 LogClass.error(e);
             }
         }
-        queryStmt.close();
         return dashboardGrid;
     }
 

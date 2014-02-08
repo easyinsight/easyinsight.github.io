@@ -19,11 +19,9 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.Date;
 
 import com.easyinsight.util.ServiceUtil;
 import org.hibernate.Session;
@@ -40,6 +38,121 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     private String username;
     private String password;
     private String sessionId;
+
+    private List<CompositeFeedConnection> addonConnections;
+
+    @Override
+    public void customStorage(Connection conn) throws SQLException {
+        super.customStorage(conn);
+        PreparedStatement dStmt = conn.prepareStatement("DELETE FROM data_source_additional_connection WHERE data_source_id = ?");
+        dStmt.setLong(1, getDataFeedID());
+        dStmt.executeUpdate();
+        dStmt.close();
+        if (addonConnections != null) {
+            PreparedStatement iStmt = conn.prepareStatement("INSERT INTO data_source_additional_connection (data_source_id, connection_id) values (?, ?)");
+            for (CompositeFeedConnection connection : addonConnections) {
+                iStmt.setLong(1, getDataFeedID());
+                iStmt.setLong(2, connection.store(conn, 0));
+                iStmt.execute();
+            }
+            iStmt.close();
+        }
+    }
+
+    @Override
+    public void customLoad(Connection conn) throws SQLException {
+        super.customLoad(conn);
+        PreparedStatement qStmt = conn.prepareStatement("SELECT connection_id FROM data_source_additional_connection WHERE data_source_id = ?");
+        qStmt.setLong(1, getDataFeedID());
+        ResultSet rs = qStmt.executeQuery();
+        List<CompositeFeedConnection> edges = new ArrayList<CompositeFeedConnection>();
+        PreparedStatement queryConnStmt = conn.prepareStatement("SELECT SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID," +
+                "SOURCE_JOIN, TARGET_JOIN, SOURCE_ITEM_ID, TARGET_ITEM_ID, left_join, right_join, left_join_on_original, right_join_on_original, marmot_script, SOURCE_REPORT_ID, TARGET_REPORT_ID " +
+                " FROM COMPOSITE_CONNECTION WHERE COMPOSITE_CONNECTION_ID = ?");
+        PreparedStatement nameStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+        PreparedStatement reportNameStmt = conn.prepareStatement("SELECT TITLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+        while (rs.next()) {
+            long connectionID = rs.getLong(1);
+
+            queryConnStmt.setLong(1, connectionID);
+
+            ResultSet connectionRS = queryConnStmt.executeQuery();
+            while (connectionRS.next()) {
+                long sourceID = connectionRS.getLong(1);
+                long targetID = connectionRS.getLong(2);
+                long sourceReportID = connectionRS.getLong(12);
+                long targetReportID = connectionRS.getLong(13);
+                String sourceName;
+                String targetName;
+                if (sourceID > 0) {
+                    nameStmt.setLong(1, sourceID);
+                    ResultSet nameRS = nameStmt.executeQuery();
+                    nameRS.next();
+
+                    sourceName = nameRS.getString(1);
+                } else {
+                    reportNameStmt.setLong(1, sourceReportID);
+                    ResultSet nameRS = reportNameStmt.executeQuery();
+                    nameRS.next();
+                    sourceName = nameRS.getString(1);
+                }
+
+                if (targetID > 0) {
+                    nameStmt.setLong(1, targetID);
+                    ResultSet nameRS = nameStmt.executeQuery();
+                    nameRS.next();
+
+                    targetName = nameRS.getString(1);
+                } else {
+                    reportNameStmt.setLong(1, targetReportID);
+                    ResultSet nameRS = reportNameStmt.executeQuery();
+                    nameRS.next();
+                    targetName = nameRS.getString(1);
+                }
+
+                long sourceKeyID = connectionRS.getLong(3);
+                if (connectionRS.wasNull()) {
+                    AnalysisItem sourceItem = getItem(conn, connectionRS.getLong(5));
+                    AnalysisItem targetItem = getItem(conn, connectionRS.getLong(6));
+                    boolean sourceJoin = connectionRS.getBoolean(7);
+                    boolean targetJoin = connectionRS.getBoolean(8);
+                    boolean sourceJoinOnOriginal = connectionRS.getBoolean(9);
+                    boolean targetJoinOnOriginal = connectionRS.getBoolean(10);
+                    String marmotScript = connectionRS.getString(11);
+                    CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(sourceID, targetID, sourceItem, targetItem, sourceName, targetName,
+                            sourceJoin, targetJoin, sourceJoinOnOriginal, targetJoinOnOriginal, marmotScript);
+                    compositeFeedConnection.setSourceReportID(sourceReportID);
+                    compositeFeedConnection.setTargetReportID(targetReportID);
+                    edges.add(compositeFeedConnection);
+                } else {
+                    Key sourceKey = getKey(conn, sourceKeyID);
+                    Key targetKey = getKey(conn, connectionRS.getLong(4));
+                    boolean sourceJoin = connectionRS.getBoolean(7);
+                    boolean targetJoin = connectionRS.getBoolean(8);
+                    boolean sourceJoinOnOriginal = connectionRS.getBoolean(9);
+                    boolean targetJoinOnOriginal = connectionRS.getBoolean(10);
+                    String marmotScript = connectionRS.getString(11);
+                    CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(sourceID, targetID, sourceKey, targetKey, sourceName, targetName,
+                            sourceJoin, targetJoin, sourceJoinOnOriginal, targetJoinOnOriginal, marmotScript);
+                    compositeFeedConnection.setSourceReportID(sourceReportID);
+                    compositeFeedConnection.setTargetReportID(targetReportID);
+                    edges.add(compositeFeedConnection);
+                }
+            }
+        }
+        queryConnStmt.close();
+        nameStmt.close();
+        reportNameStmt.close();
+        addonConnections = edges;
+    }
+
+    public List<CompositeFeedConnection> getAddonConnections() {
+        return addonConnections;
+    }
+
+    public void setAddonConnections(List<CompositeFeedConnection> addonConnections) {
+        this.addonConnections = addonConnections;
+    }
 
     public boolean hasNewData(Date lastRefreshDate, FeedDefinition parent, EIConnection conn) throws Exception {
         List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn);
@@ -120,8 +233,11 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 populateFields(conn);
             }
         }
-        sortSources(dataSources);
-        return dataSources;
+        List<IServerDataSourceDefinition> s = sortSources(dataSources);
+        if (s == null) {
+            s = dataSources;
+        }
+        return s;
     }
 
     protected List<IServerDataSourceDefinition> childDataSources(EIConnection conn) throws Exception {
@@ -158,8 +274,8 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return dataSources;
     }
 
-    protected void sortSources(List<IServerDataSourceDefinition> children) {
-
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
+        return null;
     }
 
     public List<CompositeFeedConnection> obtainChildConnections() throws SQLException {
@@ -179,6 +295,10 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             }
         }
         connections.addAll(getAdditionalConnections());
+        if (addonConnections != null) {
+            connections.addAll(addonConnections);
+        }
+
         return connections;
     }
 

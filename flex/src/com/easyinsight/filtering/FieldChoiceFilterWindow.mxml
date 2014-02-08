@@ -48,6 +48,18 @@
 
         private var _report:AnalysisDefinition;
 
+        private var _filterSet:FilterSet;
+
+        [Bindable(event="filterSetChanged")]
+        public function get filterSet():FilterSet {
+            return _filterSet;
+        }
+
+        public function set filterSet(value:FilterSet):void {
+            if (_filterSet == value) return;
+            _filterSet = value;
+            dispatchEvent(new Event("filterSetChanged"));
+        }
 
         [Bindable(event="reportChanged")]
         public function get report():AnalysisDefinition {
@@ -87,7 +99,7 @@
         ]]></mx:Script>
     <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <filtering:SingleFieldPickWindow filterValueDefinition="{embeddedFilter}"
-                id="mvWindow" typeChangeAllowed="false" otherFilters="{otherFilters}" report="{report}" dashboard="{dashboard}"/>
+                id="mvWindow" typeChangeAllowed="false" otherFilters="{otherFilters}" report="{report}" dashboard="{dashboard}" filterSet="{filterSet}"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <util:SaveButton label="Save" click="save()"/>
             <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

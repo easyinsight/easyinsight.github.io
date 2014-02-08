@@ -2,14 +2,11 @@ package com.easyinsight.datafeeds.zendesk;
 
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.analysis.*;
-import com.easyinsight.datafeeds.DataSourceCloneResult;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
-import com.easyinsight.kpi.KPI;
-import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.users.Account;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
@@ -101,7 +98,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         return types;
     }
 
-    protected void sortSources(List<IServerDataSourceDefinition> children) {
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
         Collections.sort(children, new Comparator<IServerDataSourceDefinition>() {
 
             public int compare(IServerDataSourceDefinition feedDefinition, IServerDataSourceDefinition feedDefinition1) {
@@ -111,6 +108,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
                 return 0;
             }
         });
+        return null;
     }
 
     @Override

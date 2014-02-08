@@ -273,6 +273,16 @@
         <to>/json/addRows?dataSourceID=$1</to>
     </rule>
 
+    <rule>
+        <from>/html/connections/([A-Za-z0-9]+)</from>
+        <to>/html/connectionCreation.jsp?connectionID=$1</to>
+    </rule>
+
+    <rule>
+        <from>/html/dataSources/([A-Za-z0-9]+)/createConnection</from>
+        <to>/html/connectionCreating.jsp?dataSourceID=$1</to>
+    </rule>
+
     <!--<rule>
         <from>/json/reports/([0-9]+)</from>
         <to>/json/RunReport?reportID=$1</to>

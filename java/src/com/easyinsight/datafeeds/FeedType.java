@@ -245,6 +245,13 @@ public class FeedType implements Serializable {
     public static final FeedType KASHOO_ACCOUNTS = new FeedType(216);
     public static final FeedType SMARTSHEET_TABLE = new FeedType(217);
     public static final FeedType SOLVE360_COMPANIES = new FeedType(218);
+    public static final FeedType PIVOTAL_V5_COMPOSITE = new FeedType(219);
+    public static final FeedType PIVOTAL_V5_PROJECT = new FeedType(220);
+    public static final FeedType PIVOTAL_V5_EPIC = new FeedType(221);
+    public static final FeedType PIVOTAL_V5_STORY = new FeedType(222);
+    public static final FeedType PIVOTAL_V5_LABEL = new FeedType(223);
+    public static final FeedType PIVOTAL_V5_ITERATION = new FeedType(224);
+    public static final FeedType PIVOTAL_V5_STORY_TO_LABEL = new FeedType(225);
 
     public FeedType() {
     }

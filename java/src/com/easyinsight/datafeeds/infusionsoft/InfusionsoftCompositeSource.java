@@ -46,7 +46,18 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
     }
 
     public String getUrl() {
-        return url;
+        if (url == null || "".equals(url)) {
+            return url;
+        }
+        String basecampUrl = ((url.startsWith("http://") || url.startsWith("https://")) ? "" : "https://") + url;
+        basecampUrl = basecampUrl.replaceFirst("^http://", "https://");
+        if(basecampUrl.endsWith("/")) {
+            basecampUrl = basecampUrl.substring(0, basecampUrl.length() - 1);
+        }
+        if (!basecampUrl.contains(".")) {
+            basecampUrl = basecampUrl + ".infusionsoft.com";
+        }
+        return basecampUrl;
     }
 
     public void setUrl(String url) {
@@ -147,8 +158,12 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
     protected Collection<ChildConnection> getChildConnections() {
         List<ChildConnection> connections = new ArrayList<ChildConnection>();
 
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_COMPANIES, InfusionsoftContactSource.COMPANY_ID, InfusionsoftCompanySource.ID));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_AFFILIATES, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftAffiliateSource.CONTACT_ID, InfusionsoftContactSource.ID));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_AFFILIATES, FeedType.INFUSIONSOFT_REFERRAL, InfusionsoftAffiliateSource.AFFILIATE_ID, InfusionsoftReferralSource.AFFILIATE_ID));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_REFERRAL, InfusionsoftContactSource.ID, InfusionsoftReferralSource.CONTACT_ID));
+
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_COMPANIES, InfusionsoftContactSource.COMPANY_ID, InfusionsoftCompanySource.ID));
+
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_EXPENSES, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftExpenseSource.CONTACT_ID, InfusionsoftContactSource.ID));
 
         // ecommerce
@@ -164,9 +179,13 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_AFFILIATES, InfusionsoftLeadSource.AFFILIATE_ID, InfusionsoftAffiliateSource.AFFILIATE_ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftLeadSource.CONTACT_ID, InfusionsoftContactSource.ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_LEAD_SOURCE, InfusionsoftContactSource.LEAD_SOURCE_ID, InfusionsoftLeadSourceSource.ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_LEAD_SOURCE, InfusionsoftLeadSource.LEAD_SOURCE, InfusionsoftLeadSourceSource.ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_STAGE, InfusionsoftLeadSource.STAGE_ID, InfusionsoftStageSource.STAGE_ID, IJoin.ONE, IJoin.ONE));
 
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_CONTACT_TO_TAG, InfusionsoftContactSource.ID, InfusionsoftContactToTag.CONTACT_ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACT_TO_TAG, FeedType.INFUSIONSOFT_TAG, InfusionsoftContactToTag.GROUP_ID, InfusionsoftTagSource.ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_TAG, FeedType.INFUSIONSOFT_TAG_GROUP, InfusionsoftTagSource.TAG_CATEGORY_ID, InfusionsoftContactGroupCategorySource.ID, IJoin.ONE, IJoin.ONE));
 
         return connections;
     }

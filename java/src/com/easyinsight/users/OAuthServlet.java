@@ -4,28 +4,10 @@ import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
+import com.easyinsight.html.RedirectUtil;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.security.SecurityUtil;
-import com.google.gdata.client.Query;
-import com.google.gdata.client.appsforyourdomain.*;
-import com.google.gdata.client.appsforyourdomain.UserService;
-import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
-import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
-import com.google.gdata.client.authn.oauth.OAuthParameters;
-import com.google.gdata.client.authn.oauth.OAuthSigner;
-import com.google.gdata.data.appsforyourdomain.Login;
-import com.google.gdata.data.appsforyourdomain.Name;
-import com.google.gdata.data.appsforyourdomain.provisioning.UserEntry;
-import com.google.gdata.data.appsforyourdomain.provisioning.UserFeed;
-import com.google.gdata.util.XmlBlob;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -34,9 +16,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -141,6 +120,8 @@ public class OAuthServlet extends HttpServlet {
                         } else {
                             redirectURL = "https://staging.easy-insight.com/app/#connectionConfig=" + feedDefinition.getApiKey();
                         }
+                    } else if (redirectType == TokenService.HTML_SETUP) {
+                        redirectURL = RedirectUtil.getURL(req, "/app/html/dataSources/"+ feedDefinition.getApiKey() + "/createConnection");
                     } else {
                         redirectURL = "https://www.easy-insight.com/app/";
                     }
@@ -158,9 +139,5 @@ public class OAuthServlet extends HttpServlet {
             LogClass.error(e);
             resp.sendError(500);
         }
-    }
-
-    public static void main(String[] args) throws UnsupportedEncodingException {
-        System.out.println(URLEncoder.encode("lBDyXPYoWmwN+frEa8KexO9lALDFPGZSNYBQ4tPbwspkRiqcGbwN53hWfiNp8FFdPIao6JDlYBW0gNiKIviktA==", "UTF-8"));
     }
 }

@@ -2,6 +2,7 @@ package com.easyinsight.html;
 
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedService;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.userupload.UserUploadService;
@@ -24,7 +25,8 @@ public class CompleteInstallationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
         SecurityUtil.populateThreadLocalFromSession(req);
         try {
-            long dataSourceID = Long.parseLong(req.getParameter("dataSourceID"));
+            String dataSourceKey = req.getParameter("dataSourceID");
+            long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
             FeedDefinition dataSource = new FeedService().getFeedDefinition(dataSourceID);
             CredentialsResponse credentialsResponse = new UserUploadService().completeInstallation(dataSource);
             String callDataID = credentialsResponse.getCallDataID();
@@ -33,7 +35,7 @@ public class CompleteInstallationServlet extends HttpServlet {
             response.setContentType("application/json");
             response.getOutputStream().write(jsonObject.toString().getBytes());
             response.getOutputStream().flush();
-        } catch (JSONException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             SecurityUtil.clearThreadLocal();

@@ -86,7 +86,7 @@
         <util:SaveButton label="Add Filter Set..." click="addReport()" fontSize="12"/>
         <util:SaveButton label="Delete Selected" click="deleteSelected()" fontSize="12"/>
     </mx:HBox>
-    <mx:DataGrid dataProvider="{filterSets}">
+    <mx:DataGrid dataProvider="{filterSets}" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true">
         <mx:columns>
             <mx:DataGridColumn headerText="" itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" sortable="false" fontSize="12"/>
             <mx:DataGridColumn headerText="Filter Set" dataField="name" width="300" fontSize="12"/>

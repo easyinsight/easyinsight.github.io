@@ -6,6 +6,7 @@ import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.solutions.SolutionInstallInfo;
 import com.easyinsight.storage.IDataStorage;
+import com.easyinsight.users.Account;
 import com.easyinsight.users.SuggestedUser;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.analysis.AnalysisItem;
@@ -26,6 +27,8 @@ import java.io.Serializable;
 
 import nu.xom.Attribute;
 import nu.xom.Element;
+import nu.xom.Node;
+import nu.xom.Nodes;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,6 +75,10 @@ public class FeedDefinition implements Cloneable, Serializable {
     private long defaultFieldTag;
     private boolean manualReportRun;
     private boolean showTags;
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+
+    }
 
     public boolean isShowTags() {
         return showTags;
@@ -254,7 +261,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public int getRequiredAccountTier() {
-        throw new UnsupportedOperationException();
+        return Account.BASIC;
     }
 
     public boolean isAccountVisible() {
@@ -435,6 +442,14 @@ public class FeedDefinition implements Cloneable, Serializable {
         return feed;
     }
 
+    public List<AnalysisItem> allFields(EIConnection conn) {
+        List<AnalysisItem> fields = new ArrayList<AnalysisItem>(getFields());
+        List<AnalysisItem> kpis = new ArrayList<AnalysisItem>();
+        loadKPIs(kpis, conn);
+        fields.addAll(kpis);
+        return fields;
+    }
+
     protected void loadKPIs(List<AnalysisItem> kpis, EIConnection conn) {
         Session session = Database.instance().createSession(conn);
         try {
@@ -451,12 +466,9 @@ public class FeedDefinition implements Cloneable, Serializable {
                 ResultSet fieldRS = fieldStmt.executeQuery();
                 while (fieldRS.next()) {
                     long fieldID = fieldRS.getLong(1);
-                    // get field
-
-                        AnalysisItem analysisItem = (AnalysisItem) session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, fieldID).list().get(0);
-                        analysisItem.afterLoad();
-                        kpis.add(analysisItem);
-
+                    AnalysisItem analysisItem = (AnalysisItem) session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, fieldID).list().get(0);
+                    analysisItem.afterLoad();
+                    kpis.add(analysisItem);
                 }
             }
             queryStmt.close();
@@ -529,6 +541,10 @@ public class FeedDefinition implements Cloneable, Serializable {
             }
             feedNodes.add(folderNode);
         }
+    }
+
+    public void decorateFields(List<AnalysisItem> fields, EIConnection conn) throws SQLException {
+
     }
 
     private void populateFeedFields(Feed feed, List<AnalysisItem> kpis) {
@@ -772,7 +788,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public String validateCredentials() {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Nullable
@@ -780,8 +796,12 @@ public class FeedDefinition implements Cloneable, Serializable {
         return null;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
+    public List<AnalysisItem> createAnalysisItemsNew(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         throw new UnsupportedOperationException();
+    }
+
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
+        return createAnalysisItemsNew(keys, conn, parentDefinition);
     }
 
     public Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition) {
@@ -945,5 +965,36 @@ public class FeedDefinition implements Cloneable, Serializable {
         Set<DataSourceDescriptor> dataSources = new HashSet<DataSourceDescriptor>();
         dataSources.add(new DataSourceDescriptor(getFeedName(), getDataFeedID(), getDataSourceType(), isAccountVisible(), getDataSourceBehavior()));
         return dataSources;
+    }
+
+    protected static String getJSONValue(Map n, String key) {
+        Object obj = n.get(key);
+        if(obj != null)
+            return obj.toString();
+        else
+            return null;
+    }
+
+    protected static String getXMLValue(Node n, String xpath) {
+        Nodes results = n.query(xpath);
+        if (results.size() > 0)
+            return results.get(0).getValue();
+        else
+            return null;
+    }
+
+    public String generateURL(String url, String end) {
+        if (url == null || "".equals(url)) {
+            return url;
+        }
+        String basecampUrl = ((url.startsWith("http://") || url.startsWith("https://")) ? "" : "https://") + url;
+        basecampUrl = basecampUrl.replaceFirst("^http://", "https://");
+        if(basecampUrl.endsWith("/")) {
+            basecampUrl = basecampUrl.substring(0, basecampUrl.length() - 1);
+        }
+        if (!basecampUrl.contains(".")) {
+            basecampUrl = basecampUrl + "." + end;
+        }
+        return basecampUrl;
     }
 }
