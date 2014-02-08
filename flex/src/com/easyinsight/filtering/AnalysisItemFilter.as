@@ -33,6 +33,7 @@ public class AnalysisItemFilter extends HBox implements IFilter {
     private var _filterEnabled:Boolean;
 
 
+    private var _filterSet:FilterSet;
     private var _report:AnalysisDefinition;
     private var _dashboard:Dashboard;
 
@@ -58,6 +59,7 @@ public class AnalysisItemFilter extends HBox implements IFilter {
         this._analysisItem = analysisItem;
         this._retrievalState = retrievalState;
         this.filterMetadata = filterMetadata;
+        _filterSet = filterMetadata.filterSet;
         this._report = report;
         this._dashboard = dashboard;
         setStyle("verticalAlign", "middle");
@@ -179,6 +181,7 @@ public class AnalysisItemFilter extends HBox implements IFilter {
         window.embeddedFilter = _filterDefinition;
         window.dataSourceID = _feedID;
         window.report = _report;
+        window.filterSet = _filterSet;
         window.dashboard = _dashboard;
         window.addEventListener("updated", onUpdated, false, 0, true);
         PopUpManager.addPopUp(window, this, true);

@@ -9,11 +9,8 @@ import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
-import flash.net.SharedObject;
 
 import mx.collections.ArrayCollection;
-import mx.containers.HBox;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.Label;
@@ -21,7 +18,7 @@ import mx.controls.LinkButton;
 import mx.core.UIComponent;
 import mx.managers.PopUpManager;
 
-public class NewMultiValueFilter extends HBox implements IFilter {
+public class NewMultiValueFilter extends UIComponent implements IFilter {
     private var _filterDefinition:FilterValueDefinition;
     private var _analysisItem:AnalysisItem;
     private var _feedID:int;
@@ -59,8 +56,7 @@ public class NewMultiValueFilter extends HBox implements IFilter {
         this.filterMetadata = filterMetadata;
         filterValues = new Button();
         filterValues.styleName = "multiFilterButton";
-        setStyle("verticalAlign", "middle");
-
+        this.height = 23;
     }
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -124,6 +120,39 @@ public class NewMultiValueFilter extends HBox implements IFilter {
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
 
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        var xPos:int = 0;
+        if (checkbox) {
+            xPos += checkbox.measuredWidth + 8;
+            checkbox.y = (this.height - checkbox.height) / 2;
+            checkbox.setActualSize(checkbox.measuredWidth, checkbox.measuredHeight);
+        }
+        if (labelText) {
+            labelText.x = xPos;
+            labelText.y = (this.height - labelText.height) / 2;
+            labelText.setActualSize(labelText.measuredWidth, labelText.measuredHeight);
+            xPos += labelText.measuredWidth + 3;
+        }
+        if (filterValues) {
+            filterValues.x = xPos;
+            filterValues.y = (this.height - filterValues.height) / 2;
+            filterValues.setActualSize(filterValues.measuredWidth, filterValues.measuredHeight);
+            xPos += filterValues.measuredWidth;
+        }
+        if (deleteButton) {
+            xPos += 8;
+            deleteButton.x = xPos;
+            deleteButton.y = (this.height - deleteButton.height) / 2;
+            deleteButton.setActualSize(deleteButton.measuredWidth, deleteButton.measuredHeight);
+            xPos += deleteButton.measuredWidth;
+        }
+        this.width = xPos;
+    }
+
+    private var checkbox:CheckBox;
+    private var labelText:UIComponent;
+
     override protected function createChildren():void {
         super.createChildren();
         this.setStyle("horizontalGap", 2);
@@ -138,7 +167,7 @@ public class NewMultiValueFilter extends HBox implements IFilter {
         }
 
         if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
-            var checkbox:CheckBox = new CheckBox();
+            checkbox = new CheckBox();
             checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
             checkbox.toolTip = "Click to disable this filter.";
             checkbox.addEventListener(Event.CHANGE, onChange);
@@ -146,7 +175,7 @@ public class NewMultiValueFilter extends HBox implements IFilter {
         }
 
 
-        var labelText:UIComponent;
+
         if (_filterEditable) {
             labelText = new LinkButton();
             labelText.addEventListener(MouseEvent.CLICK, edit);
