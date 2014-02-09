@@ -137,15 +137,19 @@ public class SliderMeasureFilter extends HBox implements IFilter
         var measureFilter:FilterRangeDefinition = event.filterDefinition as FilterRangeDefinition;
         if (measureFilter.startValueDefined) {
             var lowString:String;
-            if (measureFilter.field.formattingType == FormattingConfiguration.MILLISECONDS) {
-                var hours:int = _filterDefinition.startValue / 60 / 60 / 1000;
-                if (hours >= 24) {
-                    lowString = String(hours / 24) + " days";
-                } else {
-                    lowString = String(hours) + " hours";
-                }
+            if (!measureFilter.showSlider) {
+                lowString = String(_filterDefinition.startValue);
             } else {
-                lowString =  _filterDefinition.field.getFormatter().format(_filterDefinition.startValue);
+                if (measureFilter.field.formattingType == FormattingConfiguration.MILLISECONDS) {
+                    var hours:int = _filterDefinition.startValue / 60 / 60 / 1000;
+                    if (hours >= 24) {
+                        lowString = String(hours / 24) + " days";
+                    } else {
+                        lowString = String(hours) + " hours";
+                    }
+                } else {
+                    lowString =  _filterDefinition.field.getFormatter().format(_filterDefinition.startValue);
+                }
             }
             lowValueString = lowString;
         } else {
@@ -153,15 +157,19 @@ public class SliderMeasureFilter extends HBox implements IFilter
         }
         if (measureFilter.endValueDefined) {
             var highString:String;
-            if (measureFilter.field.formattingType == FormattingConfiguration.MILLISECONDS) {
-                var highHours:int = _filterDefinition.endValue / 60 / 60 / 1000;
-                if (highHours >= 24) {
-                    highString = String(highHours / 24) + " days";
-                } else {
-                    highString = String(highHours) + " hours";
-                }
+            if (!measureFilter.showSlider) {
+                highString = String(_filterDefinition.endValue);
             } else {
-                highString =  _filterDefinition.field.getFormatter().format(_filterDefinition.endValue);
+                if (measureFilter.field.formattingType == FormattingConfiguration.MILLISECONDS) {
+                    var highHours:int = _filterDefinition.endValue / 60 / 60 / 1000;
+                    if (highHours >= 24) {
+                        highString = String(highHours / 24) + " days";
+                    } else {
+                        highString = String(highHours) + " hours";
+                    }
+                } else {
+                    highString =  _filterDefinition.field.getFormatter().format(_filterDefinition.endValue);
+                }
             }
             highValueString = highString;
         } else {
@@ -308,7 +316,12 @@ public class SliderMeasureFilter extends HBox implements IFilter
                     var leftLabel:TextInput = new TextInput();
                     leftInput = leftLabel;
                     leftInput.addEventListener(Event.CHANGE, onInputChange);
-                    leftLabel.text = f.format(_filterDefinition.startValue);
+                    if (!_filterDefinition.showSlider) {
+                        leftLabel.text = String(_filterDefinition.startValue);
+                    } else {
+                        leftLabel.text = f.format(_filterDefinition.startValue);
+                    }
+
                     addChild(leftLabel);
                 }
                 if (_filterDefinition.showSlider) {
@@ -328,7 +341,11 @@ public class SliderMeasureFilter extends HBox implements IFilter
                     var rightLabel:TextInput = new TextInput();
                     rightInput = rightLabel;
                     rightInput.addEventListener(Event.CHANGE, onInputChange);
-                    rightLabel.text = f.format(_filterDefinition.endValue);
+                    if (!_filterDefinition.showSlider) {
+                        rightLabel.text = String(_filterDefinition.endValue);
+                    } else {
+                        rightLabel.text = f.format(_filterDefinition.endValue);
+                    }
                     addChild(rightLabel);    
                 }
             }
@@ -346,29 +363,37 @@ public class SliderMeasureFilter extends HBox implements IFilter
         } else {
             if (_filterDefinition.startValueDefined) {
                 var lowString:String;
-                if (_filterDefinition.field.formattingType == FormattingConfiguration.MILLISECONDS) {
-                    var hours:int = _filterDefinition.startValue / 60 / 60 / 1000;
-                    if (hours >= 24) {
-                        lowString = String(hours / 24) + " days";
-                    } else {
-                        lowString = String(hours) + " hours";
-                    }
+                if (!_filterDefinition.showSlider) {
+                    lowString = String(_filterDefinition.startValue);
                 } else {
-                    lowString =  _filterDefinition.field.getFormatter().format(_filterDefinition.startValue);
+                    if (_filterDefinition.field.formattingType == FormattingConfiguration.MILLISECONDS) {
+                        var hours:int = _filterDefinition.startValue / 60 / 60 / 1000;
+                        if (hours >= 24) {
+                            lowString = String(hours / 24) + " days";
+                        } else {
+                            lowString = String(hours) + " hours";
+                        }
+                    } else {
+                        lowString =  _filterDefinition.field.getFormatter().format(_filterDefinition.startValue);
+                    }
                 }
                 lowValueString = lowString;
             }
             if (_filterDefinition.endValueDefined) {
                 var highString:String;
-                if (_filterDefinition.field.formattingType == FormattingConfiguration.MILLISECONDS) {
-                    var highHours:int = _filterDefinition.endValue / 60 / 60 / 1000;
-                    if (highHours >= 24) {
-                        highString = String(highHours / 24) + " days";
-                    } else {
-                        highString = String(highHours) + " hours";
-                    }
+                if (!_filterDefinition.showSlider) {
+                    highString = String(_filterDefinition.endValue);
                 } else {
-                    highString =  _filterDefinition.field.getFormatter().format(_filterDefinition.endValue);
+                    if (_filterDefinition.field.formattingType == FormattingConfiguration.MILLISECONDS) {
+                        var highHours:int = _filterDefinition.endValue / 60 / 60 / 1000;
+                        if (highHours >= 24) {
+                            highString = String(highHours / 24) + " days";
+                        } else {
+                            highString = String(highHours) + " hours";
+                        }
+                    } else {
+                        highString =  _filterDefinition.field.getFormatter().format(_filterDefinition.endValue);
+                    }
                 }
                 highValueString = highString;
             }

@@ -64,6 +64,7 @@ public class EIAdminServlet extends HttpServlet {
                 resp.getOutputStream().flush();
             } else {
                 JSONArray jsonArray = new JSONArray();
+                long cutoff = System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 3);
                 try {
                     SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
                             userResponse.getAccountType(), userResponse.isAccountAdmin(), userResponse.getFirstDayOfWeek(), userResponse.getPersonaName());
@@ -81,12 +82,13 @@ public class EIAdminServlet extends HttpServlet {
                             obj.put("CreationDate", dateFormat.format(accountCreationDate));
                         }
                         Date lastLoginDate = account.getLastUserLoginDate();
-                        if (lastLoginDate == null) {
+                        /*if (lastLoginDate == null) {
                             obj.put("LastLoginDate", dateFormat.format(new Date(1)));
-                        } else {
+                        } else {*/
+                        if (lastLoginDate != null && lastLoginDate.getTime() > cutoff) {
                             obj.put("LastLoginDate", dateFormat.format(lastLoginDate));
+                            jsonArray.put(obj);
                         }
-                        jsonArray.put(obj);
                     }
                     resp.setContentType("application/json");
                     resp.setStatus(200);

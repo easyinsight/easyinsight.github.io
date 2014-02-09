@@ -20,6 +20,7 @@
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.FilterDefinition;
+        import com.easyinsight.filtering.NewFilterWindow;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -115,6 +116,7 @@
             _dashboardID = value;
         }
 
+        [Bindable]
         private var _dashboard:Dashboard;
 
         public function set dashboard(value:Dashboard):void {
@@ -220,6 +222,7 @@
             rootView = box;
             dashboardCanvas.addChild(box);
             _dashboard = new Dashboard();
+            _dashboard.dataSourceID = _startDataSourceID;
             metadata.dashboard = _dashboard;
             dataSourceID = _startDataSourceID;
             saveEnabled = true;
@@ -610,10 +613,10 @@
                 <mx:Button icon="@Embed(source='../../../../assets/funnel.png')"
                            toolTip="Create New Filter..." click="transformContainer.addNewFilter()" label="New Filter"/>
                 <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
-                                              borderStyle="solid"
+                                              borderStyle="solid" dashboard="{_dashboard}"
                                               borderThickness="1" backgroundColor="#ffffff"
                                               backgroundAlpha=".1" feedID="{dataSourceID}"
-                                              analysisItems="{allFields}"
+                                              analysisItems="{allFields}" filterSource="{NewFilterWindow.DASHBOARD_LEVEL}"
                                               updatedTransforms="transformsUpdated(event)" context="{TransformContainer.DASHBOARD_EDITOR}"/>
             </mx:HBox>
             <mx:Canvas width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">

@@ -296,7 +296,11 @@ public class JSONDataSource extends ServerDataSourceDefinition {
             }
         }
         JSONSetup jsonSetup = new JSONSetup();
-        jsonSetup.setResult(responseBody);
+        if (responseBody.length() > 100000) {
+            jsonSetup.setResult("Result too large to display.");
+        } else {
+            jsonSetup.setResult(responseBody);
+        }
         jsonSetup.setResults(pages);
         jsonSetup.setFields(fieldNames);
         jsonSetup.setFieldLine(responseLine);

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:UIComponent xmlns:mx="http://www.adobe.com/2006/mxml" implements="IEasyInsightComponent">
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.schedule.ScheduleManagement;
+
+        import mx.controls.Alert;
+        import mx.core.UIComponent;
+
+
+        public function childSetup():void {
+        }
+
+        public function go():void {
+            embeddedBase.toView();
+        }
+
+        public var embeddedBase:EmbeddedBase;
+
+
+
+        public function createView():UIComponent {
+            var simpleReportEditor:ScheduleManagement = new ScheduleManagement();
+            simpleReportEditor.percentWidth = 100;
+            simpleReportEditor.percentHeight = 100;
+            simpleReportEditor.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, embeddedBase.onClose);
+            simpleReportEditor.addEventListener(AnalyzeEvent.ANALYZE, embeddedBase.onAnalyzeEvent);
+            simpleReportEditor.embedded = true;
+            return simpleReportEditor;
+        }
+        ]]>
+	</mx:Script>
+</mx:UIComponent>

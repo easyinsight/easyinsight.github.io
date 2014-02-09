@@ -17,11 +17,16 @@
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
 
+        public var embedded:Boolean = false;
+
         private function setup():void {
             addEventListener(ScheduleActivityEvent.DELETE_ACTIVITY, deleteActivity);
             addEventListener(ScheduleActivityEvent.EDIT_ACTIVITY, editActivity);
             addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, newActivity);
             addEventListener(RolloverLabelEvent.ROLLOVER_LABEL, onEdit);
+            if (embedded) {
+                gotFocus();
+            }
         }
 
         private function onEdit(event:RolloverLabelEvent):void {
@@ -131,11 +136,13 @@
         private var index:int;
 
         public function gotFocus():void {
-            var fragmentObject:Object = new Object();
-            fragmentObject.page = "scheduling";
-            BrowserManager.getInstance().setTitle("Easy Insight - Schedule Management");
-            var fragmentString:String = URLUtil.objectToString(fragmentObject);
-            BrowserManager.getInstance().setFragment(fragmentString);
+            if (!embedded) {
+                var fragmentObject:Object = new Object();
+                fragmentObject.page = "scheduling";
+                BrowserManager.getInstance().setTitle("Easy Insight - Schedule Management");
+                var fragmentString:String = URLUtil.objectToString(fragmentObject);
+                BrowserManager.getInstance().setFragment(fragmentString);
+            }
             index = 0;
             var utcOffset:int = new Date().getTimezoneOffset();
             exportService.getScheduledActivities.send(utcOffset);
