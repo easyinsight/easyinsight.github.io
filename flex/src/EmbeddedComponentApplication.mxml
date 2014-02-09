@@ -5,6 +5,8 @@
         import com.easyinsight.framework.PerspectiveFactoryHolder;
         import com.easyinsight.skin.ApplicationSkin;
 
+        import mx.controls.Alert;
+
 
         import mx.core.Application;
         import mx.core.UIComponent;
@@ -12,6 +14,7 @@
         public static const REPORT_EDITOR:int = 1;
         public static const CONFIGURE_DATA_SOURCE:int = 2;
         public static const DASHBOARD_EDITOR:int = 3;
+        public static const SCHEDULING:int = 4;
 
         public var embedded:int;
 
@@ -37,6 +40,9 @@
             } else if (embedded == DASHBOARD_EDITOR) {
                 comp = new EmbeddedDashboardEditor();
                 EmbeddedDashboardEditor(comp).embeddedBase = this;
+            } else if (embedded == SCHEDULING) {
+                comp = new EmbeddedScheduleManagement();
+                EmbeddedScheduleManagement(comp).embeddedBase = this;
             }
             PerspectiveFactoryHolder.factory = new PerspectiveFactory();
             comp.childSetup();
