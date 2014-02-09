@@ -34,7 +34,8 @@
             <mx:AddChild relativeTo="{optionsBox}">
                 <mx:HBox creationComplete="PopUpUtil.centerPopUp(this)">
                     <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
-                    <mx:RadioButton label="Create a Trend Filter" groupName="typeGroup" value="trendFilter"/>
+                    <mx:RadioButton label="Create a Field Choice Filter" groupName="typeGroup" value="fieldChoiceFilter"/>
+                    <mx:RadioButton label="Create a Multi Field Choice Filter" groupName="typeGroup" value="multiFieldChoiceFilter"/>
                 </mx:HBox>
             </mx:AddChild>
         </mx:State>
