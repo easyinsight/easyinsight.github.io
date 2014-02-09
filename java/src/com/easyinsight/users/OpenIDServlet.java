@@ -59,6 +59,13 @@ public class OpenIDServlet extends HttpServlet {
         consumerHelper = factory.getConsumerHelper();
     }
 
+    @Override
+    public void destroy() {
+        System.out.println("Destroying Open ID servlet...");
+        super.destroy();    //To change body of overridden methods use File | Settings | File Templates.
+        System.out.println("Destroyed Open ID servlet");
+    }
+
     /**
      * Either initiates a login to a given provider or processes a response from an IDP.
      * @param req
@@ -275,6 +282,11 @@ public class OpenIDServlet extends HttpServlet {
             if(users.size() == 1) {
                 User user = users.get(0);
                 if (user.getAccount().getGoogleDomainName() == null) {
+                    String domainName = request.getParameter("hd");
+                    List<Account> existing = session.createQuery("from Account where googleDomainName = ?").setString(0, domainName).list();
+                    if (existing.size() > 0) {
+                        request.getSession().setAttribute("accountAlreadyLinked", true);
+                    }
                     UserServiceResponse userServiceResponse = new UserServiceResponse();
                     userServiceResponse.setGoogleAuth(true);
                     request.getSession().setAttribute("googleAppsSetupEmail", email);
