@@ -705,22 +705,8 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>SnappCloudValidateUser</servlet-name>
-        <url-pattern>/validateUser</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
         <servlet-name>OwaspJavaScriptServlet</servlet-name>
         <url-pattern>/owasp.js</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>SnappCloudCreateUser</servlet-name>
-        <url-pattern>/createUser</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>SnappCloudCancelUser</servlet-name>
-        <url-pattern>/cancelUser</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
