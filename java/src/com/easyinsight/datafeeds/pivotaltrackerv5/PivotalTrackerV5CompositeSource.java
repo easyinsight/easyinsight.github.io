@@ -22,7 +22,7 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
     private String token;
 
     public PivotalTrackerV5CompositeSource() {
-        setFeedName("Pivotal Tracker v5");
+        setFeedName("Pivotal Tracker");
     }
 
     public String getToken() {

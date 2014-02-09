@@ -42,7 +42,9 @@ public class FeedCreation {
         } else {
             DataStorage.liveDataSource(feedID, conn, feedDefinition.getFeedType().getType());
         }
-        feedDefinition.setApiKey(RandomTextGenerator.generateText(12));
+        if (feedDefinition.getApiKey() == null || "".equals(feedDefinition.getApiKey())) {
+            feedDefinition.setApiKey(RandomTextGenerator.generateText(12));
+        }
         feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
         return new FeedCreationResult(feedID, tableDef);
     }

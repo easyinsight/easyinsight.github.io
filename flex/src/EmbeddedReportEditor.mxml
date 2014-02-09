@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<easyinsight:EmbeddedBase xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="*" preloader="com.easyinsight.preloader.EIPreloader">
+<mx:UIComponent xmlns:mx="http://www.adobe.com/2006/mxml"
+        implements="IEasyInsightComponent">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.SimpleReportEditor;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.FeedResponse;
         import com.easyinsight.analysis.InsightResponse;
-        import com.easyinsight.framework.PerspectiveFactory;
-        import com.easyinsight.framework.PerspectiveFactoryHolder;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
@@ -53,17 +52,17 @@
             dispatchEvent(new Event("showToolbarChanged"));
         }
 
+        public var embeddedBase:EmbeddedBase;
+
         [Bindable]
         private var showFilters:Boolean;
 
-        override protected function childSetup():void {
-            super.childSetup();
-            PerspectiveFactoryHolder.factory = new PerspectiveFactory();
+        public function childSetup():void {
             this.urlKey = String(Application.application.parameters.analysisID);
             this.dataSourceURLKey = String(Application.application.parameters.dataSourceURLKey);
         }
 
-        override protected function go():void {
+        public function go():void {
             if (urlKey != null && urlKey != "undefined") {
                 ProgressAlert.alert(this, "Retrieving report..." ,null, analysisService.openAnalysisIfPossible);
                 analysisService.openAnalysisIfPossible.send(urlKey);
@@ -77,9 +76,9 @@
             var info:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
             if (info.status == InsightResponse.SUCCESS) {
                 insightDescriptor = info.insightDescriptor;
-                toView();
+                embeddedBase.toView();
             } else {
-                toLogin();
+                embeddedBase.toLogin();
             }
         }
 
@@ -89,9 +88,9 @@
                 dataSourceDescriptor = info.feedDescriptor;
                 dataSourceID = info.feedDescriptor.id;
                 dataSourceURL = info.feedDescriptor.urlKey;
-                toView();
+                embeddedBase.toView();
             } else {
-                toLogin();
+                embeddedBase.toLogin();
             }
         }
 
@@ -100,10 +99,10 @@
 
         private var dataSourceURL:String;
 
-        override protected function createView():UIComponent {
+        public function createView():UIComponent {
             var simpleReportEditor:SimpleReportEditor = new SimpleReportEditor();
-            simpleReportEditor.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, onClose);
-            simpleReportEditor.addEventListener(AnalyzeEvent.ANALYZE, onAnalyzeEvent);
+            simpleReportEditor.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, embeddedBase.onClose);
+            simpleReportEditor.addEventListener(AnalyzeEvent.ANALYZE, embeddedBase.onAnalyzeEvent);
             simpleReportEditor.embedded = true;
             if (insightDescriptor != null) {
                 simpleReportEditor.dataSourceID = insightDescriptor.dataFeedID;
@@ -116,11 +115,10 @@
         }
         ]]>
 	</mx:Script>
-    <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="openAnalysisIfPossible" result="gotReportInfo()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="openFeedIfPossible" result="gotDataSourceInfo()"/>
     </mx:RemoteObject>
-</easyinsight:EmbeddedBase>
+</mx:UIComponent>

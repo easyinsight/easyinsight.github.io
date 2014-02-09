@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<easyinsight:EmbeddedBase xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="*">
+<mx:UIComponent xmlns:mx="http://www.adobe.com/2006/mxml" implements="IEasyInsightComponent">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.feed.FeedAdministrationContainer;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.FeedResponse;
-        import com.easyinsight.framework.PerspectiveFactory;
-        import com.easyinsight.framework.PerspectiveFactoryHolder;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
@@ -23,16 +21,16 @@
         [Bindable]
         private var dataSourceID:int;
 
-        override protected function childSetup():void {
-            super.childSetup();
-            PerspectiveFactoryHolder.factory = new PerspectiveFactory();
+        public function childSetup():void {
             this.dataSourceURLKey = String(Application.application.parameters.dataSourceURLKey);
         }
 
-        override protected function go():void {
+        public function go():void {
             ProgressAlert.alert(this, "Retrieving...", null, feedService.openFeedIfPossible);
             feedService.openFeedIfPossible.send(dataSourceURLKey);
         }
+
+        public var embeddedBase:EmbeddedBase;
 
         private function gotDataSourceInfo():void {
             var info:FeedResponse = feedService.openFeedIfPossible.lastResult as FeedResponse;
@@ -40,9 +38,9 @@
                 dataSourceDescriptor = info.feedDescriptor;
                 dataSourceID = info.feedDescriptor.id;
                 dataSourceURL = info.feedDescriptor.urlKey;
-                toView();
+                embeddedBase.toView();
             } else {
-                toLogin();
+                embeddedBase.toLogin();
             }
         }
 
@@ -51,10 +49,10 @@
 
         private var dataSourceURL:String;
 
-        override protected function createView():UIComponent {
+        public function createView():UIComponent {
             var simpleReportEditor:FeedAdministrationContainer = new FeedAdministrationContainer();
-            simpleReportEditor.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, onClose);
-            simpleReportEditor.addEventListener(AnalyzeEvent.ANALYZE, onAnalyzeEvent);
+            simpleReportEditor.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, embeddedBase.onClose);
+            simpleReportEditor.addEventListener(AnalyzeEvent.ANALYZE, embeddedBase.onAnalyzeEvent);
             simpleReportEditor.embedded = true;
             if (dataSourceDescriptor != null) {
                 simpleReportEditor.feedID = dataSourceDescriptor.id;
@@ -64,8 +62,7 @@
         }
         ]]>
 	</mx:Script>
-    <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="openFeedIfPossible" result="gotDataSourceInfo()"/>
     </mx:RemoteObject>
-</easyinsight:EmbeddedBase>
+</mx:UIComponent>

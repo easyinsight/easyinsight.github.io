@@ -417,8 +417,8 @@
 
     <target name="modules4" depends="app.embeddeddashboard, app.seleniumdashboard"/>
     <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail, perspective.spreadsheetupdatewizard"/>
-    <target name="modules7" depends="perspective.kpiwindow,perspective.datasourceadmin, app.embeddedconfiguredatasource, app.embeddedreporteditor"/>
-    <target name="modules8" depends="report.heatmap, report.gantt, app.embeddeddashboardeditor"/>
+    <target name="modules7" depends="perspective.kpiwindow,perspective.datasourceadmin, app.embeddedcomponentapplication"/>
+    <target name="modules8" depends="report.heatmap, report.gantt"/>
     <target name="apps" depends="compileFlexOptimized, app.embeddedreport, app.selenium, app.admin"/>
 
     <target name="compileFlexOptimized">
@@ -427,6 +427,10 @@
 
     <target name="app.embeddedreport">
         <buildSWF mainMXML="EmbeddedInsight.mxml" swfName="EmbeddedInsight" buildFile="embedded-insight.xml"/>
+    </target>
+
+    <target name="app.embeddedcomponentapplication">
+        <buildSWF mainMXML="EmbeddedComponentApplication.mxml" swfName="EmbeddedComponentApplication" buildFile="embedded-component-application.xml"/>
     </target>
 
     <target name="app.embeddedlist">

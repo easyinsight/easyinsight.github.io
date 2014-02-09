@@ -16,13 +16,13 @@
         String dashboardURLKey = request.getParameter("dashboardID");
         String dataSourceID = request.getParameter("dataSourceID");
 
-        String swf = "EmbeddedDashboardEditor";
+            String swf = "EmbeddedComponentApplication";
 
-        String flashVars = null;
+            String flashVars = "embedded=3&";
         if (dashboardURLKey != null) {
-            flashVars = "analysisID=" + dashboardURLKey;
+            flashVars += "analysisID=" + dashboardURLKey;
         } else if (dataSourceID != null) {
-            flashVars = "dataSourceURLKey=" + dataSourceID;
+            flashVars += "dataSourceURLKey=" + dataSourceID;
         }
 
         long dashboardID = new DashboardService().canAccessDashboard(dashboardURLKey);
