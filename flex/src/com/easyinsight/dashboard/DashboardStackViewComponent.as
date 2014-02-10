@@ -25,6 +25,7 @@ import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.ComboBox;
 import mx.controls.Spacer;
@@ -275,7 +276,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
 
     public function reportCount():ArrayCollection {
-        if (!built) {
+        if (!built && !(this instanceof DashboardStackEditorComponent)) {
             buildContents();
         }
         var activeChild:IDashboardViewComponent = IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex));
@@ -296,7 +297,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             logoutButton.x = logoutButton.parent.width - 100;
         }
     }
-    
+
     protected function createStackButton(index:int, label:String):UIComponent {
         if (dashboardStack.headerBackground == null && !dashboardStack.consolidateHeaderElements && dashboardEditorMetadata.dashboard.fillStackHeaders && (dashboardStack.dashboardLevel == 0 || dashboardStack.dashboardLevel == 1)) {
             return createHeaderLink(index, label);
@@ -668,7 +669,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     private var built:Boolean = false;
 
     public function initialRetrieve():void {
-        if (!built) {
+        if (!built && !(this instanceof DashboardStackEditorComponent)) {
             buildContents();
         }
         var changed:Boolean = false;
