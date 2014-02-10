@@ -309,6 +309,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         JSONObject axes = new JSONObject();
         JSONObject xAxis = getMeasureAxis(getMeasures().get(0));
         axes.put("xaxis", xAxis);
+        xAxis.put("renderer", "$.jqplot.MeasureAxisRenderer");
         JSONObject yAxis = getGroupingAxis(getYaxis());
         axes.put("yaxis", yAxis);
         return axes;
