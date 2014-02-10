@@ -53,5 +53,5 @@
         <mx:Label text="Infusionsoft API Key:" width="250" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
         <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" width="350"/>
     </mx:HBox>
-    <mx:Label text="You can find the token on your Infusionsoft page under My Info - API Token." fontSize="12"/>
+    <mx:Label text="You can find the token on your Infusionsoft page under Admin, Settings, Application, Encrypted Key." fontSize="12"/>
 </mx:VBox>

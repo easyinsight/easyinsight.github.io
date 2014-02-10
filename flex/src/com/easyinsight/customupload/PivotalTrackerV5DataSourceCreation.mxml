@@ -37,7 +37,7 @@
         ]]></mx:Script>
     <mx:Form>
 		<mx:FormItem label="Pivotal Tracker API Token: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="tokenInput" fontWeight="normal" fontFamily="Lucida Grande" text="{token}"/>
+			<mx:TextInput id="tokenInput" fontWeight="normal" fontFamily="Lucida Grande" text="{token}" width="300"/>
 		</mx:FormItem>
 	</mx:Form>
 </mx:HBox>
