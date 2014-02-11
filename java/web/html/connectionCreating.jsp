@@ -46,10 +46,10 @@
         FeedResponse feedResponse = new FeedService().openFeedIfPossible(request.getParameter("dataSourceID"));
         if (feedResponse.getStatus() == FeedResponse.SUCCESS) {
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(feedResponse.getFeedDescriptor().getId());
-            if (dataSource.postOAuthSetup(request) != null) {
+            /*if (dataSource.postOAuthSetup(request) != null) {
                 response.sendRedirect(dataSource.postOAuthSetup(request));
                 return;
-            }
+            }*/
         }
 %>
 <script type="text/javascript">
