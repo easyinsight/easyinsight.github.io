@@ -294,6 +294,8 @@
                 var curElem = t._elem;
                 if (typeof(curElem) != "undefined") {
                     if (prev != null) {
+                        var ff = $(prev._elem);
+                        var yy = $(curElem);
                         if (ff.offset().left + ff.outerWidth() > yy.offset().left) {
                             overlap = true;
                         }
