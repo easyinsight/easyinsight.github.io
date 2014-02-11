@@ -21,7 +21,7 @@ import java.util.List;
 @PrimaryKeyJoinColumn(name="analysis_item_id")
 public class AnalysisMeasure extends AnalysisItem {
     @Column(name="aggregation")
-    private int aggregation;
+    private int aggregation = AggregationTypes.SUM;
 
     @Column(name="row_count_field")
     private boolean rowCountField;
@@ -69,6 +69,10 @@ public class AnalysisMeasure extends AnalysisItem {
     }
 
     public AnalysisMeasure() {
+    }
+
+    public AnalysisMeasure(String displayName) {
+        setDisplayName(displayName);
     }
 
     public int getType() {

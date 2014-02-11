@@ -217,10 +217,21 @@ public class TreeData {
 
             treeRow.setGroupingColumn(this.value);
 
-            for (Argh argh : map.values()) {
+            List<Argh> arghs = new ArrayList<Argh>(map.values());
+
+
+
+            for (Argh argh : arghs) {
                 TreeRow childRow = argh.toTreeRow(pipelineData);
                 treeRow.getChildren().add(childRow);
             }
+
+            Collections.sort(treeRow.getChildren(), new Comparator<TreeRow>() {
+
+                public int compare(TreeRow argh, TreeRow argh1) {
+                    return argh.sortValue().compareTo(argh1.sortValue());
+                }
+            });
 
             boolean addSummaryRow = (treeDefinition instanceof WSSummaryDefinition) && treeDefinition.isHeaderMode();
             if (addSummaryRow) {
@@ -275,6 +286,14 @@ public class TreeData {
             }*/
 
             return treeRow;
+        }
+
+        @Override
+        public Value sortValue() {
+            if (sortValue != null) {
+                return sortValue;
+            }
+            return value;
         }
 
         public String toHTML() {
@@ -445,6 +464,11 @@ public class TreeData {
             }
             return treeRow;
         }
+
+        @Override
+        public Value sortValue() {
+            return row.getValue(analysisItem);
+        }
     }
 
     private abstract class Argh {
@@ -455,5 +479,7 @@ public class TreeData {
         public abstract String toHTML();
 
         public abstract TreeRow toTreeRow(PipelineData pipelineData);
+
+        public abstract Value sortValue();
     }
 }

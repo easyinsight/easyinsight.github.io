@@ -20,14 +20,15 @@ public class NewSummaryRow {
     public var stupidFlex:int;
     public var parent:NewSummaryRow;
     public var summaryRow:Boolean;
+    public var sortColumn:Value;
 
     public function NewSummaryRow() {
     }
 
     public function sortValue():Value {
-        /*if (sortColumn != null) {
+        if (sortColumn != null) {
             return sortColumn;
-        }*/
+        }
         return groupingColumn;
     }
 }

@@ -24,7 +24,7 @@ import java.util.TimeZone;
 @PrimaryKeyJoinColumn(name="analysis_item_id")
 public class AnalysisDateDimension extends AnalysisDimension {
     @Column(name="date_level")
-    private int dateLevel;
+    private int dateLevel = DAY_LEVEL;
     @Column(name="custom_date_format")
     private String customDateFormat = "yyyy-MM-dd";
 
@@ -100,6 +100,10 @@ public class AnalysisDateDimension extends AnalysisDimension {
         this.dateLevel = dateLevel;
     }
 
+    public AnalysisDateDimension(String displayName) {
+        setDisplayName(displayName);
+    }
+
     public boolean isDateOnlyField() {
         return dateOnlyField;
     }
@@ -141,6 +145,10 @@ public class AnalysisDateDimension extends AnalysisDimension {
         this.dateLevel = dateLevel;
         this.customDateFormat = customDateFormat;
         this.dateOnlyField = dateOnly;
+    }
+
+    public AnalysisDateDimension(int dateLevel) {
+        this.dateLevel = dateLevel;
     }
 
     public AnalysisDateDimension(String key, boolean group, int dateLevel) {

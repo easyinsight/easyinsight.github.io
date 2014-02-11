@@ -276,7 +276,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
 
     public function reportCount():ArrayCollection {
-        if (!built && !(this instanceof DashboardStackEditorComponent)) {
+        if (!built && !(this is DashboardStackEditorComponent)) {
             buildContents();
         }
         var activeChild:IDashboardViewComponent = IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex));
@@ -669,7 +669,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     private var built:Boolean = false;
 
     public function initialRetrieve():void {
-        if (!built && !(this instanceof DashboardStackEditorComponent)) {
+        if (!built && !(this is DashboardStackEditorComponent)) {
             buildContents();
         }
         var changed:Boolean = false;
