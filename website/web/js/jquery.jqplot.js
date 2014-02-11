@@ -7895,6 +7895,9 @@
             td = $(document.createElement('td'));
             td.addClass('jqplot-table-legend jqplot-table-legend-label');
             td.css('paddingTop', rs);
+            console.log(this.rendererOptions.fontFamily);
+            if(typeof(this.rendererOptions.fontFamily) != "undefined")
+                td.css("font-family", this.rendererOptions.fontFamily);
             tr.append(td);
 
             // elem = $('<td class="jqplot-table-legend" style="padding-top:'+rs+';"></td>');

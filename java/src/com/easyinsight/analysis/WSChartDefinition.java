@@ -167,7 +167,7 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
         //includes.add("/js/jquery.jqplot.js");
-        includes.add("/js/plugins/jqplot.pointLabels.min.js");
+        includes.add("/js/plugins/jqplot.pointLabels.js");
         includes.add("/js/plugins/jqplot.highlighter.min.js");
         includes.add("/js/plugins/jqplot.cursor.min.js");
 
@@ -185,6 +185,10 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         legendObj.put("show", "true");
         legendObj.put("placement", "'outsideGrid'");
         legendObj.put("location", "'e'");
+        JSONObject rendererOptions = new JSONObject();
+        // TODO: Replace with font
+        rendererOptions.put("fontFamily", "'Helvetica Neue'");
+        legendObj.put("rendererOptions", rendererOptions);
         return legendObj;
     }
 
@@ -237,6 +241,12 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         } else {
             tickOptions.put("formatter", "$.jqplot.tickNumberFormatter");
         }
+        JSONObject labelOptions = new JSONObject();
+        // TODO: Replace with font
+        labelOptions.put("fontFamily", "'Helvetica Neue'");
+        // TODO: Replace with font
+        tickOptions.put("fontFamily", "'Helvetica Neue'");
+        yAxis.put("labelOptions", labelOptions);
         yAxis.put("tickOptions", tickOptions);
         return yAxis;
     }
@@ -249,9 +259,15 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         xAxis.put("labelRenderer", "$.jqplot.CanvasAxisLabelRenderer");
         xAxis.put("label", "'"+analysisItem.toUnqualifiedDisplay()+"'");
 
+        JSONObject labelOptions = new JSONObject();
+        // TODO: Replace with font
+        labelOptions.put("fontFamily", "'Helvetica Neue'");
+        xAxis.put("labelOptions", labelOptions);
         JSONObject xAxisTicketOptions = new JSONObject();
         xAxisTicketOptions.put("angle", 0);
         xAxisTicketOptions.put("showGridline", "false");
+        // TODO: Replace with font
+        xAxisTicketOptions.put("fontFamily", "'Helvetica Neue'");
         xAxis.put("tickOptions", xAxisTicketOptions);
         return xAxis;
     }

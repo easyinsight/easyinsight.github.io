@@ -325,6 +325,8 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
                 labels.put("location", "'n'");
                 labels.put("show", "true");
                 labels.put("edgetolerance", -15);
+                // TODO: Replace with font
+                labels.put("fontFamily", "'Helvetica Neue'");
                 seriesDefaults.put("pointLabels", labels);
             }
         } catch (JSONException e) {
