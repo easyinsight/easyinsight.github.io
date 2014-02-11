@@ -181,6 +181,12 @@ public class DateValue extends Value implements Serializable {
         if (value.type() == Value.DATE) {
             DateValue date2 = (DateValue) value;
             return getDate().compareTo(date2.getDate());
+        } else if (value.type() == Value.EMPTY) {
+            return 1;
+        } else if (value.type() == Value.STRING) {
+            if ("(Empty)".equals(value.toString()) || "".equals(value.toString())) {
+                return 1;
+            }
         }
         return 0;
     }
