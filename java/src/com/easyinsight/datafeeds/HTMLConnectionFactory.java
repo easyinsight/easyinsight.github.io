@@ -4,12 +4,9 @@ import com.easyinsight.html.RedirectUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.users.OAuthResponse;
 import com.easyinsight.users.TokenService;
-import com.easyinsight.userupload.UserUploadService;
-import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,53 +22,34 @@ public class HTMLConnectionFactory {
     public static final int TYPE_OAUTH = 2;
 
     private int type;
+    private String title;
     private int dataSourceType;
-    private List<Property> properties = new ArrayList<Property>();
+    private List<HTMLConnectionProperty> properties = new ArrayList<HTMLConnectionProperty>();
+
+    private String name;
 
     public HTMLConnectionFactory(int dataSourceType) {
         this.dataSourceType = dataSourceType;
         FeedDefinition dataSource = new DataSourceTypeRegistry().createDataSource(new FeedType(dataSourceType));
+        name = dataSource.getFeedName();
+        title = "Let's create your connection to " + name + "...";
         dataSource.configureFactory(this);
     }
 
-    private class Property {
-        private String field;
-        private String property;
-        private String safeProperty;
-        private String explanation;
-        private boolean password;
-
-        private Property(String field, String property, @Nullable String explanation, boolean password) {
-            this.field = field;
-            this.property = property;
-            safeProperty = "p" + property;
-            this.explanation = explanation;
-            this.password = password;
-        }
+    public String getTitle() {
+        return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
+    public String getName() {
+        return name;
+    }
 
-    public String toConnectionHTML() {
-        /*
-        <label for="userName" class="promptLabel">
-                    User Name or Email
-                </label>
-                <input type="text" class="form-control" name="userName" id="userName" style="width:100%;font-size:14px;height:28px" autocapitalize="off" autocorrect="off" autoFocus/>
-         */
-        StringBuilder sb = new StringBuilder();
-        for (Property property : properties) {
-
-            sb.append("<label for=\"").append(property.safeProperty).append("\" class=\"promptLabel\">").append(property.field).append("</label>\r\n");
-            if (property.password) {
-                sb.append("<input type=\"password\" class=\"form-control\" name=\"").append(property.safeProperty).append("\" id=\"").append(property.safeProperty).append("\" ");
-            } else {
-                sb.append("<input type=\"text\" class=\"form-control\" name=\"").append(property.safeProperty).append("\" id=\"").append(property.safeProperty).append("\" ");
-            }
-            sb.append("style=\"width:100%;font-size:14px;height:28px\" autocapitalize=\"off\" autocorrect=\"off\"/>");
-
-        }
-        return sb.toString();
+    public List<HTMLConnectionProperty> getProperties() {
+        return properties;
     }
 
     public int getType() {
@@ -80,9 +58,9 @@ public class HTMLConnectionFactory {
 
     public void actionProcess(HttpServletRequest request, HttpServletResponse servletResponse, FeedDefinition dataSource) {
         try {
-            for (Property property : properties) {
-                String value = request.getParameter(property.safeProperty);
-                String setter = "set" + Character.toUpperCase(property.property.charAt(0)) + property.property.substring(1);
+            for (HTMLConnectionProperty property : properties) {
+                String value = request.getParameter(property.getSafeProperty());
+                String setter = "set" + Character.toUpperCase(property.getProperty().charAt(0)) + property.getProperty().substring(1);
                 Method method = dataSource.getClass().getMethod(setter, String.class);
                 method.invoke(dataSource, value);
             }
@@ -107,17 +85,17 @@ public class HTMLConnectionFactory {
     }
 
     public HTMLConnectionFactory addField(String field, String property) {
-        properties.add(new Property(field, property, null, false));
+        properties.add(new HTMLConnectionProperty(field, property, null, false));
         return this;
     }
 
     public HTMLConnectionFactory addPassword(String field, String property, boolean password) {
-        properties.add(new Property(field, property, null, password));
+        properties.add(new HTMLConnectionProperty(field, property, null, password));
         return this;
     }
 
     public HTMLConnectionFactory addField(String field, String property, String explanation) {
-        properties.add(new Property(field, property, explanation, false));
+        properties.add(new HTMLConnectionProperty(field, property, explanation, false));
         return this;
     }
 }
