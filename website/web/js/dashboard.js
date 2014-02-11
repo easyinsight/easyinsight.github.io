@@ -214,6 +214,10 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
         url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent + drillthroughComponent + embedComponent + embedded,
         contentType: "application/json; charset=UTF-8",
         data: JSON.stringify(fullFilters),
+        error: function() {
+            $("#" + id + " .loading").hide();
+            $("#" + id + " .reportError").show();
+        },
         type: "POST"
     }
 
