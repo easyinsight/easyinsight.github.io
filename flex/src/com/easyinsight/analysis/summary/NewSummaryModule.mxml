@@ -19,7 +19,6 @@
         import mx.collections.SortField;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.controls.advancedDataGridClasses.SortInfo;
-        import mx.formatters.Formatter;
         import mx.utils.ObjectUtil;
 
         [Bindable]
@@ -47,6 +46,7 @@
                 var newRow:NewSummaryRow = new NewSummaryRow();
                 treeRow.newSummaryRow = newRow;
                 newRow.values = treeRow.values;
+                newRow.sortColumn = treeRow.sortColumn;
                 newRow.backgroundColor = treeRow.backgroundColor;
                 newRow.textColor = treeRow.textColor;
                 newRow.groupingColumn = treeRow.groupingColumn;
@@ -69,6 +69,16 @@
 
         private var originalSet:ArrayCollection;
 
+        private static function recurseSort(c:TreeRow, sort:Sort):void {
+            c.children.sort = sort;
+            c.children.refresh();
+            for each (var c2:TreeRow in c.children) {
+                if (c2.children != null && c2.children.length > 1) {
+                    recurseSort(c2, sort);
+                }
+            }
+        }
+
         private function blah():void {
             var fields:Array = coreGrid.dataProvider.sort.fields;
 
@@ -83,8 +93,7 @@
             sort.compareFunction = initSortCompare2;
             originalSet.sort = sort;
             for each (var c:TreeRow in originalSet) {
-                c.children.sort = sort;
-                c.children.refresh();
+                recurseSort(c, sort);
             }
             originalSet.refresh();
 
@@ -106,10 +115,10 @@
                     row.stupidFlex = i;
                 }
                 /*if (row.summaryRow) {
-                    Alert.show("summary row at " + row.stupidFlex);
-                } else if (row.groupingColumn != null) {
-                    Alert.show("g " + row.groupingColumn.getValue() + " at " + row.stupidFlex);
-                }*/
+                 Alert.show("summary row at " + row.stupidFlex);
+                 } else if (row.groupingColumn != null) {
+                 Alert.show("g " + row.groupingColumn.getValue() + " at " + row.stupidFlex);
+                 }*/
             }
             coreGrid.dataProvider.refresh();
         }
@@ -130,8 +139,8 @@
                 coreGrid.setStyle("fontFamily", treeDefinition.getFont());
             }
             /*if (eSet != null) {
-                eSet.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onChange);
-            }*/
+             eSet.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onChange);
+             }*/
             if (dataSet.length > 0) {
                 originalSet = dataSet;
                 treeDef = treeDefinition;
@@ -157,8 +166,7 @@
                 }
                 dataSet.sort = sort;
                 for each (var c:TreeRow in dataSet) {
-                    c.children.sort = sort;
-                    c.children.refresh();
+                    recurseSort(c, sort);
                 }
                 dataSet.refresh();
 
@@ -170,7 +178,6 @@
                         endSet.addItem(newSummaryRow);
                     }
                 }
-
 
 
                 for (var i:int = 0; i < endSet.length; i++) {
@@ -216,14 +223,14 @@
                 headerHierarchyFactor.properties = { report:treeDef };
                 hierarchyColumn.itemRenderer = headerHierarchyFactor;
                 /*hierarchyColumn.labelFunction = function (item:Object, column:AdvancedDataGridColumn):String {
-                    var treeRow:NewSummaryRow = item as NewSummaryRow;
-                    if (treeRow.groupingField != null) {
-                        var formatter:Formatter = treeRow.groupingField.getFormatter();
-                        return formatter.format(treeRow.groupingColumn);
-                    } else {
-                        return "";
-                    }
-                };*/
+                 var treeRow:NewSummaryRow = item as NewSummaryRow;
+                 if (treeRow.groupingField != null) {
+                 var formatter:Formatter = treeRow.groupingField.getFormatter();
+                 return formatter.format(treeRow.groupingColumn);
+                 } else {
+                 return "";
+                 }
+                 };*/
                 hierarchyColumn.dataField = "groupingColumn";
                 var existingHierarchyIndex:int = findColumnIndex(hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName());
                 if (hierarchy.reportFieldExtension != null && hierarchy.reportFieldExtension is TextReportFieldExtension &&
@@ -283,8 +290,8 @@
                     columns[k + 1] = columnHeaderObject;
                 }
                 /*if (rendererProviders.length > 0) {
-                    coreGrid.rendererProviders = rendererProviders;
-                }*/
+                 coreGrid.rendererProviders = rendererProviders;
+                 }*/
 
                 myData = dataSet;
                 //endSet.refresh();
@@ -305,7 +312,7 @@
             }
         }
 
-        private static function doNothingSort( a:Object, b:Object ):int {
+        private static function doNothingSort(a:Object, b:Object):int {
             var treeRow1:NewSummaryRow = a as NewSummaryRow;
             var treeRow2:NewSummaryRow = b as NewSummaryRow;
             return ObjectUtil.numericCompare(treeRow1.stupidFlex, treeRow2.stupidFlex);
@@ -434,7 +441,6 @@
             if (sort == null) {
                 return ObjectUtil.compare(treeRow1.sortValue(), treeRow2.sortValue());
             }
-
 
 
             var fields:Array = sort.fields;

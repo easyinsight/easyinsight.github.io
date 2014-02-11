@@ -43,7 +43,7 @@ public class PivotalTrackerV5StoryToLabelSource extends PivotalTrackerV5BaseSour
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         PivotalTrackerV5CompositeSource p = (PivotalTrackerV5CompositeSource) parentDefinition;
-        for (Map.Entry<String, List<String>> entry : p.getEpicIDToLabelMap().entrySet()) {
+        for (Map.Entry<String, List<String>> entry : p.getStoryIDToLabelMap().entrySet()) {
             for (String val : entry.getValue()) {
                 IRow row = dataSet.createRow();
                 row.addValue(keys.get(STORY_ID), entry.getKey());

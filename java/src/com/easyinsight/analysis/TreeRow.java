@@ -30,6 +30,13 @@ public class TreeRow {
     private Integer backgroundColor;
     private Integer textColor;
 
+    public Value sortValue() {
+        if (sortColumn != null) {
+            return sortColumn;
+        }
+        return groupingColumn;
+    }
+
     public Value getSortColumn() {
         return sortColumn;
     }
