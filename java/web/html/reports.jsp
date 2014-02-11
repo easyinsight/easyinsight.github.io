@@ -20,6 +20,7 @@
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.core.DataFolder" %>
 <%@ page import="com.easyinsight.html.Utils" %>
+<%@ page import="com.easyinsight.tag.Tag" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -62,6 +63,7 @@
         <jsp:include page="../recent_actions.jsp"/>
         <div class="col-md-9">
             <div class="container">
+
                 <div class="row">
                     <div class="col-md-12">
                         <h2><%= dataSourceDescriptor.getName() %></h2>
@@ -182,10 +184,10 @@
                                     if (descriptor instanceof InsightDescriptor || descriptor instanceof DashboardDescriptor) {
                                         out.println("<tr>");
                                         if (descriptor instanceof InsightDescriptor) {
-                                            out.println("<td><a href=\"../report/" + descriptor.getUrlKey() + "\">" + descriptor.getName() + "</td>");
+                                            out.println("<td><a href=\"../report/" + descriptor.getUrlKey() + "\">" + StringEscapeUtils.escapeHtml(descriptor.getName()) + "</td>");
                                             out.println("<td>Report</td>");
                                         } else if (descriptor instanceof DashboardDescriptor) {
-                                            out.println("<tr><td><a href=\"../dashboard/" + descriptor.getUrlKey() + "\">" + descriptor.getName() + "</td>");
+                                            out.println("<tr><td><a href=\"../dashboard/" + descriptor.getUrlKey() + "\">" + StringEscapeUtils.escapeHtml(descriptor.getName()) + "</td>");
                                             out.println("<td>Dashboard</td>");
                                         }
                                         out.println("</tr>");
@@ -207,7 +209,7 @@
                             </thead>
                             <%
                                 for (DataFolder dataFolder : folders) {
-                                    out.println("<tr><td><a href=\"../reportsFolder/" + dataSourceDescriptor.getUrlKey() + "/" + dataFolder.getUrlKey() + "\">" + dataFolder.getName() + "</td></tr>");
+                                    out.println("<tr><td><a href=\"../reportsFolder/" + dataSourceDescriptor.getUrlKey() + "/" + dataFolder.getUrlKey() + "\">" + StringEscapeUtils.escapeHtml(dataFolder.getName()) + "</td></tr>");
                                 }
                             %>
                         </table>
