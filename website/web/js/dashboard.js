@@ -8,7 +8,6 @@ var grid;
 var textTemplate;
 var reportTemplate;
 var fullReportTemplate;
-var test;
 
 var gaugeTemplate;
 var configurationDropdownTemplate;
@@ -475,7 +474,6 @@ $(function () {
         }
         for(f in filterMap) {
             if(filterMap[f].filter.parents && filterMap[f].filter.parents.length > 0) {
-                console.log(f);
                 filterMap[f].parent_filters = [];
                 var cur;
                 for(cur = 0;cur < filterMap[f].filter.parents.length;cur++) {
@@ -1045,7 +1043,6 @@ $(function () {
                 }
             })
         }
-        test = function() { console.log(filterMap) }
     })
 
 })
