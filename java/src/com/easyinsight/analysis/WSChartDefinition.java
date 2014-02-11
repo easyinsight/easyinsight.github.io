@@ -185,10 +185,9 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         legendObj.put("show", "true");
         legendObj.put("placement", "'outsideGrid'");
         legendObj.put("location", "'e'");
-        JSONObject rendererOptions = new JSONObject();
         // TODO: Replace with font
-        rendererOptions.put("fontFamily", "'Helvetica Neue'");
-        legendObj.put("rendererOptions", rendererOptions);
+        legendObj.put("fontFamily", "'Helvetica Neue'");
+        legendObj.put("border", "'none'");
         return legendObj;
     }
 
