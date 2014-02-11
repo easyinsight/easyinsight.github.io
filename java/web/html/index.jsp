@@ -5,6 +5,7 @@
 <%@ page import="java.util.Comparator" %>
 <%@ page import="java.util.Collections" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -30,7 +31,7 @@
 <div class="container corePageWell">
     <div class="row">
         <jsp:include page="../recent_actions.jsp" />
-        <div class="col-md-9">
+        <div id="data_sources" class="col-md-9">
             <table class="table table-striped table-bordered">
                 <thead>
                     <tr>
@@ -48,12 +49,10 @@
                         return name1.compareTo(name2);
                     }
                 });
-                for (DataSourceDescriptor dataSource : dataSources) {
-                    out.println("<tr><td><a href=\"reports/" + dataSource.getUrlKey() + "\">" + dataSource.getName() + "</a></td></tr>");
-                }
-                /*if (dataSources.size() == 0) {
-                    out.println("<li>You haven't defined any data sources yet.</li>");
-                }*/
+                for (DataSourceDescriptor dataSource : dataSources) { %>
+                   <tr><td><a href="reports/<%= dataSource.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSource.getName()) %></a></td></tr>
+                <% }
+
             %>
             </table>
         </div>
