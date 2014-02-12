@@ -1,6 +1,5 @@
 package com.easyinsight.dashboard
 {
-import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
@@ -35,7 +34,7 @@ public class DelayedReportSaveLink extends EventDispatcher
             var result:DashboardInfo = reportService.retrieveFromReportLink.lastResult as DashboardInfo;
             if (result != null) {
                 result.dashboardStackPositions.urlKey = reportID;
-                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(result.report), null, null, null, 0, null, null, null, result.dashboardStackPositions)));
+                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(result.report), null, null, null, result.dashboardStackPositions)));
             }
         }
 	}

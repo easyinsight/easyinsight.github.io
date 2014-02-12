@@ -52,7 +52,7 @@
         private var stateIndex:int;
         private var lastState:State;
 
-        public function generateState(description:String, exchangeItem:ExchangeItem, dashboardView:DashboardView):void {
+        public function generateState(description:String, dashboardView:DashboardView):void {
             _dashboardView = dashboardView;
             var ops:Array = [];
             var textAreas:Array = [];
