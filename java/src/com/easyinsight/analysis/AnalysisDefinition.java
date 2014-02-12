@@ -16,6 +16,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.easyinsight.tag.Tag;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
@@ -464,8 +465,8 @@ public class AnalysisDefinition implements Cloneable {
         return tags;
     }
 
-    public AnalysisDefinition clone(FeedDefinition target, List<AnalysisItem> allFields, boolean changingDataSource, List<AnalysisItem> additionalDataSourceFields,
-                                    Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap) throws CloneNotSupportedException {
+    public AnalysisDefinition clone(FeedDefinition target, List<AnalysisItem> allFields, boolean changingDataSource,
+                                    List<AnalysisItem> additionalDataSourceFields, Map<Long, Tag> tagMap) throws CloneNotSupportedException {
         AnalysisDefinition analysisDefinition = (AnalysisDefinition) super.clone();
 
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState.clone(allFields));
@@ -473,7 +474,7 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setAnalysisID(null);
         //Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         ReplacementMap replacementMap = new ReplacementMap();
-        replacementMap.setTagReplacementMap(tagReplacementMap);
+        replacementMap.setTagReplacementMap(tagMap);
 
         allFields = new ArrayList<AnalysisItem>(allFields);
         Map<String, AnalysisItem> set = new HashMap<String, AnalysisItem>();
@@ -623,6 +624,9 @@ public class AnalysisDefinition implements Cloneable {
                 if (deproxiedKey instanceof ReportKey) {
 
                 } else {
+                    if ("Addon Source - Deal ID".equals(analysisItem.toDisplay())) {
+                        System.out.println(".");
+                    }
                     AnalysisItem dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
                     if (dataSourceItem != null) {
                         key = dataSourceItem.getKey();
