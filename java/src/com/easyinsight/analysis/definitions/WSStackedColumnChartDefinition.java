@@ -3,6 +3,7 @@ package com.easyinsight.analysis.definitions;
 import com.easyinsight.analysis.*;
 import com.easyinsight.pipeline.GoalComponent;
 import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -358,5 +359,11 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         pie.put("styles", htmlReportMetadata.createStyleProperties());
         pie.put("url", "/app/stackedChart");
         return pie;
+    }
+
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if ("Primary".equals(getColorScheme())) {
+            setMultiColors(applicationSkin.getMultiColors());
+        }
     }
 }

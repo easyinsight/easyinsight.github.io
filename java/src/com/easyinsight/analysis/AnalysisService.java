@@ -31,6 +31,7 @@ import com.easyinsight.storage.CachedCalculationTransform;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IDataTransform;
 import com.easyinsight.tag.Tag;
+import com.easyinsight.userupload.DataSourceThreadPool;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.util.RandomTextGenerator;
@@ -1620,12 +1621,14 @@ public class AnalysisService {
                     copy instanceof DerivedAnalysisDimension) {
                 Key key = new NamedKey("Copy of " + analysisItem.toDisplay());
                 copy.setKey(key);
-                copy.setDisplayName("Copy of " + analysisItem.toDisplay());
+                copy.setDisplayName("Copy of " + analysisItem.toUnqualifiedDisplay());
+                copy.setUnqualifiedDisplayName("Copy of " + analysisItem.toUnqualifiedDisplay());
             } else {
                 if (!(analysisItem.getKey() instanceof ReportKey)) {
                     copy.setOriginalDisplayName(analysisItem.toDisplay());
                 }
-                copy.setDisplayName("Copy of " + analysisItem.toDisplay());
+                copy.setDisplayName("Copy of " + analysisItem.toUnqualifiedDisplay());
+                copy.setUnqualifiedDisplayName("Copy of " + analysisItem.toUnqualifiedDisplay());
             }
             copy.setConcrete(false);
             return copy;
@@ -2118,7 +2121,7 @@ public class AnalysisService {
             AnalysisDefinition baseReport = analysisStorage.getPersistableReport(reportID, session);
             Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
             Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
-            SolutionService.recurseReport(reports, dashboards, baseReport, session, conn, new HashSet<Long>());
+            SolutionService.recurseReport(reports, dashboards, baseReport, session, conn);
 
             for (AnalysisDefinition report : reports.values()) {
                 report.setTemporaryReport(false);
@@ -2417,7 +2420,7 @@ public class AnalysisService {
         final long accountID = SecurityUtil.getAccountID();
         final int accountType = SecurityUtil.getAccountTier();
         final boolean accountAdmin = SecurityUtil.isAccountAdmin();
-        new Thread(new Runnable() {
+        DataSourceThreadPool.instance().addActivity(new Runnable() {
 
             public void run() {
                 SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, 0, null);
@@ -2458,7 +2461,7 @@ public class AnalysisService {
                     SecurityUtil.clearThreadLocal();
                 }
             }
-        }).start();
+        });
     }
 
     public void deleteAnalysisDefinition(long reportID) {

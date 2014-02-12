@@ -1,7 +1,6 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
-//import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.FunctionFactory;
@@ -18,7 +17,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.StandardReportPipeline;
-//import net.spy.memcached.MemcachedClient;
 import com.easyinsight.tag.Tag;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
@@ -42,6 +40,7 @@ public class DataService {
     public List<AnalysisItemSelection> possibleFields(IFieldChoiceFilter filter, @Nullable WSAnalysisDefinition reportEditorReport, @Nullable Dashboard dashboardEditorDashboard,
                                                       @Nullable FilterSet filterSet) {
         WSAnalysisDefinition report = null;
+        EIConnection conn = Database.instance().getConnection();
         long dashboardID = 0;
         try {
             long dataSourceID;
@@ -53,9 +52,9 @@ public class DataService {
             } else if (filterSet != null) {
                 dataSourceID = filterSet.getDataSourceID();
             } else {
-                EIConnection conn = Database.instance().getConnection();
 
-                try {
+
+
                     PreparedStatement stmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM analysis_to_filter_join WHERE FILTER_ID = ?");
                     stmt.setLong(1, filter.getFilterID());
                     ResultSet rs = stmt.executeQuery();
@@ -74,9 +73,7 @@ public class DataService {
                             throw new RuntimeException();
                         }
                     }
-                } finally {
-                    Database.closeConnection(conn);
-                }
+
 
                 if (report != null) {
                     SecurityUtil.authorizeInsight(report.getAnalysisID());
@@ -85,11 +82,12 @@ public class DataService {
                 }
             }
 
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
             Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
             Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
             final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
-            for (AnalysisItem field : dataSource.getFields()) {
+            List<AnalysisItem> allFields = dataSource.allFields(conn);
+            for (AnalysisItem field : allFields) {
                 map.put(field.getAnalysisItemID(), field);
                 mapByName.put(field.toDisplay(), field);
             }
@@ -132,9 +130,9 @@ public class DataService {
 
             List<WeNeedToReplaceHibernateTag> tags = filter.getAvailableTags();
 
-            EIConnection conn = Database.instance().getConnection();
+
             PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ? AND field_to_tag.data_source_id = ?");
-            try {
+
                 for (WeNeedToReplaceHibernateTag tag : tags) {
                     queryStmt.setLong(1, tag.getTagID());
                     queryStmt.setLong(2, dataSourceID);
@@ -143,8 +141,10 @@ public class DataService {
                         String fieldName = rs.getString(1);
                         AnalysisItem analysisItem = mapByName.get(fieldName);
                         //if (report == null || report.accepts(analysisItem)) {
-                        positions.put(analysisItem, i++);
-                        set.add(analysisItem);
+                        if (analysisItem != null) {
+                            positions.put(analysisItem, i++);
+                            set.add(analysisItem);
+                        }
                             /*PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
                                     "extension_type = ?");
                             extStmt.setLong(1, fieldID);
@@ -169,9 +169,7 @@ public class DataService {
 
                 queryStmt.close();
 
-            } finally {
-                Database.closeConnection(conn);
-            }
+
 
 
             i = 0;
@@ -234,6 +232,8 @@ public class DataService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
@@ -531,10 +531,8 @@ public class DataService {
             Collection<AnalysisItem> feedItems = feed.getFields();
             // need to apply renames from the com.easyinsight.analysis definition here?
             List<AnalysisItem> sortedList = new ArrayList<AnalysisItem>(feedItems);
-            Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
-            for (AnalysisItem item : feedItems) {
-                map.put(item.toDisplay(), item);
-            }
+
+
             Collections.sort(sortedList, new Comparator<AnalysisItem>() {
 
                 public int compare(AnalysisItem o1, AnalysisItem o2) {
@@ -542,6 +540,7 @@ public class DataService {
                 }
             });
             AnalysisItem[] feedItemArray = new AnalysisItem[sortedList.size()];
+
             sortedList.toArray(feedItemArray);
             FeedMetadata feedMetadata = new FeedMetadata();
             feedMetadata.setFilterExampleMessage(feed.getFilterExampleMessage());
@@ -558,32 +557,18 @@ public class DataService {
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
             feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
             feedMetadata.setDefaultManualRun(feed.getDataSource().isManualReportRun());
-            long defaultTag = feed.getDataSource().getDefaultFieldTag();
-            PreparedStatement tagStmt = conn.prepareStatement("SELECT account_tag.account_tag_id, account_tag.tag_name, field_to_tag.display_name FROM " +
-                    "field_to_tag, account_tag WHERE field_to_tag.account_tag_id = account_tag.account_tag_id AND " +
-                    "field_to_tag.data_source_id = ?");
-            tagStmt.setLong(1, feedID);
-            ResultSet tagRS = tagStmt.executeQuery();
-            Set<Tag> tags = new HashSet<Tag>();
-            while (tagRS.next()) {
-                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), false, false, false);
-                if (!tags.contains(tag)) {
-                    tags.add(tag);
-                    if (tag.getId() == defaultTag) {
-                        feedMetadata.setTagDefault(tag);
+
+            //List<FieldRule> rules = FieldRule.load(conn, feedID);
+
+            /*for (AnalysisItem analysisItem : feedItems) {
+                for (FieldRule rule : rules) {
+                    if (rule.matches(analysisItem)) {
+                        rule.update(analysisItem);
                     }
                 }
-                String name = tagRS.getString(3);
-                AnalysisItem item = map.get(name);
-                if (item != null) {
-                    if (item.getTags() == null) {
-                        item.setTags(new ArrayList<Tag>());
-                    }
-                    item.getTags().add(tag);
-                }
-            }
-            feedMetadata.setTags(new ArrayList<Tag>(tags));
-            tagStmt.close();
+            }*/
+            feedMetadata.setTagDefault(feed.getDefaultTag());
+            feedMetadata.setTags(feed.getTags());
             PreparedStatement ps = conn.prepareStatement("SELECT DEFAULT_MAX_RECORDS FROM ACCOUNT WHERE ACCOUNT_ID = ?");
             ps.setLong(1, SecurityUtil.getAccountID());
             ResultSet rs = ps.executeQuery();
@@ -2043,13 +2028,24 @@ public class DataService {
                 }
             }
 
-
-            feed.getDataSource().decorateLinks(new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values()));
-
             analysisDefinition.tweakReport(aliases);
 
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
+
+            Iterator<AnalysisItem> iter = allFields.iterator();
+            while (iter.hasNext()) {
+                AnalysisItem item = iter.next();
+                if (item.getOrigin() != null) {
+                    if (item.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
+                        System.out.println("Removing " + item.toDisplay() + " from the list of available fields");
+                        iter.remove();
+                    }
+                }
+            }
+
             allFields.addAll(analysisDefinition.allAddedItems(insightRequestMetadata));
+
+
 
             KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields);
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
@@ -2111,10 +2107,38 @@ public class DataService {
             }
             insightRequestMetadata.setFieldToUniqueMap(analysisDefinition.getFieldToUniqueMap());
 
+            Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
+
+            List<FieldRule> rules = FieldRule.load(conn, analysisDefinition.getDataFeedID());
+
+            Map<String, List<Tag>> fieldMap = new HashMap<String, List<Tag>>();
+            for (AnalysisItem field : feed.getFields()) {
+                if (field.getTags() != null) {
+                    fieldMap.put(field.toOriginalDisplayName(), field.getTags());
+                }
+            }
+            for (AnalysisItem analysisItem : items) {
+                analysisItem.setTags(fieldMap.get(analysisItem.toOriginalDisplayName()));
+            }
+
+            for (AnalysisItem analysisItem : items) {
+                for (FieldRule rule : rules) {
+                    if (rule.matches(analysisItem)) {
+                        rule.update(analysisItem, analysisDefinition);
+                    }
+                }
+            }
+
+
+            feed.getDataSource().decorateLinks(new ArrayList<AnalysisItem>(items));
+
+
+
             AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
             structure.setReport(analysisDefinition);
             structure.setConn(conn);
             structure.setInsightRequestMetadata(insightRequestMetadata);
+
             Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields, structure, insightRequestMetadata);
             if (analysisDefinition.isDataSourceFields()) {
                 Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
@@ -2166,6 +2190,8 @@ public class DataService {
                 }
             }
 
+
+
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
 
             for (AnalysisItem analysisItem : analysisItems) {
@@ -2184,8 +2210,9 @@ public class DataService {
 
 
             boolean aggregateQuery = analysisDefinition.isAggregateQueryIfPossible();
-            Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
+
             items.remove(null);
+
             for (AnalysisItem analysisItem : items) {
                 if (analysisItem.blocksDBAggregation()) {
                     aggregateQuery = false;

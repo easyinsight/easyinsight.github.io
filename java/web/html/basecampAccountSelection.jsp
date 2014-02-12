@@ -20,6 +20,8 @@
 <%@ page import="com.easyinsight.core.DataFolder" %>
 <%@ page import="com.easyinsight.html.Utils" %>
 <%@ page import="com.easyinsight.datafeeds.*" %>
+<%@ page import="com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource" %>
+<%@ page import="com.easyinsight.datafeeds.basecampnext.BasecampNextAccount" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -43,52 +45,20 @@
         // find the data source
         // if it requires additional setup (i.e. Basecamp or Smartsheet, redirect appropriately)
 
+        Collection<BasecampNextAccount> accounts;
         FeedResponse feedResponse = new FeedService().openFeedIfPossible(request.getParameter("dataSourceID"));
         if (feedResponse.getStatus() == FeedResponse.SUCCESS) {
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(feedResponse.getFeedDescriptor().getId());
-            if (dataSource.postOAuthSetup(request) != null) {
-                response.sendRedirect(dataSource.postOAuthSetup(request));
-                return;
-            }
+            BasecampNextCompositeSource dataSource = (BasecampNextCompositeSource) new FeedStorage().getFeedDefinitionData(feedResponse.getFeedDescriptor().getId());
+
+            accounts = new UserUploadService().getBasecampAccounts(dataSource);
+        } else {
+            throw new RuntimeException();
+        }
+        if (accounts.size() == 1) {
+            response.sendRedirect("/app/html/dataSources/" + request.getParameter("dataSourceID") + "/basecampAccountChoice/" + accounts.iterator().next().getId());
+            return;
         }
 %>
-<script type="text/javascript">
-
-    $(document).ready(function() {
-        startRefresh();
-    });
-
-    function startRefresh() {
-        $.getJSON('/app/completeInstallation?dataSourceID=<%= request.getParameter("dataSourceID") %>', function(data) {
-            var callDataID = data["callDataID"];
-            again(callDataID);
-        });
-    }
-
-    function onCallData(data, callDataID) {
-        var status = data["status"];
-        if (status == 1) {
-            // running
-            again(callDataID);
-        } else if (status == 2) {
-            // done
-            $.getJSON('/app/connectionInstalled?dataSourceID=<%= request.getParameter("dataSourceID") %>', function(data) {
-                // redirect to result specified by data
-                window.location.replace(data["url"]);
-            });
-        } else {
-            // problem
-        }
-    }
-
-    function again(callDataID) {
-        setTimeout(function() {
-            $.getJSON('/app/refreshStatus?callDataID=' + callDataID, function(data) {
-                onCallData(data, callDataID);
-            });
-        }, 5000);
-    }
-</script>
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
@@ -96,20 +66,24 @@
 <div class="container corePageWell">
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
-            <div class="row">
-                    <div id="messageDiv" style="font-weight: bold;margin-bottom: 10px">Refreshing the data source...</div>
-                    <div class="progress progress-striped active">
-                        <div class="progress-bar"
-                             style="width: 100%;"></div>
-                    </div>
-                </div>
-                <div class="col-md-12" style="text-align:center" id="problemHTML">
-                </div>
-            </div>
+            <div>We found the following options as Basecamp accounts:</div>
         </div>
-
+    </div>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <ul>
+            <%
+                for (BasecampNextAccount account : accounts) {
+                    %>
+                <li>><a href="/app/html/dataSources/<%=request.getParameter("dataSourceID")%>/basecampAccountChoice/<%=account.getId()%>"><%= account.getName()%></a></li>
+                    <%
+                }
+            %>
+            </ul>
+        </div>
     </div>
 </div>
+
 </body>
 <%
     } finally {

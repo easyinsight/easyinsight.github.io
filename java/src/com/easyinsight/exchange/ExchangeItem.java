@@ -20,12 +20,13 @@ public class ExchangeItem {
     private long solutionID;
     private String solutionName;
     private boolean recommended;
+    private long existingInstall;
 
     public ExchangeItem() {
     }
 
     public ExchangeItem(String name, long id, int installs, Date dateAdded, String description,
-                        String author, EIDescriptor descriptor, long solutionID, String solutionName, boolean recommended) {
+                        String author, EIDescriptor descriptor, long solutionID, String solutionName, boolean recommended, long existingInstall) {
         this.name = name;
         this.id = id;
         this.installs = installs;
@@ -36,6 +37,15 @@ public class ExchangeItem {
         this.solutionID = solutionID;
         this.solutionName = solutionName;
         this.recommended = recommended;
+        this.existingInstall = existingInstall;
+    }
+
+    public long getExistingInstall() {
+        return existingInstall;
+    }
+
+    public void setExistingInstall(long existingInstall) {
+        this.existingInstall = existingInstall;
     }
 
     public boolean isRecommended() {

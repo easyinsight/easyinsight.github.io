@@ -44,7 +44,6 @@ public class TreeMapDefinitionState extends AnalysisDefinitionState {
 
     public WSAnalysisDefinition createWSDefinition() {
         WSTreeMapDefinition wsTreeMapDefinition = new WSTreeMapDefinition();
-        wsTreeMapDefinition.setColorScheme(colorScheme);
         wsTreeMapDefinition.setTreeMapDefinitionID(definitionID);
         return wsTreeMapDefinition;
     }

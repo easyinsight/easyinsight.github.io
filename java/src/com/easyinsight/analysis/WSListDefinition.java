@@ -1,7 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.intention.Intention;
@@ -9,6 +7,7 @@ import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.ReportPropertiesIntention;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ListSummaryComponent;
+import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -361,11 +360,16 @@ public class WSListDefinition extends WSAnalysisDefinition {
         setColumns(fields);
     }
 
-    protected int extensionType() {
+    public int extensionType() {
         return ReportFieldExtension.TEXT;
     }
 
     protected boolean accepts(AnalysisItem analysisItem) {
         return true;
+    }
+
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        setSummaryRowTextColor(applicationSkin.getSummaryTextColor());
+        setSummaryRowBackgroundColor(applicationSkin.getSummaryBackgroundColor());
     }
 }

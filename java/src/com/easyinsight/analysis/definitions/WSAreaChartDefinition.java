@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.preferences.ApplicationSkin;
 import flex.messaging.io.ArrayCollection;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -180,5 +181,11 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
 
     protected void assignResults(List<AnalysisItem> fields) {
         setMeasures(fields);
+    }
+
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if ("Primary".equals(getColorScheme())) {
+            setMultiColors(applicationSkin.getMultiColors());
+        }
     }
 }

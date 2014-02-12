@@ -4,6 +4,7 @@ import com.easyinsight.tag.Tag;
 import com.easyinsight.userupload.CustomFolder;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -26,6 +27,15 @@ public class DataSourceDescriptor extends EIDescriptor {
     private List<CustomFolder> customFolders = new ArrayList<CustomFolder>();
     private List<Tag> tags;
     private int rowCount;
+    private Collection<EIDescriptor> prebuilts;
+
+    public Collection<EIDescriptor> getPrebuilts() {
+        return prebuilts;
+    }
+
+    public void setPrebuilts(Collection<EIDescriptor> prebuilts) {
+        this.prebuilts = prebuilts;
+    }
 
     public List<Tag> getTags() {
         return tags;

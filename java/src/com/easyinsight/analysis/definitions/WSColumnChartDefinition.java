@@ -1,19 +1,13 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.*;
-import com.easyinsight.database.EIConnection;
-import com.easyinsight.dataset.DataSet;
-import com.easyinsight.dataset.LimitsResults;
-import com.easyinsight.export.ExportService;
-import com.easyinsight.security.SecurityUtil;
+
+import com.easyinsight.preferences.ApplicationSkin;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -234,6 +228,16 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         return xyz;
     }
 
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if (getMeasures().size() == 1 && "Primary".equals(getColorScheme())) {
+            setChartColor(applicationSkin.getCustomChartColor());
+            setUseChartColor(true);
+            setGradientColor(applicationSkin.getCustomChartColor());
+        } else if (getMeasures().size() > 1 && "Primary".equals(getColorScheme())) {
+            setMultiColors(applicationSkin.getMultiColors());
+        }
+    }
+
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
 
@@ -325,8 +329,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
                 labels.put("location", "'n'");
                 labels.put("show", "true");
                 labels.put("edgetolerance", -15);
-                // TODO: Replace with font
-                labels.put("fontFamily", "'Helvetica Neue'");
+                labels.put("fontFamily", fontName());
                 seriesDefaults.put("pointLabels", labels);
             }
         } catch (JSONException e) {

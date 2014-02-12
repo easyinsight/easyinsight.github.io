@@ -139,6 +139,15 @@ public class DrillThrough extends Link {
         this.miniWindow = miniWindow;
     }
 
+    @Override
+    public Link clone() throws CloneNotSupportedException {
+        DrillThrough drillThrough = (DrillThrough) super.clone();
+        if (passThroughField != null) {
+            drillThrough.setPassThroughField(passThroughField.clone());
+        }
+        return drillThrough;
+    }
+
     public void updateReportIDs(Map<Long, AnalysisDefinition> replacementMap, Map<Long, Dashboard> dashboardReplacementMap) {
         if (reportID != null && reportID > 0) {
             AnalysisDefinition report = replacementMap.get(reportID);

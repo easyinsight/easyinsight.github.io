@@ -393,7 +393,7 @@ public class UserUploadService {
         }
     }
 
-    public List<SolutionInstallInfo> copyDataSource(List<DataSourceDescriptor> dataSources, String newTag, boolean copyData) {
+    /*public List<SolutionInstallInfo> copyDataSource(List<DataSourceDescriptor> dataSources, String newTag, boolean copyData) {
 
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -482,7 +482,7 @@ public class UserUploadService {
             }
             Database.closeConnection(conn);
         }
-    }
+    }*/
 
     private boolean keep(EIDescriptor descriptor, boolean onlyMyData) {
         return !onlyMyData || descriptor.getRole() == Roles.OWNER;
@@ -1497,7 +1497,7 @@ public class UserUploadService {
                     final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                     final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
                     final String personaName = SecurityUtil.getPersonaName();
-                    new Thread(new Runnable() {
+                    DataSourceThreadPool.instance().addActivity(new Runnable() {
 
                         public void run() {
                             SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
@@ -1563,7 +1563,7 @@ public class UserUploadService {
                                 SecurityUtil.clearThreadLocal();
                             }
                         }
-                    }).start();
+                    });
                 } else {
                     credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
                     credentialsResponse.setEstimatedDuration(avgTime);
@@ -1917,7 +1917,7 @@ public class UserUploadService {
                 final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                 final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
                 final String personaName = SecurityUtil.getPersonaName();
-                new Thread(new Runnable() {
+                DataSourceThreadPool.instance().addActivity(new Runnable() {
 
                     public void run() {
                         SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
@@ -1949,7 +1949,7 @@ public class UserUploadService {
                             SecurityUtil.clearThreadLocal();
                         }
                     }
-                }).start();
+                });
             }
             return credentialsResponse;
         } catch (ReportException re) {

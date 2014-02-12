@@ -5,6 +5,7 @@ import com.easyinsight.core.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.LineChartComponent;
+import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -598,5 +599,11 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
 
     protected boolean accepts(AnalysisItem analysisItem) {
         return analysisItem.hasType(AnalysisItemTypes.MEASURE);
+    }
+
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if ("Primary".equals(getColorScheme())) {
+            setMultiColors(applicationSkin.getMultiColors());
+        }
     }
 }

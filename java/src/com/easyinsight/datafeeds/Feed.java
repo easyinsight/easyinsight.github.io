@@ -11,6 +11,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.tag.Tag;
 import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
@@ -26,6 +27,8 @@ import java.io.Serializable;
  */
 public abstract class Feed implements Serializable {
     private FeedDefinition dataSource;
+    private Tag defaultTag;
+    private List<Tag> tags;
     private long feedID;
     private List<AnalysisItem> fields;
     private List<FeedNode> fieldHierarchy;
@@ -40,6 +43,22 @@ public abstract class Feed implements Serializable {
     private Map<String, String> properties;
     private String marmotScript;
     private FeedType feedType;
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
+    public Tag getDefaultTag() {
+        return defaultTag;
+    }
+
+    public void setDefaultTag(Tag defaultTag) {
+        this.defaultTag = defaultTag;
+    }
 
     public void setMarmotScript(String marmotScript) {
         this.marmotScript = marmotScript;

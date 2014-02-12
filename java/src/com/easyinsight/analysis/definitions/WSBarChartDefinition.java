@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -313,6 +314,16 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         JSONObject yAxis = getGroupingAxis(getYaxis());
         axes.put("yaxis", yAxis);
         return axes;
+    }
+
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if (getMeasures().size() == 1 && "Primary".equals(getColorScheme())) {
+            setChartColor(applicationSkin.getCustomChartColor());
+            setUseChartColor(true);
+            setGradientColor(applicationSkin.getCustomChartColor());
+        } else if (getMeasures().size() > 1 && "Primary".equals(getColorScheme())) {
+            setMultiColors(applicationSkin.getMultiColors());
+        }
     }
 
     @Override

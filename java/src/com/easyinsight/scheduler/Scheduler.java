@@ -35,6 +35,8 @@ public class Scheduler {
     private ThreadPoolExecutor executor;
     private Timer timer;
     private boolean running = false;
+    private boolean taskRunning = false;
+    private boolean scheduleRunning = false;
     private Thread thread;
 
     private int claimed = 0;
@@ -63,7 +65,9 @@ public class Scheduler {
 
             public void run() {
                 if (running) {
+                    scheduleRunning = true;
                     scheduleTasks();
+                    scheduleRunning = false;
                 }
             }
         }, new Date(nextMinute), ONE_MINUTE);
@@ -72,12 +76,22 @@ public class Scheduler {
     }
 
     public void stop() {
+        System.out.println("Stopping scheduler...");
         timer.cancel();
         executor.shutdown();
         running = false;
         if (thread != null) {
             thread.interrupt();
         }
+        while (taskRunning && scheduleRunning) {
+            System.out.println("Waiting for task and scheduling to stop...");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+        System.out.println("Stopped scheduler");
     }
 
     private void launchThread() {
@@ -194,6 +208,7 @@ public class Scheduler {
         // retrieve the set of tasks which are in the SCHEDULED state, limit N
         // add them to the thread pool
         while (running) {
+            taskRunning = true;
             boolean obtainedLock = false;
             while (!obtainedLock) {
                 obtainedLock = obtainLock(TASK_LOCK);
@@ -214,6 +229,7 @@ public class Scheduler {
                     executor.execute(task);
                 }
             }
+            taskRunning = false;
         }
     }
 
