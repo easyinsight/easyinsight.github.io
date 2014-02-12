@@ -39,12 +39,23 @@ public class Link implements Cloneable, Serializable {
     @Column(name="default_link")
     private boolean defaultLink;
 
+    @Transient
+    private boolean definedByRule;
+
     public boolean isDefaultLink() {
         return defaultLink;
     }
 
     public void setDefaultLink(boolean defaultLink) {
         this.defaultLink = defaultLink;
+    }
+
+    public boolean isDefinedByRule() {
+        return definedByRule;
+    }
+
+    public void setDefinedByRule(boolean definedByRule) {
+        this.definedByRule = definedByRule;
     }
 
     @Override
