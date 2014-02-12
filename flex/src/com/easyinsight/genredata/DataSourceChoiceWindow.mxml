@@ -4,7 +4,10 @@
         import com.easyinsight.solutions.DataSourceDescriptor;
 
         import mx.collections.ArrayCollection;
+        import mx.containers.GridItem;
+        import mx.containers.GridRow;
         import mx.controls.Alert;
+        import mx.controls.LinkButton;
         import mx.controls.RadioButton;
         import mx.managers.PopUpManager;
 
@@ -16,13 +19,26 @@
 
         protected override function createChildren():void {
             super.createChildren();
-            var i:int = 1;
+
             for each (var descriptor:DataSourceDescriptor in _sources) {
                 var radioButton:RadioButton = new RadioButton();
-                radioButton.label = descriptor.name + "--" + descriptor.description;
+                var str:String = descriptor.name + "--" + descriptor.description;
+                radioButton.label = str;
                 radioButton.groupName = "dataSourceGroup";
                 radioButton.value = descriptor;
-                box.addChildAt(radioButton, i++);
+                var gridRow:GridRow = new GridRow();
+                var mainItem:GridItem = new GridItem();
+                mainItem.addChild(radioButton);
+                gridRow.addChild(mainItem);
+                if (descriptor.prebuilts != null && descriptor.prebuilts.length > 0) {
+                    var lb:LinkButton = new LinkButton();
+                    lb.label = "You've already installed for this data source.";
+                    var nextItem:GridItem = new GridItem();
+                    nextItem.addChild(lb);
+                    gridRow.addChild(nextItem);
+                }
+                grid.addChild(gridRow);
+
             }
         }
 
@@ -35,13 +51,16 @@
             }
         }
         ]]></mx:Script>
-    <mx:VBox id="box" paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10">
-        <mx:Text text="It looks like you have multiple data sources installed into your account which match this report's&#13;data source type. Please choose the one you wish to use for the demonstration of this report:"
-                fontSize="14"/>
-        <mx:RadioButtonGroup id="dataSourceGroup"/>
-        <mx:HBox width="100%" horizontalAlign="center">
-            <util:SaveButton label="Use this Data Source" click="useDataSource()"/>
-            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
-        </mx:HBox>
-    </mx:VBox>
+
+    <mx:Text text="It looks like you have multiple data sources installed into your account which match this report's&#13;data source type. Please choose the one you wish to use for the demonstration of this report:"
+            fontSize="14"/>
+    <mx:Grid id="grid">
+
+    </mx:Grid>
+    <mx:RadioButtonGroup id="dataSourceGroup"/>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Use this Data Source" click="useDataSource()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+
 </util:EISlimWindow>

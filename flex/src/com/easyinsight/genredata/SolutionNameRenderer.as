@@ -11,6 +11,7 @@ import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.listing.ListingChangeEvent;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.report.ReportAnalyzeSource;
+import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
@@ -18,6 +19,7 @@ import com.easyinsight.util.ProgressAlert;
 import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
+import mx.controls.Alert;
 
 import mx.controls.LinkButton;
 import mx.managers.PopUpManager;
@@ -54,9 +56,9 @@ public class SolutionNameRenderer extends LinkButton {
         var descriptor:EIDescriptor = solutionService.installEntity.lastResult as EIDescriptor;
         if (descriptor is InsightDescriptor) {
             var insightDescriptor:InsightDescriptor = descriptor as InsightDescriptor;
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, exchangeItem, _grid.dataProvider as ArrayCollection, _grid.dataProvider.getItemIndex(exchangeItem))));
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor)));
         } else if (descriptor is DashboardDescriptor ){
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, exchangeItem: exchangeItem, reportList: _grid.dataProvider, reportIndex: _grid.dataProvider.getItemIndex(exchangeItem)})));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id})));
         }
     }
 
@@ -73,8 +75,13 @@ public class SolutionNameRenderer extends LinkButton {
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         } else if (dataSources.length == 1) {
-            ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installEntity);
-            solutionService.installEntity.send(exchangeItem.descriptor, dataSources.getItemAt(0).id);
+            var dsd:DataSourceDescriptor = dataSources.getItemAt(0) as DataSourceDescriptor;
+            if (dsd.prebuilts != null && dsd.prebuilts.length > 0) {
+                Alert.show("You've already installed this dashboard into your account.");
+            } else {
+                ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installEntity);
+                solutionService.installEntity.send(exchangeItem.descriptor, dsd.id);
+            }
         } else {
             var dsWindow:DataSourceChoiceWindow = new DataSourceChoiceWindow();
             dsWindow.sources = dataSources;

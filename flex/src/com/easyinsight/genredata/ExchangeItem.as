@@ -18,6 +18,7 @@ public class ExchangeItem {
     public var solutionName:String;
     public var url:String;
     public var recommended:Boolean;
+    public var existingInstall:int;
 
     public function ExchangeItem() {
     }        
