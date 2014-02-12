@@ -47,6 +47,15 @@ public class ApplicationSkin extends EventDispatcher {
     public var gradientChartColor:int;
     public var gradientChartColorEnabled:Boolean;
 
+    public var secondaryColor:int;
+    public var secondaryColorEnabled:Boolean;
+    public var tertiaryColor:int;
+    public var tertiaryColorEnabled:Boolean;
+    public var summaryBackgroundColor:int;
+    public var summaryBackgroundColorEnabled:Boolean;
+    public var summaryTextColor:int;
+    public var summaryTextColorEnabled:Boolean;
+
     public var multiColors:ArrayCollection;
 
     public var dashboardStack1ColorStart:int;
@@ -90,6 +99,14 @@ public class ApplicationSkin extends EventDispatcher {
         customChartColorEnabled = appSkin.customChartColorEnabled;
         gradientChartColor = appSkin.gradientChartColor;
         gradientChartColorEnabled = appSkin.gradientChartColorEnabled;
+        secondaryColor = appSkin.secondaryColor;
+        secondaryColorEnabled = appSkin.secondaryColorEnabled;
+        tertiaryColor = appSkin.tertiaryColor;
+        tertiaryColorEnabled = appSkin.tertiaryColorEnabled;
+        summaryBackgroundColor = appSkin.summaryBackgroundColor;
+        summaryBackgroundColorEnabled = appSkin.summaryBackgroundColorEnabled;
+        summaryTextColor = appSkin.summaryTextColor;
+        summaryTextColorEnabled = appSkin.summaryTextColorEnabled;
         dashboardStack1ColorStart = appSkin.dashboardStack1ColorStart;
         dashboardStack1ColorEnd = appSkin.dashboardStack1ColorEnd;
         dashboardStackColor2Start = appSkin.dashboardStackColor2Start;

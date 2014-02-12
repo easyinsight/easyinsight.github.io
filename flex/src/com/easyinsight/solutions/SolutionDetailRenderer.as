@@ -1,6 +1,7 @@
 package com.easyinsight.solutions {
 
 import com.easyinsight.account.UpgradeEvent;
+import com.easyinsight.administration.feed.BulkFieldEvent;
 import com.easyinsight.administration.feed.BulkFieldWindow;
 import com.easyinsight.administration.feed.FeedDefinitionData;
 import com.easyinsight.analysis.PromptEvent;
@@ -16,6 +17,7 @@ import com.easyinsight.listing.DescriptorAnalyzeSource;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.schedule.DailyScheduleType;
 import com.easyinsight.schedule.DataSourceRefreshActivity;
+import com.easyinsight.skin.ApplicationSkin;
 import com.easyinsight.skin.BackgroundImage;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
@@ -119,15 +121,15 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
             PopUpManager.addPopUp(bulkFieldWindow, DisplayObject(Application.application), true);
             PopUpUtil.centerPopUp(bulkFieldWindow);
         } else {
-            connectionInstalled();
+            connectionInstalled(false);
         }
     }
 
     private function onFieldComplete(event:Event):void {
-        connectionInstalled();
+        connectionInstalled(false);
     }
 
-    private function connectionInstalled():void {
+    private function connectionInstalled(requiresResync:Boolean):void {
         var kpiData:SolutionKPIData = new SolutionKPIData();
         kpiData.dataSourceID = installResult.dataFeedID;
         if (DataSourceBehavior.pullDataSource(installResult.dataSourceBehavior)) {
@@ -152,6 +154,11 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     }
 
     private function installed(event:Event):void {
+        var steps:PostInstallSteps = solutionService.addKPIData.lastResult as PostInstallSteps;
+        if (steps.applicationSkin != null) {
+            User.getInstance().applicationSkin = steps.applicationSkin;
+            ApplicationSkin.instance().applyUserSettings(steps.applicationSkin);
+        }
         dispatchEvent(new NavigationEvent("Home", null, { dataSourceDescriptor: dataSourceDescriptor, freshInstall: true}));
         PopUpManager.removePopUp(this);
     }

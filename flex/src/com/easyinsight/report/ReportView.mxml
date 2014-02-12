@@ -76,16 +76,6 @@
             dispatchEvent(new Event("retrievalStateChanged"));
         }
 
-        override protected function keptEntity():void {
-            _showAddBar = false;
-            generateState();
-            var window:ReportAddedWindow = new ReportAddedWindow();
-            window.report = report;
-            window.addEventListener("editReport", onEdit, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
         private function onEdit(event:Event):void {
             toReportEditor();
         }
@@ -417,12 +407,12 @@
                 }
                 _breadCrumbs.push(new BreadCrumb(desc, transformContainer.getFilterDefinitions(), positions, selectedConfiguration));
                 if (event.descriptor is InsightDescriptor) {
-                    dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, exchangeItem, reportList, reportIndex, _breadCrumbs,
-                            originalExchangeItem != null ? originalExchangeItem : desc, event.additionalItems)));
+                    dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, _breadCrumbs,
+                            event.additionalItems)));
                 } else if (event.descriptor is DashboardDescriptor) {
                     dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
-                        initialFilters:event.filters, exchangeItem:exchangeItem, reportList:reportList, reportIndex:reportIndex,
-                        breadCrumbs:_breadCrumbs, originalExchangeItem:originalExchangeItem != null ? originalExchangeItem : desc})));
+                        initialFilters:event.filters,
+                        breadCrumbs:_breadCrumbs})));
                 }
             } else {
                 _reportNavHandler.call(null, event);
@@ -556,7 +546,7 @@
 
                 // if filters were passed in
                 overlayIndex = 0;
-                if (_reportID != 0 && exchangeItem == null) {
+                if (_reportID != 0) {
                     UserAudit.instance().log(new ActionReportLog(ActionReportLog.VIEW, _reportID));
                 }
                 if (_breadCrumbs != null && _breadCrumbs.length > 0) {
@@ -567,13 +557,13 @@
                     backButton.addEventListener(MouseEvent.CLICK, function (event:MouseEvent):void {
                         _breadCrumbs.pop();
                         if (crumb.eiDescriptor is InsightDescriptor) {
-                            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), null, null, null, 0, _breadCrumbs, null, null, crumb.stackPositions,
+                            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), null, _breadCrumbs, null, crumb.stackPositions,
                                 crumb.savedConfiguration)));
                         } else {
                             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:crumb.eiDescriptor.id,
                                 initialFilters:crumb.filters,
-                                exchangeItem:exchangeItem, reportList:reportList, reportIndex:reportIndex,
-                                breadCrumbs:_breadCrumbs, originalExchangeItem:originalExchangeItem != null ? originalExchangeItem : desc, dashboardStackPositions:crumb.stackPositions})));
+
+                                breadCrumbs:_breadCrumbs, dashboardStackPositions:crumb.stackPositions})));
                         }
                     });
                     breadCrumbBox.addChild(backButton);
@@ -637,7 +627,7 @@
                 options.addItem({ label: sc.name, data: sc });
             }
 
-            if (!_forceDefault && report.enableLocalStorage && exchangeItem == null && selectedConfiguration == null) {
+            if (!_forceDefault && report.enableLocalStorage && selectedConfiguration == null) {
 
                 /*var delegate:DashboardStackPositionsRetrievalState = null;
                  if (dashboardStackPositions != null) {
@@ -646,20 +636,18 @@
                 retrievalState = new LocalStorageRetrievalState(report.urlKey, 0, null);
             }
 
-            if (exchangeItem == null) {
-                var editItem:ContextMenuItem = new ContextMenuItem("Edit " + report.name);
-                editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-                    toReportEditor();
-                });
-                var exportItem:ContextMenuItem = new ContextMenuItem("Export " + report.name);
-                exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-                    exportExcel();
-                });
-                var menu:ContextMenu = new ContextMenu();
-                menu.hideBuiltInItems();
-                menu.customItems = [ editItem, exportItem ];
-                viewFactory.contextMenu = menu;
-            }
+            var editItem:ContextMenuItem = new ContextMenuItem("Edit " + report.name);
+            editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
+                toReportEditor();
+            });
+            var exportItem:ContextMenuItem = new ContextMenuItem("Export " + report.name);
+            exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
+                exportExcel();
+            });
+            var menu:ContextMenu = new ContextMenu();
+            menu.hideBuiltInItems();
+            menu.customItems = [ editItem, exportItem ];
+            viewFactory.contextMenu = menu;
 
             reportName = report.name;
             description = report.description;
@@ -776,7 +764,7 @@
                 removeExportButton.target = exportButton;
                 ops.push(removeExportButton);
             }
-            if (!_showReportEditor || _showAddBar || User.getInstance().guestUser || !User.getInstance().analyst) {
+            if (!_showReportEditor || User.getInstance().guestUser || !User.getInstance().analyst) {
                 var removeEditButton:RemoveChild = new RemoveChild();
                 removeEditButton.target = editReportButton;
                 ops.push(removeEditButton);
@@ -802,31 +790,25 @@
             } else {
                 currentState = "";
             }
-            showReportInfoButton = !_showAddBar && description != null && description != "";
-            if (!_showAddBar && contains(box)) {
+            showReportInfoButton = description != null && description != "";
+            if (contains(box)) {
                 removeChild(box);
             }
             box.visible = true;
-            if (!_showAddBar) {
-                if (selectedConfiguration != null) {
-                    var feedFragmentObject:Object = new Object();
-                    feedFragmentObject.reportConfigurationID = selectedConfiguration.urlKey;
-                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                    BrowserManager.getInstance().setFragment(feedFragmentString);
-                } else if (stackPositions == null) {
-                    var feedFragmentObject:Object = new Object();
-                    feedFragmentObject.reportID = report.urlKey;
-                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                    BrowserManager.getInstance().setFragment(feedFragmentString);
-                }
-                BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-            } else {
-                var templateFragmentObject:Object = new Object();
-                templateFragmentObject.reportTemplateID = exchangeItem.descriptor.urlKey;
-                var templateFragmentString:String = URLUtil.objectToString(templateFragmentObject);
-                BrowserManager.getInstance().setFragment(templateFragmentString);
-                BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+
+            if (selectedConfiguration != null) {
+                var feedFragmentObject:Object = new Object();
+                feedFragmentObject.reportConfigurationID = selectedConfiguration.urlKey;
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
+            } else if (stackPositions == null) {
+                var feedFragmentObject:Object = new Object();
+                feedFragmentObject.reportID = report.urlKey;
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
             }
+            BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+
         }
 
         private function toggleReportInfo():void {
@@ -970,7 +952,7 @@
             desc.dataFeedID = report.dataFeedID;
             desc.reportType = report.reportType;
             desc.urlKey = report.urlKey;
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(desc, null, null, null, 0, null, null, null, config.dashboardStackPositions,
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(desc, null, null, null, config.dashboardStackPositions,
                     config)));
         }
         ]]></mx:Script>
@@ -1027,9 +1009,7 @@
     </mx:HBox>
 
     <mx:Box width="100%" styleName="descriptionContainer" id="box" visible="false" paddingTop="5">
-        <report:DefaultDescriptionArea previousReportLabel="{previousReportLabel}" previousReportAvailable="{previousReportAvailable}"
-                nextReportAvailable="{nextReportAvailable}" nextReportLabel="{nextReportLabel}" showAdd="{_showAddBar}" description="{description}"
-                previousReport="toPreviousReport()" nextReport="toNextReport()" saveToAccount="keepEntity()"/>
+        <report:DefaultDescriptionArea description="{description}"/>
     </mx:Box>
     <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
         <mx:Box/>
