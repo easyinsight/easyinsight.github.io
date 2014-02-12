@@ -13,6 +13,7 @@ import flash.events.Event;
 public class DataSourceEvent extends Event {
 
     public static const NAVIGATE_TO_DATA_SOURCE:String = "navigateToDataSource";
+    public static const ADD_DATA_SOURCE:String = "addDataSource";
 
     public var descriptor:DataSourceDescriptor;
 
