@@ -61,7 +61,6 @@ public class AnalysisDefinitionFactory {
             WSTreeMapDefinition wsTree = (WSTreeMapDefinition) wsAnalysisDefinition;
             TreeMapDefinitionState treeMapDefinitionState = new TreeMapDefinitionState();
             treeMapDefinitionState.setDefinitionID(wsTree.getTreeMapDefinitionID());
-            treeMapDefinitionState.setColorScheme(wsTree.getColorScheme());
             analysisDefinitionState = treeMapDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TREE)) {
             WSTreeDefinition wsTree = (WSTreeDefinition) wsAnalysisDefinition;
