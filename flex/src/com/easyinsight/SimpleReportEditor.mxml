@@ -49,11 +49,13 @@
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.analysis.FeedNode;
+        import com.easyinsight.analysis.FieldDataSourceOrigin;
         import com.easyinsight.analysis.FieldDoubleClickEvent;
         import com.easyinsight.analysis.FieldEditorEvent;
         import com.easyinsight.analysis.FieldFilterWindow;
         import com.easyinsight.analysis.FilterSetManageWindow;
         import com.easyinsight.analysis.FilterSetReportEvent;
+        import com.easyinsight.analysis.FolderNode;
         import com.easyinsight.analysis.GenericDefinitionEditWindow;
         import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.IReportController;
@@ -94,6 +96,7 @@
         import com.easyinsight.report.ReportExportWindow;
         import com.easyinsight.report.ReportNavigationEvent;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.suggestion.DataSourceLevelFieldReport;
         import com.easyinsight.suggestion.IntentionListWindow;
         import com.easyinsight.suggestion.IntentionSuggestion;
         import com.easyinsight.suggestion.IntentionTriggerEvent;
@@ -606,12 +609,24 @@
                 availableFields = new ArrayCollection();
                 wrappers = new ArrayCollection();
                 for each (var feedNode:FeedNode in feedMetadata.fieldHierarchy) {
-                    var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(feedNode);
+                    var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(feedNode, analysisDefinition != null ? analysisDefinition.analysisID : 0);
+                    if (analysisWrapper.feedNode != null && analysisWrapper.feedNode is FolderNode && analysisWrapper.children != null && analysisWrapper.children.length == 0) {
+                        continue;
+                    }
                     if (!analysisWrapper.hidden) {
                         availableFields.addItem(analysisWrapper);
                     }
                 }
+                // TODO: x
                 for each (var listItem:AnalysisItem in feedMetadata.fields) {
+                    if (analysisDefinition != null) {
+                        var origin:FieldDataSourceOrigin = listItem.origin;
+                        if (origin != null) {
+                            if (origin.report == analysisDefinition.analysisID) {
+                                continue;
+                            }
+                        }
+                    }
                     var analysisNode:AnalysisItemNode = new AnalysisItemNode();
                     analysisNode.analysisItem = listItem;
                     //listItem.fieldListField = true;
@@ -651,6 +666,10 @@
                     assignSuggestions(feedMetadata.suggestions);
 
                 } else {
+                    if (analysisDefinition.dataSourceFieldReport) {
+                        var df:DataSourceLevelFieldReport = new DataSourceLevelFieldReport();
+                        rightBox.addChildAt(df, 0);
+                    }
                     //this.title = analysisDefinition.name;
                     if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
                         saveAllowed = false;
@@ -1287,14 +1306,14 @@
             window.definition = analysisDefinition;
             window.allFields = getWrappers();
             window.startIndex = index;
-            window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, function (event:ReportPreferencesEvent):void {
+            /*window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, function (event:ReportPreferencesEvent):void {
                 dispatchEvent(new AnalysisChangedEvent());
                 if (event.refreshData) {
                     dataView.forceRetrieve();
                 } else {
                     dataView.rerender();
                 }
-            }, false, 0, true);
+            }, false, 0, true);*/
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -1464,29 +1483,6 @@
                 dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID , urlKey: feedMetadata.urlKey})));
             }
         }
-
-        /*private function onChange():void {
-         IHierarchicalCollectionView(fieldGrid.dataProvider).refresh();
-         }
-
-         private function onDataChange():void {
-         IHierarchicalCollectionView(fieldGrid.dataProvider).filterFunction = filterFields;
-         }*/
-
-        /*private function filterFields(item:Object):Boolean {
-         if (findFieldInput.text != null && findFieldInput.text.length > 0) {
-         var wrapper:AnalysisItemWrapper = item as AnalysisItemWrapper;
-         var children:ICollectionView = IHierarchicalCollectionView(fieldGrid.dataProvider).getChildren(wrapper);
-         children.filterFunction = filterFields;
-         children.refresh();
-         if (children.length > 0 || wrapper.displayName.toLowerCase().indexOf(findFieldInput.text.toLowerCase()) != -1) {
-         return true;
-         } else {
-         return false;
-         }
-         }
-         return true;
-         }*/
 
         [Bindable]
         private var reportMode:String = "all";
