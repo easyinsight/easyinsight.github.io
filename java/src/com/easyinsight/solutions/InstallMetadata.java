@@ -245,6 +245,10 @@ class InstallMetadata {
 
         log("Adding " + report.getTitle() + " as a distinct source");
 
+        if (!(targetSource instanceof CompositeFeedDefinition)) {
+            return;
+        }
+
         CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) targetSource;
 
         // is this data source already added to the data source as a distinct cached node?
@@ -304,6 +308,9 @@ class InstallMetadata {
     }
 
     public void copyAdditionalConnections() throws SQLException {
+        if (!(targetSource instanceof CompositeFeedDefinition)) {
+            return;
+        }
         CompositeServerDataSource source = (CompositeServerDataSource) originalSource;
         CompositeServerDataSource target = (CompositeServerDataSource) targetSource;
 
@@ -343,6 +350,9 @@ class InstallMetadata {
     }
 
     public List<InsightDescriptor> findDistinctCachedAddons() throws SQLException {
+        if (!(targetSource instanceof CompositeFeedDefinition)) {
+            return new ArrayList<InsightDescriptor>();
+        }
         List<InsightDescriptor> ids = new ArrayList<InsightDescriptor>();
         PreparedStatement dsFieldStmt = conn.prepareStatement("SELECT COMPOSITE_NODE.DATA_FEED_ID, distinct_cached_addon_report_source.report_id, data_feed.feed_name " +
                 "FROM COMPOSITE_NODE, DATA_FEED, distinct_cached_addon_report_source, analysis, composite_feed WHERE " +
