@@ -33,19 +33,16 @@
         import com.easyinsight.filtering.FilterRawData;
 
         import mx.charts.ChartItem;
-        import mx.charts.chartClasses.CartesianTransform;
+        import mx.charts.HitData;
         import mx.charts.chartClasses.DataTip;
-        import mx.charts.chartClasses.DataTransform;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
-
         import mx.charts.events.ChartItemEvent;
         import mx.charts.renderers.CircleItemRenderer;
         import mx.charts.series.PlotSeries;
         import mx.charts.series.items.PlotSeriesItem;
-        import mx.formatters.Formatter;
-        import mx.charts.HitData;
         import mx.collections.ArrayCollection;
+        import mx.formatters.Formatter;
         import mx.formatters.NumberFormatter;
 
         [Bindable]
@@ -198,7 +195,7 @@
         }
 
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
@@ -228,7 +225,7 @@
             else
                 plotChart.selectionMode = "none";
         }
-		]]>
+        ]]>
 	</mx:Script>
 
     <mx:Stroke id="borderStroke" alpha="0"/>

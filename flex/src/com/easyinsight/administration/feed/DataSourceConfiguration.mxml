@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" label="Data Source Configuration" styleName="fallThroughFonts"
+        paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:Script><![CDATA[
+        import com.easyinsight.datasources.CompositeServerDataSource;
+        import com.easyinsight.util.PopUpUtil;
+
+
+        import mx.managers.PopUpManager;
+
+        private var _feedDefinition:FeedDefinitionData;
+
+
+        [Bindable(event="feedDefinitionChanged")]
+        public function get feedDefinition():FeedDefinitionData {
+            return _feedDefinition;
+        }
+
+        public function set feedDefinition(value:FeedDefinitionData):void {
+            if (_feedDefinition == value) return;
+            _feedDefinition = value;
+            dispatchEvent(new Event("feedDefinitionChanged"));
+            invalidateProperties();
+        }
+
+        private function fieldTags():void {
+            var window:FieldTagging = new FieldTagging();
+            window.dataSourceID = feedDefinition.dataFeedID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (feedDefinition != null && !(feedDefinition is CompositeServerDataSource)) {
+                if (addonBox && addonBox.parent) {
+                    removeChild(addonBox);
+                }
+                if (addonRule && addonRule.parent) {
+                    removeChild(addonRule);
+                }
+            }
+        }
+
+        private function fieldExtensions():void {
+            var window:ServerDataSourceConfiguration = new ServerDataSourceConfiguration();
+            window.dataSource = feedDefinition as CompositeServerDataSource;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function moreStuff():void {
+            var window:DataSourceReports = new DataSourceReports();
+            window.dataSourceID = feedDefinition.dataFeedID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function evenMoreStuff():void {
+            var window:ManageFieldRuleWindow = new ManageFieldRuleWindow();
+            window.dataSourceID = feedDefinition.dataFeedID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        // hypothetical "snapshot" source
+        // run report XYZ
+        // for date D
+        // D could be year, quarter, month
+        // snapshot process could be done
+        ]]></mx:Script>
+    <mx:HBox verticalAlign="middle">
+        <mx:Text text="Field Tags" width="100" fontWeight="bold"/>
+        <mx:Text width="400" text="Field tags enable you to categorize fields by different tags. You can use these tags to reduce the fields shown in the report editor, set up multi field filters based on these tags, and use the tags to generally manage your fields."/>
+        <util:SaveButton label="Configure Field Tags" click="fieldTags()" fontSize="12"/>
+    </mx:HBox>
+    <mx:HRule width="700" id="addonRule"/>
+    <mx:HBox  verticalAlign="middle" id="addonBox">
+        <mx:Text text="Addon Reports" width="100" fontWeight="bold"/>
+        <mx:Text width="400" text="You can build complex custom fields with addon reports, create report based connections against those reports, then add those fields into the data source to drag and drop into reports the same way you work with any other fields on the data source."/>
+        <util:SaveButton label="Configure Additional Sources" click="fieldExtensions()" fontSize="12"/>
+    </mx:HBox>
+    <mx:HRule width="700"/>
+    <mx:HBox  verticalAlign="middle">
+        <mx:Text text="Data Source Field Reports" width="100" fontWeight="bold"/>
+        <mx:Text width="400" text="Field reports allow you to flexibly abstract away data source level calculations and other custom fields from the data source itself. Any designated fields on reports included in this section will appear on the data source as standard fields."/>
+        <util:SaveButton label="Configure Field Reports" click="moreStuff()" fontSize="12"/>
+    </mx:HBox>
+    <mx:HRule width="700"/>
+    <mx:HBox  verticalAlign="middle">
+        <mx:Text text="Field Rules" width="100" fontWeight="bold"/>
+        <mx:Text width="400" text="Field rules specify drillthroughs or default report behaviors for one or more fields in the data source. For example, 'All fields of type Measure should be right aligned in list reports' or 'All fields tagged as Sales should drill down into the Sales Detail report.'"/>
+        <util:SaveButton label="Configure Field Rules" fontSize="12" click="evenMoreStuff()"/>
+    </mx:HBox>
+</mx:VBox>

@@ -4,6 +4,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.listing.Tag;
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.TagSelectionEvent;
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
@@ -45,6 +46,7 @@
                 tagOptions.addItem({label: "Remove tag - " + opTag.name + " - from selected", data: opTag, op: "remove"});
             }
             this.tagOptions = tagOptions;
+            this.tags = tags;
         }
 
         private function onTagItemClick(event:MenuEvent):void {
@@ -134,13 +136,22 @@
 
         private function valuesFilterFunction(o:Object):Boolean {
             var result:Boolean = true;
-
+            if (result) {
+                result = tagBox.filterObject(o);
+            }
             return result && (o.display as String).toLowerCase().indexOf(filterString.toLowerCase()) != -1;
         }
 
         private function save():void {
             ProgressAlert.alert(this, "Saving...", null, feedService.updateAnalysisItemConfigurations);
             feedService.updateAnalysisItemConfigurations.send(fields, dataSourceID);
+        }
+
+        [Bindable]
+        private var tags:ArrayCollection;
+
+        private function onTagSelect(event:TagSelectionEvent):void {
+            filteredFields.refresh();
         }
         ]]></mx:Script>
     <mx:Style>
@@ -167,6 +178,7 @@
         <mx:Image source="@Embed('../../../../../assets/icon-search-black.png')"/>
         <mx:TextInput id="filterBox" width="100%" change="filterBox_changeHandler(event)"/>
     </mx:HBox>
+    <util:TagBox tags="{tags}" onTagSelect="onTagSelect(event)" id="tagBox" width="100%"/>
     <mx:DataGrid dataProvider="{filteredFields}" wordWrap="true" variableRowHeight="true" height="450" id="dataGrid">
         <mx:columns>
             <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>

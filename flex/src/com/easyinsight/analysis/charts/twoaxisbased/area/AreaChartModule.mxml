@@ -7,27 +7,23 @@
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
-
         import com.easyinsight.analysis.AnalysisDateDimension;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisMeasure;
-
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.MultiColor;
         import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.EILegend;
-
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
+        import mx.charts.AreaChart;
         import mx.charts.AxisRenderer;
-
         import mx.charts.CategoryAxis;
         import mx.charts.DateTimeAxis;
         import mx.charts.HitData;
-        import mx.charts.AreaChart;
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.events.ChartItemEvent;
@@ -112,7 +108,7 @@
 
             areaChart = new AreaChart();
             areaChartDef.styleChart(areaChart);
-            areaChart.addEventListener("legendDataChanged", function(event:Event):void {
+            areaChart.addEventListener("legendDataChanged", function (event:Event):void {
                 legend.dataProvider = areaChart.legendData;
             });
             areaChart.showDataTips = true;
@@ -274,7 +270,7 @@
             hbox.addChildAt(areaChart, 0);
         }
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function preserveValues():Boolean {
@@ -282,6 +278,7 @@
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
-        }]]></mx:Script>
+        }
+        ]]></mx:Script>
     <mx:HBox width="100%" height="100%" id="hbox"/>
 </mx:Module>

@@ -71,10 +71,10 @@
             labelColumn.sortable = false;
             labelColumn.width = vert.headerWidth;
             var cf:ClassFactory = new ClassFactory(VerticalListRowHeaderRenderer);
-            cf.properties = { report: vert};
+            cf.properties = { report:vert};
             labelColumn.itemRenderer = cf;
             var labelHeaderFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
-            labelHeaderFactory.properties = { headerText: "" };
+            labelHeaderFactory.properties = { headerText:"" };
             labelColumn.headerRenderer = labelHeaderFactory;
             labelColumn.dataField = "Label";
             columns.push(labelColumn);
@@ -151,11 +151,11 @@
                         dataColumn.headerText = columnValue;
                         dataColumn.dataField = columnValue;
                         var factory:ClassFactory = new ClassFactory(VerticalListRenderer);
-                        factory.properties = { qualifiedName: columnValue, report: report };
+                        factory.properties = { qualifiedName:columnValue, report:report };
                         dataColumn.itemRenderer = factory;
                         dataColumn.sortable = false;
                         var headerFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
-                        headerFactory.properties = { headerText: columnValue };
+                        headerFactory.properties = { headerText:columnValue };
                         dataColumn.headerRenderer = headerFactory;
                         columns.push(dataColumn);
                     }
@@ -251,7 +251,7 @@
          }
          }*/
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {

@@ -110,7 +110,7 @@
             dispatchEvent(new ReportRendererEvent(ReportRendererEvent.REMOVE_ITEM, node.outcome.measure));
         }
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {

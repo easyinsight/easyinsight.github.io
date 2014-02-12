@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                   xmlns:analysis="com.easyinsight.analysis.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.Link;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.managers.PopUpManager;
+
+        private function save():void {
+            var valid:Boolean = linkPanel.validate();
+            if (!valid) {
+                return;
+            }
+            var link:Link = linkPanel.save();
+            dispatchEvent(new FieldRuleEvent(FieldRuleEvent.DEFINE_LINK, null, link));
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        public var link:Link;
+
+        [Bindable]
+        public var dataSourceID:int;
+
+        [Bindable]
+        public var analysisItems:ArrayCollection;
+        ]]></mx:Script>
+    <analysis:NewLinkPanel link="{link}" dataSourceID="{dataSourceID}" analysisItems="{analysisItems}" id="linkPanel"/>
+    <mx:HBox>
+        <util:SaveButton label="Use This Link" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

@@ -7,7 +7,6 @@
         import com.easyinsight.analysis.CustomChangeEvent;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.formatters.Formatter;
 
         [Bindable]
@@ -56,7 +55,7 @@
                 var reportVal:Number = Number(row[gaugeDefinition.measure.qualifiedName()]);
                 value = Math.min(maxValue, reportVal);
                 gauge.alertRatios = [ gaugeDefinition.alertPoint1, gaugeDefinition.alertPoint2 ];
-                gauge.alertColors = [ gaugeDefinition.color1, gaugeDefinition.color2,  gaugeDefinition.color3 ];
+                gauge.alertColors = [ gaugeDefinition.color1, gaugeDefinition.color2, gaugeDefinition.color3 ];
                 numFormatter = gaugeDefinition.measure.getFormatter();
                 if (gaugeDefinition.benchmarkMeasure != null) {
                     benchmarkValue = "Benchmark: " + gaugeDefinition.benchmarkMeasure.getFormatter().format(row[gaugeDefinition.benchmarkMeasure.qualifiedName()]);
@@ -71,7 +70,7 @@
             }
         }
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function preserveValues():Boolean {

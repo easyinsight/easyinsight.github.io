@@ -9,11 +9,11 @@
         import com.easyinsight.analysis.DrillThrough;
         import com.easyinsight.analysis.DrillThroughEvent;
         import com.easyinsight.analysis.DrillThroughExecutor;
-        import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.analysis.Link;
         import com.easyinsight.analysis.ReportWindowEvent;
         import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.report.ReportNavigationEvent;
+        import com.easyinsight.solutions.InsightDescriptor;
         import com.google.maps.InfoWindowOptions;
         import com.google.maps.LatLng;
         import com.google.maps.MapEvent;
@@ -189,15 +189,15 @@
                 var link:Link = heatMapDefinition.zipCode.links.getItemAt(0) as Link;
                 if (link is DrillThrough) {
                     var executor:DrillThroughExecutor = new DrillThroughExecutor(link as DrillThrough, point, heatMapDefinition.zipCode, heatMapDefinition);
-                    executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, function(event:DrillThroughEvent):void {
+                    executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, function (event:DrillThroughEvent):void {
                         /*var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
-                        var coordinateValue:CoordinateValue = point[heatMapDefinition.zipCode.qualifiedName()];
-                        filterDefinition.field = heatMapDefinition.getCoreAnalysisItem(heatMapDefinition.zipCode);
-                        filterDefinition.filteredValues = new ArrayCollection([coordinateValue.zip]);
-                        filterDefinition.enabled = true;
-                        filterDefinition.inclusive = true;
-                        filterDefinition.singleValue = true;
-                        var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);*/
+                         var coordinateValue:CoordinateValue = point[heatMapDefinition.zipCode.qualifiedName()];
+                         filterDefinition.field = heatMapDefinition.getCoreAnalysisItem(heatMapDefinition.zipCode);
+                         filterDefinition.filteredValues = new ArrayCollection([coordinateValue.zip]);
+                         filterDefinition.enabled = true;
+                         filterDefinition.inclusive = true;
+                         filterDefinition.singleValue = true;
+                         var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);*/
                         if (event.drillThrough.miniWindow) {
                             dispatchEvent(new ReportWindowEvent(event.drillThroughResponse.descriptor.id, 0, 0, event.drillThroughResponse.filters,
                                     InsightDescriptor(event.drillThroughResponse.descriptor).dataFeedID,
@@ -215,10 +215,10 @@
                 marker.openInfoWindow(options);
             }
             /*var lookup:String = ll.lat() + "-" + ll.lng();
-            var obj:Object = pointDictionary[lookup];
-            var options:InfoWindowOptions = new InfoWindowOptions();
-            options.contentHTML = "<p>" + heatMapDefinition.measure.display + ": <b>" + obj[heatMapDefinition.measure.qualifiedName()] + "</b></p>";
-            marker.openInfoWindow(options);*/
+             var obj:Object = pointDictionary[lookup];
+             var options:InfoWindowOptions = new InfoWindowOptions();
+             options.contentHTML = "<p>" + heatMapDefinition.measure.display + ": <b>" + obj[heatMapDefinition.measure.qualifiedName()] + "</b></p>";
+             marker.openInfoWindow(options);*/
         }
 
         private function addHeatMap():void {
@@ -251,7 +251,7 @@
                         }
                     } else {
                         if (point[heatMapDefinition.longitudeItem.qualifiedName()] != 0 ||
-                            point[heatMapDefinition.latitudeItem.qualifiedName()] != 0) {
+                                point[heatMapDefinition.latitudeItem.qualifiedName()] != 0) {
                             data.addItem(point);
                         }
                     }
@@ -267,7 +267,7 @@
             return null;
         }
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         private function latLonToPoint(o:Object):Object {
@@ -293,7 +293,8 @@
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
-        }]]></mx:Script>
+        }
+        ]]></mx:Script>
     <maps:Map xmlns:maps="com.google.maps.*" id="map" mapevent_mapready="onMapReady(event)" 
   width="100%" height="100%" key="ABQIAAAA2117HwaIOF-a5ho2SalSZxQw7JNcT96mmHPfRfrQHk2xuzdGoxSekTo3OqnayhJZONwWnFdGSn_0HQ"
             sensor="false"/>

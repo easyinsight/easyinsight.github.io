@@ -60,7 +60,7 @@
             return null;
         }
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
@@ -68,7 +68,8 @@
 
         public function preserveValues():Boolean {
             return false;
-        }]]></mx:Script>
+        }
+        ]]></mx:Script>
     <ilog:ResourceChart id="resourceChart" width="100%" height="100%" taskEndTimeField="{endTime}"
                         taskStartTimeField="{startTime}" taskLabelField="{fullLabel}"
                         resourceDataProvider="{resources}" taskDataProvider="{tasks}" resourceIdField="{labelField}"

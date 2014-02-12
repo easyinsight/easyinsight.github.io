@@ -12,17 +12,14 @@
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisMeasure;
-
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.MultiColor;
         import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.EILegend;
-
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
         import mx.charts.AxisRenderer;
-
         import mx.charts.CategoryAxis;
         import mx.charts.DateTimeAxis;
         import mx.charts.HitData;
@@ -177,7 +174,6 @@
                 lineChart.verticalAxis = verticalAxis;
 
 
-
                 var strokes:Array = [];
                 var useCustomColors:Boolean;
                 var colors:Array;
@@ -328,7 +324,7 @@
             }
         }
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function preserveValues():Boolean {

@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" implements="com.easyinsight.administration.feed.IFeedAdminDetail"
+        label="Additional Sources" paddingTop="10">
+    <mx:Script><![CDATA[
+        import com.easyinsight.datasources.CompositeServerDataSource;
+        import com.easyinsight.datasources.DataSourceType;
+        import com.easyinsight.feedassembly.CompositeFeedConnection;
+        import com.easyinsight.feedassembly.CompositeFeedNode;
+        import com.easyinsight.feedassembly.DSPickJoinWindow;
+        import com.easyinsight.feedassembly.JoinSelectionEvent;
+        import com.easyinsight.listing.DataSourceEvent;
+        import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var dataSources:ArrayCollection;
+
+        private var allSources:ArrayCollection;
+
+        [Bindable]
+        private var connections:ArrayCollection;
+
+        public var dataSource:CompositeServerDataSource;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            var nonIntrinsicNodes:ArrayCollection = new ArrayCollection();
+            allSources = new ArrayCollection();
+            for each (var node:CompositeFeedNode in dataSource.compositeFeedNodes) {
+                if (node.dataSourceType == DataSourceType.DISTINCT_CACHED || node.dataSourceType == DataSourceType.STATIC || node.dataSourceType == DataSourceType.EMPTY ||
+                        node.dataSourceType == DataSourceType.GOOGLE) {
+                    nonIntrinsicNodes.addItem(node);
+                }
+                var ds:DataSourceDescriptor = new DataSourceDescriptor();
+                ds.name = node.dataSourceName;
+                ds.id = node.dataFeedID;
+                ds.dataSourceType = node.dataSourceType;
+                allSources.addItem(ds);
+            }
+            dataSources = nonIntrinsicNodes;
+            connections = (dataSource.addonConnections == null) ? new ArrayCollection() : dataSource.addonConnections;
+        }
+
+        private function addDataSource():void {
+            var window:AddDataSourceWindow = new AddDataSourceWindow();
+            window.dataSourceID = dataSource.dataFeedID;
+            window.addEventListener(DataSourceEvent.ADD_DATA_SOURCE, onAdd);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function addConnection():void {
+            var window:DSPickJoinWindow = new DSPickJoinWindow();
+            window.dataSources = allSources;
+            window.addEventListener(JoinSelectionEvent.JOIN_SELECTION, joinsSelected, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function joinsSelected(event:JoinSelectionEvent):void {
+            var edges:ArrayCollection = event.addedJoins;
+            for each (var compositeFeedConnection:CompositeFeedConnection in edges) {
+                connections.addItem(compositeFeedConnection);
+            }
+        }
+
+        private function onAdd(event:DataSourceEvent):void {
+            var node:CompositeFeedNode = new CompositeFeedNode();
+            node.dataFeedID = event.descriptor.id;
+            node.dataSourceName = event.descriptor.name;
+            dataSources.addItem(node);
+        }
+
+        private function removeSelected():void {
+            var selected:ArrayCollection = new ArrayCollection();
+            for each (var o:CompositeFeedNode in dataSource.compositeFeedNodes) {
+                if (o.selected) {
+                    selected.addItem(o);
+                }
+            }
+            for each (var s:CompositeFeedNode in selected) {
+                dataSources.removeItemAt(dataSources.getItemIndex(s));
+            }
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+
+        private function save():void {
+            var toRemove:ArrayCollection = new ArrayCollection();
+            for each (var node:CompositeFeedNode in dataSource.compositeFeedNodes) {
+                if (node.dataSourceType == DataSourceType.DISTINCT_CACHED || node.dataSourceType == DataSourceType.STATIC || node.dataSourceType == DataSourceType.EMPTY ||
+                        node.dataSourceType == DataSourceType.GOOGLE) {
+                    if (!dataSources.contains(node)) {
+                        toRemove.addItem(node);
+                    }
+                }
+            }
+            for each (var r:CompositeFeedNode in toRemove) {
+                dataSource.compositeFeedNodes.removeItemAt(dataSource.compositeFeedNodes.getItemIndex(r));
+            }
+            for each (var n:CompositeFeedNode in dataSources) {
+                if (!dataSource.compositeFeedNodes.contains(n)) {
+                    dataSource.compositeFeedNodes.addItem(n);
+                }
+            }
+            dataSource.addonConnections = connections;
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <util:SaveButton label="Add Data Source..." click="addDataSource()" fontSize="12"/>
+        <util:SaveButton label="Removed Selected" click="removeSelected()" fontSize="12"/>
+    </mx:HBox>
+    <mx:DataGrid id="dataSourceGrid" dataProvider="{dataSources}">
+        <mx:columns>
+            <mx:DataGridColumn headerText="" itemRenderer="com.easyinsight.util.GenericGridCheckbox" sortable="false" width="30"/>
+            <mx:DataGridColumn headerText="Name" dataField="dataSourceName" width="400"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox>
+        <util:SaveButton label="Add Connection..." click="addConnection()" fontSize="12"/>
+        <util:SaveButton label="Removed Selected" click="removeSelected()" fontSize="12"/>
+    </mx:HBox>
+    <mx:DataGrid id="connectionGrid" dataProvider="{connections}">
+        <mx:columns>
+            <mx:DataGridColumn headerText="" itemRenderer="com.easyinsight.util.GenericGridCheckbox" sortable="false" width="30"/>
+            <mx:DataGridColumn headerText="Name" dataField="display" width="400"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>
