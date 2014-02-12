@@ -63,6 +63,17 @@ public class ApplicationSkin implements Serializable {
     private boolean customChartColorEnabled;
     private int gradientChartColor;
     private boolean gradientChartColorEnabled;
+    private int secondaryColor;
+    private boolean secondaryColorEnabled;
+    private int tertiaryColor;
+    private boolean tertiaryColorEnabled;
+    private int summaryBackgroundColor;
+    private boolean summaryBackgroundColorEnabled;
+    private int summaryTextColor;
+    private boolean summaryTextColorEnabled;
+
+    private int crosstabHeaderBackgroundColor;
+    private int crosstabHeaderTextColor;
 
     private int dashboardStack1ColorStart;
     private int dashboardStack1ColorEnd;
@@ -103,20 +114,12 @@ public class ApplicationSkin implements Serializable {
             properties.add(new ReportNumericProperty("reportTextColor", reportTextColor, true));
             properties.add(new ReportBooleanProperty("reportHeader", reportHeader, true));
 
-            /*
-            private int customChartColor;
-    private boolean customChartColorEnabled;
-    private int gradientChartColor;
-    private boolean gradientChartColorEnabled;
-
-    private int dashboardStack1ColorStart;
-    private int dashboardStack1ColorEnd;
-    private int dashboardStackColor2Start;
-    private int dashboardStackColor2End;
-             */
-
             properties.add(new ReportNumericProperty("customChartColor", customChartColor, customChartColorEnabled));
             properties.add(new ReportNumericProperty("gradientChartColor", gradientChartColor, gradientChartColorEnabled));
+            properties.add(new ReportNumericProperty("secondaryColor", secondaryColor, secondaryColorEnabled));
+            properties.add(new ReportNumericProperty("tertiaryColor", secondaryColor, tertiaryColorEnabled));
+            properties.add(new ReportNumericProperty("summaryBackgroundColor", summaryBackgroundColor, summaryBackgroundColorEnabled));
+            properties.add(new ReportNumericProperty("summaryTextColor", summaryTextColor, summaryTextColorEnabled));
             properties.add(new ReportNumericProperty("dashboardStack1ColorStart", dashboardStack1ColorStart));
             properties.add(new ReportNumericProperty("dashboardStack1ColorEnd", dashboardStack1ColorEnd));
             properties.add(new ReportNumericProperty("dashboardStack2ColorStart", dashboardStackColor2Start));
@@ -203,8 +206,16 @@ public class ApplicationSkin implements Serializable {
 
         customChartColor = (int) findNumberProperty(properties, "customChartColor", 0);
         gradientChartColor = (int) findNumberProperty(properties, "gradientChartColor", 0);
+        secondaryColor = (int) findNumberProperty(properties, "secondaryColor", 0);
+        tertiaryColor = (int) findNumberProperty(properties, "tertiaryColor", 0);
+        summaryBackgroundColor = (int) findNumberProperty(properties, "summaryBackgroundColor", 0);
+        summaryTextColor = (int) findNumberProperty(properties, "summaryTextColor", 0);
         customChartColorEnabled = propertyEnabled(properties, "customChartColor");
         gradientChartColorEnabled = propertyEnabled(properties, "gradientChartColor");
+        secondaryColorEnabled = propertyEnabled(properties, "secondaryColor");
+        tertiaryColorEnabled = propertyEnabled(properties, "tertiaryColor");
+        summaryBackgroundColorEnabled = propertyEnabled(properties, "summaryBackgroundColor");
+        summaryTextColorEnabled = propertyEnabled(properties, "summaryTextColor");
         dashboardStack1ColorStart = (int) findNumberProperty(properties, "dashboardStack1ColorStart", 0);
         dashboardStack1ColorEnd = (int) findNumberProperty(properties, "dashboardStack1ColorEnd", 0);
         dashboardStackColor2Start = (int) findNumberProperty(properties, "dashboardStack2ColorStart", 0);
@@ -218,6 +229,86 @@ public class ApplicationSkin implements Serializable {
         reportModified = findBooleanProperty(properties, "reportModified", false);
         reportCached = findBooleanProperty(properties, "reportCached", false);
         reportPersistedCached = findBooleanProperty(properties, "reportPersistedCached", false);
+    }
+
+    public boolean isSecondaryColorEnabled() {
+        return secondaryColorEnabled;
+    }
+
+    public void setSecondaryColorEnabled(boolean secondaryColorEnabled) {
+        this.secondaryColorEnabled = secondaryColorEnabled;
+    }
+
+    public boolean isTertiaryColorEnabled() {
+        return tertiaryColorEnabled;
+    }
+
+    public void setTertiaryColorEnabled(boolean tertiaryColorEnabled) {
+        this.tertiaryColorEnabled = tertiaryColorEnabled;
+    }
+
+    public boolean isSummaryBackgroundColorEnabled() {
+        return summaryBackgroundColorEnabled;
+    }
+
+    public void setSummaryBackgroundColorEnabled(boolean summaryBackgroundColorEnabled) {
+        this.summaryBackgroundColorEnabled = summaryBackgroundColorEnabled;
+    }
+
+    public boolean isSummaryTextColorEnabled() {
+        return summaryTextColorEnabled;
+    }
+
+    public void setSummaryTextColorEnabled(boolean summaryTextColorEnabled) {
+        this.summaryTextColorEnabled = summaryTextColorEnabled;
+    }
+
+    public int getSecondaryColor() {
+        return secondaryColor;
+    }
+
+    public void setSecondaryColor(int secondaryColor) {
+        this.secondaryColor = secondaryColor;
+    }
+
+    public int getTertiaryColor() {
+        return tertiaryColor;
+    }
+
+    public void setTertiaryColor(int tertiaryColor) {
+        this.tertiaryColor = tertiaryColor;
+    }
+
+    public int getSummaryBackgroundColor() {
+        return summaryBackgroundColor;
+    }
+
+    public void setSummaryBackgroundColor(int summaryBackgroundColor) {
+        this.summaryBackgroundColor = summaryBackgroundColor;
+    }
+
+    public int getSummaryTextColor() {
+        return summaryTextColor;
+    }
+
+    public void setSummaryTextColor(int summaryTextColor) {
+        this.summaryTextColor = summaryTextColor;
+    }
+
+    public int getCrosstabHeaderBackgroundColor() {
+        return crosstabHeaderBackgroundColor;
+    }
+
+    public void setCrosstabHeaderBackgroundColor(int crosstabHeaderBackgroundColor) {
+        this.crosstabHeaderBackgroundColor = crosstabHeaderBackgroundColor;
+    }
+
+    public int getCrosstabHeaderTextColor() {
+        return crosstabHeaderTextColor;
+    }
+
+    public void setCrosstabHeaderTextColor(int crosstabHeaderTextColor) {
+        this.crosstabHeaderTextColor = crosstabHeaderTextColor;
     }
 
     public List<MultiColor> getMultiColors() {
