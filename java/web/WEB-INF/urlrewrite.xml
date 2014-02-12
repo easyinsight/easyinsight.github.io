@@ -353,5 +353,18 @@
 
     -->
 
+    <rule>
+        <from>^/html/dataSources/([A-Za-z0-9]+)/basecampAccountSelection</from>
+        <to>/html/basecampAccountSelection.jsp?dataSourceID=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/html/dataSources/([A-Za-z0-9]+)/basecampAccountChoice/([A-Za-z0-9]+)</from>
+        <to>/html/basecampAccountChoice.jsp?dataSourceID=$1&amp;accountID=$2</to>
+    </rule>
+
+
+
+
 </urlrewrite>
 

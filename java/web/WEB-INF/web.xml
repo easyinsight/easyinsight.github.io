@@ -330,6 +330,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ThreadDump</servlet-name>
+        <display-name>ThreadDump</display-name>
+        <servlet-class>com.easyinsight.datafeeds.custom.ThreadDumpServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>EmailReport</servlet-name>
         <display-name>EmailReport</display-name>
         <servlet-class>com.easyinsight.export.EmailServlet</servlet-class>
@@ -700,6 +706,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>ThreadDump</servlet-name>
+        <url-pattern>/admin/threads</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>OpenIDServlet</servlet-name>
         <url-pattern>/openid</url-pattern>
     </servlet-mapping>
@@ -1016,5 +1027,6 @@
         <error-code>404</error-code>
         <location>/pageNotFound.jsp</location>
     </error-page>
+
 
 </web-app>
