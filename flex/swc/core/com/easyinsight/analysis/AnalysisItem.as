@@ -18,6 +18,7 @@ public class AnalysisItem {
     public var analysisItemID:int;
     public var hidden:Boolean = false;
     public var formattingType:int;
+    public var origin:FieldDataSourceOrigin;
     public var sort:int = 0;
     public var sortSequence:int = 0;
     public var displayName:String;
