@@ -13,7 +13,7 @@ import java.util.List;
 public class TreeMapDefinitionState extends AnalysisDefinitionState {
 
     @Column(name="color_scheme")
-    private int colorScheme;
+    private int colorXYZ;
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="treemap_report_id")
@@ -27,12 +27,12 @@ public class TreeMapDefinitionState extends AnalysisDefinitionState {
         this.definitionID = definitionID;
     }
 
-    public int getColorScheme() {
-        return colorScheme;
+    public int getColorXYZ() {
+        return colorXYZ;
     }
 
-    public void setColorScheme(int colorScheme) {
-        this.colorScheme = colorScheme;
+    public void setColorXYZ(int colorXYZ) {
+        this.colorXYZ = colorXYZ;
     }
 
     @Override
