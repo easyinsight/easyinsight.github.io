@@ -1,7 +1,6 @@
 package com.easyinsight.solutions {
 
 import com.easyinsight.account.UpgradeEvent;
-import com.easyinsight.administration.feed.BulkFieldEvent;
 import com.easyinsight.administration.feed.BulkFieldWindow;
 import com.easyinsight.administration.feed.FeedDefinitionData;
 import com.easyinsight.analysis.PromptEvent;
