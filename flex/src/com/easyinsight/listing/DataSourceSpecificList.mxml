@@ -562,9 +562,6 @@
                 controlsColumn.sortable = false;
                 var factory:ClassFactory = new ClassFactory(MyDataIconControls);
                 controlsColumn.itemRenderer = factory;
-                factory.properties = {
-                    showAdmin:true
-                };
                 //controlsColumn.width = i * 45 + 10;
                 var remWidth:int = controlsColumn.width;
                 columns.push(selectColumn);
