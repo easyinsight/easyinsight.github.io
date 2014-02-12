@@ -78,7 +78,7 @@
             if (this.marginRight != null) {
                 ss['marginRight'] = this.marginRight;
             }
-
+            this._elem.css(ss);
 
             var pad = false,
                 reverse = false,

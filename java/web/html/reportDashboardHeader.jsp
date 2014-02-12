@@ -16,7 +16,7 @@
 <script type="text/javascript" src="/js/helper.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.gradientPieRenderer.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.canvasTextRenderer.js"></script>
-<script type="text/javascript" src="/js/plugins/jqplot.pointLabels.min.js"></script>
+<script type="text/javascript" src="/js/plugins/jqplot.pointLabels.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.cursor.min.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.highlighter.min.js"></script>
 <script type="text/javascript" src="/js/plugins/jqplot.barRenderer.js"></script>

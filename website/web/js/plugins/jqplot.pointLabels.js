@@ -127,6 +127,7 @@
         // true to not show a label for a value which is 0.
         this.hideZeros = false;
         this._elems = [];
+        this.fontFamily = '"Helvetica Neue",helvetica,arial,sans-serif';
         
         $.extend(true, this, options);
     };
@@ -308,6 +309,7 @@
 
                 elem.addClass('jqplot-point-label jqplot-series-'+this.index+' jqplot-point-'+i);
                 elem.css('position', 'absolute');
+                elem.css('font-family', p.fontFamily);
                 elem.insertAfter(sctx.canvas);
 
                 if (p.escapeHTML) {

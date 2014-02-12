@@ -291,14 +291,11 @@
             for (var i = 0; i < ticks.length; i++) {
 
                 var t = ticks[i];
-                console.log(t);
                 var curElem = t._elem;
                 if (typeof(curElem) != "undefined") {
                     if (prev != null) {
                         var ff = $(prev._elem);
                         var yy = $(curElem);
-                        console.log(ff.offset().left + ff.outerWidth())
-                        console.log(yy.offset().left);
                         if (ff.offset().left + ff.outerWidth() > yy.offset().left) {
                             overlap = true;
                         }
@@ -307,15 +304,12 @@
                 }
             }
             if (overlap) {
-                console.log("OVERLAP");
                 var c = this._elem;
                 var h = (parseInt(c.css("height").replace(/px/, "")) + 8) + "px";
                 c.css("height", h);
                 var j = 0;
                 for (var i = 0; i < ticks.length; i++) {
                     var t = ticks[i];
-                    console.log(t._elem)
-                    console.log(t.constructor == $.jqplot.AxisTickRenderer);
                     if (t.constructor == $.jqplot.AxisTickRenderer && typeof(t._elem) != "undefined") {
                         if (j % 2 > 0) {
                             var y = $(t._elem);

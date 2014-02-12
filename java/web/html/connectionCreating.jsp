@@ -10,7 +10,6 @@
 <%@ page import="com.easyinsight.audit.ActionReportLog" %>
 <%@ page import="com.easyinsight.audit.ActionDashboardLog" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
-<%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
@@ -20,7 +19,7 @@
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.core.DataFolder" %>
 <%@ page import="com.easyinsight.html.Utils" %>
-<%@ page import="com.easyinsight.datafeeds.HTMLConnectionFactory" %>
+<%@ page import="com.easyinsight.datafeeds.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -41,9 +40,17 @@
     String userName = (String) session.getAttribute("userName");
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
+        // find the data source
+        // if it requires additional setup (i.e. Basecamp or Smartsheet, redirect appropriately)
 
-
-
+        FeedResponse feedResponse = new FeedService().openFeedIfPossible(request.getParameter("dataSourceID"));
+        if (feedResponse.getStatus() == FeedResponse.SUCCESS) {
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(feedResponse.getFeedDescriptor().getId());
+            /*if (dataSource.postOAuthSetup(request) != null) {
+                response.sendRedirect(dataSource.postOAuthSetup(request));
+                return;
+            }*/
+        }
 %>
 <script type="text/javascript">
 
