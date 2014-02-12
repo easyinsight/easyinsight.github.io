@@ -3,8 +3,6 @@ import com.easyinsight.analysis.charts.ChartTypes;
 
 import mx.charts.chartClasses.ChartBase;
 
-import mx.collections.ArrayCollection;
-
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.WSChartDefinition")]
 public class ChartDefinition extends AnalysisDefinition {
