@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
+import com.easyinsight.tag.Tag;
 import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
@@ -125,11 +126,9 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
 
         List<WeNeedToReplaceHibernateTag> replaceTags = new ArrayList<WeNeedToReplaceHibernateTag>();
         for (WeNeedToReplaceHibernateTag tag : availableTags) {
-            WeNeedToReplaceHibernateTag newTag = replacementMap.findReplacementTag(tag.getTagID());
-            if (newTag == null) {
-                newTag = new WeNeedToReplaceHibernateTag();
-                newTag.setTagID(tag.getTagID());
-            }
+            Tag newTag1 = replacementMap.findReplacementTag(tag.getTagID());
+            WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
+            newTag.setTagID(newTag1.getId());
             replaceTags.add(newTag);
         }
         this.availableTags = replaceTags;
