@@ -2391,6 +2391,28 @@ public class AnalysisService {
                     new UserUploadService().deleteUserUpload(existingID);
                 }
                 queryStmt.close();
+                PreparedStatement parentStmt = conn.prepareStatement("SELECT COMPOSITE_FEED.DATA_FEED_ID FROM COMPOSITE_FEED, COMPOSITE_NODE WHERE " +
+                        "COMPOSITE_FEED.COMPOSITE_FEED_ID = COMPOSITE_NODE.COMPOSITE_FEED_ID AND COMPOSITE_NODE.DATA_FEED_ID = ?");
+                PreparedStatement reportSourceQuery = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM distinct_cached_addon_report_source WHERE REPORT_ID = ?");
+                reportSourceQuery.setLong(1, reportID);
+                ResultSet reportRS = reportSourceQuery.executeQuery();
+                Set<Long> parents = new HashSet<Long>();
+                while (reportRS.next()) {
+                    FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(reportRS.getLong(1), conn);
+                    ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) dataSource;
+                    serverDataSourceDefinition.migrations(conn, null);
+                    parentStmt.setLong(1, dataSource.getDataFeedID());
+                    ResultSet parentRS = parentStmt.executeQuery();
+                    while (parentRS.next()) {
+                        parents.add(parentRS.getLong(1));
+                    }
+                }
+                for (Long parentID : parents) {
+                    FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(parentID, conn);
+                    new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
+                }
+                reportSourceQuery.close();
+                parentStmt.close();
             } catch (Exception e) {
                 LogClass.error(e);
             } finally {
