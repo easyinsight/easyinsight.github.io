@@ -207,7 +207,8 @@ public class FieldRule {
     public void update(AnalysisItem analysisItem, WSAnalysisDefinition report) {
         try {
             if (link != null) {
-                if (analysisItem.getLinks() != null && analysisItem.getLinks().size() > 0 && !(analysisItem.getLinks().get(0)).isDefinedByRule()) {
+                if (analysisItem.getLinks() != null && analysisItem.getLinks().size() > 0 && !(analysisItem.getLinks().get(0)).isDefinedByRule() &&
+                        !(analysisItem.getLinks().get(0)).isCodeGenerated()) {
                     // already has a link
                 } else {
                     Link clonedLink = link.clone();
