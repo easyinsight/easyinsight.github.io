@@ -18,6 +18,8 @@ public class FileBasedFeedDefinition extends ServerDataSourceDefinition {
 
     public var password:String;
 
+    public var partitionBy:int;
+
     public function FileBasedFeedDefinition() {
         super();
     }
@@ -29,7 +31,7 @@ public class FileBasedFeedDefinition extends ServerDataSourceDefinition {
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
         var config:FlatFIleConfiguration = new FlatFIleConfiguration();
-        config.dataSourceDefinition = this;
+        //config.dataSourceDefinition = this;
         pages.addItem(config);
         return pages;
     }

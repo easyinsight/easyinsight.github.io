@@ -22,7 +22,6 @@ public class ZendeskDataSource extends CompositeServerDataSource {
             var pages:ArrayCollection = new ArrayCollection();
 
             var config:ZendeskConfiguration = new ZendeskConfiguration();
-            config.dataSourceDefinition = this;
             config.label = "Zendesk Server Configuration";
             pages.addItem(config);
             return pages;

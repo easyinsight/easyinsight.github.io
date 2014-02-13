@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.managers.PopUpManager;
+
+        private function onCreation():void {
+            ProgressAlert.alert(this, "Retrieving...", null, feedService.getFeedDefinition);
+            feedService.getFeedDefinition.send(dataSourceID);
+        }
+
+        protected var dataSource:FeedDefinitionData;
+
+        public var dataSourceID:int;
+
+        private function gotFeedDefinition():void {
+            dataSource = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
+            gotSource();
+        }
+
+        protected function saveSource():void {
+            ProgressAlert.alert(this, "Saving...", null, feedService.updateFeedDefinition);
+            feedService.updateFeedDefinition.send(dataSource);
+        }
+
+        protected function gotSource():void {
+
+        }
+
+        private function updated():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="getFeedDefinition" result="gotFeedDefinition()"/>
+        <mx:method name="updateFeedDefinition" result="updated()"/>
+    </mx:RemoteObject>
+</util:EISlimWindow>

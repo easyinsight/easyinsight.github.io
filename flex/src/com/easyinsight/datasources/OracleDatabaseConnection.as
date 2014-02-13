@@ -33,7 +33,6 @@ public class OracleDatabaseConnection extends ServerDatabaseConnection {
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
         var config:OracleDataSourceConfiguration = new OracleDataSourceConfiguration();
-        config.dataSourceDefinition = this;
         config.label = "Oracle Configuration";
         pages.addItem(config);
         return pages;

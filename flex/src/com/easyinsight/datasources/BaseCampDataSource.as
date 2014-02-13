@@ -31,7 +31,6 @@ public class BaseCampDataSource extends CompositeServerDataSource {
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
         var config:BaseCampConfiguration = new BaseCampConfiguration();
-        config.dataSourceDefinition = this;
         config.label = "Basecamp Server Configuration";
         pages.addItem(config);
         return pages;

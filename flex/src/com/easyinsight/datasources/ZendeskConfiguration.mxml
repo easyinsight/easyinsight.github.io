@@ -1,11 +1,16 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%"
+                       height="100%"
+
+                       xmlns:feed="com.easyinsight.administration.feed.*">
     <mx:Metadata>
 		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
 		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
 	</mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
+
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var url:String;
@@ -18,25 +23,24 @@
         [Bindable]
         private var apiKeyInputText:String;
 
-        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
-            var ds:ZendeskDataSource = feedDefinition as ZendeskDataSource;
+
+        override protected function gotSource():void {
+            var ds:ZendeskDataSource = dataSource as ZendeskDataSource;
             url = ds.url;
             includeComments = ds.loadComments;
             usernameInputText = ds.zdUserName;
             apiKeyInputText = ds.zdApiKey;
         }
 
-        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var ds:ZendeskDataSource = feedDefinition as ZendeskDataSource;
+        private function save():void {
+            var ds:ZendeskDataSource = dataSource as ZendeskDataSource;
             ds.url = urlInput.text;
             ds.loadComments = includeComments;
             ds.zdUserName = userNameInput.text;
             ds.zdApiKey = passwordInput.text;
+            saveSource();
         }
 
-        public function validate():Boolean {
-            return true;
-        }
 
         private function inactiveCheckbox_changeHandler(event:Event):void {
             includeComments = commentsCheckbox.selected;
@@ -62,4 +66,8 @@
         <mx:Label text="Zendesk API Key:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
         <mx:TextInput id="passwordInput" text="{apiKeyInputText}" width="350"/>
     </mx:HBox>
-</mx:VBox>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</feed:DataSourceWindow>

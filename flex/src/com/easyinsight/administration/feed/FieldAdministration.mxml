@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
-           xmlns:analysis="com.easyinsight.analysis.*"
-           creationComplete="setupListeners()" height="100%" width="100%">
+<feeds:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+                        xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
+                        creationComplete="setupListeners()" height="600" width="900"
+                        xmlns:feeds="com.easyinsight.administration.feed.*">
     <mx:Metadata>
         [Event(name="disableControls", type="flash.events.Event")]
         [Event(name="enableControls", type="flash.events.Event")]
@@ -56,16 +57,48 @@
 
         private var _allFields:ArrayCollection = new ArrayCollection();
 
-        private var _dataSourceID:int;
+        override protected function gotSource():void {
+            concreteFieldsEditable = dataSource.concreteFieldsEditable || dataSource.allowFieldEdit();
+            try {
 
-        private var _kpiSource:Boolean;
+                    var hierarchy:ArrayCollection = new ArrayCollection();
+                    allFields = new ArrayCollection();
+                    var masterItemList:ArrayCollection = new ArrayCollection(dataSource.fields.toArray());
+                    for each (var folder:FeedFolder in dataSource.folders) {
+                        var folderNode:FeedNode = convertFolder(folder, masterItemList);
+                        var folderWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(folderNode);
+                        hierarchy.addItem(folderWrapper);
+                    }
+                    for each (var item:AnalysisItem in masterItemList) {
+                        var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(convertAnalysisItem(item, null));
+                        hierarchy.addItem(analysisWrapper);
+                    }
+                    fieldHierarchy = hierarchy;
+                    populateAllFields(fieldHierarchy, allFields);
+                    var hierarchyData:HierarchicalData = new HierarchicalData();
+                    hierarchyData.source = hierarchy;
+                    var myData:HierarchicalCollectionView = new HierarchicalCollectionView(hierarchyData);
+                    myData.filterFunction = filterFunction;
+                    var sort:Sort = new Sort();
+                    sort.fields = [ new SortField("sortType"), new SortField("displayName", true) ];
+                    myData.sort = sort;
+                    myData.refresh();
 
-        public function set kpiSource(value:Boolean):void {
-            _kpiSource = value;
+                    theHierarchy = myData;
+                    //availableFields.sort = null;
+
+                    loaded = true;
+            } catch (e:Error) {
+                Alert.show(e.message);
+                throw e;
+            }
         }
 
-        public function set dataSourceID(value:int):void {
-            _dataSourceID = value;
+        private function save():void {
+            var analysisItems:ArrayCollection = new ArrayCollection();
+            dataSource.folders = getFolders(analysisItems);
+            dataSource.fields = analysisItems;
+            saveSource();
         }
 
         private var openEditor:IAnalysisItemEditor;
@@ -120,7 +153,7 @@
         private function toFocus(analysisItem:AnalysisItem, handler:Function, wrapper:AnalysisItemWrapper = null):void {
             var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             analysisItemEditor.editorClass = customEditor(analysisItem);
-            analysisItemEditor.dataSourceID = _dataSourceID;
+            analysisItemEditor.dataSourceID = dataSourceID;
             analysisItemEditor.originalWrapper = wrapper;
             analysisItemEditor.analysisItems = this.allFields;
             analysisItemEditor.analysisItem = analysisItem;
@@ -156,15 +189,6 @@
             }
         }
 
-        private var _feedDefinition:FeedDefinitionData;
-
-        public function set feedDefinition(value:FeedDefinitionData):void {
-            if (_feedDefinition != value) {
-                _feedDefinition = value;
-                invalidateProperties();
-            }
-        }
-
         private function convertFolder(folder:FeedFolder, masterItemList:ArrayCollection):FeedNode {
             var folderNode:FolderNode = new FolderNode();
             folderNode.folder = folder;
@@ -190,7 +214,7 @@
             var folders:ArrayCollection = new ArrayCollection();
             for each (var wrapper:AnalysisItemWrapper in fieldHierarchy) {
                 var node:FeedNode = wrapper.feedNode;
-                var folder:FeedFolder = convertNode(node, fields);
+                var folder:FeedFolder = convertNode(node, fields, wrapper);
                 if (folder != null) {
                     folders.addItem(folder);
                 } else {
@@ -201,14 +225,15 @@
             return folders;
         }
 
-        private function convertNode(node:FeedNode, fields:ArrayCollection):FeedFolder {
+        private function convertNode(node:FeedNode, fields:ArrayCollection, wrapper:AnalysisItemWrapper):FeedFolder {
             if (node is FolderNode) {
                 var folderNode:FolderNode = node as FolderNode;
                 var feedFolder:FeedFolder = folderNode.folder;
                 var items:ArrayCollection = new ArrayCollection();
-                for each (var child:FeedNode in node.children) {
+                for each (var childWrapper:AnalysisItemWrapper in wrapper.children) {
+                    var child:FeedNode = childWrapper.feedNode;
                     if (child is FolderNode) {
-                        convertNode(child, fields);
+                        convertNode(child, fields, childWrapper);
                     } else {
                         var aNode:AnalysisItemNode = child as AnalysisItemNode;
                         items.addItem(aNode.analysisItem);
@@ -219,44 +244,6 @@
                 return feedFolder;
             } else {
                 return null;
-            }
-        }
-
-        override protected function commitProperties():void {
-            super.commitProperties();
-            try {
-                if (_feedDefinition != null) {
-                    var hierarchy:ArrayCollection = new ArrayCollection();
-                    allFields = new ArrayCollection();
-                    var masterItemList:ArrayCollection = new ArrayCollection(_feedDefinition.fields.toArray());
-                    for each (var folder:FeedFolder in _feedDefinition.folders) {
-                        var folderNode:FeedNode = convertFolder(folder, masterItemList);
-                        var folderWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(folderNode);
-                        hierarchy.addItem(folderWrapper);
-                    }
-                    for each (var item:AnalysisItem in masterItemList) {
-                        var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(convertAnalysisItem(item, null));
-                        hierarchy.addItem(analysisWrapper);
-                    }
-                    fieldHierarchy = hierarchy;
-                    populateAllFields(fieldHierarchy, allFields);
-                    var hierarchyData:HierarchicalData = new HierarchicalData();
-                    hierarchyData.source = hierarchy;
-                    var myData:HierarchicalCollectionView = new HierarchicalCollectionView(hierarchyData);
-                    myData.filterFunction = filterFunction;
-                    var sort:Sort = new Sort();
-                    sort.fields = [ new SortField("sortType"), new SortField("displayName") ];
-                    myData.sort = sort;
-                    myData.refresh();
-
-                    theHierarchy = myData;
-                    //availableFields.sort = null;
-
-                    loaded = true;
-                }
-            } catch (e:Error) {
-                Alert.show(e.message);
-                throw e;
             }
         }
 
@@ -379,7 +366,7 @@
             if (a == null) return false;
 
             var b:IHierarchicalCollectionView = (fieldGrid.dataProvider as IHierarchicalCollectionView);
-            if(b == null) return true;
+            if (b == null) return true;
             var children:ICollectionView = b.getChildren(a);
             if (a.analysisItem == null) {
                 children.filterFunction = filterFunction;
@@ -432,4 +419,8 @@
             </mx:columns>
         </mx:AdvancedDataGrid>
     </mx:VBox>
-</mx:Canvas>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</feeds:DataSourceWindow>

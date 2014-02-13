@@ -28,7 +28,6 @@ public class DatabaseConnection extends ServerDataSourceDefinition {
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
         var config:PushDatabaseConfiguration = new PushDatabaseConfiguration();
-        config.dataSourceDefinition = this;
         pages.addItem(config);
         return pages;
     }
