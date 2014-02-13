@@ -41,10 +41,10 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         var pages:ArrayCollection = new ArrayCollection();
         var index:FieldIndexing = new FieldIndexing();
         index.fields = fields;
-        index.dataSource = this;
+
         index.label = "Indexing";
         var config:QuickBaseConfiguration = new QuickBaseConfiguration();
-        config.dataSourceDefinition = this;
+
         config.label = "QuickBase Server Configuration";
         pages.addItem(config);
         pages.addItem(index);
