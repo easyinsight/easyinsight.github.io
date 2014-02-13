@@ -170,6 +170,7 @@
         <mx:method name="updateAnalysisItemConfigurations" result="saved()"/>
         <mx:method name="getFieldTags" result="gotTags()"/>
     </mx:RemoteObject>
+    <mx:Text maxWidth="500" text="You can use these tags to reduce the fields shown in the report editor, set up multi field filters based on these tags, and use the tags to generally manage your fields."/>
     <mx:HBox>
         <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onTagItemClick(event)" width="160" id="tagButton"
                             dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>

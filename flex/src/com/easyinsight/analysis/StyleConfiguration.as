@@ -44,7 +44,6 @@ import com.easyinsight.dashboard.DashboardTextElement;
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
 import mx.collections.SortField;
-import mx.controls.Alert;
 import mx.rpc.remoting.RemoteObject;
 
 public class StyleConfiguration {
@@ -71,6 +70,8 @@ public class StyleConfiguration {
 
     public static function getDataSourceItems(dataSource:FeedDefinitionData):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
+        items.addItem(new CheckBoxReportFormItem("Account Visible", "accountVisible", dataSource.accountVisible, dataSource));
+        items.addItem(new TextReportFormItem("Data Source Name", "feedName", dataSource.feedName, dataSource));
         items.addItem(new CheckBoxReportFormItem("Field Cleanup Enabled", "fieldCleanupEnabled", dataSource.fieldCleanupEnabled, dataSource));
         items.addItem(new CheckBoxReportFormItem("Field Lookup Enabled", "fieldLookupEnabled", dataSource.fieldLookupEnabled, dataSource));
         items.addItem(new CheckBoxReportFormItem("Manual Report Run", "manualReportRun", dataSource.manualReportRun, dataSource));

@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" implements="com.easyinsight.administration.feed.IFeedAdminDetail"
-        label="Additional Sources" paddingTop="10">
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                       label="Additional Sources" paddingTop="10"
+                       xmlns:feed="com.easyinsight.administration.feed.*">
     <mx:Script><![CDATA[
         import com.easyinsight.datasources.CompositeServerDataSource;
         import com.easyinsight.datasources.DataSourceType;
@@ -23,26 +24,7 @@
         [Bindable]
         private var connections:ArrayCollection;
 
-        public var dataSource:CompositeServerDataSource;
-
-        override protected function commitProperties():void {
-            super.commitProperties();
-            var nonIntrinsicNodes:ArrayCollection = new ArrayCollection();
-            allSources = new ArrayCollection();
-            for each (var node:CompositeFeedNode in dataSource.compositeFeedNodes) {
-                if (node.dataSourceType == DataSourceType.DISTINCT_CACHED || node.dataSourceType == DataSourceType.STATIC || node.dataSourceType == DataSourceType.EMPTY ||
-                        node.dataSourceType == DataSourceType.GOOGLE) {
-                    nonIntrinsicNodes.addItem(node);
-                }
-                var ds:DataSourceDescriptor = new DataSourceDescriptor();
-                ds.name = node.dataSourceName;
-                ds.id = node.dataFeedID;
-                ds.dataSourceType = node.dataSourceType;
-                allSources.addItem(ds);
-            }
-            dataSources = nonIntrinsicNodes;
-            connections = (dataSource.addonConnections == null) ? new ArrayCollection() : dataSource.addonConnections;
-        }
+        // You can build complex custom fields with addon reports, create report based connections against those reports, then add those fields into the data source to drag and drop into reports the same way you work with any other fields on the data source.
 
         private function addDataSource():void {
             var window:AddDataSourceWindow = new AddDataSourceWindow();
@@ -76,7 +58,7 @@
 
         private function removeSelected():void {
             var selected:ArrayCollection = new ArrayCollection();
-            for each (var o:CompositeFeedNode in dataSource.compositeFeedNodes) {
+            for each (var o:CompositeFeedNode in CompositeServerDataSource(dataSource).compositeFeedNodes) {
                 if (o.selected) {
                     selected.addItem(o);
                 }
@@ -86,17 +68,9 @@
             }
         }
 
-        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-
-        }
-
-        public function validate():Boolean {
-            return true;
-        }
-
         private function save():void {
             var toRemove:ArrayCollection = new ArrayCollection();
-            for each (var node:CompositeFeedNode in dataSource.compositeFeedNodes) {
+            for each (var node:CompositeFeedNode in CompositeServerDataSource(dataSource).compositeFeedNodes) {
                 if (node.dataSourceType == DataSourceType.DISTINCT_CACHED || node.dataSourceType == DataSourceType.STATIC || node.dataSourceType == DataSourceType.EMPTY ||
                         node.dataSourceType == DataSourceType.GOOGLE) {
                     if (!dataSources.contains(node)) {
@@ -105,17 +79,41 @@
                 }
             }
             for each (var r:CompositeFeedNode in toRemove) {
-                dataSource.compositeFeedNodes.removeItemAt(dataSource.compositeFeedNodes.getItemIndex(r));
+                CompositeServerDataSource(dataSource).compositeFeedNodes.removeItemAt(CompositeServerDataSource(dataSource).compositeFeedNodes.getItemIndex(r));
             }
             for each (var n:CompositeFeedNode in dataSources) {
-                if (!dataSource.compositeFeedNodes.contains(n)) {
-                    dataSource.compositeFeedNodes.addItem(n);
+                if (!CompositeServerDataSource(dataSource).compositeFeedNodes.contains(n)) {
+                    CompositeServerDataSource(dataSource).compositeFeedNodes.addItem(n);
                 }
             }
-            dataSource.addonConnections = connections;
+            CompositeServerDataSource(dataSource).addonConnections = connections;
+            saveSource();
+        }
+
+        private function updated():void {
             PopUpManager.removePopUp(this);
         }
+
+        override protected function gotSource():void {
+            super.gotSource();
+            var nonIntrinsicNodes:ArrayCollection = new ArrayCollection();
+            allSources = new ArrayCollection();
+            for each (var node:CompositeFeedNode in CompositeServerDataSource(dataSource).compositeFeedNodes) {
+                if (node.dataSourceType == DataSourceType.DISTINCT_CACHED || node.dataSourceType == DataSourceType.STATIC || node.dataSourceType == DataSourceType.EMPTY ||
+                        node.dataSourceType == DataSourceType.GOOGLE) {
+                    nonIntrinsicNodes.addItem(node);
+                }
+                var ds:DataSourceDescriptor = new DataSourceDescriptor();
+                ds.name = node.dataSourceName;
+                ds.id = node.dataFeedID;
+                ds.dataSourceType = node.dataSourceType;
+                allSources.addItem(ds);
+            }
+            dataSources = nonIntrinsicNodes;
+            connections = (CompositeServerDataSource(dataSource).addonConnections == null) ? new ArrayCollection() : CompositeServerDataSource(dataSource).addonConnections;
+        }
         ]]></mx:Script>
+
     <mx:HBox>
         <util:SaveButton label="Add Data Source..." click="addDataSource()" fontSize="12"/>
         <util:SaveButton label="Removed Selected" click="removeSelected()" fontSize="12"/>
@@ -140,4 +138,4 @@
         <util:SaveButton label="Save" click="save()"/>
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
     </mx:HBox>
-</util:EISlimWindow>
+</feed:DataSourceWindow>

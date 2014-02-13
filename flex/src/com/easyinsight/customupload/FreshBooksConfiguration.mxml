@@ -1,11 +1,14 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%"
+                       height="100%"
+                       xmlns:feed="com.easyinsight.administration.feed.*">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.FreshbooksDataSource;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var url:String;
@@ -14,21 +17,19 @@
 
         private var feedDefinition:FeedDefinitionData;
 
-        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+        private function save():void {
+            var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
+            ds.url = urlInput.text;
+            ds.liveDataSource = liveDataSourceCheckbox.selected;
+            saveSource();
+        }
+
+
+        override protected function gotSource():void {
             var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
             this.feedDefinition = ds;
             url = ds.url;
             liveDataSource = ds.liveDataSource;
-        }
-
-        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
-            ds.url = urlInput.text;
-            ds.liveDataSource = liveDataSourceCheckbox.selected;
-        }
-
-        public function validate():Boolean {
-            return true;
         }
 
         private function reauthorize():void {
@@ -58,5 +59,10 @@
             <!--<mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on inactive projects, you can save time on your synchronization by not pulling those projects across into Easy Insight."/>-->
         </mx:FormItem>
 	</mx:Form>
-    <mx:Button label="Reauthorize Access" click="reauthorize()"/>
-</mx:VBox>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:SaveButton label="Reauthorize Access" click="reauthorize()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+
+</feed:DataSourceWindow>

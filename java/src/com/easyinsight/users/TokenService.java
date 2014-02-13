@@ -187,8 +187,9 @@ public class TokenService {
                             .setRedirectURI("https://www.easy-insight.com/app/oauth")
                             .buildQueryMessage();
                 }
-                FlexContext.getHttpRequest().getSession().setAttribute("redirectTarget", redirectType);
-                FlexContext.getHttpRequest().getSession().setAttribute("dataSourceID", dataSource.getApiKey());
+
+                session.setAttribute("redirectTarget", redirectType);
+                session.setAttribute("dataSourceID", dataSource.getApiKey());
                 String uri = request.getLocationUri();
                 uri = uri + "&type=web_server";
                 return new OAuthResponse(uri, true);

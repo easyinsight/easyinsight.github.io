@@ -283,8 +283,12 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
 
     public void renderConfig(ApplicationSkin applicationSkin) {
         if ("Primary".equals(getColorScheme())) {
-            setSummaryBackgroundColor(applicationSkin.getSummaryBackgroundColor());
-            setSummaryTextColor(applicationSkin.getSummaryTextColor());
+            if (applicationSkin.isSummaryBackgroundColorEnabled()) {
+                setSummaryBackgroundColor(applicationSkin.getSummaryBackgroundColor());
+            }
+            if (applicationSkin.isSummaryTextColorEnabled()) {
+                setSummaryTextColor(applicationSkin.getSummaryTextColor());
+            }
         }
     }
 }

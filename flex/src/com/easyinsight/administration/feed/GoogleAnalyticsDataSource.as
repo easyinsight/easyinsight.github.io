@@ -25,7 +25,6 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition{
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
         var config:GoogleAnalyticsConfiguration = new GoogleAnalyticsConfiguration();
-        config.dataSourceDefinition = this;
         config.label = "Google Analytics Server Configuration";
         pages.addItem(config);
         return pages;

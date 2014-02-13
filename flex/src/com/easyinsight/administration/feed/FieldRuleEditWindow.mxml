@@ -152,7 +152,7 @@
             } else if (selectedRule == "configure") {
                 index2 = 2;
             } else {
-                index1 = 0;
+                index2 = 0;
             }
         }
 

@@ -1,17 +1,16 @@
 <?xml version="1.0" ?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
-         implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%"
+                       height="100%"
+                       xmlns:feed="com.easyinsight.administration.feed.*">
     <mx:Metadata>
         [Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
         [Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
-        import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.MySQLDatabaseConnection;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.controls.Button;
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
 
@@ -26,20 +25,9 @@
         [Bindable]
         private var query:String;
 
-        public function get dataSourceDefinition():FeedDefinitionData {
-            var obj:MySQLDatabaseConnection = new MySQLDatabaseConnection();
-            obj.host = hostInput.text;
-            obj.port = int(portInput.text);
-            obj.databaseName = databaseNameInput.text;
-            obj.dbUserName = databaseUserNameInput.text;
-            obj.dbPassword = databasePasswordInput.text;
-            obj.query = queryArea.text;
-            obj.rebuildFields = true;
-            return obj;
-        }
 
-        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
-            var ds:MySQLDatabaseConnection = feedDefinition as MySQLDatabaseConnection;
+        override protected function gotSource():void {
+            var ds:MySQLDatabaseConnection = dataSource as MySQLDatabaseConnection;
             dataSource = ds;
             host = ds.host;
             port = String(ds.port);
@@ -48,18 +36,19 @@
             query = ds.query;
         }
 
-        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var obj:MySQLDatabaseConnection = feedDefinition as MySQLDatabaseConnection;
-            obj.host = hostInput.text;
-            obj.port = int(portInput.text);
-            obj.databaseName = databaseNameInput.text;
-            obj.dbUserName = databaseUserNameInput.text;
-            obj.dbPassword = databasePasswordInput.text;
-            obj.query = queryArea.text;
-            obj.rebuildFields = true;
+        private function save():void {
+            if (validate()) {
+                var obj:MySQLDatabaseConnection = new MySQLDatabaseConnection();
+                obj.host = hostInput.text;
+                obj.port = int(portInput.text);
+                obj.databaseName = databaseNameInput.text;
+                obj.dbUserName = databaseUserNameInput.text;
+                obj.dbPassword = databasePasswordInput.text;
+                obj.query = queryArea.text;
+                obj.rebuildFields = true;
+                saveSource();
+            }
         }
-
-        private var dataSource:FeedDefinitionData;
 
         private function convert():void {
             var window:DataSourceConvertWindow = new DataSourceConvertWindow();
@@ -116,8 +105,12 @@
         <mx:Text width="200" selectable="true"
                  text="The query defines what fields and data to pull back into Easy Insight. For example, you might do 'select * from table_name', 'select a, b from table_name' or 'select a as A, b as B from table_name where X = Y'."/>
     </mx:VBox>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
     <mx:StringValidator id="hostValidator" minLength="1" source="{hostInput}" property="text"/>
     <mx:NumberValidator id="portValidator" source="{portInput}" property="text"/>
     <mx:StringValidator id="databaseNameValidator" minLength="1" source="{databaseNameInput}" property="text"/>
     <mx:StringValidator id="queryValidator" minLength="1" source="{queryArea}" property="text"/>
-</mx:HBox>
+</feed:DataSourceWindow>

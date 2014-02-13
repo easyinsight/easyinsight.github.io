@@ -512,16 +512,21 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             if (analysisItem.getLinks() == null) {
                 analysisItem.setLinks(new ArrayList<Link>());
             }
+            if (analysisItem.getLinks().size() > 0) {
+                return;
+            }
             if (isContactLinkable(analysisItem)) {
                 removeURLLinkIfExists("/people/["+HighRiseContactSource.CONTACT_ID+"]", analysisItem);
                 URLLink urlLink = new URLLink();
                 urlLink.setDefaultLink(true);
+                urlLink.setCodeGenerated(true);
                 urlLink.setUrl(getUrl() + "/people/["+HighRiseContactSource.CONTACT_ID+"]");
                 urlLink.setLabel("View Contact in Highrise...");
                 analysisItem.getLinks().add(urlLink);
             } else if (isCompanyLinkable(analysisItem)) {
                 URLLink urlLink = new URLLink();
                 urlLink.setDefaultLink(true);
+                urlLink.setCodeGenerated(true);
                 removeURLLinkIfExists("/companies/["+HighRiseCompanySource.COMPANY_ID+"]", analysisItem);
                 urlLink.setUrl(getUrl() + "/companies/["+HighRiseCompanySource.COMPANY_ID+"]");
                 urlLink.setLabel("View Company in Highrise...");
@@ -530,6 +535,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 removeURLLinkIfExists("/deals/["+HighRiseDealSource.DEAL_ID+"]", analysisItem);
                 URLLink urlLink = new URLLink();
                 urlLink.setDefaultLink(true);
+                urlLink.setCodeGenerated(true);
                 urlLink.setUrl(getUrl() + "/deals/["+HighRiseDealSource.DEAL_ID+"]");
                 urlLink.setLabel("View Deal in Highrise...");
                 analysisItem.getLinks().add(urlLink);
@@ -537,20 +543,24 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 removeURLLinkIfExists("/kases/["+HighRiseCaseSource.CASE_ID+"]", analysisItem);
                 URLLink urlLink = new URLLink();
                 urlLink.setDefaultLink(true);
+                urlLink.setCodeGenerated(true);
                 urlLink.setUrl(getUrl() + "/kases/["+HighRiseCaseSource.CASE_ID+"]");
                 urlLink.setLabel("View Case in Highrise...");
                 analysisItem.getLinks().add(urlLink);
             } else if (isTaskLinkable(analysisItem)) {
                 removeURLLinkIfExists("/tasks", analysisItem);
                 URLLink upcomingTasks = new URLLink();
+                upcomingTasks.setCodeGenerated(true);
                 upcomingTasks.setUrl(getUrl() + "/tasks");
                 upcomingTasks.setLabel("View Upcoming Tasks in Highrise...");
                 analysisItem.getLinks().add(upcomingTasks);
                 URLLink completedTasks = new URLLink();
                 completedTasks.setUrl(getUrl() + "/tasks?collection=completed");
+                completedTasks.setCodeGenerated(true);
                 completedTasks.setLabel("View Completed Tasks in Highrise...");
                 analysisItem.getLinks().add(completedTasks);
                 URLLink assignedTasks = new URLLink();
+                assignedTasks.setCodeGenerated(true);
                 assignedTasks.setUrl(getUrl() + "/tasks?collection=assigned");
                 assignedTasks.setLabel("View Assigned Tasks in Highrise...");
                 analysisItem.getLinks().add(assignedTasks);
