@@ -542,6 +542,7 @@ public class AnalysisDefinition implements Cloneable {
 
         AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
         structure.setBaseReport(this);
+        structure.setNoCalcs(true);
 
         analysisDefinition.setReportStubs(new ArrayList<ReportStub>());
 
