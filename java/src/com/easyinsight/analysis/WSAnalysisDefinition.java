@@ -1567,7 +1567,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
             } else {
                 applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
             }
-            renderConfig(applicationSkin);
+            if (applicationSkin != null) {
+                renderConfig(applicationSkin);
+            }
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
