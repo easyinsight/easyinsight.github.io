@@ -3,6 +3,7 @@ package com.easyinsight.admin;
 import com.easyinsight.analysis.*;
 import com.easyinsight.audit.*;
 import com.easyinsight.cache.MemCachedManager;
+import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.DashboardDescriptor;
@@ -26,6 +27,7 @@ import java.util.Date;
 
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.tag.Tag;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.AccountCreditCardBillingInfo;
 import com.easyinsight.users.User;
@@ -42,45 +44,241 @@ public class AdminService {
 
     private static final String LOC_XML = "<url>\r\n\t<loc>{0}</loc>\r\n</url>\r\n";
 
+    public List<EIDescriptor> getConnectionReports(int dataSourceType) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            return getConnectionReports(dataSourceType, conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public ReportResults getAvailableReports(int dataSourceType) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
+            List<DashboardDescriptor> dashboards = new ArrayList<DashboardDescriptor>();
+
+            PreparedStatement accountStmt = conn.prepareStatement("SELECT ACCOUNT_ID, NAME FROM ACCOUNT WHERE EXCHANGE_AUTHOR = ?");
+
+            PreparedStatement reportStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE FROM ANALYSIS, USER_TO_ANALYSIS, USER, DATA_FEED WHERE " +
+                    "ANALYSIS.ANALYSIS_ID = USER_TO_ANALYSIS.ANALYSIS_ID AND USER_TO_ANALYSIS.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? AND " +
+                    "ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.FEED_TYPE = ?");
+            PreparedStatement dashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD_NAME FROM DASHBOARD, USER_TO_DASHBOARD, USER, DATA_FEED WHERE " +
+                    "DASHBOARD.DASHBOARD_ID = USER_TO_DASHBOARD.DASHBOARD_ID AND USER_TO_DASHBOARD.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? AND " +
+                    "DASHBOARD.DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.FEED_TYPE = ?");
+
+            PreparedStatement findTagStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? AND REPORT_TAG = ?");
+            PreparedStatement findTagForReportStmt = conn.prepareStatement("SELECT REPORT_ID, ACCOUNT_TAG_ID, TAG_NAME " +
+                    "FROM REPORT_TO_TAG, ACCOUNT_TAG WHERE TAG_ID = ACCOUNT_TAG.ACCOUNT_TAG_ID AND " +
+                    "ACCOUNT_TAG.ACCOUNT_ID = ?");
+            PreparedStatement findTagForDashboardStmt = conn.prepareStatement("SELECT DASHBOARD_ID, ACCOUNT_TAG_ID, TAG_NAME FROM " +
+                    "DASHBOARD_TO_TAG, ACCOUNT_TAG WHERE TAG_ID = ACCOUNT_TAG.ACCOUNT_TAG_ID AND ACCOUNT_TAG.ACCOUNT_ID = ?");
+
+            accountStmt.setBoolean(1, true);
+            ResultSet rs = accountStmt.executeQuery();
+
+            int i = 0;
+            Map<String, Tag> fakeTagMap = new HashMap<String, Tag>();
+
+            while (rs.next()) {
+                long accountID = rs.getLong(1);
+                String accountName = rs.getString(2);
+
+
+
+                Map<Long, List<Tag>> reportTagMap = new HashMap<Long, List<Tag>>();
+                Map<Long, List<Tag>> dashboardTagMap = new HashMap<Long, List<Tag>>();
+                findTagStmt.setLong(1, accountID);
+                findTagStmt.setBoolean(2, true);
+                findTagStmt.executeQuery();
+                ResultSet tagRS = findTagStmt.executeQuery();
+                while (tagRS.next()) {
+                    long tagID = tagRS.getLong(1);
+                    String tagName = tagRS.getString(2);
+                    Tag tag = fakeTagMap.get(tagName);
+                    if (tag == null) {
+                        tag = new Tag(i++, tagName, false, false, false);
+                        fakeTagMap.put(tagName, tag);
+                    }
+                }
+
+                findTagForReportStmt.setLong(1, accountID);
+                ResultSet reportTagRS = findTagForReportStmt.executeQuery();
+                while (reportTagRS.next()) {
+                    long reportID = reportTagRS.getLong(1);
+                    String tagName = reportTagRS.getString(3);
+                    Tag tag = fakeTagMap.get(tagName);
+                    List<Tag> tags = reportTagMap.get(reportID);
+                    if (tags == null) {
+                        tags = new ArrayList<Tag>();
+                        reportTagMap.put(reportID, tags);
+                    }
+                    tags.add(tag);
+                }
+
+                findTagForDashboardStmt.setLong(1, accountID);
+                ResultSet dashboardTagRS = findTagForDashboardStmt.executeQuery();
+                while (dashboardTagRS.next()) {
+                    long reportID = dashboardTagRS.getLong(1);
+                    String tagName = dashboardTagRS.getString(3);
+                    Tag tag = fakeTagMap.get(tagName);
+                    List<Tag> tags = dashboardTagMap.get(reportID);
+                    if (tags == null) {
+                        tags = new ArrayList<Tag>();
+                        dashboardTagMap.put(reportID, tags);
+                    }
+                    tags.add(tag);
+                }
+
+                reportStmt.setLong(1, accountID);
+                reportStmt.setInt(2, dataSourceType);
+                ResultSet reportRS = reportStmt.executeQuery();
+                while (reportRS.next()) {
+                    long reportID = reportRS.getLong(1);
+                    String reportName = reportRS.getString(2);
+                    InsightDescriptor insightDescriptor = new InsightDescriptor();
+                    insightDescriptor.setId(reportID);
+                    insightDescriptor.setName(reportName);
+                    List<Tag> tags = reportTagMap.get(reportID);
+                    if (tags != null) {
+                        insightDescriptor.setTags(tags);
+                    }
+                    reports.add(insightDescriptor);
+                }
+
+                dashboardStmt.setLong(1, accountID);
+                dashboardStmt.setInt(2, dataSourceType);
+                ResultSet dashboardRS = dashboardStmt.executeQuery();
+                while (dashboardRS.next()) {
+                    long reportID = dashboardRS.getLong(1);
+                    String reportName = dashboardRS.getString(2);
+                    DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
+                    dashboardDescriptor.setId(reportID);
+                    dashboardDescriptor.setName(reportName);
+                    List<Tag> tags = dashboardTagMap.get(reportID);
+                    if (tags != null) {
+                        dashboardDescriptor.setTags(tags);
+                    }
+                    dashboards.add(dashboardDescriptor);
+                }
+            }
+            ReportResults reportResults = new ReportResults();
+            reportResults.setReports(reports);
+            reportResults.setDashboards(dashboards);
+            reportResults.setReportTags(new ArrayList<Tag>(fakeTagMap.values()));
+            return reportResults;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    private List<EIDescriptor> getConnectionReports(int dataSourceType, EIConnection conn) throws SQLException {
+        List<EIDescriptor> descriptors = new ArrayList<EIDescriptor>();
+        PreparedStatement ps = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE FROM ANALYSIS, DATA_FEED WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID " +
+                "AND FEED_TYPE = ? AND RECOMMENDED_EXCHANGE = ?");
+        ps.setInt(1, dataSourceType);
+        ps.setBoolean(2, true);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            long reportID = rs.getLong(1);
+            String title = rs.getString(2);
+            InsightDescriptor insightDescriptor = new InsightDescriptor();
+            insightDescriptor.setId(reportID);
+            insightDescriptor.setName(title);
+            descriptors.add(insightDescriptor);
+        }
+        ps.close();
+        PreparedStatement dashboardPS = conn.prepareStatement("SELECT DASHBOARD_ID, DASHBOARD_NAME FROM DASHBOARD, DATA_FEED WHERE " +
+                "DASHBOARD.DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.FEED_TYPE = ? AND RECOMMENDED_EXCHANGE = ?");
+        dashboardPS.setInt(1, dataSourceType);
+        dashboardPS.setBoolean(2, true);
+        ResultSet dashboardRS = dashboardPS.executeQuery();
+        while (dashboardRS.next()) {
+            long reportID = dashboardRS.getLong(1);
+            String title = dashboardRS.getString(2);
+            DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
+            dashboardDescriptor.setId(reportID);
+            dashboardDescriptor.setName(title);
+            descriptors.add(dashboardDescriptor);
+        }
+        dashboardPS.close();
+        return descriptors;
+    }
+
+    public void updateConnectionReports(int dataSourceType, List<EIDescriptor> descriptors) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            List<EIDescriptor> existingConnectionReports = getConnectionReports(dataSourceType, conn);
+            Set<EIDescriptor> set = new HashSet<EIDescriptor>(existingConnectionReports);
+            PreparedStatement ps = conn.prepareStatement("UPDATE ANALYSIS SET RECOMMENDED_EXCHANGE = ? WHERE ANALYSIS_ID = ?");
+            PreparedStatement dashboardUpdate = conn.prepareStatement("UPDATE DASHBOARD SET RECOMMENDED_EXCHANGE = ? WHERE DASHBOARD_ID = ?");
+            for (EIDescriptor desc : descriptors) {
+                if (existingConnectionReports.remove(desc)) {
+
+                } else {
+                    if (desc.getType() == EIDescriptor.REPORT) {
+                        ps.setBoolean(1, true);
+                        ps.setLong(2, desc.getId());
+                        ps.executeUpdate();
+                    } else if (desc.getType() == EIDescriptor.DASHBOARD) {
+                        dashboardUpdate.setBoolean(1, true);
+                        dashboardUpdate.setLong(2, desc.getId());
+                        dashboardUpdate.executeUpdate();
+                    }
+                }
+            }
+            for (EIDescriptor remaining : set) {
+                if (remaining.getType() == EIDescriptor.REPORT) {
+                    ps.setBoolean(1, false);
+                    ps.setLong(2, remaining.getId());
+                    ps.executeUpdate();
+                } else if (remaining.getType() == EIDescriptor.DASHBOARD) {
+                    dashboardUpdate.setBoolean(1, false);
+                    dashboardUpdate.setLong(2, remaining.getId());
+                    dashboardUpdate.executeUpdate();
+                }
+            }
+            ps.close();
+            dashboardUpdate.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void forceSemaphoreRelease() {
 
         UserThreadMutex.release();
-    }
-
-    public void argh() {
-        SecurityUtil.authorizeAccountAdmin();
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            PreparedStatement getDataSourcesStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM.ITEM_KEY_ID, ANALYSIS_DATE.date_time_field, ANALYSIS_ITEM.display_name, DATA_FEED.feed_name FROM ANALYSIS_ITEM, ANALYSIS_DATE, FEED_TO_ANALYSIS_ITEM, DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE USER.ACCOUNT_ID = ? AND USER.USER_ID = UPLOAD_POLICY_USERS.USER_ID AND UPLOAD_POLICY_USERS.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_ANALYSIS_ITEM.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_ANALYSIS_ITEM.ANALYSIS_ITEM_ID = ANALYSIS_ITEM.ANALYSIS_ITEM_ID AND ANALYSIS_ITEM.ANALYSIS_ITEM_ID = ANALYSIS_DATE.ANALYSIS_ITEM_ID");
-            getDataSourcesStmt.setLong(1, 4913);
-            ResultSet rs = getDataSourcesStmt.executeQuery();
-            while (rs.next()) {
-                long keyID = rs.getLong(1);
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS_DATE SET date_time_field = ? WHERE analysis_date.analysis_item_id in (SELECT analysis_item.analysis_item_id FROM analysis_item WHERE analysis_item.item_key_id = ?)");
-                updateStmt.setBoolean(1, true);
-                updateStmt.setLong(2, keyID);
-                updateStmt.executeUpdate();
-            }
-            conn.commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            conn.rollback();
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
     }
 
     public void disableGenerators() {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
         try {
+            /*
+            update task_generator set task_generator.disabled_generator = ?
+            where task_generator.task_generator_id in
+            (select data_activity_task_generator.task_generator_id from data_activity_task_generator, SCHEDULED_DATA_SOURCE_REFRESH, upload_policy_users, user, account
+            where data_activity_task_generator.scheduled_activity_id = SCHEDULED_DATA_SOURCE_REFRESH.scheduled_account_activity_id and
+            SCHEDULED_DATA_SOURCE_REFRESH.data_source_id = upload_policy_users.feed_id and
+            upload_policy_users.user_id = user.user_id and user.account_id = account.account_id and (account.account_state = ?))
+             */
             PreparedStatement disableStmt = conn.prepareStatement("update task_generator set task_generator.disabled_generator = ? where task_generator.task_generator_id in (select data_activity_task_generator.task_generator_id from data_activity_task_generator, SCHEDULED_DATA_SOURCE_REFRESH, upload_policy_users, user, account where data_activity_task_generator.scheduled_activity_id = SCHEDULED_DATA_SOURCE_REFRESH.scheduled_account_activity_id and SCHEDULED_DATA_SOURCE_REFRESH.data_source_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id and user.account_id = account.account_id and (account.account_state = ?))");
             disableStmt.setBoolean(1, true);
             disableStmt.setLong(2, Account.DELINQUENT);
             disableStmt.executeUpdate();
-            disableStmt.close();
 
             disableStmt.setBoolean(1, false);
             disableStmt.setLong(2, Account.ACTIVE);
