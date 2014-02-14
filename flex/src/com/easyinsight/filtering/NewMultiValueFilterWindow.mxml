@@ -123,11 +123,7 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
-            dataService = new RemoteObject();
-            dataService.destination = "data";
-            dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID,
-                    _report, _otherFilters, _filterValueDefinition, _dashboard);
+
         }
 
         private function compare(obj1:Object, obj2:Object, fields:Array = null):int {
@@ -177,7 +173,7 @@
                     loadedValuesBox.removeChild(filterTileList);
                 loadedValuesBox.addChild(tooManyBox);
             } else {
-                if (tooManyBox.parent)
+                if (tooManyBox != null && tooManyBox.parent)
                     loadedValuesBox.removeChild(tooManyBox);
                 loadedValuesBox.addChild(filterTileList);
             }
@@ -384,6 +380,11 @@
             l.text = "There are too many values to display. Please narrow your search above.";
             tooManyBox.addChild(l);
 
+            dataService = new RemoteObject();
+            dataService.destination = "data";
+            dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
+            dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID,
+                    _report, _otherFilters, _filterValueDefinition, _dashboard);
         }
 
         private function selectedFilterEvent(event:Event):void {

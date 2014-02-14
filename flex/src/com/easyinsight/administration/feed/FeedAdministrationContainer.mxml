@@ -92,11 +92,6 @@
             BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
             this.feedType = feedDefinition.getFeedType();
             this.pages = feedDefinition.createAdminPages();
-
-            // TODO: need this part...
-            /*for each (var page:IFeedAdminDetail in pages) {
-                tabNav.addChild(UIComponent(page));
-            }*/
             for each (var page:DataSourceWindow in pages) {
                 var box:HBox = new HBox();
                 box.setStyle("verticalAlign", "middle");
