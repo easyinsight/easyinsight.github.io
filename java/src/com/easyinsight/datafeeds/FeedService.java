@@ -53,6 +53,7 @@ public class FeedService {
     }
 
     public List<FieldRule> getFieldRules(long dataSourceID) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();
         try {
             return FieldRule.load(conn, dataSourceID);
@@ -65,6 +66,7 @@ public class FeedService {
     }
 
     public void saveFieldRules(long dataSourceID, List<FieldRule> fieldRules) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();
         try {
             saveFieldRules(dataSourceID, fieldRules, conn);
@@ -84,6 +86,18 @@ public class FeedService {
         int i = 0;
         for (FieldRule fieldRule : fieldRules) {
             fieldRule.save(conn, dataSourceID, i++);
+        }
+    }
+
+    public void tagJustOneField(AnalysisItem analysisItem, long dataSourceID, Tag tag) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
@@ -197,7 +211,6 @@ public class FeedService {
     }
 
     public List<AnalysisItemConfiguration> getAnalysisItemConfigurations(long dataSourceID, EIConnection conn, FeedDefinition dataSource) throws SQLException {
-        SecurityUtil.authorizeFeedAccess(dataSourceID);
         List<AnalysisItemConfiguration> configurations = new ArrayList<AnalysisItemConfiguration>();
 
         // what should these be linked by...
