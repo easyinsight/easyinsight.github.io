@@ -223,7 +223,7 @@ class InstallMetadata {
     }
 
     private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report, @Nullable List<AnalysisItem> additionalDataSourceFields) throws CloneNotSupportedException {
-        AnalysisDefinition clonedReport = report.clone(localDefinition, localDefinition.getFields(), true, additionalDataSourceFields, tagReplacementMap);
+        AnalysisDefinition clonedReport = report.clone(localDefinition, localDefinition.allFields(conn), true, additionalDataSourceFields, tagReplacementMap);
         clonedReport.setSolutionVisible(false);
         clonedReport.setRecommendedExchange(false);
         clonedReport.setAutoSetupDelivery(false);
@@ -233,7 +233,7 @@ class InstallMetadata {
     }
 
     private Dashboard copyDashboardToDataSource(FeedDefinition localDefinition, Dashboard dashboard) throws CloneNotSupportedException {
-        Dashboard clonedDashboard = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), true, localDefinition.getFields(), localDefinition);
+        Dashboard clonedDashboard = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), true, localDefinition.allFields(conn), localDefinition);
         clonedDashboard.setExchangeVisible(false);
         clonedDashboard.setRecommendedExchange(false);
         clonedDashboard.setTemporary(false);
@@ -374,6 +374,25 @@ class InstallMetadata {
         }
         dsFieldStmt.close();
         return ids;
+    }
+
+    public void copyReportTags() throws SQLException {
+        PreparedStatement reportTagStmt = conn.prepareStatement("SELECT ACCOUNT_TAG.ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG, REPORT_ID FROM " +
+                "ACCOUNT_TAG, REPORT_TO_TAG WHERE ACCOUNT_TAG.ACCOUNT_TAG_ID = REPORT_TO_TAG.TAG_ID AND REPORT_TO_TAG.REPORT_ID = ?");
+        Map<Long, List<Tag>> map = new HashMap<Long, List<Tag>>();
+        Set<Tag> reportTags = new HashSet<Tag>();
+        for (Long reportID : installedReportMap.keySet()) {
+            List<Tag> tags = new ArrayList<Tag>();
+            reportTagStmt.setLong(1, reportID);
+            ResultSet targetRS = reportTagStmt.executeQuery();
+            while (targetRS.next()) {
+                Tag tag = new Tag(targetRS.getLong(1), targetRS.getString(2), targetRS.getBoolean(3), targetRS.getBoolean(4), targetRS.getBoolean(5));
+                reportTags.add(tag);
+                tags.add(tag);
+            }
+            map.put(reportID, tags);
+        }
+
     }
 
     public void copyTags() throws SQLException {
