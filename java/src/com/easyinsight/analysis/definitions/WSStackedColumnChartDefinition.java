@@ -362,7 +362,8 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
     }
 
     public void renderConfig(ApplicationSkin applicationSkin) {
-        if ("Primary".equals(getColorScheme())) {
+        if ("Primary".equals(getColorScheme()) && applicationSkin.getMultiColors() != null && applicationSkin.getMultiColors().size() > 0 &&
+                applicationSkin.getMultiColors().get(0).isColor1StartEnabled()) {
             setMultiColors(applicationSkin.getMultiColors());
         }
     }

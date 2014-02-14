@@ -229,11 +229,12 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
     }
 
     public void renderConfig(ApplicationSkin applicationSkin) {
-        if (getMeasures().size() == 1 && "Primary".equals(getColorScheme())) {
+        if (getMeasures().size() == 1 && "Primary".equals(getColorScheme()) && applicationSkin.isCustomChartColorEnabled()) {
             setChartColor(applicationSkin.getCustomChartColor());
             setUseChartColor(true);
             setGradientColor(applicationSkin.getCustomChartColor());
-        } else if (getMeasures().size() > 1 && "Primary".equals(getColorScheme())) {
+        } else if (getMeasures().size() > 1 && "Primary".equals(getColorScheme()) && applicationSkin.getMultiColors() != null && applicationSkin.getMultiColors().size() > 0 &&
+                applicationSkin.getMultiColors().get(0).isColor1StartEnabled()) {
             setMultiColors(applicationSkin.getMultiColors());
         }
     }
