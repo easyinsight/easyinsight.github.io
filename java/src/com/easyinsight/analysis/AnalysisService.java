@@ -2055,7 +2055,7 @@ public class AnalysisService {
             List<AnalysisItem> allFields = feedDefinition.allFields(conn);
             AnalysisDefinition.SaveMetadata metadata = analysisDefinition.clone(allFields, false);
             AnalysisDefinition clone = metadata.analysisDefinition;
-            analysisDefinition.blah(null, metadata.replacementMap, clone, allFields, null);
+            analysisDefinition.blah(null, metadata.replacementMap, clone, allFields, null, metadata.added);
             clone.setAuthorName(SecurityUtil.getUserName());
             clone.setTitle(newName);
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
@@ -2114,7 +2114,7 @@ public class AnalysisService {
             List<AnalysisItem> allFields = feedDefinition.allFields(conn);
             AnalysisDefinition.SaveMetadata metadata = analysisDefinition.clone(allFields, false);
             AnalysisDefinition clone = metadata.analysisDefinition;
-            analysisDefinition.blah(null, metadata.replacementMap, clone, allFields, null);
+            analysisDefinition.blah(null, metadata.replacementMap, clone, allFields, null, metadata.added);
             clone.setDataFeedID(targetDataSource.getDataFeedID());
             clone.setAuthorName(SecurityUtil.getUserName());
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();

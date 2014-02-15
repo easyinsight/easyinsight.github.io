@@ -476,9 +476,11 @@ public class AnalysisDefinition implements Cloneable {
         replacementMap.setTagReplacementMap(tagMap);
 
         allFields = new ArrayList<AnalysisItem>(allFields);
+        List<AnalysisItem> added = new ArrayList<AnalysisItem>();
 
         if (analysisDefinition.getAddedItems() != null) {
             allFields.addAll(analysisDefinition.getAddedItems());
+            added.addAll(analysisDefinition.getAddedItems());
         }
         if (analysisDefinition.getReportStubs() != null) {
             for (ReportStub reportStub : analysisDefinition.getReportStubs()) {
@@ -525,6 +527,7 @@ public class AnalysisDefinition implements Cloneable {
                 for (AnalysisItem clone : fields) {
                     clone.updateIDs(replacements);
                     allFields.add(clone);
+                    added.add(clone);
                 }
             }
         }
@@ -636,6 +639,7 @@ public class AnalysisDefinition implements Cloneable {
 
         analysisDefinition.setReportStructure(clonedStructure);
         SaveMetadata saveMetadata = new SaveMetadata();
+        saveMetadata.added = added;
         saveMetadata.replacementMap = replacementMap;
         saveMetadata.analysisDefinition = analysisDefinition;
         return saveMetadata;
@@ -644,13 +648,13 @@ public class AnalysisDefinition implements Cloneable {
     public static class SaveMetadata {
         public ReplacementMap replacementMap;
         public AnalysisDefinition analysisDefinition;
-
+        public List<AnalysisItem> added;
 
     }
 
 
     public static void blah(FeedDefinition target, ReplacementMap replacementMap,
-                     AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> additionalDataSourceFields) throws CloneNotSupportedException {
+                     AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> additionalDataSourceFields, List<AnalysisItem> added) throws CloneNotSupportedException {
         Map<String, AnalysisItem> clonedStructure = analysisDefinition.getReportStructure();
         Map<String, AnalysisItem> set = new HashMap<String, AnalysisItem>();
         if (additionalDataSourceFields != null) {
@@ -658,6 +662,9 @@ public class AnalysisDefinition implements Cloneable {
             for (AnalysisItem analysisItem : additionalDataSourceFields) {
                 set.put(analysisItem.toDisplay(), analysisItem);
             }
+        }
+        for (AnalysisItem add : added) {
+            set.put(add.toDisplay(), add);
         }
         List<AnalysisItem> addedItems = analysisDefinition.getAddedItems();
         if (target != null) {

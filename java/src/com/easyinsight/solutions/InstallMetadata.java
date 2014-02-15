@@ -520,7 +520,7 @@ class InstallMetadata {
             AnalysisDefinition.SaveMetadata metadata = newOrUpdatedMetadatas.get(i);
             AnalysisDefinition original = originReportList.get(i);
             System.out.println("Updating metadata on " + original.getTitle());
-            AnalysisDefinition.blah(targetSource, metadata.replacementMap, metadata.analysisDefinition, targetFields, null);
+            AnalysisDefinition.blah(targetSource, metadata.replacementMap, metadata.analysisDefinition, targetFields, null, metadata.added);
             metadata.analysisDefinition.updateReportIDs(installedReportMap, installedDashboardMap, session);
             analysisStorage.saveAnalysis(metadata.analysisDefinition, session);
         }
