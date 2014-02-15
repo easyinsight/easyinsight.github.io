@@ -105,6 +105,15 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
     }
 
     @Override
+    public FilterDefinition clone() throws CloneNotSupportedException {
+        AnalysisItemFilterDefinition clone = (AnalysisItemFilterDefinition) super.clone();
+        clone.setAvailableHandles(new ArrayList<AnalysisItemHandle>(getAvailableHandles()));
+        clone.setAvailableItems(new ArrayList<AnalysisItem>(getAvailableItems()));
+        clone.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>(getAvailableTags()));
+        return clone;
+    }
+
+    @Override
     public void updateIDs(ReplacementMap replacementMap) {
         super.updateIDs(replacementMap);
         if (targetItem != null) {

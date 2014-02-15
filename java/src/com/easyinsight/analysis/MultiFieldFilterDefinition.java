@@ -168,6 +168,16 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
     }
 
     @Override
+    public FilterDefinition clone() throws CloneNotSupportedException {
+        MultiFieldFilterDefinition clone = (MultiFieldFilterDefinition) super.clone();
+        clone.setAvailableHandles(new ArrayList<AnalysisItemHandle>(getAvailableHandles()));
+        clone.setFieldOrdering(new ArrayList<AnalysisItemHandle>(getFieldOrdering()));
+        clone.setSelectedItems(new ArrayList<AnalysisItemHandle>(selectedItems()));
+        clone.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>(getAvailableTags()));
+        return clone;
+    }
+
+    @Override
     public void updateIDs(ReplacementMap replacementMap) {
         super.updateIDs(replacementMap);
 
@@ -182,6 +192,9 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
         List<WeNeedToReplaceHibernateTag> replaceTags = new ArrayList<WeNeedToReplaceHibernateTag>();
         for (WeNeedToReplaceHibernateTag tag : availableTags) {
             Tag newTag1 = replacementMap.findReplacementTag(tag.getTagID());
+            if (newTag1 == null) {
+                System.out.println("Could not find replacement tag for " + tag.getTagID());
+            }
             WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
             newTag.setTagID(newTag1.getId());
             replaceTags.add(newTag);
