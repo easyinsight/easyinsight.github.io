@@ -593,6 +593,9 @@ public class AnalysisDefinition implements Cloneable {
 
         if (getJoinOverrides() != null) {
             List<JoinOverride> clones = new ArrayList<JoinOverride>();
+            if (joinOverrides.size() > 0) {
+                System.out.println("Copying multiple join overrides for " + getTitle());
+            }
             for (JoinOverride joinOverride : joinOverrides) {
                 replacementMap.addField(joinOverride.getSourceItem(), changingDataSource);
                 replacementMap.addField(joinOverride.getTargetItem(), changingDataSource);
