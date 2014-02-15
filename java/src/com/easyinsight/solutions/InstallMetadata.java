@@ -328,17 +328,25 @@ class InstallMetadata {
             AnalysisItem targetItem = connection.getTargetItem();
 
             AnalysisItem sourceResult = sourceMap.get(sourceItem.getKey().toBaseKey().getKeyID());
+            System.out.println("\tSearching for " + sourceResult.toDisplay());
             AnalysisItem matchedSourceItem = target.findAnalysisItemByDisplayName(sourceResult.toDisplay());
+            System.out.println("\t\tMatched to " + matchedSourceItem.toDisplay());
 
             AnalysisItem targetResult = sourceMap.get(targetItem.getKey().toBaseKey().getKeyID());
+            System.out.println("\tSearching for " + targetResult.toDisplay());
             AnalysisItem matchedTargetItem = target.findAnalysisItemByDisplayName(targetResult.toDisplay());
+            System.out.println("\t\tMatched to " + matchedTargetItem.toDisplay());
 
             if (matchedSourceItem != null && matchedTargetItem != null) {
                 CompositeFeedConnection newConnection = new CompositeFeedConnection();
                 newConnection.setSourceFeedID(((DerivedKey) matchedSourceItem.getKey()).getFeedID());
                 newConnection.setTargetFeedID(((DerivedKey) matchedTargetItem.getKey()).getFeedID());
-                newConnection.setSourceItem(new FeedStorage().getFeedDefinitionData(newConnection.getSourceFeedID(), conn).findAnalysisItemByKey(matchedSourceItem.getKey().toBaseKey().toKeyString()));
-                newConnection.setTargetItem(new FeedStorage().getFeedDefinitionData(newConnection.getTargetFeedID(), conn).findAnalysisItemByKey(matchedTargetItem.getKey().toBaseKey().toKeyString()));
+                AnalysisItem s = new FeedStorage().getFeedDefinitionData(newConnection.getSourceFeedID(), conn).findAnalysisItemByKey(matchedSourceItem.getKey().toBaseKey().toKeyString());
+                System.out.println("\tEnd field = " + s.toDisplay());
+                newConnection.setSourceItem(s);
+                AnalysisItem t = new FeedStorage().getFeedDefinitionData(newConnection.getTargetFeedID(), conn).findAnalysisItemByKey(matchedTargetItem.getKey().toBaseKey().toKeyString());
+                System.out.println("\tEnd field = " + t.toDisplay());
+                newConnection.setTargetItem(t);
                 newConnections.add(newConnection);
             }
         }
