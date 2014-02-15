@@ -649,7 +649,7 @@ public class AnalysisDefinition implements Cloneable {
     }
 
 
-    public void blah(FeedDefinition target, ReplacementMap replacementMap,
+    public static void blah(FeedDefinition target, ReplacementMap replacementMap,
                      AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> additionalDataSourceFields) throws CloneNotSupportedException {
         Map<String, AnalysisItem> clonedStructure = analysisDefinition.getReportStructure();
         Map<String, AnalysisItem> set = new HashMap<String, AnalysisItem>();
@@ -659,6 +659,7 @@ public class AnalysisDefinition implements Cloneable {
                 set.put(analysisItem.toDisplay(), analysisItem);
             }
         }
+        List<AnalysisItem> addedItems = analysisDefinition.getAddedItems();
         if (target != null) {
             for (AnalysisItem analysisItem : replacementMap.getFields()) {
                 //analysisItem.afterLoad();
@@ -707,10 +708,10 @@ public class AnalysisDefinition implements Cloneable {
             }
             analysisItem.updateIDs(replacementMap);
         }
-        for (Map.Entry<String, AnalysisItem> entry : getReportStructure().entrySet()) {
+        for (Map.Entry<String, AnalysisItem> entry : analysisDefinition.getReportStructure().entrySet()) {
             clonedStructure.put(entry.getKey(), replacementMap.getField(entry.getValue()));
         }
-        for (FilterDefinition filter : filterDefinitions) {
+        for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
             filter.updateIDs(replacementMap);
         }
         if (analysisDefinition.getJoinOverrides() != null) {

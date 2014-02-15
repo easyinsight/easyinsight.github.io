@@ -512,17 +512,23 @@ class InstallMetadata {
 
     public void updateAllMetadata() throws SQLException, CloneNotSupportedException {
         // update tags, etc
+        session.flush();
 
         List<AnalysisItem> targetFields = targetSource.allFields(conn);
 
         for (int i = 0; i < newOrUpdatedMetadatas.size(); i++) {
             AnalysisDefinition.SaveMetadata metadata = newOrUpdatedMetadatas.get(i);
             AnalysisDefinition original = originReportList.get(i);
-            original.blah(targetSource, metadata.replacementMap, metadata.analysisDefinition, targetFields, null);
+            System.out.println("Updating metadata on " + original.getTitle());
+            AnalysisDefinition.blah(targetSource, metadata.replacementMap, metadata.analysisDefinition, targetFields, null);
+            metadata.analysisDefinition.updateReportIDs(installedReportMap, installedDashboardMap, session);
+            analysisStorage.saveAnalysis(metadata.analysisDefinition, session);
         }
 
+        session.flush();
+
         for (AnalysisDefinition report : newOrUpdatedReports) {
-            report.updateReportIDs(installedReportMap, installedDashboardMap, session);
+
         }
 
 
@@ -530,9 +536,15 @@ class InstallMetadata {
             dashboard.updateIDs(installedReportMap, targetFields, true, targetSource);
         }
 
-        for (AnalysisDefinition report : newOrUpdatedReports) {
-            analysisStorage.saveAnalysis(report, session);
-        }
+        /*for (AnalysisDefinition report : newOrUpdatedReports) {
+            System.out.println("Final save on report " + report.getTitle());
+            try {
+
+            } catch (Exception e) {
+                System.out.println("...");
+                throw new RuntimeException(e);
+            }
+        }*/
 
         PreparedStatement originStmt = conn.prepareStatement("INSERT INTO report_install_info (origin_report_id, result_report_id, install_date, data_source_id) VALUES (?, ?, ?, ?)");
         for (int i = 0; i < newOrUpdatedReports.size(); i++) {
