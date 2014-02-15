@@ -17,7 +17,6 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.tag.Tag;
 import org.hibernate.Session;
-import org.jetbrains.annotations.Nullable;
 
 import java.sql.*;
 import java.util.*;
@@ -46,6 +45,7 @@ class InstallMetadata {
     private Map<Long, Dashboard> installedDashboardMap = new HashMap<Long, Dashboard>();
 
     private List<AnalysisDefinition> newOrUpdatedReports = new ArrayList<AnalysisDefinition>();
+    private List<AnalysisDefinition.SaveMetadata> newOrUpdatedMetadatas = new ArrayList<AnalysisDefinition.SaveMetadata>();
     private List<AnalysisDefinition> originReportList = new ArrayList<AnalysisDefinition>();
     private List<Dashboard> newOrUpdatedDashboards = new ArrayList<Dashboard>();
     private List<Dashboard> originDashboardList = new ArrayList<Dashboard>();
@@ -163,7 +163,8 @@ class InstallMetadata {
         if (report == null) {
             AnalysisDefinition fromReport = analysisStorage.getPersistableReport(insightDescriptor.getId(), session);
             log("\tInstalling a fresh version");
-            report = copyReportToDataSource(targetSource, fromReport, null);
+            AnalysisDefinition.SaveMetadata metadata = copyReportToDataSource(targetSource, fromReport);
+            report = metadata.analysisDefinition;
             int folder = fromReport.getFolder();
             Integer folderID = folderReplacementMap.get(folder);
             if (folderID != null) {
@@ -172,6 +173,7 @@ class InstallMetadata {
             analysisStorage.saveAnalysis(report, session);
             installedReportMap.put(insightDescriptor.getId(), report);
             newOrUpdatedReports.add(report);
+            newOrUpdatedMetadatas.add(metadata);
             originReportList.add(fromReport);
             Set<EIDescriptor> ids = fromReport.containedReportIDs();
             for (EIDescriptor descriptor : ids) {
@@ -222,14 +224,15 @@ class InstallMetadata {
         return dashboard;
     }
 
-    private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report, @Nullable List<AnalysisItem> additionalDataSourceFields) throws CloneNotSupportedException {
-        AnalysisDefinition clonedReport = report.clone(localDefinition, localDefinition.allFields(conn), true, additionalDataSourceFields, tagReplacementMap);
+    private AnalysisDefinition.SaveMetadata copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report) throws CloneNotSupportedException {
+        AnalysisDefinition.SaveMetadata metadata = report.clone(localDefinition.allFields(conn), true, tagReplacementMap);
+        AnalysisDefinition clonedReport = metadata.analysisDefinition;
         clonedReport.setSolutionVisible(false);
         clonedReport.setRecommendedExchange(false);
         clonedReport.setAutoSetupDelivery(false);
         clonedReport.setDataFeedID(localDefinition.getDataFeedID());
         clonedReport.setUserBindings(Arrays.asList(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER)));
-        return clonedReport;
+        return metadata;
     }
 
     private Dashboard copyDashboardToDataSource(FeedDefinition localDefinition, Dashboard dashboard) throws CloneNotSupportedException {
@@ -507,10 +510,16 @@ class InstallMetadata {
         conn.commit();
     }
 
-    public void updateAllMetadata() throws SQLException {
+    public void updateAllMetadata() throws SQLException, CloneNotSupportedException {
         // update tags, etc
 
         List<AnalysisItem> targetFields = targetSource.allFields(conn);
+
+        for (int i = 0; i < newOrUpdatedMetadatas.size(); i++) {
+            AnalysisDefinition.SaveMetadata metadata = newOrUpdatedMetadatas.get(i);
+            AnalysisDefinition original = originReportList.get(i);
+            original.blah(targetSource, metadata.replacementMap, metadata.analysisDefinition, targetFields, null);
+        }
 
         for (AnalysisDefinition report : newOrUpdatedReports) {
             report.updateReportIDs(installedReportMap, installedDashboardMap, session);

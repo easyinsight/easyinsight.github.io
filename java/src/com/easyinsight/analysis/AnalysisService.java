@@ -448,6 +448,9 @@ public class AnalysisService {
                 System.out.println("\tSearching for " + targetResult.toDisplay());
             }
 
+            System.out.println("Source Feed ID = " + connection.getSourceFeedID());
+            System.out.println("Target Feed ID = " + connection.getTargetFeedID());
+
             JoinOverride joinOverride = new JoinOverride();
             String sourceName;
             String targetName;
@@ -2048,8 +2051,11 @@ public class AnalysisService {
             conn.setAutoCommit(false);
             Session session = Database.instance().createSession(conn);
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
-            Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
-            AnalysisDefinition clone = analysisDefinition.clone(null, feed.getFields(), false);
+            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(saveDefinition.getDataFeedID(), conn);
+            List<AnalysisItem> allFields = feedDefinition.allFields(conn);
+            AnalysisDefinition.SaveMetadata metadata = analysisDefinition.clone(allFields, false);
+            AnalysisDefinition clone = metadata.analysisDefinition;
+            analysisDefinition.blah(null, metadata.replacementMap, clone, allFields, null);
             clone.setAuthorName(SecurityUtil.getUserName());
             clone.setTitle(newName);
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
@@ -2104,7 +2110,11 @@ public class AnalysisService {
             FeedDefinition targetDataSource = new FeedStorage().getFeedDefinitionData(targetID);
             Session session = Database.instance().createSession(conn);
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
-            AnalysisDefinition clone = analysisDefinition.clone(targetDataSource, targetDataSource.getFields(), true);
+            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(saveDefinition.getDataFeedID(), conn);
+            List<AnalysisItem> allFields = feedDefinition.allFields(conn);
+            AnalysisDefinition.SaveMetadata metadata = analysisDefinition.clone(allFields, false);
+            AnalysisDefinition clone = metadata.analysisDefinition;
+            analysisDefinition.blah(null, metadata.replacementMap, clone, allFields, null);
             clone.setDataFeedID(targetDataSource.getDataFeedID());
             clone.setAuthorName(SecurityUtil.getUserName());
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
