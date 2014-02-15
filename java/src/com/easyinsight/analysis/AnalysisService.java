@@ -417,10 +417,37 @@ public class AnalysisService {
                              CompositeFeedDefinition compositeFeedDefinition, List<AnalysisItem> items, EIConnection conn) throws SQLException, CloneNotSupportedException {
         List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
 
+        Map<Long, AnalysisItem> sourceMap = new HashMap<Long, AnalysisItem>();
+        for (AnalysisItem field : compositeFeedDefinition.getFields()) {
+            if (field.isConcrete()) {
+                sourceMap.put(field.getKey().toBaseKey().getKeyID(), field);
+            }
+        }
+
         configurableDataSources.add(new DataSourceDescriptor(compositeFeedDefinition.getFeedName(), compositeFeedDefinition.getDataFeedID(), compositeFeedDefinition.getFeedType().getType(),
                 false, compositeFeedDefinition.getDataSourceBehavior()));
         Feed feed = FeedRegistry.instance().getFeed(compositeFeedDefinition.getDataFeedID(), conn);
         for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
+            AnalysisItem sourceItem = connection.getSourceItem();
+            AnalysisItem targetItem = connection.getTargetItem();
+
+            AnalysisItem sourceResult;
+            if (connection.getSourceItem() == null) {
+                sourceResult = sourceMap.get(connection.getSourceJoin().getKeyID());
+            } else {
+                sourceResult = sourceMap.get(sourceItem.getKey().toBaseKey().getKeyID());
+                System.out.println("\tSearching for " + sourceResult.toDisplay());
+            }
+
+
+            AnalysisItem targetResult;
+            if (connection.getTargetItem() == null) {
+                targetResult = sourceMap.get(connection.getTargetJoin().getKeyID());
+            } else {
+                targetResult = sourceMap.get(targetItem.getKey().toBaseKey().getKeyID());
+                System.out.println("\tSearching for " + targetResult.toDisplay());
+            }
+
             JoinOverride joinOverride = new JoinOverride();
             String sourceName;
             String targetName;
@@ -455,8 +482,8 @@ public class AnalysisService {
                 stmt.close();
             }
             joinOverride.setDataSourceID(compositeFeedDefinition.getDataFeedID());
-            joinOverride.setSourceItem(findSourceItem(connection, items == null ? feed.getFields() : items));
-            joinOverride.setTargetItem(findTargetItem(connection, items == null ? feed.getFields() : items));
+            joinOverride.setSourceItem(sourceResult);
+            joinOverride.setTargetItem(targetResult);
             if (joinOverride.getSourceItem() != null && joinOverride.getTargetItem() != null) {
                 joinOverride.setSourceName(sourceName);
                 joinOverride.setTargetName(targetName);
