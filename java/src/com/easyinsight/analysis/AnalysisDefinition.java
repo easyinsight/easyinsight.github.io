@@ -653,18 +653,26 @@ public class AnalysisDefinition implements Cloneable {
     }
 
 
-    public static void blah(FeedDefinition target, ReplacementMap replacementMap,
-                     AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> additionalDataSourceFields, List<AnalysisItem> added) throws CloneNotSupportedException {
+    public static void updateFromMetadata(FeedDefinition target, ReplacementMap replacementMap,
+                                          AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> additionalDataSourceFields, List<AnalysisItem> added) throws CloneNotSupportedException {
         Map<String, AnalysisItem> clonedStructure = analysisDefinition.getReportStructure();
-        Map<String, AnalysisItem> set = new HashMap<String, AnalysisItem>();
+        /*Map<String, AnalysisItem> set = new HashMap<String, AnalysisItem>();
         if (additionalDataSourceFields != null) {
             allFields.addAll(additionalDataSourceFields);
             for (AnalysisItem analysisItem : additionalDataSourceFields) {
                 set.put(analysisItem.toDisplay(), analysisItem);
             }
-        }
-        for (AnalysisItem add : added) {
+        }*/
+        /*for (AnalysisItem add : added) {
             set.put(add.toDisplay(), add);
+        }*/
+
+        Map<String, AnalysisItem> targetFieldMap = new HashMap<String, AnalysisItem>();
+        for (AnalysisItem item : allFields) {
+            targetFieldMap.put(item.toDisplay(), item);
+        }
+        for (AnalysisItem item : added) {
+            targetFieldMap.put(item.toDisplay(), item);
         }
         List<AnalysisItem> addedItems = analysisDefinition.getAddedItems();
         if (target != null) {
@@ -675,27 +683,30 @@ public class AnalysisDefinition implements Cloneable {
                 if (deproxiedKey instanceof ReportKey) {
 
                 } else {
-                    AnalysisItem dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
-                    if (dataSourceItem != null) {
-                        key = dataSourceItem.getKey();
-                    } else {
-                        if (analysisItem.getOriginalDisplayName() != null) {
-                            dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
-                        }
+                    AnalysisItem dataSourceItem = targetFieldMap.get(analysisItem.toDisplay());
+                    if (dataSourceItem == null) {
+                        dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
                         if (dataSourceItem != null) {
                             key = dataSourceItem.getKey();
                         } else {
-                            dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                            if (analysisItem.getOriginalDisplayName() != null) {
+                                dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
+                            }
                             if (dataSourceItem != null) {
                                 key = dataSourceItem.getKey();
+                            } else {
+                                dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                                if (dataSourceItem != null) {
+                                    key = dataSourceItem.getKey();
+                                }
                             }
                         }
                     }
                     if (key != null) {
                         analysisItem.setKey(key);
-                        if (set.containsKey(analysisItem.toDisplay()) && !addedItems.contains(analysisItem)) {
+                        /*if (set.containsKey(analysisItem.toDisplay()) && !addedItems.contains(analysisItem)) {
                             addedItems.add(analysisItem);
-                        }
+                        }*/
                     } else {
                         Key clonedKey = analysisItem.getKey().clone();
                         analysisItem.setKey(clonedKey);
