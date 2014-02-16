@@ -123,11 +123,8 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             Session session = Database.instance().createSession(conn);
             List results;
             try {
-                session.beginTransaction();
                 results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
-                session.getTransaction().commit();
             } catch (Exception e) {
-                session.getTransaction().rollback();
                 throw new RuntimeException(e);
             } finally {
                 session.close();
