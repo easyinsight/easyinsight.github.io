@@ -36,6 +36,8 @@ public class PivotalTrackerV5StorySource extends PivotalTrackerV5BaseSource {
     public static final String OWNER = "Owner";
     public static final String COUNT = "Count";
 
+    public static int PAGE_SIZE = 100;
+
     public PivotalTrackerV5StorySource() {
         setFeedName("Stories");
     }
@@ -70,44 +72,50 @@ public class PivotalTrackerV5StorySource extends PivotalTrackerV5BaseSource {
         PivotalTrackerV5CompositeSource p = (PivotalTrackerV5CompositeSource) parentDefinition;
         Map<String, List<String>> storyIDToLabelMap = new HashMap<String, List<String>>();
         List<Map> projects = runRequestForList("projects", p, httpClient);
+        int page = 0;
+
         for (Map project : projects) {
             String projectID = getJSONValue(project, "id");
-            List<Map> stories = runRequestForList("/projects/" + projectID  + "/stories", p, httpClient);
-            for (Map story : stories) {
-                String storyID = getJSONValue(story, "id");
-                List<Map> labels = (List<Map>) story.get("labels");
-                for (Map label : labels) {
-                    String labelID = label.get("id").toString();
-                    List<String> labelList = storyIDToLabelMap.get(storyID);
-                    if (labelList == null) {
-                        labelList = new ArrayList<String>();
-                        storyIDToLabelMap.put(storyID, labelList);
+            List<Map> stories;
+            do {
+                stories = runRequestForList("/projects/" + projectID + "/stories?limit=" + PAGE_SIZE + "&offset=" + (page * PAGE_SIZE), p, httpClient);
+                for (Map story : stories) {
+                    String storyID = getJSONValue(story, "id");
+                    List<Map> labels = (List<Map>) story.get("labels");
+                    for (Map label : labels) {
+                        String labelID = label.get("id").toString();
+                        List<String> labelList = storyIDToLabelMap.get(storyID);
+                        if (labelList == null) {
+                            labelList = new ArrayList<String>();
+                            storyIDToLabelMap.put(storyID, labelList);
+                        }
+                        labelList.add(labelID);
                     }
-                    labelList.add(labelID);
+                    IRow row = dataSet.createRow();
+                    row.addValue(keys.get(ID), storyID);
+                    String iterationID = p.getIterationToStoryMap().get(storyID);
+                    if (iterationID != null) {
+                        row.addValue(keys.get(ITERATION_ID), iterationID);
+                    }
+                    row.addValue(keys.get(PROJECT_ID), projectID);
+                    row.addValue(keys.get(NAME), getJSONValue(story, "name"));
+                    row.addValue(keys.get(KIND), getJSONValue(story, "kind"));
+                    row.addValue(keys.get(URL), getJSONValue(story, "url"));
+                    row.addValue(keys.get(CURRENT_STATE), getJSONValue(story, "current_state"));
+                    row.addValue(keys.get(REQUESTED_BY), p.getUser(getJSONValue(story, "requested_by_id")));
+                    row.addValue(keys.get(ACCEPTED_AT), getDate(story, "accepted_at"));
+                    row.addValue(keys.get(CREATED_AT), getDate(story, "created_at"));
+                    row.addValue(keys.get(STORY_TYPE), getJSONValue(story, "url"));
+                    row.addValue(keys.get(OWNER), p.getUser(getJSONValue(story, "owned_by_id")));
+                    row.addValue(keys.get(DEADLINE), getDate(story, "deadline"));
+                    row.addValue(keys.get(UPDATED_AT), getDate(story, "updated_at"));
+                    row.addValue(keys.get(ESTIMATE), getJSONValue(story, "estimate"));
+                    row.addValue(keys.get(COUNT), 1);
                 }
-                IRow row = dataSet.createRow();
-                row.addValue(keys.get(ID), storyID);
-                String iterationID = p.getIterationToStoryMap().get(storyID);
-                if (iterationID != null) {
-                    row.addValue(keys.get(ITERATION_ID), iterationID);
-                }
-                row.addValue(keys.get(PROJECT_ID), projectID);
-                row.addValue(keys.get(NAME), getJSONValue(story, "name"));
-                row.addValue(keys.get(KIND), getJSONValue(story, "kind"));
-                row.addValue(keys.get(URL), getJSONValue(story, "url"));
-                row.addValue(keys.get(CURRENT_STATE), getJSONValue(story, "current_state"));
-                row.addValue(keys.get(REQUESTED_BY), p.getUser(getJSONValue(story, "requested_by_id")));
-                row.addValue(keys.get(ACCEPTED_AT), getDate(story, "accepted_at"));
-                row.addValue(keys.get(CREATED_AT), getDate(story, "created_at"));
-                row.addValue(keys.get(STORY_TYPE), getJSONValue(story, "url"));
-                row.addValue(keys.get(OWNER), p.getUser(getJSONValue(story, "owned_by_id")));
-                row.addValue(keys.get(DEADLINE), getDate(story, "deadline"));
-                row.addValue(keys.get(UPDATED_AT), getDate(story, "updated_at"));
-                row.addValue(keys.get(ESTIMATE), getJSONValue(story, "estimate"));
-                row.addValue(keys.get(COUNT), 1);
-            }
-
+                page = page + 1;
+            } while (stories.size() > 0);
         }
+
         p.setStoryIDToLabelMap(storyIDToLabelMap);
         return dataSet;
     }
