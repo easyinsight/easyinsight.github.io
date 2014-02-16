@@ -527,6 +527,7 @@ public class AnalysisDefinition implements Cloneable {
                 for (AnalysisItem clone : fields) {
                     clone.updateIDs(replacements);
                     allFields.add(clone);
+                    System.out.println("Adding report level clone " + clone.toDisplay());
                     added.add(clone);
                 }
             }
@@ -654,7 +655,7 @@ public class AnalysisDefinition implements Cloneable {
 
 
     public static void updateFromMetadata(FeedDefinition target, ReplacementMap replacementMap,
-                                          AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> additionalDataSourceFields, List<AnalysisItem> added) throws CloneNotSupportedException {
+                                          AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> added) throws CloneNotSupportedException {
         Map<String, AnalysisItem> clonedStructure = analysisDefinition.getReportStructure();
         /*Map<String, AnalysisItem> set = new HashMap<String, AnalysisItem>();
         if (additionalDataSourceFields != null) {
@@ -701,13 +702,17 @@ public class AnalysisDefinition implements Cloneable {
                                 }
                             }
                         }
+                    } else {
+                        key = dataSourceItem.getKey();
                     }
                     if (key != null) {
+                        System.out.println("Found existing key for " + dataSourceItem.toDisplay());
                         analysisItem.setKey(key);
                         /*if (set.containsKey(analysisItem.toDisplay()) && !addedItems.contains(analysisItem)) {
                             addedItems.add(analysisItem);
                         }*/
                     } else {
+                        System.out.println("Couldn't find the key for " + analysisItem.toDisplay());
                         Key clonedKey = analysisItem.getKey().clone();
                         analysisItem.setKey(clonedKey);
                         if (!addedItems.contains(analysisItem)) {
@@ -901,8 +906,9 @@ public class AnalysisDefinition implements Cloneable {
 
     private void blah(AnalysisItem analysisItem, Map<Long, AnalysisDefinition> reportReplacementMap, Session session) {
             //Key key = (Key) Database.deproxy(analysisItem.getKey());
-            if (analysisItem.getKey() instanceof ReportKey) {
-                ReportKey reportKey = (ReportKey) analysisItem.getKey();
+        Key argh = (Key) Database.deproxy(analysisItem.getKey());
+        if (argh instanceof ReportKey) {
+                ReportKey reportKey = (ReportKey) argh;
                 //reportKey.afterLoad();
                 if (reportReplacementMap.containsKey(reportKey.getReportID())) {
                     ReportKey cloneKey = new ReportKey();
@@ -920,6 +926,40 @@ public class AnalysisDefinition implements Cloneable {
                     session.save(cloneKey);
                 }
             }
+    }
+
+    public Set<ValidationID>  populateValidationIDs() {
+        Set<ValidationID> validationIDs = new HashSet<ValidationID>();
+        for (AnalysisItem item : reportStructure.values()) {
+            validationIDs.add(new ValidationID(ValidationID.KEY, item.getKey().getKeyID()));
+            validationIDs.add(new ValidationID(ValidationID.FIELD, item.getAnalysisItemID()));
+        }
+        if (joinOverrides != null) {
+            for (JoinOverride joinOverride : joinOverrides) {
+                if (joinOverride.getSourceItem() != null) {
+                    validationIDs.add(new ValidationID(ValidationID.FIELD, joinOverride.getSourceItem().getAnalysisItemID()));
+                }
+                if (joinOverride.getTargetItem() != null) {
+                    validationIDs.add(new ValidationID(ValidationID.FIELD, joinOverride.getTargetItem().getAnalysisItemID()));
+                }
+            }
+        }
+        if (filterDefinitions != null) {
+            for (FilterDefinition filter : filterDefinitions) {
+                validationIDs.add(new ValidationID(ValidationID.FILTER, filter.getFilterID()));
+                if (filter.getField() != null) {
+                    validationIDs.add(new ValidationID(ValidationID.KEY, filter.getField().getKey().getKeyID()));
+                    validationIDs.add(new ValidationID(ValidationID.FIELD, filter.getField().getAnalysisItemID()));
+                }
+            }
+        }
+        if (addedItems != null) {
+            for (AnalysisItem item : addedItems) {
+                validationIDs.add(new ValidationID(ValidationID.KEY, item.getKey().getKeyID()));
+                validationIDs.add(new ValidationID(ValidationID.FIELD, item.getAnalysisItemID()));
+            }
+        }
+        return validationIDs;
     }
 
     public Set<EIDescriptor> containedReportIDs() {
