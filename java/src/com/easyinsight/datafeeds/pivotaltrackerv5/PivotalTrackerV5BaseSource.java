@@ -6,6 +6,7 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
+import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import nu.xom.Builder;
 import org.apache.commons.httpclient.HttpClient;
@@ -81,7 +82,11 @@ public abstract class PivotalTrackerV5BaseSource extends ServerDataSourceDefinit
             } else if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
             }
-            return (List) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+            Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+            if(o instanceof JSONObject) {
+                // probably an error
+            }
+            return (List) o;
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
