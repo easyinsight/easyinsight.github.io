@@ -18,7 +18,9 @@ import com.easyinsight.framework.User;
 import com.easyinsight.schedule.DailyScheduleType;
 import com.easyinsight.schedule.DataSourceRefreshActivity;
 import com.easyinsight.scorecard.DataSourceAsyncEvent;
+import com.easyinsight.skin.ApplicationSkin;
 import com.easyinsight.solutions.DataSourceDescriptor;
+import com.easyinsight.solutions.PostInstallSteps;
 import com.easyinsight.solutions.SolutionKPIData;
 import com.easyinsight.util.CancelButton;
 import com.easyinsight.util.EISlimWindow;
@@ -162,6 +164,11 @@ public class DelayedSync extends EISlimWindow {
     }
 
     private function installed(event:Event):void {
+        var steps:PostInstallSteps = solutionService.addKPIData.lastResult as PostInstallSteps;
+        if (steps.applicationSkin != null) {
+            User.getInstance().applicationSkin = steps.applicationSkin;
+            ApplicationSkin.instance().applyUserSettings(steps.applicationSkin);
+        }
         var desc:DataSourceDescriptor = new DataSourceDescriptor();
         desc.id = _dataSourceDefinition.dataFeedID;
         desc.name = _dataSourceDefinition.feedName;

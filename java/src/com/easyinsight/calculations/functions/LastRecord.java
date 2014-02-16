@@ -56,7 +56,7 @@ public class LastRecord extends Function {
         ProcessCalculationCache processCalculationCache = (ProcessCalculationCache) calculationMetadata.getCache(new ProcessCacheBuilder(instanceIDField, sortField), processName);
         Value instanceValue = getParameter(0);
         List<IRow> rows = processCalculationCache.rowsForValue(instanceValue);
-        if (rows.size() == 0) {
+        if (rows == null || rows.size() == 0) {
             return new EmptyValue();
         }
         return rows.get(rows.size() - 1).getValue(targetField);

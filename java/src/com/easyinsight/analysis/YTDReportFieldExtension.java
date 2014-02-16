@@ -135,4 +135,8 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
             dateField.afterLoad();
         }*/
     }
+
+    public int extensionType() {
+        return ReportFieldExtension.YTD;
+    }
 }

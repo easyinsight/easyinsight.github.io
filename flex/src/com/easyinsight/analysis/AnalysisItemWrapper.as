@@ -6,6 +6,7 @@ import flash.events.EventDispatcher;
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
 import mx.collections.SortField;
+import mx.controls.Alert;
 
 public class AnalysisItemWrapper extends EventDispatcher
 	{
@@ -14,7 +15,7 @@ public class AnalysisItemWrapper extends EventDispatcher
         private var _children:ArrayCollection;
     public var addonReportID:int;
 		
-		public function AnalysisItemWrapper(feedNode:FeedNode)	{
+		public function AnalysisItemWrapper(feedNode:FeedNode, reportID:int = 0)	{
 			this._feedNode = feedNode;
 			displayName = feedNode.display;
             if (displayName == null) {
@@ -22,6 +23,9 @@ public class AnalysisItemWrapper extends EventDispatcher
             }
             _children = new ArrayCollection();
             for each (var child:FeedNode in feedNode.children) {
+                if (reportID > 0 && child is AnalysisItemNode && AnalysisItemNode(child).analysisItem.origin != null && AnalysisItemNode(child).analysisItem.origin.report == reportID) {
+                    continue;
+                }
                 _children.addItem(new AnalysisItemWrapper(child));
             }
             if (_children.length > 0) {
@@ -79,10 +83,6 @@ public class AnalysisItemWrapper extends EventDispatcher
     }
 
     public function get hidden():Boolean {
-        if (isAnalysisItem()) {
-            var node:AnalysisItemNode = _feedNode as AnalysisItemNode;
-            return node.analysisItem.hidden;
-        }
         return false;
     }
 

@@ -125,14 +125,14 @@
             window.definition = _analysisDefinition;
             window.allFields = _wrappers;
             window.startIndex = index;
-            window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, function (event:ReportPreferencesEvent):void {
+            /*window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, function (event:ReportPreferencesEvent):void {
                 dispatchEvent(new AnalysisChangedEvent());
                 if (event.refreshData) {
                     _dataView.forceRetrieve();
                 } else {
                     _dataView.rerender();
                 }
-            }, false, 0, true);
+            }, false, 0, true);*/
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
             PopUpManager.removePopUp(this);

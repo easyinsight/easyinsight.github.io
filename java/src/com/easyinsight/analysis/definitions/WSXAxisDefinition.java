@@ -1,8 +1,9 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.easyinsight.core.*;
+import com.easyinsight.dataset.DataSet;
+import com.easyinsight.dataset.LimitsResults;
 
 import java.util.*;
 
@@ -19,14 +20,50 @@ public abstract class WSXAxisDefinition extends WSChartDefinition {
     private double yAxisMin;
     private double yAxisMax;
 
-    private String colorScheme;
+    public LimitsResults applyLimits(DataSet dataSet) {
+        LimitsResults limitsResults;
+        if (getLimitsMetadata() != null && getLimitsMetadata().isLimitEnabled()) {
+            int count = dataSet.getRows().size();
+            limitsResults = new LimitsResults(count >= getLimitsMetadata().getNumber(), count, getLimitsMetadata().getNumber());
+            Map<String, AnalysisItem> structure = new HashMap<String, AnalysisItem>();
+            createReportStructure(structure);
+            AnalysisMeasure analysisMeasure = null;
+            for (AnalysisItem analysisItem : structure.values()) {
+                if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    analysisMeasure = (AnalysisMeasure) analysisItem;
+                    break;
+                }
+            }
+            if (analysisMeasure != null) {
+                dataSet.sort(analysisMeasure, getLimitsMetadata().isTop());
+                List<IRow> subset = dataSet.subset(getLimitsMetadata().getNumber());
+                if (subset.size() > 0) {
+                    IRow other = dataSet.createRow();
+                    Map<AnalysisItem, Aggregation> map = new HashMap<AnalysisItem, Aggregation>();
+                    List<Value> otherValues = new ArrayList<Value>();
+                    for (AnalysisItem measure1 : getMeasures()) {
+                        AggregationFactory aggFactory = new AggregationFactory((AnalysisMeasure) measure1, false);
+                        map.put(measure1, aggFactory.getAggregation());
+                    }
 
-    public String getColorScheme() {
-        return colorScheme;
-    }
-
-    public void setColorScheme(String colorScheme) {
-        this.colorScheme = colorScheme;
+                    for (IRow row : subset) {
+                        for (AnalysisItem measure : getMeasures()) {
+                            map.get(measure).addValue(row.getValue(measure));
+                        }
+                        otherValues.add(row.getValue(getXaxis().createAggregateKey()));
+                    }
+                    Value otherValue = new StringValue("Other");
+                    otherValue.setOtherValues(otherValues);
+                    other.addValue(getXaxis().createAggregateKey(), otherValue);
+                    for (AnalysisItem measure : getMeasures()) {
+                        other.addValue(measure.createAggregateKey(), map.get(measure).getValue());
+                    }
+                }
+            }
+        } else {
+            limitsResults = super.applyLimits(dataSet);
+        }
+        return limitsResults;
     }
 
     public double getYAxisMax() {
@@ -80,18 +117,5 @@ public abstract class WSXAxisDefinition extends WSChartDefinition {
         }
         columnList.add(xaxis);
         return columnList;
-    }
-
-    @Override
-    public void populateProperties(List<ReportProperty> properties) {
-        super.populateProperties(properties);
-        colorScheme = findStringProperty(properties, "colorScheme", "Bright Gradients");
-    }
-
-    @Override
-    public List<ReportProperty> createProperties() {
-        List<ReportProperty> properties = super.createProperties();
-        properties.add(new ReportStringProperty("colorScheme", colorScheme));
-        return properties;
     }
 }

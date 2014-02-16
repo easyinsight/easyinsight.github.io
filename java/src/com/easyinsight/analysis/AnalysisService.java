@@ -31,6 +31,7 @@ import com.easyinsight.storage.CachedCalculationTransform;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IDataTransform;
 import com.easyinsight.tag.Tag;
+import com.easyinsight.userupload.DataSourceThreadPool;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.util.RandomTextGenerator;
@@ -416,10 +417,40 @@ public class AnalysisService {
                              CompositeFeedDefinition compositeFeedDefinition, List<AnalysisItem> items, EIConnection conn) throws SQLException, CloneNotSupportedException {
         List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
 
+        Map<Long, AnalysisItem> sourceMap = new HashMap<Long, AnalysisItem>();
+        for (AnalysisItem field : compositeFeedDefinition.getFields()) {
+            if (field.isConcrete()) {
+                sourceMap.put(field.getKey().toBaseKey().getKeyID(), field);
+            }
+        }
+
         configurableDataSources.add(new DataSourceDescriptor(compositeFeedDefinition.getFeedName(), compositeFeedDefinition.getDataFeedID(), compositeFeedDefinition.getFeedType().getType(),
                 false, compositeFeedDefinition.getDataSourceBehavior()));
         Feed feed = FeedRegistry.instance().getFeed(compositeFeedDefinition.getDataFeedID(), conn);
         for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
+            AnalysisItem sourceItem = connection.getSourceItem();
+            AnalysisItem targetItem = connection.getTargetItem();
+
+            AnalysisItem sourceResult;
+            if (connection.getSourceItem() == null) {
+                sourceResult = sourceMap.get(connection.getSourceJoin().getKeyID());
+            } else {
+                sourceResult = sourceMap.get(sourceItem.getKey().toBaseKey().getKeyID());
+                System.out.println("\tSearching for " + sourceResult.toDisplay());
+            }
+
+
+            AnalysisItem targetResult;
+            if (connection.getTargetItem() == null) {
+                targetResult = sourceMap.get(connection.getTargetJoin().getKeyID());
+            } else {
+                targetResult = sourceMap.get(targetItem.getKey().toBaseKey().getKeyID());
+                System.out.println("\tSearching for " + targetResult.toDisplay());
+            }
+
+            System.out.println("Source Feed ID = " + connection.getSourceFeedID());
+            System.out.println("Target Feed ID = " + connection.getTargetFeedID());
+
             JoinOverride joinOverride = new JoinOverride();
             String sourceName;
             String targetName;
@@ -454,8 +485,8 @@ public class AnalysisService {
                 stmt.close();
             }
             joinOverride.setDataSourceID(compositeFeedDefinition.getDataFeedID());
-            joinOverride.setSourceItem(findSourceItem(connection, items == null ? feed.getFields() : items));
-            joinOverride.setTargetItem(findTargetItem(connection, items == null ? feed.getFields() : items));
+            joinOverride.setSourceItem(sourceResult);
+            joinOverride.setTargetItem(targetResult);
             if (joinOverride.getSourceItem() != null && joinOverride.getTargetItem() != null) {
                 joinOverride.setSourceName(sourceName);
                 joinOverride.setTargetName(targetName);
@@ -1620,12 +1651,14 @@ public class AnalysisService {
                     copy instanceof DerivedAnalysisDimension) {
                 Key key = new NamedKey("Copy of " + analysisItem.toDisplay());
                 copy.setKey(key);
-                copy.setDisplayName("Copy of " + analysisItem.toDisplay());
+                copy.setDisplayName("Copy of " + analysisItem.toUnqualifiedDisplay());
+                copy.setUnqualifiedDisplayName("Copy of " + analysisItem.toUnqualifiedDisplay());
             } else {
                 if (!(analysisItem.getKey() instanceof ReportKey)) {
                     copy.setOriginalDisplayName(analysisItem.toDisplay());
                 }
-                copy.setDisplayName("Copy of " + analysisItem.toDisplay());
+                copy.setDisplayName("Copy of " + analysisItem.toUnqualifiedDisplay());
+                copy.setUnqualifiedDisplayName("Copy of " + analysisItem.toUnqualifiedDisplay());
             }
             copy.setConcrete(false);
             return copy;
@@ -2018,8 +2051,11 @@ public class AnalysisService {
             conn.setAutoCommit(false);
             Session session = Database.instance().createSession(conn);
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
-            Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
-            AnalysisDefinition clone = analysisDefinition.clone(null, feed.getFields(), false);
+            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(saveDefinition.getDataFeedID(), conn);
+            List<AnalysisItem> allFields = feedDefinition.allFields(conn);
+            AnalysisDefinition.SaveMetadata metadata = analysisDefinition.clone(allFields, false);
+            AnalysisDefinition clone = metadata.analysisDefinition;
+            AnalysisDefinition.updateFromMetadata(null, metadata.replacementMap, clone, allFields, null, metadata.added);
             clone.setAuthorName(SecurityUtil.getUserName());
             clone.setTitle(newName);
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
@@ -2074,7 +2110,11 @@ public class AnalysisService {
             FeedDefinition targetDataSource = new FeedStorage().getFeedDefinitionData(targetID);
             Session session = Database.instance().createSession(conn);
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
-            AnalysisDefinition clone = analysisDefinition.clone(targetDataSource, targetDataSource.getFields(), true);
+            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(saveDefinition.getDataFeedID(), conn);
+            List<AnalysisItem> allFields = feedDefinition.allFields(conn);
+            AnalysisDefinition.SaveMetadata metadata = analysisDefinition.clone(allFields, false);
+            AnalysisDefinition clone = metadata.analysisDefinition;
+            AnalysisDefinition.updateFromMetadata(null, metadata.replacementMap, clone, allFields, null, metadata.added);
             clone.setDataFeedID(targetDataSource.getDataFeedID());
             clone.setAuthorName(SecurityUtil.getUserName());
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
@@ -2118,7 +2158,7 @@ public class AnalysisService {
             AnalysisDefinition baseReport = analysisStorage.getPersistableReport(reportID, session);
             Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
             Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
-            SolutionService.recurseReport(reports, dashboards, baseReport, session, conn, new HashSet<Long>());
+            SolutionService.recurseReport(reports, dashboards, baseReport, session, conn);
 
             for (AnalysisDefinition report : reports.values()) {
                 report.setTemporaryReport(false);
@@ -2388,6 +2428,28 @@ public class AnalysisService {
                     new UserUploadService().deleteUserUpload(existingID);
                 }
                 queryStmt.close();
+                PreparedStatement parentStmt = conn.prepareStatement("SELECT COMPOSITE_FEED.DATA_FEED_ID FROM COMPOSITE_FEED, COMPOSITE_NODE WHERE " +
+                        "COMPOSITE_FEED.COMPOSITE_FEED_ID = COMPOSITE_NODE.COMPOSITE_FEED_ID AND COMPOSITE_NODE.DATA_FEED_ID = ?");
+                PreparedStatement reportSourceQuery = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM distinct_cached_addon_report_source WHERE REPORT_ID = ?");
+                reportSourceQuery.setLong(1, reportID);
+                ResultSet reportRS = reportSourceQuery.executeQuery();
+                Set<Long> parents = new HashSet<Long>();
+                while (reportRS.next()) {
+                    FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(reportRS.getLong(1), conn);
+                    ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) dataSource;
+                    serverDataSourceDefinition.migrations(conn, null);
+                    parentStmt.setLong(1, dataSource.getDataFeedID());
+                    ResultSet parentRS = parentStmt.executeQuery();
+                    while (parentRS.next()) {
+                        parents.add(parentRS.getLong(1));
+                    }
+                }
+                for (Long parentID : parents) {
+                    FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(parentID, conn);
+                    new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
+                }
+                reportSourceQuery.close();
+                parentStmt.close();
             } catch (Exception e) {
                 LogClass.error(e);
             } finally {
@@ -2417,7 +2479,7 @@ public class AnalysisService {
         final long accountID = SecurityUtil.getAccountID();
         final int accountType = SecurityUtil.getAccountTier();
         final boolean accountAdmin = SecurityUtil.isAccountAdmin();
-        new Thread(new Runnable() {
+        DataSourceThreadPool.instance().addActivity(new Runnable() {
 
             public void run() {
                 SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, 0, null);
@@ -2458,7 +2520,7 @@ public class AnalysisService {
                     SecurityUtil.clearThreadLocal();
                 }
             }
-        }).start();
+        });
     }
 
     public void deleteAnalysisDefinition(long reportID) {

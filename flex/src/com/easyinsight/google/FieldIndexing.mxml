@@ -1,20 +1,28 @@
 <?xml version="1.0"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
-        implements="com.easyinsight.administration.feed.IFeedAdminDetail" paddingTop="10">
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%"
+                       height="100%"
+                       paddingTop="10"
+                       xmlns:feed="com.easyinsight.administration.feed.*">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.DerivedKey;
 
-        import com.easyinsight.analysis.NamedKey;
         import com.easyinsight.feedassembly.CompositeFeedDefinition;
         import com.easyinsight.feedassembly.CompositeFeedNode;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var _fields:ArrayCollection;
+
+        override protected function gotSource():void {
+            fields = dataSource.fields;
+            var comp:CompositeFeedDefinition = dataSource as CompositeFeedDefinition;
+            dataSources = new ArrayCollection(comp.compositeFeedNodes.toArray());
+            dataSources.addItemAt({dataSourceName:"[ All ]" }, 0);
+        }
 
         public function set fields(value:ArrayCollection):void {
             var fields:ArrayCollection = new ArrayCollection();
@@ -40,33 +48,27 @@
             return true;
         }
 
-        public function set dataSource(feedDefinition:FeedDefinitionData):void {
-            if (feedDefinition is CompositeFeedDefinition) {
-                var comp:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition;
-                dataSources = new ArrayCollection(comp.compositeFeedNodes.toArray());
-                dataSources.addItemAt({dataSourceName: "[ All ]" }, 0);
-            }
-        }
-        
+
         [Bindable]
         private var dataSources:ArrayCollection;
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            for each (var item:AnalysisItem in feedDefinition.fields) {
+
+        }
+
+        private function save():void {
+            for each (var item:AnalysisItem in dataSource.fields) {
                 for each (var field:AnalysisItemDispatcher in _fields) {
                     if (item.analysisItemID == field.analysisItem.analysisItemID) {
                         item.key = field.analysisItem.key;
                     }
                 }
             }
+            saveSource();
         }
 
         private function onChange():void {
             _fields.refresh();
-        }
-
-        public function validate():Boolean {
-            return true;
         }
 
         private function selectAll():void {
@@ -92,4 +94,8 @@
             <util:EIDataGridColumn headerText="" itemRenderer="com.easyinsight.google.IndexCheckbox" width="100"/>
         </mx:columns>
     </mx:DataGrid>
-</mx:VBox>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</feed:DataSourceWindow>

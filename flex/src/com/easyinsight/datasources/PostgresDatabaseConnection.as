@@ -31,7 +31,7 @@ public class PostgresDatabaseConnection extends ServerDatabaseConnection {
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
         var config:PostgresDataSourceConfiguration = new PostgresDataSourceConfiguration();
-        config.dataSourceDefinition = this;
+
         config.label = "PostgreSQL Server Configuration";
         pages.addItem(config);
         return pages;

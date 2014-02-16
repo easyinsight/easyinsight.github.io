@@ -1,8 +1,11 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%"
+                       height="100%"
+                       xmlns:feed="com.easyinsight.administration.feed.*">
     <mx:Script><![CDATA[
-        import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.google.QuickbaseCompositeSource;
+
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var url:String;
@@ -13,24 +16,22 @@
         [Bindable]
         private var inline:Boolean;
 
-        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
-            var ds:QuickbaseCompositeSource = feedDefinition as QuickbaseCompositeSource;
-            url = ds.host;
-            saveCredentials = ds.preserveCredentials;
-            rebuildFields = ds.rebuildFields;
-            inline = ds.inlineUsers;
-        }
-
-        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var ds:QuickbaseCompositeSource = feedDefinition as QuickbaseCompositeSource;
+        private function save():void {
+            var ds:QuickbaseCompositeSource = dataSource as QuickbaseCompositeSource;
             ds.host = urlInput.text;
             ds.preserveCredentials = saveCredentialsCheckbox.selected;
             ds.rebuildFields = rebuildFieldsCheckbox.selected;
             ds.inlineUsers = inlineCheckbox.selected;
+            saveSource();
         }
 
-        public function validate():Boolean {
-            return true;
+
+        override protected function gotSource():void {
+            var ds:QuickbaseCompositeSource = dataSource as QuickbaseCompositeSource;
+            url = ds.host;
+            saveCredentials = ds.preserveCredentials;
+            rebuildFields = ds.rebuildFields;
+            inline = ds.inlineUsers;
         }
         ]]></mx:Script>
     <mx:Form paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
@@ -47,4 +48,8 @@
             <mx:CheckBox id="inlineCheckbox" selected="{inline}"/>
         </mx:FormItem>
 	</mx:Form>
-</mx:VBox>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</feed:DataSourceWindow>

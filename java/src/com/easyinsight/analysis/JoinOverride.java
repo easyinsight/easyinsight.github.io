@@ -189,6 +189,8 @@ public class JoinOverride implements Cloneable, Serializable {
     public JoinOverride clone() throws CloneNotSupportedException {
         JoinOverride joinOverride = (JoinOverride) super.clone();
         joinOverride.setJoinOverrideID(0);
+        joinOverride.setSourceItems(new ArrayList<AnalysisItem>(sourceItems));
+        joinOverride.setTargetItems(new ArrayList<AnalysisItem>(targetItems));
         return joinOverride;
     }
 
@@ -246,8 +248,12 @@ public class JoinOverride implements Cloneable, Serializable {
     }
 
     public void updateIDs(ReplacementMap replacementMap) {
+        System.out.println("Updating " + sourceItem.toDisplay() + "...");
         sourceItem = replacementMap.getField(sourceItem);
+        System.out.println("\tUpdated with " + sourceItem.toDisplay());
+        System.out.println("Updating " + targetItem.toDisplay() + "...");
         targetItem = replacementMap.getField(targetItem);
+        System.out.println("\tUpdated with " + targetItem.toDisplay());
     }
 
     public long getJoinOverrideID() {

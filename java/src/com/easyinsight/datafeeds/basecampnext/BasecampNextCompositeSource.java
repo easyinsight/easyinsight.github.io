@@ -7,9 +7,10 @@ import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
-import com.easyinsight.oauth.HttpClient4Logger;
+import com.easyinsight.html.RedirectUtil;
 import com.easyinsight.users.Account;
 import org.apache.amber.oauth2.client.OAuthClient;
 //import org.apache.amber.oauth2.client.URLConnectionClient;
@@ -249,5 +250,17 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String postOAuthSetup(HttpServletRequest request) {
+        if (endpoint == null || "".equals(endpoint)) {
+            return RedirectUtil.getURL(request, "/app/html/dataSources/" + getApiKey() + "/basecampAccountSelection");
+        } else {
+            return null;
+        }
+    }
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.type(HTMLConnectionFactory.TYPE_OAUTH);
     }
 }

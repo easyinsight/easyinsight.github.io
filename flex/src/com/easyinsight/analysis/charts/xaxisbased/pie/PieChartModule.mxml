@@ -22,7 +22,6 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.ClickUtil;
         import com.easyinsight.analysis.CustomChangeEvent;
@@ -31,18 +30,12 @@
         import com.easyinsight.analysis.MultiColor;
         import com.easyinsight.analysis.charts.ChartUtil;
 
-        import mx.controls.Alert;
-
+        import mx.charts.events.ChartItemEvent;
+        import mx.collections.ArrayCollection;
+        import mx.formatters.Formatter;
         import mx.graphics.SolidColor;
 
         //import com.easyinsight.pseudocontext.PseudoContextWindow;
-
-        import mx.charts.series.PieSeries;
-        import mx.formatters.Formatter;
-        import mx.charts.series.items.PieSeriesItem;
-        import mx.charts.events.ChartItemEvent;
-        import mx.collections.ArrayCollection;
-        import mx.managers.PopUpManager;
 
         [Bindable]
         private var graphData:ArrayCollection = new ArrayCollection();
@@ -127,7 +120,7 @@
             dispatchEvent(event);
         }
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
@@ -136,7 +129,7 @@
         public function preserveValues():Boolean {
             return false;
         }
-        
+
         private var defaultLink:Link;
 
         private function onChartClick(event:ChartItemEvent):void {

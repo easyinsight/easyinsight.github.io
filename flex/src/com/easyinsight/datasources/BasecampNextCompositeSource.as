@@ -24,7 +24,6 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
         var config:BasecampNextConfiguration = new BasecampNextConfiguration();
-        config.dataSourceDefinition = this;
         config.label = "Basecamp Server Configuration";
         pages.addItem(config);
         return pages;

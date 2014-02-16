@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"  creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private function editRule(event:FieldRuleEvent):void {
+            var window:FieldRuleEditWindow = new FieldRuleEditWindow();
+            window.fieldRule = event.fieldRule;
+            window.dataSourceID = dataSourceID;
+            window.fields = fields;
+            window.tags = tags;
+            window.addEventListener(FieldRuleEvent.FIELD_RULE_EDIT, onRuleEdit, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUpWithX(window, 100);
+        }
+
+        private function onRuleEdit(event:FieldRuleEvent):void {
+
+        }
+
+        private function onCreation():void {
+            addEventListener(FieldRuleEvent.EDIT_RULE, editRule);
+            ProgressAlert.alert(this, "Retrieving...", null, feedService.getFieldRules, feedService.getAnalysisItemConfigurations,
+                    feedService.getFieldTags);
+            feedService.getFieldRules.send(dataSourceID);
+            feedService.getAnalysisItemConfigurations.send(dataSourceID);
+            feedService.getFieldTags.send();
+        }
+
+        [Bindable]
+        private var rules:ArrayCollection;
+
+        public var dataSourceID:int;
+
+        private function gotRules():void {
+            rules = feedService.getFieldRules.lastResult as ArrayCollection;
+        }
+
+        private function saved():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onRuleAdd(event:FieldRuleEvent):void {
+            rules.addItem(event.fieldRule);
+        }
+
+        private function addRule():void {
+            var window:FieldRuleEditWindow = new FieldRuleEditWindow();
+            window.dataSourceID = dataSourceID;
+            window.fields = fields;
+            window.tags = tags;
+            window.addEventListener(FieldRuleEvent.FIELD_RULE_ADD, onRuleAdd, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUpWithX(window, 100);
+        }
+
+        private function gotConfigurations():void {
+            var configs:ArrayCollection = feedService.getAnalysisItemConfigurations.lastResult as ArrayCollection;
+            var fields:ArrayCollection = new ArrayCollection();
+            for each (var c:AnalysisItemConfiguration in configs) {
+                fields.addItem(c.analysisItem);
+            }
+            this.fields = fields;
+        }
+
+        private var fields:ArrayCollection;
+
+        private var tags:ArrayCollection;
+
+        private function gotTags():void {
+            tags = feedService.getFieldTags.lastResult as ArrayCollection;
+        }
+
+        private function deleteSelected():void {
+            var selected:ArrayCollection = new ArrayCollection();
+            for each (var r:FieldRule in rules) {
+                if (r.selected) {
+                    selected.addItem(r);
+                }
+            }
+            for each (var s:FieldRule in selected) {
+                rules.removeItemAt(rules.getItemIndex(s));
+            }
+        }
+
+        private function save():void {
+            feedService.saveFieldRules.send(dataSourceID, rules);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="getFieldRules" result="gotRules()"/>
+        <mx:method name="getAnalysisItemConfigurations" result="gotConfigurations()"/>
+        <mx:method name="getFieldTags" result="gotTags()"/>
+        <mx:method name="saveFieldRules" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:HBox>
+        <util:SaveButton label="Add Rule..." click="addRule()" fontSize="12"/>
+        <util:SaveButton label="Delete Selected" click="deleteSelected()" fontSize="12"/>
+    </mx:HBox>
+    <mx:DataGrid id="ruleWindow" dragEnabled="true" dropEnabled="true" dragMoveEnabled="true" dataProvider="{rules}" variableRowHeight="true">
+        <mx:columns>
+            <mx:DataGridColumn headerText="" itemRenderer="com.easyinsight.util.GenericGridCheckbox" sortable="false" width="30"/>
+            <mx:DataGridColumn headerText="Name" dataField="display" width="400" wordWrap="true"/>
+            <mx:DataGridColumn headerText="" dataField="display" sortable="false" itemRenderer="com.easyinsight.administration.feed.FieldRuleEditButton" width="100"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

@@ -76,22 +76,18 @@ public class WSTextDefinition extends WSAnalysisDefinition {
         setColumns(items("", structure));
     }
 
-    @Override
+    /*@Override
     public List<String> javaScriptIncludes() {
         List<String> list = new ArrayList<String>();
-        list.add("/js/visualizations/util.js");
-        list.add("/js/visualizations/list.js");
-        list.add("/js/jquery.dataTables.js");
-        list.add("/js/color.js");
         return list;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public List<String> cssIncludes() {
         return Arrays.asList("/css/jquery.dataTables.css");
-    }
+    }*/
 
-    @Override
+    /*@Override
     public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
         try {
             JSONObject analysisItemMap = new JSONObject();
@@ -111,7 +107,7 @@ public class WSTextDefinition extends WSAnalysisDefinition {
             throw new RuntimeException(e);
         }
     }
-
+*/
     @Override
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);

@@ -31,7 +31,6 @@ import mx.collections.ArrayCollection;
         var pages:ArrayCollection = new ArrayCollection();
         var index:FieldIndexing = new FieldIndexing();
         index.fields = fields;
-        index.dataSource = this;
         index.label = "Indexing";
         pages.addItem(index);
         return pages;

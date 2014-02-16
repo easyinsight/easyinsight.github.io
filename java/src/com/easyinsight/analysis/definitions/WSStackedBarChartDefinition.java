@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -292,4 +293,10 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         }
     }
 
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if ("Primary".equals(getColorScheme()) && applicationSkin.getMultiColors() != null && applicationSkin.getMultiColors().size() > 0 &&
+                applicationSkin.getMultiColors().get(0).isColor1StartEnabled()) {
+            setMultiColors(applicationSkin.getMultiColors());
+        }
+    }
 }

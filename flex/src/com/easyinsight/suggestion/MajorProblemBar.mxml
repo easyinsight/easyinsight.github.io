@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="center" width="100%" backgroundColor="#880000">
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="center" width="100%" backgroundColor="{bgColor}">
     <mx:Script><![CDATA[
         import com.easyinsight.SimpleReportEditor;
 
@@ -12,8 +12,14 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
+            if (intentionSuggestion.priority == IntentionSuggestion.WARNING) {
+                bgColor = 0x888800;
+            }
             problemText = intentionSuggestion.description;
         }
+
+        [Bindable]
+        private var bgColor:uint = 0x880000;
 
         public var simpleReportEditor:SimpleReportEditor;
 

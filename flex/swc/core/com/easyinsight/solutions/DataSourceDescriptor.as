@@ -26,6 +26,7 @@ public class DataSourceDescriptor extends EIDescriptor{
     public var customFolders:ArrayCollection;
     public var tags:ArrayCollection;
     public var rowCount:int;
+    public var prebuilts:ArrayCollection;
 
     public function DataSourceDescriptor() {
         super();

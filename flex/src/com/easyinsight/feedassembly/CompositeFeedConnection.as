@@ -28,6 +28,7 @@ import com.easyinsight.analysis.Key;
         public var targetCardinality:int = ONE;
         public var forceOuterJoin:int;
         public var marmotScript:String;
+        public var selected:Boolean;
 
 		public function CompositeFeedConnection()
 			{

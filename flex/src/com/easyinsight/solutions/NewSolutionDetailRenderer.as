@@ -107,6 +107,11 @@ public class NewSolutionDetailRenderer extends EventDispatcher {
     }
 
     private function installed(event:Event):void {
+        var steps:PostInstallSteps = solutionService.addKPIData.lastResult as PostInstallSteps;
+        if (steps.applicationSkin != null) {
+            User.getInstance().applicationSkin = steps.applicationSkin;
+            ApplicationSkin.instance().applyUserSettings(steps.applicationSkin);
+        }
         User.getEventNotifier().dispatchEvent(new NavigationEvent("Home", null, { dataSourceDescriptor: dataSourceDescriptor, freshInstall: true}));
     }
 

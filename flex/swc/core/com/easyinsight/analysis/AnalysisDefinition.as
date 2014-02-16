@@ -104,9 +104,7 @@ import mx.collections.ArrayCollection;
     public var newFieldModel:Boolean;
     public var cachePartitionFilter:String;
     public var enableLocalStorage:Boolean;
-    public var usePrimaryColor:Boolean;
-    public var useSecondaryColor:Boolean;
-    public var useTertiaryColor:Boolean;
+    public var colorScheme:String = "Primary";
     public var canSave:Boolean;
     public var filterSets:ArrayCollection;
 
@@ -118,6 +116,10 @@ import mx.collections.ArrayCollection;
         public function initialConfig():void {
 
         }
+
+    public function renderConfig():void {
+
+    }
 
         public function newFilters(filterDefinitions:ArrayCollection):ArrayCollection {
             return new ArrayCollection();

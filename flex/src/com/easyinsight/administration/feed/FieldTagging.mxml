@@ -2,8 +2,13 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
                    creationComplete="onCreation()" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.DerivedKey;
+        import com.easyinsight.feedassembly.CompositeFeedDefinition;
+        import com.easyinsight.feedassembly.CompositeFeedNode;
         import com.easyinsight.listing.Tag;
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.TagSelectionEvent;
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
@@ -20,9 +25,27 @@
         public var dataSourceID:int;
 
         private function onCreation():void {
-            ProgressAlert.alert(this, "Retrieving...", null, feedService.getAnalysisItemConfigurations, feedService.getFieldTags);
+            ProgressAlert.alert(this, "Retrieving...", null, feedService.getAnalysisItemConfigurations, feedService.getFieldTags, feedService.getFeedDefinition);
             feedService.getAnalysisItemConfigurations.send(dataSourceID);
             feedService.getFieldTags.send();
+            feedService.getFeedDefinition.send(dataSourceID);
+        }
+
+        private function gotDataSource():void {
+            var ds:FeedDefinitionData = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
+            var dataSources:ArrayCollection = new ArrayCollection();
+            if (ds is CompositeFeedDefinition) {
+                var all:Object = { name: "All" };
+                dataSources.addItem(all);
+                var c:CompositeFeedDefinition = ds as CompositeFeedDefinition;
+                for each (var n:CompositeFeedNode in c.compositeFeedNodes) {
+                    var dsd:DataSourceDescriptor = new DataSourceDescriptor();
+                    dsd.id = n.dataFeedID;
+                    dsd.name = n.dataSourceName;
+                    dataSources.addItem(dsd);
+                }
+            }
+            this.dataSources = dataSources;
         }
 
         [Bindable]
@@ -45,6 +68,7 @@
                 tagOptions.addItem({label: "Remove tag - " + opTag.name + " - from selected", data: opTag, op: "remove"});
             }
             this.tagOptions = tagOptions;
+            this.tags = tags;
         }
 
         private function onTagItemClick(event:MenuEvent):void {
@@ -108,23 +132,6 @@
             PopUpManager.removePopUp(this);
         }
 
-        private function renderTags(value:Object, column:DataGridColumn):String {
-            var ds:AnalysisItemConfiguration = value as AnalysisItemConfiguration;
-            if (ds.tags == null || ds.tags.length == 0) {
-                return "";
-            } else {
-                var str:String = "";
-                for (var i:int = 0; i < ds.tags.length; i++) {
-                    var tag:Tag = ds.tags.getItemAt(i) as Tag;
-                    str += tag.name;
-                    if (i < (ds.tags.length - 1)) {
-                        str += ", ";
-                    }
-                }
-                return str;
-            }
-        }
-
         private var filterString:String = "";
 
         private function filterBox_changeHandler(event:Event):void {
@@ -134,7 +141,25 @@
 
         private function valuesFilterFunction(o:Object):Boolean {
             var result:Boolean = true;
-
+            if (result) {
+                result = tagBox.filterObject(o);
+            }
+            if (result && dataSourceBox.selectedItem != null) {
+                var dsd:DataSourceDescriptor = dataSourceBox.selectedItem as DataSourceDescriptor;
+                if (dsd != null) {
+                    var found:Boolean = false;
+                    var c:AnalysisItemConfiguration = o as AnalysisItemConfiguration;
+                    if (c.analysisItem.key is DerivedKey) {
+                        var key:DerivedKey = DerivedKey(c.analysisItem.key);
+                        if (key.feedID == dsd.id) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        result = false;
+                    }
+                }
+            }
             return result && (o.display as String).toLowerCase().indexOf(filterString.toLowerCase()) != -1;
         }
 
@@ -142,6 +167,32 @@
             ProgressAlert.alert(this, "Saving...", null, feedService.updateAnalysisItemConfigurations);
             feedService.updateAnalysisItemConfigurations.send(fields, dataSourceID);
         }
+
+        [Bindable]
+        private var tags:ArrayCollection;
+
+        private function onTagSelect(event:TagSelectionEvent):void {
+            filteredFields.refresh();
+        }
+
+        [Bindable]
+        private var dataSources:ArrayCollection;
+
+        private function selectAll():void {
+            if (allSelected) {
+                allSelected = false;
+                for each (var s:AnalysisItemConfiguration in filteredFields) {
+                    s.selected = false;
+                }
+            } else {
+                allSelected = true;
+                for each (var s1:AnalysisItemConfiguration in filteredFields) {
+                    s1.selected = true;
+                }
+            }
+        }
+
+        private var allSelected:Boolean = false;
         ]]></mx:Script>
     <mx:Style>
         .myCustomPopUpStyleName {
@@ -158,7 +209,9 @@
         <mx:method name="getAnalysisItemConfigurations" result="gotConfigurations()"/>
         <mx:method name="updateAnalysisItemConfigurations" result="saved()"/>
         <mx:method name="getFieldTags" result="gotTags()"/>
+        <mx:method name="getFeedDefinition" result="gotDataSource()"/>
     </mx:RemoteObject>
+    <mx:Text maxWidth="500" text="You can use these tags to reduce the fields shown in the report editor, set up multi field filters based on these tags, and use the tags to generally manage your fields."/>
     <mx:HBox>
         <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onTagItemClick(event)" width="160" id="tagButton"
                             dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
@@ -166,12 +219,15 @@
     <mx:HBox width="100%">
         <mx:Image source="@Embed('../../../../../assets/icon-search-black.png')"/>
         <mx:TextInput id="filterBox" width="100%" change="filterBox_changeHandler(event)"/>
+        <mx:ComboBox id="dataSourceBox" dataProvider="{dataSources}" labelField="name" change="filteredFields.refresh()"/>
     </mx:HBox>
-    <mx:DataGrid dataProvider="{filteredFields}" wordWrap="true" variableRowHeight="true" height="450" id="dataGrid">
+    <util:TagBox tags="{tags}" onTagSelect="onTagSelect(event)" id="tagBox" width="100%"/>
+    <mx:Button label="Select All" click="selectAll()"/>
+    <mx:DataGrid dataProvider="{filteredFields}" wordWrap="true" variableRowHeight="true" height="350" id="dataGrid">
         <mx:columns>
             <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>
             <mx:DataGridColumn headerText="Field" dataField="display" width="400"/>
-            <mx:DataGridColumn headerText="Tags"  width="200" wordWrap="true" labelFunction="renderTags"/>
+            <mx:DataGridColumn headerText="Tags"  width="200" wordWrap="true" dataField="tagString"/>
         </mx:columns>
     </mx:DataGrid>
     <mx:HBox width="100%" horizontalAlign="center">

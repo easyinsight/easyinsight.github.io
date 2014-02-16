@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="600" horizontalAlign="center">
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="600"
+                       horizontalAlign="center" xmlns:feed="com.easyinsight.administration.feed.*">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.ReportFormItem;
         import com.easyinsight.analysis.StyleConfiguration;
@@ -11,12 +12,11 @@
         import mx.managers.PopUpManager;
 
 
-        public var dataSource:FeedDefinitionData;
-
         private var items:ArrayCollection;
 
-        protected override function createChildren():void {
-            super.createChildren();
+
+        override protected function gotSource():void {
+            super.gotSource();
             items = StyleConfiguration.getDataSourceItems(dataSource);
             var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
             lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
@@ -39,8 +39,7 @@
                     item.save();
                 }
             }
-            dispatchEvent(new Event(Event.CHANGE));
-            PopUpManager.removePopUp(this);
+            saveSource();
         }
         ]]></mx:Script>
     <mx:Box width="100%" height="100%" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
@@ -53,4 +52,4 @@
         <util:SaveButton label="Save" click="save()"/>
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
     </mx:HBox>
-</util:EISlimWindow>
+</feed:DataSourceWindow>

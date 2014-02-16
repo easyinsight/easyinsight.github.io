@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.analysis.FieldDataSourceOrigin;
 import com.easyinsight.analysis.ReplacementMap;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.Key;
@@ -9,8 +10,6 @@ import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
-import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.solutions.SolutionInstallInfo;
 
 import java.sql.*;
 import java.util.*;
@@ -210,6 +209,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
             this.compositeFeedNodes = nodes;
             this.connections = edges;
+            reportNameStmt.close();
             nameStmt.close();
             queryConnStmt.close();
         } else {
@@ -217,7 +217,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
     }
 
-    protected void loadKPIs(List<AnalysisItem> kpis, EIConnection conn) {
+    /*protected void loadKPIs(Map<String, List<AnalysisItem>> kpis, EIConnection conn) {
         if (!getFeedType().equals(FeedType.COMPOSITE)) {
             super.loadKPIs(kpis, conn);
             return;
@@ -244,6 +244,44 @@ public class CompositeFeedDefinition extends FeedDefinition {
             LogClass.error(e);
         } finally {
             session.close();
+        }
+    }*/
+
+    public void decorateFields(List<AnalysisItem> fields, EIConnection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT REPORT_ID FROM distinct_cached_addon_report_source WHERE DATA_SOURCE_ID = ?");
+        Map<Long, CompositeFeedNode> nodeMap = new HashMap<Long, CompositeFeedNode>();
+        Map<Long, Long> rMap = new HashMap<Long, Long>();
+        for (CompositeFeedNode node : getCompositeFeedNodes()) {
+            nodeMap.put(node.getDataFeedID(), node);
+            if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
+                stmt.setLong(1, node.getDataFeedID());
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    long reportID = rs.getLong(1);
+                    rMap.put(node.getDataFeedID(), reportID);
+                }
+            }
+        }
+        stmt.close();
+        for (AnalysisItem field : fields) {
+            Key key = field.getKey();
+            if ("Won Deal Value".equals(field.toDisplay())) {
+                System.out.println("hrm");
+            }
+            if (key instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                CompositeFeedNode node = nodeMap.get(derivedKey.getFeedID());
+                if (node != null) {
+                    if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
+                        Long reportID = rMap.get(node.getDataFeedID());
+                        if (reportID != null) {
+                            FieldDataSourceOrigin origin = new FieldDataSourceOrigin();
+                            origin.setReport(reportID);
+                            field.setOrigin(origin);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -277,11 +315,11 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
     }
 
-    protected void addKPIs(List<AnalysisItem> kpis, Map<Long, AnalysisItem> replacementMap, List<FeedNode> feedNodes) {
+    /*protected void addKPIs(List<AnalysisItem> kpis, Map<Long, AnalysisItem> replacementMap, List<FeedNode> feedNodes) {
         if (!getFeedType().equals(FeedType.COMPOSITE)) {
             super.addKPIs(kpis, replacementMap, feedNodes);
         }
-    }
+    }*/
 
     protected boolean compositeSourceFolder(FeedFolder clonedFolder) {
         if (!getFeedType().equals(FeedType.COMPOSITE)) {
@@ -598,7 +636,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         return new FeedStorage().retrieveFields(feedID, conn);
     }
 
-    @Override
+    /*@Override
     public Map<Long, SolutionInstallInfo> cloneDataSource(Connection conn) throws Exception {
         Map<Long, SolutionInstallInfo> infos = super.cloneDataSource(conn);
         CompositeFeedDefinition feedDefinition = (CompositeFeedDefinition) infos.get(getDataFeedID()).getNewDataSource();
@@ -660,7 +698,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
         }
         return infos;
-    }
+    }*/
 
     protected void cloneFields() {
 

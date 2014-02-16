@@ -90,6 +90,10 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
 
         List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
 
+        if (structure.isNoCalcs()) {
+            return analysisItemList;
+        }
+
         if (!structure.onOrAfter(structure.getInsightRequestMetadata().getDerived(this))) {
             return analysisItemList;
         }

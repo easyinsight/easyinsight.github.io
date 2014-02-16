@@ -218,9 +218,9 @@
                     /*if (analysisItem.getType() == existingType) {
                      analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
                      }*/
+                    analysisItem.originalDisplayName = startingAnalysisItem.originalDisplayName != null ? startingAnalysisItem.originalDisplayName : startingAnalysisItem.display;
                     analysisItem.unqualifiedDisplayName = fieldNameInput.text;
                     analysisItem.displayName = fieldNameInput.text;
-                    analysisItem.originalDisplayName = startingAnalysisItem.originalDisplayName != null ? startingAnalysisItem.originalDisplayName : startingAnalysisItem.display;
                     analysisItem.key = key;
                     //analysisItem.reloadFromDataSource = reloadCheckbox.selected;
                     detailEditor.save(analysisItem, aggregationBox.selectedItem as String);

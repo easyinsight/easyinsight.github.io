@@ -24,24 +24,16 @@
         import com.easyinsight.analysis.Link;
         import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.EIDataTip;
-        import com.easyinsight.filtering.FilterRawData;
 
-        import com.easyinsight.pseudocontext.PseudoContextWindow;
-
-        import mx.charts.ChartItem;
+        import mx.charts.HitData;
         import mx.charts.chartClasses.DataTip;
         import mx.charts.chartClasses.IAxis;
-        import mx.charts.chartClasses.Series;
         import mx.charts.events.ChartItemEvent;
         import mx.charts.renderers.CircleItemRenderer;
         import mx.charts.series.items.BubbleSeriesItem;
-        import mx.controls.Alert;
-        import mx.formatters.Formatter;
-        import mx.charts.HitData;
         import mx.collections.ArrayCollection;
-        import mx.graphics.SolidColor;
+        import mx.formatters.Formatter;
         import mx.graphics.Stroke;
-        import mx.managers.PopUpManager;
 
         [Bindable]
         private var graphData:ArrayCollection = new ArrayCollection();
@@ -166,7 +158,7 @@
         }
 
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
@@ -202,7 +194,7 @@
 
         [Bindable]
         private var yAxisBaseAtZero:Boolean;
-		]]>
+        ]]>
 	</mx:Script>
 
 	<mx:SeriesZoom id="zoomIn" duration="1000"/>

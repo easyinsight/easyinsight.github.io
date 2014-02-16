@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+                   creationComplete="onCreation()" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AddonReportChoiceWindow;
+        import com.easyinsight.analysis.AddonReportEvent;
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        public var dataSourceID:int;
+
+        private function onCreation():void {
+            ProgressAlert.alert(this, "Retrieving...", null, feedService.getDataSourceReports);
+            feedService.getDataSourceReports.send(dataSourceID);
+        }
+
+        private function saved():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function save():void {
+            ProgressAlert.alert(this, "Saving...", null, feedService.updateDataSourceReports);
+            feedService.updateDataSourceReports.send(dataSourceID, reports, removed);
+        }
+
+        [Bindable]
+        private var reports:ArrayCollection;
+
+        private function gotReports():void {
+            var reports:ArrayCollection = feedService.getDataSourceReports.lastResult as ArrayCollection;
+            var vReports:ArrayCollection = new ArrayCollection();
+            for each (var desc:InsightDescriptor in reports) {
+                if (desc.dataSourceReport) {
+                    vReports.addItem(desc);
+                }
+            }
+            this.reports = vReports;
+        }
+
+        private function onAdd(event:AddonReportEvent):void {
+            event.report.dataSourceReport = true;
+            reports.addItem(event.report);
+        }
+
+        private function addReport():void {
+            var window:AddonReportChoiceWindow = new AddonReportChoiceWindow();
+            window.dataSourceID = dataSourceID;
+            window.reportsExisting = reports;
+            window.addEventListener(AddonReportEvent.ADD_REPORT, onAdd, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function removeSelected():void {
+            var selected:ArrayCollection = new ArrayCollection();
+            for each (var desc:InsightDescriptor in reports) {
+                if (desc.selected) {
+                    selected.addItem(desc);
+                }
+            }
+            for each (var d:InsightDescriptor in selected) {
+                d.dataSourceReport = false;
+                reports.removeItemAt(reports.getItemIndex(d));
+                removed.addItem(d);
+            }
+        }
+
+        private var removed:ArrayCollection = new ArrayCollection();
+        ]]></mx:Script>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="getDataSourceReports" result="gotReports()"/>
+        <mx:method name="updateDataSourceReports" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:HBox>
+        <util:SaveButton label="Add Report..." click="addReport()" fontSize="12"/>
+        <util:SaveButton label="Remove Selected" click="removeSelected()" fontSize="12"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{reports}" wordWrap="true" variableRowHeight="true" height="450" id="dataGrid">
+        <mx:columns>
+            <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>
+            <mx:DataGridColumn headerText="Field" dataField="name" width="400"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

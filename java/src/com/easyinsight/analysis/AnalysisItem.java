@@ -45,6 +45,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     private List<Tag> tags;
 
     @Transient
+    private FieldDataSourceOrigin origin;
+
+    @Transient
     private transient boolean loaded;
 
     @Transient
@@ -169,6 +172,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void setFormattingType(int formattingType) {
         this.formattingType = formattingType;
+    }
+
+    public FieldDataSourceOrigin getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(FieldDataSourceOrigin origin) {
+        this.origin = origin;
     }
 
     public List<Tag> getTags() {
@@ -667,6 +678,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             }
 
         }
+        if (structure.onOrAfter(Pipeline.BEFORE) && links != null) {
+            for (Link link : links) {
+                analysisItemList.addAll(link.getFields(allItems));
+            }
+        }
         return analysisItemList;
     }
 
@@ -789,7 +805,12 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             fromField = (AnalysisItem) Database.deproxy(fromField);
             fromField.afterLoad();
         }
+        if (links != null) {
+            for (Link link : links) {
+                link.afterLoad();
             }
+        }
+    }
 
     public String toKeySQL() {
         if (isDerived()) {
@@ -827,13 +848,22 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         for (FilterDefinition filterDefinition : getFilters()) {
             filterDefinition.beforeSave(session);
         }
+        if (reportFieldExtension != null && reportFieldExtension.getFromFieldRuleID() > 0) {
+            reportFieldExtension = null;
+        }
         if (reportFieldExtension != null) {
             reportFieldExtension.reportSave(session);
             session.saveOrUpdate(reportFieldExtension);
         }
         if (getLinks() != null) {
-            for (Link link : getLinks()) {
-                link.beforeSave(session);
+            Iterator<Link> iter = getLinks().iterator();
+            while (iter.hasNext()) {
+                Link link = iter.next();
+                if (link.isDefinedByRule()) {
+                    iter.remove();
+                } else {
+                    link.beforeSave(session);
+                }
             }
         }
         if (sortItem != null) {

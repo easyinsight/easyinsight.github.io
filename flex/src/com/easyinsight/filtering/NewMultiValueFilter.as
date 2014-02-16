@@ -110,6 +110,9 @@ public class NewMultiValueFilter extends UIComponent implements IFilter {
     }
 
     private function onFilterEdit(event:FilterEditEvent):void {
+        if (labelText != null && labelText is LinkButton) {
+            LinkButton(labelText).label = FilterDefinition.getLabel(event.filterDefinition, _analysisItem);
+        }
         updateFilterLabel();
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
     }

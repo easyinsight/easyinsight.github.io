@@ -16,6 +16,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.easyinsight.tag.Tag;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
@@ -446,8 +447,8 @@ public class AnalysisDefinition implements Cloneable {
         }
     }
 
-    public AnalysisDefinition clone(FeedDefinition target, List<AnalysisItem> allFields, boolean changingDataSource) throws CloneNotSupportedException {
-        return clone(target, allFields, changingDataSource, null, null);
+    public SaveMetadata clone(List<AnalysisItem> allFields, boolean changingDataSource) throws CloneNotSupportedException {
+        return clone(allFields, changingDataSource, null);
     }
 
     public Set<Long> findTags() {
@@ -464,8 +465,7 @@ public class AnalysisDefinition implements Cloneable {
         return tags;
     }
 
-    public AnalysisDefinition clone(FeedDefinition target, List<AnalysisItem> allFields, boolean changingDataSource, List<AnalysisItem> additionalDataSourceFields,
-                                    Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap) throws CloneNotSupportedException {
+    public SaveMetadata clone(List<AnalysisItem> allFields, boolean changingDataSource, Map<Long, Tag> tagMap) throws CloneNotSupportedException {
         AnalysisDefinition analysisDefinition = (AnalysisDefinition) super.clone();
 
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState.clone(allFields));
@@ -473,18 +473,14 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setAnalysisID(null);
         //Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         ReplacementMap replacementMap = new ReplacementMap();
-        replacementMap.setTagReplacementMap(tagReplacementMap);
+        replacementMap.setTagReplacementMap(tagMap);
 
         allFields = new ArrayList<AnalysisItem>(allFields);
-        Map<String, AnalysisItem> set = new HashMap<String, AnalysisItem>();
-        if (additionalDataSourceFields != null) {
-            allFields.addAll(additionalDataSourceFields);
-            for (AnalysisItem analysisItem : additionalDataSourceFields) {
-                set.put(analysisItem.toDisplay(), analysisItem);
-            }
-        }
+        List<AnalysisItem> added = new ArrayList<AnalysisItem>();
+
         if (analysisDefinition.getAddedItems() != null) {
             allFields.addAll(analysisDefinition.getAddedItems());
+            added.addAll(analysisDefinition.getAddedItems());
         }
         if (analysisDefinition.getReportStubs() != null) {
             for (ReportStub reportStub : analysisDefinition.getReportStubs()) {
@@ -531,6 +527,7 @@ public class AnalysisDefinition implements Cloneable {
                 for (AnalysisItem clone : fields) {
                     clone.updateIDs(replacements);
                     allFields.add(clone);
+                    added.add(clone);
                 }
             }
         }
@@ -541,6 +538,7 @@ public class AnalysisDefinition implements Cloneable {
 
         AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
         structure.setBaseReport(this);
+        structure.setNoCalcs(true);
 
         analysisDefinition.setReportStubs(new ArrayList<ReportStub>());
 
@@ -591,6 +589,9 @@ public class AnalysisDefinition implements Cloneable {
 
         if (getJoinOverrides() != null) {
             List<JoinOverride> clones = new ArrayList<JoinOverride>();
+            if (joinOverrides.size() > 0) {
+                System.out.println("Copying multiple join overrides for " + getTitle());
+            }
             for (JoinOverride joinOverride : joinOverrides) {
                 replacementMap.addField(joinOverride.getSourceItem(), changingDataSource);
                 replacementMap.addField(joinOverride.getTargetItem(), changingDataSource);
@@ -608,13 +609,72 @@ public class AnalysisDefinition implements Cloneable {
             }
         }*/
 
-        Map<String, AnalysisItem> nameMap = new HashMap<String, AnalysisItem>();
-        for (AnalysisItem item : allFields) {
-            nameMap.put(item.toDisplay(), item);
+        List<ReportStub> clonedStubs = new ArrayList<ReportStub>();
+        for (ReportStub reportStub : reportStubs) {
+            clonedStubs.add(reportStub.clone());
         }
+
+        analysisDefinition.setReportStubs(clonedStubs);
+        if (filterSets != null) {
+            List<FilterSetStub> filterSetStubs = new ArrayList<FilterSetStub>();
+            for (FilterSetStub stub : this.filterSets) {
+                filterSetStubs.add(stub.clone());
+            }
+            analysisDefinition.setFilterSets(filterSetStubs);
+        }
+
+
+        analysisDefinition.getAnalysisDefinitionState().updateIDs(replacementMap);
+
+        analysisDefinition.setAddedItems(addedItems);
+        analysisDefinition.setUserBindings(new ArrayList<UserToAnalysisBinding>());
+        List<ReportProperty> clonedProperties = new ArrayList<ReportProperty>();
+        for (ReportProperty reportProperty : this.properties) {
+            clonedProperties.add(reportProperty.clone());
+        }
+        analysisDefinition.setProperties(clonedProperties);
+        analysisDefinition.setTemporaryReport(temporaryReport);
 
         Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
 
+        analysisDefinition.setReportStructure(clonedStructure);
+        SaveMetadata saveMetadata = new SaveMetadata();
+        saveMetadata.added = added;
+        saveMetadata.replacementMap = replacementMap;
+        saveMetadata.analysisDefinition = analysisDefinition;
+        return saveMetadata;
+    }
+
+    public static class SaveMetadata {
+        public ReplacementMap replacementMap;
+        public AnalysisDefinition analysisDefinition;
+        public List<AnalysisItem> added;
+
+    }
+
+
+    public static void updateFromMetadata(FeedDefinition target, ReplacementMap replacementMap,
+                                          AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> additionalDataSourceFields, List<AnalysisItem> added) throws CloneNotSupportedException {
+        Map<String, AnalysisItem> clonedStructure = analysisDefinition.getReportStructure();
+        /*Map<String, AnalysisItem> set = new HashMap<String, AnalysisItem>();
+        if (additionalDataSourceFields != null) {
+            allFields.addAll(additionalDataSourceFields);
+            for (AnalysisItem analysisItem : additionalDataSourceFields) {
+                set.put(analysisItem.toDisplay(), analysisItem);
+            }
+        }*/
+        /*for (AnalysisItem add : added) {
+            set.put(add.toDisplay(), add);
+        }*/
+
+        Map<String, AnalysisItem> targetFieldMap = new HashMap<String, AnalysisItem>();
+        for (AnalysisItem item : allFields) {
+            targetFieldMap.put(item.toDisplay(), item);
+        }
+        for (AnalysisItem item : added) {
+            targetFieldMap.put(item.toDisplay(), item);
+        }
+        List<AnalysisItem> addedItems = analysisDefinition.getAddedItems();
         if (target != null) {
             for (AnalysisItem analysisItem : replacementMap.getFields()) {
                 //analysisItem.afterLoad();
@@ -623,27 +683,30 @@ public class AnalysisDefinition implements Cloneable {
                 if (deproxiedKey instanceof ReportKey) {
 
                 } else {
-                    AnalysisItem dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
-                    if (dataSourceItem != null) {
-                        key = dataSourceItem.getKey();
-                    } else {
-                        if (analysisItem.getOriginalDisplayName() != null) {
-                            dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
-                        }
+                    AnalysisItem dataSourceItem = targetFieldMap.get(analysisItem.toDisplay());
+                    if (dataSourceItem == null) {
+                        dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
                         if (dataSourceItem != null) {
                             key = dataSourceItem.getKey();
                         } else {
-                            dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                            if (analysisItem.getOriginalDisplayName() != null) {
+                                dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
+                            }
                             if (dataSourceItem != null) {
                                 key = dataSourceItem.getKey();
+                            } else {
+                                dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                                if (dataSourceItem != null) {
+                                    key = dataSourceItem.getKey();
+                                }
                             }
                         }
                     }
                     if (key != null) {
                         analysisItem.setKey(key);
-                        if (set.containsKey(analysisItem.toDisplay()) && !addedItems.contains(analysisItem)) {
+                        /*if (set.containsKey(analysisItem.toDisplay()) && !addedItems.contains(analysisItem)) {
                             addedItems.add(analysisItem);
-                        }
+                        }*/
                     } else {
                         Key clonedKey = analysisItem.getKey().clone();
                         analysisItem.setKey(clonedKey);
@@ -655,28 +718,18 @@ public class AnalysisDefinition implements Cloneable {
                 }
             }
         }
-        List<ReportStub> clonedStubs = new ArrayList<ReportStub>();
-        for (ReportStub reportStub : reportStubs) {
-            clonedStubs.add(reportStub.clone());
-        }
-        analysisDefinition.setReportStubs(clonedStubs);
-        if (filterSets != null) {
-            List<FilterSetStub> filterSetStubs = new ArrayList<FilterSetStub>();
-            for (FilterSetStub stub : this.filterSets) {
-                filterSetStubs.add(stub.clone());
-            }
-            analysisDefinition.setFilterSets(filterSetStubs);
-        }
+
+
         for (AnalysisItem analysisItem : replacementMap.getFields()) {
             if (target != null) {
                 target.updateLinks(analysisItem);
             }
             analysisItem.updateIDs(replacementMap);
         }
-        for (Map.Entry<String, AnalysisItem> entry : getReportStructure().entrySet()) {
+        for (Map.Entry<String, AnalysisItem> entry : analysisDefinition.getReportStructure().entrySet()) {
             clonedStructure.put(entry.getKey(), replacementMap.getField(entry.getValue()));
         }
-        for (FilterDefinition filter : filterDefinitions) {
+        for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
             filter.updateIDs(replacementMap);
         }
         if (analysisDefinition.getJoinOverrides() != null) {
@@ -687,17 +740,8 @@ public class AnalysisDefinition implements Cloneable {
                 }
             }
         }
-        analysisDefinition.getAnalysisDefinitionState().updateIDs(replacementMap);
-        analysisDefinition.setReportStructure(clonedStructure);
-        analysisDefinition.setAddedItems(addedItems);
-        analysisDefinition.setUserBindings(new ArrayList<UserToAnalysisBinding>());
-        List<ReportProperty> clonedProperties = new ArrayList<ReportProperty>();
-        for (ReportProperty reportProperty : this.properties) {
-            clonedProperties.add(reportProperty.clone());
-        }
-        analysisDefinition.setProperties(clonedProperties);
-        analysisDefinition.setTemporaryReport(temporaryReport);
-        return analysisDefinition;
+
+
     }
 
     private AnalysisDefinitionState migrationHandler() {

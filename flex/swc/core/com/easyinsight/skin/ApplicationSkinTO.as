@@ -55,6 +55,14 @@ public class ApplicationSkinTO {
     public var customChartColorEnabled:Boolean;
     public var gradientChartColor:int;
     public var gradientChartColorEnabled:Boolean;
+    public var secondaryColor:int;
+    public var secondaryColorEnabled:Boolean;
+    public var tertiaryColor:int;
+    public var tertiaryColorEnabled:Boolean;
+    public var summaryBackgroundColor:int;
+    public var summaryBackgroundColorEnabled:Boolean;
+    public var summaryTextColor:int;
+    public var summaryTextColorEnabled:Boolean;
 
     public var dashboardStack1ColorStart:int;
     public var dashboardStack1ColorEnd:int;

@@ -30,6 +30,17 @@ public class ReportFieldExtension implements Cloneable, Serializable {
     @Column(name="report_field_extension_id")
     private long reportFieldExtensionID;
 
+    @Transient
+    private long fromFieldRuleID;
+
+    public long getFromFieldRuleID() {
+        return fromFieldRuleID;
+    }
+
+    public void setFromFieldRuleID(long fromFieldRuleID) {
+        this.fromFieldRuleID = fromFieldRuleID;
+    }
+
     public long getReportFieldExtensionID() {
         return reportFieldExtensionID;
     }
@@ -81,5 +92,9 @@ public class ReportFieldExtension implements Cloneable, Serializable {
 
     protected void subclassFromXML(Element extensionElement, XMLImportMetadata xmlImportMetadata) {
 
+    }
+
+    public int extensionType() {
+        return 0;
     }
 }

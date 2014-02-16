@@ -10,26 +10,19 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
-
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.ChartDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
-
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.Link;
         import com.easyinsight.analysis.MultiColor;
-
         import com.easyinsight.analysis.Value;
         import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartDefinition;
         import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
 
-
         import mx.charts.AxisRenderer;
-
         import mx.charts.CategoryAxis;
-
         import mx.charts.HitData;
-
         import mx.charts.LinearAxis;
         import mx.charts.LogAxis;
         import mx.charts.chartClasses.ChartBase;
@@ -37,10 +30,8 @@
         import mx.charts.chartClasses.IAxisRenderer;
         import mx.charts.chartClasses.NumericAxis;
         import mx.charts.chartClasses.Series;
-
         import mx.charts.events.ChartItemEvent;
         import mx.collections.ArrayCollection;
-
         import mx.formatters.Formatter;
         import mx.graphics.GradientEntry;
         import mx.graphics.LinearGradient;
@@ -178,7 +169,6 @@
                 var firstMeasure:AnalysisMeasure = getMeasures().getItemAt(0) as AnalysisMeasure;
 
 
-
                 createChart();
 
                 var axisType:String;
@@ -205,7 +195,7 @@
                 measureFormatter = firstMeasure.getFormatter();
 
                 dimensionAxisItem = getDimensionItem();
-                
+
                 this.defaultLink = ChartUtil.setup(dimensionAxisItem, chart, onChartClick);
 
                 dimensionFormatter = dimensionAxisItem.getFormatter();
@@ -218,8 +208,8 @@
                     var measure:AnalysisMeasure = getMeasures().getItemAt(i) as AnalysisMeasure;
                     var series:Series = createSeries(measure, dataSet, dimensionAxisItem.qualifiedName(), i);
                     /*var cFactory:ClassFactory = new ClassFactory(ContextMenuBoxItemRenderer);
-                    cFactory.properties = { stackItem: dimensionAxisItem, report: chartDef };
-                    series.setStyle("itemRenderer", cFactory);*/
+                     cFactory.properties = { stackItem: dimensionAxisItem, report: chartDef };
+                     series.setStyle("itemRenderer", cFactory);*/
                     mySeries.push(series);
                 }
                 var legendItems:Array = styleColumns(mySeries);
@@ -327,7 +317,7 @@
             return true;
         }
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {

@@ -1,36 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Module xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml"
            width="100%" height="100%"
-           xmlns:feed="com.easyinsight.administration.feed.*" xmlns:easyinsight="com.easyinsight.*"
+           xmlns:easyinsight="com.easyinsight.*"
            creationComplete="setupListeners()"
            implements="com.easyinsight.listing.IPerspective"
            styleName="screenBackground">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
-        import com.easyinsight.analysis.AddonReportEvent;
-        import com.easyinsight.analysis.AddonReportWindow;
         import com.easyinsight.analysis.AnalysisChangedEvent;
-        import com.easyinsight.analysis.AnalysisItem;
-        import com.easyinsight.analysis.AnalysisItemNode;
-        import com.easyinsight.analysis.AnalysisItemWrapper;
-        import com.easyinsight.analysis.PromptEvent;
-        import com.easyinsight.analysis.SavePromptWindow;
+        import com.easyinsight.code.DataSourceCacheWindow;
         import com.easyinsight.code.DataSourceMarmotScriptWindow;
-        import com.easyinsight.code.MarmotScriptEvent;
+        import com.easyinsight.datasources.CompositeServerDataSource;
         import com.easyinsight.datasources.DataSourceInfo;
-        import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
+        import mx.controls.Alert;
+
+        import mx.core.Container;
+
         import mx.core.UIComponent;
+
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
-        import mx.validators.Validator;
-        import mx.controls.Alert;
 
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
@@ -44,27 +40,17 @@
         [Bindable]
         private var feedDefinition:FeedDefinitionData;
 
-        [Bindable]
-        private var haveFeed:Boolean = false;
 
         private var unsavedChanges:Boolean = false;
 
-        [Bindable]
-        private var showImpl:Boolean = false;
-
         private var _feedID:int;
-
-        private var generalValidators:Array = [];
-
-        private var fieldsValidators:Array = [];
 
         public var urlKey:String;
 
         private function setupListeners():void {
             addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onChange);
-            ProgressAlert.alert(this, "Retrieving the data source details...", null, feedService.getFeedDefinition, shareService.getUserStubs);
+            ProgressAlert.alert(this, "Retrieving the data source details...", null, feedService.getFeedDefinition);
             feedService.getFeedDefinition.send(_feedID);
-            shareService.getUserStubs.send(false);
         }
 
 
@@ -87,21 +73,44 @@
         [Bindable]
         private var refreshable:Boolean;
 
+        private function detailFunction(page:DataSourceWindow, parent:UIComponent):Function {
+            return function(event:MouseEvent):void {
+                var window:Container = page as Container;
+                var className:String = getQualifiedClassName(window);
+                var clazz:Class = getDefinitionByName(className) as Class;
+                var newWindow:Container = new clazz();
+                DataSourceWindow(newWindow).dataSourceID = feedDefinition.dataFeedID;
+                PopUpManager.addPopUp(newWindow, parent, true);
+                PopUpUtil.centerPopUp(newWindow);
+            }
+        }
+
         private function gotFeedDefinition():void {
             this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
-            showAddonReports = feedDefinition.getFeedType() == DataSourceType.COMPOSITE;
-            kpiSource = feedDefinition.kpiSource;
             var owner:UserStub = feedDefinition.uploadPolicy.owners.getItemAt(0) as UserStub;
             ownerID = owner.userID;
-            concreteFieldsEditable = feedDefinition.concreteFieldsEditable || feedDefinition.allowFieldEdit();
             BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
             this.feedType = feedDefinition.getFeedType();
             this.pages = feedDefinition.createAdminPages();
-            for each (var page:IFeedAdminDetail in pages) {
-                tabNav.addChild(UIComponent(page));
-            }
-            if (feedDefinition.fields == null || feedDefinition.fields.length == 0) {
-                tabNav.removeChild(fieldsBox);
+            for each (var page:DataSourceWindow in pages) {
+                var box:HBox = new HBox();
+                box.setStyle("verticalAlign", "middle");
+                var canvas:Canvas = new Canvas();
+                canvas.width = 300;
+                var button:LinkButton = new LinkButton();
+                button.setStyle("fontSize", 16);
+                button.setStyle("fontWeight", "bold");
+                button.label = Container(page).label;
+                button.addEventListener(MouseEvent.CLICK, detailFunction(page, this));
+                canvas.addChild(button);
+                box.addChild(canvas);
+                mainBox.addChildAt(box, 0);
+                var rule:HRule = new HRule();
+                rule.width = 700;
+                mainBox.addChildAt(rule, 1);
+                var text:Text = new Text();
+                text.maxWidth = 400;
+                text.text = "Data source type specific configuration."
             }
             this.feedAdminMode = true;
 
@@ -114,7 +123,6 @@
                 var fragmentString:String = URLUtil.objectToString(fragmentObject);
                 BrowserManager.getInstance().setFragment(fragmentString);
             }
-            haveFeed = true;
         }
 
         override protected function createChildren():void {
@@ -130,124 +138,19 @@
             }
         }
 
-        private function save(saveHandler:Function = null):void {
-            var results:Array = Validator.validateAll(generalValidators);
-            var detailValidated:Boolean = true;
-            for each (var adminPage:IFeedAdminDetail in pages) {
-                detailValidated = adminPage.validate() && detailValidated;
-            }
-            if (results.length > 0 || !detailValidated) {
-                Alert.show("There are one or more errors which must be fixed before you can save this data source.");
-            } else {
-                /*var stub:UserStub = ownerComboBox.selectedItem as UserStub;
-                if (feedDefinition.uploadPolicy.owners.length == 1) {
-                    feedDefinition.uploadPolicy.owners.removeItemAt(0);
-                    feedDefinition.uploadPolicy.owners.addItem(stub);
-                }*/
-                var analysisItems:ArrayCollection = new ArrayCollection();
-                feedDefinition.folders = fieldAdministration.getFolders(analysisItems);
-                feedDefinition.fields = analysisItems;
-
-                for each (var page:IFeedAdminDetail in pages) {
-                    page.updateDataSource(feedDefinition);
-                }
-
-                if (saveHandler == null) {
-                    saveHandler = onSave;
-                }
-                var window:DataSourceSaveWindow = new DataSourceSaveWindow();
-                window.addEventListener(DataSourceSaveEvent.DATA_SOURCE_SAVE, saveHandler, false, 0, true);
-                window.dataSource = feedDefinition;
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-            }
-        }
-
-        private function onSave(event:DataSourceSaveEvent):void {
-            unsavedChanges = false;
-        }
-
-        private function createPromptWindow(prompt:String, doneHandler:Function):void {
-            var window:SavePromptWindow = new SavePromptWindow();
-            window.prompt = prompt;
-            window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
-                save(function(event:DataSourceSaveEvent):void {
-                    doneHandler.call();
-                });
-            }, false, 0, true);
-            window.addEventListener(PromptEvent.PROMPT_DISCARD, function(event:PromptEvent):void {
-                doneHandler.call();
-            }, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
         private function toReport():void {
-            if (unsavedChanges) {
-                createPromptWindow("You have unsaved changes to this data source.", function():void {
-                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID, feedDefinition.apiKey)));
-                });
-            } else {
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID, feedDefinition.apiKey)));
-            }
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID, feedDefinition.apiKey)));
         }
 
         private function close():void {
-            if (unsavedChanges) {
-                createPromptWindow("You have unsaved changes to this data source.", function():void {
-                    dispatchEvent(new AnalysisCloseEvent(feedDefinition.apiKey));
-                });
-            } else {
-                dispatchEvent(new AnalysisCloseEvent(feedDefinition.apiKey));
-            }
+            dispatchEvent(new AnalysisCloseEvent(feedDefinition.apiKey));
         }
 
-        [Bindable]
-        private var kpiSource:Boolean = false;
 
-        [Bindable]
-        private var controlsEnabled:Boolean = true;
-
-        public function disableControls():void {
-            controlsEnabled = false;
-        }
-
-        public function enableControls():void {
-            controlsEnabled = true;
-        }
-
-        private function clearCaches():void {
-            feedDefinition.lastRefreshStart = null;
-            Alert.show("Caches around this data source have been cleared. Your next refresh of the data source will retrieve all data.");
-            dispatchEvent(new AnalysisChangedEvent());
-        }
-
-        [Bindable]
-        private var concreteFieldsEditable:Boolean = false;
-
-        private function editCode():void {
-            var window:DataSourceMarmotScriptWindow = new DataSourceMarmotScriptWindow();
-            window.script = feedDefinition.marmotScript;
-            window.afterScript = feedDefinition.refreshMarmotScript;
-            window.addEventListener(MarmotScriptEvent.SAVE_SCRIPT, onScript, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
 
         [Bindable]
         private var ownerID:int;
 
-        [Bindable]
-        private var users:ArrayCollection;
-
-        private function gotUserStubs():void {
-            users = shareService.getUserStubs.lastResult as ArrayCollection;
-        }
-
-        private function onScript(event:MarmotScriptEvent):void {
-            feedDefinition.marmotScript = event.script;
-            feedDefinition.refreshMarmotScript = event.afterScript;
-        }
 
         public function cleanup():void {
         }
@@ -255,20 +158,8 @@
         public function gotFocus():void {
         }
 
-        private function addonReports():void {
-            var window:AddonReportWindow = new AddonReportWindow();
-            window.addEventListener(AddonReportEvent.NEW_ADDONS, onNewAddons, false, 0, true);
-            window.dataSource = feedDefinition;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
 
-        private function onNewAddons(event:AddonReportEvent):void {
 
-        }
-
-        [Bindable]
-        private var showAddonReports:Boolean;
 
         private function fieldTags():void {
             var window:FieldTagging = new FieldTagging();
@@ -277,69 +168,141 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        private function fieldExtensions():void {
-            var window:FieldExtensions = new FieldExtensions();
-            window.dataSourceID = feedDefinition.dataFeedID;
-            var aFields:ArrayCollection = new ArrayCollection();
-            for each (var field:AnalysisItem in feedDefinition.fields) {
-                aFields.addItem(new AnalysisItemWrapper(new AnalysisItemNode(field)));
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (feedDefinition != null && !(feedDefinition is CompositeServerDataSource)) {
+                if (addonBox && addonBox.parent) {
+                    removeChild(addonBox);
+                }
+                if (addonRule && addonRule.parent) {
+                    removeChild(addonRule);
+                }
             }
-            window.allFields = aFields;
+        }
+
+        private function fieldExtensions():void {
+            var window:ServerDataSourceConfiguration = new ServerDataSourceConfiguration();
+            window.dataSourceID = feedDefinition.dataFeedID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function moreStuff():void {
+            var window:DataSourceReports = new DataSourceReports();
+            window.dataSourceID = feedDefinition.dataFeedID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function evenMoreStuff():void {
+            var window:ManageFieldRuleWindow = new ManageFieldRuleWindow();
+            window.dataSourceID = feedDefinition.dataFeedID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function configureFields():void {
+            var window:FieldAdministration = new FieldAdministration();
+            window.dataSourceID = feedDefinition.dataFeedID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function scripting():void {
+            var window:DataSourceMarmotScriptWindow = new DataSourceMarmotScriptWindow();
+            window.dataSourceID = feedDefinition.dataFeedID;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
 
         private function dataSourceProperties():void {
             var window:DataSourcePropertiesWindow = new DataSourcePropertiesWindow();
-            window.dataSource = feedDefinition;
+            window.dataSourceID = feedDefinition.dataFeedID;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
+        private function caches():void {
+            var window:DataSourceCacheWindow = new DataSourceCacheWindow();
+            window.dataSourceID = feedDefinition.dataFeedID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+
 		]]>
 	</mx:Script>
-    <mx:RemoteObject id="shareService" destination="share">
-        <mx:method name="getUserStubs" result="gotUserStubs()"/>
-    </mx:RemoteObject>
 	<mx:RemoteObject id="feedService" destination="feeds">
 		<mx:method name="getFeedDefinition" result="gotFeedDefinition()"/>
 	</mx:RemoteObject>
     <mx:VBox verticalGap="15" width="100%" height="100%">
-        <mx:HBox id="buttonBox" enabled="{controlsEnabled}" styleName="topButtonBar" width="100%">
+        <mx:HBox id="buttonBox" styleName="topButtonBar" width="100%">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../../../assets/document_out.png')" click="close()" toolTip="Close"
                     label="Close Editor" labelPlacement="right" styleName="grayButton"/>
-            <mx:Button id="saveButton" icon="@Embed(source='../../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"
-                    label="Save Data Source" labelPlacement="right" styleName="grayButton"/>
             <mx:Button icon="@Embed(source='../../../../../assets/media_play_green.png')" click="toReport()" toolTip="Jump to Report Editor"
                     label="Create a New Report" labelPlacement="right" styleName="grayButton"/>
-            <mx:Button icon="@Embed(source='../../../../../assets/garbage.png')" click="clearCaches()" toolTip="Clear Caches"
-                    label="Clear Caches" labelPlacement="right" styleName="grayButton"/>
-            <!--<datasources:RefreshButton styleName="grayButton" label="Refresh the Data Source" dataSource="{dataSourceInfo}"
-                                       icon="@Embed(source='../../../../../assets/refresh.png')" labelPlacement="right" enabled="{refreshable}"/>-->
-            <mx:Button icon="@Embed(source='../../../../../assets/code_edit.png')" click="editCode()" toolTip="Edit Code..."
-                    label="Edit Code" labelPlacement="right" styleName="grayButton"/>
-            <mx:Button label="Field Tags" styleName="grayButton" click="fieldTags()"/>
-            <mx:Button label="Field Extensions" styleName="grayButton" click="fieldExtensions()"/>
-            <mx:Button label="Data Source Properties" styleName="grayButton" click="dataSourceProperties()"/>
             <mx:Spacer width="100%"/>
             <easyinsight:LoggedOnStatus textColor="#FFFFFF" id="logonStatus"/>
         </mx:HBox>
         <mx:Box width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" paddingTop="10">
             <mx:VBox width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10" verticalGap="0" borderStyle="solid"
                      borderThickness="1"
-                     cornerRadius="8" dropShadowEnabled="true" backgroundColor="#FFFFFF" backgroundAlpha="1">
-                <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="10"
-                    paddingLeft="10" paddingRight="10" resizeToContent="true" id="tabNav" enabled="{haveFeed}">
-                    <mx:VBox label="Fields" id="fieldsBox" paddingTop="10">
-                        <!--<mx:Form>
-                            <mx:FormItem label="Owner:">
-                                <util:SmartComboBox dataProvider="{users}" selectedProperty="userID" selectedValue="{ownerID}" labelField="displayName"
-                                        id="ownerComboBox"/>
-                            </mx:FormItem>
-                        </mx:Form>-->
-                        <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration" dataSourceID="{feedID}" disableControls="disableControls()"
-                                enableControls="enableControls()" concreteFieldsEditable="{concreteFieldsEditable}" kpiSource="{kpiSource}"/>
-                    </mx:VBox>
-                </mx:TabNavigator>
+                     cornerRadius="8" dropShadowEnabled="true" backgroundColor="#FFFFFF" backgroundAlpha="1" id="mainBox">
+                <mx:HBox  verticalAlign="middle">
+                    <mx:HBox width="300">
+                        <mx:LinkButton label="Fields" fontWeight="bold" click="configureFields()" fontSize="16"/>
+                    </mx:HBox>
+                    <mx:Text width="400" text="Configuration of data source fields."/>
+                </mx:HBox>
+                <mx:HRule width="700"/>
+                <mx:HBox  verticalAlign="middle">
+                    <mx:HBox width="300">
+                        <mx:LinkButton label="Data Source Properties" fontWeight="bold" click="dataSourceProperties()" fontSize="16"/>
+                    </mx:HBox>
+                    <mx:Text width="400" text="Rename the data source, change account visibility, and other general settings."/>
+                </mx:HBox>
+                <mx:HRule width="700"/>
+                <mx:HBox verticalAlign="middle">
+                    <mx:Canvas width="300">
+                        <mx:LinkButton label="Field Tags" fontWeight="bold" click="fieldTags()" fontSize="16"/>
+                    </mx:Canvas>
+                    <mx:Text width="400" text="Field tags enable you to categorize fields by different tags."/>
+                </mx:HBox>
+                <mx:HRule width="700" id="addonRule"/>
+                <mx:HBox  verticalAlign="middle" id="addonBox">
+                    <mx:Canvas width="300">
+                        <mx:LinkButton label="Additional Sources" fontWeight="bold" click="fieldExtensions()" fontSize="16"/>
+                    </mx:Canvas>
+                    <mx:Text width="400" text="Add additional data sources such as report based sources to this data source as children."/>
+                </mx:HBox>
+                <mx:HRule width="700"/>
+                <mx:HBox  verticalAlign="middle">
+                    <mx:Canvas width="300">
+                        <mx:LinkButton label="Field Reports" fontWeight="bold" click="moreStuff()" fontSize="16"/>
+                    </mx:Canvas>
+                    <mx:Text width="400" text="Pull custom data source level calculations from report fields."/>
+                </mx:HBox>
+                <mx:HRule width="700"/>
+                <mx:HBox  verticalAlign="middle">
+                    <mx:Canvas width="300">
+                        <mx:LinkButton label="Field Rules" fontWeight="bold" click="evenMoreStuff()" fontSize="16"/>
+                    </mx:Canvas>
+                    <mx:Text width="400" text="Specify drillthroughs or default report behaviors for one or more fields in the data source."/>
+                </mx:HBox>
+                <mx:HRule width="700"/>
+                <mx:HBox  verticalAlign="middle">
+                    <mx:Canvas width="300">
+                        <mx:LinkButton label="Caching" fontWeight="bold" click="caches()" fontSize="16"/>
+                    </mx:Canvas>
+                    <mx:Text width="400" text="Manage the caching of data for the data source."/>
+                </mx:HBox>
+                <mx:HRule width="700"/>
+                <mx:HBox  verticalAlign="middle">
+                    <mx:Canvas width="300">
+                        <mx:LinkButton label="Scripting" fontWeight="bold" click="scripting()" fontSize="16"/>
+                    </mx:Canvas>
+                    <mx:Text width="400" text="Advanced customization of scripting to modify data source behavior."/>
+                </mx:HBox>
             </mx:VBox>
         </mx:Box>
     </mx:VBox>

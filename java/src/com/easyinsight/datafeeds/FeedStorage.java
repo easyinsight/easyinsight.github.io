@@ -497,7 +497,7 @@ public class FeedStorage {
         try {
             analysisItems = optimizedRetrieval(conn, feedID, analysisItemIDs);
         } catch (Exception e) {
-            //LogClass.error(e);
+            LogClass.userError("Retrieving fields for data source", e);
             analysisItems = slowRetrieval(conn, analysisItemIDs);
         }
         return analysisItems;
@@ -552,6 +552,8 @@ public class FeedStorage {
         }
         if (sb.length() > 0) {
             sb.deleteCharAt(sb.length() - 1);
+        } else {
+            return analysisItems;
         }
         //StringBuilder aIDs = new StringBuilder(sb.toString());
         Session session = Database.instance().createSession(conn);
@@ -680,6 +682,9 @@ public class FeedStorage {
                         filterDefinition.afterLoad();
                         long analysisItemID = lookup.get(filterDefinition.getFilterID());
                         AnalysisItem analysisItem = coreLookup.get(analysisItemID);
+                        if (analysisItem.getFilters() == null) {
+                            analysisItem.setFilters(new ArrayList<FilterDefinition>());
+                        }
                         analysisItem.getFilters().add(filterDefinition);
                     }
                 }
@@ -695,6 +700,15 @@ public class FeedStorage {
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws Exception {
         updateDataFeedConfiguration(feedDefinition, conn, -1);
+    }
+
+    public void flushCache(long dataSourceID) {
+        ReportCache.instance().flushResults(dataSourceID);
+        //feedCache.remove(feedDefinition.getDataFeedID());
+        MemCachedManager.delete("ds" + dataSourceID);
+        if (FeedRegistry.instance() != null) {
+            FeedRegistry.instance().flushCache(dataSourceID);
+        }
     }
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn, int overrideType) throws Exception {

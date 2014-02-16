@@ -57,7 +57,10 @@ public class AnalysisDimension extends AnalysisItem {
     public AnalysisDimension() {
     }
 
-    
+    public AnalysisDimension(String displayName) {
+        setDisplayName(displayName);
+    }
+
 
     public AnalysisDimension getKeyDimension() {
         return keyDimension;

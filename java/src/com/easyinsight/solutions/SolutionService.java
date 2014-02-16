@@ -3,29 +3,23 @@ package com.easyinsight.solutions;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
-import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.exchange.ExchangeItem;
 import com.easyinsight.export.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.ApplicationSkinSettings;
-import com.easyinsight.scorecard.Scorecard;
-import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.AuthorizationManager;
 import com.easyinsight.security.AuthorizationRequirement;
 import com.easyinsight.goals.*;
 import com.easyinsight.core.InsightDescriptor;
-import com.easyinsight.core.Key;
 import com.easyinsight.core.DataSourceDescriptor;
-import com.easyinsight.tag.Tag;
 import com.easyinsight.users.Account;
 
 import java.text.SimpleDateFormat;
@@ -45,7 +39,7 @@ import org.hibernate.Session;
  */
 public class SolutionService {
 
-    public void addKPIData(SolutionKPIData solutionKPIData) {
+    public PostInstallSteps addKPIData(SolutionKPIData solutionKPIData) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -64,46 +58,67 @@ public class SolutionService {
                     new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset(), conn);
                 }
             }
-            Map<Long, AnalysisDefinition> alreadyInstalledMap = new HashMap<Long, AnalysisDefinition>();
-            PreparedStatement analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.auto_setup_delivery FROM ANALYSIS, DATA_FEED " +
+
+            Set<Long> idSet = new HashSet<Long>();
+
+            PreparedStatement analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.DATA_FEED_ID, ANALYSIS.TITLE FROM ANALYSIS, DATA_FEED " +
                     " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                    "DATA_FEED.feed_type = ? AND ANALYSIS.SOLUTION_VISIBLE = ? AND " +
-                    "analysis.recommended_exchange = ?");
+                    "DATA_FEED.feed_type = ? AND analysis.recommended_exchange = ?");
+            List<EIDescriptor> toInstall = new ArrayList<EIDescriptor>();
             analysisQueryStmt.setInt(1, dataSource.getFeedType().getType());
             analysisQueryStmt.setBoolean(2, true);
-            analysisQueryStmt.setBoolean(3, true);
             ResultSet rs = analysisQueryStmt.executeQuery();
-            Session session = Database.instance().createSession(conn);
+
+            long masterSourceID = 0;
             while (rs.next()) {
                 long reportID = rs.getLong(1);
-                installReport(reportID, solutionKPIData.getDataSourceID(), conn, session, false, true, alreadyInstalledMap);
+                long dataSourceID = rs.getLong(2);
+                idSet.add(dataSourceID);
+                String name = rs.getString(3);
+                masterSourceID = dataSourceID;
+                InsightDescriptor report = new InsightDescriptor();
+                report.setId(reportID);
+                report.setName(name);
+                toInstall.add(report);
             }
 
-            PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD.DASHBOARD_NAME FROM DASHBOARD, DATA_FEED " +
+            PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD.DASHBOARD_NAME, DASHBOARD.DATA_SOURCE_ID FROM DASHBOARD, DATA_FEED " +
                     " WHERE DASHBOARD.DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
-                    "DATA_FEED.feed_type = ? AND DASHBOARD.EXCHANGE_VISIBLE = ? AND " +
+                    "DATA_FEED.feed_type = ? AND " +
                     "DASHBOARD.recommended_exchange = ?");
             dashboardQueryStmt.setInt(1, dataSource.getFeedType().getType());
             dashboardQueryStmt.setBoolean(2, true);
-            dashboardQueryStmt.setBoolean(3, true);
             ResultSet dashboardRS = dashboardQueryStmt.executeQuery();
-            PreparedStatement saveFolderStmt = conn.prepareStatement("INSERT INTO REPORT_FOLDER (ACCOUNT_ID, FOLDER_NAME, FOLDER_SEQUENCE, DATA_SOURCE_ID) VALUES (?, ?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
 
             while (dashboardRS.next()) {
                 long dashboardID = dashboardRS.getLong(1);
-                saveFolderStmt.setLong(1, SecurityUtil.getAccountID());
-                saveFolderStmt.setString(2, dashboardRS.getString(2) + " Reports");
-                saveFolderStmt.setInt(3, 1);
-                saveFolderStmt.setLong(4, solutionKPIData.getDataSourceID());
-                saveFolderStmt.execute();
-                long id = Database.instance().getAutoGenKey(saveFolderStmt);
-
-                installDashboard(dashboardID, solutionKPIData.getDataSourceID(), conn, session, false, true, alreadyInstalledMap, (int) id);
+                String dashboardName = dashboardRS.getString(2);
+                long dataSourceID = dashboardRS.getLong(3);
+                idSet.add(dataSourceID);
+                masterSourceID = dataSourceID;
+                DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
+                dashboardDescriptor.setName(dashboardName);
+                dashboardDescriptor.setId(dashboardID);
+                toInstall.add(dashboardDescriptor);
             }
-            saveFolderStmt.close();
-            session.close();
+
+            if (masterSourceID > 0) {
+                Session session = Database.instance().createSession(conn);
+                try {
+                    FeedDefinition source = new FeedStorage().getFeedDefinitionData(masterSourceID);
+                    long targetID = solutionKPIData.getDataSourceID();
+                    FeedDefinition target = new FeedStorage().getFeedDefinitionData(targetID);
+                    InstallMetadata.blah(source, target, conn, session, toInstall);
+                } finally {
+                    session.close();
+                }
+            }
+
+            PostInstallSteps postInstallSteps = new PostInstallSteps();
+
+            copyLookAndFeel(solutionKPIData, conn, postInstallSteps);
             conn.commit();
+            return postInstallSteps;
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -111,6 +126,56 @@ public class SolutionService {
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
+        }
+    }
+
+    private void copyLookAndFeel(SolutionKPIData solutionKPIData, EIConnection conn, PostInstallSteps postInstallSteps) throws SQLException {
+        Session session;PreparedStatement lfStmt = conn.prepareStatement("SELECT look_and_feel_customized FROM account WHERE account_id = ?");
+        lfStmt.setLong(1, SecurityUtil.getAccountID());
+        ResultSet lfRS = lfStmt.executeQuery();
+        lfRS.next();
+
+        boolean customized = lfRS.getBoolean(1);
+        if (!customized) {
+            PreparedStatement typeStmt = conn.prepareStatement("SELECT feed_type FROM data_feed WHERE data_feed_id = ?");
+            typeStmt.setLong(1, solutionKPIData.getDataSourceID());
+            ResultSet typeRS = typeStmt.executeQuery();
+            typeRS.next();
+            int connectionType = typeRS.getInt(1);
+            ApplicationSkinSettings connectionSkin;
+            session = Database.instance().createSession(conn);
+            List results = session.createQuery("from ApplicationSkinSettings where connectionType = ?").setInteger(0, connectionType).list();
+            if (results.size() > 0) {
+                connectionSkin = (ApplicationSkinSettings) results.get(0);
+                ApplicationSkinSettings globalSkin;
+                results = session.createQuery("from ApplicationSkinSettings where globalSkin = ?").setBoolean(0, true).list();
+                if (results.size() > 0) {
+                    globalSkin = (ApplicationSkinSettings) results.get(0);
+                } else {
+                    globalSkin = new ApplicationSkinSettings();
+                }
+                ApplicationSkinSettings accountSkin;
+                results = session.createQuery("from ApplicationSkinSettings where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list();
+                if (results.size() > 0) {
+                    accountSkin = (ApplicationSkinSettings) results.get(0);
+                } else {
+                    accountSkin = new ApplicationSkinSettings();
+                }
+                ApplicationSkinSettings userSkin;
+                results = session.createQuery("from ApplicationSkinSettings where userID = ?").setLong(0, SecurityUtil.getUserID()).list();
+                if (results.size() > 0) {
+                    userSkin = (ApplicationSkinSettings) results.get(0);
+                } else {
+                    userSkin = new ApplicationSkinSettings();
+                }
+                ApplicationSkinSettings settings = globalSkin.toSkin().toSettings(ApplicationSkin.APPLICATION).override(connectionSkin.toSkin().toSettings(ApplicationSkin.ACCOUNT));
+                settings.setAccountID(SecurityUtil.getAccountID());
+                session.save(settings);
+                session.flush();
+                ApplicationSkin applicationSkin = settings.override(accountSkin.toSkin().toSettings(ApplicationSkin.ACCOUNT)).override(userSkin.toSkin().toSettings(ApplicationSkin.USER)).toSkin();
+                postInstallSteps.setApplicationSkin(applicationSkin);
+            }
+            session.close();
         }
     }
 
@@ -333,6 +398,9 @@ public class SolutionService {
     public List<DataSourceDescriptor> determineDataSourceForEntity(EIDescriptor descriptor) {
         EIConnection conn = Database.instance().getConnection();
         try {
+
+            // look for existing installs, find any...
+
             if (descriptor.getType() == EIDescriptor.REPORT) {
                 return determineDataSourceForReport(descriptor.getId(), conn).descriptors;
             } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
@@ -349,12 +417,35 @@ public class SolutionService {
     }
 
     private Blah determineDataSourceForDashboard(long dashboardID, EIConnection conn) throws SQLException {
+        PreparedStatement alreadyInstalledStmt = conn.prepareStatement("SELECT result_dashboard_id, data_feed.data_feed_id FROM dashboard, dashboard_install_info, data_feed, upload_policy_users, user " +
+                "WHERE origin_dashboard_id = ? AND dashboard_install_info.data_source_id = data_feed.data_feed_id and data_feed.data_feed_id = upload_policy_users.feed_id AND " +
+                "upload_policy_users.user_id = user.user_id and user.account_id = ? AND result_dashboard_id = dashboard.dashboard_id");
+        alreadyInstalledStmt.setLong(1, dashboardID);
+        alreadyInstalledStmt.setLong(2, SecurityUtil.getAccountID());
+
+        ResultSet installRS = alreadyInstalledStmt.executeQuery();
+        Map<Long, Set<EIDescriptor>> map = new HashMap<Long, Set<EIDescriptor>>();
+        while (installRS.next()) {
+            long existingID = installRS.getLong(1);
+            long sourceID = installRS.getLong(2);
+            Set<EIDescriptor> existingSet = map.get(sourceID);
+            if (existingSet == null) {
+                existingSet = new HashSet<EIDescriptor>();
+                map.put(sourceID, existingSet);
+            }
+            existingSet.add(new DashboardDescriptor(null, existingID, null, 0, 0, null, false));
+        }
+
         PreparedStatement dashboardQuery = conn.prepareStatement("SELECT DASHBOARD.data_source_id FROM DASHBOARD WHERE DASHBOARD_ID = ?");
         dashboardQuery.setLong(1, dashboardID);
         ResultSet dashboardRS = dashboardQuery.executeQuery();
         if (dashboardRS.next()) {
             long dataSourceID = dashboardRS.getLong(1);
-            return determineDataSources(conn, dataSourceID);
+            Blah blah = determineDataSources(conn, dataSourceID);
+            for (DataSourceDescriptor d : blah.descriptors) {
+                d.setPrebuilts(map.get(d.getId()));
+            }
+            return blah;
         }
         return null;
     }
@@ -399,7 +490,7 @@ public class SolutionService {
                 int installs = ratingRS.getInt(1);
                 blah = determineDataSourceForReport(reportID, conn);
                 srei = new ExchangeItem(reportName, reportID, installs, dateCreated, description,
-                        authorName, descriptor, blah.connectionID, blah.connectionName, recommended);
+                        authorName, descriptor, blah.connectionID, blah.connectionName, recommended, 0);
             } else {
                 PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD_ID, URL_KEY, DASHBOARD_NAME, CREATION_DATE," +
                         "AUTHOR_NAME, DESCRIPTION, recommended_exchange FROM DASHBOARD WHERE DASHBOARD.exchange_visible = ? and " +
@@ -423,7 +514,7 @@ public class SolutionService {
                     ratingRS.next();
                     int installs = ratingRS.getInt(1);
                     srei = new ExchangeItem(dashboardName, dashboardID, installs, dateCreated, description,
-                            authorName, descriptor, blah.connectionID, blah.connectionName, recommended);
+                            authorName, descriptor, blah.connectionID, blah.connectionName, recommended, 0);
                 } else {
                     return null;
                 }
@@ -515,33 +606,33 @@ public class SolutionService {
     }
 
     public DashboardDescriptor installDashboard(long dashboardID, long dataSourceID) {
-        DashboardDescriptor dashboardDescriptor;
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             Session session = Database.instance().createSession(conn);
-            PreparedStatement getStmt = conn.prepareStatement("SELECT DASHBOARD_NAME FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+
+            PreparedStatement getStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, DATA_SOURCE_ID FROM DASHBOARD WHERE DASHBOARD_ID = ?");
             getStmt.setLong(1, dashboardID);
             ResultSet rs = getStmt.executeQuery();
             rs.next();
             String dashboardName = rs.getString(1);
+            long sourceID = rs.getLong(2);
             getStmt.close();
-            PreparedStatement saveFolderStmt = conn.prepareStatement("INSERT INTO REPORT_FOLDER (ACCOUNT_ID, FOLDER_NAME, FOLDER_SEQUENCE, DATA_SOURCE_ID) VALUES (?, ?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
-            saveFolderStmt.setLong(1, SecurityUtil.getAccountID());
-            saveFolderStmt.setString(2, dashboardName + " Reports");
-            saveFolderStmt.setInt(3, 1);
-            saveFolderStmt.setLong(4, dataSourceID);
-            saveFolderStmt.execute();
-            long id = Database.instance().getAutoGenKey(saveFolderStmt);
-            saveFolderStmt.close();
-            dashboardDescriptor = installDashboard(dashboardID, dataSourceID, conn, session, true, true, new HashMap<Long, AnalysisDefinition>(), (int) id);
+
+            FeedDefinition sourceDataSource = new FeedStorage().getFeedDefinitionData(sourceID, conn);
+            FeedDefinition targetDataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+
+            DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
+            dashboardDescriptor.setId(dashboardID);
+            dashboardDescriptor.setName(dashboardName);
+            DashboardDescriptor result = (DashboardDescriptor) InstallMetadata.blah(sourceDataSource, targetDataSource, conn, session, Arrays.asList((EIDescriptor) dashboardDescriptor));
 
             session.flush();
 
             conn.commit();
             session.close();
-
+            return result;
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -550,229 +641,31 @@ public class SolutionService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
-        /*try {
-            Dashboard source = new DashboardStorage().getDashboard(dashboardID);
-            Dashboard target = new DashboardStorage().getDashboard(dashboardDescriptor.getId());
-            FeedDefinition sourceDataSource = new FeedStorage().getFeedDefinitionData(source.getDataSourceID());
-            FeedDefinition targetDataSource = new FeedStorage().getFeedDefinitionData(target.getDataSourceID());
-            analyze(source.allItems(sourceDataSource.getFields()), target.allItems(targetDataSource.getFields()));
-        } catch (Exception e) {
-            LogClass.error(e);
-        }*/
-        return dashboardDescriptor;
     }
     
-    public static void recurseDashboard(Map<Long, AnalysisDefinition> reports, Map<Long, Dashboard> dashboards, Dashboard dashboard, Session session, EIConnection conn, Set<Long> tags) throws Exception {
+    public static void recurseDashboard(Map<Long, AnalysisDefinition> reports, Map<Long, Dashboard> dashboards, Dashboard dashboard, Session session, EIConnection conn) throws Exception {
         if (!dashboards.containsKey(dashboard.getId())) {
             dashboards.put(dashboard.getId(), dashboard);
             Set<Long> reportIDs = dashboard.containedReports();
             for (Long reportID : reportIDs) {
                 AnalysisDefinition report = new AnalysisStorage().getPersistableReport(reportID, session);
-                recurseReport(reports, dashboards, report, session, conn, tags);
+                recurseReport(reports, dashboards, report, session, conn);
             }
         }
     }
 
-    public static void recurseReport(Map<Long, AnalysisDefinition> reports, Map<Long, Dashboard> dashboards, AnalysisDefinition report, Session session, EIConnection conn, Set<Long> tags) throws Exception {
+    public static void recurseReport(Map<Long, AnalysisDefinition> reports, Map<Long, Dashboard> dashboards, AnalysisDefinition report, Session session, EIConnection conn) throws Exception {
         if (!reports.containsKey(report.getAnalysisID())) {
             reports.put(report.getAnalysisID(), report);
-            tags.addAll(report.findTags());
             Set<EIDescriptor> containedReportIDs = report.containedReportIDs();
             for (EIDescriptor descriptor : containedReportIDs) {
                 if (descriptor.getType() == EIDescriptor.REPORT) {
                     AnalysisDefinition child = new AnalysisStorage().getPersistableReport(descriptor.getId(), session);
-                    recurseReport(reports, dashboards, child, session, conn, tags);
+                    recurseReport(reports, dashboards, child, session, conn);
                 } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
                     Dashboard dashboard = new DashboardStorage().getDashboard(descriptor.getId(), conn);
-                    recurseDashboard(reports, dashboards, dashboard, session, conn, tags);
+                    recurseDashboard(reports, dashboards, dashboard, session, conn);
                 }
-            }
-        }
-    }
-
-    public DashboardDescriptor installDashboard(long dashboardID, long dataSourceID, EIConnection conn, Session session, boolean temporaryDashboard,
-                                                 boolean makeAccountVisible, Map<Long, AnalysisDefinition> alreadyInstalledMap, int toFolder) throws Exception {
-        DashboardStorage dashboardStorage = new DashboardStorage();
-        FeedStorage feedStorage = new FeedStorage();
-        Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
-        Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
-        Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
-        Set<Long> tags = new HashSet<Long>();
-        recurseDashboard(reports, dashboards, dashboard, session, conn, tags);
-
-        Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap = createTagReplacements(conn, tags);
-
-        /*for (Long containedReportID : reportIDs) {
-            AnalysisDefinition report = new AnalysisStorage().getPersistableReport(containedReportID, session);
-            reports.add(report);
-            Set<EIDescriptor> containedReportIDs = report.containedReportIDs();
-            for (EIDescriptor descriptor : containedReportIDs) {
-                if (descriptor.getType() == EIDescriptor.REPORT) {
-                    reports.add(new AnalysisStorage().getPersistableReport(descriptor.getId(), session));
-                } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
-                    dashboards.add(new DashboardStorage().getDashboard(descriptor.getId(), conn));
-                }
-            }
-        }*/
-
-        Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
-        Map<Long, Dashboard> dashboardReplacementMap = new HashMap<Long, Dashboard>();
-
-        FeedDefinition originalSource = feedStorage.getFeedDefinitionData(dashboard.getDataSourceID(), conn);
-        FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
-
-        Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
-        for (AnalysisItem field : originalSource.getFields()) {
-            map.put(field.toDisplay(), field);
-        }
-        for (AnalysisItem field : targetDataSource.getFields()) {
-            map.remove(field.toDisplay());
-        }
-
-        List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
-        List<Dashboard> dashboardList = new ArrayList<Dashboard>();
-        for (AnalysisDefinition childReport : reports.values()) {
-            //childReport.setFolder(EIDescriptor.OTHER_VIEW);
-            AnalysisDefinition alreadyInstalled = alreadyInstalledMap.get(childReport.getAnalysisID());
-            if (alreadyInstalled == null) {
-                childReport.createBlazeDefinition();
-                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, childReport, new ArrayList<AnalysisItem>(map.values()), tagReplacementMap);
-                copyReport.setFolder(toFolder);
-                reportReplacementMap.put(childReport.getAnalysisID(), copyReport);
-                reportList.add(copyReport);
-                alreadyInstalledMap.put(childReport.getAnalysisID(), copyReport);
-            } else {
-                reportReplacementMap.put(childReport.getAnalysisID(), alreadyInstalled);
-            }
-        }
-        
-        for (Dashboard childDashboard : dashboards.values()) {
-            Dashboard copyDashboard = copyDashboardToDataSource(targetDataSource, childDashboard);
-            if (childDashboard == dashboard) {
-                copyDashboard.setFolder(EIDescriptor.MAIN_VIEW);
-            } else {
-                copyDashboard.setFolder(toFolder);
-            }
-            dashboardReplacementMap.put(childDashboard.getId(), copyDashboard);
-            dashboardList.add(copyDashboard);
-        }
-
-        for (AnalysisDefinition copiedReport : reportList) {
-            copiedReport.setTemporaryReport(temporaryDashboard);
-            copiedReport.setAccountVisible(makeAccountVisible);
-            new AnalysisStorage().saveAnalysis(copiedReport, session);
-        }
-        
-        for (Dashboard copiedDashboard : dashboardList) {
-            copiedDashboard.setTemporary(temporaryDashboard);
-            copiedDashboard.setAccountVisible(makeAccountVisible);
-            new DashboardStorage().saveDashboard(copiedDashboard, conn);
-        }
-
-        for (AnalysisDefinition copiedReport : reportList) {
-            copiedReport.updateReportIDs(reportReplacementMap, dashboardReplacementMap, session);
-        }
-        
-        for (Dashboard copiedDashboard : dashboardReplacementMap.values()) {
-            copiedDashboard.updateIDs(reportReplacementMap, targetDataSource.getFields(), true, targetDataSource);
-        }
-
-        for (AnalysisDefinition copiedReport : reportList) {
-            new AnalysisStorage().saveAnalysis(copiedReport, session);
-        }
-        
-        for (Dashboard copiedDashboard : dashboardList) {
-            new DashboardStorage().saveDashboard(copiedDashboard, conn);
-        }
-
-        Set<Long> scorecardIDs = dashboard.containedScorecards();
-        List<Scorecard> scorecards = new ArrayList<Scorecard>();
-
-        for (Long containedScorecardID : scorecardIDs) {
-            Scorecard scorecard = new ScorecardStorage().getScorecard(containedScorecardID, conn);
-            scorecards.add(scorecard);
-        }
-
-        Map<Long, Scorecard> scorecardReplacementMap = new HashMap<Long, Scorecard>();
-        List<Scorecard> scorecardList = new ArrayList<Scorecard>();
-        for (Scorecard child : scorecards) {
-            Scorecard copyScorecard = copyScorecardToDataSource(targetDataSource, child);
-            scorecardReplacementMap.put(child.getScorecardID(), copyScorecard);
-            scorecardList.add(copyScorecard);
-        }
-
-        for (Scorecard copiedScorecard : scorecardList) {
-            new ScorecardStorage().saveScorecardForUser(copiedScorecard, SecurityUtil.getUserID(), conn);
-        }
-        
-        Dashboard copiedDashboard = dashboardReplacementMap.get(dashboardID);
-        
-
-
-        /*Dashboard copiedDashboard = dashboard.cloneDashboard(scorecardReplacementMap, true, targetDataSource.getFields(), targetDataSource);
-        copiedDashboard.setTemporary(temporaryDashboard);
-        copiedDashboard.setDataSourceID(dataSourceID);
-        copiedDashboard.setAccountVisible(makeAccountVisible);
-
-        dashboardStorage.saveDashboard(copiedDashboard, conn);*/
-
-        return new DashboardDescriptor(copiedDashboard.getName(), copiedDashboard.getId(), copiedDashboard.getUrlKey(), 0, Roles.NONE, null, false);
-    }
-
-    private Map<Long, WeNeedToReplaceHibernateTag> createTagReplacements(EIConnection conn, Set<Long> tags) throws SQLException {
-        Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap = new HashMap<Long, WeNeedToReplaceHibernateTag>();
-        for (Long tagID : tags) {
-            PreparedStatement ps = conn.prepareStatement("SELECT TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_TAG_ID = ?");
-            ps.setLong(1, tagID);
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            String tagName = rs.getString(1);
-            PreparedStatement findInAccountStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID FROM ACCOUNT_TAG WHERE TAG_NAME = ? AND ACCOUNT_ID = ?");
-            findInAccountStmt.setString(1, tagName);
-            findInAccountStmt.setLong(2, SecurityUtil.getAccountID());
-            ResultSet inAccountRS = findInAccountStmt.executeQuery();
-            long replaceID;
-            if (inAccountRS.next()) {
-                replaceID = inAccountRS.getLong(1);
-            } else {
-                PreparedStatement saveTagStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG) VALUES (?, ?, ?, ?, ?)",
-                        Statement.RETURN_GENERATED_KEYS);
-                saveTagStmt.setString(1, tagName);
-                saveTagStmt.setLong(2, SecurityUtil.getAccountID());
-                saveTagStmt.setBoolean(3, false);
-                saveTagStmt.setBoolean(4, false);
-                saveTagStmt.setBoolean(5, true);
-                saveTagStmt.execute();
-                replaceID = Database.instance().getAutoGenKey(saveTagStmt);
-
-                // also need to assign the appropriate tags here...
-            }
-            WeNeedToReplaceHibernateTag weNeedToReplaceHibernateTag = new WeNeedToReplaceHibernateTag();
-            weNeedToReplaceHibernateTag.setTagID(replaceID);
-            tagReplacementMap.put(tagID, weNeedToReplaceHibernateTag);
-        }
-        return tagReplacementMap;
-    }
-
-    public void regenerateTags(Set<Long> tagIDs, long fromDataSourceID, FeedDefinition toDataSource, EIConnection conn, Map<Long, WeNeedToReplaceHibernateTag> tags) throws SQLException {
-        Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
-        for (AnalysisItem existing : toDataSource.getFields()) {
-            map.put(existing.toDisplay(), existing);
-        }
-        List<AnalysisItemConfiguration> configurations = new FeedService().getAnalysisItemConfigurations(fromDataSourceID);
-        for (AnalysisItemConfiguration config : configurations) {
-            AnalysisItem target = map.get(config.getAnalysisItem().qualifiedName());
-            AnalysisItemConfiguration config1 = new AnalysisItemConfiguration();
-            config1.setAnalysisItem(target);
-            if (config.getTags() != null && config.getTags().size() > 0) {
-                List<Tag> newTags = new ArrayList<Tag>();
-                for (Tag tag : config.getTags()) {
-                    WeNeedToReplaceHibernateTag copy = tags.get(tag.getId());
-                    Tag copyTag = new Tag();
-                    copyTag.setId(copy.getTagID());
-                    newTags.add(copyTag);
-                }
-                config1.setTags(newTags);
             }
         }
     }
@@ -785,10 +678,22 @@ public class SolutionService {
 
 
             Session session = Database.instance().createSession(conn);
-            InsightDescriptor insightDescriptor = installReport(reportID, dataSourceID, conn, session, true, true, new HashMap<Long, AnalysisDefinition>());
+            PreparedStatement ps = conn.prepareStatement("SELECT TITLE, DATA_FEED_ID FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+            ps.setLong(1, reportID);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            String reportName = rs.getString(1);
+            long sourceID = rs.getLong(2);
+            FeedDefinition sourceDataSource = new FeedStorage().getFeedDefinitionData(sourceID, conn);
+            FeedDefinition targetDataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+
+            InsightDescriptor insightDescriptor = new InsightDescriptor();
+            insightDescriptor.setId(reportID);
+            insightDescriptor.setName(reportName);
+            InsightDescriptor result = (InsightDescriptor) InstallMetadata.blah(sourceDataSource, targetDataSource, conn, session, Arrays.asList((EIDescriptor) insightDescriptor));
             conn.commit();
             session.close();
-            return insightDescriptor;
+            return result;
         } catch (Exception e) {
             LogClass.error("Installing report " + reportID + " from exchange", e);
             conn.rollback();
@@ -799,186 +704,6 @@ public class SolutionService {
         }
     }
 
-    public InsightDescriptor installReport(long reportID, long dataSourceID, EIConnection conn, Session session,
-                                            boolean keepTemporary, boolean makeAccountVisible, Map<Long, AnalysisDefinition> alreadyInstalledMap) throws Exception {
-        AnalysisDefinition originalBaseReport = new AnalysisStorage().getPersistableReport(reportID, session);
-        Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
-        Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
-        Set<Long> tags = new HashSet<Long>();
-        recurseReport(reports, dashboards, originalBaseReport, session, conn, tags);
-        Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap = createTagReplacements(conn, tags);
-        FeedStorage feedStorage = new FeedStorage();
-        FeedDefinition originalSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
-
-        FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
-        Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
-        for (AnalysisItem field : originalSource.getFields()) {
-            map.put(field.toDisplay(), field);
-        }
-        for (AnalysisItem field : targetDataSource.getFields()) {
-            map.remove(field.toDisplay());
-        }
-        Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
-        Map<Long, Dashboard> dashboardReplacementMap = new HashMap<Long, Dashboard>();
-        List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
-        List<Dashboard> dashboardList = new ArrayList<Dashboard>();
-        for (AnalysisDefinition child : reports.values()) {
-            AnalysisDefinition alreadyInstalled = alreadyInstalledMap.get(child.getAnalysisID());
-            if (alreadyInstalled == null) {
-                child.createBlazeDefinition();
-                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child, new ArrayList<AnalysisItem>(map.values()), tagReplacementMap);
-                if (child.getAnalysisID() != reportID) {
-                    copyReport.setFolder(EIDescriptor.OTHER_VIEW);
-                }
-                reportReplacementMap.put(child.getAnalysisID(), copyReport);
-                reportList.add(copyReport);
-                alreadyInstalledMap.put(child.getAnalysisID(), copyReport);
-            } else {
-                reportReplacementMap.put(child.getAnalysisID(), alreadyInstalled);
-            }
-        }
-
-        for (Dashboard childDashboard : dashboards.values()) {
-            Dashboard copyDashboard = copyDashboardToDataSource(targetDataSource, childDashboard);
-            copyDashboard.setFolder(EIDescriptor.OTHER_VIEW);
-            dashboardReplacementMap.put(childDashboard.getId(), copyDashboard);
-            dashboardList.add(copyDashboard);
-        }
-
-        for (AnalysisDefinition copiedReport : reportList) {
-            copiedReport.setTemporaryReport(keepTemporary);
-            copiedReport.setAccountVisible(makeAccountVisible);
-            new AnalysisStorage().saveAnalysis(copiedReport, session);
-        }
-
-        for (Dashboard copiedDashboard : dashboardList) {
-            copiedDashboard.setTemporary(keepTemporary);
-            copiedDashboard.setAccountVisible(makeAccountVisible);
-            new DashboardStorage().saveDashboard(copiedDashboard, conn);
-        }
-
-        for (AnalysisDefinition copiedReport : reportList) {
-            copiedReport.updateReportIDs(reportReplacementMap, dashboardReplacementMap, session);
-        }
-
-        for (Dashboard copiedDashboard : dashboardList) {
-            copiedDashboard.updateIDs(reportReplacementMap, targetDataSource.getFields(), true, targetDataSource);
-        }
-
-        for (AnalysisDefinition copiedReport : reportList) {
-            new AnalysisStorage().saveAnalysis(copiedReport, session);
-
-        }
-
-        for (Dashboard copiedDashboard : dashboardList) {
-            new DashboardStorage().saveDashboard(copiedDashboard, conn);
-        }
-
-        session.flush();
-
-        AnalysisDefinition copiedBaseReport = reportReplacementMap.get(reportID);
-        return new InsightDescriptor(copiedBaseReport.getAnalysisID(), copiedBaseReport.getTitle(),
-                copiedBaseReport.getDataFeedID(), copiedBaseReport.getReportType(), copiedBaseReport.getUrlKey(), Roles.OWNER, false);
-    }
-
-    private Map<Key, Key> createKeyReplacementMap(FeedDefinition localDefinition, FeedDefinition sourceDefinition) {
-        Map<Key, Key> keys = new HashMap<Key, Key>();
-        for (AnalysisItem sourceField : sourceDefinition.getFields()) {
-            for (AnalysisItem targetField : localDefinition.getFields()) {
-                if (sourceField.toDisplay().equals(targetField.toDisplay())) {
-                    keys.put(sourceField.getKey(), targetField.getKey());
-                    break;
-                }
-            }
-        }
-        return keys;
-    }
-    
-    /*private void analyze(List<EIDescriptor> originalDescriptors, List<EIDescriptor> newDescriptors) {
-        boolean collide = false;
-        Map<String, EIDescriptor> map = new HashMap<String, EIDescriptor>();
-        for (EIDescriptor descriptor : originalDescriptors) {
-            map.put(descriptor.getType() + "-" + descriptor.getId(), descriptor);
-        }
-        for (EIDescriptor descriptor : newDescriptors) {
-            EIDescriptor collision = map.get(descriptor.getType() + "-" + descriptor.getId());
-            if (collision != null) {
-                collide = true;
-                System.out.println("Collision on " + collision.getName() + " - " + collision.getId());
-            }
-        }
-        if (collide) {
-            System.out.println("Collisions were found");
-        } else {
-            System.out.println("No collisions");
-        }
-    }*/
-
-    private Map<Long, Long> createDataSourceReplacementMap(FeedDefinition localDefinition, FeedDefinition sourceDefinition, EIConnection conn) throws SQLException {
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
-        Map<Long, Long> map = new HashMap<Long, Long>();
-        Map<Integer, Long> typeMap = new HashMap<Integer, Long>();
-        if (localDefinition instanceof CompositeFeedDefinition) {
-            CompositeFeedDefinition localCompositeFeedDefinition = (CompositeFeedDefinition) localDefinition;
-            CompositeFeedDefinition sourceCompositeFeedDefinition = (CompositeFeedDefinition) sourceDefinition;
-            for (CompositeFeedNode node : localCompositeFeedDefinition.getCompositeFeedNodes()) {
-                queryStmt.setLong(1, node.getDataFeedID());
-                ResultSet rs = queryStmt.executeQuery();
-                rs.next();
-                int type = rs.getInt(1);
-                typeMap.put(type, node.getDataFeedID());
-            }
-            for (CompositeFeedNode node : sourceCompositeFeedDefinition.getCompositeFeedNodes()) {
-                queryStmt.setLong(1, node.getDataFeedID());
-                ResultSet rs = queryStmt.executeQuery();
-                rs.next();
-                int type = rs.getInt(1);
-                long id = typeMap.get(type);
-                map.put(id, node.getDataFeedID());
-            }
-        }
-        map.put(localDefinition.getDataFeedID(), sourceDefinition.getDataFeedID());
-        return map;
-    }
-    
-    public void keepEntity(long id, int type, long exchangeItemID) {
-        if (type == EIDescriptor.DASHBOARD) {
-            new DashboardService().keepDashboard(id, exchangeItemID);
-        } else if (type == EIDescriptor.REPORT) {
-            new AnalysisService().keepReport(id, exchangeItemID);
-        }
-    }
-
-    private Scorecard copyScorecardToDataSource(FeedDefinition localDefinition, Scorecard scorecard) throws CloneNotSupportedException {
-        Scorecard clonedScorecard = scorecard.clone(localDefinition, localDefinition.getFields());
-        clonedScorecard.setExchangeVisible(false);
-        clonedScorecard.setDataSourceID(localDefinition.getDataFeedID());
-        return clonedScorecard;
-    }
-    
-    private Dashboard copyDashboardToDataSource(FeedDefinition localDefinition, Dashboard dashboard) throws CloneNotSupportedException {
-        Dashboard clonedDashboard = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), true, localDefinition.getFields(), localDefinition);
-        clonedDashboard.setExchangeVisible(false);
-        clonedDashboard.setDataSourceID(localDefinition.getDataFeedID());
-        return clonedDashboard;
-    }
-
-    private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report, List<AnalysisItem> additionalDataSourceFields,
-                                                      Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap) throws CloneNotSupportedException {
-        AnalysisDefinition clonedReport = report.clone(localDefinition, localDefinition.getFields(), true, additionalDataSourceFields, tagReplacementMap);
-        clonedReport.setSolutionVisible(false);
-        clonedReport.setRecommendedExchange(false);
-        clonedReport.setAutoSetupDelivery(false);
-        //clonedReport.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
-        clonedReport.setDataFeedID(localDefinition.getDataFeedID());
-
-        // what to do here...
-
-        clonedReport.setUserBindings(Arrays.asList(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER)));
-        clonedReport.setTemporaryReport(true);
-        return clonedReport;
-    }
-
     public List<ExchangeItem> getSolutionReports() {
         List<ExchangeItem> reports = new ArrayList<ExchangeItem>();
         EIConnection conn = Database.instance().getConnection();
@@ -987,13 +712,12 @@ public class SolutionService {
                     "analysis.create_date, ANALYSIS.DESCRIPTION, DATA_FEED.FEED_NAME, ANALYSIS.AUTHOR_NAME," +
                     "DATA_FEED.PUBLICLY_VISIBLE, SOLUTION.NAME, SOLUTION.SOLUTION_ID, ANALYSIS.url_key, analysis.recommended_exchange FROM DATA_FEED, SOLUTION, ANALYSIS " +
                     " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                    "DATA_FEED.feed_type = SOLUTION.data_source_type AND ANALYSIS.SOLUTION_VISIBLE = ? AND ANALYSIS.RECOMMENDED_EXCHANGE = ?");
+                    "DATA_FEED.feed_type = SOLUTION.data_source_type AND ANALYSIS.RECOMMENDED_EXCHANGE = ?");
 
             PreparedStatement getReportRatingStmt = conn.prepareStatement("SELECT count(exchange_report_install_id) from " +
                     "exchange_report_install where report_id = ?");
 
             analysisQueryStmt.setBoolean(1, true);
-            analysisQueryStmt.setBoolean(2, true);
             ResultSet analysisRS = analysisQueryStmt.executeQuery();
             while (analysisRS.next()) {
                 long analysisID = analysisRS.getLong(1);
@@ -1022,15 +746,18 @@ public class SolutionService {
                 int installs = ratingRS.getInt(1);
                 InsightDescriptor insightDescriptor = new InsightDescriptor(analysisID, title, dataSourceID, reportType, urlKey, Roles.NONE, false);
                 ExchangeItem item = new ExchangeItem(title, analysisID,
-                        installs, created, description, authorName, insightDescriptor, connectionID, connectionName, recommended);
+                        installs, created, description, authorName, insightDescriptor, connectionID, connectionName, recommended, 0);
                 reports.add(item);
             }
 
+            PreparedStatement alreadyInstalledStmt = conn.prepareStatement("SELECT result_dashboard_id FROM dashboard, dashboard_install_info, data_feed, upload_policy_users, user " +
+                    "WHERE origin_dashboard_id = ? AND dashboard_install_info.data_source_id = data_feed.data_feed_id and data_feed.data_feed_id = upload_policy_users.feed_id AND " +
+                    "upload_policy_users.user_id = user.user_id and user.account_id = ? AND result_dashboard_id = dashboard.dashboard_id");
             PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD.DASHBOARD_NAME, " +
                     "SOLUTION.NAME, SOLUTION.SOLUTION_ID, dashboard.creation_date, dashboard.description," +
                     "dashboard.author_name, dashboard.url_key, dashboard.recommended_exchange FROM DATA_FEED, SOLUTION, dashboard " +
                     " WHERE dashboard.data_source_id = DATA_FEED.DATA_FEED_ID AND " +
-                    "data_feed.feed_type = solution.data_source_type AND dashboard.exchange_visible = ? " +
+                    "data_feed.feed_type = solution.data_source_type AND dashboard.recommended_exchange = ? " +
                     "AND dashboard.temporary_dashboard = ?");
             PreparedStatement getRatingDashboardStmt = conn.prepareStatement("SELECT count(exchange_dashboard_install_id) from " +
                     "exchange_dashboard_install where dashboard_id = ?");
@@ -1040,6 +767,14 @@ public class SolutionService {
             ResultSet dashboardRS = dashboardQueryStmt.executeQuery();
             while (dashboardRS.next()) {
                 long dashboardID = dashboardRS.getLong(1);
+                alreadyInstalledStmt.setLong(1, dashboardID);
+                alreadyInstalledStmt.setLong(2, SecurityUtil.getAccountID());
+                ResultSet alreadyRS = alreadyInstalledStmt.executeQuery();
+                long existingID = 0;
+                if (alreadyRS.next()) {
+
+                    existingID = alreadyRS.getLong(1);
+                }
                 String dashboardName = dashboardRS.getString(2);
                 String connectionName = dashboardRS.getString(3);
                 long connectionID = dashboardRS.getLong(4);
@@ -1049,6 +784,8 @@ public class SolutionService {
                 String urlKey = dashboardRS.getString(8);
                 boolean recommended = dashboardRS.getBoolean(9);
 
+
+
                 getRatingDashboardStmt.setLong(1, dashboardID);
                 ResultSet ratingRS = getRatingDashboardStmt.executeQuery();
                 ratingRS.next();
@@ -1056,7 +793,7 @@ public class SolutionService {
                 int installs = ratingRS.getInt(1);
                 DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey, 0, Roles.NONE, null, false);
                 ExchangeItem item = new ExchangeItem(dashboardName, dashboardID, installs,
-                        createdDate, description, authorName, dashboardDescriptor, connectionID, connectionName, recommended);
+                        createdDate, description, authorName, dashboardDescriptor, connectionID, connectionName, recommended, existingID);
                 reports.add(item);
             }
             Collections.sort(reports, new Comparator<ExchangeItem>() {

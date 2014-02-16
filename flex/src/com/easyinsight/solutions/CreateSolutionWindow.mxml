@@ -86,10 +86,6 @@
                 _solution = new Solution();
             }
             _solution.name = nameInput.text;
-            _solution.logoLink = logoLinkInput.text;
-            //_solution.author = authorInput.text;
-            //_solution.industry = industryInput.text;
-            _solution.copyData = includeDataCheckbox.selected;
             _solution.solutionTier = accountTierBox.selectedIndex + 1;
             _solution.category = solutionCategoryBox.selectedIndex + 1;
             _solution.dataSourceType = int(typeInput.text);
@@ -115,7 +111,7 @@
 		<mx:method name="addSolution" result="saveCompleted()"/>
 		<mx:method name="updateSolution" result="saveCompleted()"/>
 	</mx:RemoteObject>
-    <mx:HBox>
+
         <mx:Form>
             <mx:FormItem label="Name: ">
                 <mx:TextInput id="nameInput" text="{nameText}"/>
@@ -155,23 +151,16 @@
                     </mx:dataProvider>
                 </mx:ComboBox>
             </mx:FormItem>
-            <mx:FormItem label="Include Data Source Data: ">
-                <mx:CheckBox id="includeDataCheckbox" selected="{includeData}"/>
-            </mx:FormItem>
             <mx:FormItem label="Image: " direction="vertical">
                 <mx:Button label="Update Image" click="updateImage()"/>
                 <mx:Image source="{solutionImage}"/>
             </mx:FormItem>
-            <mx:FormItem label="Image Link: ">
-                <mx:TextInput text="{logoLink}" id="logoLinkInput"/>
-            </mx:FormItem>
             <mx:FormItem label="Data Source Type:">
                 <mx:TextInput id="typeInput" text="{dataSourceType}"/>
             </mx:FormItem>
-            <mx:FormItem label="" direction="horizontal">
-                <mx:Button label="Save" click="save()"/>
-                <mx:Button label="Cancel" click="cancel()"/>
-            </mx:FormItem>
         </mx:Form>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="cancel()"/>
     </mx:HBox>
 </util:EITitleWindow>

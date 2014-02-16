@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+                xmlns:solutions="com.easyinsight.solutions.*" layout="absolute"
+                creationComplete="setup()">
+    <mx:states>
+        <mx:State name="loggedIn">
+            <mx:RemoveChild target="{loginForm}"/>
+            <mx:AddChild relativeTo="{coreBox}">
+                <solutions:SolutionAdministration width="100%" height="100%"/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.account.Account;
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.LoginObject;
+        import com.easyinsight.framework.LoginResponse;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.skin.GlobalSkinWindow;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.managers.PopUpManager;
+        import mx.messaging.config.ServerConfig;
+        import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncToken;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+
+
+
+        private function handleAuthentication():void {
+            var authResult:UserServiceResponse = authAdminService.authenticateAdmin.lastResult as UserServiceResponse;
+            var successful:Boolean = authResult.successful;
+            if (successful) {
+                User.initializeUser(authResult);
+                User.getInstance().userName = authResult.userName;
+                currentState = "loggedIn";
+            } else {
+                failureMessageLabel.text = authResult.failureMessage;
+            }
+        }
+
+        private function login():void {
+            if (authService.channelSet == null) {
+                authService.channelSet = ServerConfig.getChannelSet(authService.destination);
+            }
+            var token:AsyncToken = authService.channelSet.login(userName.text, password.text);
+            token.addResponder(new AsyncResponder(
+                    function (event:ResultEvent, token:Object = null):void {
+                        switch (event.result) {
+                            case "success":
+                                authAdminService.authenticateAdmin.send(userName.text, password.text);
+                                break;
+                            default:
+                                trace(event.result);
+                        }
+                    },
+                    function (event:FaultEvent, token:Object = null):void {
+                        switch (event.fault.faultCode) {
+                            case "Client.Authentication":
+                            default:
+                                var failureMessage:String = event.fault.faultString;
+                                failureMessageLabel.text = failureMessage;
+                        }
+                    }
+            ));
+        }
+
+        private function setup():void {
+            authService.isSessionLoggedIn.send();
+            //var user:User = User.getInstance();
+            //if (user == null) {
+            //	currentState = 'notLoggedIn';
+            //}
+        }
+
+
+        private function onLogin(event:LoginEvent):void {
+            var authResult:UserServiceResponse = event.authResponse;
+            if (authResult.accountType == Account.ADMINISTRATOR) {
+                User.initializeUser(authResult);
+                User.getInstance().userName = authResult.userName;
+                currentState = "loggedIn";
+            }
+        }
+
+        private var loginObject:LoginObject;
+
+        private function sessionCheck():void {
+            var loginResponse:LoginResponse = authService.isSessionLoggedIn.lastResult as LoginResponse;
+            if (loginResponse != null && loginResponse.token != null) {
+                loginObject = new LoginObject();
+                loginObject.addEventListener(LoginEvent.LOGIN, onLogin);
+                loginObject.authenticate(loginResponse.token, loginResponse.userIDString, loginResponse.userServiceResponse);
+            } else if (loginResponse != null) {
+                var authResult:UserServiceResponse = loginResponse.userServiceResponse;
+                if (authResult.accountType == Account.ADMINISTRATOR) {
+                    User.initializeUser(authResult);
+                    User.getInstance().userName = authResult.userName;
+                    currentState = "loggedIn";
+                }
+            }
+        }
+
+        private function specialOffer():void {
+            ProgressAlert.alert(this, "Updating...", null, authAdminService.specialOffer);
+            authAdminService.specialOffer.send();
+        }
+
+        private function globalSkin():void {
+            var window:GlobalSkinWindow = new GlobalSkinWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function offered():void {
+
+        }
+        ]]>
+    </mx:Script>
+    <mx:RemoteObject id="authService" destination="login">
+        <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="authAdminService" destination="eiAdmin">
+        <mx:method name="authenticateAdmin" result="handleAuthentication()"/>
+    </mx:RemoteObject>
+    <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
+    <mx:VBox id="coreBox" width="100%" height="100%" horizontalAlign="center">
+        <mx:Form id="loginForm">
+            <mx:FormItem label="User Name: ">
+                <mx:TextInput id="userName"/>
+            </mx:FormItem>
+            <mx:FormItem label="Password: ">
+                <mx:TextInput id="password" displayAsPassword="true"/>
+            </mx:FormItem>
+            <mx:FormItem label="">
+                <mx:Label id="failureMessageLabel"/>
+            </mx:FormItem>
+            <mx:FormItem label="">
+                <mx:Button label="Submit" click="login()"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:VBox>
+
+</mx:Application>

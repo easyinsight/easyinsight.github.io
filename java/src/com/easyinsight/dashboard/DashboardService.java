@@ -15,7 +15,6 @@ import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.tag.Tag;
 import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
@@ -527,62 +526,6 @@ public class DashboardService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
-    public void keepDashboard(long dashboardID, long sourceDashboardID) {
-        SecurityUtil.authorizeDashboard(dashboardID);
-        EIConnection conn = Database.instance().getConnection();
-        Session session = Database.instance().createSession(conn);
-        try {
-            conn.setAutoCommit(false);
-            Dashboard dashboard = getDashboard(dashboardID);
-            Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
-            Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
-            SolutionService.recurseDashboard(reports, dashboards, dashboard, session, conn, new HashSet<Long>());
-
-            for (AnalysisDefinition report : reports.values()) {
-                report.setTemporaryReport(false);
-                session.update(report);
-            }
-            session.flush();
-            for (Dashboard tDashboard : dashboards.values()) {
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET TEMPORARY_DASHBOARD = ? WHERE dashboard_id = ?");
-                updateStmt.setBoolean(1, false);
-                updateStmt.setLong(2, tDashboard.getId());
-                updateStmt.executeUpdate();
-            }
-            try {
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT EXCHANGE_DASHBOARD_INSTALL_ID FROM EXCHANGE_DASHBOARD_INSTALL WHERE USER_ID = ? AND " +
-                        "dashboard_id = ?");
-                queryStmt.setLong(1, SecurityUtil.getUserID());
-                queryStmt.setLong(2, dashboardID);
-                ResultSet rs = queryStmt.executeQuery();
-                if (rs.next()) {
-                    long id = rs.getLong(1);
-                    PreparedStatement updateTimeStmt = conn.prepareStatement("UPDATE EXCHANGE_DASHBOARD_INSTALL SET install_date = ? WHERE EXCHANGE_DASHBOARD_INSTALL_ID = ?");
-                    updateTimeStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-                    updateTimeStmt.setLong(2, id);
-                    updateTimeStmt.executeUpdate();
-                } else {
-                    PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCHANGE_DASHBOARD_INSTALL (USER_ID, DASHBOARD_ID, INSTALL_DATE) VALUES (?, ?, ?)");
-                    insertStmt.setLong(1, SecurityUtil.getUserID());
-                    insertStmt.setLong(2, sourceDashboardID);
-                    insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-                    insertStmt.execute();
-                }
-            } catch (SQLException e) {
-                LogClass.error("Error updating exchange info for dashboard " + sourceDashboardID, e);
-            }
-            conn.commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }

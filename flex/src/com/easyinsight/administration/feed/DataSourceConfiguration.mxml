@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" label="Data Source Configuration" styleName="fallThroughFonts"
+        paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:Script><![CDATA[
+        import com.easyinsight.code.DataSourceCacheWindow;
+        import com.easyinsight.code.DataSourceMarmotScriptWindow;
+        import com.easyinsight.datasources.CompositeServerDataSource;
+        import com.easyinsight.util.PopUpUtil;
+
+
+        import mx.managers.PopUpManager;
+
+        private var _feedDefinition:FeedDefinitionData;
+
+
+        [Bindable(event="feedDefinitionChanged")]
+        public function get feedDefinition():FeedDefinitionData {
+            return _feedDefinition;
+        }
+
+        public function set feedDefinition(value:FeedDefinitionData):void {
+            if (_feedDefinition == value) return;
+            _feedDefinition = value;
+            dispatchEvent(new Event("feedDefinitionChanged"));
+            invalidateProperties();
+        }
+
+
+
+        ]]></mx:Script>
+
+</mx:VBox>

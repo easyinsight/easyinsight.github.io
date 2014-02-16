@@ -1,9 +1,6 @@
 package com.easyinsight.analysis {
 import com.easyinsight.customupload.ProblemDataEvent;
-import com.easyinsight.filtering.AnalysisItemFilterDefinition;
-import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.filtering.FilterRawData;
-import com.easyinsight.filtering.MultiFieldFilterDefinition;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.ReportModuleLoader;
 import com.easyinsight.report.ReportCanvas;
@@ -22,13 +19,11 @@ import flash.utils.getQualifiedClassName;
 import mx.binding.utils.BindingUtils;
 import mx.binding.utils.ChangeWatcher;
 import mx.collections.ArrayCollection;
-import mx.containers.Box;
 import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.controls.Button;
 import mx.core.IUIComponent;
-import mx.core.UIComponent;
 import mx.core.UIComponent;
 import mx.events.DragEvent;
 import mx.managers.DragManager;
@@ -536,18 +531,24 @@ public class DataViewFactory extends VBox implements IRetrievable {
                         _controlBar.deleteExplainButton();
                     }
                     if (event.report == null) {
+                        //_analysisDefinition.renderConfig();
                         _reportRenderer.renderReport(event.dataSet, _analysisDefinition, new Object(), event.additionalProperties);
                     } else {
-                        var useReportInEvent:Boolean = false;
-                        if (event.report.filterDefinitions != null) {
+                        //var useReportInEvent:Boolean = false;
+                        /*if (event.report.filterDefinitions != null) {
                             for each (var f:FilterDefinition in event.report.filterDefinitions) {
                                 if (f is MultiFieldFilterDefinition || f is AnalysisItemFilterDefinition) {
                                     useReportInEvent = true;
                                     break;
                                 }
                             }
-                        }
-                        _reportRenderer.renderReport(event.dataSet, useReportInEvent ? event.report : _analysisDefinition, new Object(), event.additionalProperties);
+                        }*/
+                        /*if (useReportInEvent) {
+                            event.report.renderConfig();
+                        } else {*/
+                           // event.report.renderConfig();
+                        //}
+                        _reportRenderer.renderReport(event.dataSet, event.report, new Object(), event.additionalProperties);
                     }
                 } else {
                     showNoData();
@@ -729,7 +730,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     public function updateExportMetadata():void {
-        _reportRenderer.updateExportMetadata();
+        _reportRenderer.updateExportMetadata(_analysisDefinition);
     }
 
     public function getCoreView():DisplayObject {

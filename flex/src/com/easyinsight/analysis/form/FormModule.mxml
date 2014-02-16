@@ -3,21 +3,16 @@
            implements="com.easyinsight.analysis.IReportRenderer">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.list.SizeOverrideEvent;
-        import com.easyinsight.filtering.FilterRawData;
 
         import mx.collections.ArrayCollection;
         import mx.containers.Form;
         import mx.containers.FormItem;
         import mx.containers.HBox;
-        import mx.containers.VBox;
-        import mx.controls.Alert;
         import mx.core.UIComponent;
         import mx.events.FlexEvent;
-
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
 
@@ -77,7 +72,7 @@
             return hbox;
         }
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
@@ -85,5 +80,6 @@
 
         public function preserveValues():Boolean {
             return true;
-        }]]></mx:Script>
+        }
+        ]]></mx:Script>
 </mx:Canvas>

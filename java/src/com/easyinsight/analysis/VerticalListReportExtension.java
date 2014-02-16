@@ -55,4 +55,8 @@ public class VerticalListReportExtension extends ReportFieldExtension {
     public void setLineAbove(boolean lineAbove) {
         this.lineAbove = lineAbove;
     }
+
+    public int extensionType() {
+        return ReportFieldExtension.VERTICAL_LIST;
+    }
 }

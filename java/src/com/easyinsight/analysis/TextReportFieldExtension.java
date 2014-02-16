@@ -114,4 +114,9 @@ public class TextReportFieldExtension extends ReportFieldExtension {
     public void setSize(int size) {
         this.size = size;
     }
+
+    @Override
+    public int extensionType() {
+        return ReportFieldExtension.TEXT;
+    }
 }
