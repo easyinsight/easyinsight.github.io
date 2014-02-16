@@ -72,9 +72,10 @@ public class PivotalTrackerV5StorySource extends PivotalTrackerV5BaseSource {
         PivotalTrackerV5CompositeSource p = (PivotalTrackerV5CompositeSource) parentDefinition;
         Map<String, List<String>> storyIDToLabelMap = new HashMap<String, List<String>>();
         List<Map> projects = runRequestForList("projects", p, httpClient);
-        int page = 0;
+
 
         for (Map project : projects) {
+            int page = 0;
             String projectID = getJSONValue(project, "id");
             List<Map> stories;
             do {
