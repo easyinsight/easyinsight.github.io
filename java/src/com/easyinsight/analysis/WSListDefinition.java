@@ -26,14 +26,14 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private ListLimitsMetadata listLimitsMetadata;
     private boolean summaryTotal;
     private long listDefinitionID;
-    private int rowColor1;
-    private int rowColor2;
-    private int headerColor1;
-    private int headerColor2;
-    private int textColor;
-    private int headerTextColor;
-    private int summaryRowTextColor;
-    private int summaryRowBackgroundColor;
+    private int rowColor1 = 0xF7F7F7;
+    private int rowColor2 = 0xFFFFFF;
+    private int headerColor1 = 0xFFFFFF;
+    private int headerColor2 = 0xEFEFEF;
+    private int textColor = 0x000000;
+    private int headerTextColor = 0x000000;
+    private int summaryRowTextColor = 0x000000;
+    private int summaryRowBackgroundColor = 0x6699ff;
     private String defaultColumnAlignment;
     private boolean rolloverIcon;
     private boolean multiLineHeaders;
@@ -369,7 +369,17 @@ public class WSListDefinition extends WSAnalysisDefinition {
     }
 
     public void renderConfig(ApplicationSkin applicationSkin) {
-        setSummaryRowTextColor(applicationSkin.getSummaryTextColor());
-        setSummaryRowBackgroundColor(applicationSkin.getSummaryBackgroundColor());
+        if (applicationSkin.isSummaryTextColorEnabled()) {
+            setSummaryRowTextColor(applicationSkin.getSummaryTextColor());
+        }
+        if (applicationSkin.isSummaryBackgroundColorEnabled()) {
+            setSummaryRowBackgroundColor(applicationSkin.getSummaryBackgroundColor());
+        }
+        if (applicationSkin.isHeaderStartEnabled()) {
+            setHeaderColor1(applicationSkin.getHeaderStart());
+        }
+        if (applicationSkin.isHeaderEndEnabled()) {
+            setHeaderColor2(applicationSkin.getHeaderEnd());
+        }
     }
 }

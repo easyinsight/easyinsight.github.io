@@ -672,12 +672,15 @@ public class AnalysisDefinition implements Cloneable {
         for (AnalysisItem item : allFields) {
             targetFieldMap.put(item.toDisplay(), item);
         }
-        for (AnalysisItem item : added) {
+        /*for (AnalysisItem item : added) {
             targetFieldMap.put(item.toDisplay(), item);
-        }
+        }*/
         List<AnalysisItem> addedItems = analysisDefinition.getAddedItems();
         if (target != null) {
             for (AnalysisItem analysisItem : replacementMap.getFields()) {
+                if ("Blah".equals(analysisItem.toDisplay())) {
+                    System.out.println("...");
+                }
                 //analysisItem.afterLoad();
                 Key key = null;
                 Key deproxiedKey = (Key) Database.deproxy(analysisItem.getKey());
@@ -685,25 +688,30 @@ public class AnalysisDefinition implements Cloneable {
 
                 } else {
                     AnalysisItem dataSourceItem = targetFieldMap.get(analysisItem.toDisplay());
-                    if (dataSourceItem == null) {
-                        dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
+                    if (dataSourceItem != null && (dataSourceItem.getOrigin() == null || dataSourceItem.getOrigin().getReport() != analysisDefinition.getAnalysisID())) {
+                        key = dataSourceItem.getKey();
+                    } else {
+                        dataSourceItem = targetFieldMap.get(analysisItem.toOriginalDisplayName());
                         if (dataSourceItem != null) {
                             key = dataSourceItem.getKey();
                         } else {
-                            if (analysisItem.getOriginalDisplayName() != null) {
-                                dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
-                            }
+                            dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
                             if (dataSourceItem != null) {
                                 key = dataSourceItem.getKey();
                             } else {
-                                dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                                if (analysisItem.getOriginalDisplayName() != null) {
+                                    dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
+                                }
                                 if (dataSourceItem != null) {
                                     key = dataSourceItem.getKey();
+                                } else {
+                                    dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                                    if (dataSourceItem != null) {
+                                        key = dataSourceItem.getKey();
+                                    }
                                 }
                             }
                         }
-                    } else {
-                        key = dataSourceItem.getKey();
                     }
                     if (key != null) {
                         System.out.println("Found existing key for " + dataSourceItem.toDisplay());

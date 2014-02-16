@@ -4,6 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.core.Key;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.dashboard.DashboardStorage;
@@ -244,6 +245,8 @@ class InstallMetadata {
         return clonedDashboard;
     }
 
+    private Map<Long, Long> reportToDSMap = new HashMap<Long, Long>();
+
     public void addReportToDataSource(AnalysisDefinition report, String name) throws Exception {
 
         log("Adding " + report.getTitle() + " as a distinct source");
@@ -268,6 +271,7 @@ class InstallMetadata {
                 if (reportID == report.getAnalysisID()) {
                     // already exists
                     alreadyInSource = true;
+                    reportToDSMap.put(report.getAnalysisID(), node.getDataFeedID());
                     break;
                 }
             }
@@ -283,8 +287,10 @@ class InstallMetadata {
             source.create(conn, null, null);
             CompositeFeedNode node = new CompositeFeedNode();
             node.setDataFeedID(source.getDataFeedID());
+            node.setDataSourceType(FeedType.DISTINCT_CACHED_ADDON.getType());
 
             compositeFeedDefinition.getCompositeFeedNodes().add(node);
+            reportToDSMap.put(report.getAnalysisID(), node.getDataFeedID());
             dataSourceChanged = true;
         } else {
             log("\tFound in the data source, not adding");
@@ -515,6 +521,49 @@ class InstallMetadata {
         session.flush();
 
         List<AnalysisItem> targetFields = targetSource.allFields(conn);
+        if (targetSource instanceof CompositeFeedDefinition) {
+            CompositeFeedDefinition compositeOriginalSource = (CompositeFeedDefinition) targetSource;
+            PreparedStatement stmt = conn.prepareStatement("SELECT REPORT_ID FROM distinct_cached_addon_report_source WHERE DATA_SOURCE_ID = ?");
+            Map<Long, CompositeFeedNode> nodeMap = new HashMap<Long, CompositeFeedNode>();
+            Map<Long, Long> rMap = new HashMap<Long, Long>();
+            for (CompositeFeedNode node : compositeOriginalSource.getCompositeFeedNodes()) {
+                nodeMap.put(node.getDataFeedID(), node);
+                if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
+                    stmt.setLong(1, node.getDataFeedID());
+                    ResultSet rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        long reportID = rs.getLong(1);
+                        rMap.put(node.getDataFeedID(), reportID);
+                    }
+                }
+            }
+
+            stmt.close();
+            for (AnalysisItem field : targetFields) {
+                Key key = field.getKey();
+                if ("Blah".equals(field.toDisplay())) {
+                    System.out.println("hrm");
+                }
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    CompositeFeedNode node = nodeMap.get(derivedKey.getFeedID());
+                    if (node != null) {
+                        if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
+                            Long reportID = rMap.get(node.getDataFeedID());
+                            if (reportID != null) {
+                                FieldDataSourceOrigin origin = new FieldDataSourceOrigin();
+                                origin.setReport(reportID);
+                                field.setOrigin(origin);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        targetSource.decorateFields(targetFields, conn);
 
         for (int i = 0; i < newOrUpdatedMetadatas.size(); i++) {
             AnalysisDefinition.SaveMetadata metadata = newOrUpdatedMetadatas.get(i);
