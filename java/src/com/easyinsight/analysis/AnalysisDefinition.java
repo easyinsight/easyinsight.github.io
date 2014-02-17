@@ -692,7 +692,7 @@ public class AnalysisDefinition implements Cloneable {
                         key = dataSourceItem.getKey();
                     } else {
                         dataSourceItem = targetFieldMap.get(analysisItem.toOriginalDisplayName());
-                        if (dataSourceItem != null) {
+                        if (dataSourceItem != null && (dataSourceItem.getOrigin() == null || dataSourceItem.getOrigin().getReport() != analysisDefinition.getAnalysisID())) {
                             key = dataSourceItem.getKey();
                         } else {
                             dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
