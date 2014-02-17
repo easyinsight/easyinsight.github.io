@@ -541,9 +541,6 @@ class InstallMetadata {
             stmt.close();
             for (AnalysisItem field : targetFields) {
                 Key key = field.getKey();
-                if ("Blah".equals(field.toDisplay())) {
-                    System.out.println("hrm");
-                }
                 if (key instanceof DerivedKey) {
                     DerivedKey derivedKey = (DerivedKey) key;
                     CompositeFeedNode node = nodeMap.get(derivedKey.getFeedID());
@@ -560,10 +557,6 @@ class InstallMetadata {
                 }
             }
         }
-
-
-
-        targetSource.decorateFields(targetFields, conn);
 
         for (int i = 0; i < newOrUpdatedMetadatas.size(); i++) {
             AnalysisDefinition.SaveMetadata metadata = newOrUpdatedMetadatas.get(i);
