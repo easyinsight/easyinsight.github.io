@@ -81,6 +81,11 @@ public class PivotalTrackerV5StorySource extends PivotalTrackerV5BaseSource {
             do {
                 stories = runRequestForList("/projects/" + projectID + "/stories?limit=" + PAGE_SIZE + "&offset=" + (page * PAGE_SIZE), p, httpClient);
                 for (Map story : stories) {
+                    /*
+                    {"id":55842886,"owner_ids":[],"updated_at":"2013-08-26T19:36:12Z",
+                    "labels":[{"id":6391516,"updated_at":"2013-08-26T19:30:18Z","name":"a","project_id":736787,"created_at":"2013-08-26T19:30:18Z","kind":"label"},{"id":6391556,"updated_at":"2013-08-26T19:35:24Z","name":"epic team 3","project_id":736787,"created_at":"2013-08-26T19:35:24Z","kind":"label"}],
+                    "name":"a epic Story 3","project_id":736787,"created_at":"2013-08-26T19:33:18Z","requested_by_id":1050017,"current_state":"unscheduled","kind":"story","url":"https:\/\/www.pivotaltracker.com\/story\/show\/55842886","story_type":"feature"}
+                     */
                     String storyID = getJSONValue(story, "id");
                     List<Map> labels = (List<Map>) story.get("labels");
                     for (Map label : labels) {
