@@ -669,8 +669,15 @@ public class AnalysisDefinition implements Cloneable {
         }*/
 
         Map<String, AnalysisItem> targetFieldMap = new HashMap<String, AnalysisItem>();
+        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
         for (AnalysisItem item : allFields) {
             targetFieldMap.put(item.toDisplay(), item);
+            List<AnalysisItem> items = keyMap.get(item.getKey().toKeyString());
+            if (items == null) {
+                items = new ArrayList<AnalysisItem>();
+                keyMap.put(item.getKey().toKeyString(), items);
+            }
+            items.add(item);
         }
         /*for (AnalysisItem item : added) {
             targetFieldMap.put(item.toDisplay(), item);
@@ -705,30 +712,20 @@ public class AnalysisDefinition implements Cloneable {
                             }
                             key = dataSourceItem.getKey();
                         } else {
-                            dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
+                            List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                            for (AnalysisItem item : items) {
+                                if (item.getOrigin() != null && item.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
+
+                                } else {
+                                    dataSourceItem = item;
+                                    break;
+                                }
+                            }
                             if (dataSourceItem != null) {
                                 if ("Open Count".equals(analysisItem.toDisplay())) {
-                                    System.out.println("from path 3");
+                                    System.out.println("from path 5");
                                 }
                                 key = dataSourceItem.getKey();
-                            } else {
-                                if (analysisItem.getOriginalDisplayName() != null) {
-                                    dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
-                                }
-                                if (dataSourceItem != null) {
-                                    if ("Open Count".equals(analysisItem.toDisplay())) {
-                                        System.out.println("from path 4");
-                                    }
-                                    key = dataSourceItem.getKey();
-                                } else {
-                                    dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
-                                    if (dataSourceItem != null) {
-                                        if ("Open Count".equals(analysisItem.toDisplay())) {
-                                            System.out.println("from path 5");
-                                        }
-                                        key = dataSourceItem.getKey();
-                                    }
-                                }
                             }
                         }
                     }
