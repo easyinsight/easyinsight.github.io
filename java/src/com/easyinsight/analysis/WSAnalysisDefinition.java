@@ -1523,6 +1523,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         });
 
         if (set.size() > 0) {
+            System.out.println("Assigned results = " + clones);
             assignResults(clones);
         }
     }
