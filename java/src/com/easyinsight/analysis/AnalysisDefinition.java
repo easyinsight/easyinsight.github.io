@@ -682,11 +682,10 @@ public class AnalysisDefinition implements Cloneable {
         /*for (AnalysisItem item : added) {
             targetFieldMap.put(item.toDisplay(), item);
         }*/
-        System.out.println("xyz");
         List<AnalysisItem> addedItems = analysisDefinition.getAddedItems();
         if (target != null) {
             for (AnalysisItem analysisItem : replacementMap.getFields()) {
-
+                analysisItem.setBasedOnReportField(null);
                 //analysisItem.afterLoad();
                 Key key = null;
                 Key deproxiedKey = (Key) Database.deproxy(analysisItem.getKey());
@@ -695,22 +694,10 @@ public class AnalysisDefinition implements Cloneable {
                 } else {
                     AnalysisItem dataSourceItem = targetFieldMap.get(analysisItem.toDisplay());
                     if (dataSourceItem != null && (dataSourceItem.getOrigin() == null || dataSourceItem.getOrigin().getReport() != analysisDefinition.getAnalysisID())) {
-                        if ("Open Count".equals(analysisItem.toDisplay())) {
-                            System.out.println("Pulled from path 1");
-                            if (dataSourceItem.getOrigin() != null) {
-                                System.out.println("\tOrigin on item = " + dataSourceItem.getOrigin().getReport() + " when installing " + analysisDefinition.getTitle());
-                            }
-                        }
                         key = dataSourceItem.getKey();
                     } else {
                         dataSourceItem = targetFieldMap.get(analysisItem.toOriginalDisplayName());
                         if (dataSourceItem != null && (dataSourceItem.getOrigin() == null || dataSourceItem.getOrigin().getReport() != analysisDefinition.getAnalysisID())) {
-                            if ("Open Count".equals(analysisItem.toDisplay())) {
-                                System.out.println("Pulled from path 2");
-                                if (dataSourceItem.getOrigin() != null) {
-                                    System.out.println("\tOrigin on item = " + dataSourceItem.getOrigin().getReport() + " when installing " + analysisDefinition.getTitle());
-                                }
-                            }
                             key = dataSourceItem.getKey();
                         } else {
                             dataSourceItem = null;
@@ -718,34 +705,25 @@ public class AnalysisDefinition implements Cloneable {
                             if (items != null) {
                                 for (AnalysisItem item : items) {
                                     if (item.getOrigin() != null && item.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
-                                        if ("Todo Status".equals(analysisItem.toDisplay())) {
-                                            System.out.println("\tProperly skipping past " + item.getOrigin().getReport());
-                                        }
+
                                     } else {
                                         dataSourceItem = item;
                                         break;
                                     }
                                 }
                                 if (dataSourceItem != null) {
-                                    if ("Todo Status".equals(analysisItem.toDisplay())) {
-                                        System.out.println("from path 5, data source item key was " + dataSourceItem.getKey().getClass().getName());
-                                        if (dataSourceItem.getOrigin() != null) {
-                                            System.out.println("\tOrigin on item = " + dataSourceItem.getOrigin().getReport() + " when installing " + analysisDefinition.getTitle() + " - " + analysisDefinition.getAnalysisID());
-                                        }
-                                    }
+
                                     key = dataSourceItem.getKey();
                                 }
                             }
                         }
                     }
                     if (key != null) {
-                        System.out.println("Found existing key for " + analysisItem.toDisplay());
                         analysisItem.setKey(key);
                         /*if (set.containsKey(analysisItem.toDisplay()) && !addedItems.contains(analysisItem)) {
                             addedItems.add(analysisItem);
                         }*/
                     } else {
-                        System.out.println("Couldn't find the key for " + analysisItem.toDisplay());
                         Key clonedKey = analysisItem.getKey().clone();
                         analysisItem.setKey(clonedKey);
                         if (!addedItems.contains(analysisItem)) {
