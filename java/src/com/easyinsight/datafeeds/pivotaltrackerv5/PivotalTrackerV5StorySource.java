@@ -106,7 +106,7 @@ public class PivotalTrackerV5StorySource extends PivotalTrackerV5BaseSource {
                     row.addValue(keys.get(REQUESTED_BY), p.getUser(getJSONValue(story, "requested_by_id")));
                     row.addValue(keys.get(ACCEPTED_AT), getDate(story, "accepted_at"));
                     row.addValue(keys.get(CREATED_AT), getDate(story, "created_at"));
-                    row.addValue(keys.get(STORY_TYPE), getJSONValue(story, "url"));
+                    row.addValue(keys.get(STORY_TYPE), getJSONValue(story, "story_type"));
                     row.addValue(keys.get(OWNER), p.getUser(getJSONValue(story, "owned_by_id")));
                     row.addValue(keys.get(DEADLINE), getDate(story, "deadline"));
                     row.addValue(keys.get(UPDATED_AT), getDate(story, "updated_at"));
