@@ -714,21 +714,23 @@ public class AnalysisDefinition implements Cloneable {
                             key = dataSourceItem.getKey();
                         } else {
                             List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
-                            for (AnalysisItem item : items) {
-                                if (item.getOrigin() != null && item.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
+                            if (items != null) {
+                                for (AnalysisItem item : items) {
+                                    if (item.getOrigin() != null && item.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
 
-                                } else {
-                                    dataSourceItem = item;
-                                    break;
+                                    } else {
+                                        dataSourceItem = item;
+                                        break;
+                                    }
+                                }
+                                if (dataSourceItem != null) {
+                                    if ("Open Count".equals(analysisItem.toDisplay())) {
+                                        System.out.println("from path 5");
+                                    }
+                                    key = dataSourceItem.getKey();
                                 }
                             }
-                            if (dataSourceItem != null) {
-                                if ("Open Count".equals(analysisItem.toDisplay())) {
-                                    System.out.println("from path 5");
-                                }
-                                key = dataSourceItem.getKey();
                             }
-                        }
                     }
                     if (key != null) {
                         System.out.println("Found existing key for " + dataSourceItem.toDisplay());
