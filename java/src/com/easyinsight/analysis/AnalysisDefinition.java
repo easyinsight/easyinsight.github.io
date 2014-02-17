@@ -678,9 +678,7 @@ public class AnalysisDefinition implements Cloneable {
         List<AnalysisItem> addedItems = analysisDefinition.getAddedItems();
         if (target != null) {
             for (AnalysisItem analysisItem : replacementMap.getFields()) {
-                if ("Blah".equals(analysisItem.toDisplay())) {
-                    System.out.println("...");
-                }
+
                 //analysisItem.afterLoad();
                 Key key = null;
                 Key deproxiedKey = (Key) Database.deproxy(analysisItem.getKey());
@@ -689,10 +687,22 @@ public class AnalysisDefinition implements Cloneable {
                 } else {
                     AnalysisItem dataSourceItem = targetFieldMap.get(analysisItem.toDisplay());
                     if (dataSourceItem != null && (dataSourceItem.getOrigin() == null || dataSourceItem.getOrigin().getReport() != analysisDefinition.getAnalysisID())) {
+                        if ("Open Count".equals(analysisItem.toDisplay())) {
+                            System.out.println("Pulled from path 1");
+                            if (dataSourceItem.getOrigin() != null) {
+                                System.out.println("\tOrigin on item = " + dataSourceItem.getOrigin().getReport() + " when installing " + analysisDefinition.getTitle());
+                            }
+                        }
                         key = dataSourceItem.getKey();
                     } else {
                         dataSourceItem = targetFieldMap.get(analysisItem.toOriginalDisplayName());
                         if (dataSourceItem != null && (dataSourceItem.getOrigin() == null || dataSourceItem.getOrigin().getReport() != analysisDefinition.getAnalysisID())) {
+                            if ("Open Count".equals(analysisItem.toDisplay())) {
+                                System.out.println("Pulled from path 2");
+                                if (dataSourceItem.getOrigin() != null) {
+                                    System.out.println("\tOrigin on item = " + dataSourceItem.getOrigin().getReport() + " when installing " + analysisDefinition.getTitle());
+                                }
+                            }
                             key = dataSourceItem.getKey();
                         } else {
                             dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
