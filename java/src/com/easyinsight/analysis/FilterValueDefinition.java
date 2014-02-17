@@ -174,6 +174,7 @@ public class FilterValueDefinition extends FilterDefinition {
 
     public void beforeSave(Session session) {
         super.beforeSave(session);
+        System.out.println("Calling before save on " + getFilterID() + " with field " + getField().toDisplay());
         Set<Value> valueSet = new HashSet<Value>();
         if (filteredValues != null) {
             for (Object valueObject : filteredValues) {
