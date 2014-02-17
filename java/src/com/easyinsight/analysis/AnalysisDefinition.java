@@ -724,8 +724,11 @@ public class AnalysisDefinition implements Cloneable {
                                     }
                                 }
                                 if (dataSourceItem != null) {
-                                    if ("Open Count".equals(analysisItem.toDisplay())) {
-                                        System.out.println("from path 5");
+                                    if ("Todo Status".equals(analysisItem.toDisplay())) {
+                                        System.out.println("from path 5, data source item key was " + dataSourceItem.getKey().getClass().getName());
+                                        if (dataSourceItem.getOrigin() != null) {
+                                            System.out.println("\tOrigin on item = " + dataSourceItem.getOrigin().getReport() + " when installing " + analysisDefinition.getTitle());
+                                        }
                                     }
                                     key = dataSourceItem.getKey();
                                 }
@@ -733,7 +736,7 @@ public class AnalysisDefinition implements Cloneable {
                             }
                     }
                     if (key != null) {
-                        System.out.println("Found existing key for " + dataSourceItem.toDisplay());
+                        System.out.println("Found existing key for " + analysisItem.toDisplay());
                         analysisItem.setKey(key);
                         /*if (set.containsKey(analysisItem.toDisplay()) && !addedItems.contains(analysisItem)) {
                             addedItems.add(analysisItem);
