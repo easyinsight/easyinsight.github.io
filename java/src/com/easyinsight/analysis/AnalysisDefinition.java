@@ -713,6 +713,7 @@ public class AnalysisDefinition implements Cloneable {
                             }
                             key = dataSourceItem.getKey();
                         } else {
+                            dataSourceItem = null;
                             List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
                             if (items != null) {
                                 for (AnalysisItem item : items) {
