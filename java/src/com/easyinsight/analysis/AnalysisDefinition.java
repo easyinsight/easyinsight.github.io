@@ -682,6 +682,7 @@ public class AnalysisDefinition implements Cloneable {
         /*for (AnalysisItem item : added) {
             targetFieldMap.put(item.toDisplay(), item);
         }*/
+        System.out.println("xyz");
         List<AnalysisItem> addedItems = analysisDefinition.getAddedItems();
         if (target != null) {
             for (AnalysisItem analysisItem : replacementMap.getFields()) {
