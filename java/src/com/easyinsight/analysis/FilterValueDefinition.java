@@ -137,7 +137,6 @@ public class FilterValueDefinition extends FilterDefinition {
 
     public FilterDefinition clone() throws CloneNotSupportedException {
         FilterValueDefinition filter = (FilterValueDefinition) super.clone();
-        System.out.println("cloning filter on " + getField().toDisplay());
         Set<PersistableValue> values = new HashSet<PersistableValue>();
         if (persistedValues == null) {
             Set<Value> valueSet = new HashSet<Value>();
@@ -174,7 +173,6 @@ public class FilterValueDefinition extends FilterDefinition {
 
     public void beforeSave(Session session) {
         super.beforeSave(session);
-        System.out.println("Calling before save on " + getFilterID() + " with field " + getField().toDisplay());
         Set<Value> valueSet = new HashSet<Value>();
         if (filteredValues != null) {
             for (Object valueObject : filteredValues) {
@@ -319,7 +317,6 @@ public class FilterValueDefinition extends FilterDefinition {
                 // http://cl.ly/image/370S3T1U0f0D
             }
         }
-        System.out.println("filtered values size = " + filteredValues.size());
         if (filteredValues.size() > SystemSettings.instance().getMaxFilterValues()) {
             return false;
         }
