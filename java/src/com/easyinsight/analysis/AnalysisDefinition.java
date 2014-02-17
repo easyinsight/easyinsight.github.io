@@ -636,7 +636,10 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setProperties(clonedProperties);
         analysisDefinition.setTemporaryReport(temporaryReport);
 
-        Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
+        Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>();
+        for (Map.Entry<String, AnalysisItem> entry : getReportStructure().entrySet()) {
+            clonedStructure.put(entry.getKey(), replacementMap.getField(entry.getValue()));
+        }
 
         analysisDefinition.setReportStructure(clonedStructure);
         SaveMetadata saveMetadata = new SaveMetadata();
