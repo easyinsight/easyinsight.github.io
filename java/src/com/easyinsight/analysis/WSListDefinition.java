@@ -369,17 +369,25 @@ public class WSListDefinition extends WSAnalysisDefinition {
     }
 
     public void renderConfig(ApplicationSkin applicationSkin) {
-        if (applicationSkin.isSummaryTextColorEnabled()) {
-            setSummaryRowTextColor(applicationSkin.getSummaryTextColor());
-        }
-        if (applicationSkin.isSummaryBackgroundColorEnabled()) {
-            setSummaryRowBackgroundColor(applicationSkin.getSummaryBackgroundColor());
-        }
-        if (applicationSkin.isHeaderStartEnabled()) {
-            setHeaderColor1(applicationSkin.getHeaderStart());
-        }
-        if (applicationSkin.isHeaderEndEnabled()) {
-            setHeaderColor2(applicationSkin.getHeaderEnd());
+        if ("Primary".equals(getColorScheme())) {
+            if (applicationSkin.isSummaryTextColorEnabled()) {
+                setSummaryRowTextColor(applicationSkin.getSummaryTextColor());
+            }
+            if (applicationSkin.isSummaryBackgroundColorEnabled()) {
+                setSummaryRowBackgroundColor(applicationSkin.getSummaryBackgroundColor());
+            }
+            if (applicationSkin.isHeaderStartEnabled()) {
+                setHeaderColor1(applicationSkin.getHeaderStart());
+            }
+            if (applicationSkin.isHeaderEndEnabled()) {
+                setHeaderColor2(applicationSkin.getHeaderEnd());
+            }
+            if (applicationSkin.isTableColorStartEnabled()) {
+                setRowColor1(applicationSkin.getTableColorStart());
+            }
+            if (applicationSkin.isTableColorEndEnabled()) {
+                setRowColor2(applicationSkin.getTableColorEnd());
+            }
         }
     }
 }

@@ -314,7 +314,6 @@ public class FilterValueDefinition extends FilterDefinition {
                 return !"".equals(stringValue.toString()) && !"All".equals(stringValue.toString());
             } else if (value instanceof EmptyValue) {
                 return false;
-                // http://cl.ly/image/370S3T1U0f0D
             }
         }
         if (filteredValues.size() > SystemSettings.instance().getMaxFilterValues()) {

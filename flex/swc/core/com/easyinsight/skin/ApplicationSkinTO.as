@@ -63,6 +63,18 @@ public class ApplicationSkinTO {
     public var summaryBackgroundColorEnabled:Boolean;
     public var summaryTextColor:int;
     public var summaryTextColorEnabled:Boolean;
+    public var crosstabHeaderTextColor:int;
+    public var crosstabHeaderTextColorEnabled:Boolean;
+    public var crosstabHeaderBackgroundColor:int;
+    public var crosstabHeaderBackgroundColorEnabled:Boolean;
+    public var headerStart:int;
+    public var headerStartEnabled:Boolean;
+    public var headerEnd:int;
+    public var headerEndEnabled:Boolean;
+    public var tableColorStart:int;
+    public var tableColorStartEnabled:Boolean;
+    public var tableColorEnd:int;
+    public var tableColorEndEnabled:Boolean;
 
     public var dashboardStack1ColorStart:int;
     public var dashboardStack1ColorEnd:int;
@@ -70,6 +82,7 @@ public class ApplicationSkinTO {
     public var dashboardStackColor2End:int;
 
     public var multiColors:ArrayCollection;
+    public var secondaryMultiColors:ArrayCollection;
 
     public function ApplicationSkinTO() {
     }

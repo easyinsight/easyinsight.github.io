@@ -233,9 +233,16 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             setChartColor(applicationSkin.getCustomChartColor());
             setUseChartColor(true);
             setGradientColor(applicationSkin.getCustomChartColor());
+        } else if (getMeasures().size() == 1 && "Secondary".equals(getColorScheme()) && applicationSkin.isSecondaryColorEnabled()) {
+            setChartColor(applicationSkin.getSecondaryColor());
+            setUseChartColor(true);
+            setGradientColor(applicationSkin.getSecondaryColor());
         } else if (getMeasures().size() > 1 && "Primary".equals(getColorScheme()) && applicationSkin.getMultiColors() != null && applicationSkin.getMultiColors().size() > 0 &&
                 applicationSkin.getMultiColors().get(0).isColor1StartEnabled()) {
             setMultiColors(applicationSkin.getMultiColors());
+        } else if (getMeasures().size() > 1 && "Secondary".equals(getColorScheme()) && applicationSkin.getSecondaryMultiColors() != null && applicationSkin.getSecondaryMultiColors().size() > 0 &&
+                applicationSkin.getSecondaryMultiColors().get(0).isColor1StartEnabled()) {
+            setMultiColors(applicationSkin.getSecondaryMultiColors());
         }
     }
 

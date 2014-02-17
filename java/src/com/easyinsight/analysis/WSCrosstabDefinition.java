@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -162,5 +163,22 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
         list.put("key", getUrlKey());
         list.put("url", "/app/htmlExport");
         return list;
+    }
+
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if ("Primary".equals(getColorScheme())) {
+            if (applicationSkin.isCrosstabHeaderBackgroundColorEnabled()) {
+                setHeaderBackgroundColor(applicationSkin.getHeaderBarBackgroundColor());
+            }
+            if (applicationSkin.isCrosstabHeaderTextColorEnabled()) {
+                setHeaderTextColor(applicationSkin.getCrosstabHeaderTextColor());
+            }
+            if (applicationSkin.isSummaryBackgroundColorEnabled()) {
+                setSummaryBackgroundColor(applicationSkin.getSummaryBackgroundColor());
+            }
+            if (applicationSkin.isSummaryTextColorEnabled()) {
+                setSummaryTextColor(applicationSkin.getSummaryTextColor());
+            }
+        }
     }
 }
