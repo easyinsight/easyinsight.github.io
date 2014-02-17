@@ -1366,9 +1366,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
         Set<AnalysisItem> set = new HashSet<AnalysisItem>();
         final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
         if (multiFieldFilterDefinition.isAll()) {
+            System.out.println("Using all logic...");
             int i = 0;
             if (!multiFieldFilterDefinition.excludeReportFields()) {
                 for (AnalysisItem column : columns) {
+                    System.out.println("\tadded report field " + column.toDisplay());
                     set.add(column);
                     positions.put(column, i++);
                 }
@@ -1380,6 +1382,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     positions.put(item, i++);
                 } else {
                     item = mapByName.get(field.getName());
+                    System.out.println("\tadded by name " + item.toDisplay());
                     if (item != null) {
                         set.add(item);
                         positions.put(item, i++);
@@ -1472,13 +1475,23 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
         final Map<String, Integer> fieldOrderingMap = new HashMap<String, Integer>();
         if (multiFieldFilterDefinition.getFieldOrdering() != null && multiFieldFilterDefinition.getFieldOrdering().size() > 0) {
+            System.out.println("Using explicit field ordering...");
             int j = 0;
             for (AnalysisItemHandle handle : multiFieldFilterDefinition.getFieldOrdering()) {
+                System.out.println("\tHandle " + handle.getName() + " = " + j);
                 fieldOrderingMap.put(handle.getName(), j++);
             }
         }
 
         final boolean alphaSort = multiFieldFilterDefinition.isAlphaSort();
+
+        if (alphaSort) {
+            System.out.println("Using alpha sort");
+        } else if (fieldOrderingMap.isEmpty()) {
+            System.out.println("Using position sort");
+        } else {
+            System.out.println("Using field ordering sort");
+        }
 
         Collections.sort(clones, new Comparator<AnalysisItem>() {
 
