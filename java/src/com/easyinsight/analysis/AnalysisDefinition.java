@@ -707,16 +707,25 @@ public class AnalysisDefinition implements Cloneable {
                         } else {
                             dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
                             if (dataSourceItem != null) {
+                                if ("Open Count".equals(analysisItem.toDisplay())) {
+                                    System.out.println("from path 3");
+                                }
                                 key = dataSourceItem.getKey();
                             } else {
                                 if (analysisItem.getOriginalDisplayName() != null) {
                                     dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
                                 }
                                 if (dataSourceItem != null) {
+                                    if ("Open Count".equals(analysisItem.toDisplay())) {
+                                        System.out.println("from path 4");
+                                    }
                                     key = dataSourceItem.getKey();
                                 } else {
                                     dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
                                     if (dataSourceItem != null) {
+                                        if ("Open Count".equals(analysisItem.toDisplay())) {
+                                            System.out.println("from path 5");
+                                        }
                                         key = dataSourceItem.getKey();
                                     }
                                 }
