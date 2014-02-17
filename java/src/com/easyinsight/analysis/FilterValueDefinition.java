@@ -137,6 +137,7 @@ public class FilterValueDefinition extends FilterDefinition {
 
     public FilterDefinition clone() throws CloneNotSupportedException {
         FilterValueDefinition filter = (FilterValueDefinition) super.clone();
+        System.out.println("cloning filter on " + getField().toDisplay());
         Set<PersistableValue> values = new HashSet<PersistableValue>();
         if (persistedValues == null) {
             Set<Value> valueSet = new HashSet<Value>();
