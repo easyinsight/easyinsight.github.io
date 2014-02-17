@@ -1412,6 +1412,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         }
                     }
                 }
+                queryStmt.close();
             } finally {
                 Database.closeConnection(conn);
             }
@@ -1523,7 +1524,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
         });
 
         if (set.size() > 0) {
+            int i = 0;
             System.out.println("Assigned results = " + clones);
+            for (AnalysisItem item : clones) {
+                item.setItemPosition(i++);
+            }
             assignResults(clones);
         }
     }
