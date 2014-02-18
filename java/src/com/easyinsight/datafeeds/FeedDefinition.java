@@ -71,14 +71,23 @@ public class FeedDefinition implements Cloneable, Serializable {
     private DataSourceInfo dataSourceInfo;
     private boolean kpiSource;
     private List<AddonReport> addonReports;
-    private boolean fieldCleanupEnabled;
+    private boolean fieldCleanupEnabled = true;
     private boolean fieldLookupEnabled;
     private long defaultFieldTag;
     private boolean manualReportRun;
     private boolean showTags;
+    private boolean visibleWithinParentConfiguration;
 
     public void configureFactory(HTMLConnectionFactory factory) {
 
+    }
+
+    public boolean isVisibleWithinParentConfiguration() {
+        return visibleWithinParentConfiguration;
+    }
+
+    public void setVisibleWithinParentConfiguration(boolean visibleWithinParentConfiguration) {
+        this.visibleWithinParentConfiguration = visibleWithinParentConfiguration;
     }
 
     public boolean isShowTags() {
