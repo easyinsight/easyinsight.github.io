@@ -34,11 +34,11 @@
             drillthroughFilters = drillThroughData.getFilters();
             dashboardID = drillThroughData.getDashboardID();
             SecurityUtil.authorizeDashboard(dashboardID);
-            dashboard = new DashboardService().getDashboard(dashboardID);
+            dashboard = new DashboardService().getDashboardView(dashboardID);
         } else {
             String dashboardIDString = request.getParameter("dashboardID");
             dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
-            dashboard = new DashboardService().getDashboard(dashboardID);
+            dashboard = new DashboardService().getDashboardView(dashboardID);
         }
         String showToolbarString = request.getParameter("showToolbar");
         boolean showToolbar = showToolbarString != null && "1".equals(showToolbarString);
