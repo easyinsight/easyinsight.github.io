@@ -220,16 +220,16 @@ public class FeedService {
                 "field_to_tag.account_tag_id = account_tag.account_tag_id");
         PreparedStatement loadFormatting = conn.prepareStatement("SELECT report_field_extension_id, display_name FROM analysis_item_to_report_field_extension WHERE data_source_id = ?");
 
-        Map<String, List<Tag>> tagMap = new HashMap<String, List<Tag>>();
+        Map<String, Set<Tag>> tagMap = new HashMap<String, Set<Tag>>();
         ps.setLong(1, dataSourceID);
         ResultSet tagRS = ps.executeQuery();
         while (tagRS.next()) {
             long tagID = tagRS.getLong(1);
             String tagName = tagRS.getString(2);
             String fieldName = tagRS.getString(3);
-            List<Tag> tags = tagMap.get(fieldName);
+            Set<Tag> tags = tagMap.get(fieldName);
             if (tags == null) {
-                tags = new ArrayList<Tag>();
+                tags = new HashSet<Tag>();
                 tagMap.put(fieldName, tags);
             }
             tags.add(new Tag(tagID, tagName, false, false, false));
@@ -251,11 +251,11 @@ public class FeedService {
         for (AnalysisItem field : fields) {
             AnalysisItemConfiguration configuration = new AnalysisItemConfiguration();
             configuration.setAnalysisItem(field);
-            List<Tag> tags = tagMap.get(field.toDisplay());
+            Set<Tag> tags = tagMap.get(field.toDisplay());
             if (tags == null) {
-                tags = new ArrayList<Tag>();
+                tags = new HashSet<Tag>();
             }
-            configuration.setTags(tags);
+            configuration.setTags(new ArrayList<Tag>(tags));
             List<Long> extensions = extensionMap.get(field.toDisplay());
             if (extensions != null) {
                 for (Long formattingID : extensions) {
