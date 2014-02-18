@@ -74,14 +74,20 @@
             lfItems.addItem(new ColorReportFormItem("Primary Chart Color", "customChartColor", skin.customChartColor, skin, "customChartColorEnabled"));
             lfItems.addItem(new ColorReportFormItem("Primary Chart Color Gradient End", "gradientChartColor", skin.gradientChartColor, skin, "gradientChartColorEnabled"));
             lfItems.addItem(new ColorReportFormItem("Secondary Chart Color", "secondaryColor", skin.secondaryColor, skin, "secondaryColorEnabled"));
-            lfItems.addItem(new ColorReportFormItem("Tertiary Chart Color", "tertiaryColor", skin.tertiaryColor, skin, "tertiaryColorEnabled"));
             lfItems.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", skin.summaryBackgroundColor, skin, "summaryBackgroundColorEnabled"));
             lfItems.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", skin.summaryTextColor, skin, "summaryTextColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Crosstab Header Background Color", "crosstabHeaderBackgroundColor", skin.crosstabHeaderBackgroundColor, skin, "crosstabHeaderBackgroundColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Crosstab Header Text Color", "crosstabHeaderTextColor", skin.crosstabHeaderTextColor, skin, "crosstabHeaderTextColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Grid Header Start Background", "headerStart", skin.headerStart, skin, "headerStartEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Grid Header End Background", "headerEnd", skin.headerEnd, skin, "headerEndEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Grid Row Background Color 1", "tableColorStart", skin.tableColorStart, skin, "tableColorStartEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Grid Row Background Color 2", "tableColorEnd", skin.tableColorEnd, skin, "tableColorEndEnabled"));
             lfItems.addItem(new ColorReportFormItem("Stack 1 Fill Start", "dashboardStack1ColorStart", skin.dashboardStack1ColorStart, skin));
             lfItems.addItem(new ColorReportFormItem("Stack 1 Fill End", "dashboardStack1ColorEnd", skin.dashboardStack1ColorEnd, skin));
             lfItems.addItem(new ColorReportFormItem("Stack 2 Fill Start", "dashboardStackColor2Start", skin.dashboardStackColor2Start, skin));
             lfItems.addItem(new ColorReportFormItem("Stack 2 Fill End", "dashboardStackColor2End", skin.dashboardStackColor2End, skin));
-            lfItems.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", skin.multiColors, skin));
+            lfItems.addItem(new MultiColorReportFormItem("Primary Multi Color Report", "multiColors", skin.multiColors, skin));
+            lfItems.addItem(new MultiColorReportFormItem("Secondary Multi Color Report", "multiColors", skin.secondaryMultiColors, skin));
 
             reportBackgroundColor = skin.reportBackgroundColor;
             reportTextColor = skin.reportTextColor;

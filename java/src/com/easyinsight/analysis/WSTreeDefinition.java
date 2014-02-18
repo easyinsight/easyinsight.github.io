@@ -283,11 +283,23 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
 
     public void renderConfig(ApplicationSkin applicationSkin) {
         if ("Primary".equals(getColorScheme())) {
-            if (applicationSkin.isSummaryBackgroundColorEnabled()) {
-                setSummaryBackgroundColor(applicationSkin.getSummaryBackgroundColor());
-            }
             if (applicationSkin.isSummaryTextColorEnabled()) {
-                setSummaryTextColor(applicationSkin.getSummaryTextColor());
+                setSummaryBackgroundColor(applicationSkin.getSummaryTextColor());
+            }
+            if (applicationSkin.isSummaryBackgroundColorEnabled()) {
+                setSummaryTextColor(applicationSkin.getSummaryBackgroundColor());
+            }
+            if (applicationSkin.isHeaderStartEnabled()) {
+                setHeaderColor1(applicationSkin.getHeaderStart());
+            }
+            if (applicationSkin.isHeaderEndEnabled()) {
+                setHeaderColor2(applicationSkin.getHeaderEnd());
+            }
+            if (applicationSkin.isTableColorStartEnabled()) {
+                setRowColor1(applicationSkin.getTableColorStart());
+            }
+            if (applicationSkin.isTableColorEndEnabled()) {
+                setRowColor2(applicationSkin.getTableColorEnd());
             }
         }
     }

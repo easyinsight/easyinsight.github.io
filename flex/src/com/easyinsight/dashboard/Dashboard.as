@@ -30,6 +30,7 @@ public class Dashboard {
     public var padding:int = 3;
     public var borderColor:uint = 0x000000;
     public var borderThickness:int = 1;
+    public var colorSet:String = "Primary";
 
     public var headerStyle:int;
     public var recommendedExchange:Boolean;

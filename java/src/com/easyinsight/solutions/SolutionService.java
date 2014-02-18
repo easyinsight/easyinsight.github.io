@@ -68,7 +68,7 @@ public class SolutionService {
             analysisQueryStmt.setInt(1, dataSource.getFeedType().getType());
             analysisQueryStmt.setBoolean(2, true);
             ResultSet rs = analysisQueryStmt.executeQuery();
-            Session session = Database.instance().createSession(conn);
+
             long masterSourceID = 0;
             while (rs.next()) {
                 long reportID = rs.getLong(1);
@@ -103,10 +103,15 @@ public class SolutionService {
             }
 
             if (masterSourceID > 0) {
-                FeedDefinition source = new FeedStorage().getFeedDefinitionData(masterSourceID);
-                long targetID = solutionKPIData.getDataSourceID();
-                FeedDefinition target = new FeedStorage().getFeedDefinitionData(targetID);
-                InstallMetadata.blah(source, target, conn, session, toInstall);
+                Session session = Database.instance().createSession(conn);
+                try {
+                    FeedDefinition source = new FeedStorage().getFeedDefinitionData(masterSourceID);
+                    long targetID = solutionKPIData.getDataSourceID();
+                    FeedDefinition target = new FeedStorage().getFeedDefinitionData(targetID);
+                    InstallMetadata.blah(source, target, conn, session, toInstall);
+                } finally {
+                    session.close();
+                }
             }
 
             PostInstallSteps postInstallSteps = new PostInstallSteps();

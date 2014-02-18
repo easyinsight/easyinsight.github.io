@@ -21,6 +21,16 @@ public class AnalysisItemRetrievalStructure {
     private InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
     private Map<String, UniqueKey> namespaceMap;
     private EIConnection conn;
+    private boolean noCalcs;
+
+
+    public boolean isNoCalcs() {
+        return noCalcs;
+    }
+
+    public void setNoCalcs(boolean noCalcs) {
+        this.noCalcs = noCalcs;
+    }
 
     public AnalysisItemRetrievalStructure(@Nullable String currentSection, AnalysisItemRetrievalStructure structure) {
         setReport(structure.getReport());

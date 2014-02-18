@@ -148,6 +148,7 @@ public class FilterUtils {
                         selections.add(h);
                     }
                 }
+                System.out.println("Using all = " + multiFieldFilterDefinition.isAll());
                 multiFieldFilterDefinition.setSelectedItems(selections);
             }
         }

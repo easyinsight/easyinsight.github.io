@@ -1366,9 +1366,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
         Set<AnalysisItem> set = new HashSet<AnalysisItem>();
         final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
         if (multiFieldFilterDefinition.isAll()) {
+            System.out.println("Using all logic...");
             int i = 0;
             if (!multiFieldFilterDefinition.excludeReportFields()) {
                 for (AnalysisItem column : columns) {
+                    System.out.println("\tadded report field " + column.toDisplay());
                     set.add(column);
                     positions.put(column, i++);
                 }
@@ -1380,6 +1382,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     positions.put(item, i++);
                 } else {
                     item = mapByName.get(field.getName());
+                    System.out.println("\tadded by name " + item.toDisplay());
                     if (item != null) {
                         set.add(item);
                         positions.put(item, i++);
@@ -1409,6 +1412,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         }
                     }
                 }
+                queryStmt.close();
             } finally {
                 Database.closeConnection(conn);
             }
@@ -1472,13 +1476,23 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
         final Map<String, Integer> fieldOrderingMap = new HashMap<String, Integer>();
         if (multiFieldFilterDefinition.getFieldOrdering() != null && multiFieldFilterDefinition.getFieldOrdering().size() > 0) {
+            System.out.println("Using explicit field ordering...");
             int j = 0;
             for (AnalysisItemHandle handle : multiFieldFilterDefinition.getFieldOrdering()) {
+                System.out.println("\tHandle " + handle.getName() + " = " + j);
                 fieldOrderingMap.put(handle.getName(), j++);
             }
         }
 
         final boolean alphaSort = multiFieldFilterDefinition.isAlphaSort();
+
+        if (alphaSort) {
+            System.out.println("Using alpha sort");
+        } else if (fieldOrderingMap.isEmpty()) {
+            System.out.println("Using position sort");
+        } else {
+            System.out.println("Using field ordering sort");
+        }
 
         Collections.sort(clones, new Comparator<AnalysisItem>() {
 
@@ -1510,6 +1524,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
         });
 
         if (set.size() > 0) {
+            int i = 0;
+            System.out.println("Assigned results = " + clones);
+            for (AnalysisItem item : clones) {
+                item.setItemPosition(i++);
+            }
             assignResults(clones);
         }
     }
@@ -1524,20 +1543,35 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void applyStyling(EIConnection conn, int dataSourceType)  {
         Session session = Database.instance().createSession(conn);
+        ApplicationSkin applicationSkin;
         try {
-            PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-            ps.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            boolean exchangeAuthor = rs.getBoolean(1);
-            ps.close();
-            ApplicationSkin applicationSkin;
-            if (exchangeAuthor) {
-                applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+            if (SecurityUtil.getAccountID(false) == 0) {
+                PreparedStatement uStmt = conn.prepareStatement("SELECT USER.USER_ID, ACCOUNT_ID FROM USER, user_to_analysis WHERE user_to_analysis.analysis_id = ? AND " +
+                        "user_to_analysis.user_id = user.user_id");
+                uStmt.setLong(1, getAnalysisID());
+                ResultSet uRS = uStmt.executeQuery();
+                uRS.next();
+                long userID = uRS.getLong(1);
+                long accountID = uRS.getLong(2);
+                applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
+                uRS.close();
             } else {
-                applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+                ps.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                boolean exchangeAuthor = rs.getBoolean(1);
+                ps.close();
+
+                if (exchangeAuthor) {
+                    applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+                } else {
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                }
             }
-            renderConfig(applicationSkin);
+            if (applicationSkin != null) {
+                renderConfig(applicationSkin);
+            }
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
@@ -1549,25 +1583,40 @@ public abstract class WSAnalysisDefinition implements Serializable {
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
-            PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-            ps.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            boolean exchangeAuthor = rs.getBoolean(1);
-            ps.close();
             ApplicationSkin applicationSkin;
-            if (exchangeAuthor) {
-                PreparedStatement typeStmt = conn.prepareStatement("SELECT FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
-                typeStmt.setLong(1, getDataFeedID());
-                ResultSet typeRS = typeStmt.executeQuery();
-                typeRS.next();
-                int dataSourceType = typeRS.getInt(1);
-                typeStmt.close();
-                applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+            if (SecurityUtil.getAccountID(false) == 0) {
+                PreparedStatement uStmt = conn.prepareStatement("SELECT USER.USER_ID, ACCOUNT_ID FROM USER, user_to_analysis WHERE user_to_analysis.analysis_id = ? AND " +
+                        "user_to_analysis.user_id = user.user_id");
+                uStmt.setLong(1, getAnalysisID());
+                ResultSet uRS = uStmt.executeQuery();
+                uRS.next();
+                long userID = uRS.getLong(1);
+                long accountID = uRS.getLong(2);
+                applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
+                uRS.close();
             } else {
-                applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+                ps.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                boolean exchangeAuthor = rs.getBoolean(1);
+                ps.close();
+
+                if (exchangeAuthor) {
+                    PreparedStatement typeStmt = conn.prepareStatement("SELECT FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                    typeStmt.setLong(1, getDataFeedID());
+                    ResultSet typeRS = typeStmt.executeQuery();
+                    typeRS.next();
+                    int dataSourceType = typeRS.getInt(1);
+                    typeStmt.close();
+                    applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+                } else {
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                }
             }
-            renderConfig(applicationSkin);
+            if (applicationSkin != null) {
+                renderConfig(applicationSkin);
+            }
         } catch (Exception e) {
             LogClass.error(e);
         } finally {

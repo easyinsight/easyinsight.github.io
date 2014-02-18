@@ -59,6 +59,9 @@
             validReports.refresh();
             nextLevelReports = new ArrayCollection(validReports.toArray());
             var dataSources:ArrayCollection = results.dataSources;
+            if (dataSources == null) {
+                dataSources = new ArrayCollection();
+            }
             var none:Object = { name:"[ All Data Sources ]", id:0};
             dataSources.addItemAt(none, 0);
             this.dataSources = dataSources;

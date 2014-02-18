@@ -10,6 +10,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.TextReportFieldExtension;
 import com.easyinsight.analysis.ytd.VerticalListReportExtension;
 import com.easyinsight.analysis.ytd.YTDReportFieldExtension;
+import com.easyinsight.listing.Tag;
 
 import mx.collections.ArrayCollection;
 
@@ -30,6 +31,23 @@ public class AnalysisItemConfiguration {
 
     public function get display():String {
         return analysisItem.display;
+    }
+
+    public function get tagString():String {
+
+        if (tags == null || tags.length == 0) {
+            return "";
+        } else {
+            var str:String = "";
+            for (var i:int = 0; i < tags.length; i++) {
+                var tag:Tag = tags.getItemAt(i) as Tag;
+                str += tag.name;
+                if (i < (tags.length - 1)) {
+                    str += ", ";
+                }
+            }
+            return str;
+        }
     }
 }
 }

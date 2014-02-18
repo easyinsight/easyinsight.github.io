@@ -317,8 +317,12 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                     startYear = flatDateFilter.getStartYear();
                     int endYear = 2014;
                     Calendar cal = Calendar.getInstance();
+                    if (lastRefreshDate != null && lastRefreshDate.getTime() > 10000) {
+                        cal.add(Calendar.YEAR, -1);
+                    } else {
+                        cal.set(Calendar.YEAR, startYear);
+                    }
 
-                    cal.set(Calendar.YEAR, startYear);
 
                     boolean keepGoing = true;
                     do {

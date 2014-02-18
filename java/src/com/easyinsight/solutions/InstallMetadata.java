@@ -1,9 +1,7 @@
 package com.easyinsight.solutions;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.DerivedKey;
-import com.easyinsight.core.EIDescriptor;
-import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.dashboard.DashboardStorage;
@@ -17,7 +15,6 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.tag.Tag;
 import org.hibernate.Session;
-import org.jetbrains.annotations.Nullable;
 
 import java.sql.*;
 import java.util.*;
@@ -46,6 +43,7 @@ class InstallMetadata {
     private Map<Long, Dashboard> installedDashboardMap = new HashMap<Long, Dashboard>();
 
     private List<AnalysisDefinition> newOrUpdatedReports = new ArrayList<AnalysisDefinition>();
+    private List<AnalysisDefinition.SaveMetadata> newOrUpdatedMetadatas = new ArrayList<AnalysisDefinition.SaveMetadata>();
     private List<AnalysisDefinition> originReportList = new ArrayList<AnalysisDefinition>();
     private List<Dashboard> newOrUpdatedDashboards = new ArrayList<Dashboard>();
     private List<Dashboard> originDashboardList = new ArrayList<Dashboard>();
@@ -88,6 +86,8 @@ class InstallMetadata {
 
         installMetadata.populateFolderReplacements();
         installMetadata.copyTags();
+
+        // change to graph structure...
 
         // copy any distinct sources, add them to the data source
 
@@ -163,7 +163,8 @@ class InstallMetadata {
         if (report == null) {
             AnalysisDefinition fromReport = analysisStorage.getPersistableReport(insightDescriptor.getId(), session);
             log("\tInstalling a fresh version");
-            report = copyReportToDataSource(targetSource, fromReport, null);
+            AnalysisDefinition.SaveMetadata metadata = copyReportToDataSource(targetSource, fromReport);
+            report = metadata.analysisDefinition;
             int folder = fromReport.getFolder();
             Integer folderID = folderReplacementMap.get(folder);
             if (folderID != null) {
@@ -172,6 +173,7 @@ class InstallMetadata {
             analysisStorage.saveAnalysis(report, session);
             installedReportMap.put(insightDescriptor.getId(), report);
             newOrUpdatedReports.add(report);
+            newOrUpdatedMetadatas.add(metadata);
             originReportList.add(fromReport);
             Set<EIDescriptor> ids = fromReport.containedReportIDs();
             for (EIDescriptor descriptor : ids) {
@@ -222,24 +224,27 @@ class InstallMetadata {
         return dashboard;
     }
 
-    private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report, @Nullable List<AnalysisItem> additionalDataSourceFields) throws CloneNotSupportedException {
-        AnalysisDefinition clonedReport = report.clone(localDefinition, localDefinition.getFields(), true, additionalDataSourceFields, tagReplacementMap);
+    private AnalysisDefinition.SaveMetadata copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report) throws CloneNotSupportedException {
+        AnalysisDefinition.SaveMetadata metadata = report.clone(localDefinition.allFields(conn), true, tagReplacementMap);
+        AnalysisDefinition clonedReport = metadata.analysisDefinition;
         clonedReport.setSolutionVisible(false);
         clonedReport.setRecommendedExchange(false);
         clonedReport.setAutoSetupDelivery(false);
         clonedReport.setDataFeedID(localDefinition.getDataFeedID());
         clonedReport.setUserBindings(Arrays.asList(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER)));
-        return clonedReport;
+        return metadata;
     }
 
     private Dashboard copyDashboardToDataSource(FeedDefinition localDefinition, Dashboard dashboard) throws CloneNotSupportedException {
-        Dashboard clonedDashboard = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), true, localDefinition.getFields(), localDefinition);
+        Dashboard clonedDashboard = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), true, localDefinition.allFields(conn), localDefinition);
         clonedDashboard.setExchangeVisible(false);
         clonedDashboard.setRecommendedExchange(false);
         clonedDashboard.setTemporary(false);
         clonedDashboard.setDataSourceID(localDefinition.getDataFeedID());
         return clonedDashboard;
     }
+
+    private Map<Long, Long> reportToDSMap = new HashMap<Long, Long>();
 
     public void addReportToDataSource(AnalysisDefinition report, String name) throws Exception {
 
@@ -265,6 +270,7 @@ class InstallMetadata {
                 if (reportID == report.getAnalysisID()) {
                     // already exists
                     alreadyInSource = true;
+                    reportToDSMap.put(report.getAnalysisID(), node.getDataFeedID());
                     break;
                 }
             }
@@ -274,14 +280,16 @@ class InstallMetadata {
         if (!alreadyInSource) {
             log("\tNot yet in the data source, creating and adding");
             DistinctCachedSource source = (DistinctCachedSource) new InstallationSystem(conn).installConnection(FeedType.DISTINCT_CACHED_ADDON.getType());
-            source.setVisible(true);
+            source.setVisible(false);
             source.setReportID(report.getAnalysisID());
             source.setFeedName(name);
             source.create(conn, null, null);
             CompositeFeedNode node = new CompositeFeedNode();
             node.setDataFeedID(source.getDataFeedID());
+            node.setDataSourceType(FeedType.DISTINCT_CACHED_ADDON.getType());
 
             compositeFeedDefinition.getCompositeFeedNodes().add(node);
+            reportToDSMap.put(report.getAnalysisID(), node.getDataFeedID());
             dataSourceChanged = true;
         } else {
             log("\tFound in the data source, not adding");
@@ -328,17 +336,25 @@ class InstallMetadata {
             AnalysisItem targetItem = connection.getTargetItem();
 
             AnalysisItem sourceResult = sourceMap.get(sourceItem.getKey().toBaseKey().getKeyID());
+            System.out.println("\tSearching for " + sourceResult.toDisplay());
             AnalysisItem matchedSourceItem = target.findAnalysisItemByDisplayName(sourceResult.toDisplay());
+            System.out.println("\t\tMatched to " + matchedSourceItem.toDisplay());
 
             AnalysisItem targetResult = sourceMap.get(targetItem.getKey().toBaseKey().getKeyID());
+            System.out.println("\tSearching for " + targetResult.toDisplay());
             AnalysisItem matchedTargetItem = target.findAnalysisItemByDisplayName(targetResult.toDisplay());
+            System.out.println("\t\tMatched to " + matchedTargetItem.toDisplay());
 
             if (matchedSourceItem != null && matchedTargetItem != null) {
                 CompositeFeedConnection newConnection = new CompositeFeedConnection();
                 newConnection.setSourceFeedID(((DerivedKey) matchedSourceItem.getKey()).getFeedID());
                 newConnection.setTargetFeedID(((DerivedKey) matchedTargetItem.getKey()).getFeedID());
-                newConnection.setSourceItem(new FeedStorage().getFeedDefinitionData(newConnection.getSourceFeedID(), conn).findAnalysisItemByKey(matchedSourceItem.getKey().toBaseKey().toKeyString()));
-                newConnection.setTargetItem(new FeedStorage().getFeedDefinitionData(newConnection.getTargetFeedID(), conn).findAnalysisItemByKey(matchedTargetItem.getKey().toBaseKey().toKeyString()));
+                AnalysisItem s = new FeedStorage().getFeedDefinitionData(newConnection.getSourceFeedID(), conn).findAnalysisItemByKey(matchedSourceItem.getKey().toBaseKey().toKeyString());
+                System.out.println("\tEnd field = " + s.toDisplay());
+                newConnection.setSourceItem(s);
+                AnalysisItem t = new FeedStorage().getFeedDefinitionData(newConnection.getTargetFeedID(), conn).findAnalysisItemByKey(matchedTargetItem.getKey().toBaseKey().toKeyString());
+                System.out.println("\tEnd field = " + t.toDisplay());
+                newConnection.setTargetItem(t);
                 newConnections.add(newConnection);
             }
         }
@@ -374,6 +390,25 @@ class InstallMetadata {
         }
         dsFieldStmt.close();
         return ids;
+    }
+
+    public void copyReportTags() throws SQLException {
+        PreparedStatement reportTagStmt = conn.prepareStatement("SELECT ACCOUNT_TAG.ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG, REPORT_ID FROM " +
+                "ACCOUNT_TAG, REPORT_TO_TAG WHERE ACCOUNT_TAG.ACCOUNT_TAG_ID = REPORT_TO_TAG.TAG_ID AND REPORT_TO_TAG.REPORT_ID = ?");
+        Map<Long, List<Tag>> map = new HashMap<Long, List<Tag>>();
+        Set<Tag> reportTags = new HashSet<Tag>();
+        for (Long reportID : installedReportMap.keySet()) {
+            List<Tag> tags = new ArrayList<Tag>();
+            reportTagStmt.setLong(1, reportID);
+            ResultSet targetRS = reportTagStmt.executeQuery();
+            while (targetRS.next()) {
+                Tag tag = new Tag(targetRS.getLong(1), targetRS.getString(2), targetRS.getBoolean(3), targetRS.getBoolean(4), targetRS.getBoolean(5));
+                reportTags.add(tag);
+                tags.add(tag);
+            }
+            map.put(reportID, tags);
+        }
+
     }
 
     public void copyTags() throws SQLException {
@@ -480,13 +515,61 @@ class InstallMetadata {
         conn.commit();
     }
 
-    public void updateAllMetadata() throws SQLException {
+    public void updateAllMetadata() throws SQLException, CloneNotSupportedException {
         // update tags, etc
+        session.flush();
 
         List<AnalysisItem> targetFields = targetSource.allFields(conn);
+        if (targetSource instanceof CompositeFeedDefinition) {
+            CompositeFeedDefinition compositeOriginalSource = (CompositeFeedDefinition) targetSource;
+            PreparedStatement stmt = conn.prepareStatement("SELECT REPORT_ID FROM distinct_cached_addon_report_source WHERE DATA_SOURCE_ID = ?");
+            Map<Long, CompositeFeedNode> nodeMap = new HashMap<Long, CompositeFeedNode>();
+            Map<Long, Long> rMap = new HashMap<Long, Long>();
+            for (CompositeFeedNode node : compositeOriginalSource.getCompositeFeedNodes()) {
+                nodeMap.put(node.getDataFeedID(), node);
+                if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
+                    stmt.setLong(1, node.getDataFeedID());
+                    ResultSet rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        long reportID = rs.getLong(1);
+                        rMap.put(node.getDataFeedID(), reportID);
+                    }
+                }
+            }
+
+            stmt.close();
+            for (AnalysisItem field : targetFields) {
+                Key key = field.getKey();
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    CompositeFeedNode node = nodeMap.get(derivedKey.getFeedID());
+                    if (node != null) {
+                        if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
+                            Long reportID = rMap.get(node.getDataFeedID());
+                            if (reportID != null) {
+                                FieldDataSourceOrigin origin = new FieldDataSourceOrigin();
+                                origin.setReport(reportID);
+                                field.setOrigin(origin);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < newOrUpdatedMetadatas.size(); i++) {
+            AnalysisDefinition.SaveMetadata metadata = newOrUpdatedMetadatas.get(i);
+            AnalysisDefinition original = originReportList.get(i);
+            System.out.println("Updating metadata on " + original.getTitle());
+            AnalysisDefinition.updateFromMetadata(targetSource, metadata.replacementMap, metadata.analysisDefinition, targetFields, metadata.added);
+            metadata.analysisDefinition.updateReportIDs(installedReportMap, installedDashboardMap, session);
+            analysisStorage.saveAnalysis(metadata.analysisDefinition, session);
+        }
+
+        session.flush();
 
         for (AnalysisDefinition report : newOrUpdatedReports) {
-            report.updateReportIDs(installedReportMap, installedDashboardMap, session);
+
         }
 
 
@@ -494,9 +577,15 @@ class InstallMetadata {
             dashboard.updateIDs(installedReportMap, targetFields, true, targetSource);
         }
 
-        for (AnalysisDefinition report : newOrUpdatedReports) {
-            analysisStorage.saveAnalysis(report, session);
-        }
+        /*for (AnalysisDefinition report : newOrUpdatedReports) {
+            System.out.println("Final save on report " + report.getTitle());
+            try {
+
+            } catch (Exception e) {
+                System.out.println("...");
+                throw new RuntimeException(e);
+            }
+        }*/
 
         PreparedStatement originStmt = conn.prepareStatement("INSERT INTO report_install_info (origin_report_id, result_report_id, install_date, data_source_id) VALUES (?, ?, ?, ?)");
         for (int i = 0; i < newOrUpdatedReports.size(); i++) {
