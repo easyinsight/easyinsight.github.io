@@ -117,7 +117,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                     }
                     String type = String.valueOf(recordNode.get("type"));
                     if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type) || "FieldTagger".equals(type) || "tagger".equals(type) ||
-                            "checkbox".equals(type) || "dropdown".equals(type)) {
+                            "checkbox".equals(type) || "dropdown".equals(type) || "text".equals(type)) {
                         items.add(new AnalysisDimension(customKey, title));
                     } else if ("MultiLineField".equals(type) || "FieldTextarea".equals(type) || "textarea".equals(type)) {
                         items.add(new AnalysisText(customKey, title));
