@@ -48,6 +48,7 @@ import mx.collections.ArrayCollection;
         public var fieldLookupEnabled:Boolean;
         public var manualReportRun:Boolean;
         public var defaultFieldTag:int;
+        public var visibleWithinParentConfiguration:Boolean;
 		
 		public function FeedDefinitionData()
 		{

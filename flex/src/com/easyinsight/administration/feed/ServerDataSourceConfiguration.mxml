@@ -68,6 +68,18 @@
             }
         }
 
+        private function removeSelectedConnections():void {
+            var selected:ArrayCollection = new ArrayCollection();
+            for each (var o:CompositeFeedConnection in CompositeServerDataSource(dataSource).connections) {
+                if (o.selected) {
+                    selected.addItem(o);
+                }
+            }
+            for each (var s:CompositeFeedConnection in selected) {
+                connections.removeItemAt(connections.getItemIndex(s));
+            }
+        }
+
         private function save():void {
             var toRemove:ArrayCollection = new ArrayCollection();
             for each (var node:CompositeFeedNode in CompositeServerDataSource(dataSource).compositeFeedNodes) {
@@ -126,7 +138,7 @@
     </mx:DataGrid>
     <mx:HBox>
         <util:SaveButton label="Add Connection..." click="addConnection()" fontSize="12"/>
-        <util:SaveButton label="Removed Selected" click="removeSelected()" fontSize="12"/>
+        <util:SaveButton label="Removed Selected" click="removeSelectedConnections()" fontSize="12"/>
     </mx:HBox>
     <mx:DataGrid id="connectionGrid" dataProvider="{connections}">
         <mx:columns>
