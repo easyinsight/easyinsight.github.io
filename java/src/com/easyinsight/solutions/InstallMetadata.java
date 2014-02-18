@@ -1,10 +1,7 @@
 package com.easyinsight.solutions;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.DerivedKey;
-import com.easyinsight.core.EIDescriptor;
-import com.easyinsight.core.InsightDescriptor;
-import com.easyinsight.core.Key;
+import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.dashboard.DashboardStorage;
@@ -89,6 +86,8 @@ class InstallMetadata {
 
         installMetadata.populateFolderReplacements();
         installMetadata.copyTags();
+
+        // change to graph structure...
 
         // copy any distinct sources, add them to the data source
 
@@ -281,7 +280,7 @@ class InstallMetadata {
         if (!alreadyInSource) {
             log("\tNot yet in the data source, creating and adding");
             DistinctCachedSource source = (DistinctCachedSource) new InstallationSystem(conn).installConnection(FeedType.DISTINCT_CACHED_ADDON.getType());
-            source.setVisible(true);
+            source.setVisible(false);
             source.setReportID(report.getAnalysisID());
             source.setFeedName(name);
             source.create(conn, null, null);
