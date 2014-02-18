@@ -1,10 +1,10 @@
 package com.easyinsight.datasources {
-import com.easyinsight.administration.feed.ServerDataSourceDefinition;
+
 import com.easyinsight.customupload.PivotalTrackerV5DataSourceCreation;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.pivotaltrackerv5.PivotalTrackerV5CompositeSource")]
-public class PivotalTrackerV5CompositeSource extends ServerDataSourceDefinition {
+public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
 
     public var token:String;
 
