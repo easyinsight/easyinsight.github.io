@@ -2,6 +2,9 @@ package com.easyinsight.core;
 
 import com.easyinsight.dashboard.SavedConfiguration;
 import com.easyinsight.tag.Tag;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
@@ -137,5 +140,19 @@ public class InsightDescriptor extends EIDescriptor {
         result = 31 * result + (int) (dataFeedID ^ (dataFeedID >>> 32));
         result = 31 * result + reportType;
         return result;
+    }
+
+    @Override
+    public JSONObject toJSON() throws JSONException {
+        JSONObject jo = super.toJSON();
+        jo.put("type", "report");
+        JSONArray tags = new JSONArray();
+        if(getTags() != null) {
+            for(Tag t : getTags()) {
+                tags.put(t.toJSON());
+            }
+        }
+        jo.put("tags", tags);
+        return jo;
     }
 }

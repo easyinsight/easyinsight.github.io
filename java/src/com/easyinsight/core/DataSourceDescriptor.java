@@ -2,6 +2,9 @@ package com.easyinsight.core;
 
 import com.easyinsight.tag.Tag;
 import com.easyinsight.userupload.CustomFolder;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -145,5 +148,18 @@ public class DataSourceDescriptor extends EIDescriptor {
         super(name, id, accountVisible);
         this.dataSourceType = dataSourceType;
         this.dataSourceBehavior = dataSourceBehavior;
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject jo = super.toJSON();
+        JSONArray ja = new JSONArray();
+        for(Tag t : getTags()) {
+            JSONObject to = new JSONObject();
+            to.put("name", t.getName());
+            to.put("id", t.getId());
+            ja.put(to);
+        }
+        jo.put("tags", ja);
+        return jo;
     }
 }

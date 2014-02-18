@@ -1,5 +1,8 @@
 package com.easyinsight.userupload;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * User: jamesboe
  * Date: 10/12/12
@@ -23,5 +26,12 @@ public class CustomFolder {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("name", getName());
+        jo.put("id", getId());
+        return jo;
     }
 }
