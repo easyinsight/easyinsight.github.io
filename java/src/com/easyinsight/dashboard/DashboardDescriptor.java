@@ -2,6 +2,9 @@ package com.easyinsight.dashboard;
 
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.tag.Tag;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
@@ -83,5 +86,19 @@ public class DashboardDescriptor extends EIDescriptor {
         int result = super.hashCode();
         result = 31 * result + (int) (dataSourceID ^ (dataSourceID >>> 32));
         return result;
+    }
+
+    @Override
+    public JSONObject toJSON() throws JSONException {
+        JSONObject jo = super.toJSON();
+        jo.put("type", "dashboard");
+        JSONArray tags = new JSONArray();
+        if(getTags() != null) {
+            for(Tag t : getTags()) {
+                tags.put(t.toJSON());
+            }
+        }
+        jo.put("tags", tags);
+        return jo;
     }
 }

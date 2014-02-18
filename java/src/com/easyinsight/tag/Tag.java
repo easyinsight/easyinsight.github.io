@@ -1,5 +1,8 @@
 package com.easyinsight.tag;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -85,5 +88,12 @@ public class Tag implements Serializable {
     @Override
     public String toString() {
         return name;
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("name", getName());
+        jo.put("id", getId());
+        return jo;
     }
 }

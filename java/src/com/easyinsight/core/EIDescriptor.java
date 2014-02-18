@@ -1,6 +1,8 @@
 package com.easyinsight.core;
 
 import com.easyinsight.security.Roles;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -157,5 +159,12 @@ public abstract class EIDescriptor implements Serializable {
 
     public void setUrlKey(String urlKey) {
         this.urlKey = urlKey;
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("name", getName());
+        jo.put("url_key", getUrlKey());
+        return jo;
     }
 }
