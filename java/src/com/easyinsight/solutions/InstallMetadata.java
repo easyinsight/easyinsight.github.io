@@ -515,10 +515,7 @@ class InstallMetadata {
         conn.commit();
     }
 
-    public void updateAllMetadata() throws SQLException, CloneNotSupportedException {
-        // update tags, etc
-        session.flush();
-
+    private List<AnalysisItem> createTargetFields() throws SQLException {
         List<AnalysisItem> targetFields = targetSource.allFields(conn);
         if (targetSource instanceof CompositeFeedDefinition) {
             CompositeFeedDefinition compositeOriginalSource = (CompositeFeedDefinition) targetSource;
@@ -556,8 +553,17 @@ class InstallMetadata {
                 }
             }
         }
+        return targetFields;
+    }
+
+    public void updateAllMetadata() throws SQLException, CloneNotSupportedException {
+        // update tags, etc
+        session.flush();
+
+
 
         for (int i = 0; i < newOrUpdatedMetadatas.size(); i++) {
+            List<AnalysisItem> targetFields = createTargetFields();
             AnalysisDefinition.SaveMetadata metadata = newOrUpdatedMetadatas.get(i);
             AnalysisDefinition original = originReportList.get(i);
             System.out.println("Updating metadata on " + original.getTitle());
@@ -568,12 +574,9 @@ class InstallMetadata {
 
         session.flush();
 
-        for (AnalysisDefinition report : newOrUpdatedReports) {
-
-        }
-
 
         for (Dashboard dashboard : newOrUpdatedDashboards) {
+            List<AnalysisItem> targetFields = createTargetFields();
             dashboard.updateIDs(installedReportMap, targetFields, true, targetSource);
         }
 
