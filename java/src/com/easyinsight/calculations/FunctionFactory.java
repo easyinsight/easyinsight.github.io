@@ -287,6 +287,8 @@ public class FunctionFactory {
             return new BusinessDayOfMonth();
         } else if (s.equals("json")) {
             return new JSONParse();
+        } else if (s.equals("tagparse")) {
+            return new TagBlah();
         } else if (s.equals("stringformat")) {
             return new StringFormat();
         } else {

@@ -61,14 +61,16 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     }
 
     public function stackPopulate(positions:DashboardStackPositions):void {
-        positions.saveStackPosition(dashboardStack.urlKey, viewStack.selectedIndex);
-        for each (var comp:IDashboardViewComponent in viewChildren) {
-            comp.stackPopulate(positions);
-        }
-        if (transformContainer != null) {
-            for each (var filterDefinition:FilterDefinition in transformContainer.getFilterDefinitions()) {
-                var str:String = FilterPositionKey.createString(FilterPositionKey.DASHBOARD_STACK, filterDefinition.filterID, dashboardStack.urlKey);
-                positions.filterMap[str] = filterDefinition;
+        if (viewStack != null) {
+            positions.saveStackPosition(dashboardStack.urlKey, viewStack.selectedIndex);
+            for each (var comp:IDashboardViewComponent in viewChildren) {
+                comp.stackPopulate(positions);
+            }
+            if (transformContainer != null) {
+                for each (var filterDefinition:FilterDefinition in transformContainer.getFilterDefinitions()) {
+                    var str:String = FilterPositionKey.createString(FilterPositionKey.DASHBOARD_STACK, filterDefinition.filterID, dashboardStack.urlKey);
+                    positions.filterMap[str] = filterDefinition;
+                }
             }
         }
     }
