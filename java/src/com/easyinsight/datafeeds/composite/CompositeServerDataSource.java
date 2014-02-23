@@ -257,6 +257,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         newSource = newSource || getFeedType().getType() == FeedType.ZENDESK_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.CONSTANT_CONTACT.getType() ||
                 getFeedType().getType() == FeedType.HARVEST_COMPOSITE.getType() ||
+                getFeedType().getType() == FeedType.INSIGHTLY_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.INFUSIONSOFT_COMPOSITE.getType();
 
         for (FeedType feedType : feedTypes) {
