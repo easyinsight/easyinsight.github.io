@@ -47,6 +47,7 @@ public class Solve360CompanySource extends Solve360BaseSource {
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
+        Solve360CompositeSource solve360CompositeSource = (Solve360CompositeSource) parentDefinition;
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID)));
         analysisItems.add(new AnalysisDimension(keys.get(NAME)));
@@ -58,12 +59,15 @@ public class Solve360CompanySource extends Solve360BaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(SHIPPING_ADDRESS)));
         analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLE_PARTY)));
         analysisItems.add(new AnalysisDimension(keys.get(WEBSITE)));
+        List<AnalysisItem> customFields = solve360CompositeSource.createCustomCompanyFields(keys);
+        analysisItems.addAll(customFields);
         return analysisItems;
     }
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
-        Map<Integer, Company> companies = ((Solve360CompositeSource) parentDefinition).getOrCreateCompanyCache();
+        Solve360CompositeSource solve360CompositeSource = (Solve360CompositeSource) parentDefinition;
+        Map<Integer, Company> companies = solve360CompositeSource.getOrCreateCompanyCache(keys);
         try {
             DataSet dataSet = new DataSet();
             for(Company c : companies.values()) {
@@ -78,6 +82,13 @@ public class Solve360CompanySource extends Solve360BaseSource {
                 row.addValue(keys.get(SHIPPING_ADDRESS), c.getShippingAddress());
                 row.addValue(keys.get(RESPONSIBLE_PARTY), c.getResponsibleParty());
                 row.addValue(keys.get(WEBSITE), c.getWebsite());
+                for (Map.Entry<Key, Object> entry : c.getCustomFieldValues().entrySet()) {
+                    if (entry.getValue() instanceof Date) {
+                        row.addValue(entry.getKey(), (Date) entry.getValue());
+                    } else {
+                        row.addValue(entry.getKey(), (String) entry.getValue());
+                    }
+                }
             }
             return dataSet;
         } catch (ReportException re) {

@@ -1,5 +1,9 @@
 package com.easyinsight.datafeeds.solve360;
 
+import com.easyinsight.core.Key;
+
+import java.util.Map;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Alan
@@ -18,6 +22,15 @@ public class Company {
     private String faxNumber;
     private String responsibleParty;
     private String company;
+    private Map<Key, Object> customFieldValues;
+
+    public Map<Key, Object> getCustomFieldValues() {
+        return customFieldValues;
+    }
+
+    public void setCustomFieldValues(Map<Key, Object> customFieldValues) {
+        this.customFieldValues = customFieldValues;
+    }
 
     public void setName(String name) {
         this.name = name;

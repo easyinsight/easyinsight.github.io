@@ -5,18 +5,9 @@ import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.kashoo.KashooBaseSource;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.IDataStorage;
-import com.easyinsight.users.Token;
-import com.easyinsight.users.TokenStorage;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Node;
-import nu.xom.Nodes;
-import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -64,6 +55,7 @@ public class Solve360ContactsSource extends Solve360BaseSource {
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
+        Solve360CompositeSource solve360CompositeSource = (Solve360CompositeSource) parentDefinition;
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_ID)));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_NAME)));
@@ -82,12 +74,14 @@ public class Solve360ContactsSource extends Solve360BaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(PERSONAL_EMAIL)));
         analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLE_USER)));
         analysisItems.add(new AnalysisDimension(keys.get(WEBSITE)));
+        List<AnalysisItem> customFields = solve360CompositeSource.createCustomContactFields(keys);
+        analysisItems.addAll(customFields);
         return analysisItems;
     }
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
-        Map<Integer, Contact> contacts = ((Solve360CompositeSource) parentDefinition).getOrCreateContactCache();
+        Map<Integer, Contact> contacts = ((Solve360CompositeSource) parentDefinition).getOrCreateContactCache(keys);
         try {
             DataSet dataSet = new DataSet();
             for(Contact c : contacts.values()) {
@@ -102,13 +96,20 @@ public class Solve360ContactsSource extends Solve360BaseSource {
                 row.addValue(keys.get(BUSINESS_PHONE_EXT), c.getBusinessPhoneExt());
                 row.addValue(keys.get(BUSINESS_PHONE_MAIN), c.getBusinessPhoneMain());
                 row.addValue(keys.get(CELLPHONE), c.getCellphone());
-                row.addValue(keys.get(COMPANY), c.getCompany());                
+                row.addValue(keys.get(COMPANY), c.getCompany());
                 row.addValue(keys.get(HOME_ADDRESS), c.getHomeAddress());
                 row.addValue(keys.get(HOME_PHONE), c.getHomePhone());
                 row.addValue(keys.get(OTHER_EMAIL), c.getOtherEmail());
                 row.addValue(keys.get(PERSONAL_EMAIL), c.getPersonalEmail());
                 row.addValue(keys.get(RESPONSIBLE_USER), c.getResponsibleUser());
                 row.addValue(keys.get(WEBSITE), c.getWebsite());
+                for (Map.Entry<Key, Object> entry : c.getCustomFieldValues().entrySet()) {
+                    if (entry.getValue() instanceof Date) {
+                        row.addValue(entry.getKey(), (Date) entry.getValue());
+                    } else {
+                        row.addValue(entry.getKey(), (String) entry.getValue());
+                    }
+                }
             }
             return dataSet;
         } catch (ReportException re) {
