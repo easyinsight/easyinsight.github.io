@@ -252,6 +252,8 @@ public class FeedType implements Serializable {
     public static final FeedType PIVOTAL_V5_LABEL = new FeedType(223);
     public static final FeedType PIVOTAL_V5_ITERATION = new FeedType(224);
     public static final FeedType PIVOTAL_V5_STORY_TO_LABEL = new FeedType(225);
+    public static final FeedType INSIGHTLY_NOTES = new FeedType(226);
+    public static final FeedType INSIGHTLY_NOTE_LINKS = new FeedType(227);
 
     public FeedType() {
     }

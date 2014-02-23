@@ -374,7 +374,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.PIVOTAL_V5_LABEL, PivotalTrackerV5LabelSource.class);
         registerType(FeedType.PIVOTAL_V5_ITERATION, PivotalTrackerV5IterationSource.class);
         registerType(FeedType.PIVOTAL_V5_STORY_TO_LABEL, PivotalTrackerV5StoryToLabelSource.class);
-
+        registerType(FeedType.INSIGHTLY_NOTES, InsightlyNoteSource.class);
+        registerType(FeedType.INSIGHTLY_NOTE_LINKS, InsightlyNoteLinkSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
