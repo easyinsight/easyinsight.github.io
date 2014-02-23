@@ -40,6 +40,7 @@ import com.easyinsight.datafeeds.pivotaltrackerv5.*;
 import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseDatabaseSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseUserSource;
+import com.easyinsight.datafeeds.redbooth.*;
 import com.easyinsight.datafeeds.redirect.RedirectDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceSObjectSource;
@@ -108,13 +109,17 @@ public class DataSourceTypeRegistry {
         connectionBillingInfoMap.put(FeedType.BATCHBOOK_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.CONSTANT_CONTACT, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.FRESHBOOKS_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.FRESHDESK_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.GITHUB_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.GOOGLE_ANALYTICS, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.HARVEST_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.HIGHRISE_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.INFUSIONSOFT_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.INSIGHTLY_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.KASHOO_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.LINKEDIN, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.PIVOTAL_TRACKER, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.PIVOTAL_V5_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.SALESFORCE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.SENDGRID, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.SOLVE360_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
@@ -132,6 +137,7 @@ public class DataSourceTypeRegistry {
         connectionBillingInfoMap.put(FeedType.SERVER_SQL_SERVER, ConnectionBillingType.CUSTOM_DATA);
         connectionBillingInfoMap.put(FeedType.SERVER_POSTGRES, ConnectionBillingType.CUSTOM_DATA);
         connectionBillingInfoMap.put(FeedType.SERVER_ORACLE, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.SMARTSHEET_TABLE, ConnectionBillingType.CUSTOM_DATA);
         connectionBillingInfoMap.put(FeedType.STATIC, ConnectionBillingType.CUSTOM_DATA);
         connectionBillingInfoMap.put(FeedType.TREASURE_DATA, ConnectionBillingType.CUSTOM_DATA);
     }
@@ -374,7 +380,13 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.PIVOTAL_V5_LABEL, PivotalTrackerV5LabelSource.class);
         registerType(FeedType.PIVOTAL_V5_ITERATION, PivotalTrackerV5IterationSource.class);
         registerType(FeedType.PIVOTAL_V5_STORY_TO_LABEL, PivotalTrackerV5StoryToLabelSource.class);
-
+        registerType(FeedType.INSIGHTLY_NOTES, InsightlyNoteSource.class);
+        registerType(FeedType.INSIGHTLY_NOTE_LINKS, InsightlyNoteLinkSource.class);
+        registerType(FeedType.REDBOOTH_COMPOSITE, RedboothCompositeSource.class);
+        registerType(FeedType.REDBOOTH_ORGANIZATION, RedboothOrganizationSource.class);
+        registerType(FeedType.REDBOOTH_PROJECT, RedboothProjectSource.class);
+        registerType(FeedType.REDBOOTH_TASK_LIST, RedboothTaskListSource.class);
+        registerType(FeedType.REDBOOTH_TASK, RedboothTaskSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
