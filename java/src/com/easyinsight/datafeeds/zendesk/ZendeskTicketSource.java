@@ -245,7 +245,15 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                     Map map = (Map) obj;
                     IRow row = dataSet.createRow();
                     String id = parseTicket(keys, userCache, row, map);
-
+                    for (Map.Entry<String, Key> entry : keys.entrySet()) {
+                        if (entry.getKey().startsWith("zd")) {
+                            int customFieldID = Integer.parseInt(entry.getKey().substring(2));
+                            Object customFieldObject = map.get("field_" + customFieldID);
+                            if (customFieldObject != null) {
+                                row.addValue(entry.getKey(), customFieldObject.toString());
+                            }
+                        }
+                    }
                     if (zendeskCompositeSource.isHackMethod()) {
                         Map ticketDetail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + ".json", zendeskCompositeSource, httpClient);
 
@@ -256,25 +264,16 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                                 for (Object cFieldObj : customFields) {
                                     Map customFieldMap = (Map) cFieldObj;
                                     String fieldID = customFieldMap.get("id").toString();
+                                    Key key = keys.get("zd" + fieldID);
+                                    if (row.getValueNoAdd(key).type() == Value.EMPTY || "".equals(row.getValueNoAdd(key).toString())) {
+                                        Object fieldValueObject = customFieldMap.get("value");
+                                        if (fieldValueObject != null) {
 
-                                    Object fieldValueObject = customFieldMap.get("value");
-                                    if (fieldValueObject != null) {
-                                        Key key = keys.get("zd" + fieldID);
-                                        if (key != null) {
-                                            row.addValue(key, fieldValueObject.toString());
+                                            if (key != null) {
+                                                row.addValue(key, fieldValueObject.toString());
+                                            }
                                         }
                                     }
-                                }
-                            }
-                        }
-                    } else {
-
-                        for (Map.Entry<String, Key> entry : keys.entrySet()) {
-                            if (entry.getKey().startsWith("zd")) {
-                                int customFieldID = Integer.parseInt(entry.getKey().substring(2));
-                                Object customFieldObject = map.get("field_" + customFieldID);
-                                if (customFieldObject != null) {
-                                    row.addValue(entry.getKey(), customFieldObject.toString());
                                 }
                             }
                         }
