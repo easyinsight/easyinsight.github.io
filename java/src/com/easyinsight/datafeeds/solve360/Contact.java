@@ -1,8 +1,10 @@
 package com.easyinsight.datafeeds.solve360;
 
+import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,6 +32,15 @@ public class Contact {
     private String businessEmail;
     private String company;
 
+    private Map<Key, Object> customFieldValues;
+
+    public Map<Key, Object> getCustomFieldValues() {
+        return customFieldValues;
+    }
+
+    public void setCustomFieldValues(Map<Key, Object> customFieldValues) {
+        this.customFieldValues = customFieldValues;
+    }
 
     public String getName() {
         return name;
