@@ -11,6 +11,7 @@ import org.hibernate.Session;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * User: jamesboe
@@ -41,6 +42,15 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
 
     public void setTrendComparisonField(AnalysisItem trendComparisonField) {
         this.trendComparisonField = trendComparisonField;
+    }
+
+    public void validate(Set<Long> sourceIDs) {
+        if (trendComparisonField != null) {
+            trendComparisonField.validate(sourceIDs);
+        }
+        if (date != null) {
+            date.validate(sourceIDs);
+        }
     }
 
     @Override
