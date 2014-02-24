@@ -47,7 +47,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private UploadPolicy uploadPolicy = new UploadPolicy();
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
-    private boolean accountVisible;
+    private boolean accountVisible = true;
     private long dataFeedID;
     private long size;
     private Date dateCreated;
