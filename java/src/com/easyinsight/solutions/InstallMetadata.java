@@ -9,6 +9,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
+import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.goals.InstallationSystem;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.Roles;
@@ -63,29 +64,142 @@ class InstallMetadata {
         PreparedStatement getFolderStmt = conn.prepareStatement("SELECT REPORT_FOLDER_ID, FOLDER_NAME FROM REPORT_FOLDER WHERE DATA_SOURCE_ID = ?");
         PreparedStatement saveFolderStmt = conn.prepareStatement("INSERT INTO REPORT_FOLDER (ACCOUNT_ID, FOLDER_NAME, FOLDER_SEQUENCE, DATA_SOURCE_ID) VALUES (?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement findFolderStmt = conn.prepareStatement("SELECT REPORT_FOLDER_ID FROM REPORT_FOLDER WHERE ACCOUNT_ID = ? AND FOLDER_NAME = ? AND DATA_SOURCE_ID = ?");
+
         getFolderStmt.setLong(1, originalSource.getDataFeedID());
         ResultSet rs = getFolderStmt.executeQuery();
         while (rs.next()) {
             int id = rs.getInt(1);
-            saveFolderStmt.setLong(1, SecurityUtil.getAccountID());
-            saveFolderStmt.setString(2, rs.getString(2));
-            saveFolderStmt.setInt(3, 1);
-            saveFolderStmt.setLong(4, targetSource.getDataFeedID());
-            saveFolderStmt.execute();
-            int savedID = (int) Database.instance().getAutoGenKey(saveFolderStmt);
-            folderReplacementMap.put(id, savedID);
+            String folderName = rs.getString(2);
+            findFolderStmt.setLong(1, SecurityUtil.getAccountID());
+            findFolderStmt.setString(2, folderName);
+            findFolderStmt.setLong(3, targetSource.getDataFeedID());
+            ResultSet existing = findFolderStmt.executeQuery();
+            if (existing.next()) {
+                int existingID = existing.getInt(1);
+                folderReplacementMap.put(id, existingID);
+            } else {
+
+                saveFolderStmt.setLong(1, SecurityUtil.getAccountID());
+                saveFolderStmt.setString(2, folderName);
+                saveFolderStmt.setInt(3, 1);
+                saveFolderStmt.setLong(4, targetSource.getDataFeedID());
+                saveFolderStmt.execute();
+                int savedID = (int) Database.instance().getAutoGenKey(saveFolderStmt);
+                folderReplacementMap.put(id, savedID);
+            }
         }
+        findFolderStmt.close();
         saveFolderStmt.close();
         getFolderStmt.close();
     }
 
-    public static EIDescriptor blah(FeedDefinition originalSource, FeedDefinition targetDataSource, EIConnection conn, Session session, List<EIDescriptor> installing) throws Exception {
+    private List<ReportValidation> validateReport(long reportID) throws Exception {
+        List<ReportValidation> validations = new ArrayList<ReportValidation>();
+        PreparedStatement ps = conn.prepareStatement("SELECT result_report_id FROM report_install_info WHERE origin_report_id = ? AND data_source_id = ?");
+        ps.setLong(1, reportID);
+        ps.setLong(2, targetSource.getDataFeedID());
+        boolean exists = false;
+        int existingVersion = 0;
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            long resultID = rs.getLong(1);
+            log("\tUsing report from a previous install");
+            exists = true;
+            AnalysisDefinition report = analysisStorage.getPersistableReport(resultID, session);
+            existingVersion = 1;
+            Set<EIDescriptor> ids = report.containedReportIDs();
+            for (EIDescriptor descriptor : ids) {
+                if (descriptor.getType() == EIDescriptor.REPORT) {
+                    validations.addAll(validateReport(descriptor.getId()));
+                } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                    validations.addAll(validateDashboard(descriptor.getId()));
+                }
+            }
+            // find version...
+        }
+        ps.close();
+        ReportValidation reportValidation = new ReportValidation();
+        reportValidation.setExists(exists);
+        reportValidation.setExistingVersion(existingVersion);
+        validations.add(reportValidation);
+        return validations;
+    }
+
+    private List<ReportValidation> validateDashboard(long reportID) throws Exception {
+        List<ReportValidation> validations = new ArrayList<ReportValidation>();
+        PreparedStatement ps = conn.prepareStatement("SELECT result_dashboard_id FROM dashboard_install_info WHERE origin_dashboard_id = ? AND data_source_id = ?");
+        ps.setLong(1, reportID);
+        ps.setLong(2, targetSource.getDataFeedID());
+        boolean exists = false;
+        int existingVersion = 0;
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            long resultID = rs.getLong(1);
+            log("\tUsing report from a previous install");
+            exists = true;
+            Dashboard dashboard = dashboardStorage.getDashboard(resultID, conn);
+            existingVersion = 1;
+            Set<Long> ids = dashboard.containedReports();
+            for (Long id : ids) {
+                validations.addAll(validateReport(id));
+            }
+            // find version...
+        }
+        ps.close();
+        ReportValidation reportValidation = new ReportValidation();
+        reportValidation.setExists(exists);
+        reportValidation.setExistingVersion(existingVersion);
+        validations.add(reportValidation);
+        return validations;
+    }
+
+    public static List<ReportValidation> determine(FeedDefinition originalSource, FeedDefinition targetDataSource, EIConnection conn, Session session, List<EIDescriptor> installing)
+        throws Exception {
+        InstallMetadata installMetadata = new InstallMetadata(originalSource, targetDataSource, conn, session);
+
+        // any tags we'll have to copy?
+
+        List<ReportValidation> validations = new ArrayList<ReportValidation>();
+
+        List<InsightDescriptor> distinctAddons =  installMetadata.findDistinctCachedAddons();
+        for (InsightDescriptor reportID : distinctAddons) {
+            // does report exist, and if so, which version
+            // is report part of data source
+            validations.addAll(installMetadata.validateReport(reportID.getId()));
+        }
+
+        List<InsightDescriptor> dataSourceFieldReports = installMetadata.findDataSourceFieldReports();
+        for (InsightDescriptor reportID : dataSourceFieldReports) {
+            // does report exist, and if so, which version
+            // is report a data source field report
+            validations.addAll(installMetadata.validateReport(reportID.getId()));
+        }
+
+        for (EIDescriptor desc : installing) {
+            if (desc.getType() == EIDescriptor.REPORT) {
+                validations.addAll(installMetadata.validateReport(desc.getId()));
+                // does report exist, and if so, is it the right version
+
+                //installReport((InsightDescriptor) desc);
+            } else if (desc.getType() == EIDescriptor.DASHBOARD) {
+
+                // does dashboard exist, and if so, is it the right version
+                validations.addAll(installMetadata.validateDashboard(desc.getId()));
+                //installDashboard((DashboardDescriptor) desc);
+            }
+        }
+        return validations;
+    }
+
+    public static EIDescriptor install(FeedDefinition originalSource, FeedDefinition targetDataSource, EIConnection conn, Session session, List<EIDescriptor> installing) throws Exception {
 
         InstallMetadata installMetadata = new InstallMetadata(originalSource, targetDataSource, conn, session);
 
 
         installMetadata.populateFolderReplacements();
         installMetadata.copyTags();
+        installMetadata.copyCustomFieldTags();
 
         // change to graph structure...
 
@@ -147,7 +261,7 @@ class InstallMetadata {
         if (report != null) {
             log("\tFound the report in the list already installed");
         }
-        if (report == null) {
+        /*if (report == null && installMode != SolutionService.UPGRADE_CHANGES) {
             PreparedStatement ps = conn.prepareStatement("SELECT result_report_id FROM report_install_info WHERE origin_report_id = ? AND data_source_id = ?");
             ps.setLong(1, insightDescriptor.getId());
             ps.setLong(2, targetSource.getDataFeedID());
@@ -159,7 +273,7 @@ class InstallMetadata {
                 installedReportMap.put(insightDescriptor.getId(), report);
             }
             ps.close();
-        }
+        }*/
         if (report == null) {
             AnalysisDefinition fromReport = analysisStorage.getPersistableReport(insightDescriptor.getId(), session);
             log("\tInstalling a fresh version");
@@ -192,7 +306,7 @@ class InstallMetadata {
         if (dashboard != null) {
             log("\tFound the dashboard in the list already installed");
         }
-        if (dashboard == null) {
+        /*if (dashboard == null) {
             PreparedStatement ps = conn.prepareStatement("SELECT result_dashboard_id FROM dashboard_install_info WHERE origin_dashboard_id = ? AND data_source_id = ?");
             ps.setLong(1, dashboardDescriptor.getId());
             ps.setLong(2, targetSource.getDataFeedID());
@@ -204,7 +318,7 @@ class InstallMetadata {
                 installedDashboardMap.put(dashboardDescriptor.getId(), dashboard);
             }
             ps.close();
-        }
+        }*/
         if (dashboard == null) {
             Dashboard fromDashboard = dashboardStorage.getDashboard(dashboardDescriptor.getId(), conn);
             log("\tInstalling a fresh version");
@@ -411,6 +525,23 @@ class InstallMetadata {
 
     }
 
+    public void copyCustomFieldTags() throws SQLException {
+        log("Copying custom field tags...");
+        List<CustomFieldTag> customFieldTags = new FeedService().getCustomFieldTags(originalSource.getDataFeedID(), conn);
+        if (customFieldTags != null) {
+            List<CustomFieldTag> copy = new ArrayList<CustomFieldTag>();
+            for (CustomFieldTag customFieldTag : customFieldTags) {
+                if (customFieldTag.getTagID() > 0) {
+                    CustomFieldTag copyTag = new CustomFieldTag(customFieldTag.getType(), customFieldTag.getName());
+                    Tag targetTag = tagReplacementMap.get(customFieldTag.getTagID());
+                    copyTag.setTagID(targetTag.getId());
+                    copy.add(copyTag);
+                }
+            }
+            new FeedService().saveCustomFieldTags(copy, targetSource.getDataFeedID(), conn);
+        }
+    }
+
     public void copyTags() throws SQLException {
         log("Copying tags...");
         PreparedStatement findNeeded = conn.prepareStatement("SELECT ACCOUNT_TAG.ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG " +
@@ -515,6 +646,17 @@ class InstallMetadata {
         conn.commit();
     }
 
+    private Set<Long> validChildSources() throws SQLException {
+        Set<Long> valids = new HashSet<Long>();
+        if (targetSource instanceof CompositeFeedDefinition) {
+            CompositeFeedDefinition compositeOriginalSource = (CompositeFeedDefinition) targetSource;
+            for (CompositeFeedNode node : compositeOriginalSource.getCompositeFeedNodes()) {
+                valids.add(node.getDataFeedID());
+            }
+        }
+        return valids;
+    }
+
     private List<AnalysisItem> createTargetFields() throws SQLException {
         List<AnalysisItem> targetFields = targetSource.allFields(conn);
         if (targetSource instanceof CompositeFeedDefinition) {
@@ -560,7 +702,7 @@ class InstallMetadata {
         // update tags, etc
         session.flush();
 
-
+        //
 
         for (int i = 0; i < newOrUpdatedMetadatas.size(); i++) {
             List<AnalysisItem> targetFields = createTargetFields();
@@ -572,6 +714,11 @@ class InstallMetadata {
             analysisStorage.saveAnalysis(metadata.analysisDefinition, session);
         }
 
+        Set<Long> valids = validChildSources();
+        for (AnalysisDefinition report : newOrUpdatedReports) {
+            report.populateValidationIDs(valids);
+        }
+
         session.flush();
 
 
@@ -579,16 +726,6 @@ class InstallMetadata {
             List<AnalysisItem> targetFields = createTargetFields();
             dashboard.updateIDs(installedReportMap, targetFields, true, targetSource);
         }
-
-        /*for (AnalysisDefinition report : newOrUpdatedReports) {
-            System.out.println("Final save on report " + report.getTitle());
-            try {
-
-            } catch (Exception e) {
-                System.out.println("...");
-                throw new RuntimeException(e);
-            }
-        }*/
 
         PreparedStatement originStmt = conn.prepareStatement("INSERT INTO report_install_info (origin_report_id, result_report_id, install_date, data_source_id) VALUES (?, ?, ?, ?)");
         for (int i = 0; i < newOrUpdatedReports.size(); i++) {
