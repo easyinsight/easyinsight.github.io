@@ -51,7 +51,7 @@ public class SolutionGridActionRenderer extends HBox{
         var descriptor:EIDescriptor = solutionService.installEntity.lastResult as EIDescriptor;
         if (descriptor is InsightDescriptor) {
             var insightDescriptor:InsightDescriptor = descriptor as InsightDescriptor;
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, exchangeItem)));
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor)));
         } else if (descriptor is DashboardDescriptor ){
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, exchangeItem: exchangeItem})));
         }
