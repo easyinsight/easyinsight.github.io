@@ -67,6 +67,8 @@ public class ApplicationSkinTO {
     public var crosstabHeaderTextColorEnabled:Boolean;
     public var crosstabHeaderBackgroundColor:int;
     public var crosstabHeaderBackgroundColorEnabled:Boolean;
+    public var reportHeaderTextColor:int;
+    public var reportHeaderTextColorEnabled:Boolean;
     public var headerStart:int;
     public var headerStartEnabled:Boolean;
     public var headerEnd:int;
@@ -75,6 +77,8 @@ public class ApplicationSkinTO {
     public var tableColorStartEnabled:Boolean;
     public var tableColorEnd:int;
     public var tableColorEndEnabled:Boolean;
+    public var textColor:int;
+    public var textColorEnabled:Boolean;
 
     public var dashboardStack1ColorStart:int;
     public var dashboardStack1ColorEnd:int;
