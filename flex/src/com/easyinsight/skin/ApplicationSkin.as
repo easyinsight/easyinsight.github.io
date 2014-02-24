@@ -65,11 +65,16 @@ public class ApplicationSkin extends EventDispatcher {
     public var headerStartEnabled:Boolean;
     public var headerEnd:int;
     public var headerEndEnabled:Boolean;
+    public var reportHeaderTextColor:int;
+    public var reportHeaderTextColorEnabled:Boolean;
 
     public var tableColorStart:int;
     public var tableColorStartEnabled:Boolean;
     public var tableColorEnd:int;
     public var tableColorEndEnabled:Boolean;
+
+    public var textColor:int;
+    public var textColorEnabled:Boolean;
 
     public var multiColors:ArrayCollection;
     public var secondaryMultiColors:ArrayCollection;
@@ -133,6 +138,8 @@ public class ApplicationSkin extends EventDispatcher {
         headerStartEnabled = appSkin.headerStartEnabled;
         headerEnd = appSkin.headerEnd;
         headerEndEnabled = appSkin.headerEndEnabled;
+
+        reportHeaderTextColor = appSkin.reportHeaderTextColor;
 
         tableColorStart = appSkin.tableColorStart;
         tableColorStartEnabled = appSkin.tableColorStartEnabled;
