@@ -78,5 +78,9 @@ import mx.collections.ArrayCollection;
         public function additionalSetup():Boolean {
             return false;
         }
+
+        public function hasCustomFields():Boolean {
+            return false;
+        }
     }
 }

@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:feed="com.easyinsight.administration.feed.*"
+                       xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.SmartComboBox;
+
+        import mx.collections.ArrayCollection;
+        import mx.containers.HBox;
+        import mx.controls.Text;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var tags:ArrayCollection;
+
+        private function onChange(event:Event):void {
+            var c1:CustomFieldTag = event.currentTarget.data;
+            c1.tagID = event.currentTarget.selectedItem.id;
+        }
+
+        private function gotTags():void {
+            var tags:ArrayCollection = feedService.getFieldTags.lastResult as ArrayCollection;
+            var none:Object = { name: "[ No Selection ]", id: 0};
+            tags.addItemAt(none, 0);
+            this.tags = tags;
+        }
+
+        private function onCreation():void {
+            ProgressAlert.alert(this, "Retrieving data...", null, feedService.getFieldTags, feedService.getCustomFieldTags);
+            feedService.getFieldTags.send();
+            feedService.getCustomFieldTags.send(dataSourceID);
+        }
+
+        public var dataSourceID:int;
+
+        private function save():void {
+            ProgressAlert.alert(this, "Saving...", null, feedService.saveCustomFieldTags);
+            feedService.saveCustomFieldTags.send(customFieldTags, dataSourceID);
+        }
+
+        private var customFieldTags:ArrayCollection;
+
+        private function gotCustomFieldTags():void {
+            var c:ArrayCollection = feedService.getCustomFieldTags.lastResult as ArrayCollection;
+            customFieldTags = c;
+            for each (var c1:CustomFieldTag in c) {
+                var row:HBox = new HBox();
+                var t:Text = new Text();
+                t.text = c1.name;
+                row.addChild(t);
+                var m:Text = new Text();
+                m.text = "maps into";
+                row.addChild(m);
+                var comboBox:SmartComboBox = new SmartComboBox();
+                comboBox.data = c1;
+                comboBox.dataProvider = tags;
+                comboBox.selectedProperty = "id";
+                comboBox.selectedValue = c1.tagID;
+                comboBox.labelField = "name";
+                comboBox.addEventListener(Event.CHANGE, onChange);
+                row.addChild(comboBox);
+                contents.addChild(row);
+            }
+        }
+
+        private function saved():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="saveCustomFieldTags" result="saved()"/>
+        <mx:method name="getCustomFieldTags" result="gotCustomFieldTags()"/>
+        <mx:method name="getFieldTags" result="gotTags()"/>
+    </mx:RemoteObject>
+    <mx:VBox id="contents"/>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

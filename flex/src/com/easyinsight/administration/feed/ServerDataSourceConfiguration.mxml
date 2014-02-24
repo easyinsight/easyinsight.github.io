@@ -75,7 +75,7 @@
 
         private function removeSelectedConnections():void {
             var selected:ArrayCollection = new ArrayCollection();
-            for each (var o:CompositeFeedConnection in CompositeServerDataSource(dataSource).connections) {
+            for each (var o:CompositeFeedConnection in connections) {
                 if (o.selected) {
                     selected.addItem(o);
                 }
