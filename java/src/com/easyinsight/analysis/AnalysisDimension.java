@@ -5,6 +5,7 @@ import com.easyinsight.core.*;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Collection;
+import java.util.Set;
 
 import com.easyinsight.database.Database;
 import nu.xom.Attribute;
@@ -94,6 +95,13 @@ public class AnalysisDimension extends AnalysisItem {
             analysisItems.add(keyDimension);
         }
         return analysisItems;
+    }
+
+    public void validate(Set<Long> sourceIDs) {
+        super.validate(sourceIDs);
+        if (keyDimension != null) {
+            keyDimension.validate(sourceIDs);
+        }
     }
 
     public int getType() {

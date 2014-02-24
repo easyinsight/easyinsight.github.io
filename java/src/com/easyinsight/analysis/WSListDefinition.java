@@ -388,6 +388,12 @@ public class WSListDefinition extends WSAnalysisDefinition {
             if (applicationSkin.isTableColorEndEnabled()) {
                 setRowColor2(applicationSkin.getTableColorEnd());
             }
+            if (applicationSkin.isReportHeaderTextColorEnabled()) {
+                setHeaderTextColor(applicationSkin.getReportHeaderTextColor());
+            }
+            if (applicationSkin.isTextColorEnabled()) {
+                setTextColor(applicationSkin.getTextColor());
+            }
         }
     }
 }

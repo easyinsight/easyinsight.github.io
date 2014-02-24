@@ -4,6 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
+import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.datafeeds.composite.FederationSource;
 import com.easyinsight.datafeeds.constantcontact.CCContactSource;
@@ -50,6 +51,69 @@ public class FeedService {
 
     public FeedService() {
         // this goes into a different data provider        
+    }
+
+    public void saveCustomFieldTags(List<CustomFieldTag> tags, long dataSourceID) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            saveCustomFieldTags(tags, dataSourceID, conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void saveCustomFieldTags(List<CustomFieldTag> tags, long dataSourceID, EIConnection conn) throws SQLException {
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM CUSTOM_FLAG_TO_TAG WHERE DATA_SOURCE_ID = ?");
+        clearStmt.setLong(1, dataSourceID);
+        clearStmt.executeUpdate();
+        clearStmt.close();
+        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO CUSTOM_FLAG_TO_TAG (TAG_ID, CUSTOM_FLAG, DATA_SOURCE_ID) VALUES (?, ?, ?)");
+        for (CustomFieldTag tag : tags) {
+            if (tag.getTagID() == 0) {
+                continue;
+            }
+            saveStmt.setLong(1, tag.getTagID());
+            saveStmt.setInt(2, tag.getType());
+            saveStmt.setLong(3, dataSourceID);
+            saveStmt.execute();
+        }
+        saveStmt.close();
+    }
+
+    public List<CustomFieldTag> getCustomFieldTags(long dataSourceID) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            return getCustomFieldTags(dataSourceID, conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public List<CustomFieldTag> getCustomFieldTags(long dataSourceID, EIConnection conn) throws SQLException {
+        FeedDefinition dataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+        List<CustomFieldTag> tags = dataSource.customFieldTags();
+        PreparedStatement ps = conn.prepareStatement("SELECT TAG_ID, CUSTOM_FLAG FROM CUSTOM_FLAG_TO_TAG WHERE DATA_SOURCE_ID = ?");
+        ps.setLong(1, dataSourceID);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            long tagID = rs.getLong(1);
+            int customFlag = rs.getInt(2);
+            for (CustomFieldTag customFieldTag : tags) {
+                if (customFieldTag.getType() == customFlag) {
+                    customFieldTag.setTagID(tagID);
+                }
+            }
+        }
+        ps.close();
+        return tags;
     }
 
     public List<FieldRule> getFieldRules(long dataSourceID) {

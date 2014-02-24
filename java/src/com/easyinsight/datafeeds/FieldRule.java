@@ -204,16 +204,23 @@ public class FieldRule {
         return false;
     }
 
-    public void update(AnalysisItem analysisItem, WSAnalysisDefinition report) {
+    public void update(AnalysisItem analysisItem, WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
         try {
             if (link != null) {
                 if (analysisItem.getLinks() != null && analysisItem.getLinks().size() > 0 && !(analysisItem.getLinks().get(0)).isDefinedByRule() &&
                         !(analysisItem.getLinks().get(0)).isCodeGenerated()) {
                     // already has a link
                 } else {
+                    if (link instanceof DrillThrough) {
+                        DrillThrough drillThrough = (DrillThrough) link;
+                        if (drillThrough.getReportID() != null && drillThrough.getReportID() == report.getAnalysisID()) {
+                            return;
+                        }
+                    }
                     Link clonedLink = link.clone();
                     clonedLink.setDefinedByRule(true);
                     analysisItem.setLinks(Arrays.asList(clonedLink));
+                    insightRequestMetadata.addAudit(analysisItem, "Field rule added link.");
                 }
             }
             if (extension != null) {
@@ -225,6 +232,7 @@ public class FieldRule {
                         ReportFieldExtension clone = extension.clone();
                         clone.setFromFieldRuleID(1);
                         analysisItem.setReportFieldExtension(clone);
+                        insightRequestMetadata.addAudit(analysisItem, "Field rule added field extension.");
                     }
                 }
             }
