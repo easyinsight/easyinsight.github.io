@@ -4,6 +4,7 @@ import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.listing.ListingChangeEvent;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.report.ReportAnalyzeSource;
+import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
@@ -44,18 +45,29 @@ public class DelayedReportTemplate extends EventDispatcher {
             return;
         }
         var dataSources:ArrayCollection = info.dataSources;
-        if (dataSources.length == 0) {
+        var validDataSources:ArrayCollection = new ArrayCollection();
+        for each (var ds:DataSourceDescriptor in dataSources) {
+            if (ds.prebuilts == null || ds.prebuilts.length == 0) {
+                validDataSources.addItem(ds);
+            }
+        }
+        if (validDataSources.length == 0 && dataSources.length == 1) {
+            Alert.show("You've already installed this prebuilt onto your data source.");
+        } else if (validDataSources.length == 0 && dataSources.length > 1) {
+            Alert.show("You've already installed this prebuilt onto all of your data sources.");
+        } else if (dataSources.length == 0) {
             var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
             window.solution = info.exchangeData.solutionID;
             window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
             PopUpManager.addPopUp(window, Application.application as DisplayObject, true);
             PopUpUtil.centerPopUp(window);
-        } else if (dataSources.length == 1) {
-            ProgressAlert.alert(Application.application as DisplayObject, "Preparing the report...", null, solutionService.installEntity);
-            solutionService.installEntity.send(info.exchangeData.descriptor, dataSources.getItemAt(0).id);
+        } else if (validDataSources.length == 1) {
+            var dsd:DataSourceDescriptor = dataSources.getItemAt(0) as DataSourceDescriptor;
+            ProgressAlert.alert(Application.application as DisplayObject, "Installing...", null, solutionService.installEntity);
+            solutionService.installEntity.send(info.exchangeData.descriptor, dsd.id);
         } else {
             var dsWindow:DataSourceChoiceWindow = new DataSourceChoiceWindow();
-            dsWindow.sources = dataSources;
+            dsWindow.sources = validDataSources;
             dsWindow.addEventListener(DataSourceSelectionEvent.DATA_SOURCE_SELECTION, dataSourceChoice, false, 0, true);
             PopUpManager.addPopUp(dsWindow, Application.application as DisplayObject, true);
             PopUpUtil.centerPopUp(dsWindow);
@@ -67,7 +79,7 @@ public class DelayedReportTemplate extends EventDispatcher {
     }
 
     private function dataSourceChoice(event:DataSourceSelectionEvent):void {
-        ProgressAlert.alert(Application.application as DisplayObject, "Preparing the report...", null, solutionService.installEntity);
+        ProgressAlert.alert(Application.application as DisplayObject, "Installing...", null, solutionService.installEntity);
         solutionService.installEntity.send(info.exchangeData.descriptor, event.dataSource.id);
     }
 
@@ -76,7 +88,7 @@ public class DelayedReportTemplate extends EventDispatcher {
         var descriptor:EIDescriptor = solutionService.installEntity.lastResult as EIDescriptor;
         if (descriptor is InsightDescriptor) {
             var insightDescriptor:InsightDescriptor = descriptor as InsightDescriptor;
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, info.exchangeData)));
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor)));
         } else if (descriptor is DashboardDescriptor ){
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, exchangeItem: info.exchangeData})));
         }

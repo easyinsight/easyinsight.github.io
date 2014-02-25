@@ -11,6 +11,7 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 
+import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.intention.*;
 import com.easyinsight.security.SecurityUtil;
 
@@ -42,6 +43,9 @@ import org.apache.commons.httpclient.auth.AuthScope;
  */
 public class HighRiseCompositeSource extends CompositeServerDataSource {
 
+    public static final int CUSTOM_FIELD_CONTACT = 1;
+    public static final int CUSTOM_FIELD_COMPANY = 2;
+
     private String url = "";
     private boolean includeEmails;
     private boolean joinDealsToContacts;
@@ -52,6 +56,13 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private boolean joinTasksToContacts;
     private String token;
     private List<HighriseAdditionalToken> additionalTokens = new ArrayList<HighriseAdditionalToken>();
+
+    public List<CustomFieldTag> customFieldTags() {
+        List<CustomFieldTag> customTags = new ArrayList<CustomFieldTag>();
+        customTags.add(new CustomFieldTag(HighRiseCompositeSource.CUSTOM_FIELD_COMPANY, "Company Custom Field"));
+        customTags.add(new CustomFieldTag(HighRiseCompositeSource.CUSTOM_FIELD_CONTACT, "Contact Custom Field"));
+        return customTags;
+    }
 
     public void configureFactory(HTMLConnectionFactory factory) {
         factory.addField("Highrise URL", "url", "Your Highrise URL is the browser URL you normally use to connect to Highrise. For example, if you access Highrise as yourcompanyname.highrisehq.com, put yourcompanyname in as the Highrise URL.");

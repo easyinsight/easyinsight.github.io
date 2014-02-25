@@ -8,6 +8,7 @@
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
 
@@ -38,6 +39,10 @@
                 for each (var item:ReportFormItem in items) {
                     item.save();
                 }
+            }
+            if (dataSource.feedName == null || dataSource.feedName.length < 1) {
+                Alert.show("You must configure a data source name.");
+                return;
             }
             saveSource();
         }

@@ -23,6 +23,15 @@ public abstract class DataResults implements Cloneable {
     private String uid;
     private long databaseTime;
     private long processingTime;
+    private Map<String, List<String>> fieldEvents = new HashMap<String, List<String>>();
+
+    public Map<String, List<String>> getFieldEvents() {
+        return fieldEvents;
+    }
+
+    public void setFieldEvents(Map<String, List<String>> fieldEvents) {
+        this.fieldEvents = fieldEvents;
+    }
 
     public WSAnalysisDefinition getReport() {
         return report;

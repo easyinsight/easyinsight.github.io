@@ -1939,6 +1939,14 @@ public class AnalysisService {
                     filtered.add(insightDescriptors);
                 }
             }
+
+            Collections.sort(filtered, new Comparator<InsightDescriptor>() {
+
+                public int compare(InsightDescriptor insightDescriptor, InsightDescriptor insightDescriptor1) {
+                    return insightDescriptor.getName().compareToIgnoreCase(insightDescriptor1.getName());
+                }
+            });
+
             return new ReportResults(filtered, reportTags);
         } catch (Exception e) {
             LogClass.error(e);

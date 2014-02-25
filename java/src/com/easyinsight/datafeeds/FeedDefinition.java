@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.core.*;
+import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.security.SecurityUtil;
@@ -46,7 +47,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private UploadPolicy uploadPolicy = new UploadPolicy();
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
-    private boolean accountVisible;
+    private boolean accountVisible = true;
     private long dataFeedID;
     private long size;
     private Date dateCreated;
@@ -88,6 +89,10 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public void setVisibleWithinParentConfiguration(boolean visibleWithinParentConfiguration) {
         this.visibleWithinParentConfiguration = visibleWithinParentConfiguration;
+    }
+
+    public List<CustomFieldTag> customFieldTags() {
+        return null;
     }
 
     public boolean isShowTags() {

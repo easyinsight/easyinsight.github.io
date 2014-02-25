@@ -54,6 +54,11 @@
             node.dataFeedID = event.descriptor.id;
             node.dataSourceName = event.descriptor.name;
             dataSources.addItem(node);
+            var ds:DataSourceDescriptor = new DataSourceDescriptor();
+            ds.name = event.descriptor.name;
+            ds.id = event.descriptor.id;
+            ds.dataSourceType = event.descriptor.dataSourceType;
+            allSources.addItem(ds);
         }
 
         private function removeSelected():void {
@@ -70,7 +75,7 @@
 
         private function removeSelectedConnections():void {
             var selected:ArrayCollection = new ArrayCollection();
-            for each (var o:CompositeFeedConnection in CompositeServerDataSource(dataSource).connections) {
+            for each (var o:CompositeFeedConnection in connections) {
                 if (o.selected) {
                     selected.addItem(o);
                 }

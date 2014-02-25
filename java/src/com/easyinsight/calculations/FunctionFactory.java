@@ -289,6 +289,8 @@ public class FunctionFactory {
             return new JSONParse();
         } else if (s.equals("stringformat")) {
             return new StringFormat();
+        } else if (s.equals("tagparse")) {
+            return new TagBlah();
         } else {
             return null;
         }

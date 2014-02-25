@@ -1342,9 +1342,16 @@ public abstract class WSAnalysisDefinition implements Serializable {
         List<AnalysisItem> columns = reportFieldsForMultiField();
         long id = getDataFeedID();
         FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(id);
+        List<AnalysisItem> allFields;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            allFields = dataSource.allFields(conn);
+        } finally {
+            Database.closeConnection(conn);
+        }
         Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
         Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
-        for (AnalysisItem field : dataSource.getFields()) {
+        for (AnalysisItem field : allFields) {
             map.put(field.getAnalysisItemID(), field);
             mapByName.put(field.toDisplay(), field);
         }
@@ -1392,9 +1399,27 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
             List<WeNeedToReplaceHibernateTag> tags = multiFieldFilterDefinition.getAvailableTags();
 
-            EIConnection conn = Database.instance().getConnection();
+            conn = Database.instance().getConnection();
 
             try {
+                PreparedStatement customFieldQueryStmt = conn.prepareStatement("SELECT custom_flag_to_tag.custom_flag FROM custom_flag_to_tag WHERE tag_id = ? AND data_source_id = ?");
+
+                for (WeNeedToReplaceHibernateTag tag : tags) {
+                    customFieldQueryStmt.setLong(1, tag.getTagID());
+                    customFieldQueryStmt.setLong(2, getDataFeedID());
+                    ResultSet rs = customFieldQueryStmt.executeQuery();
+                    while (rs.next()) {
+                        int customFlag = rs.getInt(1);
+                        for (AnalysisItem analysisItem : allFields) {
+                            if (analysisItem.getCustomFlag() == customFlag) {
+                                positions.put(analysisItem, i++);
+                                set.add(analysisItem);
+                            }
+                        }
+                    }
+                }
+                customFieldQueryStmt.close();
+
                 PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ? AND field_to_tag.data_source_id = ?");
                 for (WeNeedToReplaceHibernateTag tag : tags) {
                     queryStmt.setLong(1, tag.getTagID());
@@ -1439,39 +1464,15 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
 
         List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
-        EIConnection conn = Database.instance().getConnection();
-        try {
 
-            for (AnalysisItem analysisItem : fields) {
-                //long fieldID = analysisItem.getAnalysisItemID();
-                try {
-                    analysisItem = analysisItem.clone();
-                } catch (CloneNotSupportedException e) {
-                    throw new RuntimeException(e);
-                }
-                clones.add(analysisItem);
-
-                /*PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE display_name = ? and " +
-                        "extension_type = ? AND data_source_id = ?");
-                extStmt.setString(1, analysisItem.toDisplay());
-                extStmt.setInt(2, extensionType());
-                extStmt.setLong(3, dataFeedID);
-                ResultSet extRS = extStmt.executeQuery();
-                if (extRS.next()) {
-                    long extID = extRS.getLong(1);
-                    Session session = Database.instance().createSession(conn);
-                    try {
-                        ReportFieldExtension ext = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, extID).list().get(0);
-                        ext.afterLoad();
-                        analysisItem.setReportFieldExtension(ext);
-                    } finally {
-                        session.close();
-                    }
-                }
-                extStmt.close();*/
+        for (AnalysisItem analysisItem : fields) {
+            //long fieldID = analysisItem.getAnalysisItemID();
+            try {
+                analysisItem = analysisItem.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
             }
-        } finally {
-            Database.closeConnection(conn);
+            clones.add(analysisItem);
         }
 
         final Map<String, Integer> fieldOrderingMap = new HashMap<String, Integer>();

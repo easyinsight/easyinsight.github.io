@@ -687,6 +687,17 @@ public class AnalysisDefinition implements Cloneable {
         }*/
         List<AnalysisItem> addedItems = analysisDefinition.getAddedItems();
         if (target != null) {
+
+            // here is where if it's a semantic link, we find the appropriate source and field
+
+            // so the challenge from there, dealing with partials/joins
+
+            // how do we handle that...
+
+            // other thing is that we really want to be able to join individual tables
+
+            //
+
             for (AnalysisItem analysisItem : replacementMap.getFields()) {
                 analysisItem.setBasedOnReportField(null);
                 //analysisItem.afterLoad();
@@ -722,11 +733,16 @@ public class AnalysisDefinition implements Cloneable {
                         }
                     }
                     if (key != null) {
+                        System.out.println("\t\tFound key for " + analysisItem.toDisplay());
                         analysisItem.setKey(key);
                         /*if (set.containsKey(analysisItem.toDisplay()) && !addedItems.contains(analysisItem)) {
                             addedItems.add(analysisItem);
                         }*/
                     } else {
+                        if (analysisItem.getKey() instanceof DerivedKey) {
+                            System.out.println("*** THIS IS BAAAAAAAAD ***");
+                        }
+                        System.out.println("\t\tCould not find " + analysisItem.toDisplay() + ", cloning key");
                         Key clonedKey = analysisItem.getKey().clone();
                         analysisItem.setKey(clonedKey);
                         if (!addedItems.contains(analysisItem)) {
@@ -942,18 +958,21 @@ public class AnalysisDefinition implements Cloneable {
             }
     }
 
-    public Set<ValidationID>  populateValidationIDs() {
+    public Set<ValidationID>  populateValidationIDs(Set<Long> validFeedIDs) {
         Set<ValidationID> validationIDs = new HashSet<ValidationID>();
         for (AnalysisItem item : reportStructure.values()) {
             validationIDs.add(new ValidationID(ValidationID.KEY, item.getKey().getKeyID()));
             validationIDs.add(new ValidationID(ValidationID.FIELD, item.getAnalysisItemID()));
+            item.validate(validFeedIDs);
         }
         if (joinOverrides != null) {
             for (JoinOverride joinOverride : joinOverrides) {
                 if (joinOverride.getSourceItem() != null) {
+                    joinOverride.getSourceItem().validate(validFeedIDs);
                     validationIDs.add(new ValidationID(ValidationID.FIELD, joinOverride.getSourceItem().getAnalysisItemID()));
                 }
                 if (joinOverride.getTargetItem() != null) {
+                    joinOverride.getTargetItem().validate(validFeedIDs);
                     validationIDs.add(new ValidationID(ValidationID.FIELD, joinOverride.getTargetItem().getAnalysisItemID()));
                 }
             }
@@ -962,6 +981,7 @@ public class AnalysisDefinition implements Cloneable {
             for (FilterDefinition filter : filterDefinitions) {
                 validationIDs.add(new ValidationID(ValidationID.FILTER, filter.getFilterID()));
                 if (filter.getField() != null) {
+                    filter.getField().validate(validFeedIDs);
                     validationIDs.add(new ValidationID(ValidationID.KEY, filter.getField().getKey().getKeyID()));
                     validationIDs.add(new ValidationID(ValidationID.FIELD, filter.getField().getAnalysisItemID()));
                 }
@@ -969,6 +989,7 @@ public class AnalysisDefinition implements Cloneable {
         }
         if (addedItems != null) {
             for (AnalysisItem item : addedItems) {
+                item.validate(validFeedIDs);
                 validationIDs.add(new ValidationID(ValidationID.KEY, item.getKey().getKeyID()));
                 validationIDs.add(new ValidationID(ValidationID.FIELD, item.getAnalysisItemID()));
             }

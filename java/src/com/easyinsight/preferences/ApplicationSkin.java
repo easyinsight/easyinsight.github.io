@@ -80,10 +80,14 @@ public class ApplicationSkin implements Serializable {
     private boolean headerStartEnabled;
     private int headerEnd;
     private boolean headerEndEnabled;
+    private int reportHeaderTextColor;
+    private boolean reportHeaderTextColorEnabled;
     private int tableColorStart;
     private boolean tableColorStartEnabled;
     private int tableColorEnd;
     private boolean tableColorEndEnabled;
+    private int textColor;
+    private boolean textColorEnabled;
 
     private int dashboardStack1ColorStart;
     private int dashboardStack1ColorEnd;
@@ -100,6 +104,38 @@ public class ApplicationSkin implements Serializable {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public int getReportHeaderTextColor() {
+        return reportHeaderTextColor;
+    }
+
+    public void setReportHeaderTextColor(int reportHeaderTextColor) {
+        this.reportHeaderTextColor = reportHeaderTextColor;
+    }
+
+    public boolean isReportHeaderTextColorEnabled() {
+        return reportHeaderTextColorEnabled;
+    }
+
+    public void setReportHeaderTextColorEnabled(boolean reportHeaderTextColorEnabled) {
+        this.reportHeaderTextColorEnabled = reportHeaderTextColorEnabled;
+    }
+
+    public int getTextColor() {
+        return textColor;
+    }
+
+    public void setTextColor(int textColor) {
+        this.textColor = textColor;
+    }
+
+    public boolean isTextColorEnabled() {
+        return textColorEnabled;
+    }
+
+    public void setTextColorEnabled(boolean textColorEnabled) {
+        this.textColorEnabled = textColorEnabled;
     }
 
     public List<MultiColor> getSecondaryMultiColors() {
@@ -223,9 +259,11 @@ public class ApplicationSkin implements Serializable {
             properties.add(new ReportNumericProperty("crosstabHeaderTextColor", crosstabHeaderTextColor, crosstabHeaderTextColorEnabled));
             properties.add(new ReportNumericProperty("headerStart", headerStart, headerStartEnabled));
             properties.add(new ReportNumericProperty("headerEnd", headerEnd, headerEndEnabled));
+            properties.add(new ReportNumericProperty("reportHeaderTextColor", reportHeaderTextColor, reportHeaderTextColorEnabled));
 
             properties.add(new ReportNumericProperty("tableColorStart", tableColorStart, tableColorStartEnabled));
             properties.add(new ReportNumericProperty("tableColorEnd", tableColorEnd, tableColorEndEnabled));
+            properties.add(new ReportNumericProperty("textColor", textColor, textColorEnabled));
 
             properties.add(new ReportNumericProperty("dashboardStack1ColorStart", dashboardStack1ColorStart));
             properties.add(new ReportNumericProperty("dashboardStack1ColorEnd", dashboardStack1ColorEnd));
@@ -332,10 +370,14 @@ public class ApplicationSkin implements Serializable {
         headerStartEnabled = propertyEnabled(properties, "headerStart");
         headerEnd = (int) findNumberProperty(properties, "headerEnd", 0);
         headerEndEnabled = propertyEnabled(properties, "headerEnd");
+        reportHeaderTextColor = (int) findNumberProperty(properties, "reportHeaderTextColor", 0);
+        reportHeaderTextColorEnabled = propertyEnabled(properties, "reportHeaderTextColor");
         tableColorStart = (int) findNumberProperty(properties, "tableColorStart", 0);
         tableColorStartEnabled = propertyEnabled(properties, "tableColorStart");
         tableColorEnd = (int) findNumberProperty(properties, "tableColorEnd", 0);
         tableColorEndEnabled = propertyEnabled(properties, "tableColorEnd");
+        textColor = (int) findNumberProperty(properties, "textColor", 0);
+        textColorEnabled = propertyEnabled(properties, "textColor");
         dashboardStack1ColorStart = (int) findNumberProperty(properties, "dashboardStack1ColorStart", 0);
         dashboardStack1ColorEnd = (int) findNumberProperty(properties, "dashboardStack1ColorEnd", 0);
         dashboardStackColor2Start = (int) findNumberProperty(properties, "dashboardStack2ColorStart", 0);

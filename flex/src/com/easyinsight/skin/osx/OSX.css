@@ -106,15 +106,15 @@ MenuBar {
 
 TitleWindow {
 	backgroundAlpha: 1; 
-	backgroundColor: #DCE2F8;
+	backgroundColor: #FFFFFF;
 	borderThicknessLeft: 0; 
 	borderThicknessBottom: 0; 
 	borderThicknessRight: 0;
 	borderThicknessTop: 0;
-	paddingLeft: 0;
-	paddingTop: 0;
-	paddingRight: 0;
-	paddingBottom: 0;
+	paddingLeft: 10;
+	paddingTop: 10;
+	paddingRight: 10;
+	paddingBottom: 10;
 }
 
 Alert {

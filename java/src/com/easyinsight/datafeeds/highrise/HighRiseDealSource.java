@@ -75,6 +75,9 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         priceMeasure.setFormattingType(FormattingConfiguration.CURRENCY);
         analysisItems.add(priceMeasure);
         AnalysisMeasure dealValueMeasure = new AnalysisMeasure(TOTAL_DEAL_VALUE, AggregationTypes.SUM);
+        // assign to X
+        // if we create a generic sales connection
+        // the field reconiliation is just what changes...
         dealValueMeasure.setFormattingType(FormattingConfiguration.CURRENCY);
         analysisItems.add(dealValueMeasure);
         analysisItems.add(new AnalysisDimension(keys.get(DURATION), true));

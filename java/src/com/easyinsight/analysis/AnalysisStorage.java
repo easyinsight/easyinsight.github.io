@@ -594,7 +594,7 @@ public class AnalysisStorage {
         }
     }
 
-    public Set<ValidationID> populateValidationIDs(long reportID) {
+    public Set<ValidationID> populateValidationIDs(long reportID, Set<Long> ids) {
         Set<ValidationID> validationIDs;
         Session session = Database.instance().createSession();
         try {
@@ -602,7 +602,7 @@ public class AnalysisStorage {
             List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, reportID).list();
             if (results.size() > 0) {
                 AnalysisDefinition analysisDefinition = (AnalysisDefinition) results.get(0);
-                validationIDs = analysisDefinition.populateValidationIDs();
+                validationIDs = analysisDefinition.populateValidationIDs(ids);
             } else {
                 throw new RuntimeException();
             }

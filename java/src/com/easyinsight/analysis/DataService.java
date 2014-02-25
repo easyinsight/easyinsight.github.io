@@ -130,6 +130,23 @@ public class DataService {
 
             List<WeNeedToReplaceHibernateTag> tags = filter.getAvailableTags();
 
+            PreparedStatement customFieldQueryStmt = conn.prepareStatement("SELECT custom_flag_to_tag.custom_flag FROM custom_flag_to_tag WHERE tag_id = ? AND data_source_id = ?");
+
+            for (WeNeedToReplaceHibernateTag tag : tags) {
+                customFieldQueryStmt.setLong(1, tag.getTagID());
+                customFieldQueryStmt.setLong(2, dataSourceID);
+                ResultSet rs = customFieldQueryStmt.executeQuery();
+                while (rs.next()) {
+                    int customFlag = rs.getInt(1);
+                    for (AnalysisItem analysisItem : allFields) {
+                        if (analysisItem.getCustomFlag() == customFlag) {
+                            positions.put(analysisItem, i++);
+                            set.add(analysisItem);
+                        }
+                    }
+                }
+            }
+            customFieldQueryStmt.close();
 
             PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ? AND field_to_tag.data_source_id = ?");
 
@@ -662,6 +679,9 @@ public class DataService {
                 }
             }
             RollingFilterDefinition reportFilter = null;
+
+
+
             for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
                 if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
                     reportFilter = (RollingFilterDefinition) customFilter;
@@ -1805,6 +1825,7 @@ public class DataService {
             long processingTime = elapsed - insightRequestMetadata.getDatabaseTime();
             results.setProcessingTime(processingTime);
             results.setDatabaseTime(insightRequestMetadata.getDatabaseTime());
+            results.setFieldEvents(insightRequestMetadata.getFieldAudits());
             if (insightRequestMetadata.isLogReport()) {
                 results.setAuditMessages(events);
             }
@@ -2124,7 +2145,7 @@ public class DataService {
             for (AnalysisItem analysisItem : items) {
                 for (FieldRule rule : rules) {
                     if (rule.matches(analysisItem)) {
-                        rule.update(analysisItem, analysisDefinition);
+                        rule.update(analysisItem, analysisDefinition, insightRequestMetadata);
                     }
                 }
             }

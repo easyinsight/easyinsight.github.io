@@ -48,6 +48,20 @@ public class InsightRequestMetadata implements Serializable {
     private boolean noDataOnNoJoin;
     private String ip;
     private transient boolean noLogging;
+    private transient Map<String, List<String>> fieldAudits = new HashMap<String, List<String>>();
+
+    public Map<String, List<String>> getFieldAudits() {
+        return fieldAudits;
+    }
+
+    public void addAudit(AnalysisItem field, String audit) {
+        List<String> audits = fieldAudits.get(field.toDisplay());
+        if (audits == null) {
+            audits = new ArrayList<String>();
+            fieldAudits.put(field.toDisplay(), audits);
+        }
+        audits.add(audit);
+    }
 
     public List<ReportAuditEvent> getAuditEvents() {
         return auditEvents;

@@ -40,6 +40,7 @@ import com.easyinsight.datafeeds.pivotaltrackerv5.*;
 import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseDatabaseSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseUserSource;
+import com.easyinsight.datafeeds.redbooth.*;
 import com.easyinsight.datafeeds.redirect.RedirectDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceSObjectSource;
@@ -379,6 +380,13 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.SURVEYGIZMO_COMPOSITE, SurveyGizmoCompositeSource.class);
         registerType(FeedType.SURVEYGIZMO_FORM, SurveyGizmoFormSource.class);
 
+        registerType(FeedType.INSIGHTLY_NOTES, InsightlyNoteSource.class);
+        registerType(FeedType.INSIGHTLY_NOTE_LINKS, InsightlyNoteLinkSource.class);
+        registerType(FeedType.REDBOOTH_COMPOSITE, RedboothCompositeSource.class);
+        registerType(FeedType.REDBOOTH_ORGANIZATION, RedboothOrganizationSource.class);
+        registerType(FeedType.REDBOOTH_PROJECT, RedboothProjectSource.class);
+        registerType(FeedType.REDBOOTH_TASK_LIST, RedboothTaskListSource.class);
+        registerType(FeedType.REDBOOTH_TASK, RedboothTaskSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
