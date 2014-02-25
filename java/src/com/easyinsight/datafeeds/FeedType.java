@@ -260,6 +260,9 @@ public class FeedType implements Serializable {
     public static final FeedType REDBOOTH_TASK = new FeedType(231);
     public static final FeedType REDBOOTH_TASK_LIST = new FeedType(232);
     public static final FeedType REDBOOTH_COMMENT = new FeedType(233);
+    public static final FeedType SURVEYGIZMO_COMPOSITE = new FeedType(234);
+    public static final FeedType SURVEYGIZMO_FORM = new FeedType(235);
+    public static final FeedType SURVEYGIZMO_FORM_METADATA = new FeedType(236);
 
     public FeedType() {
     }
