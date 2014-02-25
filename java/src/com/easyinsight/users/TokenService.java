@@ -10,6 +10,7 @@ import com.easyinsight.datafeeds.harvest.HarvestCompositeSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 //import com.easyinsight.datafeeds.xero.XeroCompositeSource;
 import com.easyinsight.datafeeds.smartsheet.SmartsheetBaseSource;
+import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoCompositeSource;
 import com.easyinsight.datafeeds.trello.TrelloCompositeSource;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
@@ -77,6 +78,12 @@ public class TokenService {
                 provider = new DefaultOAuthProvider(
                         "https://api.linkedin.com/uas/oauth/requestToken", "https://api.linkedin.com/uas/oauth/accessToken",
                         "https://api.linkedin.com/uas/oauth/authorize");
+            } else if (type == FeedType.SURVEYGIZMO_COMPOSITE.getType()) {
+                consumer = new DefaultOAuthConsumer(SurveyGizmoCompositeSource.CONSUMER_KEY,
+                        SurveyGizmoCompositeSource.CONSUMER_SECRET);
+                provider = new DefaultOAuthProvider(
+                        "http://restapi.surveygizmo.com/head/oauth/request_token", "http://restapi.surveygizmo.com/head/oauth/access_token",
+                        "http://restapi.surveygizmo.com/head/oauth/authenticate");
             } else if (type == FeedType.TWITTER.getType()) {
                 consumer = new DefaultOAuthConsumer("Kb9mqPL8TlaJB3lZHK8Fpw",
                         "q7W04Nth2vZYOvOfiiLfTZNdE83sPDpI2uGSAtJhKnM");
@@ -245,7 +252,7 @@ public class TokenService {
             if (redirect) {
                 if (ConfigLoader.instance().isProduction()) {
                     //requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.comasy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
-                    if(dataSourceId != null) {
+                    if (dataSourceId != null) {
                         requestToken = provider.retrieveRequestToken(consumer, "https://www.easy-insight.com/app/oauth?redirectTarget=" + redirectType + "&dataSourceID=" + dataSourceId);
                     } else {
                         requestToken = provider.retrieveRequestToken(consumer, "https://www.easy-insight.com/app/oauth?redirectTarget=" + redirectType + "&type=googleProvider");
@@ -253,10 +260,10 @@ public class TokenService {
 
                 } else {
                     //requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
-                    if(dataSourceId != null) {
-                        requestToken = provider.retrieveRequestToken(consumer, "https://localhost:4443/app/oauth?redirectTarget=" + redirectType + "&dataSourceID=" + dataSourceId);
+                    if (dataSourceId != null) {
+                        requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget=" + redirectType + "&dataSourceID=" + dataSourceId);
                     } else {
-                        requestToken = provider.retrieveRequestToken(consumer, "https://localhost:4443/app/oauth?redirectTarget=" + redirectType + "&type=googleProvider");
+                        requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget=" + redirectType + "&type=googleProvider");
                     }
                 }
             } else {

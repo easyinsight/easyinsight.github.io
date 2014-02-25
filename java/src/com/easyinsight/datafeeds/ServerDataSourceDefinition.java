@@ -42,12 +42,19 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         private Map<String, Key> keyMap;
         private List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
 
+
         public void addField(String keyName, AnalysisItem analysisItem) {
+            addField(keyName, null, analysisItem);
+        }
+
+        public void addField(String keyName, String displayName, AnalysisItem analysisItem) {
             Key key = keyMap.get(keyName);
             if (key == null) {
                 key = new NamedKey(keyName);
             }
             analysisItem.setKey(key);
+            if(displayName != null)
+                analysisItem.setDisplayName(displayName);
             analysisItems.add(analysisItem);
         }
     }

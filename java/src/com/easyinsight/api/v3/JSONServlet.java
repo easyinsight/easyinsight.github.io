@@ -135,7 +135,8 @@ public abstract class JSONServlet extends HttpServlet {
 
                 InputStream is = req.getInputStream();
                 JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-                net.minidev.json.JSONObject postObject = (net.minidev.json.JSONObject) parser.parse(is);
+                Object o = parser.parse(is);
+                net.minidev.json.JSONObject postObject = (net.minidev.json.JSONObject) o;
                 EIConnection conn = Database.instance().getConnection();
                 ResponseInfo responseInfo;
                 try {

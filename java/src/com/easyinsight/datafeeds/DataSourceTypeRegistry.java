@@ -54,6 +54,8 @@ import com.easyinsight.datafeeds.solve360.Solve360ContactsSource;
 import com.easyinsight.datafeeds.solve360.Solve360OpportunitiesSource;*/
 import com.easyinsight.datafeeds.smartsheet.SmartsheetTableSource;
 import com.easyinsight.datafeeds.solve360.*;
+import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoCompositeSource;
+import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoFormSource;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
@@ -374,6 +376,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.PIVOTAL_V5_LABEL, PivotalTrackerV5LabelSource.class);
         registerType(FeedType.PIVOTAL_V5_ITERATION, PivotalTrackerV5IterationSource.class);
         registerType(FeedType.PIVOTAL_V5_STORY_TO_LABEL, PivotalTrackerV5StoryToLabelSource.class);
+        registerType(FeedType.SURVEYGIZMO_COMPOSITE, SurveyGizmoCompositeSource.class);
+        registerType(FeedType.SURVEYGIZMO_FORM, SurveyGizmoFormSource.class);
 
     }
 
