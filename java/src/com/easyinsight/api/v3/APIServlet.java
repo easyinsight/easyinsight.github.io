@@ -219,6 +219,7 @@ public abstract class APIServlet extends HttpServlet {
             }
         }
         Date end = new Date();
+        BenchmarkManager.recordBenchmark(this.getClass().getCanonicalName(), (end.getTime() - start.getTime()), userResponse.getUserID());
         System.out.println("API Call: " + this.getClass().getCanonicalName() + " Duration: " + (end.getTime() - start.getTime()) + " User: " + ((userResponse != null && userResponse.getUserName() != null) ? userResponse.getUserName() : "unknown" ) + " and requested user ID " + userID);
     }
 
