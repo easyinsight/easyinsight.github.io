@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:feed="com.easyinsight.administration.feed.*"
-                       xmlns:util="com.easyinsight.util.*">
+                       xmlns:util="com.easyinsight.util.*" width="1000">
     <mx:Script><![CDATA[
         import com.easyinsight.util.PopUpUtil;
 
