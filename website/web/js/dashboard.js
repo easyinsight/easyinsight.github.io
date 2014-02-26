@@ -335,7 +335,7 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
 }
 
 var hideFilter = function (id, filterMap) {
-    $(".filter" + id).addClass("hideFilter");
+    $("._dashboard_filter_" + id).addClass("hideFilter");
     for (var f in filterMap) {
         if (filterMap[f].filter.id == id) {
             filterMap[f].filter.override = true;
