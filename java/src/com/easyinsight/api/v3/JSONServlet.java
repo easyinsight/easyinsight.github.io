@@ -3,6 +3,7 @@ package com.easyinsight.api.v3;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.api.DataTransformation;
 import com.easyinsight.api.ServiceRuntimeException;
+import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -14,8 +15,6 @@ import com.easyinsight.users.UserService;
 import com.easyinsight.users.UserServiceResponse;
 import com.easyinsight.userupload.UploadPolicy;
 import net.minidev.json.parser.JSONParser;
-import nu.xom.Builder;
-import nu.xom.Document;
 import nu.xom.ParsingException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,6 +30,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +64,7 @@ public abstract class JSONServlet extends HttpServlet {
                 userResponse = new UserService().authenticate(userID, password, false);
             }
         }
-
+        Date start = new Date();
         if (userResponse == null || !userResponse.isSuccessful()) {
             sendError(401, "Your credentials were rejected.", resp);
         } else {
@@ -101,6 +101,9 @@ public abstract class JSONServlet extends HttpServlet {
                 sendError(400, "Your request was malformed.", resp);
             }
         }
+        Date end = new Date();
+        BenchmarkManager.recordBenchmark(this.getClass().getCanonicalName(), (end.getTime() - start.getTime()), userResponse.getUserID());
+        System.out.println("API Call: " + this.getClass().getCanonicalName() + " Duration: " + (end.getTime() - start.getTime()));
     }
 
     @Override
@@ -126,6 +129,7 @@ public abstract class JSONServlet extends HttpServlet {
             }
         }
 
+        Date start = new Date();
         if (userResponse == null || !userResponse.isSuccessful()) {
             sendError(401, "Your credentials were rejected.", resp);
         } else {
@@ -167,6 +171,9 @@ public abstract class JSONServlet extends HttpServlet {
                 sendError(400, "Your request was malformed.", resp);
             }
         }
+        Date end = new Date();
+        BenchmarkManager.recordBenchmark(this.getClass().getCanonicalName(), (end.getTime() - start.getTime()), userResponse.getUserID());
+        System.out.println("API Call: " + this.getClass().getCanonicalName() + " Duration: " + (end.getTime() - start.getTime()));
     }
 
     protected abstract ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception;
