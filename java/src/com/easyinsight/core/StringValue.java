@@ -19,6 +19,8 @@ public class StringValue extends Value implements Serializable {
     private static PolicyFactory policy = new HtmlPolicyBuilder()
             .allowElements("li")
             .allowElements("ul")
+            .allowElements("b")
+            .allowElements("i")
             .toFactory();
 
     public StringValue() {
@@ -29,9 +31,13 @@ public class StringValue extends Value implements Serializable {
 
 
 // Sanitize your output.
-        //return policy.sanitize(value);
+        try {
+            return policy.sanitize(value);
+        } catch (Exception e) {
+            return StringEscapeUtils.escapeHtml(value);
+        }
         /*HtmlSanitizer.sanitize(value);*/
-        return StringEscapeUtils.escapeHtml(value);
+        //return StringEscapeUtils.escapeHtml(value);
     }
 
     @Override
