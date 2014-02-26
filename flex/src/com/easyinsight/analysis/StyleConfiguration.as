@@ -71,14 +71,14 @@ public class StyleConfiguration {
 
     public static function getDataSourceItems(dataSource:FeedDefinitionData):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
-        items.addItem(new CheckBoxReportFormItem("Account Visible", "accountVisible", dataSource.accountVisible, dataSource));
-        items.addItem(new TextReportFormItem("Data Source Name", "feedName", dataSource.feedName, dataSource));
-        items.addItem(new CheckBoxReportFormItem("Field Cleanup Enabled", "fieldCleanupEnabled", dataSource.fieldCleanupEnabled, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Should this data source be visible to everyone in the account?", "accountVisible", dataSource.accountVisible, dataSource));
+        items.addItem(new TextReportFormItem("What should this data source be named?", "feedName", dataSource.feedName, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Should the data source clean up old, duplicate fields when saved?", "fieldCleanupEnabled", dataSource.fieldCleanupEnabled, dataSource));
         items.addItem(new CheckBoxReportFormItem("Field Lookup Enabled", "fieldLookupEnabled", dataSource.fieldLookupEnabled, dataSource));
-        items.addItem(new CheckBoxReportFormItem("Manual Report Run", "manualReportRun", dataSource.manualReportRun, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Should reports in the editor on this data source run manually?", "manualReportRun", dataSource.manualReportRun, dataSource));
         var dashboardService:RemoteObject = new RemoteObject();
         dashboardService.destination = "analysisDefinition";
-        items.addItem(new ServerLoadComboBoxReportFormItem("Preferred Tag", "defaultFieldTag", dataSource.defaultFieldTag, dataSource, dashboardService.getFieldTags));
+        items.addItem(new ServerLoadComboBoxReportFormItem("Should the field list default to showing only fields matching a certain tag?", "defaultFieldTag", dataSource.defaultFieldTag, dataSource, dashboardService.getFieldTags));
         return items;
     }
 
@@ -176,6 +176,7 @@ public class StyleConfiguration {
          "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
          }*/
         items.addItem(new NumericReportFormItem("Font Size", "fontSize", report.fontSize, report, 8, 48));
+        items.addItem(new TextReportFormItem("Export String", "exportString", report.exportString, report));
         items.addItem(new NumericReportFormItem("Header Font Size", "headerFontSize", report.headerFontSize, report, 8, 48));
         items.addItem(new NumericReportFormItem("Max Header Width", "maxHeaderWidth", report.maxHeaderWidth, report, 100, 1500));
         items.addItem(new NumericReportFormItem("Background Alpha", "backgroundAlpha", report.backgroundAlpha, report, 0, 1));
