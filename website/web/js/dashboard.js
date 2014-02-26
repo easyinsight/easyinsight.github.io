@@ -228,7 +228,7 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     }
     else if (obj.metadata.type == "diagram") {
         $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
-            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, afterRefresh($("#" + id + " .loading")));
+            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, typeof(userJSON.embedded) != "undefined" ? userJSON.embedded : false, afterRefresh($("#" + id + " .loading")));
         }) }));
     }
     else if (obj.metadata.type == "list") {
