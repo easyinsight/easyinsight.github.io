@@ -5,7 +5,6 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRetrievalState;
-import com.easyinsight.filtering.FlatDateFilterEditor;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
@@ -17,6 +16,8 @@ import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.ComboBox;
 import mx.controls.Label;
+import mx.controls.LinkButton;
+import mx.core.UIComponent;
 import mx.managers.PopUpManager;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
@@ -91,7 +92,7 @@ import mx.rpc.events.ResultEvent;
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
 
-        private var filterLabel:Label;
+        private var filterLabel:UIComponent;
         private var checkbox:CheckBox;
 
         private function createCheckbox():void {
@@ -108,9 +109,16 @@ import mx.rpc.events.ResultEvent;
                 createCheckbox();
             }
 
-            filterLabel = new Label();
-            filterLabel.styleName = "filterLabel";
-            filterLabel.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            if (_filterEditable) {
+                filterLabel = new LinkButton();
+                filterLabel.addEventListener(MouseEvent.CLICK, edit);
+                filterLabel.styleName = "filterLabel";
+                LinkButton(filterLabel).label = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            } else {
+                filterLabel = new Label();
+                filterLabel.styleName = "filterLabel";
+                Label(filterLabel).text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            }
             addChild(filterLabel);
 
             comboBox = new ComboBox();
@@ -188,13 +196,6 @@ import mx.rpc.events.ResultEvent;
             }
 
             if (_filterEditable) {
-                var editButton:Button = new Button();
-                editButton.addEventListener(MouseEvent.CLICK, edit);
-                editButton.setStyle("icon", ImageConstants.EDIT_ICON);
-                editButton.toolTip = "Edit";
-                addChild(editButton);
-
-
                 var deleteButton:Button = new Button();
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
                 deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
@@ -243,8 +244,8 @@ import mx.rpc.events.ResultEvent;
             if (event.filterDefinition is FilterDateRangeDefinition) {
 
             }
-            if (filterLabel != null) {
-                filterLabel.text = FilterDefinition.getLabel(event.filterDefinition, analysisItem);
+            if (filterLabel is LinkButton) {
+                LinkButton(filterLabel).label = FilterDefinition.getLabel(event.filterDefinition, analysisItem);
             }
             if (!event.filterDefinition.toggleEnabled) {
                 if (!checkbox) {
