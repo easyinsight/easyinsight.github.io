@@ -1,4 +1,4 @@
-window.drawDiagram = function (j, selector, reportID, afterRefresh) {
+window.drawDiagram = function (j, selector, reportID, embedded, afterRefresh) {
     var diagram = j;
 
     function createNode(node, key) {
@@ -12,7 +12,7 @@ window.drawDiagram = function (j, selector, reportID, afterRefresh) {
         if (node["drillthrough"] != null) {
             $(e).addClass("drillthrough");
             $(e).bind("click", function (e) {
-                drillThrough('reportID=' + reportID + "&drillthroughID=" + node["drillthrough"] + "&sourceField=" + key);
+                drillThrough('reportID=' + reportID + "&drillthroughID=" + node["drillthrough"] + "&sourceField=" + key + "&embedded=" + embedded);
             })
         }
 
