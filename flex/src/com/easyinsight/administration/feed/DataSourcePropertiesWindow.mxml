@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="600"
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="800"
                        horizontalAlign="center" xmlns:feed="com.easyinsight.administration.feed.*">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.ReportFormItem;
