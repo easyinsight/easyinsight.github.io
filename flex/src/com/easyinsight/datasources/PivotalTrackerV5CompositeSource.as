@@ -2,6 +2,8 @@ package com.easyinsight.datasources {
 
 import com.easyinsight.customupload.PivotalTrackerV5DataSourceCreation;
 
+import mx.collections.ArrayCollection;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.pivotaltrackerv5.PivotalTrackerV5CompositeSource")]
 public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
@@ -15,6 +17,11 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
 
     override public function getFeedType():int {
         return DataSourceType.PIVOTAL_TRACKER_V5;
+    }
+
+    override public function createAdminPages():ArrayCollection {
+        var pages:ArrayCollection = new ArrayCollection();
+        return pages;
     }
 
     override public function configClass():Class {
