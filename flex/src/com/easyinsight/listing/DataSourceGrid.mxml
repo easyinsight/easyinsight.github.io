@@ -4,7 +4,7 @@
          height="100%" horizontalAlign="center" initialize="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
-        import com.easyinsight.datasources.CopyDataSourceWindow;
+
         import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.util.ProgressAlert;
@@ -118,7 +118,7 @@
             } else if (op == "joinDataSources") {
                 createCompositeFeed();
             } else if (op == "copyDataSources") {
-                blah();
+                //blah();
             } else if (op == "customizeTopReports") {
                 blah1();
             }
@@ -444,13 +444,13 @@
         [Bindable]
         private var tagsVisible:Boolean;
 
-        private function blah():void {
+        /*private function blah():void {
             var window:CopyDataSourceWindow = new CopyDataSourceWindow();
             window.availableTags = tags;
             window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, onRefresh, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-        }
+        }*/
 
         private function onRefresh(event:UploadConfigEvent):void {
             dispatchEvent(event);
@@ -483,7 +483,6 @@
 
         [Bindable]
         private var actions:ArrayCollection = new ArrayCollection([ {label: "Join data sources", op: "joinDataSources"},
-            {label: "Copy data sources", op: "copyDataSources"},
             {label: "Customize top reports", op: "customizeTopReports"}
         ]);
 
