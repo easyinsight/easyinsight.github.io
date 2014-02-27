@@ -864,6 +864,7 @@ public class DashboardService {
             dashboard.setOverridenFilters(overriddenFilters);
             dashboard.visit(new StateVisitor(dashboardStackPositions));
         }
+        dashboard.setDataSourceInfo(feed.createSourceInfo(conn));
         BenchmarkManager.recordBenchmarkForDashboard("DashboardView", System.currentTimeMillis() - startTime, SecurityUtil.getUserID(false), dashboardID);
         return dashboard;
     }

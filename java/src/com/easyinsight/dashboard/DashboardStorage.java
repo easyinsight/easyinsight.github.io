@@ -1,10 +1,12 @@
 package com.easyinsight.dashboard;
 
+import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.Link;
 import com.easyinsight.core.RolePrioritySet;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.CompositeFeedNode;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.FeedRegistry;
@@ -14,9 +16,8 @@ import com.easyinsight.security.Roles;
 import org.hibernate.Session;
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Date;
-import java.util.List;
 
 /**
  * User: jamesboe
@@ -522,8 +523,6 @@ public class DashboardStorage {
         }
         getUserStmt.close();
         dashboard.setAdministrators(admins);
-        Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
-        dashboard.setDataSourceInfo(feed.createSourceInfo(conn));
         return dashboard;
     }
 
