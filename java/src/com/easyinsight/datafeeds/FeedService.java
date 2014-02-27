@@ -116,6 +116,24 @@ public class FeedService {
         return tags;
     }
 
+    public List<CustomFieldTag> getCustomFieldTags(FeedDefinition dataSource, EIConnection conn) throws SQLException {
+        List<CustomFieldTag> tags = dataSource.customFieldTags();
+        PreparedStatement ps = conn.prepareStatement("SELECT TAG_ID, CUSTOM_FLAG FROM CUSTOM_FLAG_TO_TAG WHERE DATA_SOURCE_ID = ?");
+        ps.setLong(1, dataSource.getDataFeedID());
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            long tagID = rs.getLong(1);
+            int customFlag = rs.getInt(2);
+            for (CustomFieldTag customFieldTag : tags) {
+                if (customFieldTag.getType() == customFlag) {
+                    customFieldTag.setTagID(tagID);
+                }
+            }
+        }
+        ps.close();
+        return tags;
+    }
+
     public List<FieldRule> getFieldRules(long dataSourceID) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();

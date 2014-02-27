@@ -428,7 +428,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public Feed createFeed(EIConnection conn) {
-        FeedDefinition parentSource = null; 
+        FeedDefinition parentSource = null;
         if (getParentSourceID() > 0) {
             try {
                 parentSource = new FeedStorage().getFeedDefinitionData(getParentSourceID(), conn);
@@ -436,6 +436,11 @@ public class FeedDefinition implements Cloneable, Serializable {
                 throw new RuntimeException(e);
             }
         }
+        return createFeed(conn, parentSource);
+    }
+
+    public Feed createFeed(EIConnection conn, FeedDefinition parentSource) {
+
         Feed feed = createFeedObject(parentSource);
 
         // load from report

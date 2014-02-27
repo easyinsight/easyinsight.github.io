@@ -6,7 +6,6 @@ import com.easyinsight.core.EmptyValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.core.Key;
-import com.easyinsight.intention.DataSourceIntention;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.scorecard.DataSourceRefreshEvent;
@@ -140,6 +139,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 }
             }
         }
+        qStmt.close();
         queryConnStmt.close();
         nameStmt.close();
         reportNameStmt.close();
@@ -280,17 +280,18 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     }
 
     public List<CompositeFeedConnection> obtainChildConnections() throws SQLException {
-        Map<FeedType, IServerDataSourceDefinition> feedMap = new HashMap<FeedType, IServerDataSourceDefinition>();
+        Map<FeedType, CompositeFeedNode> feedMap = new HashMap<FeedType, CompositeFeedNode>();
         for (CompositeFeedNode child : getCompositeFeedNodes()) {
-            FeedDefinition childDef = new FeedStorage().getFeedDefinitionData(child.getDataFeedID());
-            feedMap.put(childDef.getFeedType(), (IServerDataSourceDefinition) childDef);
+            //FeedDefinition childDef = new FeedStorage().getFeedDefinitionData(child.getDataFeedID());
+            feedMap.put(new FeedType(child.getDataSourceType()), child);
         }
         List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
             for (ChildConnection childConnection : getLiveChildConnections()) {
-            IServerDataSourceDefinition sourceDef = feedMap.get(childConnection.getSourceFeedType());
-            IServerDataSourceDefinition targetDef = feedMap.get(childConnection.getTargetFeedType());
+            CompositeFeedNode sourceDef = feedMap.get(childConnection.getSourceFeedType());
+                CompositeFeedNode targetDef = feedMap.get(childConnection.getTargetFeedType());
             
-            CompositeFeedConnection connection = childConnection.createConnection(sourceDef, targetDef);
+            CompositeFeedConnection connection = childConnection.createConnection(sourceDef.getDataFeedID(), sourceDef.getDataSourceName(),
+                    targetDef.getDataFeedID(), targetDef.getDataSourceName(), this);
             if (connection != null) {
                 connections.add(connection);
             }
@@ -552,21 +553,22 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
     protected List<JoinOverride> fromChildConnections(List<ChildConnection> childConnections, List<AnalysisItem> fields) throws SQLException {
         List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
-        Map<FeedType, FeedDefinition> feedMap = new HashMap<FeedType, FeedDefinition>();
+        Map<FeedType, CompositeFeedNode> feedMap = new HashMap<FeedType, CompositeFeedNode>();
         for (CompositeFeedNode child : getCompositeFeedNodes()) {
-            FeedDefinition childDef = new FeedStorage().getFeedDefinitionData(child.getDataFeedID());
-            feedMap.put(childDef.getFeedType(), childDef);
+            //FeedDefinition childDef = new FeedStorage().getFeedDefinitionData(child.getDataFeedID());
+            feedMap.put(new FeedType(child.getDataSourceType()), child);
         }
         for (ChildConnection childConnection : childConnections) {
-            FeedDefinition sourceDef = feedMap.get(childConnection.getSourceFeedType());
-            FeedDefinition targetDef = feedMap.get(childConnection.getTargetFeedType());
+            CompositeFeedNode sourceDef = feedMap.get(childConnection.getSourceFeedType());
+            CompositeFeedNode targetDef = feedMap.get(childConnection.getTargetFeedType());
             if (sourceDef == null || targetDef == null) {
                 continue;
             }
-            CompositeFeedConnection connection = childConnection.createConnection((IServerDataSourceDefinition) sourceDef, (IServerDataSourceDefinition) targetDef);
+            CompositeFeedConnection connection = childConnection.createConnection(sourceDef.getDataFeedID(), sourceDef.getDataSourceName(),
+                    targetDef.getDataFeedID(), targetDef.getDataSourceName(), this);
             JoinOverride joinOverride = new JoinOverride();
-            joinOverride.setSourceName(sourceDef.getFeedName());
-            joinOverride.setTargetName(targetDef.getFeedName());
+            joinOverride.setSourceName(sourceDef.getDataSourceName());
+            joinOverride.setTargetName(targetDef.getDataSourceName());
             joinOverride.setDataSourceID(getDataFeedID());
             joinOverride.setSourceItem(findSourceItem(connection, fields));
             joinOverride.setTargetItem(findTargetItem(connection, fields));

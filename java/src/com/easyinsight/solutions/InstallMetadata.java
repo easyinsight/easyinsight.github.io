@@ -226,9 +226,13 @@ class InstallMetadata {
         installMetadata.copyFieldTags();
         installMetadata.copyFieldRules();
 
+
         // copy all reports and dashboards
 
         installMetadata.installAll(installing);
+
+        installMetadata.copyReportTags();
+        installMetadata.copyDashboardTags();
 
         // update all reports and dashboards to point to appropriate copied tags
 
@@ -358,7 +362,7 @@ class InstallMetadata {
         return clonedDashboard;
     }
 
-    private Map<Long, Long> reportToDSMap = new HashMap<Long, Long>();
+
 
     public void addReportToDataSource(AnalysisDefinition report, String name) throws Exception {
 
@@ -384,7 +388,7 @@ class InstallMetadata {
                 if (reportID == report.getAnalysisID()) {
                     // already exists
                     alreadyInSource = true;
-                    reportToDSMap.put(report.getAnalysisID(), node.getDataFeedID());
+
                     break;
                 }
             }
@@ -403,7 +407,6 @@ class InstallMetadata {
             node.setDataSourceType(FeedType.DISTINCT_CACHED_ADDON.getType());
 
             compositeFeedDefinition.getCompositeFeedNodes().add(node);
-            reportToDSMap.put(report.getAnalysisID(), node.getDataFeedID());
             dataSourceChanged = true;
         } else {
             log("\tFound in the data source, not adding");
@@ -450,14 +453,10 @@ class InstallMetadata {
             AnalysisItem targetItem = connection.getTargetItem();
 
             AnalysisItem sourceResult = sourceMap.get(sourceItem.getKey().toBaseKey().getKeyID());
-            System.out.println("\tSearching for " + sourceResult.toDisplay());
             AnalysisItem matchedSourceItem = target.findAnalysisItemByDisplayName(sourceResult.toDisplay());
-            System.out.println("\t\tMatched to " + matchedSourceItem.toDisplay());
-
             AnalysisItem targetResult = sourceMap.get(targetItem.getKey().toBaseKey().getKeyID());
-            System.out.println("\tSearching for " + targetResult.toDisplay());
             AnalysisItem matchedTargetItem = target.findAnalysisItemByDisplayName(targetResult.toDisplay());
-            System.out.println("\t\tMatched to " + matchedTargetItem.toDisplay());
+
 
             if (matchedSourceItem != null && matchedTargetItem != null) {
                 CompositeFeedConnection newConnection = new CompositeFeedConnection();
@@ -507,27 +506,99 @@ class InstallMetadata {
     }
 
     public void copyReportTags() throws SQLException {
-        PreparedStatement reportTagStmt = conn.prepareStatement("SELECT ACCOUNT_TAG.ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG, REPORT_ID FROM " +
+        PreparedStatement reportTagStmt = conn.prepareStatement("SELECT TAG_NAME FROM " +
                 "ACCOUNT_TAG, REPORT_TO_TAG WHERE ACCOUNT_TAG.ACCOUNT_TAG_ID = REPORT_TO_TAG.TAG_ID AND REPORT_TO_TAG.REPORT_ID = ?");
-        Map<Long, List<Tag>> map = new HashMap<Long, List<Tag>>();
-        Set<Tag> reportTags = new HashSet<Tag>();
         for (Long reportID : installedReportMap.keySet()) {
-            List<Tag> tags = new ArrayList<Tag>();
+            reportTagStmt.setLong(1, reportID);
+            ResultSet targetRS = reportTagStmt.executeQuery();
+            PreparedStatement findInAccountStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, REPORT_TAG FROM ACCOUNT_TAG WHERE TAG_NAME = ? AND ACCOUNT_ID = ?");
+            while (targetRS.next()) {
+                String tagName = targetRS.getString(1);
+
+                findInAccountStmt.setString(1, tagName);
+                findInAccountStmt.setLong(2, SecurityUtil.getAccountID());
+                ResultSet rs = findInAccountStmt.executeQuery();
+                long inOurAccountTagID;
+                if (rs.next()) {
+                    inOurAccountTagID = rs.getLong(1);
+                    boolean reportTag = rs.getBoolean(2);
+                    if (!reportTag) {
+                        PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TAG SET REPORT_TAG = ? WHERE ACCOUNT_TAG_ID = ?");
+                        updateStmt.setBoolean(1, true);
+                        updateStmt.setLong(2, inOurAccountTagID);
+                        updateStmt.executeUpdate();
+                        updateStmt.close();
+                    }
+                } else {
+                    PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG) VALUES (?, ?, ?, ?, ?)",
+                            Statement.RETURN_GENERATED_KEYS);
+                    saveStmt.setString(1, tagName);
+                    saveStmt.setLong(2, SecurityUtil.getAccountID());
+                    saveStmt.setBoolean(3, false);
+                    saveStmt.setBoolean(4, true);
+                    saveStmt.setBoolean(5, false);
+                    saveStmt.execute();
+                    inOurAccountTagID = Database.instance().getAutoGenKey(saveStmt);
+                }
+
+                PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO REPORT_TO_TAG (REPORT_ID, TAG_ID) VALUES (?, ?)");
+                saveStmt.setLong(1, installedReportMap.get(reportID).getAnalysisID());
+                saveStmt.setLong(2, inOurAccountTagID);
+                saveStmt.execute();
+                saveStmt.close();
+            }
+            findInAccountStmt.close();
+        }
+        reportTagStmt.close();
+    }
+
+    public void copyDashboardTags() throws SQLException {
+        PreparedStatement reportTagStmt = conn.prepareStatement("SELECT TAG_NAME FROM " +
+                "ACCOUNT_TAG, DASHBOARD_TO_TAG WHERE ACCOUNT_TAG.ACCOUNT_TAG_ID = DASHBOARD_TO_TAG.TAG_ID AND DASHBOARD_TO_TAG.DASHBOARD_ID = ?");
+        for (Long reportID : installedDashboardMap.keySet()) {
             reportTagStmt.setLong(1, reportID);
             ResultSet targetRS = reportTagStmt.executeQuery();
             while (targetRS.next()) {
-                Tag tag = new Tag(targetRS.getLong(1), targetRS.getString(2), targetRS.getBoolean(3), targetRS.getBoolean(4), targetRS.getBoolean(5));
-                reportTags.add(tag);
-                tags.add(tag);
+                String tagName = targetRS.getString(1);
+                PreparedStatement findInAccountStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, REPORT_TAG FROM ACCOUNT_TAG WHERE TAG_NAME = ? AND ACCOUNT_ID = ?");
+                findInAccountStmt.setString(1, tagName);
+                findInAccountStmt.setLong(2, SecurityUtil.getAccountID());
+                ResultSet rs = findInAccountStmt.executeQuery();
+                long inOurAccountTagID;
+                if (rs.next()) {
+                    inOurAccountTagID = rs.getLong(1);
+                    boolean reportTag = rs.getBoolean(2);
+                    if (!reportTag) {
+                        PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TAG SET REPORT_TAG = ? WHERE ACCOUNT_TAG_ID = ?");
+                        updateStmt.setBoolean(1, true);
+                        updateStmt.setLong(2, inOurAccountTagID);
+                        updateStmt.executeUpdate();
+                        updateStmt.close();
+                    }
+                } else {
+                    PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG) VALUES (?, ?, ?, ?, ?)",
+                            Statement.RETURN_GENERATED_KEYS);
+                    saveStmt.setString(1, tagName);
+                    saveStmt.setLong(2, SecurityUtil.getAccountID());
+                    saveStmt.setBoolean(3, false);
+                    saveStmt.setBoolean(4, true);
+                    saveStmt.setBoolean(5, false);
+                    saveStmt.execute();
+                    inOurAccountTagID = Database.instance().getAutoGenKey(saveStmt);
+                }
+                PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO DASHBOARD_TO_TAG (DASHBOARD_ID, TAG_ID) VALUES (?, ?)");
+                saveStmt.setLong(1, installedDashboardMap.get(reportID).getId());
+                saveStmt.setLong(2, inOurAccountTagID);
+                saveStmt.execute();
+                saveStmt.close();
             }
-            map.put(reportID, tags);
         }
 
     }
 
     public void copyCustomFieldTags() throws SQLException {
         log("Copying custom field tags...");
-        List<CustomFieldTag> customFieldTags = new FeedService().getCustomFieldTags(originalSource.getDataFeedID(), conn);
+        List<CustomFieldTag> customFieldTags = new FeedService().getCustomFieldTags(originalSource, conn);
         if (customFieldTags != null) {
             List<CustomFieldTag> copy = new ArrayList<CustomFieldTag>();
             for (CustomFieldTag customFieldTag : customFieldTags) {
