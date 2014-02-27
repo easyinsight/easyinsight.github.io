@@ -54,6 +54,14 @@ public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
 
+    public void reportUses(long reportID) {
+        analysisStorage.getAnalysisDefinition(reportID);
+    }
+
+    public void dashboardUses(long dashboardID) {
+
+    }
+
     /*public String generateDescription(WSAnalysisDefinition report) {
         try {
             return report.generateDescription();
@@ -2714,7 +2722,7 @@ public class AnalysisService {
         Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID());
         suggestions.addAll(commonIntentions());
         DataSourceInfo dataSourceInfo = feed.createSourceInfo(conn);
-        FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID(), conn);
+        FeedDefinition dataSource = feed.getDataSource();
         suggestions.addAll(dataSource.suggestIntentions(report, dataSourceInfo));
         suggestions.addAll(report.suggestIntentions(report));
         Collections.sort(suggestions, new Comparator<IntentionSuggestion>() {
