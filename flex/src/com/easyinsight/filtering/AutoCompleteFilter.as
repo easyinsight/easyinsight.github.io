@@ -13,7 +13,6 @@ import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-import mx.collections.Sort;
 import mx.containers.HBox;
 import mx.containers.ViewStack;
 
@@ -245,18 +244,7 @@ public class AutoCompleteFilter extends HBox implements IFilter {
 
         var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
                 AnalysisDimensionResultMetadata;
-        var strings:ArrayCollection = new ArrayCollection();
-        if (analysisDimensionResultMetadata != null && analysisDimensionResultMetadata.values != null) {
-            for each (var value:Value in analysisDimensionResultMetadata.values) {
-                var string:String = String(value.getValue());
-
-                if (!strings.contains(string)) {
-                    strings.addItem(string);
-                }
-            }
-        }
-        strings.sort = new Sort();
-        strings.refresh();
+        var strings:ArrayCollection = analysisDimensionResultMetadata.strings;
         completion.dataProvider = strings;
         if (_filterDefinition == null) {
             _filterDefinition = new FilterValueDefinition();

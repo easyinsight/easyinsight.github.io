@@ -93,16 +93,7 @@
                 }
                 filteredStrings.addItem(filterString);
             }
-            var strings:ArrayCollection = new ArrayCollection();
-            for each (var value:Value in analysisDimensionResultMetadata.values) {
-                var string:String = String(value.getValue());
-                if (string == null || string == "") {
-                    string = "[ No Value ]";
-                }
-                if (!strings.contains(string) && !filteredStrings.contains(string)) {
-                    strings.addItem(string);
-                }
-            }
+            var strings:ArrayCollection = analysisDimensionResultMetadata.strings;
             strings.sort = new Sort();
             strings.sort.compareFunction = compare;
             strings.filterFunction = filterFunction;
