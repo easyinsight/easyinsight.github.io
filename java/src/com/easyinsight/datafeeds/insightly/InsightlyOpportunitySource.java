@@ -42,6 +42,7 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
     public static final String DATE_CREATED = "Opportunity Date Created";
     public static final String DATE_UPDATED = "Opportunity Date Updated";
     public static final String OPPORTUNITY_COUNT = "Opportunity Count";
+    public static final String LINKED_ORGANIZATION = "Linked Organization";
 
     public InsightlyOpportunitySource() {
         setFeedName("Opportunities");
@@ -66,6 +67,11 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
         fields.add(new AnalysisDimension(keys.get(BID_TYPE)));
         fields.add(new AnalysisDimension(keys.get(BID_CURRENCY)));
         fields.add(new AnalysisDimension(keys.get(DETAILS)));
+        Key linkedKey = keys.get(LINKED_ORGANIZATION);
+        if (linkedKey == null) {
+            linkedKey = new NamedKey(LINKED_ORGANIZATION);
+        }
+        fields.add(new AnalysisDimension(linkedKey));
         InsightlyCompositeSource insightlyCompositeSource = (InsightlyCompositeSource) parentDefinition;
         HttpClient httpClient = getHttpClient(insightlyCompositeSource.getInsightlyApiKey(), "x");
         List customFields = runJSONRequest("customFields", insightlyCompositeSource, httpClient);
@@ -175,6 +181,13 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
                 Map contactMap = (Map) contactObj;
                 row.addValue(keys.get(OPPORTUNITY_ID), contactMap.get("OPPORTUNITY_ID").toString());
                 row.addValue(keys.get(NAME), getValue(contactMap, "OPPORTUNITY_NAME"));
+                if (contactMap.get("LINKS") != null) {
+                    List links = (List) contactMap.get("LINKS");
+                    if (links.size() > 0) {
+                        Map linkMap = (Map) links.get(0);
+                        row.addValue(keys.get(LINKED_ORGANIZATION), getValue(linkMap, "ORGANISATION_ID"));
+                    }
+                }
                 row.addValue(keys.get(DETAILS), getValue(contactMap, "OPPORTUNITY_DETAILS"));
                 row.addValue(keys.get(BID_TYPE), getValue(contactMap, "BID_TYPE"));
                 Value opportunityState = getValue(contactMap, "OPPORTUNITY_STATE");

@@ -93,6 +93,7 @@ public class InsightlyCompositeSource extends CompositeServerDataSource {
     @Override
     protected Collection<ChildConnection> getChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.INSIGHTLY_OPPORTUNITIES, FeedType.INSIGHTLY_PROJECTS, InsightlyOpportunitySource.OPPORTUNITY_ID, InsightlyProjectSource.OPPORTUNITY_ID),
+            new ChildConnection(FeedType.INSIGHTLY_OPPORTUNITIES, FeedType.INSIGHTLY_ORGANIZATIONS, InsightlyOpportunitySource.LINKED_ORGANIZATION, InsightlyOrganisationSource.ORGANIZATION_ID),
             new ChildConnection(FeedType.INSIGHTLY_PROJECTS, FeedType.INSIGHTLY_TASKS, InsightlyProjectSource.PROJECT_ID, InsightlyTaskSource.PROJECT_ID),
             new ChildConnection(FeedType.INSIGHTLY_OPPORTUNITIES, FeedType.INSIGHTLY_TASKS, InsightlyOpportunitySource.OPPORTUNITY_ID, InsightlyTaskSource.OPPORTUNITY_ID),
             new ChildConnection(FeedType.INSIGHTLY_ORGANIZATIONS, FeedType.INSIGHTLY_CONTACTS, InsightlyOrganisationSource.ORGANIZATION_ID, InsightlyContactSource.ORGANIZATION_ID),
