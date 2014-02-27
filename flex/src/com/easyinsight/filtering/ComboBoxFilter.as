@@ -393,10 +393,9 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             }
             var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = metadata as AnalysisDimensionResultMetadata;
             var valueObj:Dictionary = new Dictionary();
-            if (analysisDimensionResultMetadata != null && analysisDimensionResultMetadata.values != null) {
-                for each (var value:Value in analysisDimensionResultMetadata.values) {
-                    var string:String = String(value.getValue());
-                    valueObj[string] = true;
+            if (analysisDimensionResultMetadata != null && analysisDimensionResultMetadata.strings != null) {
+                for each (var value:String in analysisDimensionResultMetadata.strings) {
+                    valueObj[value] = value;
                 }
             }
             if (_filterDefinition != null && _filterDefinition.excludeEmpty) {

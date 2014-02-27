@@ -7,7 +7,8 @@ package com.easyinsight.analysis
 	public class AnalysisDimensionResultMetadata extends AnalysisItemResultMetadata
 	{
 		public var values:ArrayCollection;
-		
+		public var strings:ArrayCollection;
+
 		public function AnalysisDimensionResultMetadata()
 		{
 			super();

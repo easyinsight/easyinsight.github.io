@@ -314,6 +314,7 @@ public abstract class Feed implements Serializable {
         for (IRow row : dataSet.getRows()) {
             metadata.addValue(analysisItem, analysisItem.polishValue(row.getValue(analysisItem.createAggregateKey())), insightRequestMetadata);
         }
+        metadata.calculateCaches();
         return metadata;
     }
 
