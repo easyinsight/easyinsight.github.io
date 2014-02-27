@@ -221,7 +221,7 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
                         c.setHomePhone(Solve360BaseSource.queryField(contactNode, "homephone/text()"));
                         c.setResponsibleUser(Solve360BaseSource.queryField(contactNode, "assignedto/@cn"));
                         Map<Key, Object> customFieldValues = new HashMap<Key, Object>();
-                        for (AnalysisItem analysisItem : customCompanyFields) {
+                        for (AnalysisItem analysisItem : customContactFields) {
                             String value = Solve360BaseSource.queryField(contactNode, analysisItem.getKey().toKeyString() + "/text()");
                             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                                 if (value != null) {
