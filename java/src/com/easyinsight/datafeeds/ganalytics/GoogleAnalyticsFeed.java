@@ -143,7 +143,7 @@ public class GoogleAnalyticsFeed extends Feed {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-
+        metadata.calculateCaches();
         return metadata;
     }
 
