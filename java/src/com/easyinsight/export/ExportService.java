@@ -1556,9 +1556,7 @@ public class ExportService {
             Iterator<FilterDefinition> iter = filters.iterator();
             while (iter.hasNext()) {
                 FilterDefinition filter = iter.next();
-                System.out.println("Testing filter of type " + filter.getClass().getName());
                 if (filter instanceof FlatDateFilter) {
-                    System.out.println("Hiding year filter");
                     iter.remove();
                 }
             }
@@ -1586,6 +1584,15 @@ public class ExportService {
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (CompareYearsRow ytdValue : ytdStuff.getRows()) {
+            boolean atLeastOneValue = false;
+            for (CompareYearsResult result : ytdValue.getResults().values()) {
+                if (result.getValue().toDouble() > 0) {
+                    atLeastOneValue = true;
+                }
+            }
+            if (!atLeastOneValue) {
+                continue;
+            }
             String ytdTRStyle = "";
             AnalysisMeasure baseMeasure = (AnalysisMeasure) ytdValue.getMeasure();
             boolean alwaysShow = false;
@@ -1624,6 +1631,133 @@ public class ExportService {
                 }
             }
             sb.append("</tr>");
+        }
+        sb.append("</table>");
+        return sb.toString();
+    }
+
+    // sb.append("<table style=\"font-size:").append(report.getFontSize()).append("px").append("\" class=\"table ").append("reportTable").append(report.getAnalysisID()).append(" table-bordered table-hover table-condensed\">");
+
+    public static String ytdToHTMLTableWithActualCSS(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
+        WSYTDDefinition verticalList = (WSYTDDefinition) listDefinition;
+        if (verticalList.getTimeDimension() instanceof AnalysisDateDimension) {
+            AnalysisDateDimension date = (AnalysisDateDimension) verticalList.getTimeDimension();
+            date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+        }
+        ExtendedDataSet dataSet = DataService.extendedListDataSet(verticalList, insightRequestMetadata, conn);
+        YTDStuff ytdStuff = YTDUtil.getYTDStuff(verticalList, dataSet.getDataSet(), insightRequestMetadata, conn, dataSet.getPipelineData(), dataSet.getReportItems());
+        boolean hasBenchmark = false;
+        for (AnalysisItem analysisItem : verticalList.getMeasures()) {
+            if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof YTDReportFieldExtension) {
+                YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) analysisItem.getReportFieldExtension();
+                if (ytdReportFieldExtension.getBenchmark() != null) {
+                    hasBenchmark = true;
+                }
+            }
+        }
+
+        String cellStyle;
+        String thStyle = "text-align:center";
+        StringBuilder sb = new StringBuilder();
+        if (includeTitle && listDefinition.getName() != null) {
+            sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(listDefinition.getName()).append("</h0>").append("</div>");
+        }
+        sb.append("<table style=\"font-size:").append(verticalList.getFontSize()).append("px").append("\" class=\"table ").append("reportTable").append(verticalList.getAnalysisID()).append(" table-bordered table-hover table-condensed\">");
+        //sb.append("<table style=\"width:100%;font-size:" + verticalList.getFontSize() + "px;\" class='export_table'>");
+        sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
+        sb.append("<th></th>");
+        for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
+            String date = createValue(exportMetadata.dateFormat, verticalList.getTimeDimension(), ytdStuff.getIntervals().get(i), exportMetadata.cal, exportMetadata.currencySymbol, false, "MMM");
+            sb.append("<th style=\"").append(thStyle).append("\">").append(date).append("</th>");
+        }
+        sb.append("<th style=\"").append(thStyle).append("\">").append("YTD").append("</th>");
+        sb.append("<th style=\"").append(thStyle).append("\">").append("Average").append("</th>");
+        if (hasBenchmark) {
+            sb.append("<th style=\"").append(thStyle).append("\">").append("BK").append("</th>");
+            sb.append("<th style=\"").append(thStyle).append("\">").append("Variation").append("</th>");
+        }
+        sb.append("</tr>");
+        AnalysisMeasure percentMeasure = new AnalysisMeasure();
+        percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
+        percentMeasure.setMinPrecision(1);
+        percentMeasure.setPrecision(1);
+
+        int maxColumns = 0;
+        for (YTDValue ytdValue : ytdStuff.getValues()) {
+            if (ytdValue != null) {
+                if (ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
+                    int ctr = 0;
+                    for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
+                        ctr++;
+                    }
+                    ctr += 2;
+                    maxColumns = Math.max(ctr, maxColumns);
+                }
+            }
+        }
+
+        for (YTDValue ytdValue : ytdStuff.getValues()) {
+            if (ytdValue != null && ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
+                String ytdTRStyle = "";
+                AnalysisMeasure baseMeasure = ytdValue.getAnalysisMeasure();
+                boolean alwaysShow = false;
+                if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
+                    YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) baseMeasure.getReportFieldExtension();
+                    if (ytdReportFieldExtension.isLineAbove()) {
+                        ytdTRStyle += "border-top: solid 1px black;";
+                    }
+                    if (ytdReportFieldExtension.isAlwaysShow()) {
+                        alwaysShow = true;
+                        cellStyle = "padding:2px;text-align:left;font-weight:bold";
+                    } else {
+                        cellStyle = "padding:2px;text-align:right";
+                    }
+                } else {
+                    cellStyle = "padding:2px;text-align:right";
+                }
+                if (baseMeasure.isUnderline()) {
+                    ytdTRStyle += "border-bottom:solid 1px black";
+                }
+
+                sb.append("<tr style=\"" + ytdTRStyle + "\">");
+                sb.append("<td style=\"white-space: nowrap; ").append(cellStyle).append("\">").append(baseMeasure.toUnqualifiedDisplay()).append("</td>");
+                if (ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
+                    Map<Value, TimeIntervalValue> map = new HashMap<Value, TimeIntervalValue>();
+                    for (int i = 0; i < ytdValue.getTimeIntervalValues().size(); i++) {
+                        TimeIntervalValue timeIntervalValue = ytdValue.getTimeIntervalValues().get(i);
+                        map.put(timeIntervalValue.getDateValue(), timeIntervalValue);
+                    }
+                    for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
+                        TimeIntervalValue timeIntervalValue = map.get(ytdStuff.getIntervals().get(i));
+                        if (timeIntervalValue != null) {
+                            Value value = timeIntervalValue.getValue();
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                        } else {
+                            sb.append("<td style=\"").append(cellStyle).append("</td>");
+                        }
+                    }
+                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+
+                    if (ytdValue.getBenchmarkMeasure() != null) {
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                    } else {
+                        sb.append("<td style=\"").append(cellStyle).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("</td>");
+                    }
+                } else if (alwaysShow) {
+                    for (int i = 0; i < maxColumns; i++) {
+                        sb.append("<td style=\"").append(cellStyle).append("</td>");
+                    }
+                    if (hasBenchmark) {
+                        sb.append("<td>").append("</td>");
+                        sb.append("<td>").append("</td>");
+                    }
+                }
+                sb.append("</tr>");
+            }
         }
         sb.append("</table>");
         return sb.toString();
@@ -1689,7 +1823,7 @@ public class ExportService {
         }
 
         for (YTDValue ytdValue : ytdStuff.getValues()) {
-            if (ytdValue != null) {
+            if (ytdValue != null && ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
                 String ytdTRStyle = "";
                 AnalysisMeasure baseMeasure = ytdValue.getAnalysisMeasure();
                 boolean alwaysShow = false;
@@ -2568,6 +2702,51 @@ public class ExportService {
     private static final String summaryTRStyle = "padding:0px;margin:0px;background-color:#F4F4F4";
     private static final String tdStyle = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
 
+    public static String treeReportToHTMLTableWithActualCSS(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
+        DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
+        PipelineData pipelineData = dataSet.getPipelineData();
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
+
+        StringBuilder sb = new StringBuilder();
+        java.util.List<AnalysisItem> items = new java.util.ArrayList<AnalysisItem>(report.getAllAnalysisItems());
+        items.remove(null);
+        java.util.Collections.sort(items, new java.util.Comparator<AnalysisItem>() {
+
+            public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
+            }
+        });
+
+        WSTreeDefinition tree = (WSTreeDefinition) report;
+
+        sb.append("<table style=\"").append(tableStyle).append("\">");
+        sb.append("<tr style=\"").append(headerTRStyle).append("\">");
+
+        AnalysisHierarchyItem hierarchy = (AnalysisHierarchyItem) tree.getHierarchy();
+        sb.append("<th style=\"").append(thStyle).append("\">");
+        sb.append(hierarchy.toUnqualifiedDisplay());
+        sb.append("</th>");
+        for (AnalysisItem analysisItem : tree.getItems()) {
+            sb.append("<th style=\"").append(thStyle).append("\">");
+            sb.append(analysisItem.toUnqualifiedDisplay());
+            sb.append("</th>");
+        }
+        sb.append("</tr>");
+
+        TreeData treeData = new TreeData(tree, hierarchy, exportMetadata, dataSet);
+        for (IRow row : dataSet.getRows()) {
+            treeData.addRow(row);
+        }
+        List<TreeRow> rows = treeData.toTreeRows(pipelineData);
+        for (TreeRow row : rows) {
+            sb.append(row.toHTML(tree, exportMetadata));
+        }
+
+        sb.append("</table>");
+
+        return sb.toString();
+    }
+
     public static String treeReportToHTMLTable(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         PipelineData pipelineData = dataSet.getPipelineData();
@@ -2721,6 +2900,254 @@ public class ExportService {
                             }
                         }
                         sb.append("<td style=\"").append(styleString.toString()).append("\">");
+                        //sb.append("<td>");
+                        if (!exportProperties.isEmailed()) {
+                            sb.append("<span class='sortData'>");
+                            Value v = value;
+                            if (value.getSortValue() != null) {
+                                v = value.getSortValue();
+                            }
+                            sb.append(StringEscapeUtils.escapeHtml(v.toHTMLString()));
+                            sb.append("</span>");
+                        }
+
+                        Link defaultLink = linkMap.get(analysisItem);
+                        boolean showLink = false;
+                        if (defaultLink != null) {
+                            if (defaultLink instanceof URLLink) {
+                                showLink = defaultLink != null && value.getLinks() != null && value.getLinks().get(defaultLink.getLabel()) != null;
+                                if (showLink) {
+                                    sb.append("<a href=\"");
+                                    sb.append(value.getLinks().get(defaultLink.getLabel()));
+                                    sb.append("\">");
+                                }
+                            } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
+                                StringBuilder paramBuilder = new StringBuilder();
+                                DrillThrough drillThrough = (DrillThrough) defaultLink;
+                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
+                                if (exportProperties.getEmbedKey() != null) {
+                                    paramBuilder.append("&embedKey=" + exportProperties.getEmbedKey()+"&");
+                                }
+                                for (AnalysisItem dataItem : items) {
+                                    for (int k = 0; k < listDataResults.getHeaders().length; k++) {
+                                        AnalysisItem dataHeaderItem = listDataResults.getHeaders()[k];
+                                        String encodedValue;
+                                        if (dataItem == dataHeaderItem) {
+                                            try {
+                                                Value drillthroughValue = listRow.getValues()[k];
+                                                String drillthroughValueString;
+                                                if (drillthroughValue.type() == Value.NUMBER) {
+                                                    drillthroughValueString = String.valueOf(drillthroughValue.toDouble().intValue());
+                                                } else {
+                                                    drillthroughValueString = drillthroughValue.toString();
+                                                }
+                                                encodedValue = StringEscapeUtils.escapeHtml(URLEncoder.encode(drillthroughValueString, "UTF-8"));
+                                            } catch (UnsupportedEncodingException e) {
+                                                throw new RuntimeException(e);
+                                            }
+                                            paramBuilder.append("f").append(dataItem.getAnalysisItemID()).append("=").append(encodedValue).append("&");
+                                        }
+                                    }
+                                }
+                                paramBuilder.append("')");
+                                sb.append("<a href=\"#\" onclick=\"");
+                                sb.append(paramBuilder.toString());
+                                sb.append("\">");
+                                showLink = true;
+                            }
+                        }
+
+
+                        sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+                        if (showLink) {
+                            sb.append("</a>");
+                        }
+                        sb.append("</td>");
+                    }
+                }
+            }
+            sb.append("</tr>");
+        }
+        sb.append("</tbody>");
+        if (report.getReportType() == WSAnalysisDefinition.LIST) {
+            WSListDefinition list = (WSListDefinition) report;
+            if (list.isSummaryTotal()) {
+                sb.append("<tfoot>");
+                sb.append("<tr style=\"").append(summaryTRStyle).append("\">");
+                for (AnalysisItem analysisItem : items) {
+                    for (int j = 0; j < listDataResults.getHeaders().length; j++) {
+                        AnalysisItem headerItem = listDataResults.getHeaders()[j];
+
+                        if (headerItem == analysisItem) {
+                            if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
+                                double summary = listDataResults.getSummaries()[j];
+                                if (Double.isNaN(summary) || Double.isInfinite(summary)) {
+                                    summary = 0;
+                                }
+                                StringBuilder styleString = new StringBuilder(tdStyle);
+                                String align = "left";
+                                if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                                    TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
+                                    if (textReportFieldExtension.getAlign() != null) {
+                                        if ("Left".equals(textReportFieldExtension.getAlign())) {
+                                            align = "left";
+                                        } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                                            align = "center";
+                                        } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                                            align = "right";
+                                        }
+                                    }
+                                    styleString.append(align);
+                                    if (textReportFieldExtension.getFixedWidth() > 0) {
+                                        styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
+                                    }
+                                } else {
+                                    styleString.append(align);
+                                }
+                                sb.append("<td style=\"").append(styleString.toString()).append("\">");
+                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                                sb.append("</td>");
+                            } else {
+                                sb.append("<td></td>");
+                            }
+                        }
+                    }
+                }
+                sb.append("</tr>");
+                sb.append("</tfoot>");
+            }
+        }
+
+        sb.append("</table>");
+        return sb.toString();
+    }
+
+    public static String listReportToHTMLTableWithActualCSS(WSAnalysisDefinition report, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle,
+                                                            ExportProperties exportProperties) throws SQLException {
+
+        if (report.getReportType() == WSAnalysisDefinition.LIST) {
+            WSListDefinition list = (WSListDefinition) report;
+            if (list.isSummaryTotal()) {
+                listDataResults.summarize();
+            }
+        }
+
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
+
+        StringBuilder sb = new StringBuilder();
+        java.util.List<AnalysisItem> items = new java.util.ArrayList<AnalysisItem>(report.getAllAnalysisItems());
+        items.remove(null);
+        java.util.Collections.sort(items, new java.util.Comparator<AnalysisItem>() {
+
+            public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
+            }
+        });
+
+
+        if (includeTitle && report.getName() != null) {
+            sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(report.getName()).append("</h0>").append("</div>");
+        }
+        String backgroundColor1 = "#f9f9f9";
+        String backgroundColor2 = "#ffffff";
+        if (report instanceof WSListDefinition) {
+            WSListDefinition list = (WSListDefinition) report;
+            backgroundColor1 = createHexString(list.getRowColor1());
+            backgroundColor2 = createHexString(list.getRowColor2());
+        }
+        sb.append("<style type=\"text/css\">").
+                append(".reportTable").append(report.getAnalysisID()).append(" > tbody > tr:nth-child(odd) > td,\n" +
+                ".reportTable").append(report.getAnalysisID()).append(" > tbody > tr:nth-child(odd) > th {\n" +
+                "  background-color: ").append(backgroundColor1).append(";\n" +
+                "}").append("}");
+        sb.append(".reportTable").append(report.getAnalysisID()).append(" > tbody > tr:nth-child(even) > td,\n" +
+                ".reportTable").append(report.getAnalysisID()).append(" > tbody > tr:nth-child(even) > th {\n" +
+                "  background-color: ").append(backgroundColor2).append(";\n" +
+                "}").append("}");
+        /*sb.append(".reportTable").append(report.getAnalysisID()).append("{ font-size:").append(report.getFontSize()).append("px;\n").append("}");*/
+        sb.append("</style>");
+        sb.append("<table style=\"font-size:").append(report.getFontSize()).append("px").append("\" class=\"table ").append("reportTable").append(report.getAnalysisID()).append(" table-bordered table-hover table-condensed\">");
+        sb.append("<thead>");
+        sb.append("<tr>");
+        Map<AnalysisItem, Link> linkMap = new HashMap<AnalysisItem, Link>();
+        for (AnalysisItem analysisItem : items) {
+            if (analysisItem.getLinks() != null) {
+                Link defaultLink = null;
+                if (includeTitle) {
+                    for (Link link : analysisItem.getLinks()) {
+                        if (link.isDefaultLink() && link instanceof URLLink) {
+                            defaultLink = link;
+                        } else if (defaultLink == null && link instanceof URLLink) {
+                            defaultLink = link;
+                        }
+                    }
+                } else {
+                    for (Link link : analysisItem.getLinks()) {
+                        if (link.isDefaultLink()) {
+                            defaultLink = link;
+                        }
+                    }
+                    if (defaultLink == null && analysisItem.getLinks().size() == 1) {
+                        defaultLink = analysisItem.getLinks().get(0);
+                    }
+                }
+
+                linkMap.put(analysisItem, defaultLink);
+            }
+            for (AnalysisItem headerItem : listDataResults.getHeaders()) {
+                if (headerItem == analysisItem) {
+                    sb.append("<th style=\"text-align:center\">");
+                    sb.append(headerItem.toUnqualifiedDisplay());
+                    sb.append("</th>");
+                }
+            }
+        }
+        sb.append("</tr>");
+        sb.append("</thead>");
+        sb.append("<tbody>");
+        for (com.easyinsight.analysis.ListRow listRow : listDataResults.getRows()) {
+            sb.append("<tr>");
+            for (AnalysisItem analysisItem : items) {
+                for (int i = 0; i < listDataResults.getHeaders().length; i++) {
+                    AnalysisItem headerItem = listDataResults.getHeaders()[i];
+                    if (headerItem == analysisItem) {
+                        StringBuilder styleString = new StringBuilder("text-align:");
+                        String align = "left";
+                        if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                            TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
+                            if (textReportFieldExtension.getAlign() != null) {
+                                if ("Left".equals(textReportFieldExtension.getAlign())) {
+                                    align = "left";
+                                } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                                    align = "center";
+                                } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                                    align = "right";
+                                }
+                            }
+                            styleString.append(align);
+                            if (textReportFieldExtension.getFixedWidth() > 0) {
+                                styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
+                            }
+                        } else {
+                            styleString.append(align);
+                        }
+                        com.easyinsight.core.Value value = listRow.getValues()[i];
+                        if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
+                            TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
+                            if (textValueExtension.getColor() != 0) {
+                                String hexString = createHexString(textValueExtension.getColor());
+                                styleString.append(";color:").append(hexString);
+                            }
+                            if (textValueExtension.getBackgroundColor() != TextValueExtension.WHITE) {
+                                String hexString = createHexString(textValueExtension.getBackgroundColor());
+                                styleString.append(";background-color:").append(hexString);
+                            }
+                            if (textValueExtension.isBold()) {
+                                styleString.append(";font-weight:bold");
+                            }
+                        }
+
+                        sb.append("<td style=\"").append(styleString).append("\">");
                         //sb.append("<td>");
                         if (!exportProperties.isEmailed()) {
                             sb.append("<span class='sortData'>");

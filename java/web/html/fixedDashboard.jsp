@@ -22,7 +22,7 @@
         String dashboardIDString = request.getParameter("dashboardID");
         long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
 
-        Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
+        Dashboard dashboard = new DashboardService().getDashboardView(dashboardID);
 
         FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, false);
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
