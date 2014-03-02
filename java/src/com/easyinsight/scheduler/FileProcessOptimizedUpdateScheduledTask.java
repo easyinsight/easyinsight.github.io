@@ -114,6 +114,9 @@ public class FileProcessOptimizedUpdateScheduledTask {
             while (r.readRecord()) {
                 IRow row = dataSet.createRow();
                 for(int j = 0;j < r.getColumnCount();j++) {
+                    if (j >= headerColumns.length) {
+                        continue;
+                    }
                     String key = headerColumns[j];
                     if (key.length() > 50) {
                         key = key.substring(0, 50);
