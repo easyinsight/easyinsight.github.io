@@ -1654,25 +1654,32 @@ public class ExportService {
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (CompareYearsRow ytdValue : ytdStuff.getRows()) {
+            boolean alwaysShow = false;
+            AnalysisMeasure baseMeasure = (AnalysisMeasure) ytdValue.getMeasure();
+            if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof VerticalListReportExtension) {
+                VerticalListReportExtension ytdReportFieldExtension = (VerticalListReportExtension) baseMeasure.getReportFieldExtension();
+                if (ytdReportFieldExtension.isAlwaysShow()) {
+                    alwaysShow = true;
+                }
+            }
             boolean atLeastOneValue = false;
             for (CompareYearsResult result : ytdValue.getResults().values()) {
                 if (result.getValue().toDouble() > 0) {
                     atLeastOneValue = true;
                 }
             }
-            if (!atLeastOneValue) {
+            if (!alwaysShow && !atLeastOneValue) {
                 continue;
             }
             String ytdTRStyle = "";
-            AnalysisMeasure baseMeasure = (AnalysisMeasure) ytdValue.getMeasure();
-            boolean alwaysShow = false;
+
+
             if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof VerticalListReportExtension) {
                 VerticalListReportExtension ytdReportFieldExtension = (VerticalListReportExtension) baseMeasure.getReportFieldExtension();
                 if (ytdReportFieldExtension.isLineAbove()) {
                     ytdTRStyle += "border-top: solid 2px black;";
                 }
-                if (ytdReportFieldExtension.isAlwaysShow()) {
-                    alwaysShow = true;
+                if (alwaysShow) {
                     cellStyle = "text-align:left;font-weight:bold";
                 } else {
                     cellStyle = "text-align:right";
@@ -1748,34 +1755,41 @@ public class ExportService {
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (CompareYearsRow ytdValue : ytdStuff.getRows()) {
+            boolean alwaysShow = false;
+            AnalysisMeasure baseMeasure = (AnalysisMeasure) ytdValue.getMeasure();
+            if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof VerticalListReportExtension) {
+                VerticalListReportExtension ytdReportFieldExtension = (VerticalListReportExtension) baseMeasure.getReportFieldExtension();
+                if (ytdReportFieldExtension.isAlwaysShow()) {
+                    alwaysShow = true;
+                }
+            }
             boolean atLeastOneValue = false;
             for (CompareYearsResult result : ytdValue.getResults().values()) {
                 if (result.getValue().toDouble() > 0) {
                     atLeastOneValue = true;
                 }
             }
-            if (!atLeastOneValue) {
+            if (!alwaysShow && !atLeastOneValue) {
                 continue;
             }
             String ytdTRStyle = "";
-            AnalysisMeasure baseMeasure = (AnalysisMeasure) ytdValue.getMeasure();
-            boolean alwaysShow = false;
+
+
             if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof VerticalListReportExtension) {
                 VerticalListReportExtension ytdReportFieldExtension = (VerticalListReportExtension) baseMeasure.getReportFieldExtension();
                 if (ytdReportFieldExtension.isLineAbove()) {
-                    ytdTRStyle += "border-top: solid 1px black;";
+                    ytdTRStyle += "border-top: solid 2px black;";
                 }
-                if (ytdReportFieldExtension.isAlwaysShow()) {
-                    alwaysShow = true;
-                    cellStyle = "padding:2px;text-align:left;font-weight:bold";
+                if (alwaysShow) {
+                    cellStyle = "text-align:left;font-weight:bold";
                 } else {
-                    cellStyle = "padding:2px;text-align:right";
+                    cellStyle = "text-align:right";
                 }
             } else {
-                cellStyle = "padding:2px;text-align:right";
+                cellStyle = "text-align:right";
             }
             if (baseMeasure.isUnderline()) {
-                ytdTRStyle += "border-bottom:solid 1px black";
+                ytdTRStyle += "border-bottom:solid 2px black";
             }
             sb.append("<tr style=\"" + ytdTRStyle + "\">");
             sb.append("<td style=\"white-space: nowrap;text-align:left;").append(cellStyle).append("\">").append(baseMeasure.toUnqualifiedDisplay()).append("</td>");
@@ -1864,17 +1878,22 @@ public class ExportService {
         }
 
         for (YTDValue ytdValue : ytdStuff.getValues()) {
-            if (ytdValue != null && ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
+            AnalysisMeasure baseMeasure = ytdValue.getAnalysisMeasure();
+            boolean alwaysShow = false;
+            if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
+                YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) baseMeasure.getReportFieldExtension();
+                if (ytdReportFieldExtension.isAlwaysShow()) {
+                    alwaysShow = true;
+                }
+            }
+            if (alwaysShow || (ytdValue != null && ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0)) {
                 String ytdTRStyle = "";
-                AnalysisMeasure baseMeasure = ytdValue.getAnalysisMeasure();
-                boolean alwaysShow = false;
                 if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
                     YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) baseMeasure.getReportFieldExtension();
                     if (ytdReportFieldExtension.isLineAbove()) {
                         ytdTRStyle += "border-top: solid 2px #222222;";
                     }
-                    if (ytdReportFieldExtension.isAlwaysShow()) {
-                        alwaysShow = true;
+                    if (alwaysShow) {
                         cellStyle = "text-align:left;font-weight:bold";
                     } else {
                         cellStyle = "text-align:right";
