@@ -1930,8 +1930,8 @@ public class ExportService {
                             sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
                             sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
                         } else {
-                            sb.append("<td style=\"").append(cellStyle).append("</td>");
-                            sb.append("<td style=\"").append(cellStyle).append("</td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\"></td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\"></td>");
                         }
                     }
                 } else if (alwaysShow) {
@@ -1939,8 +1939,8 @@ public class ExportService {
                         sb.append("<td style=\"").append(cellStyle).append("</td>");
                     }
                     if (hasBenchmark) {
-                        sb.append("<td>").append("</td>");
-                        sb.append("<td>").append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\"></td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\"></td>");
                     }
                 }
                 sb.append("</tr>");

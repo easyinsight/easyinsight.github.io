@@ -28,6 +28,11 @@ public class RemoveDashboardElement extends Function {
                     DashboardElement dashboardElement = child.getDashboardElement();
                     if (toRemove.equals(dashboardElement.getLabel())) {
                         iter.remove();
+                    } else if (dashboardElement instanceof DashboardReport) {
+                        DashboardReport dashboardReport = (DashboardReport) dashboardElement;
+                        if (toRemove.equals(dashboardReport.getReport().getName())) {
+                            iter.remove();
+                        }
                     }
                 }
             } else {
