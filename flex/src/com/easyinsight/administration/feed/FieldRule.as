@@ -21,11 +21,15 @@ public class FieldRule {
     public var link:Link;
     public var extension:ReportFieldExtension;
 
+    public var dataSourceID:int;
+    public var dataSourceName:String;
+
     public var explicitField:AnalysisItemHandle;
     public var tag:Tag;
     public var type:int;
     public var all:Boolean;
     public var selected:Boolean;
+    public var drillthroughName:String;
 
     public function FieldRule() {
     }
@@ -42,11 +46,13 @@ public class FieldRule {
             str += "For all measures ";
         } else if (type == AnalysisItemTypes.DATE) {
             str += "For all dates ";
+        } else if (dataSourceID > 0) {
+            str += "For all fields on data source " + dataSourceName + " ";
         } else {
             str += "WHYYYYYY";
         }
         if (link != null) {
-            str += "add " + link.createString() + ".";
+            str += "add " + link.createString(drillthroughName) + ".";
         } else if (extension != null) {
             var ext:ReportFieldExtension = extension;
             if (ext is YTDReportFieldExtension) {

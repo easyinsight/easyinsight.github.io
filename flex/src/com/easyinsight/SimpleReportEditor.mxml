@@ -588,7 +588,7 @@
                 //this.dataSourceFields = feedMetadata.dataSourceFields;
                 this.admin = feedMetadata.dataSourceAdmin;
                 var cFactory:ClassFactory = new ClassFactory(AvailableFieldRenderer);
-                cFactory.properties = { dataSourceID:dataSourceID, calcRefactor:feedMetadata.allowRefactor };
+                cFactory.properties = { dataSourceID:dataSourceID, calcRefactor:feedMetadata.allowRefactor, tags: feedMetadata.tags };
                 rendererFactory = cFactory;
                 dataSourceName = this.feedMetadata.dataSourceName;
                 joinsCustomizable = this.feedMetadata.customJoinsAllowed;
@@ -849,6 +849,21 @@
             dispatchEvent(new AnalyzeEvent(new ReportEditorAnalyzeSource(report, 0)));
         }
 
+        private function tagField(event:ReportEditorFieldEvent):void {
+            var wrapper:AnalysisItemWrapper = event.item as AnalysisItemWrapper;
+            var tag:Tag = event.tag as Tag;
+            if (wrapper.analysisItem.tags == null) {
+                wrapper.analysisItem.tags = new ArrayCollection();
+            }
+            wrapper.analysisItem.tags.addItem(tag);
+            ProgressAlert.alert(this, "Tagging the field...", null, feedService.tagField);
+            feedService.tagField.send(wrapper.displayName, dataService.dataFeedID, tag);
+        }
+
+        private function taggedField():void {
+
+        }
+
         public function initializeForWorksheet():void {
             try {
                 if (User.getInstance().reportMode) {
@@ -873,6 +888,7 @@
                 addEventListener(ReportEditorFieldEvent.ITEM_DELETE, fieldEventHandler.deleteField);
                 addEventListener(ReportEditorFieldEvent.ITEM_EDIT, fieldEventHandler.editField);
                 addEventListener(ReportEditorFieldEvent.ITEM_FILTER, filterField);
+                addEventListener(ReportEditorFieldEvent.TAG_ITEM, tagField);
                 addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
                 addEventListener(AnalysisItemCopyEvent.ITEM_COPY, onCopy);
 
@@ -1578,6 +1594,7 @@
     </mx:RemoteObject>
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="fieldToDataSourceLevel" result="promoted()"/>
+        <mx:method name="tagField" result="taggedField()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="coreDataService" destination="data">
         <mx:method name="addonFields" result="onBolt()"/>

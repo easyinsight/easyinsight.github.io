@@ -66,6 +66,35 @@ public class FeedService {
         }
     }
 
+    public String tagField(String name, long dataSourceID, Tag tag) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT FIELD_TO_TAG_ID FROM FIELD_TO_TAG WHERE DISPLAY_NAME = ? AND ACCOUNT_TAG_ID = ? AND DATA_SOURCE_ID = ?");
+            stmt.setString(1, name);
+            stmt.setLong(2, tag.getId());
+            stmt.setLong(3, dataSourceID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+
+            } else {
+                PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO FIELD_TO_TAG (DISPLAY_NAME, ACCOUNT_TAG_ID, DATA_SOURCE_ID) VALUES (?, ?, ?)");
+                saveStmt.setString(1, name);
+                saveStmt.setLong(2, tag.getId());
+                saveStmt.setLong(3, dataSourceID);
+                saveStmt.execute();
+                saveStmt.close();
+            }
+            stmt.close();
+            return null;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void saveCustomFieldTags(List<CustomFieldTag> tags, long dataSourceID, EIConnection conn) throws SQLException {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM CUSTOM_FLAG_TO_TAG WHERE DATA_SOURCE_ID = ?");
         clearStmt.setLong(1, dataSourceID);
