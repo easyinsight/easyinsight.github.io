@@ -291,6 +291,8 @@ public class FunctionFactory {
             return new StringFormat();
         } else if (s.equals("tagparse")) {
             return new TagBlah();
+        } else if (s.equals("plural")) {
+            return new Plural();
         } else {
             return null;
         }

@@ -3,10 +3,7 @@ package com.easyinsight.calculations.functions;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
-import com.easyinsight.dashboard.DashboardElement;
-import com.easyinsight.dashboard.DashboardStack;
-import com.easyinsight.dashboard.DashboardStackItem;
-import com.easyinsight.dashboard.IDashboardVisitor;
+import com.easyinsight.dashboard.*;
 
 import java.util.Iterator;
 
@@ -22,21 +19,39 @@ public class RemoveDashboardElement extends Function {
 
             final String toRemove = minusQuotes(1);
 
-            IDashboardVisitor findStackVisitor = new IDashboardVisitor() {
-                public void accept(DashboardElement dashboardElement) {
-                    if (target.equals(dashboardElement.getLabel())) {
-                        DashboardStack dashboardStack = (DashboardStack) dashboardElement;
-                        Iterator<DashboardStackItem> iter = dashboardStack.getGridItems().iterator();
-                        while (iter.hasNext()) {
-                            DashboardStackItem dashboardStackItem = iter.next();
-                            if (toRemove.equals(dashboardStackItem.getDashboardElement().getLabel())) {
-                                iter.remove();
-                            }
+            if ("".equals(target)) {
+                Dashboard dashboard = calculationMetadata.getDashboard();
+                DashboardStack dashboardStack = (DashboardStack) dashboard.getRootElement();
+                Iterator<DashboardStackItem> iter = dashboardStack.getGridItems().iterator();
+                while (iter.hasNext()) {
+                    DashboardStackItem child = iter.next();
+                    DashboardElement dashboardElement = child.getDashboardElement();
+                    if (toRemove.equals(dashboardElement.getLabel())) {
+                        iter.remove();
+                    } else if (dashboardElement instanceof DashboardReport) {
+                        DashboardReport dashboardReport = (DashboardReport) dashboardElement;
+                        if (toRemove.equals(dashboardReport.getReport().getName())) {
+                            iter.remove();
                         }
                     }
                 }
-            };
-            calculationMetadata.getDashboard().visit(findStackVisitor);
+            } else {
+                IDashboardVisitor findStackVisitor = new IDashboardVisitor() {
+                    public void accept(DashboardElement dashboardElement) {
+                        if (target.equals(dashboardElement.getLabel())) {
+                            DashboardStack dashboardStack = (DashboardStack) dashboardElement;
+                            Iterator<DashboardStackItem> iter = dashboardStack.getGridItems().iterator();
+                            while (iter.hasNext()) {
+                                DashboardStackItem dashboardStackItem = iter.next();
+                                if (toRemove.equals(dashboardStackItem.getDashboardElement().getLabel())) {
+                                    iter.remove();
+                                }
+                            }
+                        }
+                    }
+                };
+                calculationMetadata.getDashboard().visit(findStackVisitor);
+            }
         }
         return new EmptyValue();
     }
