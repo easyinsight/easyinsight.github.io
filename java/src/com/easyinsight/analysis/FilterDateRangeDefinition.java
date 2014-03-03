@@ -356,4 +356,12 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         this.setStartDate(f.getStartDate());
         f.setEndDate(f.getEndDate());
     }
+
+    @Override
+    public String asString(InsightRequestMetadata insightRequestMetadata) {
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        String startString = df.format(getStartDate());
+        String endString = df.format(getStartDate());
+        return "between " + startString + " and " + endString;
+    }
 }
