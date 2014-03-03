@@ -12,6 +12,7 @@ import com.easyinsight.security.PasswordService;
 import com.easyinsight.security.Roles;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.userupload.DataSourceThreadPool;
 import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.email.AccountMemberInvitation;
 import com.easyinsight.logging.LogClass;
@@ -477,11 +478,11 @@ public class UserAccountAdminService {
                     final String adminFirstName = admin.getFirstName();
                     final String adminName = admin.getName();
                     final String userName = entry.getValue().getUserName();
-                    new Thread(new Runnable() {
+                    DataSourceThreadPool.instance().addActivity(new Runnable() {
                         public void run() {
                             new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password, accountName, loginURL, adminEmail, "");
                         }
-                    }).start();
+                    });
                 }
             }
             session.getTransaction().commit();
