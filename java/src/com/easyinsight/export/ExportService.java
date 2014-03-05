@@ -56,10 +56,7 @@ import java.io.*;
 
 import java.net.URLEncoder;
 import java.sql.*;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.*;
 import java.util.Date;
 import java.util.List;
@@ -529,7 +526,7 @@ public class ExportService {
                         analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
                     html = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, true, includeTitle);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TEXT) {
-                    html = ExportService.textReportToHtml(analysisDefinition, conn, insightRequestMetadata);
+                    html = ExportService.textReportToHtml(analysisDefinition, conn, insightRequestMetadata, includeTitle);
                 } else {
                     ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
                     html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, new ExportProperties(true, true, null));
@@ -1598,10 +1595,15 @@ public class ExportService {
         return new VListInfo(dColl, columns);
     }
 
-    public static String textReportToHtml(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
+    public static String textReportToHtml(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean email) {
         DataSet dataSet = DataService.listDataSet(listDefinition, insightRequestMetadata, conn);
         WSTextDefinition wsTextDefinition = (WSTextDefinition) listDefinition;
         StringBuilder sb = new StringBuilder();
+        if (!email) {
+            String style = MessageFormat.format("<div style=\"text-align:left; color:{1}; font-size:{0}px\">", wsTextDefinition.getFontSize(),
+                    createHexString(wsTextDefinition.getFontColor()));
+            sb.append(style);
+        }
         for (IRow row : dataSet.getRows()) {
             for (int i = 0; i < wsTextDefinition.getColumns().size(); i++) {
                 AnalysisItem item = wsTextDefinition.getColumns().get(i);
@@ -1611,6 +1613,9 @@ public class ExportService {
                     sb.append(" ");
                 }
             }
+        }
+        if (!email) {
+            sb.append("</div>");
         }
         return sb.toString();
     }
@@ -3174,7 +3179,7 @@ public class ExportService {
                             } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
                                 StringBuilder paramBuilder = new StringBuilder();
                                 DrillThrough drillThrough = (DrillThrough) defaultLink;
-                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
+                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.createID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
                                 if (exportProperties.getEmbedKey() != null) {
                                     paramBuilder.append("&embedKey=" + exportProperties.getEmbedKey()+"&");
                                 }
@@ -3422,7 +3427,7 @@ public class ExportService {
                             } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
                                 StringBuilder paramBuilder = new StringBuilder();
                                 DrillThrough drillThrough = (DrillThrough) defaultLink;
-                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
+                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.createID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
                                 if (exportProperties.getEmbedKey() != null) {
                                     paramBuilder.append("&embedKey=" + exportProperties.getEmbedKey()+"&");
                                 }

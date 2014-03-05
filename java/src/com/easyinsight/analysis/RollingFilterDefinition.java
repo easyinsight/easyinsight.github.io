@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -159,7 +160,8 @@ public class RollingFilterDefinition extends FilterDefinition {
     public void applyCalculationsBeforeRun(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
                                            Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) {
         try {
-            for (CustomRollingInterval interval : intervals) {
+            List<CustomRollingInterval> intervalList = new ArrayList<CustomRollingInterval>(intervals);
+            for (CustomRollingInterval interval : intervalList) {
                 if (interval.getIntervalNumber() == this.getInterval()) {
                     if (interval.isStartDefined()) {
                         Value value = new ReportCalculation(interval.getStartScript()).filterApply(report, allFields, keyMap, displayMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata,
@@ -437,5 +439,46 @@ public class RollingFilterDefinition extends FilterDefinition {
             }
         } while (found);
         return string;
+    }
+
+    public String asString(InsightRequestMetadata insightRequestMetadata) {
+
+        // Showing data for [Months] of [Year] for describe([Location], [Provider], [Discipline])
+        //
+        // need to find start date and end date
+        if (insightRequestMetadata == null) {
+            insightRequestMetadata = new InsightRequestMetadata();
+        }
+        Date now = insightRequestMetadata.getNow();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        String startString = null;
+        String endString = null;
+
+        if (interval == MaterializedRollingFilterDefinition.ALL) {
+            return "";
+        } else if (interval > MaterializedRollingFilterDefinition.ALL) {
+            applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
+            if (startDate != null) {
+                startString = df.format(startDate);
+            }
+
+            if (endDate != null) {
+                endString = df.format(endDate);
+            }
+        } else {
+            long startTime = MaterializedRollingFilterDefinition.findStartDate(this, now, insightRequestMetadata);
+            long endTime = MaterializedRollingFilterDefinition.findEndDate(this, now, insightRequestMetadata);
+            startString = df.format(new Date(startTime));
+            endString = df.format(new Date(endTime));
+
+        }
+
+        if (startString != null && endString != null) {
+            return "between " + startString + " and " + endString;
+        } else if (startString != null) {
+            return "after " + startString;
+        } else {
+            return "before " + endString;
+        }
     }
 }

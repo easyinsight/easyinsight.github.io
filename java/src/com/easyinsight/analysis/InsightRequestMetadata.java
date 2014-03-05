@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class InsightRequestMetadata implements Serializable {
     private Date now = new Date();
+    private AnalysisDateDimension baseDate;
+    private boolean dateJoin;
     private int utcOffset;
     private int version;
     private boolean refreshAllSources;
@@ -50,8 +52,43 @@ public class InsightRequestMetadata implements Serializable {
     private transient boolean noLogging;
     private transient Map<String, List<String>> fieldAudits = new HashMap<String, List<String>>();
 
+    private transient List<AnalysisItem> allItems;
+    private transient AnalysisItemRetrievalStructure structure;
+
+    public List<AnalysisItem> getAllItems() {
+        return allItems;
+    }
+
+    public void setAllItems(List<AnalysisItem> allItems) {
+        this.allItems = allItems;
+    }
+
+    public AnalysisItemRetrievalStructure getStructure() {
+        return structure;
+    }
+
+    public void setStructure(AnalysisItemRetrievalStructure structure) {
+        this.structure = structure;
+    }
+
     public Map<String, List<String>> getFieldAudits() {
         return fieldAudits;
+    }
+
+    public boolean isDateJoin() {
+        return dateJoin;
+    }
+
+    public void setDateJoin(boolean dateJoin) {
+        this.dateJoin = dateJoin;
+    }
+
+    public AnalysisDateDimension getBaseDate() {
+        return baseDate;
+    }
+
+    public void setBaseDate(AnalysisDateDimension baseDate) {
+        this.baseDate = baseDate;
     }
 
     public void addAudit(AnalysisItem field, String audit) {

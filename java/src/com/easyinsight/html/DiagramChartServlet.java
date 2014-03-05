@@ -69,7 +69,7 @@ public class DiagramChartServlet extends HtmlServlet {
 
 
                 if (defaultLink != null) {
-                    node.put("drillthrough", defaultLink.getLinkID());
+                    node.put("drillthrough", defaultLink.createID());
                 }
 
                 node.put("image", nodeValues.getIconImage());

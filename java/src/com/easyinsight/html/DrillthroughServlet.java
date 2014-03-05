@@ -8,6 +8,10 @@ import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.Feed;
+import com.easyinsight.datafeeds.FeedRegistry;
+import com.easyinsight.datafeeds.FieldRule;
+import com.easyinsight.tag.Tag;
 import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
 import org.json.JSONObject;
@@ -18,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,7 +33,7 @@ import java.util.Map;
 public class DrillthroughServlet extends HtmlServlet {
     @Override
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws Exception {
-        Long drillthroughID = Long.parseLong(request.getParameter("drillthroughID"));
+        String drillthroughID = request.getParameter("drillthroughID");
         Long sourceField = Long.parseLong(request.getParameter("sourceField"));
         String embeddedString = request.getParameter("embedded");
         boolean embedded = false;
@@ -49,9 +54,25 @@ public class DrillthroughServlet extends HtmlServlet {
         if (linkItem == null) {
             throw new RuntimeException();
         }
+        List<FieldRule> rules = FieldRule.load(conn, report.getDataFeedID());
+
+        Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID(), conn);
+        Map<String, List<Tag>> fieldMap = new HashMap<String, List<Tag>>();
+        for (AnalysisItem field : feed.getFields()) {
+            if (field.getTags() != null) {
+                fieldMap.put(field.toOriginalDisplayName(), field.getTags());
+            }
+        }
+        linkItem.setTags(fieldMap.get(linkItem.toOriginalDisplayName()));
+        for (FieldRule rule : rules) {
+            if (rule.matches(linkItem)) {
+                rule.update(linkItem, report, insightRequestMetadata);
+            }
+        }
+
         DrillThrough drillThrough = null;
         for (Link link : linkItem.getLinks()) {
-            if (link.getLinkID() == drillthroughID) {
+            if (link.createID().equals(drillthroughID)) {
                 drillThrough = (DrillThrough) link;
             }
         }
@@ -83,6 +104,7 @@ public class DrillthroughServlet extends HtmlServlet {
             saveDrillStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             saveDrillStmt.execute();
             long drillID = Database.instance().getAutoGenKey(saveDrillStmt);
+            saveDrillStmt.close();
             PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO DRILLTHROUGH_REPORT_SAVE_FILTER (DRILLTHROUGH_SAVE_ID, FILTER_ID) VALUES (?, ?)");
             for (FilterDefinition filter : drillThroughResponse.getFilters()) {
                 Session session = Database.instance().createSession(conn);
@@ -94,6 +116,7 @@ public class DrillthroughServlet extends HtmlServlet {
                 saveStmt.setLong(2, filter.getFilterID());
                 saveStmt.execute();
             }
+            saveStmt.close();
             if (embedKey != null) {
                 result.put("url", "/app/html/user/"+embedKey+"/report/drillthrough/" + urlKey + "/embed");
             } else if (embedded) {
@@ -111,6 +134,7 @@ public class DrillthroughServlet extends HtmlServlet {
             saveDrillStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             saveDrillStmt.execute();
             long drillID = Database.instance().getAutoGenKey(saveDrillStmt);
+            saveDrillStmt.close();
             PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO DRILLTHROUGH_REPORT_SAVE_FILTER (DRILLTHROUGH_SAVE_ID, FILTER_ID) VALUES (?, ?)");
             for (FilterDefinition filter : drillThroughResponse.getFilters()) {
                 Session session = Database.instance().createSession(conn);
@@ -122,6 +146,7 @@ public class DrillthroughServlet extends HtmlServlet {
                 saveStmt.setLong(2, filter.getFilterID());
                 saveStmt.execute();
             }
+            saveStmt.close();
             if (embedKey != null) {
                 result.put("url", "/app/html/user/"+embedKey+"/report/drillthrough/" + urlKey + "/embed");
             } else if (embedded) {

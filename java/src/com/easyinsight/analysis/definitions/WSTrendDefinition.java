@@ -93,7 +93,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
                 if (l != null && l instanceof DrillThrough) {
                     JSONObject j = new JSONObject();
                     j.put("embedded", "false");
-                    j.put("id", l.getLinkID());
+                    j.put("id", l.createID());
                     j.put("reportID", getUrlKey());
                     j.put("source", outcome.getMeasure().getAnalysisItemID());
                     clickEvent = "drillThroughParameterized(" + j.toString() + ")";

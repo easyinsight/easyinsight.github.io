@@ -110,7 +110,7 @@ public class ColumnChartServlet extends HtmlServlet {
         if (l != null && l instanceof DrillThrough) {
             JSONObject drillthrough = new JSONObject();
             drillthrough.put("reportID", report.getUrlKey());
-            drillthrough.put("id", l.getLinkID());
+            drillthrough.put("id", l.createID());
             drillthrough.put("source", xAxisItem.getAnalysisItemID());
             drillthrough.put("xaxis", xAxisItem.getAnalysisItemID());
             object.put("drillthrough", drillthrough);

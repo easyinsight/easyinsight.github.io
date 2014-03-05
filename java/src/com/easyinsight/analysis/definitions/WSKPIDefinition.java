@@ -1,8 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.analysis.WSAnalysisDefinition;
+import com.easyinsight.analysis.*;
 
 import java.util.*;
 
@@ -16,6 +14,24 @@ public abstract class WSKPIDefinition extends WSAnalysisDefinition {
     private String filterName;
     private int dayWindow;
     private List<AnalysisItem> groupings;
+    private String nowDate;
+    private String previousDate;
+
+    public String getNowDate() {
+        return nowDate;
+    }
+
+    public void setNowDate(String nowDate) {
+        this.nowDate = nowDate;
+    }
+
+    public String getPreviousDate() {
+        return previousDate;
+    }
+
+    public void setPreviousDate(String previousDate) {
+        this.previousDate = previousDate;
+    }
 
     public List<AnalysisItem> getGroupings() {
         return groupings;
@@ -70,6 +86,21 @@ public abstract class WSKPIDefinition extends WSAnalysisDefinition {
             validFilters.add(filter);
         }
         return validFilters;
+    }
+
+    @Override
+    public void populateProperties(List<ReportProperty> properties) {
+        super.populateProperties(properties);
+        nowDate = findStringProperty(properties, "nowDate", "");
+        previousDate = findStringProperty(properties, "previousDate", "");
+    }
+
+    @Override
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportStringProperty("nowDate", nowDate));
+        properties.add(new ReportStringProperty("previousDate", previousDate));
+        return properties;
     }
 
     @Override

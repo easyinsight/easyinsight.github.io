@@ -126,6 +126,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean manualButRunFirst;
     private String customFontFamily;
     private boolean useCustomFontFamily;
+    private String baseDate;
     private String exportString;
     private int generalSizeLimit;
     private boolean passThroughFilters;
@@ -173,6 +174,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setDataSourceFieldReport(boolean dataSourceFieldReport) {
         this.dataSourceFieldReport = dataSourceFieldReport;
+    }
+
+    public String getBaseDate() {
+        return baseDate;
+    }
+
+    public void setBaseDate(String baseDate) {
+        this.baseDate = baseDate;
     }
 
     private List<FilterDefinition> filtersForDrillthrough;
@@ -1066,6 +1075,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         enableLocalStorage = findBooleanProperty(properties, "enableLocalStorage", false);
         colorScheme = findStringProperty(properties, "reportColorScheme", "None");
         exportString = findStringProperty(properties, "exportString", "");
+        baseDate = findStringProperty(properties, "baseDate", "");
     }
 
     public List<ReportProperty> createProperties() {
@@ -1084,6 +1094,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("dataSourceFields", dataSourceFields));
         properties.add(new ReportBooleanProperty("lookupTableOptimization", lookupTableOptimization));
         properties.add(new ReportStringProperty("exportString", exportString));
+        properties.add(new ReportStringProperty("baseDate", baseDate));
         properties.add(new ReportBooleanProperty("adHocExecution", adHocExecution));
         properties.add(new ReportBooleanProperty("cacheable", cacheable));
         properties.add(new ReportBooleanProperty("manualButRunFirst", manualButRunFirst));

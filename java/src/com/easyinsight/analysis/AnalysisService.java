@@ -1326,32 +1326,7 @@ public class AnalysisService {
                                              WSAnalysisDefinition report, String altKey, List altValues) {
         try {
             List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
-            if (drillThrough.getPassThroughField() != null) {
-                FilterValueDefinition multi = new FilterValueDefinition();
-                multi.setField(drillThrough.getPassThroughField().reconcileToAnalysisItem(report.getDataFeedID()));
-                multi.setFilteredValues(altValues);
-                multi.setInclusive(true);
-                multi.setNewType(true);
-                multi.setSingleValue(false);
-                multi.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                multi.setToggleEnabled(true);
-                filters.add(multi);
-                DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
-                EIDescriptor descriptor;
-                if (drillThrough.getReportID() != null && drillThrough.getReportID() != 0) {
-                    InsightResponse insightResponse = openAnalysisIfPossibleByID(drillThrough.getReportID());
-                    descriptor = insightResponse.getInsightDescriptor();
-                } else {
-                    DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
-                    String urlKey = new DashboardStorage().urlKeyForID(drillThrough.getDashboardID());
-                    dashboardDescriptor.setId(drillThrough.getDashboardID());
-                    dashboardDescriptor.setUrlKey(urlKey);
-                    descriptor = dashboardDescriptor;
-                }
-                drillThroughResponse.setDescriptor(descriptor);
-                drillThroughResponse.setFilters(filters);
-                return drillThroughResponse;
-            }
+
             Map<String, Object> data;
             if (dataObj instanceof Map) {
                 data = (Map<String, Object>) dataObj;
@@ -1482,11 +1457,11 @@ public class AnalysisService {
                     }
 
                 }
-                if (drillThrough.isAddAllFilters()) {
+                if (drillThrough.isAddAllFilters() || drillThrough.getPassThroughField() != null) {
                     filters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
                             analysisItem));
                 }
-                if (drillThrough.isFilterRowGroupings()) {
+                if (drillThrough.isFilterRowGroupings() || drillThrough.getPassThroughField() != null) {
 
                     /*for (FilterDefinition filter : filters) {
                         if (filter.getField() != null) {
@@ -1548,6 +1523,52 @@ public class AnalysisService {
 
                 }
             }*/
+
+            if (drillThrough.getPassThroughField() != null) {
+                AnalysisItem item = drillThrough.getPassThroughField().reconcileToAnalysisItem(report.getDataFeedID());
+                report.getFilterDefinitions().addAll(filters);
+                EIConnection conn = Database.instance().getConnection();
+                DataSet dataSet;
+
+                try {
+                    dataSet = DataService.listDataSet(report, new InsightRequestMetadata(), conn);
+                } finally {
+                    Database.closeConnection(conn);
+                }
+                Set<Value> allValues = new HashSet<Value>();
+                for (IRow row : dataSet.getRows()) {
+                    Set<Value> values = row.getPassthroughRow().get(item.qualifiedName());
+                    allValues.addAll(values);
+                }
+                FilterValueDefinition multi = new FilterValueDefinition();
+                List<Object> valueList = new ArrayList<Object>(allValues.size());
+                for (Value value : allValues) {
+                    valueList.add(value);
+                }
+                multi.setField(item);
+                multi.setFilteredValues(valueList);
+                multi.setInclusive(true);
+                multi.setNewType(true);
+                multi.setSingleValue(false);
+                multi.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                multi.setToggleEnabled(true);
+                //filters.add(multi);
+                DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
+                EIDescriptor descriptor;
+                if (drillThrough.getReportID() != null && drillThrough.getReportID() != 0) {
+                    InsightResponse insightResponse = openAnalysisIfPossibleByID(drillThrough.getReportID());
+                    descriptor = insightResponse.getInsightDescriptor();
+                } else {
+                    DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
+                    String urlKey = new DashboardStorage().urlKeyForID(drillThrough.getDashboardID());
+                    dashboardDescriptor.setId(drillThrough.getDashboardID());
+                    dashboardDescriptor.setUrlKey(urlKey);
+                    descriptor = dashboardDescriptor;
+                }
+                drillThroughResponse.setDescriptor(descriptor);
+                drillThroughResponse.setFilters(Arrays.asList((FilterDefinition) multi));
+                return drillThroughResponse;
+            }
 
             DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
             EIDescriptor descriptor;

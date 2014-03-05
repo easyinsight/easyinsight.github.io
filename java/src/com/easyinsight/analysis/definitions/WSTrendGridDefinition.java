@@ -1,6 +1,12 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.AnalysisTypes;
+import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.analysis.HTMLReportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -42,5 +48,12 @@ public class WSTrendGridDefinition extends WSKPIDefinition {
         return AnalysisTypes.TREND_GRID;
     }
 
-
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject list = super.toJSON(htmlReportMetadata, parentDefinitions);
+        list.put("type", "trend_definition");
+        list.put("key", getUrlKey());
+        list.put("url", "/app/htmlExport");
+        return list;
+    }
 }
