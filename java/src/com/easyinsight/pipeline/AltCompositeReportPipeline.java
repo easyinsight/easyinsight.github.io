@@ -32,7 +32,8 @@ public class AltCompositeReportPipeline extends Pipeline {
                 } else if (lookupTable.getSourceField().hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                     Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
                     analysisItems.add(lookupTable.getSourceField());
-                    components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, Pipeline.BEFORE, new AnalysisItemRetrievalStructure(Pipeline.BEFORE)));
+                    components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, Pipeline.BEFORE, new AnalysisItemRetrievalStructure(Pipeline.BEFORE),
+                            insightRequestMetadata));
                 }
                 components.add(new LookupTableComponent(lookupTable));
             }
@@ -41,7 +42,8 @@ public class AltCompositeReportPipeline extends Pipeline {
         for (JoinMetadata joinMetadata : joinMetadatas) {
             joinItems.add(joinMetadata.analysisItem);
         }
-        components.addAll(new CalcGraph().doFunGraphStuff(new HashSet<AnalysisItem>(joinItems), allItems, reportItems, Pipeline.BEFORE, new AnalysisItemRetrievalStructure(Pipeline.BEFORE)));
+        components.addAll(new CalcGraph().doFunGraphStuff(new HashSet<AnalysisItem>(joinItems), allItems, reportItems, Pipeline.BEFORE, new AnalysisItemRetrievalStructure(Pipeline.BEFORE),
+                insightRequestMetadata));
         for (JoinMetadata joinMetadata : joinMetadatas) {
             AnalysisItem item = joinMetadata.analysisItem;
             for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, joinItems)) {

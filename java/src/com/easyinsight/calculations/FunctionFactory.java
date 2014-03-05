@@ -293,6 +293,8 @@ public class FunctionFactory {
             return new TagBlah();
         } else if (s.equals("plural")) {
             return new Plural();
+        } else if (s.equals("daysinyear")) {
+            return new DaysInYear();
         } else {
             return null;
         }

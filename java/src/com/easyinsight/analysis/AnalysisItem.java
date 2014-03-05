@@ -48,6 +48,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     private List<Tag> tags;
 
     @Transient
+    private String defaultDate;
+
+    @Transient
     private FieldDataSourceOrigin origin;
 
     @Transient
@@ -175,6 +178,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void setFormattingType(int formattingType) {
         this.formattingType = formattingType;
+    }
+
+    public String getDefaultDate() {
+        return defaultDate;
+    }
+
+    public void setDefaultDate(String defaultDate) {
+        this.defaultDate = defaultDate;
     }
 
     public FieldDataSourceOrigin getOrigin() {
