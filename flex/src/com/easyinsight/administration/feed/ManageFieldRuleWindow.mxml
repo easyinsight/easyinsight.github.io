@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"  creationComplete="onCreation()">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.feedassembly.CompositeFeedDefinition;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -15,6 +16,7 @@
             window.fieldRule = event.fieldRule;
             window.dataSourceID = dataSourceID;
             window.dataSources = dataSources;
+            window.dates = dates;
             window.fields = fields;
             window.tags = tags;
             window.addEventListener(FieldRuleEvent.FIELD_RULE_EDIT, onRuleEdit, false, 0, true);
@@ -69,6 +71,7 @@
             var window:FieldRuleEditWindow = new FieldRuleEditWindow();
             window.dataSourceID = dataSourceID;
             window.fields = fields;
+            window.dates = dates;
             window.dataSources = dataSources;
             window.tags = tags;
             window.addEventListener(FieldRuleEvent.FIELD_RULE_ADD, onRuleAdd, false, 0, true);
@@ -79,16 +82,25 @@
         private function gotConfigurations():void {
             var configs:ArrayCollection = feedService.getAnalysisItemConfigurations.lastResult as ArrayCollection;
             var fields:ArrayCollection = new ArrayCollection();
+            var dates:ArrayCollection = new ArrayCollection();
             for each (var c:AnalysisItemConfiguration in configs) {
                 fields.addItem(c.analysisItem);
+                if (c.analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                    dates.addItem(c.analysisItem);
+                }
             }
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("display", true) ];
+            fields.sort = sort;
             fields.refresh();
+            dates.sort = sort;
+            dates.refresh();
             this.fields = fields;
+            this.dates = dates;
         }
 
         private var fields:ArrayCollection;
+        private var dates:ArrayCollection;
 
         private var tags:ArrayCollection;
 

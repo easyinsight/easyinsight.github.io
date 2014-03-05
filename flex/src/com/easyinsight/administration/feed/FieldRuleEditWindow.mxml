@@ -30,6 +30,12 @@
         public var fieldRule:FieldRule;
 
         [Bindable]
+        public var dates:ArrayCollection;
+
+        [Bindable]
+        private var defaultDate:String;
+
+        [Bindable]
         private var ruleType:String = "[ Choose an Option ]";
 
         [Bindable]
@@ -86,6 +92,10 @@
                         selectedReportType = "Text";
                     }
                     index3 = 1;
+                } else if (fieldRule.defaultDate != null && fieldRule.defaultDate != "") {
+                    selectedAction = "set default date";
+                    index2 = 3;
+                    defaultDate = fieldRule.defaultDate;
                 }
             }
         }
@@ -138,9 +148,15 @@
             if (index2 == 1) {
                 fieldRule.link = link;
                 fieldRule.extension = null;
+                fieldRule.defaultDate = null;
             } else if (index2 == 2) {
                 fieldRule.extension = reportFieldExtension;
                 fieldRule.link = null;
+                fieldRule.defaultDate = null;
+            } else if (index2 == 3) {
+                fieldRule.link = null;
+                fieldRule.extension = null;
+                fieldRule.defaultDate = defaultDateBox.selectedItem.display;
             } else {
                 Alert.show("You need to choose an action.");
             }
@@ -173,6 +189,8 @@
                 index2 = 1;
             } else if (selectedRule == "configure") {
                 index2 = 2;
+            } else if (selectedRule == "set default date") {
+                index2 = 3;
             } else {
                 index2 = 0;
             }
@@ -324,6 +342,7 @@
                     <mx:String>[ Choose an Option ]</mx:String>
                     <mx:String>add a link</mx:String>
                     <mx:String>configure</mx:String>
+                    <mx:String>set default date</mx:String>
                 </mx:Array>
             </mx:ArrayCollection>
         </mx:dataProvider>
@@ -352,6 +371,9 @@
                     <mx:LinkButton label="default behavior" click="defaultBehavior()"/>
                 </mx:Box>
             </mx:ViewStack>
+        </mx:HBox>
+        <mx:HBox>
+            <util:SmartComboBox id="defaultDateBox" selectedValue="{defaultDate}" selectedProperty="display" dataProvider="{dates}" labelField="display"/>
         </mx:HBox>
     </mx:ViewStack>
     </mx:HBox>

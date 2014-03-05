@@ -30,6 +30,7 @@ public class FieldRule {
     public var all:Boolean;
     public var selected:Boolean;
     public var drillthroughName:String;
+    public var defaultDate:String;
 
     public function FieldRule() {
     }
@@ -48,8 +49,6 @@ public class FieldRule {
             str += "For all dates ";
         } else if (dataSourceID > 0) {
             str += "For all fields on data source " + dataSourceName + " ";
-        } else {
-            str += "WHYYYYYY";
         }
         if (link != null) {
             str += "add " + link.createString(drillthroughName) + ".";
@@ -60,6 +59,8 @@ public class FieldRule {
             } else if (ext is TextReportFieldExtension) {
                 str += "configure text properties."
             }
+        } else {
+            str += "set default trend analysis date to " + defaultDate + ".";
         }
         return str;
     }
