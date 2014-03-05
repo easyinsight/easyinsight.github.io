@@ -6,7 +6,6 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.analysis {
-import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
 
 import mx.collections.ArrayCollection;
@@ -18,6 +17,8 @@ public class KPIDefinition extends AnalysisDefinition {
     public var measures:ArrayCollection;
     public var filterName:String;
     public var groupings:ArrayCollection;
+    public var nowDate:String;
+    public var previousDate:String;
     public var dayWindow:int = 30;
 
     public function KPIDefinition() {
@@ -28,39 +29,38 @@ public class KPIDefinition extends AnalysisDefinition {
         // keep it from removing intrinsic trend filter
     }
 
-    override public function newFilters(filterDefinitions:ArrayCollection):ArrayCollection {
+    override public function newFilters(filterDefinitions:ArrayCollection):Object {
+        var o:Object = new Object();
         var toAdd:ArrayCollection = new ArrayCollection();
+        var fields:ArrayCollection = new ArrayCollection();
         if (filterName == null) {
-            var filter:RollingDateRangeFilterDefinition;
-            for each (var filterDef:FilterDefinition in filterDefinitions) {
-                if (filterDef.intrinsic && filterDef.getType() == FilterDefinition.ROLLING_DATE) {
-                    filter = filterDef as RollingDateRangeFilterDefinition;
-                    break;
-                }
-            }
-            if (filter == null) {
-                var tempField:AnalysisDateDimension = new AnalysisDateDimension();
-                tempField.displayName = "Date";
+            if (analysisID == 0 && baseDate == null) {
+                //baseDate = "Date";
+                nowDate = "Now";
+                previousDate = "Against";
+                var date:DerivedAnalysisDateDimension = new DerivedAnalysisDateDimension();
+                date.concrete = false;
+                date.applyBeforeAggregation = true;
+                date.derivationCode = "nowdate()";
                 var key:NamedKey = new NamedKey();
                 key.name = "Date";
-                tempField.key = key;
-
-                filter = new RollingDateRangeFilterDefinition();
-                filter.intrinsic = true;
-                filter.trendFilter = true;
-                filter.filterName = "Trend Date";
-                filter.interval = RollingDateRangeFilterDefinition.WEEK;
-                filter.field = tempField;
-                toAdd.addItem(filter);
+                date.key = key;
+                fields.addItem(date);
+                var filter1:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
+                filter1.field = date;
+                filter1.interval = RollingDateRangeFilterDefinition.ALL;
+                filter1.filterName = "Now";
+                toAdd.addItem(filter1);
+                var filter2:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
+                filter2.field = date;
+                filter2.interval = RollingDateRangeFilterDefinition.ALL;
+                filter2.filterName = "Against";
+                toAdd.addItem(filter2);
             }
-            if (filter.filterName == null || filter.filterName == "") {
-                filterName = filter.field.display;
-            } else {
-                filterName = filter.filterName;
-            }
-
         }
-        return toAdd;
+        o["filters"] = toAdd;
+        o["fields"] = fields;
+        return o;
     }
 }
 }

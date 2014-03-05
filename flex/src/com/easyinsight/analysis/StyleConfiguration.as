@@ -129,7 +129,8 @@ public class StyleConfiguration {
                     false, function(dashboardReport:DashboardReport):Boolean {
                         return dashboardReport.report.reportType == AnalysisDefinition.LIST || dashboardReport.report.reportType == AnalysisDefinition.FORM ||
                                 dashboardReport.report.reportType == AnalysisDefinition.CROSSTAB || dashboardReport.report.reportType == AnalysisDefinition.YTD ||
-                                dashboardReport.report.reportType == AnalysisDefinition.VERTICAL_LIST || dashboardReport.report.reportType == AnalysisDefinition.COMPARE_YEARS;
+                                dashboardReport.report.reportType == AnalysisDefinition.VERTICAL_LIST || dashboardReport.report.reportType == AnalysisDefinition.COMPARE_YEARS ||
+                                dashboardReport.report.reportType == AnalysisDefinition.TEXT;
                     }));
             //items.addItem(new CheckBoxReportFormItem("Space Sides", "spaceSides", DashboardReport(dashboardElement).spaceSides, dashboardElement));
         }
@@ -177,6 +178,7 @@ public class StyleConfiguration {
          }*/
         items.addItem(new NumericReportFormItem("Font Size", "fontSize", report.fontSize, report, 8, 48));
         items.addItem(new TextReportFormItem("Export String", "exportString", report.exportString, report));
+        items.addItem(new TextReportFormItem("Base Date", "baseDate", report.baseDate, report));
         items.addItem(new NumericReportFormItem("Header Font Size", "headerFontSize", report.headerFontSize, report, 8, 48));
         items.addItem(new NumericReportFormItem("Max Header Width", "maxHeaderWidth", report.maxHeaderWidth, report, 100, 1500));
         items.addItem(new NumericReportFormItem("Background Alpha", "backgroundAlpha", report.backgroundAlpha, report, 0, 1));
@@ -199,6 +201,10 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Max Rows To Display", "generalSizeLimit", report.generalSizeLimit, report, 0, 10000000));
             items.addItem(new ComboBoxReportFormItem("Default Alignment", "defaultColumnAlignment", ListDefinition(report).defaultColumnAlignment, report, ["left", "center", "right"]));
             items.addItem(new ComboBoxReportFormItem("Color Set", "colorScheme", report.colorScheme, report, [ "Primary", "Secondary", "None"]));
+        }
+        if (report is KPIDefinition) {
+            items.addItem(new TextReportFormItem("Now Date", "nowDate", KPIDefinition(report).nowDate, report));
+            items.addItem(new TextReportFormItem("Previous Date", "previousDate", KPIDefinition(report).previousDate, report));
         }
         if (report is CrosstabDefinition) {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
@@ -405,6 +411,7 @@ public class StyleConfiguration {
         }
         if (report is TextReport) {
             items.addItem(new ColorReportFormItem("Text Color", "fontColor", TextReport(report).fontColor, report));
+            items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
         }
         items.addItem(new TextReportFormItem("Custom Field 1", "customField1", report.customField1, report));
         items.addItem(new TextReportFormItem("Custom Field 2", "customField2", report.customField2, report));
