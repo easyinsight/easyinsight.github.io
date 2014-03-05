@@ -844,15 +844,23 @@ public class DeliveryScheduledTask extends ScheduledTask {
             if (dataSet.getRows().size() == 0 && !sendIfNoData) {
                 return null;
             }
-            table = ExportService.verticalListToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
+            table = ExportService.verticalListToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, exportProperties.isEmailed());
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.YTD) {
-            table = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
+            if (!exportProperties.isEmailed()) {
+                table = ExportService.ytdToHTMLTableWithActualCSS(analysisDefinition, conn, insightRequestMetadata, includeTitle);
+            } else {
+                table = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
+            }
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
                 analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
 
             table = ExportService.treeReportToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
-            table = ExportService.compareYearsToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
+            if (!exportProperties.isEmailed()) {
+                table = ExportService.compareYearsToHTMLTableWithActualCSS(analysisDefinition, conn, insightRequestMetadata, includeTitle);
+            } else {
+                table = ExportService.compareYearsToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
+            }
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
             DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
             if (dataSet.getRows().size() == 0 && !sendIfNoData) {
@@ -865,7 +873,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
             table = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, sendIfNoData, includeTitle);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TEXT) {
-            table = ExportService.textReportToHtml(analysisDefinition, conn, insightRequestMetadata);
+            table = ExportService.textReportToHtml(analysisDefinition, conn, insightRequestMetadata, exportProperties.isEmailed());
         } else {
             ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
             if (listDataResults.getRows().length == 0 && !sendIfNoData) {
@@ -875,7 +883,12 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 System.out.println("\tReport fault on " + analysisDefinition.getAnalysisID() + " - " + listDataResults.getReportFault().toString());
                 return null;
             }
-            table = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, exportProperties);
+            if (!exportProperties.isEmailed()) {
+                table = ExportService.listReportToHTMLTableWithActualCSS(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, exportProperties);
+            } else {
+                table = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, exportProperties);
+            }
+
         }
         return table;
     }
