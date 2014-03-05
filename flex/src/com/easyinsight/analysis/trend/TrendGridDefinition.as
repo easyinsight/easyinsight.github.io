@@ -30,6 +30,17 @@ public class TrendGridDefinition extends KPIDefinition {
         return true;
     }
 
+    override public function getFont():String {
+        if (customFontFamily != null && customFontFamily != "" && useCustomFontFamily) {
+            return customFontFamily;
+        }
+        if (fontName == "Lucida Grande" || fontName == "Open Sans") {
+            return fontName;
+        } else {
+            return "Lucida Grande";
+        }
+    }
+
     override public function fromSave(savedDef:AnalysisDefinition):void {
         super.fromSave(savedDef);
         this.trendReportID = TrendGridDefinition(savedDef).trendReportID;

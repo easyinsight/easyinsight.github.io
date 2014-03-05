@@ -33,8 +33,8 @@ public class TrendHistoricalValueRenderer extends UIComponent implements IListIt
     public function set data(val:Object):void {
         this.trendOutcome = val as TrendOutcome;
         if (trendOutcome != null) {
-            if (trendOutcome.measure.reportFieldExtension != null && trendOutcome.measure.reportFieldExtension is TrendReportFieldExtension &&
-                    (TrendReportFieldExtension(trendOutcome.measure.reportFieldExtension).date || TrendReportFieldExtension(trendOutcome.measure.reportFieldExtension).trendComparisonField)) {
+            if (trendOutcome.historical != null || (trendOutcome.measure.reportFieldExtension != null && trendOutcome.measure.reportFieldExtension is TrendReportFieldExtension &&
+                    (TrendReportFieldExtension(trendOutcome.measure.reportFieldExtension).date || TrendReportFieldExtension(trendOutcome.measure.reportFieldExtension).trendComparisonField))) {
                 var formatter:Formatter = trendOutcome.measure.getFormatter();
                 valueLabel.text = formatter.format(trendOutcome.historical.getValue());
                 valueLabel.validateNow();

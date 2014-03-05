@@ -534,22 +534,9 @@ public class DataViewFactory extends VBox implements IRetrievable {
                         //_analysisDefinition.renderConfig();
                         _reportRenderer.renderReport(event.dataSet, _analysisDefinition, new Object(), event.additionalProperties);
                     } else {
-                        //var useReportInEvent:Boolean = false;
-                        /*if (event.report.filterDefinitions != null) {
-                            for each (var f:FilterDefinition in event.report.filterDefinitions) {
-                                if (f is MultiFieldFilterDefinition || f is AnalysisItemFilterDefinition) {
-                                    useReportInEvent = true;
-                                    break;
-                                }
-                            }
-                        }*/
-                        /*if (useReportInEvent) {
-                            event.report.renderConfig();
-                        } else {*/
-                           // event.report.renderConfig();
-                        //}
                         _reportRenderer.renderReport(event.dataSet, event.report, new Object(), event.additionalProperties);
                     }
+                    _analysisDefinition.fieldEvents = event.events;
                 } else {
                     showNoData();
                 }
@@ -684,6 +671,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.cacheMinutes = source.cacheMinutes;
         target.cacheable = source.cacheable;
         target.addonReports = source.addonReports;
+        target.baseDate = source.baseDate;
 
         copyPropertyIfExists(source, target, "multiColors");
         copyPropertyIfExists(source, target, "labelPosition");
@@ -699,6 +687,8 @@ public class DataViewFactory extends VBox implements IRetrievable {
         copyPropertyIfExists(source, target, "columnSort");
         copyPropertyIfExists(source, target, "showLabels");
         copyPropertyIfExists(source, target, "briefLabels");
+        copyPropertyIfExists(source, target, "nowDate");
+        copyPropertyIfExists(source, target, "previousDate");
     }
 
     private static function copyPropertyIfExists(source:AnalysisDefinition, target:AnalysisDefinition, property:String):void {

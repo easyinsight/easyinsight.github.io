@@ -5,6 +5,7 @@
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.Value;
+        import com.easyinsight.analysis.list.SizeOverrideEvent;
 
         import mx.collections.ArrayCollection;
         import mx.events.FlexEvent;
@@ -30,7 +31,11 @@
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             blah();
             textReport = analysisDefinition as TextReport;
-            fontFamily = textReport.getFont();
+            if (textReport.useCustomFontFamily) {
+                setStyle("fontFamily", textReport.getFont());
+                fontFamily = textReport.getFont();
+            }
+            //Alert.show("font size = " + textReport.fontSize);
             fontSize = textReport.fontSize;
             fontColor = textReport.fontColor;
 
@@ -48,7 +53,19 @@
                      }*/
                 }
             }
+            if (additionalProperties["preferredSize"]) {
+                reportText.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+            }
             this.text = str;
+        }
+
+        private function onUpdateComplete(event:Event):void {
+            event.currentTarget.removeEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+            callLater(computeSize);
+        }
+
+        private function computeSize():void {
+            dispatchEvent(new SizeOverrideEvent(-1, reportText.height));
         }
 
         [Bindable]

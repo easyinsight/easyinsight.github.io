@@ -348,9 +348,16 @@
             for each (var toRemoveFilter:FilterDefinition in toRemove) {
                 transformContainer.removeFilter(toRemoveFilter);
             }
-            var newFilters:ArrayCollection = analysisDefinition.newFilters(transformContainer.getFilterDefinitions());
-            for each (var filterDefinition:FilterDefinition in newFilters) {
-                transformContainer.addFilterDefinition(filterDefinition);
+            var o:Object = analysisDefinition.newFilters(transformContainer.getFilterDefinitions());
+            if (o != null) {
+                var newFilters:ArrayCollection = o["filters"];
+                for each (var filterDefinition:FilterDefinition in newFilters) {
+                    transformContainer.addFilterDefinition(filterDefinition);
+                }
+                var newFields:ArrayCollection = o["fields"];
+                for each (var item:AnalysisItem in newFields) {
+                    onAnalysisItemEdit(new AnalysisItemEditEvent(item, null));
+                }
             }
             dataView = dataViewFactory;
             dataView.adHocMode = !defaultManualRun;
