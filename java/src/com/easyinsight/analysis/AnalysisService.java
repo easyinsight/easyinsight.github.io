@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSStackedBarChartDefinition;
 import com.easyinsight.analysis.definitions.WSStackedColumnChartDefinition;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.*;
@@ -2493,6 +2494,9 @@ public class AnalysisService {
                 conn.setAutoCommit(true);
                 Database.closeConnection(conn);
             }
+        }
+        if (wsAnalysisDefinition.isDataSourceFieldReport()) {
+            MemCachedManager.delete("ds" + wsAnalysisDefinition.getDataFeedID());
         }
         session = Database.instance().createSession();
         try {
