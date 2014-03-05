@@ -53,7 +53,6 @@ public class FeedRegistry {
     }
 
     public Feed getFeed(long identifier, EIConnection conn) {
-        System.out.println("getting feed by id " + identifier);
         Feed feed = (Feed) MemCachedManager.get("feed" + identifier);
 
         try {
@@ -74,7 +73,6 @@ public class FeedRegistry {
     }
 
     public Feed getFeed(long identifier, EIConnection conn, FeedDefinition parentSource) {
-        System.out.println("getting feed by id " + identifier);
         Feed feed = (Feed) MemCachedManager.get("feed" + identifier);
 
         try {

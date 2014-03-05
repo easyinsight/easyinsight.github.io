@@ -22,6 +22,7 @@ public class FieldRule {
 
     private Link link;
     private ReportFieldExtension extension;
+    private long fieldRuleID;
 
     private AnalysisItemHandle explicitField;
     private Tag tag;
@@ -30,6 +31,15 @@ public class FieldRule {
     private long dataSourceID;
     private String dataSourceName;
     private String drillthroughName;
+    private String defaultDate;
+
+    public long getFieldRuleID() {
+        return fieldRuleID;
+    }
+
+    public void setFieldRuleID(long fieldRuleID) {
+        this.fieldRuleID = fieldRuleID;
+    }
 
     public String getDrillthroughName() {
         return drillthroughName;
@@ -39,8 +49,16 @@ public class FieldRule {
         this.drillthroughName = drillthroughName;
     }
 
+    public String getDefaultDate() {
+        return defaultDate;
+    }
+
+    public void setDefaultDate(String defaultDate) {
+        this.defaultDate = defaultDate;
+    }
+
     public static List<FieldRule> load(EIConnection conn, long dataSourceID) throws SQLException {
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT FIELD_RULE_ID, FIELD_TYPE, ALL_FIELDS, LINK_ID, EXTENSION_ID, TAG_ID, DISPLAY_NAME, RULE_DATA_SOURCE_ID FROM FIELD_RULE WHERE DATA_SOURCE_ID = ? ORDER BY FIELD_ORDER ASC");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT FIELD_RULE_ID, FIELD_TYPE, ALL_FIELDS, LINK_ID, EXTENSION_ID, TAG_ID, DISPLAY_NAME, RULE_DATA_SOURCE_ID, DEFAULT_DATE FROM FIELD_RULE WHERE DATA_SOURCE_ID = ? ORDER BY FIELD_ORDER ASC");
         PreparedStatement getTagStmt = conn.prepareStatement("SELECT TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_TAG_ID = ?");
         loadStmt.setLong(1, dataSourceID);
         ResultSet rs = loadStmt.executeQuery();
@@ -121,8 +139,11 @@ public class FieldRule {
                 }
                 nameStmt.close();
             }
+            fieldRule.setDefaultDate(rs.getString(9));
             rules.add(fieldRule);
         }
+        loadStmt.close();
+        getTagStmt.close();
         return rules;
     }
 
@@ -144,7 +165,7 @@ public class FieldRule {
 
     public void save(EIConnection conn, long dataSourceID, int order) throws SQLException {
         PreparedStatement ps = conn.prepareStatement("INSERT INTO FIELD_RULE (DATA_SOURCE_ID, FIELD_TYPE, ALL_FIELDS, LINK_ID, FIELD_ORDER, " +
-                "EXTENSION_ID, TAG_ID, DISPLAY_NAME, rule_data_source_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "EXTENSION_ID, TAG_ID, DISPLAY_NAME, rule_data_source_id, default_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         ps.setLong(1, dataSourceID);
         ps.setInt(2, type);
@@ -191,6 +212,7 @@ public class FieldRule {
         } else {
             ps.setNull(9, Types.BIGINT);
         }
+        ps.setString(10, getDefaultDate());
         ps.execute();
         ps.close();
     }
@@ -286,7 +308,9 @@ public class FieldRule {
                     }
                     Link clonedLink = link.clone();
                     clonedLink.setDefinedByRule(true);
-                    analysisItem.setLinks(Arrays.asList(clonedLink));
+                    List<Link> list = new ArrayList<Link>();
+                    list.add(clonedLink);
+                    analysisItem.setLinks(list);
                     insightRequestMetadata.addAudit(analysisItem, "Field rule added link.");
                 }
             }
@@ -302,6 +326,9 @@ public class FieldRule {
                         insightRequestMetadata.addAudit(analysisItem, "Field rule added field extension.");
                     }
                 }
+            }
+            if (defaultDate != null && !"".equals(defaultDate)) {
+                analysisItem.setDefaultDate(defaultDate);
             }
         } catch (Exception e) {
             LogClass.error(e);

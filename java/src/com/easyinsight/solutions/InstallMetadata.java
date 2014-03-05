@@ -673,6 +673,29 @@ class InstallMetadata {
                 Tag replaceTag = tagReplacementMap.get(tag.getId());
                 copiedRule.setTag(replaceTag);
             }
+            if (fieldRule.getDataSourceID() > 0) {
+                CompositeFeedDefinition source = (CompositeFeedDefinition) originalSource;
+                int type = 0;
+                for (CompositeFeedNode node : source.getCompositeFeedNodes()) {
+                    if (node.getDataFeedID() == fieldRule.getDataSourceID()) {
+                        type = node.getDataSourceType();
+                    }
+                }
+                long targetID = 0;
+                if (type > 0) {
+                    CompositeFeedDefinition target = (CompositeFeedDefinition) targetSource;
+                    for (CompositeFeedNode node : target.getCompositeFeedNodes()) {
+                        if (node.getDataSourceType() == type) {
+                            targetID = node.getDataFeedID();
+                        }
+                    }
+                }
+                if (targetID > 0) {
+                    fieldRule.setDataSourceID(targetID);
+                } else {
+                    fieldRule.setDataSourceID(0);
+                }
+            }
             if (fieldRule.getExplicitField() != null) {
                 AnalysisItemHandle handle = fieldRule.getExplicitField();
                 AnalysisItemHandle copy = new AnalysisItemHandle();
