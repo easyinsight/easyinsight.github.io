@@ -10,6 +10,7 @@ public class IntentionSuggestion {
     public static final int PROBLEM = 1;
     public static final int WARNING = 2;
     public static final int OTHER = 3;
+    public static final int YOU_SHOULD_DO_THIS = 4;
 
     public static final int SCOPE_DATA_SOURCE = 1;
     public static final int SCOPE_REPORT = 2;
@@ -36,6 +37,7 @@ public class IntentionSuggestion {
     public static final int FILTERED_FIELD = 18;
     public static final int DISTINCT_COUNT = 19;
     public static final int WARNING_MESSAGE = 20;
+    public static final int CONFIGURE_TRENDING = 21;
 
     private String headline;
     private String description;

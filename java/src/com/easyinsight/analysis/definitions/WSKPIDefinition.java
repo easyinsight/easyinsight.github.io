@@ -1,7 +1,11 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.intention.Intention;
+import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.intention.ReportPropertiesIntention;
 
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -16,6 +20,27 @@ public abstract class WSKPIDefinition extends WSAnalysisDefinition {
     private List<AnalysisItem> groupings;
     private String nowDate;
     private String previousDate;
+
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
+        List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+        WSKPIDefinition wsListDefinition = (WSKPIDefinition) report;
+        if (wsListDefinition.getNowDate() == null || "".equals(wsListDefinition.getNowDate())) {
+            suggestions.add(new IntentionSuggestion("Set up Trending",
+                    "Set up filters for trend analysis.",
+                    IntentionSuggestion.SCOPE_REPORT, IntentionSuggestion.CONFIGURE_TRENDING, IntentionSuggestion.YOU_SHOULD_DO_THIS));
+        }
+        return suggestions;
+    }
+
+    public List<Intention> createIntentions(List<AnalysisItem> fields, int type) throws SQLException {
+        if (type == IntentionSuggestion.CONFIGURE_TRENDING) {
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
+            reportPropertiesIntention.setTrendSetup(true);
+            return Arrays.asList((Intention) reportPropertiesIntention);
+        } else {
+            return super.createIntentions(fields, type);
+        }
+    }
 
     public String getNowDate() {
         return nowDate;
