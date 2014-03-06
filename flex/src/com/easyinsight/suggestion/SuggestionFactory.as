@@ -45,6 +45,8 @@ public class SuggestionFactory {
             PopUpUtil.centerPopUp(distinctCountWindow);
         } else if (type == IntentionSuggestion.WARNING_JOIN_FAILURE) {
             reportEditor.joinWindow();
+        } else {
+
         }
     }
 }

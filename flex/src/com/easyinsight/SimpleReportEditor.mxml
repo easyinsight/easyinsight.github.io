@@ -244,6 +244,7 @@
             var errors:ArrayCollection = new ArrayCollection();
             var warnings:ArrayCollection = new ArrayCollection();
             var quickActions:ArrayCollection = new ArrayCollection();
+            var shouldDoThis:ArrayCollection = new ArrayCollection();
             if (suggests != null) {
 
                 for each (var intentionSuggestion:IntentionSuggestion in suggests) {
@@ -251,6 +252,9 @@
                         errors.addItem(intentionSuggestion);
                     } else if (intentionSuggestion.priority == IntentionSuggestion.WARNING) {
                         warnings.addItem(intentionSuggestion);
+                    } else if (intentionSuggestion.priority == IntentionSuggestion.YOU_SHOULD_REALLY_DO_THIS) {
+                        shouldDoThis.addItem(intentionSuggestion);
+                        quickActions.addItem(intentionSuggestion);
                     } else {
                         quickActions.addItem(intentionSuggestion);
                     }
@@ -267,7 +271,7 @@
                 multiProblemBar = null;
             }
 
-            if ((errors.length + warnings.length) > 1) {
+            if ((errors.length + warnings.length + shouldDoThis) > 1) {
                 multiProblemBar = new MultiProblemBar();
                 multiProblemBar.simpleReportEditor = this;
                 multiProblemBar.warnings = warnings;
@@ -277,26 +281,22 @@
                 multiProblemBar.fields = getWrappers();
                 rightBox.addChildAt(multiProblemBar, 0);
             }
-            else if (errors.length == 1 || warnings.length == 1) {
+            else if (errors.length == 1 || warnings.length == 1 || shouldDoThis.length == 1) {
                 majorProblemBar = new MajorProblemBar();
                 majorProblemBar.simpleReportEditor = this;
                 if (errors.length == 1) {
                     majorProblemBar.intentionSuggestion = errors.getItemAt(0) as IntentionSuggestion;
-                } else {
+                } else if (warnings.length == 1) {
                     majorProblemBar.intentionSuggestion = warnings.getItemAt(0) as IntentionSuggestion;
+                } else {
+                    majorProblemBar.intentionSuggestion = shouldDoThis.getItemAt(0) as IntentionSuggestion;
                 }
 
                 majorProblemBar.fields = getWrappers();
                 majorProblemBar.dataSourceID = dataService.dataFeedID;
                 rightBox.addChildAt(majorProblemBar, 0);
             }
-            //this.suggestions = suggestions;
             this.quickActions = quickActions;
-            /*if (suggestions != null && suggestions.length > 0) {
-                currentState = "showSuggestions";
-            } else {
-                currentState = "";
-            }*/
         }
 
         private function gotIntentions():void {
@@ -347,17 +347,6 @@
             var toRemove:ArrayCollection = analysisDefinition.cleanupReport(transformContainer.getFilterDefinitions());
             for each (var toRemoveFilter:FilterDefinition in toRemove) {
                 transformContainer.removeFilter(toRemoveFilter);
-            }
-            var o:Object = analysisDefinition.newFilters(transformContainer.getFilterDefinitions());
-            if (o != null) {
-                var newFilters:ArrayCollection = o["filters"];
-                for each (var filterDefinition:FilterDefinition in newFilters) {
-                    transformContainer.addFilterDefinition(filterDefinition);
-                }
-                var newFields:ArrayCollection = o["fields"];
-                for each (var item:AnalysisItem in newFields) {
-                    onAnalysisItemEdit(new AnalysisItemEditEvent(item, null));
-                }
             }
             dataView = dataViewFactory;
             dataView.adHocMode = !defaultManualRun;
@@ -1457,7 +1446,7 @@
             window.y = customFieldButton.y + customFieldButton.height + 10;
         }
 
-        private function onAnalysisItemEdit(event:AnalysisItemEditEvent):void {
+        public function onAnalysisItemEdit(event:AnalysisItemEditEvent):void {
             var node:AnalysisItemNode = new AnalysisItemNode();
             node.analysisItem = event.analysisItem;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
