@@ -5,6 +5,7 @@ package com.easyinsight.dashboard {
 public class DashboardTextElement extends DashboardElement {
 
     public var text:String;
+    public var html:String;
     public var fontSize:int = 12;
     public var color:uint;
 

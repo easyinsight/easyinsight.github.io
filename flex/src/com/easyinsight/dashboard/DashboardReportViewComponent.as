@@ -61,7 +61,18 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
-        return new SizeInfo(dashboardReport.preferredWidth, alteredHeight == -1 ? dashboardReport.preferredHeight : alteredHeight, dashboardReport.autoCalculateHeight);
+        var height:int = 0;
+        if (alteredHeight == -1) {
+            if (dashboardReport.preferredHeight == 0) {
+                if (dashboardReport.report.reportType == AnalysisDefinition.TREND) {
+                    height = 150;
+                }
+            } else {
+                height = dashboardReport.preferredHeight;
+            }
+        }
+        //Alert.show("size for " + dashboardReport.report.name + " = " + height);
+        return new SizeInfo(dashboardReport.preferredWidth, height, dashboardReport.autoCalculateHeight);
     }
 
     private var alteredHeight:int = -1;
@@ -75,11 +86,19 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             percentWidth = 100;
         }
         if (!sizeInfo.autoCalcHeight && sizeInfo.preferredHeight > 0) {
-            height = dashboardReport.preferredHeight;
+            height = sizeInfo.preferredHeight;
         } else if (!sizeInfo.autoCalcHeight && dashboardEditorMetadata.dashboard.absoluteSizing) {
-            height = 400;
+            if (dashboardReport.report.reportType == AnalysisDefinition.TREND) {
+                height = 150;
+            } else {
+                height = 400;
+            }
         } else if (!sizeInfo.autoCalcHeight) {
-            percentHeight = 100;
+            if (dashboardReport.report.reportType == AnalysisDefinition.TREND) {
+                height = 150;
+            } else {
+                percentHeight = 100;
+            }
         } else {
             percentHeight = NaN;
         }
@@ -176,11 +195,19 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         if (sizeInfo.preferredHeight > 0) {
             height = dashboardReport.preferredHeight;
         } else if (!sizeInfo.autoCalcHeight && dashboardEditorMetadata.dashboard.absoluteSizing) {
-            height = 400;
+            if (dashboardReport.report.reportType == AnalysisDefinition.TREND) {
+                height = 150;
+            } else {
+                height = 400;
+            }
         } else if (!sizeInfo.autoCalcHeight) {
             percentHeight = 100;
         } else {
-            height = 400;
+            if (dashboardReport.report.reportType == AnalysisDefinition.TREND) {
+                height = 150;
+            } else {
+                height = 400;
+            }
             percentHeight = NaN;
         }
 

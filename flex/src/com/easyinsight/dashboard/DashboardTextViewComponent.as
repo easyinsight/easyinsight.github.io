@@ -70,7 +70,7 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         if (textArea != null && (invalidatedTextSize || textArea.maxWidth == 10000)) {
             textArea.maxWidth = unscaledWidth - 40;
-            textArea.htmlText = dashboardText.text;
+            textArea.htmlText = dashboardText.html;
             invalidatedTextSize = false;
         }
     }
