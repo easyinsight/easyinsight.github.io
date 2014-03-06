@@ -34,7 +34,7 @@ public class KPIDefinition extends AnalysisDefinition {
         var toAdd:ArrayCollection = new ArrayCollection();
         var fields:ArrayCollection = new ArrayCollection();
         if (filterName == null) {
-            if (analysisID == 0 && baseDate == null) {
+            if (analysisID == 0 && nowDate == null) {
                 //baseDate = "Date";
                 nowDate = "Now";
                 previousDate = "Against";
