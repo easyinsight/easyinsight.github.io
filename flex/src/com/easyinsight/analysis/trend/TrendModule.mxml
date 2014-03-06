@@ -40,7 +40,7 @@
             var def:TrendDefinition = analysisDefinition as TrendDefinition;
             if (dataSet.length > 0) {
                 currentState = "";
-                altContent.renderReport(dataSet, analysisDefinition);
+                altContent.renderReport(dataSet, analysisDefinition, additionalProperties);
             } else {
                 if (def.measures.length > 0) {
                     currentState = "noData";
