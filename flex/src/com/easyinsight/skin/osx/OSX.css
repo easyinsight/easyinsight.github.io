@@ -734,3 +734,10 @@ TransformContainer {
     color: #847f03;
     font-size: 14px;
 }
+
+.boldRecommendedButton {
+    fontWeight: bold;
+    font-family: "Helvetica Neue", "Helvetica";
+    color: #000088;
+    font-size: 14px;
+}
