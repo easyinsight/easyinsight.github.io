@@ -603,9 +603,14 @@ public class FilterValueDefinition extends FilterDefinition {
             if (i < (filteredValues.size() - 2)) {
                 sb.append(", ");
             } else if (i == (filteredValues.size() - 2)) {
-                sb.append(" and ");
+                sb.append(" or ");
             }
         }
         return sb.toString();
+    }
+
+    @Override
+    public String fullString(InsightRequestMetadata insightRequestMetadata) {
+        return getField().toDisplay() + " is " + asString(insightRequestMetadata);
     }
 }

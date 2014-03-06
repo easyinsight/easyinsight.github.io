@@ -20,6 +20,9 @@ public class ReplacementMap {
     private Map<Long, Tag> tagReplacementMap = new HashMap<Long, Tag>();
 
     public Tag findReplacementTag(long tagID) {
+        if (tagReplacementMap == null) {
+            return null;
+        }
         return tagReplacementMap.get(tagID);
     }
 

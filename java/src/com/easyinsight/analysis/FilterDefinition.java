@@ -571,4 +571,8 @@ public class FilterDefinition implements Serializable, Cloneable {
     public String asString(InsightRequestMetadata insightRequestMetadata) {
         return "";
     }
+
+    public String fullString(InsightRequestMetadata insightRequestMetadata) {
+        return "";
+    }
 }
