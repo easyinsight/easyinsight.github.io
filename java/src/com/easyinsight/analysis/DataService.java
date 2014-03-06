@@ -1049,6 +1049,8 @@ public class DataService {
         TrendResult trendResult = createTrendOutcomes(analysisDefinition, insightRequestMetadata, conn);
         TrendDataResults trendDataResults = new TrendDataResults();
         trendDataResults.setTrendOutcomes(trendResult.trendOutcomes);
+        trendDataResults.setNowString(trendResult.nowString);
+        trendDataResults.setPreviousString(trendResult.previousString);
         trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
         trendDataResults.setDataSourceInfo(trendResult.dataSourceInfo);
         return trendDataResults;
@@ -1297,6 +1299,12 @@ public class DataService {
                 }
             }
         }
+        if (previousFilter instanceof RollingFilterDefinition) {
+            RollingFilterDefinition rf = (RollingFilterDefinition) previousFilter;
+            if (rf.getInterval() == MaterializedRollingFilterDefinition.ALL) {
+                previousFilter = null;
+            }
+        }
 
         List<FieldRule> rules = FieldRule.load(conn, analysisDefinition.getDataFeedID());
 
@@ -1401,6 +1409,8 @@ public class DataService {
         }
         List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
         DataSourceInfo dataSourceInfo = null;
+        String nowString = null;
+        String previousString = null;
         for (Map.Entry<String, List<AnalysisMeasure>> entry : trendMap.entrySet()) {
             String key = entry.getKey();
             List<AnalysisMeasure> measures = entry.getValue();
@@ -1452,7 +1462,7 @@ public class DataService {
                         filters.add(filter);
                     }
                 }
-                FilterDefinition previousFilterClone = null;
+                FilterDefinition previousFilterClone;
                 try {
                     previousFilterClone = previousFilter.clone();
                 } catch (CloneNotSupportedException e) {
@@ -1466,6 +1476,10 @@ public class DataService {
                 reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
                 dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
                 pastSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+                nowString = nowFilter.asString(insightRequestMetadata);
+                previousString = previousFilter.asString(insightRequestMetadata);
+            } else if (nowFilter != null) {
+                pastSet = new DataSet();
             } else if ("".equals(key)) {
                 pastSet = nowSet;
             } else {
@@ -1479,16 +1493,20 @@ public class DataService {
             }
             trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
         }
-        return new TrendResult(new ArrayList<TrendOutcome>(trendOutcomes), dataSourceInfo);
+        return new TrendResult(new ArrayList<TrendOutcome>(trendOutcomes), dataSourceInfo, nowString, previousString);
     }
 
     private static class TrendResult {
         private List<TrendOutcome> trendOutcomes;
         private DataSourceInfo dataSourceInfo;
+        private String nowString;
+        private String previousString;
 
-        private TrendResult(List<TrendOutcome> trendOutcomes, DataSourceInfo dataSourceInfo) {
+        private TrendResult(List<TrendOutcome> trendOutcomes, DataSourceInfo dataSourceInfo, String nowString, String previousString) {
             this.trendOutcomes = trendOutcomes;
             this.dataSourceInfo = dataSourceInfo;
+            this.nowString = nowString;
+            this.previousString = previousString;
         }
     }
 
@@ -1502,6 +1520,8 @@ public class DataService {
             trendDataResults.setTrendOutcomes(trendResult.trendOutcomes);
             trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
             trendDataResults.setDataSourceInfo(trendResult.dataSourceInfo);
+            trendDataResults.setNowString(trendResult.nowString);
+            trendDataResults.setPreviousString(trendResult.previousString);
             if (!insightRequestMetadata.isNoLogging()) {
                 reportEditorBenchmark(analysisDefinition, System.currentTimeMillis() - insightRequestMetadata.getDatabaseTime() - start, insightRequestMetadata.getDatabaseTime(), conn);
             }

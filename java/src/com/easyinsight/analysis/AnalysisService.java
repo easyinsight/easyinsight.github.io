@@ -10,6 +10,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.documentation.DocReader;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.preferences.ApplicationSkin;
@@ -36,6 +37,7 @@ import com.easyinsight.userupload.DataSourceThreadPool;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.util.RandomTextGenerator;
+import flex.messaging.FlexContext;
 import nu.xom.Builder;
 import nu.xom.Document;
 import org.antlr.runtime.RecognitionException;
@@ -57,6 +59,117 @@ public class AnalysisService {
 
     public void reportUses(long reportID) {
         analysisStorage.getAnalysisDefinition(reportID);
+    }
+
+    public Usage whatUsesReport(WSAnalysisDefinition report) {
+        EIConnection conn = Database.instance().getConnection();
+        List<InsightDescriptor> reportsUsingAsAddon = new ArrayList<InsightDescriptor>();
+        List<DataSourceDescriptor> dataSourcesBasedOn = new ArrayList<DataSourceDescriptor>();
+        List<DashboardDescriptor> dashboardsUsing = new ArrayList<DashboardDescriptor>();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.URL_KEY FROM ANALYSIS, REPORT_TO_REPORT_STUB, REPORT_STUB WHERE " +
+                    "ANALYSIS.ANALYSIS_ID = REPORT_TO_REPORT_STUB.REPORT_ID AND REPORT_TO_REPORT_STUB.REPORT_STUB_ID = REPORT_STUB.REPORT_STUB_ID AND REPORT_STUB.REPORT_ID = ?");
+            queryStmt.setLong(1, report.getAnalysisID());
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long reportID = rs.getLong(1);
+                String title = rs.getString(2);
+                String urlKey = rs.getString(3);
+                reportsUsingAsAddon.add(new InsightDescriptor(reportID, title, report.getDataFeedID(), 0, urlKey, 0, true));
+            }
+            PreparedStatement dataSourceStmt = conn.prepareStatement("SELECT data_feed.feed_name, data_feed.data_feed_id, data_feed.api_key FROM distinct_cached_addon_report_source, data_feed WHERE " +
+                    "distinct_cached_addon_report_source.report_id = ? AND distinct_cached_addon_report_source.data_source_id = data_feed.data_feed_id");
+            dataSourceStmt.setLong(1, report.getAnalysisID());
+            ResultSet dataSourceRS = dataSourceStmt.executeQuery();
+            while (dataSourceRS.next()) {
+                String dataSourceName = dataSourceRS.getString(1);
+                long dataSourceID = dataSourceRS.getLong(2);
+                DataSourceDescriptor dsd = new DataSourceDescriptor(dataSourceName, dataSourceID, 0, true, 0);
+                dsd.setUrlKey(dataSourceRS.getString(3));
+                dataSourcesBasedOn.add(dsd);
+            }
+
+            PreparedStatement dashboardStmt = conn.prepareStatement("SELECT dashboard_report.dashboard_element_id FROM dashboard_report WHERE dashboard_report.report_id = ?");
+            PreparedStatement dashboardDetailStmt = conn.prepareStatement("SELECT dashboard.dashboard_name, dashboard.url_key FROM dashboard WHERE dashboard_id = ?");
+            dashboardStmt.setLong(1, report.getAnalysisID());
+            ResultSet elementRS = dashboardStmt.executeQuery();
+            while (elementRS.next()) {
+                long dashboardElementID = elementRS.getLong(1);
+                PreparedStatement rootStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DATA_SOURCE_ID FROM DASHBOARD, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ELEMENT_ID = ? AND " +
+                        "DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ID = DASHBOARD.DASHBOARD_ID");
+                PreparedStatement findParentInGridStmt = conn.prepareStatement("SELECT DASHBOARD_GRID.DASHBOARD_ELEMENT_ID  FROM " +
+                        "DASHBOARD_GRID, DASHBOARD_GRID_ITEM WHERE DASHBOARD_GRID_ITEM.DASHBOARD_ELEMENT_ID = ? AND DASHBOARD_GRID_ITEM.DASHBOARD_GRID_ID = DASHBOARD_GRID.DASHBOARD_GRID_ID");
+                PreparedStatement findParentInStackStmt = conn.prepareStatement("SELECT DASHBOARD_STACK.DASHBOARD_ELEMENT_ID  FROM " +
+                        "DASHBOARD_STACK, DASHBOARD_STACK_ITEM WHERE DASHBOARD_STACK_ITEM.DASHBOARD_ELEMENT_ID = ? AND DASHBOARD_STACK_ITEM.DASHBOARD_STACK_ID = DASHBOARD_STACK.DASHBOARD_STACK_ID");
+                Blah blah = findDashboard(dashboardElementID, rootStmt, findParentInGridStmt, findParentInStackStmt);
+                if (blah == null) {
+                    throw new RuntimeException();
+                }
+                long dashboardID = blah.dashboardID;
+                rootStmt.close();
+                findParentInGridStmt.close();
+                findParentInStackStmt.close();
+                dashboardDetailStmt.setLong(1, dashboardID);
+                ResultSet dashboardRS = dashboardDetailStmt.executeQuery();
+                if (dashboardRS.next()) {
+                    String dashboardName = dashboardRS.getString(1);
+                    String urlKey = dashboardRS.getString(2);
+                    DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey, 0, 0, null, false);
+                    dashboardsUsing.add(dashboardDescriptor);
+                }
+            }
+            dashboardDetailStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return new Usage(reportsUsingAsAddon, dataSourcesBasedOn, dashboardsUsing);
+    }
+
+    private Blah findDashboard(long dashboardElementID, PreparedStatement rootStmt, PreparedStatement findParentInGridStmt, PreparedStatement findParentInStackStmt) throws SQLException {
+        rootStmt.setLong(1, dashboardElementID);
+        ResultSet rootRS = rootStmt.executeQuery();
+        if (rootRS.next()) {
+            return new Blah(rootRS.getLong(1), rootRS.getLong(2));
+        }
+        findParentInGridStmt.setLong(1, dashboardElementID);
+        ResultSet gridRS = findParentInGridStmt.executeQuery();
+        if (gridRS.next()) {
+            return findDashboard(gridRS.getLong(1), rootStmt, findParentInGridStmt, findParentInStackStmt);
+        }
+        findParentInStackStmt.setLong(1, dashboardElementID);
+        ResultSet stackRS = findParentInStackStmt.executeQuery();
+        if (stackRS.next()) {
+            return findDashboard(stackRS.getLong(1), rootStmt, findParentInGridStmt, findParentInStackStmt);
+        }
+        return null;
+    }
+
+    private static class Blah {
+        long dashboardID;
+        long dataSourceID;
+
+        private Blah(long dashboardID, long dataSourceID) {
+            this.dashboardID = dashboardID;
+            this.dataSourceID = dataSourceID;
+        }
+    }
+
+    public String getBaseDocs() {
+        try {
+            String html = DocReader.toHTML(null, FlexContext.getHttpRequest());
+            System.out.println(html);
+            html = html.replace("<h2 id=\"Easy_Insight_Documentation\">", "<b>");
+            html = html.replace("</h2>", "</b>");
+            html = html.replace("Connections<ol>", "Connections<textformat leftmargin=\"50\">");
+            html = html.replace("</ol>", "</textformat>");
+            System.out.println(html);
+            return html;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     public void dashboardUses(long dashboardID) {
