@@ -1733,6 +1733,99 @@ public class ExportService {
         return sb.toString();
     }
 
+    public static String kpiReportToHtmlTableWithActualCSS(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean sendIfNoData, boolean includeTitle) throws SQLException {
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
+        WSKPIDefinition kpiReport = (WSKPIDefinition) listDefinition;
+        TrendDataResults trendDataResults = DataService.getTrendDataResults(kpiReport, insightRequestMetadata, conn);
+        if (trendDataResults.getTrendOutcomes().size() == 0 && !sendIfNoData) {
+            return null;
+        }
+        List<TrendOutcome> outcomes = trendDataResults.getTrendOutcomes();
+        StringBuilder sb = new StringBuilder();
+
+        if (includeTitle && listDefinition.getName() != null) {
+            sb.append("<div style=\"" + headerLabelStyle + "\">").append("<h0>").append(listDefinition.getName()).append("</h0></div>");
+        }
+        sb.append("<table class=\"table table-bordered table-condensed\" style=\"font-size:").append(listDefinition.getFontSize()).append("px\">");
+        sb.append("<thead>");
+        sb.append("<tr>");
+        int i;
+        if (kpiReport.getGroupings() != null) {
+            for (i = 0; i < kpiReport.getGroupings().size(); i++) {
+                AnalysisItem grouping = kpiReport.getGroupings().get(i);
+                sb.append("<th style=\"" + thStyle + "\">");
+                sb.append(grouping.toUnqualifiedDisplay());
+                sb.append("</th>");
+            }
+        }
+        sb.append("<th style=\"" + thStyle + "\">Name</th>");
+        if (trendDataResults.getNowString() == null) {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">Latest Value</th>");
+        } else {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">").append(trendDataResults.getNowString()).append("</th>");
+        }
+        if (trendDataResults.getPreviousString() == null) {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">Previous Value</th>");
+        } else {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">").append(trendDataResults.getPreviousString()).append("</th>");
+        }
+
+        sb.append("<th style=\"width:120px;" + thStyle + "\">Percent Change</th>");
+        sb.append("</tr>");
+        sb.append("</thead>");
+        sb.append("<tbody>");
+        AnalysisMeasure percentMeasure = new AnalysisMeasure();
+        percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
+        percentMeasure.setMinPrecision(1);
+        percentMeasure.setPrecision(1);
+        for (TrendOutcome trendOutcome : outcomes) {
+            sb.append("<tr>");
+            if (kpiReport.getGroupings() != null) {
+                for (i = 0; i < kpiReport.getGroupings().size(); i++) {
+                    AnalysisItem grouping = kpiReport.getGroupings().get(i);
+                    Value value = trendOutcome.getDimensions().get(grouping.qualifiedName());
+                    sb.append("<td style=\"" + tdStyle + "left\">");
+                    sb.append(value);
+                    sb.append("<span class='sortData'>");
+                    sb.append(value.toString());
+                    sb.append("</span>");
+                    sb.append("</td>");
+                }
+            }
+            sb.append("<td style=\"" + tdStyle + "left\">");
+            sb.append(trendOutcome.getMeasure().toUnqualifiedDisplay());
+            sb.append("<span class='sortData'>");
+            sb.append(trendOutcome.getMeasure().toUnqualifiedDisplay());
+            sb.append("</span>");
+            sb.append("</td>");
+            String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, false);
+            sb.append("<td style=\"" + tdStyle + "right\">").append(nowValue);
+            sb.append("<span class='sortData'>");
+            sb.append(trendOutcome.getNow().toDouble());
+            sb.append("</span>");
+            sb.append("</td>");
+            String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, false);
+            sb.append("<td style=\"" + tdStyle + "right\">").append(previousValue);
+            sb.append("<span class='sortData'>");
+            sb.append(trendOutcome.getHistorical().toDouble());
+            sb.append("</span>");
+            sb.append("</td>");
+            sb.append("<td style=\"" + tdStyle + "right\">");
+            if (trendOutcome.getHistorical().toDouble() != 0) {
+                double percentChange = (trendOutcome.getNow().toDouble() - trendOutcome.getHistorical().toDouble()) / trendOutcome.getHistorical().toDouble() * 100;
+                sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                sb.append("<span class='sortData'>");
+                sb.append(percentChange);
+                sb.append("</span>");
+            }
+            sb.append("</td>");
+            sb.append("</tr>");
+        }
+        sb.append("</tbody>");
+        sb.append("</table>");
+        return sb.toString();
+    }
+
     public static String verticalListToHTMLTable(WSAnalysisDefinition listDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean emailing) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSVerticalListDefinition verticalList = (WSVerticalListDefinition) listDefinition;

@@ -171,15 +171,15 @@ public class RollingFilterDefinition extends FilterDefinition {
     public static List<CustomRollingInterval> createAdditionalIntervals() {
         List<CustomRollingInterval> additionalIntervals = new ArrayList<CustomRollingInterval>();
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_FULL_QUARTER, "Last Full Quarter", "dayofquarter(nowdate() - quarters(1), 1)", "dayofquarter(nowdate() - quarters(1), daysinquarter(nowdate() - quarters(1)))"));
-        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_FULL_YEAR, "Last Full Year", "dayofmonth(nowdate() - quarters(1), 1)", "dayofmonth(nowdate() - quarters(1), daysinquarter(nowdate() - quarters(1))))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_FULL_YEAR, "Last Full Year", "dayofmonth(nowdate() - quarters(1), 1)", "dayofmonth(nowdate() - quarters(1), daysinquarter(nowdate() - quarters(1)))"));
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.PREVIOUS_FULL_WEEK, "Previous Full Week", "dayofweek(nowdate() - weeks(2), 1)", "dayofweek(nowdate() - weeks(2), 7))"));
-        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.PREVIOUS_FULL_MONTH, "Previous Full Month", "dayofmonth(nowdate() - months(2), 1)", "dayofmonth(nowdate() - months(2), daysinmonth(nowdate() - months(2))))"));
-        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.PREVIOUS_FULL_QUARTER, "Previous Full Quarter", "dayofmonth(nowdate() - quarters(2), 1)", "dayofmonth(nowdate() - quarters(2), daysinquarter(nowdate() - quarters(2))))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.PREVIOUS_FULL_MONTH, "Previous Full Month", "dayofmonth(nowdate() - months(2), 1)", "dayofmonth(nowdate() - months(2), daysinmonth(nowdate() - months(2)))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.PREVIOUS_FULL_QUARTER, "Previous Full Quarter", "dayofmonth(nowdate() - quarters(2), 1)", "dayofmonth(nowdate() - quarters(2), daysinquarter(nowdate() - quarters(2)))"));
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.PREVIOUS_FULL_YEAR, "Last Full Year", "nowdate() - years(1)", "dayofyear(nowdate() - years(1), daysinyear(nowdate() - years(1)))"));
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_WEEK_TO_NOW, "Last Week to Now", "dayofweek(nowdate() - weeks(1), 1)", "dayofweek(nowdate() - weeks(1), dayofweek(nowdate()))"));
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_MONTH_TO_NOW, "Last Month to Now", "dayofmonth(nowdate() - months(1), 1)", "dayofmonth(nowdate() - months(1), dayofmonth(nowdate()))"));
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_QUARTER_TO_NOW, "Last Quarter to Now", "dayofquarter(nowdate() - quarters(1), 1)", "dayofquarter(nowdate() - quarters(1), dayofquarter(nowdate()))"));
-        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_YEAR_TO_NOW, "Last Year to Now", "dayofmonth(nowdate() - years(1), 1)", "dayofmonth(nowdate() - years(1), daysinyear(nowdate() - years(1))))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_YEAR_TO_NOW, "Last Year to Now", "dayofmonth(nowdate() - years(1), 1)", "dayofmonth(nowdate() - years(1), daysinyear(nowdate() - years(1)))"));
 
         return additionalIntervals;
     }
