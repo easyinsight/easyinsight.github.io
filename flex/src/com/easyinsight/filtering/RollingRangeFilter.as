@@ -2,7 +2,6 @@ package com.easyinsight.filtering
 {
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRetrievalState;
-import com.easyinsight.skin.ApplicationSkin;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.events.Event;
@@ -173,14 +172,6 @@ public class RollingRangeFilter extends HBox implements IFilter
         if (rollingFilter != null) {
             for each (var interval:CustomRollingInterval in rollingFilter.intervals) {
                 rangeOptions.addItem(new RangeOption(interval.filterLabel, interval.intervalNumber));
-            }
-        }
-
-        if (rollingFilter != null && rollingFilter.pullCustomIntervalsFromAccount) {
-            if (ApplicationSkin.instance().rollingFilterOptions != null) {
-                for each (var i:CustomRollingInterval in ApplicationSkin.instance().rollingFilterOptions) {
-                    rangeOptions.addItem(new RangeOption(i.filterLabel, i.intervalNumber));
-                }
             }
         }
 
