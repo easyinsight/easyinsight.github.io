@@ -17,6 +17,7 @@ public class CustomRollingInterval {
     public var startDefined:Boolean;
     public var endScript:String;
     public var startScript:String;
+    public var selected:Boolean;
 
     public function CustomRollingInterval() {
     }
