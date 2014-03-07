@@ -51,11 +51,14 @@
                     previousText = additionalProperties["previousString"];
                     var previousWidth:int = measureText(previousText).width;
                     this.previousWidth = previousWidth;
-
                 } else if (additionalProperties["nowString"] != null) {
                     previousText = "";
                 } else {
-                    previousText = trendDef.dayWindow + " days ago";
+                    if (trendDef.nowDate != null) {
+                        previousText = "compared to";
+                    } else {
+                        previousText = trendDef.dayWindow + " days ago";
+                    }
                 }
                 var trends:ArrayCollection = new ArrayCollection();
                 var columns:Array = [];
