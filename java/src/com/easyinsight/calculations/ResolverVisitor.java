@@ -24,7 +24,7 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
     private Map<String, List<AnalysisItem>> displayItems;
     private Map<String, List<AnalysisItem>> unqualifiedDisplayItems;
     private Map<String, UniqueKey> uniqueKeyMap;
-    private Map<String, FilterDefinition> filterMap;
+    private Map<FilterKey, FilterDefinition> filterMap;
     private FunctionFactory functionResolver;
     private int aggregationType;
     private Collection<String> warnings = new LinkedHashSet<String>();
@@ -39,7 +39,7 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
         aggregationType = 0;
     }
 
-    public ResolverVisitor(Map<String, FilterDefinition> filterMap, FunctionFactory f, Map<String, UniqueKey> uniqueKeyMap, Collection<String> warnings) {
+    public ResolverVisitor(Map<FilterKey, FilterDefinition> filterMap, FunctionFactory f, Map<String, UniqueKey> uniqueKeyMap, Collection<String> warnings) {
         this.filterMap = filterMap;
         this.uniqueKeyMap = uniqueKeyMap;
         functionResolver = f;

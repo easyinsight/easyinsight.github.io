@@ -40,14 +40,51 @@ public class VariableNode extends CalculationTreeNode {
         return analysisItem.toDisplay();
     }
 
-    public void resolveVariableKey(Map<String, FilterDefinition> filterMap) {
-        String s = getChild(0).getText().trim();
-        if(s.startsWith("[") && s.endsWith("]"))
-            s = s.substring(1, s.length() - 1);
-        filterDefinition = filterMap.get(s);
-        if (filterDefinition == null) {
-            throw new FunctionException("We could not find a filter named " + s + ".");
+    public void resolveVariableKey(Map<FilterKey, FilterDefinition> filterMap) {
+        String s;
+        String namespace = null;
+        if (getChildCount() == 1) {
+            s = getChild(0).getText().trim();
+            if(s.startsWith("[") && s.endsWith("]"))
+                s = s.substring(1, s.length() - 1);
+        } else if (getChildCount() == 2) {
+            s = getChild(1).getText().trim();
+            if(s.startsWith("[") && s.endsWith("]"))
+                s = s.substring(1, s.length() - 1);
+            namespace = getChild(0).getText().trim();
+            if (namespace.startsWith("[") && namespace.endsWith("]")) {
+                namespace = namespace.substring(1, namespace.length() - 1);
+            }
+        } else {
+            throw new RuntimeException();
         }
+        if (namespace != null) {
+            filterDefinition = filterMap.get(new FilterKey(s, namespace));
+            if (filterDefinition == null) {
+                throw new FunctionException("We could not find a filter named " + s + " on a report or dashboard named " + namespace + ".");
+            }
+        } else {
+            for (FilterDefinition filterDefinition : filterMap.values()) {
+                String label = filterDefinition.label(false);
+                if (label != null && s.equals(label)) {
+                    this.filterDefinition = filterDefinition;
+                    break;
+                }
+            }
+        }
+        if (filterDefinition == null) {
+            for (FilterDefinition filterDefinition : filterMap.values()) {
+                if (filterDefinition.getField() != null) {
+                    if (s.equals(filterDefinition.getField().toDisplay())) {
+                        this.filterDefinition = filterDefinition;
+                        break;
+                    }
+                }
+            }
+        }
+        /*if (filterDefinition == null) {
+            throw new FunctionException("We could not find a filter named " + s + ".");
+        }*/
     }
     
     public void resolveVariableKey(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems,
