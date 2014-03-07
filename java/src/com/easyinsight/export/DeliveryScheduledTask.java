@@ -4,7 +4,9 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.benchmark.ScheduledTaskBenchmarkInfo;
 import com.easyinsight.config.ConfigLoader;
+import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardService;
+import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.dashboard.SavedConfiguration;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -133,8 +135,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
         getInfoStmt.setLong(1, activityID);
         ResultSet deliveryInfoRS = getInfoStmt.executeQuery();
         if (deliveryInfoRS.next()) {
-            final String subject = deliveryInfoRS.getString(1);
-            String body = deliveryInfoRS.getString(2);
+            String subjectLine = deliveryInfoRS.getString(1);
+            String bodyStart = deliveryInfoRS.getString(2);
             final boolean htmlEmail = deliveryInfoRS.getBoolean(3);
             final int timezoneOffset = deliveryInfoRS.getInt(4);
             long id = deliveryInfoRS.getLong(5);
@@ -144,6 +146,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     "delivery_to_report.report_id = analysis.analysis_id");
             getReportStmt.setLong(1, id);
             List<DeliveryInfo> infos = new ArrayList<DeliveryInfo>();
+            List<WSAnalysisDefinition> reportList = new ArrayList<WSAnalysisDefinition>();
             ResultSet reports = getReportStmt.executeQuery();
             while (reports.next()) {
                 DeliveryInfo deliveryInfo = new DeliveryInfo();
@@ -156,8 +159,10 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 deliveryInfo.setFilters(getCustomFiltersForMultipleDelivery(reports.getLong(5), conn));
                 deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, 0, reports.getLong(5), deliveryInfo.getFormat(), 0));
                 infos.add(deliveryInfo);
+                reportList.add(new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn));
             }
 
+            List<Dashboard> dashboardList = new ArrayList<Dashboard>();
             PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD.DASHBOARD_NAME, DELIVERY_INDEX, DELIVERY_FORMAT," +
                     "DELIVERY_TO_DASHBOARD_ID, DELIVERY_LABEL FROM DELIVERY_TO_DASHBOARD, DASHBOARD WHERE GENERAL_DELIVERY_ID = ? AND " +
                     "DELIVERY_TO_DASHBOARD.dashboard_id = dashboard.dashboard_id");
@@ -174,7 +179,12 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 deliveryInfo.setType(DeliveryInfo.DASHBOARD);
                 deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, 0, 0, deliveryInfo.getFormat(), dashboards.getLong(5)));
                 infos.add(deliveryInfo);
+                dashboardList.add(new DashboardStorage().getDashboard(deliveryInfo.getId(), conn));
             }
+
+
+            final String subject = ExportService.filterTransform(reportList, dashboardList, subjectLine);
+            final String body = ExportService.filterTransform(reportList, dashboardList, bodyStart);
 
             PreparedStatement getScorecardStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD_NAME, DELIVERY_INDEX, DELIVERY_FORMAT FROM delivery_to_scorecard, scorecard WHERE GENERAL_DELIVERY_ID = ? AND " +
                     "delivery_to_scorecard.scorecard_id = scorecard.scorecard_id");
@@ -682,8 +692,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
         if (deliveryInfoRS.next()) {
             final int deliveryFormat = deliveryInfoRS.getInt(1);
             long reportID = deliveryInfoRS.getLong(2);
-            final String subject = deliveryInfoRS.getString(3);
-            final String body = deliveryInfoRS.getString(4);
+            String subjectLine = deliveryInfoRS.getString(3);
+            WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            final String subject = ExportService.filterTransformForReport(report, subjectLine);
+            String bodyStart = deliveryInfoRS.getString(4);
+            final String body = ExportService.filterTransformForReport(report, bodyStart);
             final boolean htmlEmail = deliveryInfoRS.getBoolean(5);
             int timezoneOffset = deliveryInfoRS.getInt(7);
 

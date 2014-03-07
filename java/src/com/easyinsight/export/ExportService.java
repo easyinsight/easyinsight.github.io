@@ -60,6 +60,8 @@ import java.text.*;
 import java.util.*;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -110,9 +112,9 @@ public class ExportService {
         switch (o.getOutcome()) {
             case KPIOutcome.EXCEEDING_GOAL:
             case KPIOutcome.POSITIVE:
-                return "#00ff00";
+                return "#009900";
             case KPIOutcome.NEGATIVE:
-                return "#ff0000";
+                return "#990000";
             default:
                 return "inherit";
         }
@@ -621,6 +623,68 @@ public class ExportService {
         return sb.toString();
     }
 
+    @Nullable
+    public static String filterTransformForReport(WSAnalysisDefinition report) {
+        if (report.getExportString() != null && !"".equals(report.getExportString())) {
+            return filterTransform(Arrays.asList(report), new ArrayList<Dashboard>(), report.getExportString());
+        }
+        return null;
+    }
+
+    @Nullable
+    public static String filterTransformForReport(WSAnalysisDefinition report, String exportString) {
+        return filterTransform(Arrays.asList(report), new ArrayList<Dashboard>(), exportString);
+    }
+
+    @Nullable
+    public static String filterTransform(List<WSAnalysisDefinition> reports, List<Dashboard> dashboards, String exportString) {
+        Map<FilterKey, FilterDefinition> namespaces = new HashMap<FilterKey, FilterDefinition>();
+        for (WSAnalysisDefinition report : reports) {
+            if (report.getFilterDefinitions() != null) {
+                for (FilterDefinition filter : report.getFilterDefinitions()) {
+                    namespaces.put(new FilterKey(filter.label(false), report.getName()), filter);
+                }
+            }
+        }
+        for (Dashboard dashboard : dashboards) {
+            if (dashboard.getFilters() != null) {
+                for (FilterDefinition filter : dashboard.getFilters()) {
+                    namespaces.put(new FilterKey(filter.label(false), dashboard.getName()), filter);
+                }
+            }
+        }
+
+
+        try {
+            Pattern pattern = Pattern.compile("\\{(.*?)\\}");
+            Matcher matcher = pattern.matcher(exportString);
+            String end = exportString;
+            while (matcher.find()) {
+                String g = matcher.group();
+                g = g.substring(1, g.length() - 1);
+                CalculationTreeNode tree;
+
+                ResolverVisitor visitor;
+                tree = CalculationHelper.createTree(g, false);
+
+                visitor = new ResolverVisitor(namespaces, new FunctionFactory(), new HashMap<String, UniqueKey>(), new ArrayList<String>());
+                tree.accept(visitor);
+                EvaluationVisitor rowVisitor = new EvaluationVisitor();
+                tree.accept(rowVisitor);
+                Value result = rowVisitor.getResult();
+                if (result.type() != Value.EMPTY) {
+                    String toReplace = result.toString();
+                    end = matcher.replaceAll(toReplace);
+                }
+            }
+            return end;
+
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
+
     public byte[] toPDFBytes(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -647,36 +711,16 @@ public class ExportService {
             LogClass.error(e);
         }
 
-        if (analysisDefinition.getExportString() != null && !"".equals(analysisDefinition.getExportString())) {
-            String string;
-            {
-                try {
-                    CalculationTreeNode tree;
-
-                    ResolverVisitor visitor;
-                    //tree = CalculationHelper.createTree("[Created At] + \" and \" + [Status]", false);
-                    tree = CalculationHelper.createTree(analysisDefinition.getExportString(), false);
-                    Map<String, FilterDefinition> filterMap = new HashMap<String, FilterDefinition>();
-                    for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
-                        filterMap.put(filter.label(false), filter);
-                    }
-
-                    visitor = new ResolverVisitor(filterMap, new FunctionFactory(), new HashMap<String, UniqueKey>(), new ArrayList<String>());
-                    tree.accept(visitor);
-                    EvaluationVisitor rowVisitor = new EvaluationVisitor();
-                    tree.accept(rowVisitor);
-                    Value result = rowVisitor.getResult();
-                    string = result.toString();
-                    com.itextpdf.text.Font phraseFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL,
-                            new BaseColor(20, 20, 20));
-                    Phrase phrase = new Phrase(string, phraseFont);
-                    Paragraph paragraph = new Paragraph(phrase);
-                    paragraph.setAlignment(Element.ALIGN_CENTER);
-                    document.add(paragraph);
-                } catch (Exception e) {
-                    LogClass.error(e);
-                }
-            }
+        try {
+            String string = filterTransformForReport(analysisDefinition);
+            com.itextpdf.text.Font phraseFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL,
+                    new BaseColor(20, 20, 20));
+            Phrase phrase = new Phrase(string, phraseFont);
+            Paragraph paragraph = new Paragraph(phrase);
+            paragraph.setAlignment(Element.ALIGN_CENTER);
+            document.add(paragraph);
+        } catch (Exception e) {
+            LogClass.error(e);
         }
 
         if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
@@ -1645,8 +1689,17 @@ public class ExportService {
             }
         }
         sb.append("<th style=\"" + thStyle + "\">Name</th>");
-        sb.append("<th style=\"width:120px;" + thStyle + "\">Latest Value</th>");
-        sb.append("<th style=\"width:120px;" + thStyle + "\">Previous Value</th>");
+        if (trendDataResults.getNowString() == null) {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">Latest Value</th>");
+        } else {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">").append(trendDataResults.getNowString()).append("</th>");
+        }
+        if (trendDataResults.getPreviousString() == null) {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">Previous Value</th>");
+        } else {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">").append(trendDataResults.getPreviousString()).append("</th>");
+        }
+
         sb.append("<th style=\"width:120px;" + thStyle + "\">Percent Change</th>");
         AnalysisMeasure percentMeasure = new AnalysisMeasure();
         percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
