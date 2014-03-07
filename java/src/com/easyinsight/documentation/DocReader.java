@@ -100,7 +100,7 @@ public class DocReader {
         Map<String, String> fileMap = new HashMap<String, String>();
         // find links
         {
-            Pattern pattern = Pattern.compile("\\[\\[([A-Za-z0-9\\-_\\|:. ]+)\\]\\]");
+            Pattern pattern = Pattern.compile("\\[\\[(.*?)\\]\\]");
             Matcher matcher = pattern.matcher(value);
             Map<String, String> gs = new HashMap<String, String>();
             while (matcher.find()) {
