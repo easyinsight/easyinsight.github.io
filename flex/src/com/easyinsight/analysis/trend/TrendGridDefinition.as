@@ -22,6 +22,14 @@ public class TrendGridDefinition extends KPIDefinition {
     public var sortIndex:int = 3;
     public var sortAscending:Boolean = false;
     public var showKPIName:Boolean = false;
+    public var rowColor1:int = 0xF7F7F7;
+    public var rowColor2:int = 0xFFFFFF;
+    public var headerColor1:int = 0xFFFFFF;
+    public var headerColor2:int = 0xEFEFEF;
+    public var textColor:int = 0x000000;
+    public var headerTextColor:int = 0x000000;
+    public var summaryRowTextColor:int = 0x000000;
+    public var summaryRowBackgroundColor:int = 0x6699ff;
 
     public function TrendGridDefinition() {
     }
