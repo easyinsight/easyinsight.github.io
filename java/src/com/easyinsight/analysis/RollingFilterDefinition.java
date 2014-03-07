@@ -157,10 +157,51 @@ public class RollingFilterDefinition extends FilterDefinition {
         return interval != MaterializedRollingFilterDefinition.ALL && super.validForQuery();
     }
 
+    private static CustomRollingInterval createInterval(int number, String name, String start, String end) {
+        CustomRollingInterval interval = new CustomRollingInterval();
+        interval.setFilterLabel(name);
+        interval.setStartScript(start);
+        interval.setStartDefined(start != null);
+        interval.setEndScript(end);
+        interval.setEndDefined(end != null);
+        interval.setIntervalNumber(number);
+        return interval;
+    }
+
+    public static List<CustomRollingInterval> createAdditionalIntervals() {
+        List<CustomRollingInterval> additionalIntervals = new ArrayList<CustomRollingInterval>();
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_FULL_QUARTER, "Last Full Quarter", "dayofquarter(nowdate() - quarters(1), 1)", "dayofquarter(nowdate() - quarters(1), daysinquarter(nowdate() - quarters(1)))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_FULL_YEAR, "Last Full Year", "dayofmonth(nowdate() - quarters(1), 1)", "dayofmonth(nowdate() - quarters(1), daysinquarter(nowdate() - quarters(1))))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.PREVIOUS_FULL_WEEK, "Previous Full Week", "dayofweek(nowdate() - weeks(2), 1)", "dayofweek(nowdate() - weeks(2), 7))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.PREVIOUS_FULL_MONTH, "Previous Full Month", "dayofmonth(nowdate() - months(2), 1)", "dayofmonth(nowdate() - months(2), daysinmonth(nowdate() - months(2))))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.PREVIOUS_FULL_QUARTER, "Previous Full Quarter", "dayofmonth(nowdate() - quarters(2), 1)", "dayofmonth(nowdate() - quarters(2), daysinquarter(nowdate() - quarters(2))))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.PREVIOUS_FULL_YEAR, "Last Full Year", "nowdate() - years(1)", "dayofyear(nowdate() - years(1), daysinyear(nowdate() - years(1)))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_WEEK_TO_NOW, "Last Week to Now", "dayofweek(nowdate() - weeks(1), 1)", "dayofweek(nowdate() - weeks(1), dayofweek(nowdate()))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_MONTH_TO_NOW, "Last Month to Now", "dayofmonth(nowdate() - months(1), 1)", "dayofmonth(nowdate() - months(1), dayofmonth(nowdate()))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_QUARTER_TO_NOW, "Last Quarter to Now", "dayofquarter(nowdate() - quarters(1), 1)", "dayofquarter(nowdate() - quarters(1), dayofquarter(nowdate()))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_YEAR_TO_NOW, "Last Year to Now", "dayofmonth(nowdate() - years(1), 1)", "dayofmonth(nowdate() - years(1), daysinyear(nowdate() - years(1))))"));
+
+        return additionalIntervals;
+    }
+
     public void applyCalculationsBeforeRun(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
                                            Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) {
         try {
+
+            /*
+            public static final int LAST_FULL_QUARTER = -1;
+    public static final int LAST_FULL_YEAR = -2;
+    public static final int LAST_MONTH_TO_NOW = -3;
+    public static final int PREVIOUS_FULL_MONTH = -4;
+    public static final int LAST_WEEK_TO_NOW = -5;
+    public static final int PREVIOUS_FULL_WEEK = -6;
+    public static final int LAST_QUARTER_TO_NOW = -7;
+    public static final int PREVIOUS_FULL_QUARTER = -8;
+    public static final int PREVIOUS_FULL_YEAR = -9;
+    public static final int LAST_YEAR_TO_NOW = -10;
+             */
             List<CustomRollingInterval> intervalList = new ArrayList<CustomRollingInterval>(intervals);
+            intervalList.addAll(createAdditionalIntervals());
             for (CustomRollingInterval interval : intervalList) {
                 if (interval.getIntervalNumber() == this.getInterval()) {
                     if (interval.isStartDefined()) {
@@ -259,7 +300,7 @@ public class RollingFilterDefinition extends FilterDefinition {
         StringBuilder queryBuilder = new StringBuilder();
         if (interval == MaterializedRollingFilterDefinition.LAST_DAY) {
             queryBuilder.append("date(").append(getField().toKeySQL()).append(") = (select max(date(").append(getField().toKeySQL()).append(")) from ").append(tableName).append(")");
-        } else if (interval > MaterializedRollingFilterDefinition.ALL) {
+        } else if ((interval > MaterializedRollingFilterDefinition.ALL) || (interval < 0)) {
             if (startDate != null && endDate != null) {
                 queryBuilder.append(getField().toKeySQL());
                 queryBuilder.append(" >= ? AND ");
@@ -290,7 +331,7 @@ public class RollingFilterDefinition extends FilterDefinition {
     }
 
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        if (interval > MaterializedRollingFilterDefinition.ALL) {
+        if ((interval > MaterializedRollingFilterDefinition.ALL) || (interval < 0)) {
             if (startDate != null) {
                 preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startDate.getTime()));
             }
@@ -338,6 +379,12 @@ public class RollingFilterDefinition extends FilterDefinition {
         jo.put("value", customIntervalAmount);
         jo.put("interval", customIntervalType);
         JSONArray customIntervalList = new JSONArray();
+        for (CustomRollingInterval interval : createAdditionalIntervals()) {
+            JSONObject jj = new JSONObject();
+            jj.put("name", interval.getFilterLabel());
+            jj.put("interval", interval.getIntervalNumber());
+            customIntervalList.put(jj);
+        }
         for (CustomRollingInterval interval : getIntervals()) {
             JSONObject jj = new JSONObject();
             jj.put("name", interval.getFilterLabel());
@@ -456,7 +503,7 @@ public class RollingFilterDefinition extends FilterDefinition {
 
         if (interval == MaterializedRollingFilterDefinition.ALL) {
             return "";
-        } else if (interval > MaterializedRollingFilterDefinition.ALL) {
+        } else if ((interval > MaterializedRollingFilterDefinition.ALL) || (interval < 0)) {
             applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
             if (startDate != null) {
                 startString = df.format(startDate);
@@ -474,7 +521,7 @@ public class RollingFilterDefinition extends FilterDefinition {
         }
 
         if (startString != null && endString != null) {
-            return "between " + startString + " and " + endString;
+            return startString + " to " + endString;
         } else if (startString != null) {
             return "after " + startString;
         } else {

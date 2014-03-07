@@ -96,6 +96,16 @@ public class FilterRangeDefinition extends FilterDefinition {
     }
 
     @Override
+    public String asString(InsightRequestMetadata insightRequestMetadata) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getField().toDisplay()).append(" is ");
+        if (startValueDefined && endValueDefined) {
+            sb.append(startValue).append(" ").append(lowerOperator).append(" and ");
+        }
+        return sb.toString();
+    }
+
+    @Override
     public void beforeSave(Session session) {
         super.beforeSave(session);
         if (Double.isNaN(startValue)) startValue = 0;
