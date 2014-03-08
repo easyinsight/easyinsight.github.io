@@ -515,7 +515,13 @@
             }
         }
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
+            var treeDef:SummaryDefinition;
+            if (report != null) {
+                treeDef = report as SummaryDefinition;
+            } else {
+                treeDef = this.treeDef;
+            }
             var hierarchy:AnalysisHierarchyItem = treeDef.hierarchy as AnalysisHierarchyItem;
             var hierarchyIndex:int = 0;
             updateItem(hierarchy, hierarchyIndex);
@@ -525,6 +531,7 @@
                 updateItem(item, columnIndex);
             }
         }
+
 
         private function onStretch(event:Event):void {
             var hierarchy:AnalysisHierarchyItem = treeDef.hierarchy as AnalysisHierarchyItem;

@@ -267,7 +267,7 @@
             return null;
         }
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         private function latLonToPoint(o:Object):Object {

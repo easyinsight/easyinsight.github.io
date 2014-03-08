@@ -42,6 +42,9 @@ public class ApplicationSkinSettings {
         this.globalSkin = globalSkin;
     }
 
+    @Column(name="connection_type")
+    private int connectionType;
+
     @Column(name="user_id")
     private Long userID;
 
@@ -78,6 +81,14 @@ public class ApplicationSkinSettings {
         this.properties = properties;
     }
 
+    public int getConnectionType() {
+        return connectionType;
+    }
+
+    public void setConnectionType(int connectionType) {
+        this.connectionType = connectionType;
+    }
+
     public ApplicationSkin toSkin() {
         ApplicationSkin skin = new ApplicationSkin();
         skin.setId(skinID);
@@ -110,7 +121,7 @@ public class ApplicationSkinSettings {
         return globalSkin.toSkin().toSettings(ApplicationSkin.APPLICATION).override(accountSkin.toSkin().toSettings(ApplicationSkin.ACCOUNT)).override(userSkin.toSkin().toSettings(ApplicationSkin.USER)).toSkin();
     }
 
-    private ApplicationSkinSettings override(ApplicationSkinSettings settings) {
+    public ApplicationSkinSettings override(ApplicationSkinSettings settings) {
         Map<String, ReportProperty> propertyMap = new HashMap<String, ReportProperty>();
         for (ReportProperty reportProperty : settings.getProperties()) {
             if (reportProperty instanceof ReportMultiColorProperty) {

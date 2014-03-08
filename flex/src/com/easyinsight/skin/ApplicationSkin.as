@@ -47,7 +47,37 @@ public class ApplicationSkin extends EventDispatcher {
     public var gradientChartColor:int;
     public var gradientChartColorEnabled:Boolean;
 
+    public var secondaryColor:int;
+    public var secondaryColorEnabled:Boolean;
+    public var tertiaryColor:int;
+    public var tertiaryColorEnabled:Boolean;
+    public var summaryBackgroundColor:int;
+    public var summaryBackgroundColorEnabled:Boolean;
+    public var summaryTextColor:int;
+    public var summaryTextColorEnabled:Boolean;
+
+    public var crosstabHeaderBackgroundColor:int;
+    public var crosstabHeaderBackgroundColorEnabled:Boolean;
+    public var crosstabHeaderTextColor:int;
+    public var crosstabHeaderTextColorEnabled:Boolean;
+
+    public var headerStart:int;
+    public var headerStartEnabled:Boolean;
+    public var headerEnd:int;
+    public var headerEndEnabled:Boolean;
+    public var reportHeaderTextColor:int;
+    public var reportHeaderTextColorEnabled:Boolean;
+
+    public var tableColorStart:int;
+    public var tableColorStartEnabled:Boolean;
+    public var tableColorEnd:int;
+    public var tableColorEndEnabled:Boolean;
+
+    public var textColor:int;
+    public var textColorEnabled:Boolean;
+
     public var multiColors:ArrayCollection;
+    public var secondaryMultiColors:ArrayCollection;
 
     public var dashboardStack1ColorStart:int;
     public var dashboardStack1ColorEnd:int;
@@ -90,11 +120,39 @@ public class ApplicationSkin extends EventDispatcher {
         customChartColorEnabled = appSkin.customChartColorEnabled;
         gradientChartColor = appSkin.gradientChartColor;
         gradientChartColorEnabled = appSkin.gradientChartColorEnabled;
+        secondaryColor = appSkin.secondaryColor;
+        secondaryColorEnabled = appSkin.secondaryColorEnabled;
+        tertiaryColor = appSkin.tertiaryColor;
+        tertiaryColorEnabled = appSkin.tertiaryColorEnabled;
+        summaryBackgroundColor = appSkin.summaryBackgroundColor;
+        summaryBackgroundColorEnabled = appSkin.summaryBackgroundColorEnabled;
+        summaryTextColor = appSkin.summaryTextColor;
+        summaryTextColorEnabled = appSkin.summaryTextColorEnabled;
+
+        crosstabHeaderBackgroundColor = appSkin.crosstabHeaderBackgroundColor;
+        crosstabHeaderBackgroundColorEnabled = appSkin.crosstabHeaderBackgroundColorEnabled;
+        crosstabHeaderTextColor = appSkin.crosstabHeaderTextColor;
+        crosstabHeaderTextColorEnabled = appSkin.crosstabHeaderTextColorEnabled;
+
+        headerStart = appSkin.headerStart;
+        headerStartEnabled = appSkin.headerStartEnabled;
+        headerEnd = appSkin.headerEnd;
+        headerEndEnabled = appSkin.headerEndEnabled;
+
+        reportHeaderTextColor = appSkin.reportHeaderTextColor;
+        reportHeaderTextColorEnabled = appSkin.reportHeaderTextColorEnabled;
+
+        tableColorStart = appSkin.tableColorStart;
+        tableColorStartEnabled = appSkin.tableColorStartEnabled;
+        tableColorEnd = appSkin.tableColorEnd;
+        tableColorEndEnabled = appSkin.tableColorEndEnabled;
+
         dashboardStack1ColorStart = appSkin.dashboardStack1ColorStart;
         dashboardStack1ColorEnd = appSkin.dashboardStack1ColorEnd;
         dashboardStackColor2Start = appSkin.dashboardStackColor2Start;
         dashboardStackColor2End = appSkin.dashboardStackColor2End;
         multiColors = appSkin.multiColors;
+        secondaryMultiColors = appSkin.secondaryMultiColors;
 
         if (appSkin.reportHeaderImage != null) {
             var reportHeaderImageLoader:ImageLoader = new ImageLoader();

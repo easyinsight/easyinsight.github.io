@@ -1,19 +1,13 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.*;
-import com.easyinsight.database.EIConnection;
-import com.easyinsight.dataset.DataSet;
-import com.easyinsight.dataset.LimitsResults;
-import com.easyinsight.export.ExportService;
-import com.easyinsight.security.SecurityUtil;
+
+import com.easyinsight.preferences.ApplicationSkin;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -234,6 +228,24 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         return xyz;
     }
 
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if (getMeasures().size() == 1 && "Primary".equals(getColorScheme()) && applicationSkin.isCustomChartColorEnabled()) {
+            setChartColor(applicationSkin.getCustomChartColor());
+            setUseChartColor(true);
+            setGradientColor(applicationSkin.getCustomChartColor());
+        } else if (getMeasures().size() == 1 && "Secondary".equals(getColorScheme()) && applicationSkin.isSecondaryColorEnabled()) {
+            setChartColor(applicationSkin.getSecondaryColor());
+            setUseChartColor(true);
+            setGradientColor(applicationSkin.getSecondaryColor());
+        } else if (getMeasures().size() > 1 && "Primary".equals(getColorScheme()) && applicationSkin.getMultiColors() != null && applicationSkin.getMultiColors().size() > 0 &&
+                applicationSkin.getMultiColors().get(0).isColor1StartEnabled()) {
+            setMultiColors(applicationSkin.getMultiColors());
+        } else if (getMeasures().size() > 1 && "Secondary".equals(getColorScheme()) && applicationSkin.getSecondaryMultiColors() != null && applicationSkin.getSecondaryMultiColors().size() > 0 &&
+                applicationSkin.getSecondaryMultiColors().get(0).isColor1StartEnabled()) {
+            setMultiColors(applicationSkin.getSecondaryMultiColors());
+        }
+    }
+
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
 
@@ -263,36 +275,36 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
             JSONObject seriesDefaults = new JSONObject();
             seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
-                JSONArray colorObj = new JSONArray();
+            JSONArray colorObj = new JSONArray();
 
-                JSONObject colorStop = new JSONObject();
-                colorStop.put("point", 0);
-                colorStop.put("color", color);
-                colorObj.put(colorStop);
+            JSONObject colorStop = new JSONObject();
+            colorStop.put("point", 0);
+            colorStop.put("color", color);
+            colorObj.put(colorStop);
 
-                colorStop = new JSONObject();
-                colorStop.put("point", .15);
-                colorStop.put("color", color2);
-                colorObj.put(colorStop);
+            colorStop = new JSONObject();
+            colorStop.put("point", .15);
+            colorStop.put("color", color2);
+            colorObj.put(colorStop);
 
-                colorStop = new JSONObject();
-                colorStop.put("point", .5);
-                colorStop.put("color", color);
-                colorObj.put(colorStop);
+            colorStop = new JSONObject();
+            colorStop.put("point", .5);
+            colorStop.put("color", color);
+            colorObj.put(colorStop);
 
-                colorStop = new JSONObject();
-                colorStop.put("point", .9);
-                colorStop.put("color", color);
-                colorObj.put(colorStop);
+            colorStop = new JSONObject();
+            colorStop.put("point", .9);
+            colorStop.put("color", color);
+            colorObj.put(colorStop);
 
-                colorStop = new JSONObject();
-                colorStop.put("point", 1);
-                colorStop.put("color", color2);
-                colorObj.put(colorStop);
+            colorStop = new JSONObject();
+            colorStop.put("point", 1);
+            colorStop.put("color", color2);
+            colorObj.put(colorStop);
 
 //                colorObj.put("first", "'" + color + "'");
 //                colorObj.put("second", "'" + color2 + "'");
-                jsonParams.put("seriesColors", new JSONArray(Arrays.asList(colorObj)));
+            jsonParams.put("seriesColors", new JSONArray(Arrays.asList(colorObj)));
 
 
 
@@ -325,8 +337,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
                 labels.put("location", "'n'");
                 labels.put("show", "true");
                 labels.put("edgetolerance", -15);
-                // TODO: Replace with font
-                labels.put("fontFamily", "'Helvetica Neue'");
+                //labels.put("fontFamily", fontName());
                 seriesDefaults.put("pointLabels", labels);
             }
         } catch (JSONException e) {

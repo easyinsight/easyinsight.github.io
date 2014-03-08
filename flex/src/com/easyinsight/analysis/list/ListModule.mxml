@@ -597,12 +597,19 @@
             dispatchEvent(new ColumnReorderEvent(keys));
         }
 
-        public function updateExportMetadata():void {
-            if (listDef != null) {
-                for (var i:int = 0; i < listDef.columns.length; i++) {
-                    var item:AnalysisItem = listDef.columns.getItemAt(i) as AnalysisItem;
-                    var columnIndex:int = findColumnIndex(item.qualifiedName());
-                    item.itemPosition = columnIndex;
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
+            var listDef:ListDefinition;
+            if (report != null) {
+                listDef = report as ListDefinition;
+            } else {
+                listDef = this.listDef;
+            }
+            for (var i:int = 0; i < listDef.columns.length; i++) {
+                var item:AnalysisItem = listDef.columns.getItemAt(i) as AnalysisItem;
+                item.sort = 0;
+                var columnIndex:int = findColumnIndex(item.qualifiedName());
+                item.itemPosition = columnIndex;
+                if (dataGrid != null) {
                     var column:AdvancedDataGridColumn = dataGrid.columns[columnIndex];
                     if (column != null) {
                         item.width = column.width;
@@ -617,14 +624,6 @@
                         } else {
                             item.sort = 0;
                         }
-                        /*var ext:TextReportFieldExtension;
-                        if (item.reportFieldExtension == null) {
-                            ext = new TextReportFieldExtension();
-                            item.reportFieldExtension = ext;
-                        } else {
-                            ext = item.reportFieldExtension as TextReportFieldExtension;
-                        }
-                        ext.fixedWidth = column.width;*/
                     }
                 }
             }
