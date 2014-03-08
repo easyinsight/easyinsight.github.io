@@ -274,7 +274,7 @@
             hbox.addChildAt(areaChart, 0);
         }
 
-        public function updateExportMetadata():void {
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function preserveValues():Boolean {

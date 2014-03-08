@@ -1,7 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.intention.Intention;
@@ -9,6 +7,7 @@ import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.ReportPropertiesIntention;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ListSummaryComponent;
+import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,14 +26,14 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private ListLimitsMetadata listLimitsMetadata;
     private boolean summaryTotal;
     private long listDefinitionID;
-    private int rowColor1;
-    private int rowColor2;
-    private int headerColor1;
-    private int headerColor2;
-    private int textColor;
-    private int headerTextColor;
-    private int summaryRowTextColor;
-    private int summaryRowBackgroundColor;
+    private int rowColor1 = 0xF7F7F7;
+    private int rowColor2 = 0xFFFFFF;
+    private int headerColor1 = 0xFFFFFF;
+    private int headerColor2 = 0xEFEFEF;
+    private int textColor = 0x000000;
+    private int headerTextColor = 0x000000;
+    private int summaryRowTextColor = 0x000000;
+    private int summaryRowBackgroundColor = 0x6699ff;
     private String defaultColumnAlignment;
     private boolean rolloverIcon;
     private boolean multiLineHeaders;
@@ -361,11 +360,40 @@ public class WSListDefinition extends WSAnalysisDefinition {
         setColumns(fields);
     }
 
-    protected int extensionType() {
+    public int extensionType() {
         return ReportFieldExtension.TEXT;
     }
 
     protected boolean accepts(AnalysisItem analysisItem) {
         return true;
+    }
+
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if ("Primary".equals(getColorScheme())) {
+            if (applicationSkin.isSummaryTextColorEnabled()) {
+                setSummaryRowTextColor(applicationSkin.getSummaryTextColor());
+            }
+            if (applicationSkin.isSummaryBackgroundColorEnabled()) {
+                setSummaryRowBackgroundColor(applicationSkin.getSummaryBackgroundColor());
+            }
+            if (applicationSkin.isHeaderStartEnabled()) {
+                setHeaderColor1(applicationSkin.getHeaderStart());
+            }
+            if (applicationSkin.isHeaderEndEnabled()) {
+                setHeaderColor2(applicationSkin.getHeaderEnd());
+            }
+            if (applicationSkin.isTableColorStartEnabled()) {
+                setRowColor1(applicationSkin.getTableColorStart());
+            }
+            if (applicationSkin.isTableColorEndEnabled()) {
+                setRowColor2(applicationSkin.getTableColorEnd());
+            }
+            if (applicationSkin.isReportHeaderTextColorEnabled()) {
+                setHeaderTextColor(applicationSkin.getReportHeaderTextColor());
+            }
+            if (applicationSkin.isTextColorEnabled()) {
+                setTextColor(applicationSkin.getTextColor());
+            }
+        }
     }
 }

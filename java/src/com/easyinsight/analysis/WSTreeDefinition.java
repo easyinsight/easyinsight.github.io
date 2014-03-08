@@ -4,6 +4,7 @@ import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.NewHierarchyIntention;
 import com.easyinsight.pipeline.*;
+import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -277,8 +278,29 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
         list.put("type", "tree");
         list.put("key", getUrlKey());
         list.put("url", "/app/htmlExport");
-
-
         return list;
+    }
+
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if ("Primary".equals(getColorScheme())) {
+            if (applicationSkin.isSummaryTextColorEnabled()) {
+                setSummaryBackgroundColor(applicationSkin.getSummaryTextColor());
+            }
+            if (applicationSkin.isSummaryBackgroundColorEnabled()) {
+                setSummaryTextColor(applicationSkin.getSummaryBackgroundColor());
+            }
+            if (applicationSkin.isHeaderStartEnabled()) {
+                setHeaderColor1(applicationSkin.getHeaderStart());
+            }
+            if (applicationSkin.isHeaderEndEnabled()) {
+                setHeaderColor2(applicationSkin.getHeaderEnd());
+            }
+            if (applicationSkin.isTableColorStartEnabled()) {
+                setRowColor1(applicationSkin.getTableColorStart());
+            }
+            if (applicationSkin.isTableColorEndEnabled()) {
+                setRowColor2(applicationSkin.getTableColorEnd());
+            }
+        }
     }
 }

@@ -11,6 +11,7 @@ import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.NewHierarchyIntention;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.*;
 
 import java.sql.PreparedStatement;
@@ -20,7 +21,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.Serializable;
 
+import com.easyinsight.preferences.ApplicationSkin;
+import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.preferences.ImageDescriptor;
+import com.easyinsight.preferences.PreferencesService;
 import com.easyinsight.security.SecurityUtil;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
@@ -134,9 +138,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private boolean publicWithKey;
 
-    private boolean usePrimaryColor;
-    private boolean useSecondaryColor;
-    private boolean useTertiaryColor;
+    private String colorScheme;
 
     private ImageDescriptor headerImage;
     private String fontName = "Tahoma";
@@ -156,6 +158,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private String customField1;
     private String customField2;
+
+    public String getColorScheme() {
+        return colorScheme;
+    }
+
+    public void setColorScheme(String colorScheme) {
+        this.colorScheme = colorScheme;
+    }
 
     public boolean isDataSourceFieldReport() {
         return dataSourceFieldReport;
@@ -489,30 +499,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setUrlKey(String urlKey) {
         this.urlKey = urlKey;
-    }
-
-    public boolean isUseSecondaryColor() {
-        return useSecondaryColor;
-    }
-
-    public void setUseSecondaryColor(boolean useSecondaryColor) {
-        this.useSecondaryColor = useSecondaryColor;
-    }
-
-    public boolean isUsePrimaryColor() {
-        return usePrimaryColor;
-    }
-
-    public void setUsePrimaryColor(boolean usePrimaryColor) {
-        this.usePrimaryColor = usePrimaryColor;
-    }
-
-    public boolean isUseTertiaryColor() {
-        return useTertiaryColor;
-    }
-
-    public void setUseTertiaryColor(boolean useTertiaryColor) {
-        this.useTertiaryColor = useTertiaryColor;
     }
 
     public boolean isTemporaryReport() {
@@ -1078,9 +1064,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         customField2 = findStringProperty(properties, "customField2", "");
         cachePartitionFilter = findStringProperty(properties, "cachePartitionFilter", "");
         enableLocalStorage = findBooleanProperty(properties, "enableLocalStorage", false);
-        usePrimaryColor = findBooleanProperty(properties, "usePrimaryColor", false);
-        useSecondaryColor = findBooleanProperty(properties, "useSecondaryColor", false);
-        useTertiaryColor = findBooleanProperty(properties, "useTertiaryColor", false);
+        colorScheme = findStringProperty(properties, "reportColorScheme", "None");
         exportString = findStringProperty(properties, "exportString", "");
     }
 
@@ -1113,9 +1097,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportStringProperty("customField2", customField2));
         properties.add(new ReportStringProperty("cachePartitionFilter", cachePartitionFilter));
         properties.add(new ReportBooleanProperty("cacheFilters", cacheFilters));
-        properties.add(new ReportBooleanProperty("usePrimaryColor", usePrimaryColor));
-        properties.add(new ReportBooleanProperty("useSecondaryColor", useSecondaryColor));
-        properties.add(new ReportBooleanProperty("useTertiaryColor", useTertiaryColor));
+        properties.add(new ReportStringProperty("reportColorScheme", colorScheme));
         if (headerImage != null) {
             properties.add(new ReportImageProperty("headerImage", headerImage));
         }
@@ -1305,7 +1287,13 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return sb.toString();
     }
 
+    public void renderConfig(ApplicationSkin applicationSkin) {
+
+    }
+
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentFilters) throws JSONException {
+
+        applyStyling();
         JSONObject jo = new JSONObject();
         JSONArray filters = new JSONArray();
         for (FilterDefinition f : getFilterDefinitions()) {
@@ -1544,7 +1532,87 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return 0;
     }
 
-    public void applyStyling(EIConnection conn, int dataSourceType) throws SQLException {
+    public void applyStyling(EIConnection conn, int dataSourceType)  {
+        Session session = Database.instance().createSession(conn);
+        ApplicationSkin applicationSkin;
+        try {
+            if (SecurityUtil.getAccountID(false) == 0) {
+                PreparedStatement uStmt = conn.prepareStatement("SELECT USER.USER_ID, ACCOUNT_ID FROM USER, user_to_analysis WHERE user_to_analysis.analysis_id = ? AND " +
+                        "user_to_analysis.user_id = user.user_id");
+                uStmt.setLong(1, getAnalysisID());
+                ResultSet uRS = uStmt.executeQuery();
+                uRS.next();
+                long userID = uRS.getLong(1);
+                long accountID = uRS.getLong(2);
+                applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
+                uRS.close();
+            } else {
+                PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+                ps.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                boolean exchangeAuthor = rs.getBoolean(1);
+                ps.close();
 
+                if (exchangeAuthor) {
+                    applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+                } else {
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                }
+            }
+            if (applicationSkin != null) {
+                renderConfig(applicationSkin);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public void applyStyling()  {
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            ApplicationSkin applicationSkin;
+            if (SecurityUtil.getAccountID(false) == 0) {
+                PreparedStatement uStmt = conn.prepareStatement("SELECT USER.USER_ID, ACCOUNT_ID FROM USER, user_to_analysis WHERE user_to_analysis.analysis_id = ? AND " +
+                        "user_to_analysis.user_id = user.user_id");
+                uStmt.setLong(1, getAnalysisID());
+                ResultSet uRS = uStmt.executeQuery();
+                uRS.next();
+                long userID = uRS.getLong(1);
+                long accountID = uRS.getLong(2);
+                applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
+                uRS.close();
+            } else {
+                PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+                ps.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                boolean exchangeAuthor = rs.getBoolean(1);
+                ps.close();
+
+                if (exchangeAuthor) {
+                    PreparedStatement typeStmt = conn.prepareStatement("SELECT FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                    typeStmt.setLong(1, getDataFeedID());
+                    ResultSet typeRS = typeStmt.executeQuery();
+                    typeRS.next();
+                    int dataSourceType = typeRS.getInt(1);
+                    typeStmt.close();
+                    applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+                } else {
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                }
+            }
+            if (applicationSkin != null) {
+                renderConfig(applicationSkin);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            session.close();
+            Database.closeConnection(conn);
+        }
     }
 }

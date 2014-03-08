@@ -1,6 +1,7 @@
 package com.easyinsight.preferences;
 
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
@@ -211,6 +212,27 @@ public class PreferencesService {
         return applicationSkin;
     }
 
+    public ApplicationSkin getConnectionSkin(int type) {
+        ApplicationSkin applicationSkin = null;
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from ApplicationSkinSettings where connectionType = ?").setInteger(0, type).list();
+            if (results.size() > 0) {
+                ApplicationSkinSettings settings = (ApplicationSkinSettings) results.get(0);
+                applicationSkin = settings.toSkin();
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException();
+        } finally {
+            session.close();
+        }
+        return applicationSkin;
+    }
+
     public ApplicationSkin getAccountSkin() {
         Session session = Database.instance().createSession();
         try {
@@ -237,6 +259,24 @@ public class PreferencesService {
         try {
             ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.APPLICATION);
             settings.setGlobalSkin(true);
+            session.getTransaction().begin();
+            session.saveOrUpdate(settings);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public void saveConnectionSkin(ApplicationSkin skin, int connectionType) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Session session = Database.instance().createSession();
+        try {
+            ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.ACCOUNT);
+            settings.setConnectionType(connectionType);
             session.getTransaction().begin();
             session.saveOrUpdate(settings);
             session.getTransaction().commit();
@@ -286,6 +326,7 @@ public class PreferencesService {
         } finally {
             session.close();
         }
+        BenchmarkManager.recordBenchmark("ApplicationSkinSaved", 0, SecurityUtil.getUserID());
         return result;
     }
 

@@ -1,9 +1,6 @@
 package com.easyinsight.analysis {
 import com.easyinsight.customupload.ProblemDataEvent;
-import com.easyinsight.filtering.AnalysisItemFilterDefinition;
-import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.filtering.FilterRawData;
-import com.easyinsight.filtering.MultiFieldFilterDefinition;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.ReportModuleLoader;
 import com.easyinsight.report.ReportCanvas;
@@ -22,13 +19,11 @@ import flash.utils.getQualifiedClassName;
 import mx.binding.utils.BindingUtils;
 import mx.binding.utils.ChangeWatcher;
 import mx.collections.ArrayCollection;
-import mx.containers.Box;
 import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.controls.Button;
 import mx.core.IUIComponent;
-import mx.core.UIComponent;
 import mx.core.UIComponent;
 import mx.events.DragEvent;
 import mx.managers.DragManager;
@@ -41,7 +36,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
     private var _reportDataService:Class;
 
     private var _adHocMode:Boolean;
-    
+
     private var _analysisDefinition:AnalysisDefinition;
 
     private var _lastData:ArrayCollection;
@@ -61,7 +56,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     public function DataViewFactory() {
         this.percentHeight = 100;
-        this.percentWidth = 100;        
+        this.percentWidth = 100;
     }
 
     [Bindable(event="reportSelectionEnabledChanged")]
@@ -102,10 +97,10 @@ public class DataViewFactory extends VBox implements IRetrievable {
             reportCanvas.highlight();
         }
         /*if (notConfigured.parent) {
-            notConfigured.highlight(analysisItem);
-        } else {
+         notConfigured.highlight(analysisItem);
+         } else {
 
-        }*/
+         }*/
     }
 
     public function revertDropAreas():void {
@@ -183,9 +178,9 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     /*private var _dataSourceFields:ArrayCollection;
 
-    public function set dataSourceFields(value:ArrayCollection):void {
-        _dataSourceFields = value;
-    }*/
+     public function set dataSourceFields(value:ArrayCollection):void {
+     _dataSourceFields = value;
+     }*/
 
     private function hideControlBar(event:MouseEvent):void {
         var button:Button = event.currentTarget as Button;
@@ -308,10 +303,10 @@ public class DataViewFactory extends VBox implements IRetrievable {
             reportCanvas.width = canvas.width - 20;
             reportCanvas.height = canvas.height - 20;
             /*if (currentComponent != null && (currentComponent.height != reportCanvas.height || currentComponent.width != reportCanvas.width)) {
-                currentComponent.height = reportCanvas.height;
-                currentComponent.width = reportCanvas.width;
-                currentComponent.invalidateDisplayList();
-            }*/
+             currentComponent.height = reportCanvas.height;
+             currentComponent.width = reportCanvas.width;
+             currentComponent.invalidateDisplayList();
+             }*/
             if (currentComponent.height != reportCanvas.height || currentComponent.width != reportCanvas.width) {
                 currentComponent.height = reportCanvas.height;
                 currentComponent.width = reportCanvas.width;
@@ -331,7 +326,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
     private var reportCanvas:ReportCanvas;
 
     private var _showLoading:Boolean = false;
-    
+
     private var _stackTrace:String;
 
     private var _overlayIndex:int;
@@ -513,7 +508,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     private var _lastProperties:Object;
-    
+
     private var _hasData:Boolean;
 
     private function gotData(event:DataServiceEvent):void {
@@ -536,18 +531,10 @@ public class DataViewFactory extends VBox implements IRetrievable {
                         _controlBar.deleteExplainButton();
                     }
                     if (event.report == null) {
+                        //_analysisDefinition.renderConfig();
                         _reportRenderer.renderReport(event.dataSet, _analysisDefinition, new Object(), event.additionalProperties);
                     } else {
-                        var useReportInEvent:Boolean = false;
-                        if (event.report.filterDefinitions != null) {
-                            for each (var f:FilterDefinition in event.report.filterDefinitions) {
-                                if (f is MultiFieldFilterDefinition || f is AnalysisItemFilterDefinition) {
-                                    useReportInEvent = true;
-                                    break;
-                                }
-                            }
-                        }
-                        _reportRenderer.renderReport(event.dataSet, useReportInEvent ? event.report : _analysisDefinition, new Object(), event.additionalProperties);
+                        _reportRenderer.renderReport(event.dataSet, event.report, new Object(), event.additionalProperties);
                     }
                 } else {
                     showNoData();
@@ -570,7 +557,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         reportModuleLoader.addEventListener("moduleLoaded", reportLoadHandler);
         reportModuleLoader.loadReportRenderer(_reportRendererModule, reportCanvas);
     }
-            
+
     private function reportLoadHandler(event:Event):void {
         _reportRenderer = reportModuleLoader.create() as IReportRenderer;
         //moduleInfo = null;
@@ -619,7 +606,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     private function customChangeFromControlBar(event:CustomChangeEvent):void {
         _reportRenderer.onCustomChangeEvent(event);
-    }    
+    }
 
     private function customChangeFromRenderer(event:CustomChangeEvent):void {
         _controlBar.onCustomChangeEvent(event);
@@ -729,7 +716,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     public function updateExportMetadata():void {
-        _reportRenderer.updateExportMetadata();
+        _reportRenderer.updateExportMetadata(_analysisDefinition);
     }
 
     public function getCoreView():DisplayObject {
