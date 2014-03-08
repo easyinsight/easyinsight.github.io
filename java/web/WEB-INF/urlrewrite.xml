@@ -353,5 +353,15 @@
 
     -->
 
+    <rule>
+        <from>^/connectionImage/([A-Za-z0-9]+)</from>
+        <to>/connectionImage?connectionID=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/docs/(.*?)</from>
+        <to>/docs/index.jsp?doc=$1</to>
+    </rule>
+
 </urlrewrite>
 
