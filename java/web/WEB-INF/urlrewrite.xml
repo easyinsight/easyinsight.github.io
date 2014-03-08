@@ -363,8 +363,24 @@
         <to>/html/basecampAccountChoice.jsp?dataSourceID=$1&amp;accountID=$2</to>
     </rule>
 
+    <rule>
+        <from>^/html/dataSources/([A-Za-z0-9]+)/smartsheetAccountSelection</from>
+        <to>/html/smartsheetTableSelection.jsp?dataSourceID=$1</to>
+    </rule>
 
+    <rule>
+        <from>^/html/dataSources/([A-Za-z0-9]+)/smartsheetAccountChoice/([A-Za-z0-9]+)/([A-Za-z0-9]+)</from>
+        <to>/html/smartsheetAccountChoice.jsp?dataSourceID=$1&amp;accountID=$2&amp;tableName=$3</to>
+    </rule>
 
+    <rule>
+        <from>^/connectionImage/([A-Za-z0-9]+)</from>
+        <to>/connectionImage?connectionID=$1</to>
+    </rule>
 
+    <rule>
+        <from>^/docs/(.*?)</from>
+        <to>/docs/index.jsp?doc=$1</to>
+    </rule>
 </urlrewrite>
 

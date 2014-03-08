@@ -2,7 +2,6 @@ package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
-import org.antlr.runtime.tree.Tree;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -353,14 +352,19 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(VariableNode node) {
-        if (row == null) {
+        if (row == null && node.getFilterDefinition() == null) {
             result = new EmptyValue();
         } else {
             //if (node.ready()) {
-            result = row.getValue(node.createAggregateKey());
-            if (calculationMetadata != null && node.getWarnings() != null) {
-                for (String warning : node.getWarnings()) {
-                    calculationMetadata.addWarning(warning);
+            if (node.getFilterDefinition() != null) {
+                // store the value as something we can work with...
+                result = new StringValue(node.getFilterDefinition().asString(null));
+            } else {
+                result = row.getValue(node.createAggregateKey());
+                if (calculationMetadata != null && node.getWarnings() != null) {
+                    for (String warning : node.getWarnings()) {
+                        calculationMetadata.addWarning(warning);
+                    }
                 }
             }
             /*} else {

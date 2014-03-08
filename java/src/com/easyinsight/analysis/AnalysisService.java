@@ -9,6 +9,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.documentation.DocReader;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.preferences.ApplicationSkin;
@@ -35,6 +36,7 @@ import com.easyinsight.userupload.DataSourceThreadPool;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.util.RandomTextGenerator;
+import flex.messaging.FlexContext;
 import nu.xom.Builder;
 import nu.xom.Document;
 import org.antlr.runtime.RecognitionException;
@@ -62,6 +64,21 @@ public class AnalysisService {
             throw new RuntimeException(e);
         }
     }*/
+
+    public String getBaseDocs() {
+        try {
+            String html = DocReader.toHTML(null, FlexContext.getHttpRequest());
+            html = html.replace("<h2 id=\"Easy_Insight_Documentation\">", "<b>");
+            html = html.replace("</h2>", "</b>");
+            html = html.replace("Connections<ol>", "Connections<textformat leftmargin=\"50\">");
+            html = html.replace("</ol>", "</textformat>");
+            System.out.println(html);
+            return html;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
 
     public List<FilterSetDescriptor> getFilterSetsForDataSource(long dataSourceID) {
         try {
