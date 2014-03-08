@@ -135,7 +135,8 @@
         private function gotMetadata(event:ResultEvent):void {
             var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
                     AnalysisDimensionResultMetadata;
-            var filteredStrings:ArrayCollection = new ArrayCollection();
+            var fStrings:Array = new Array();
+            var filtered:Dictionary = new Dictionary();
             for each (var filterValue:Object in FilterValueDefinition(_filterValueDefinition).filteredValues) {
                 var filterString:String;
                 if (filterValue is Value) {
@@ -146,27 +147,20 @@
                 if (filterString == null || filterString == "") {
                     filterString = "[ No Value ]";
                 }
-                filteredStrings.addItem(filterString);
+                fStrings.push(filterString);
+                filtered[filterString] = true;
+                //filteredStrings.addItem(filterString);
             }
+            var filteredStrings:ArrayCollection = new ArrayCollection(fStrings);
 
-            strings = new ArrayCollection();
-            for each (var value:Value in analysisDimensionResultMetadata.values) {
-                var string:String = String(value.getValue());
-                if (string == null || string == "") {
-                    string = "[ No Value ]";
-                }
-                if (!strings.contains(string)) {
-                    strings.addItem(string);
-                }
-            }
-            strings.sort = new Sort();
-            strings.sort.compareFunction = compare;
-            strings.filterFunction = filterFunction;
-            strings.refresh();
-            sourceValues = strings;
+            //var o:Dictionary = new Dictionary();
+            this.strings = analysisDimensionResultMetadata.strings;
+            this.strings.filterFunction = filterFunction;
+            this.strings.refresh();
+            sourceValues = this.strings;
             filteredStrings.sort = new Sort();
             filteredStrings.sort.compareFunction = compare;
-//            filteredStrings.filterFunction = targetFilterFunction;
+            filteredStrings.filterFunction = targetFilterFunction;
             filteredStrings.refresh();
             if (strings.length > 500) {
                 if (filterTileList.parent)
@@ -181,11 +175,11 @@
             var all:Boolean = filteredStrings.contains("All");
             allCheckBox.selected = all;
 
-            var a:Array = strings.toArray().map(function (obj:Object, a:*, b:*):Object {
-                var m:MultiValueFilterOption = new MultiValueFilterOption(obj as String, all || filteredStrings.contains(obj))
+            var a:Array = this.strings.toArray().map(function (obj:Object, a:*, b:*):Object {
+                var m:MultiValueFilterOption = new MultiValueFilterOption(obj as String, all || filtered[obj]);
                 m.addEventListener("selectedChanged", valueChanged, false, 0, true);
                 return m;
-            })
+            });
 
             realValues = new ArrayCollection(a);
             targetValues = new ArrayCollection(a);
@@ -340,6 +334,9 @@
             var result:Boolean = true;
             if (selectedFilter) {
                 result = (o.selected as Boolean);
+            }
+            if (filterString == null || filterString == "") {
+                return result;
             }
             return result && (o.label as String).toLowerCase().indexOf(filterString.toLowerCase()) != -1;
         }

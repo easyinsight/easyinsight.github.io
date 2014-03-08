@@ -8,6 +8,7 @@ import com.easyinsight.analysis.DataService;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.definitions.*;
+import com.easyinsight.calculations.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.Database;
@@ -55,13 +56,12 @@ import java.io.*;
 
 import java.net.URLEncoder;
 import java.sql.*;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.*;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -112,9 +112,9 @@ public class ExportService {
         switch (o.getOutcome()) {
             case KPIOutcome.EXCEEDING_GOAL:
             case KPIOutcome.POSITIVE:
-                return "#00ff00";
+                return "#009900";
             case KPIOutcome.NEGATIVE:
-                return "#ff0000";
+                return "#990000";
             default:
                 return "inherit";
         }
@@ -365,6 +365,41 @@ public class ExportService {
         return activities;
     }
 
+    public ScheduledActivity getActivityByID(long id) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SCHEDULED_ACCOUNT_ACTIVITY.scheduled_account_activity_id," +
+                    "SCHEDULED_ACCOUNT_ACTIVITY.activity_type FROM SCHEDULED_ACCOUNT_ACTIVITY WHERE ACCOUNT_ID = ? AND SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+            queryStmt.setLong(1, SecurityUtil.getAccountID());
+            queryStmt.setLong(2, id);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long activityID = rs.getLong(1);
+                int activityType = rs.getInt(2);
+                try {
+                    ScheduledActivity scheduledActivity = ScheduledActivity.createActivity(activityType, activityID, conn);
+                    if (scheduledActivity.authorize()) {
+                        return scheduledActivity;
+                    }
+                } catch (Exception e) {
+                    //LogClass.error(e);
+                    // blah
+                }
+            }
+            queryStmt.close();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+        return null;
+    }
+
 
     public void deleteSchedules(List<Integer> activities) {
         EIConnection conn = Database.instance().getConnection();
@@ -493,7 +528,7 @@ public class ExportService {
                         analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
                     html = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, true, includeTitle);
                 } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TEXT) {
-                    html = ExportService.textReportToHtml(analysisDefinition, conn, insightRequestMetadata);
+                    html = ExportService.textReportToHtml(analysisDefinition, conn, insightRequestMetadata, includeTitle);
                 } else {
                     ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
                     html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, new ExportProperties(true, true, null));
@@ -588,6 +623,68 @@ public class ExportService {
         return sb.toString();
     }
 
+    @Nullable
+    public static String filterTransformForReport(WSAnalysisDefinition report) {
+        if (report.getExportString() != null && !"".equals(report.getExportString())) {
+            return filterTransform(Arrays.asList(report), new ArrayList<Dashboard>(), report.getExportString());
+        }
+        return null;
+    }
+
+    @Nullable
+    public static String filterTransformForReport(WSAnalysisDefinition report, String exportString) {
+        return filterTransform(Arrays.asList(report), new ArrayList<Dashboard>(), exportString);
+    }
+
+    @Nullable
+    public static String filterTransform(List<WSAnalysisDefinition> reports, List<Dashboard> dashboards, String exportString) {
+        Map<FilterKey, FilterDefinition> namespaces = new HashMap<FilterKey, FilterDefinition>();
+        for (WSAnalysisDefinition report : reports) {
+            if (report.getFilterDefinitions() != null) {
+                for (FilterDefinition filter : report.getFilterDefinitions()) {
+                    namespaces.put(new FilterKey(filter.label(false), report.getName()), filter);
+                }
+            }
+        }
+        for (Dashboard dashboard : dashboards) {
+            if (dashboard.getFilters() != null) {
+                for (FilterDefinition filter : dashboard.getFilters()) {
+                    namespaces.put(new FilterKey(filter.label(false), dashboard.getName()), filter);
+                }
+            }
+        }
+
+
+        try {
+            Pattern pattern = Pattern.compile("\\{(.*?)\\}");
+            Matcher matcher = pattern.matcher(exportString);
+            String end = exportString;
+            while (matcher.find()) {
+                String g = matcher.group();
+                g = g.substring(1, g.length() - 1);
+                CalculationTreeNode tree;
+
+                ResolverVisitor visitor;
+                tree = CalculationHelper.createTree(g, false);
+
+                visitor = new ResolverVisitor(namespaces, new FunctionFactory(), new HashMap<String, UniqueKey>(), new ArrayList<String>());
+                tree.accept(visitor);
+                EvaluationVisitor rowVisitor = new EvaluationVisitor();
+                tree.accept(rowVisitor);
+                Value result = rowVisitor.getResult();
+                if (result.type() != Value.EMPTY) {
+                    String toReplace = result.toString();
+                    end = matcher.replaceAll(toReplace);
+                }
+            }
+            return end;
+
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
+
     public byte[] toPDFBytes(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -609,8 +706,19 @@ public class ExportService {
                 Image image = Image.getInstance(bytes);
                 image.setAlignment(Element.ALIGN_CENTER);
                 document.add(image);
-
             }
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+
+        try {
+            String string = filterTransformForReport(analysisDefinition);
+            com.itextpdf.text.Font phraseFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL,
+                    new BaseColor(20, 20, 20));
+            Phrase phrase = new Phrase(string, phraseFont);
+            Paragraph paragraph = new Paragraph(phrase);
+            paragraph.setAlignment(Element.ALIGN_CENTER);
+            document.add(paragraph);
         } catch (Exception e) {
             LogClass.error(e);
         }
@@ -624,6 +732,8 @@ public class ExportService {
         } else {
             listReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, document, exportMetadata);
         }
+
+
 
 
         document.close();
@@ -1529,10 +1639,15 @@ public class ExportService {
         return new VListInfo(dColl, columns);
     }
 
-    public static String textReportToHtml(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
+    public static String textReportToHtml(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean email) {
         DataSet dataSet = DataService.listDataSet(listDefinition, insightRequestMetadata, conn);
         WSTextDefinition wsTextDefinition = (WSTextDefinition) listDefinition;
         StringBuilder sb = new StringBuilder();
+        if (!email) {
+            String style = MessageFormat.format("<div style=\"text-align:left; color:{1}; font-size:{0}px\">", wsTextDefinition.getFontSize(),
+                    createHexString(wsTextDefinition.getFontColor()));
+            sb.append(style);
+        }
         for (IRow row : dataSet.getRows()) {
             for (int i = 0; i < wsTextDefinition.getColumns().size(); i++) {
                 AnalysisItem item = wsTextDefinition.getColumns().get(i);
@@ -1542,6 +1657,9 @@ public class ExportService {
                     sb.append(" ");
                 }
             }
+        }
+        if (!email) {
+            sb.append("</div>");
         }
         return sb.toString();
     }
@@ -1571,8 +1689,17 @@ public class ExportService {
             }
         }
         sb.append("<th style=\"" + thStyle + "\">Name</th>");
-        sb.append("<th style=\"width:120px;" + thStyle + "\">Latest Value</th>");
-        sb.append("<th style=\"width:120px;" + thStyle + "\">Previous Value</th>");
+        if (trendDataResults.getNowString() == null) {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">Latest Value</th>");
+        } else {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">").append(trendDataResults.getNowString()).append("</th>");
+        }
+        if (trendDataResults.getPreviousString() == null) {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">Previous Value</th>");
+        } else {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">").append(trendDataResults.getPreviousString()).append("</th>");
+        }
+
         sb.append("<th style=\"width:120px;" + thStyle + "\">Percent Change</th>");
         AnalysisMeasure percentMeasure = new AnalysisMeasure();
         percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
@@ -1602,6 +1729,99 @@ public class ExportService {
             sb.append("</td>");
             sb.append("</tr>");
         }
+        sb.append("</table>");
+        return sb.toString();
+    }
+
+    public static String kpiReportToHtmlTableWithActualCSS(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean sendIfNoData, boolean includeTitle) throws SQLException {
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
+        WSKPIDefinition kpiReport = (WSKPIDefinition) listDefinition;
+        TrendDataResults trendDataResults = DataService.getTrendDataResults(kpiReport, insightRequestMetadata, conn);
+        if (trendDataResults.getTrendOutcomes().size() == 0 && !sendIfNoData) {
+            return null;
+        }
+        List<TrendOutcome> outcomes = trendDataResults.getTrendOutcomes();
+        StringBuilder sb = new StringBuilder();
+
+        if (includeTitle && listDefinition.getName() != null) {
+            sb.append("<div style=\"" + headerLabelStyle + "\">").append("<h0>").append(listDefinition.getName()).append("</h0></div>");
+        }
+        sb.append("<table class=\"table table-bordered table-condensed\" style=\"font-size:").append(listDefinition.getFontSize()).append("px\">");
+        sb.append("<thead>");
+        sb.append("<tr>");
+        int i;
+        if (kpiReport.getGroupings() != null) {
+            for (i = 0; i < kpiReport.getGroupings().size(); i++) {
+                AnalysisItem grouping = kpiReport.getGroupings().get(i);
+                sb.append("<th style=\"" + thStyle + "\">");
+                sb.append(grouping.toUnqualifiedDisplay());
+                sb.append("</th>");
+            }
+        }
+        sb.append("<th style=\"" + thStyle + "\">Name</th>");
+        if (trendDataResults.getNowString() == null) {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">Latest Value</th>");
+        } else {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">").append(trendDataResults.getNowString()).append("</th>");
+        }
+        if (trendDataResults.getPreviousString() == null) {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">Previous Value</th>");
+        } else {
+            sb.append("<th style=\"width:120px;" + thStyle + "\">").append(trendDataResults.getPreviousString()).append("</th>");
+        }
+
+        sb.append("<th style=\"width:120px;" + thStyle + "\">Percent Change</th>");
+        sb.append("</tr>");
+        sb.append("</thead>");
+        sb.append("<tbody>");
+        AnalysisMeasure percentMeasure = new AnalysisMeasure();
+        percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
+        percentMeasure.setMinPrecision(1);
+        percentMeasure.setPrecision(1);
+        for (TrendOutcome trendOutcome : outcomes) {
+            sb.append("<tr>");
+            if (kpiReport.getGroupings() != null) {
+                for (i = 0; i < kpiReport.getGroupings().size(); i++) {
+                    AnalysisItem grouping = kpiReport.getGroupings().get(i);
+                    Value value = trendOutcome.getDimensions().get(grouping.qualifiedName());
+                    sb.append("<td style=\"" + tdStyle + "left\">");
+                    sb.append(value);
+                    sb.append("<span class='sortData'>");
+                    sb.append(value.toString());
+                    sb.append("</span>");
+                    sb.append("</td>");
+                }
+            }
+            sb.append("<td style=\"" + tdStyle + "left\">");
+            sb.append(trendOutcome.getMeasure().toUnqualifiedDisplay());
+            sb.append("<span class='sortData'>");
+            sb.append(trendOutcome.getMeasure().toUnqualifiedDisplay());
+            sb.append("</span>");
+            sb.append("</td>");
+            String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, false);
+            sb.append("<td style=\"" + tdStyle + "right\">").append(nowValue);
+            sb.append("<span class='sortData'>");
+            sb.append(trendOutcome.getNow().toDouble());
+            sb.append("</span>");
+            sb.append("</td>");
+            String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, false);
+            sb.append("<td style=\"" + tdStyle + "right\">").append(previousValue);
+            sb.append("<span class='sortData'>");
+            sb.append(trendOutcome.getHistorical().toDouble());
+            sb.append("</span>");
+            sb.append("</td>");
+            sb.append("<td style=\"" + tdStyle + "right\">");
+            if (trendOutcome.getHistorical().toDouble() != 0) {
+                double percentChange = (trendOutcome.getNow().toDouble() - trendOutcome.getHistorical().toDouble()) / trendOutcome.getHistorical().toDouble() * 100;
+                sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                sb.append("<span class='sortData'>");
+                sb.append(percentChange);
+                sb.append("</span>");
+            }
+            sb.append("</td>");
+            sb.append("</tr>");
+        }
+        sb.append("</tbody>");
         sb.append("</table>");
         return sb.toString();
     }
@@ -1755,41 +1975,34 @@ public class ExportService {
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
         for (CompareYearsRow ytdValue : ytdStuff.getRows()) {
-            boolean alwaysShow = false;
-            AnalysisMeasure baseMeasure = (AnalysisMeasure) ytdValue.getMeasure();
-            if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof VerticalListReportExtension) {
-                VerticalListReportExtension ytdReportFieldExtension = (VerticalListReportExtension) baseMeasure.getReportFieldExtension();
-                if (ytdReportFieldExtension.isAlwaysShow()) {
-                    alwaysShow = true;
-                }
-            }
             boolean atLeastOneValue = false;
             for (CompareYearsResult result : ytdValue.getResults().values()) {
                 if (result.getValue().toDouble() > 0) {
                     atLeastOneValue = true;
                 }
             }
-            if (!alwaysShow && !atLeastOneValue) {
+            if (!atLeastOneValue) {
                 continue;
             }
             String ytdTRStyle = "";
-
-
+            AnalysisMeasure baseMeasure = (AnalysisMeasure) ytdValue.getMeasure();
+            boolean alwaysShow = false;
             if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof VerticalListReportExtension) {
                 VerticalListReportExtension ytdReportFieldExtension = (VerticalListReportExtension) baseMeasure.getReportFieldExtension();
                 if (ytdReportFieldExtension.isLineAbove()) {
-                    ytdTRStyle += "border-top: solid 2px black;";
+                    ytdTRStyle += "border-top: solid 1px black;";
                 }
-                if (alwaysShow) {
-                    cellStyle = "text-align:left;font-weight:bold";
+                if (ytdReportFieldExtension.isAlwaysShow()) {
+                    alwaysShow = true;
+                    cellStyle = "padding:2px;text-align:left;font-weight:bold";
                 } else {
-                    cellStyle = "text-align:right";
+                    cellStyle = "padding:2px;text-align:right";
                 }
             } else {
-                cellStyle = "text-align:right";
+                cellStyle = "padding:2px;text-align:right";
             }
             if (baseMeasure.isUnderline()) {
-                ytdTRStyle += "border-bottom:solid 2px black";
+                ytdTRStyle += "border-bottom:solid 1px black";
             }
             sb.append("<tr style=\"" + ytdTRStyle + "\">");
             sb.append("<td style=\"white-space: nowrap;text-align:left;").append(cellStyle).append("\">").append(baseMeasure.toUnqualifiedDisplay()).append("</td>");
@@ -1936,7 +2149,7 @@ public class ExportService {
                     }
                 } else if (alwaysShow) {
                     for (int i = 0; i < maxColumns; i++) {
-                        sb.append("<td style=\"").append(cellStyle).append("\"></td>");
+                        sb.append("<td style=\"").append(cellStyle).append("</td>");
                     }
                     if (hasBenchmark) {
                         sb.append("<td style=\"").append(cellStyle).append("\"></td>");
@@ -2069,10 +2282,10 @@ public class ExportService {
                     for (int i = 0; i < maxColumns; i++) {
                         sb.append("<td style=\"").append(cellStyle).append("</td>");
                     }
-                    //if (hasBenchmark) {
+                    if (hasBenchmark) {
                         sb.append("<td>").append("</td>");
                         sb.append("<td>").append("</td>");
-                    //}
+                    }
                 }
                 sb.append("</tr>");
             }
@@ -3117,7 +3330,7 @@ public class ExportService {
                             } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
                                 StringBuilder paramBuilder = new StringBuilder();
                                 DrillThrough drillThrough = (DrillThrough) defaultLink;
-                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
+                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.createID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
                                 if (exportProperties.getEmbedKey() != null) {
                                     paramBuilder.append("&embedKey=" + exportProperties.getEmbedKey()+"&");
                                 }
@@ -3151,7 +3364,7 @@ public class ExportService {
                         }
 
 
-                        sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+                        sb.append(createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
                         if (showLink) {
                             sb.append("</a>");
                         }
@@ -3365,7 +3578,7 @@ public class ExportService {
                             } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
                                 StringBuilder paramBuilder = new StringBuilder();
                                 DrillThrough drillThrough = (DrillThrough) defaultLink;
-                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
+                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.createID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
                                 if (exportProperties.getEmbedKey() != null) {
                                     paramBuilder.append("&embedKey=" + exportProperties.getEmbedKey()+"&");
                                 }
@@ -3399,7 +3612,7 @@ public class ExportService {
                         }
 
 
-                        sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+                        sb.append(createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
                         if (showLink) {
                             sb.append("</a>");
                         }

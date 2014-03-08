@@ -314,10 +314,8 @@ public class FilterValueDefinition extends FilterDefinition {
                 return !"".equals(stringValue.toString()) && !"All".equals(stringValue.toString());
             } else if (value instanceof EmptyValue) {
                 return false;
-                // http://cl.ly/image/370S3T1U0f0D
             }
         }
-        System.out.println("filtered values size = " + filteredValues.size());
         if (filteredValues.size() > SystemSettings.instance().getMaxFilterValues()) {
             return false;
         }
@@ -439,7 +437,7 @@ public class FilterValueDefinition extends FilterDefinition {
             sb.append("<select class=\"filterSelect\" id=\"" + filterName + "\" onchange=\"" + onChange + "\">");
 
 
-            List<String> stringList = new ArrayList<String>();
+            List<String> stringList = dimensionMetadata.getStrings();
             for (Value value : dimensionMetadata.getValues()) {
                 stringList.add(value.toHTMLString());
             }
@@ -527,12 +525,7 @@ public class FilterValueDefinition extends FilterDefinition {
         AnalysisDimensionResultMetadata dimensionMetadata = (AnalysisDimensionResultMetadata) metadata;
         if (singleValue) {
             jo.put("type", "single");
-            List<String> stringList = new ArrayList<String>();
-            for (Value value : dimensionMetadata.getValues()) {
-
-                stringList.add(FilterUtils.toFilterString(value));
-            }
-            Collections.sort(stringList);
+            List<String> stringList = dimensionMetadata.getStrings();
             if (isAllOption()) {
                 stringList.add(0, "All");
             }
@@ -552,13 +545,9 @@ public class FilterValueDefinition extends FilterDefinition {
             jo.put("values", arr);
         } else {
             jo.put("type", "multiple");
-            jo.put("count", dimensionMetadata.getValues().size());
+            jo.put("count", dimensionMetadata.getStrings().size());
 
-            List<String> stringList = new ArrayList<String>();
-            for (Value value : dimensionMetadata.getValues()) {
-                stringList.add(FilterUtils.toFilterString(value));
-            }
-            Collections.sort(stringList);
+            List<String> stringList = dimensionMetadata.getStrings();
             if (isAllOption()) {
                 stringList.add(0, "All");
             }
@@ -601,5 +590,27 @@ public class FilterValueDefinition extends FilterDefinition {
     public void override(FilterDefinition overrideFilter) {
         FilterValueDefinition filterValueDefinition = (FilterValueDefinition) overrideFilter;
         setFilteredValues(filterValueDefinition.getFilteredValues());
+    }
+
+    @Override
+    public String asString(InsightRequestMetadata insightRequestMetadata) {
+        if (filteredValues.size() == 1 && "All".equals(filteredValues.get(0).toString())) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < filteredValues.size(); i++) {
+            sb.append(filteredValues.get(i));
+            if (i < (filteredValues.size() - 2)) {
+                sb.append(", ");
+            } else if (i == (filteredValues.size() - 2)) {
+                sb.append(" or ");
+            }
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public String fullString(InsightRequestMetadata insightRequestMetadata) {
+        return getField().toDisplay() + " is " + asString(insightRequestMetadata);
     }
 }

@@ -33,4 +33,7 @@ public class AnalysisItemResultMetadata implements Serializable {
 
     public void addValue(AnalysisItem analysisItem, Value value, InsightRequestMetadata insightRequestMetadata) {
     }
+
+    public void calculateCaches() {
+    }
 }

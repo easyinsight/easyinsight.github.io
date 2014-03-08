@@ -34,12 +34,11 @@ public class AssignFilterValue extends Function {
                 List<Date> dates = new ArrayList<Date>();
                 Map<Date, Object> dateMap = new HashMap<Date, Object>();
                 FilterValueDefinition filterValueDefinition = (FilterValueDefinition) matchedFilter;
-                List<Value> values = metadata.getValues();
-                for (Value value : values) {
-                    String string = value.toString();
+                List<String> values = metadata.getStrings();
+                for (String string : values) {
                     try {
                         Date date = sdf.parse(string);
-                        dateMap.put(date, value);
+                        dateMap.put(date, string);
                         dates.add(date);
                     } catch (ParseException e) {
                         // ignore

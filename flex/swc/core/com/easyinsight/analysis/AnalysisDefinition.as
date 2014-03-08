@@ -107,6 +107,7 @@ import mx.collections.ArrayCollection;
     public var colorScheme:String = "Primary";
     public var canSave:Boolean;
     public var filterSets:ArrayCollection;
+    public var exportString:String;
 
 		public function AnalysisDefinition()
 		{

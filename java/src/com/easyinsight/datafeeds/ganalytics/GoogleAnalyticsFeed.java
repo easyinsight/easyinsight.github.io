@@ -143,7 +143,7 @@ public class GoogleAnalyticsFeed extends Feed {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-
+        metadata.calculateCaches();
         return metadata;
     }
 
@@ -257,8 +257,16 @@ public class GoogleAnalyticsFeed extends Feed {
                         endDate = dateRange.getEndDate();
                     } else if (filterDefinition instanceof RollingFilterDefinition) {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
-                        endDate = insightRequestMetadata.getNow();
-                        startDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, endDate));
+                        if (rollingFilterDefinition.getStartDate() != null) {
+                            startDate = rollingFilterDefinition.getStartDate();
+                        } else {
+                            startDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, insightRequestMetadata.getNow()));
+                        }
+                        if (rollingFilterDefinition.getEndDate() != null) {
+                            endDate = rollingFilterDefinition.getEndDate();
+                        } else {
+                            endDate = insightRequestMetadata.getNow();
+                        }
                     }
                 } else if (filterDefinition instanceof FilterValueDefinition) {
                     if (filterDefinition.getField().getKey().toKeyString().equals(GoogleAnalyticsDataSource.TITLE)) {
@@ -281,13 +289,22 @@ public class GoogleAnalyticsFeed extends Feed {
 
             String startDateString = outboundDateFormat.format(startDate);
             String endDateString = outboundDateFormat.format(endDate);
+
+            if (startDateString.equals(endDateString)) {
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.YEAR, -1);
+                endDate = new Date();
+                startDate = cal.getTime();
+                startDateString = outboundDateFormat.format(startDate);
+                endDateString = outboundDateFormat.format(endDate);
+            }
             //String baseUrl = "https://www.googleapis.com/analytics/v2.4/data";
             URL queryURL = new URL("https://www.googleapis.com/analytics/v2.4/management/accounts");
             ManagementFeed accountsFeed = as.getFeed(queryURL, ManagementFeed.class);
             //AccountFeed accountFeed = as.getFeed(new URL(baseUrl), AccountFeed.class);
 
             for (ManagementEntry accountEntry : accountsFeed.getEntries()) {
-               /* String title = accountEntry.getTitle().getPlainText();
+                /* String title = accountEntry.getTitle().getPlainText();
                 if (!titleFilters.isEmpty() && !titleFilters.contains(title)) {
                     continue;
                 }*/
@@ -310,6 +327,7 @@ public class GoogleAnalyticsFeed extends Feed {
                         urlBuilder.append(ids);
 
                         urlBuilder.append("&dimensions=");
+                        StringBuilder dimBuilder = new StringBuilder();
                         if (dimensions.size() > 0) {
                             Iterator<AnalysisDimension> dimIter = dimensions.iterator();
                             while (dimIter.hasNext()) {
@@ -317,15 +335,19 @@ public class GoogleAnalyticsFeed extends Feed {
                                 if ("title".equals(analysisDimension.getKey().toKeyString())) {
                                     continue;
                                 }
-                                urlBuilder.append(analysisDimension.getKey().toKeyString());
+                                dimBuilder.append(analysisDimension.getKey().toKeyString());
                                 if (dimIter.hasNext()) {
-                                    urlBuilder.append(",");
+                                    dimBuilder.append(",");
                                 }
                             }
-                            if (urlBuilder.charAt(urlBuilder.length() - 1) == ',') {
-                                urlBuilder.deleteCharAt(urlBuilder.length() - 1);
-                            }
                         }
+                        if (!dimBuilder.toString().contains("ga:date")) {
+                            dimBuilder.append("ga:date");
+                        }
+                        if (dimBuilder.length() > 0 && dimBuilder.charAt(dimBuilder.length() - 1) == ',') {
+                            dimBuilder.deleteCharAt(dimBuilder.length() - 1);
+                        }
+                        urlBuilder.append(dimBuilder);
                         urlBuilder.append("&metrics=");
                         Iterator<AnalysisMeasure> measureIter = measures.iterator();
                         while (measureIter.hasNext()) {
@@ -340,6 +362,7 @@ public class GoogleAnalyticsFeed extends Feed {
 
                         while (next != null) {
                             URL reportUrl = new URL(next);
+                            System.out.println("next url = " + next);
                             DataFeed feed = null;
                             int retries = 0;
                             Exception sfe = null;

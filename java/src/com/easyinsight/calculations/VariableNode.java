@@ -32,10 +32,61 @@ public class VariableNode extends CalculationTreeNode {
         return analysisItem.createAggregateKey();
     }
 
+    public FilterDefinition getFilterDefinition() {
+        return filterDefinition;
+    }
+
     public String toDisplay() {
         return analysisItem.toDisplay();
     }
-    
+
+    public void resolveVariableKey(Map<FilterKey, FilterDefinition> filterMap) {
+        String s;
+        String namespace = null;
+        if (getChildCount() == 1) {
+            s = getChild(0).getText().trim();
+            if(s.startsWith("[") && s.endsWith("]"))
+                s = s.substring(1, s.length() - 1);
+        } else if (getChildCount() == 2) {
+            s = getChild(1).getText().trim();
+            if(s.startsWith("[") && s.endsWith("]"))
+                s = s.substring(1, s.length() - 1);
+            namespace = getChild(0).getText().trim();
+            if (namespace.startsWith("[") && namespace.endsWith("]")) {
+                namespace = namespace.substring(1, namespace.length() - 1);
+            }
+        } else {
+            throw new RuntimeException();
+        }
+        if (namespace != null) {
+            filterDefinition = filterMap.get(new FilterKey(s, namespace));
+            if (filterDefinition == null) {
+                throw new FunctionException("We could not find a filter named " + s + " on a report or dashboard named " + namespace + ".");
+            }
+        } else {
+            for (FilterDefinition filterDefinition : filterMap.values()) {
+                String label = filterDefinition.label(false);
+                if (label != null && s.equals(label)) {
+                    this.filterDefinition = filterDefinition;
+                    break;
+                }
+            }
+        }
+        if (filterDefinition == null) {
+            for (FilterDefinition filterDefinition : filterMap.values()) {
+                if (filterDefinition.getField() != null) {
+                    if (s.equals(filterDefinition.getField().toDisplay())) {
+                        this.filterDefinition = filterDefinition;
+                        break;
+                    }
+                }
+            }
+        }
+        /*if (filterDefinition == null) {
+            throw new FunctionException("We could not find a filter named " + s + ".");
+        }*/
+    }
+
     public void resolveVariableKey(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems,
                                    Map<String, List<AnalysisItem>> unqualifiedDisplayItems, Map<String, UniqueKey> namespaces) {
         String s;
@@ -142,10 +193,14 @@ public class VariableNode extends CalculationTreeNode {
                 }
             }
             if (matchedByKey.size() > 1) {
+                boolean dupe = false;
                 for (AnalysisItem testItem : matchedByKey) {
                     if (s.equals(testItem.toUnqualifiedDisplay())) {
-                        analysisItem = testItem;
-                        break;
+                        if (analysisItem == null) {
+                            analysisItem = testItem;
+                        } else {
+                            dupe = true;
+                        }
                     }
                 }
                 if (analysisItem == null) {
@@ -154,6 +209,11 @@ public class VariableNode extends CalculationTreeNode {
                     }
 
                     analysisItem = matchedByKey.get(0);
+                    warnings.add("we found multiple fields matching the name of <b>" + s + "</b> and chose <b>" + analysisItem.toDisplay() + "</b>.");
+                } else if (dupe) {
+                    if (warnings == null) {
+                        warnings = new ArrayList<String>();
+                    }
                     warnings.add("we found multiple fields matching the name of <b>" + s + "</b> and chose <b>" + analysisItem.toDisplay() + "</b>.");
                 }
             } else if (matchedByKey.size() == 1) {
@@ -164,11 +224,15 @@ public class VariableNode extends CalculationTreeNode {
                 if (analysisItems.size() > 1) {
                     if (analysisItem == null) {
                         boolean matched = false;
+                        boolean dupe = false;
                         for (AnalysisItem testItem : analysisItems) {
                             if (s.equals(testItem.toDisplay())) {
-                                analysisItem = testItem;
-                                matched = true;
-                                break;
+                                if (!matched) {
+                                    analysisItem = testItem;
+                                    matched = true;
+                                } else {
+                                    dupe = true;
+                                }
                             }
                         }
                         if (!matched) {
@@ -176,6 +240,11 @@ public class VariableNode extends CalculationTreeNode {
                                 warnings = new ArrayList<String>();
                             }
                             analysisItem = analysisItems.get(0);
+                            warnings.add("we found multiple fields matching the name of <b>" + s + "</b> and chose <b>" + analysisItem.toDisplay() + "</b>.");
+                        } else if (dupe) {
+                            if (warnings == null) {
+                                warnings = new ArrayList<String>();
+                            }
                             warnings.add("we found multiple fields matching the name of <b>" + s + "</b> and chose <b>" + analysisItem.toDisplay() + "</b>.");
                         }
                     }
@@ -186,6 +255,11 @@ public class VariableNode extends CalculationTreeNode {
                 analysisItems = displayItems.get(s);
                 if (analysisItems != null) {
                     if (analysisItems.size() > 1) {
+                        analysisItem = analysisItems.get(0);
+                        if (warnings == null) {
+                            warnings = new ArrayList<String>();
+                        }
+                        warnings.add("we found multiple fields matching the name of <b>" + s + "</b> and chose <b>" + analysisItem.toDisplay() + "</b>.");
                     }
                     if (analysisItem == null) {
                         analysisItem = analysisItems.get(0);
@@ -262,4 +336,6 @@ public class VariableNode extends CalculationTreeNode {
     }
 
     private AnalysisItem analysisItem;
+
+    private FilterDefinition filterDefinition;
 }

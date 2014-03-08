@@ -42,6 +42,25 @@ public class Link implements Cloneable, Serializable {
     @Transient
     private boolean definedByRule;
 
+    @Transient
+    private long definedByRuleID;
+
+    public String createID() {
+        if (definedByRuleID > 0) {
+            return "rule" + definedByRuleID;
+        } else {
+            return "linkID" + linkID;
+        }
+    }
+
+    public long getDefinedByRuleID() {
+        return definedByRuleID;
+    }
+
+    public void setDefinedByRuleID(long definedByRuleID) {
+        this.definedByRuleID = definedByRuleID;
+    }
+
     public boolean isDefaultLink() {
         return defaultLink;
     }
@@ -110,7 +129,7 @@ public class Link implements Cloneable, Serializable {
     }
 
     public void updateReportIDs(Map<Long, AnalysisDefinition> replacementMap, Map<Long, Dashboard> dashboardReplacementMap) {
-        
+
     }
 
     public Element toXML(XMLMetadata xmlMetadata) {
