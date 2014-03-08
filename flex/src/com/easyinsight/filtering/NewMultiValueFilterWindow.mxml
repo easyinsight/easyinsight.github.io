@@ -123,11 +123,7 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
-            dataService = new RemoteObject();
-            dataService.destination = "data";
-            dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID,
-                    _report, _otherFilters, _filterValueDefinition, _dashboard);
+
         }
 
         private function compare(obj1:Object, obj2:Object, fields:Array = null):int {
@@ -139,7 +135,8 @@
         private function gotMetadata(event:ResultEvent):void {
             var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
                     AnalysisDimensionResultMetadata;
-            var filteredStrings:ArrayCollection = new ArrayCollection();
+            var fStrings:Array = new Array();
+            var filtered:Dictionary = new Dictionary();
             for each (var filterValue:Object in FilterValueDefinition(_filterValueDefinition).filteredValues) {
                 var filterString:String;
                 if (filterValue is Value) {
@@ -150,34 +147,27 @@
                 if (filterString == null || filterString == "") {
                     filterString = "[ No Value ]";
                 }
-                filteredStrings.addItem(filterString);
+                fStrings.push(filterString);
+                filtered[filterString] = true;
+                //filteredStrings.addItem(filterString);
             }
+            var filteredStrings:ArrayCollection = new ArrayCollection(fStrings);
 
-            strings = new ArrayCollection();
-            for each (var value:Value in analysisDimensionResultMetadata.values) {
-                var string:String = String(value.getValue());
-                if (string == null || string == "") {
-                    string = "[ No Value ]";
-                }
-                if (!strings.contains(string)) {
-                    strings.addItem(string);
-                }
-            }
-            strings.sort = new Sort();
-            strings.sort.compareFunction = compare;
-            strings.filterFunction = filterFunction;
-            strings.refresh();
-            sourceValues = strings;
+            //var o:Dictionary = new Dictionary();
+            this.strings = analysisDimensionResultMetadata.strings;
+            this.strings.filterFunction = filterFunction;
+            this.strings.refresh();
+            sourceValues = this.strings;
             filteredStrings.sort = new Sort();
             filteredStrings.sort.compareFunction = compare;
-//            filteredStrings.filterFunction = targetFilterFunction;
+            filteredStrings.filterFunction = targetFilterFunction;
             filteredStrings.refresh();
             if (strings.length > 500) {
                 if (filterTileList.parent)
                     loadedValuesBox.removeChild(filterTileList);
                 loadedValuesBox.addChild(tooManyBox);
             } else {
-                if (tooManyBox.parent)
+                if (tooManyBox != null && tooManyBox.parent)
                     loadedValuesBox.removeChild(tooManyBox);
                 loadedValuesBox.addChild(filterTileList);
             }
@@ -185,11 +175,11 @@
             var all:Boolean = filteredStrings.contains("All");
             allCheckBox.selected = all;
 
-            var a:Array = strings.toArray().map(function (obj:Object, a:*, b:*):Object {
-                var m:MultiValueFilterOption = new MultiValueFilterOption(obj as String, all || filteredStrings.contains(obj))
+            var a:Array = this.strings.toArray().map(function (obj:Object, a:*, b:*):Object {
+                var m:MultiValueFilterOption = new MultiValueFilterOption(obj as String, all || filtered[obj]);
                 m.addEventListener("selectedChanged", valueChanged, false, 0, true);
                 return m;
-            })
+            });
 
             realValues = new ArrayCollection(a);
             targetValues = new ArrayCollection(a);
@@ -345,6 +335,9 @@
             if (selectedFilter) {
                 result = (o.selected as Boolean);
             }
+            if (filterString == null || filterString == "") {
+                return result;
+            }
             return result && (o.label as String).toLowerCase().indexOf(filterString.toLowerCase()) != -1;
         }
 
@@ -384,6 +377,11 @@
             l.text = "There are too many values to display. Please narrow your search above.";
             tooManyBox.addChild(l);
 
+            dataService = new RemoteObject();
+            dataService.destination = "data";
+            dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
+            dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field, new Date().getTimezoneOffset(), _reportID, _dashboardID,
+                    _report, _otherFilters, _filterValueDefinition, _dashboard);
         }
 
         private function selectedFilterEvent(event:Event):void {

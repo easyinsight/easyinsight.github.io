@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" backgroundColor="#FFFFFF" paddingBottom="10"
-        paddingLeft="10" paddingRight="10" paddingTop="10">
+                    paddingLeft="10" paddingRight="10" paddingTop="10">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
         import com.easyinsight.analysis.AnalysisItem;
@@ -8,8 +8,10 @@
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.Value;
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
 
         protected function copyField(analysisItem:AnalysisItem, onComplete:Function, copies:int = 1):void {
             onCopyComplete = onComplete;
@@ -37,6 +39,7 @@
 
         protected function getMetadata(analysisItem:AnalysisItem,  onComplete:Function):void {
             onMetadataComplete = onComplete;
+            ProgressAlert.alert(this, "Retrieving values...", null, dataService.getAnalysisItemMetadata);
             dataService.getAnalysisItemMetadata.send(dataSourceID, analysisItem, 0, 0, 0);
         }
 
@@ -44,11 +47,12 @@
 
         private function gotMetadata():void {
             var metadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisDimensionResultMetadata;
-            var strings:ArrayCollection = new ArrayCollection();
-            for each (var value:Value in metadata.values) {
-                strings.addItem(value.getValue());
+            var strings:ArrayCollection = metadata.strings;
+            if (strings.length > 100) {
+                Alert.show("You can't invoke this quick action on something with more than 100 values.");
+            } else {
+                onMetadataComplete.call(this, strings);
             }
-            onMetadataComplete.call(this, strings);
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">

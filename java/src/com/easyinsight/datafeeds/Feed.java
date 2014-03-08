@@ -11,6 +11,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.tag.Tag;
 import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
@@ -26,6 +27,8 @@ import java.io.Serializable;
  */
 public abstract class Feed implements Serializable {
     private FeedDefinition dataSource;
+    private Tag defaultTag;
+    private List<Tag> tags;
     private long feedID;
     private List<AnalysisItem> fields;
     private List<FeedNode> fieldHierarchy;
@@ -40,6 +43,22 @@ public abstract class Feed implements Serializable {
     private Map<String, String> properties;
     private String marmotScript;
     private FeedType feedType;
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
+    public Tag getDefaultTag() {
+        return defaultTag;
+    }
+
+    public void setDefaultTag(Tag defaultTag) {
+        this.defaultTag = defaultTag;
+    }
 
     public void setMarmotScript(String marmotScript) {
         this.marmotScript = marmotScript;
@@ -224,8 +243,8 @@ public abstract class Feed implements Serializable {
 
         try {
             PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
-                        "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
-                        "user_dls.user_id = ?");
+                    "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
+                    "user_dls.user_id = ?");
             dlsStmt.setLong(1, feedID);
             dlsStmt.setLong(2, SecurityUtil.getUserID(false));
 
@@ -295,6 +314,7 @@ public abstract class Feed implements Serializable {
         for (IRow row : dataSet.getRows()) {
             metadata.addValue(analysisItem, analysisItem.polishValue(row.getValue(analysisItem.createAggregateKey())), insightRequestMetadata);
         }
+        metadata.calculateCaches();
         return metadata;
     }
 
@@ -316,12 +336,12 @@ public abstract class Feed implements Serializable {
         if (versionRS.next()) {
             version = versionRS.getInt(1);
             PreparedStatement stmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.last_data_time FROM DATA_FEED," +
-                "FEED_PERSISTENCE_METADATA WHERE DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.feed_id AND " +
-                "(DATA_FEED.DATA_FEED_ID = ? OR DATA_FEED.PARENT_SOURCE_ID = ?) AND FEED_PERSISTENCE_METADATA.VERSION = ?");
+                    "FEED_PERSISTENCE_METADATA WHERE DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.feed_id AND " +
+                    "(DATA_FEED.DATA_FEED_ID = ? OR DATA_FEED.PARENT_SOURCE_ID = ?) AND FEED_PERSISTENCE_METADATA.VERSION = ?");
             stmt.setLong(1, getFeedID());
             stmt.setLong(2, getFeedID());
             stmt.setInt(3, version);
-            
+
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Date date1 = new Date(rs.getTimestamp(1).getTime());

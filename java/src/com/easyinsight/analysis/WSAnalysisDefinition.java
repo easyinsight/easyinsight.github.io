@@ -122,6 +122,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean manualButRunFirst;
     private String customFontFamily;
     private boolean useCustomFontFamily;
+    private String exportString;
     private int generalSizeLimit;
     private boolean passThroughFilters;
     private boolean enableLocalStorage;
@@ -204,6 +205,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setCachePartitionFilter(String cachePartitionFilter) {
         this.cachePartitionFilter = cachePartitionFilter;
+    }
+
+    public String getExportString() {
+        return exportString;
+    }
+
+    public void setExportString(String exportString) {
+        this.exportString = exportString;
     }
 
     public List<AnalysisItem> getFieldsForDrillthrough() {
@@ -1072,6 +1081,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         usePrimaryColor = findBooleanProperty(properties, "usePrimaryColor", false);
         useSecondaryColor = findBooleanProperty(properties, "useSecondaryColor", false);
         useTertiaryColor = findBooleanProperty(properties, "useTertiaryColor", false);
+        exportString = findStringProperty(properties, "exportString", "");
     }
 
     public List<ReportProperty> createProperties() {
@@ -1089,6 +1099,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("fullJoins", fullJoins));
         properties.add(new ReportBooleanProperty("dataSourceFields", dataSourceFields));
         properties.add(new ReportBooleanProperty("lookupTableOptimization", lookupTableOptimization));
+        properties.add(new ReportStringProperty("exportString", exportString));
         properties.add(new ReportBooleanProperty("adHocExecution", adHocExecution));
         properties.add(new ReportBooleanProperty("cacheable", cacheable));
         properties.add(new ReportBooleanProperty("manualButRunFirst", manualButRunFirst));

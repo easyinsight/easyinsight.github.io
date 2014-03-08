@@ -139,7 +139,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         }
         if (endDateDimension != null) {
             endDateDimension = (AnalysisDateDimension) Database.deproxy(endDateDimension);
-            endDateDimension.afterLoad();            
+            endDateDimension.afterLoad();
         }
     }
 
@@ -355,5 +355,13 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         FilterDateRangeDefinition f = (FilterDateRangeDefinition) overrideFilter;
         this.setStartDate(f.getStartDate());
         f.setEndDate(f.getEndDate());
+    }
+
+    @Override
+    public String asString(InsightRequestMetadata insightRequestMetadata) {
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        String startString = df.format(getStartDate());
+        String endString = df.format(getEndDate());
+        return startString + " to " + endString;
     }
 }

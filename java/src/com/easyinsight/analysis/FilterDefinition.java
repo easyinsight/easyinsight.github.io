@@ -567,4 +567,12 @@ public class FilterDefinition implements Serializable, Cloneable {
     public void override(FilterDefinition overrideFilter) {
 
     }
+
+    public String asString(InsightRequestMetadata insightRequestMetadata) {
+        return "";
+    }
+
+    public String fullString(InsightRequestMetadata insightRequestMetadata) {
+        return "";
+    }
 }

@@ -57,9 +57,9 @@ public class FilterValueServlet extends HttpServlet {
                         AnalysisItemResultMetadata result = new DataService().getAnalysisItemMetadataForFilter(id, adjustedFilters, offset);
                         AnalysisDimensionResultMetadata dimensionMetadata = (AnalysisDimensionResultMetadata) result;
                         JSONArray ja = new JSONArray();
-                        for (Value v : dimensionMetadata.getValues()) {
+                        for (String v : dimensionMetadata.getStrings()) {
                             if (v != null)
-                                ja.add(FilterUtils.toFilterString(v));
+                                ja.add(v);
                         }
                         JSONObject jo = new JSONObject();
                         jo.put("values", ja);

@@ -109,6 +109,7 @@ import mx.collections.ArrayCollection;
     public var useTertiaryColor:Boolean;
     public var canSave:Boolean;
     public var filterSets:ArrayCollection;
+    public var exportString:String;
 
 		public function AnalysisDefinition()
 		{
