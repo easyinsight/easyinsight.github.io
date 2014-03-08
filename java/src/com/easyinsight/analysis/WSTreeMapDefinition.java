@@ -13,7 +13,6 @@ import java.util.HashSet;
 public class WSTreeMapDefinition extends WSAnalysisDefinition {
 
     private long treeMapDefinitionID;
-    private int colorScheme;
 
     private String colorStrategy = "Linear";
     private int lowColor = 3355528;
@@ -41,14 +40,6 @@ public class WSTreeMapDefinition extends WSAnalysisDefinition {
 
     public void setHighColor(int highColor) {
         this.highColor = highColor;
-    }
-
-    public int getColorScheme() {
-        return colorScheme;
-    }
-
-    public void setColorScheme(int colorScheme) {
-        this.colorScheme = colorScheme;
     }
 
     public long getTreeMapDefinitionID() {
