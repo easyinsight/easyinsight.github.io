@@ -287,10 +287,16 @@ public class FunctionFactory {
             return new BusinessDayOfMonth();
         } else if (s.equals("json")) {
             return new JSONParse();
-        } else if (s.equals("tagparse")) {
-            return new TagBlah();
         } else if (s.equals("stringformat")) {
             return new StringFormat();
+        } else if (s.equals("tagparse")) {
+            return new TagBlah();
+        } else if (s.equals("plural")) {
+            return new Plural();
+        } else if (s.equals("daysinyear")) {
+            return new DaysInYear();
+        } else if (s.equals("years")) {
+            return new Years();
         } else {
             return null;
         }

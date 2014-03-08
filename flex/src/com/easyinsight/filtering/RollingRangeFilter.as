@@ -15,6 +15,8 @@ import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.ComboBox;
 import mx.controls.Label;
+import mx.controls.LinkButton;
+import mx.core.UIComponent;
 
 import mx.events.DropdownEvent;
 import mx.managers.PopUpManager;
@@ -29,7 +31,6 @@ public class RollingRangeFilter extends HBox implements IFilter
 
     private var comboBox:ComboBox;
     private var deleteButton:Button;
-    private var editButton:Button;
     private var _analysisItems:ArrayCollection;
 
     private var rangeOptions:ArrayCollection;
@@ -58,8 +59,18 @@ public class RollingRangeFilter extends HBox implements IFilter
         rangeOptions.addItem(new RangeOption("Last Full Day", RollingDateRangeFilterDefinition.LAST_FULL_DAY));
         rangeOptions.addItem(new RangeOption("Last Full Week", RollingDateRangeFilterDefinition.LAST_FULL_WEEK));
         rangeOptions.addItem(new RangeOption("Last Full Month", RollingDateRangeFilterDefinition.LAST_FULL_MONTH));
-        rangeOptions.addItem(new RangeOption("Last Day of Data", RollingDateRangeFilterDefinition.LAST_DAY));        
+        rangeOptions.addItem(new RangeOption("Last Full Quarter", RollingDateRangeFilterDefinition.LAST_FULL_QUARTER));
+        rangeOptions.addItem(new RangeOption("Last Full Year", RollingDateRangeFilterDefinition.LAST_FULL_YEAR));
+        rangeOptions.addItem(new RangeOption("Prior Full Week", RollingDateRangeFilterDefinition.PREVIOUS_FULL_WEEK));
+        rangeOptions.addItem(new RangeOption("Prior Full Month", RollingDateRangeFilterDefinition.PREVIOUS_FULL_MONTH));
+        rangeOptions.addItem(new RangeOption("Prior Full Quarter", RollingDateRangeFilterDefinition.PREVIOUS_FULL_QUARTER));
+        rangeOptions.addItem(new RangeOption("Prior Full Year", RollingDateRangeFilterDefinition.PREVIOUS_FULL_YEAR));
+        rangeOptions.addItem(new RangeOption("Last Week to Current Day", RollingDateRangeFilterDefinition.LAST_WEEK_TO_NOW));
+        rangeOptions.addItem(new RangeOption("Last Month to Current Day", RollingDateRangeFilterDefinition.LAST_MONTH_TO_NOW));
+        rangeOptions.addItem(new RangeOption("Last Quarter to Current Day", RollingDateRangeFilterDefinition.LAST_QUARTER_TO_NOW));
+        rangeOptions.addItem(new RangeOption("Last Year to Current Day", RollingDateRangeFilterDefinition.LAST_YEAR_TO_NOW));
         rangeOptions.addItem(new RangeOption("Custom", RollingDateRangeFilterDefinition.CUSTOM));
+
         this.filterMetadata = filterMetadata;
         _retrievalState = retrievalState;
         setStyle("verticalAlign", "middle");
@@ -135,8 +146,13 @@ public class RollingRangeFilter extends HBox implements IFilter
             }
             comboBox.selectedItem = selected;
         }
+        if (filterLabel is LinkButton) {
+            LinkButton(filterLabel).label = FilterDefinition.getLabel(rollingFilter, _analysisItem);
+        }
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
     }
+
+    private var filterLabel:UIComponent;
 
     override protected function createChildren():void {
         super.createChildren();
@@ -147,9 +163,9 @@ public class RollingRangeFilter extends HBox implements IFilter
             checkbox.addEventListener(Event.CHANGE, onChange);
             addChild(checkbox);
             /*if (rollingFilter != null && (rollingFilter.intrinsic || rollingFilter.trendFilter)) {
-                checkbox.enabled = false;
-                checkbox.toolTip = "This filter is an intrinsic part of the data source and cannot be disabled.";
-            }*/
+             checkbox.enabled = false;
+             checkbox.toolTip = "This filter is an intrinsic part of the data source and cannot be disabled.";
+             }*/
 
         }
 
@@ -159,10 +175,19 @@ public class RollingRangeFilter extends HBox implements IFilter
             }
         }
 
-        var label:Label = new Label();
-        label.styleName = "filterLabel";
-        label.text = FilterDefinition.getLabel(rollingFilter, _analysisItem);
-        addChild(label);
+        if (_filterEditable) {
+            var lb:LinkButton = new LinkButton();
+            lb.styleName = "filterLabel";
+            lb.label = FilterDefinition.getLabel(rollingFilter, _analysisItem);
+            lb.addEventListener(MouseEvent.CLICK, edit);
+            filterLabel = lb;
+        } else {
+            var label:Label = new Label();
+            label.styleName = "filterLabel";
+            label.text = FilterDefinition.getLabel(rollingFilter, _analysisItem);
+            filterLabel = label;
+        }
+        addChild(filterLabel);
 
         if (comboBox == null) {
             var newFilter:Boolean = false;
@@ -211,22 +236,15 @@ public class RollingRangeFilter extends HBox implements IFilter
             currentState = "Custom";
         }
         if (_filterEditable) {
-            if (editButton == null) {
-                editButton = new Button();
-                editButton.addEventListener(MouseEvent.CLICK, edit);
-                editButton.setStyle("icon", ImageConstants.EDIT_ICON);
-                editButton.toolTip = "Edit";
-            }
-            addChild(editButton);
             if (deleteButton == null) {
                 deleteButton = new Button();
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
                 deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
                 /*if (rollingFilter.intrinsic) {
-                    deleteButton.enabled = false;
-                    deleteButton.toolTip = "This filter is an intrinsic part of the data source and cannot be deleted.";
-                } else {*/
-                    deleteButton.toolTip = "Delete";
+                 deleteButton.enabled = false;
+                 deleteButton.toolTip = "This filter is an intrinsic part of the data source and cannot be deleted.";
+                 } else {*/
+                deleteButton.toolTip = "Delete";
                 //}
             }
             addChild(deleteButton);

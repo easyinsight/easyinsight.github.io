@@ -10,6 +10,24 @@ import java.util.List;
  */
 public class EmbeddedTrendDataResults extends EmbeddedResults {
     private List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
+    private String nowString;
+    private String previousString;
+
+    public String getNowString() {
+        return nowString;
+    }
+
+    public void setNowString(String nowString) {
+        this.nowString = nowString;
+    }
+
+    public String getPreviousString() {
+        return previousString;
+    }
+
+    public void setPreviousString(String previousString) {
+        this.previousString = previousString;
+    }
 
     public List<TrendOutcome> getTrendOutcomes() {
         return trendOutcomes;

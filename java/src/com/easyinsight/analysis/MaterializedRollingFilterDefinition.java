@@ -30,11 +30,22 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     public static final int LAST_FULL_DAY = 12;
     public static final int LAST_FULL_WEEK = 13;
     public static final int LAST_FULL_MONTH = 14;
-    public static final int LAST_FULL_QUARTER = 15;
     public static final int LAST_YEAR = 16;
     public static final int ALL_TIME = 17;
     public static final int CUSTOM = 18;
     public static final int ALL = 19;
+
+    public static final int LAST_FULL_QUARTER = -1;
+    public static final int LAST_FULL_YEAR = -2;
+    public static final int LAST_WEEK_TO_NOW = -5;
+    public static final int LAST_MONTH_TO_NOW = -3;
+    public static final int LAST_QUARTER_TO_NOW = -7;
+    public static final int LAST_YEAR_TO_NOW = -10;
+    public static final int PREVIOUS_FULL_WEEK = -6;
+    public static final int PREVIOUS_FULL_MONTH = -4;
+    public static final int PREVIOUS_FULL_QUARTER = -8;
+    public static final int PREVIOUS_FULL_YEAR = -9;
+
 
     private long limitDate;
     private long endDate;
@@ -73,11 +84,24 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     }
 
     public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
+        if (rollingFilterDefinition.getStartDate() != null) {
+            return rollingFilterDefinition.getStartDate().getTime();
+        }
         int interval = rollingFilterDefinition.getInterval();
+        if (interval < 0) {
+            for (CustomRollingInterval i : RollingFilterDefinition.createAdditionalIntervals()) {
+                if (i.getIntervalNumber() == interval) {
+                    rollingFilterDefinition.applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
+                    if (rollingFilterDefinition.getStartDate() != null) {
+                        return rollingFilterDefinition.getStartDate().getTime();
+                    }
+                }
+            }
+        }
         int intervalAmount = -rollingFilterDefinition.getCustomIntervalAmount();
         int intervalType = rollingFilterDefinition.getCustomIntervalType();
         Calendar cal = Calendar.getInstance();
-            cal.setTime(now);
+        cal.setTime(now);
         if (!(rollingFilterDefinition.getField() instanceof AnalysisDateDimension)) {
             throw new RuntimeException("Report attempted to run a rolling filter on field " + rollingFilterDefinition.getField().toDisplay() + " - " + rollingFilterDefinition.getField().getAnalysisItemID());
         }
@@ -175,7 +199,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 break;
             case LAST_FULL_DAY:
                 cal.add(Calendar.DAY_OF_YEAR, -1);
-                cal.set(Calendar.HOUR_OF_DAY, 0);   
+                cal.set(Calendar.HOUR_OF_DAY, 0);
                 cal.set(Calendar.MINUTE, 0);
                 cal.set(Calendar.SECOND, 0);
                 cal.set(Calendar.MILLISECOND, 0);
@@ -275,7 +299,20 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     }
 
     public static long findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
+        if (rollingFilterDefinition.getStartDate() != null) {
+            return rollingFilterDefinition.getEndDate().getTime();
+        }
         int interval = rollingFilterDefinition.getInterval();
+        if (interval < 0) {
+            for (CustomRollingInterval i : RollingFilterDefinition.createAdditionalIntervals()) {
+                if (i.getIntervalNumber() == interval) {
+                    rollingFilterDefinition.applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
+                    if (rollingFilterDefinition.getEndDate() != null) {
+                        return rollingFilterDefinition.getEndDate().getTime();
+                    }
+                }
+            }
+        }
         int intervalAmount = rollingFilterDefinition.getCustomIntervalAmount();
         int intervalType = rollingFilterDefinition.getCustomIntervalType();
         Calendar cal = Calendar.getInstance();
