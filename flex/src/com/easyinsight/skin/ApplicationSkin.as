@@ -140,6 +140,7 @@ public class ApplicationSkin extends EventDispatcher {
         headerEndEnabled = appSkin.headerEndEnabled;
 
         reportHeaderTextColor = appSkin.reportHeaderTextColor;
+        reportHeaderTextColorEnabled = appSkin.reportHeaderTextColorEnabled;
 
         tableColorStart = appSkin.tableColorStart;
         tableColorStartEnabled = appSkin.tableColorStartEnabled;

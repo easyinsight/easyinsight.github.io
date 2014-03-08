@@ -5,17 +5,21 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.ColorReportFormItem;
 
-        import com.easyinsight.analysis.ComboBoxReportFormItem;
-        import com.easyinsight.analysis.ImageReportFormItem;
+
         import com.easyinsight.analysis.MultiColorReportFormItem;
 
-        import com.easyinsight.analysis.NumericReportFormItem;
+
 
         import com.easyinsight.analysis.ReportFormItem;
+        import com.easyinsight.filtering.CustomRollingInterval;
+        import com.easyinsight.filtering.CustomRollingIntervalEvent;
+        import com.easyinsight.filtering.CustomRollingIntervalWindow;
+        import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
 
         import com.easyinsight.framework.User;
 
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.RolloverLabelEvent;
 
         import mx.binding.utils.BindingUtils;
 
@@ -80,6 +84,7 @@
             lfItems.addItem(new ColorReportFormItem("Crosstab Header Text Color", "crosstabHeaderTextColor", skin.crosstabHeaderTextColor, skin, "crosstabHeaderTextColorEnabled"));
             lfItems.addItem(new ColorReportFormItem("Grid Header Start Background", "headerStart", skin.headerStart, skin, "headerStartEnabled"));
             lfItems.addItem(new ColorReportFormItem("Grid Header End Background", "headerEnd", skin.headerEnd, skin, "headerEndEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Grid Header Text Background", "reportHeaderTextColor", skin.reportHeaderTextColor, skin, "reportHeaderTextColorEnabled"));
             lfItems.addItem(new ColorReportFormItem("Grid Row Background Color 1", "tableColorStart", skin.tableColorStart, skin, "tableColorStartEnabled"));
             lfItems.addItem(new ColorReportFormItem("Grid Row Background Color 2", "tableColorEnd", skin.tableColorEnd, skin, "tableColorEndEnabled"));
             lfItems.addItem(new ColorReportFormItem("Stack 1 Fill Start", "dashboardStack1ColorStart", skin.dashboardStack1ColorStart, skin));
@@ -188,6 +193,32 @@
                 PopUpUtil.centerPopUp(this);
             }
         }
+
+        [Bindable]
+        private var customIntervals:ArrayCollection;
+
+        private function onIntervalAdded(event:CustomRollingIntervalEvent):void {
+            customIntervals.addItem(event.interval);
+        }
+
+        private function defineCustomFilter(event:MouseEvent):void {
+            var window:CustomRollingIntervalWindow = new CustomRollingIntervalWindow();
+            window.addEventListener(CustomRollingIntervalEvent.FILTER_ADDED, onIntervalAdded, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function deleteSelected():void {
+            var selected:ArrayCollection = new ArrayCollection();
+            for each (var interval:CustomRollingInterval in customIntervals) {
+                if (interval.selected) {
+                    selected.addItem(interval);
+                }
+            }
+            for each (var s:CustomRollingInterval in selected) {
+                customIntervals.removeItemAt(customIntervals.getItemIndex(s));
+            }
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
         <mx:method name="getAccountSkin" result="gotAccountSkin()"/>
@@ -218,10 +249,22 @@
                     </mx:FormItem>
                 </mx:Form>
             </mx:VBox>
-            <mx:VBox label="Look and Feel Settings" width="600" horizontalAlign="center" updateComplete="onEvent(event)">
+            <mx:VBox label="Look and Feel Settings" width="600" horizontalAlign="center" updateComplete="onEvent(event)" maxHeight="400">
                 <mx:Form id="lookAndFeelForm" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
 
                 </mx:Form>
+            </mx:VBox>
+            <mx:VBox label="Custom Filter Options" width="600" horizontalAlign="center" updateComplete="onEvent(event)">
+                <mx:HBox>
+                    <util:SaveButton label="Add Filter Option..." click="defineCustomFilter(event)"/>
+                    <util:SaveButton label="Delete Selected" click="deleteSelected()"/>
+                </mx:HBox>
+                <mx:AdvancedDataGrid dataProvider="{customIntervals}">
+                    <mx:columns>
+                        <mx:AdvancedDataGridColumn dataField="" headerText="" sortable="false" width="30" itemRenderer="com.easyinsight.util.GenericGridCheckbox"/>
+                        <mx:AdvancedDataGridColumn dataField="filterLabel" headerText="Filter" sortable="true" width="400" itemRenderer="com.easyinsight.util.GenericRolloverLabel"/>
+                    </mx:columns>
+                </mx:AdvancedDataGrid>
             </mx:VBox>
         </mx:TabNavigator>
 
