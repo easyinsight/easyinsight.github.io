@@ -61,14 +61,13 @@ public class AnalysisDefinitionFactory {
             WSTreeMapDefinition wsTree = (WSTreeMapDefinition) wsAnalysisDefinition;
             TreeMapDefinitionState treeMapDefinitionState = new TreeMapDefinitionState();
             treeMapDefinitionState.setDefinitionID(wsTree.getTreeMapDefinitionID());
-            treeMapDefinitionState.setColorScheme(wsTree.getColorScheme());
             analysisDefinitionState = treeMapDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TREE)) {
             WSTreeDefinition wsTree = (WSTreeDefinition) wsAnalysisDefinition;
             TreeDefinitionState treeDefinitionState = new TreeDefinitionState();
             treeDefinitionState.setTreeDefinitionID(wsTree.getTreeDefinitionID());
             analysisDefinitionState = treeDefinitionState;
-         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.SUMMARY)) {
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.SUMMARY)) {
             WSSummaryDefinition wsTree = (WSSummaryDefinition) wsAnalysisDefinition;
             SummaryDefinitionState treeDefinitionState = new SummaryDefinitionState();
             treeDefinitionState.setSummaryDefinitionID(wsTree.getSummaryDefinitionID());
