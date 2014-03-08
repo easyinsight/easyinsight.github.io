@@ -17,13 +17,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>What's New with Easy Insight</title>
+    <title>Easy Insight Documentation</title>
     <jsp:include page="../html/bootstrapHeader.jsp"/>
 </head>
 <body>
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
-    <jsp:param name="headerActive" value="<%= HtmlConstants.WHATS_NEW %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.NONE %>"/>
 </jsp:include>
 <div class="container corePageWell">
     <%= html %>
