@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.util.*;
-import java.util.concurrent.*;
 
 /**
  * User: jamesboe
@@ -96,10 +95,21 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
     }
 
     @Override
+    protected boolean clearsData(FeedDefinition parentSource) {
+        return false;
+    }
+
+    @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, final IDataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
 
         try {
             final ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
+
+            String lastRefreshString = null;
+            if (lastRefreshDate != null) {
+                Calendar cal = Calendar.getInstance();
+                lastRefreshString = DATE_FORMAT.format(cal.getTime());
+            }
 
             List<Campaign> campaigns = ccSource.getOrCreateCampaignCache().getOrCreateCampaigns(ccSource);
 
@@ -115,7 +125,12 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
 
                 try {
                     {
-                        Map result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/clicks?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        Map result;
+                        if (lastRefreshString == null) {
+                            result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/clicks?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        } else {
+                            result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/clicks?api_key=" + ConstantContactCompositeSource.KEY + "&created_since=" + lastRefreshString, ccSource, client);
+                        }
                         Map meta = (Map) result.get("meta");
                         String nextLink = null;
                         if (meta != null) {
@@ -165,7 +180,12 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                     }
 
                     {
-                        Map result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/opens?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        Map result;
+                        if (lastRefreshString == null) {
+                            result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/opens?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        } else {
+                            result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/opens?api_key=" + ConstantContactCompositeSource.KEY + "&created_since=" + lastRefreshString, ccSource, client);
+                        }
                         Map meta = (Map) result.get("meta");
                         String nextLink = null;
                         if (meta != null) {
@@ -213,7 +233,12 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                     }
 
                     {
-                        Map result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/sends?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        Map result;
+                        if (lastRefreshString == null) {
+                            result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/sends?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        } else {
+                            result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/sends?api_key=" + ConstantContactCompositeSource.KEY + "&created_since=" + lastRefreshString, ccSource, client);
+                        }
                         Map meta = (Map) result.get("meta");
                         String nextLink = null;
                         if (meta != null) {
@@ -260,7 +285,13 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                         } while (hasMoreData);
                     }
                     {
-                        Map result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/bounces?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        Map result;
+                        if (lastRefreshString == null) {
+                            result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/bounces?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        } else {
+                            result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/bounces?api_key=" + ConstantContactCompositeSource.KEY + "&created_since=" + lastRefreshString, ccSource, client);
+                        }
+
                         Map meta = (Map) result.get("meta");
                         String nextLink = null;
                         if (meta != null) {
@@ -307,7 +338,12 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                         } while (hasMoreData);
                     }
                     {
-                        Map result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/unsubscribes?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        Map result;
+                        if (lastRefreshString == null) {
+                            result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/unsubscribes?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        } else {
+                            result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/unsubscribes?api_key=" + ConstantContactCompositeSource.KEY + "&created_since=" + lastRefreshString, ccSource, client);
+                        }
                         Map meta = (Map) result.get("meta");
                         String nextLink = null;
                         if (meta != null) {
@@ -354,7 +390,12 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                         } while (hasMoreData);
                     }
                     {
-                        Map result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/forwards?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        Map result;
+                        if (lastRefreshString == null) {
+                            result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/forwards?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        } else {
+                            result = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/" + campaign.getId() + "/tracking/forwards?api_key=" + ConstantContactCompositeSource.KEY + "&created_since=" + lastRefreshString, ccSource, client);
+                        }
                         Map meta = (Map) result.get("meta");
                         String nextLink = null;
                         if (meta != null) {
@@ -412,9 +453,5 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println(new Date(1336608000000L));
     }
 }
