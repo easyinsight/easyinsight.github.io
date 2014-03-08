@@ -295,6 +295,8 @@ public class FunctionFactory {
             return new Plural();
         } else if (s.equals("daysinyear")) {
             return new DaysInYear();
+        } else if (s.equals("years")) {
+            return new Years();
         } else {
             return null;
         }
