@@ -1,6 +1,7 @@
 package com.easyinsight.preferences;
 
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
@@ -325,6 +326,7 @@ public class PreferencesService {
         } finally {
             session.close();
         }
+        BenchmarkManager.recordBenchmark("ApplicationSkinSaved", 0, SecurityUtil.getUserID());
         return result;
     }
 

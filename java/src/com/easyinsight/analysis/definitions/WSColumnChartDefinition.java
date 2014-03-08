@@ -233,9 +233,16 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             setChartColor(applicationSkin.getCustomChartColor());
             setUseChartColor(true);
             setGradientColor(applicationSkin.getCustomChartColor());
+        } else if (getMeasures().size() == 1 && "Secondary".equals(getColorScheme()) && applicationSkin.isSecondaryColorEnabled()) {
+            setChartColor(applicationSkin.getSecondaryColor());
+            setUseChartColor(true);
+            setGradientColor(applicationSkin.getSecondaryColor());
         } else if (getMeasures().size() > 1 && "Primary".equals(getColorScheme()) && applicationSkin.getMultiColors() != null && applicationSkin.getMultiColors().size() > 0 &&
                 applicationSkin.getMultiColors().get(0).isColor1StartEnabled()) {
             setMultiColors(applicationSkin.getMultiColors());
+        } else if (getMeasures().size() > 1 && "Secondary".equals(getColorScheme()) && applicationSkin.getSecondaryMultiColors() != null && applicationSkin.getSecondaryMultiColors().size() > 0 &&
+                applicationSkin.getSecondaryMultiColors().get(0).isColor1StartEnabled()) {
+            setMultiColors(applicationSkin.getSecondaryMultiColors());
         }
     }
 
@@ -268,36 +275,36 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
             Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
             JSONObject seriesDefaults = new JSONObject();
             seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
-                JSONArray colorObj = new JSONArray();
+            JSONArray colorObj = new JSONArray();
 
-                JSONObject colorStop = new JSONObject();
-                colorStop.put("point", 0);
-                colorStop.put("color", color);
-                colorObj.put(colorStop);
+            JSONObject colorStop = new JSONObject();
+            colorStop.put("point", 0);
+            colorStop.put("color", color);
+            colorObj.put(colorStop);
 
-                colorStop = new JSONObject();
-                colorStop.put("point", .15);
-                colorStop.put("color", color2);
-                colorObj.put(colorStop);
+            colorStop = new JSONObject();
+            colorStop.put("point", .15);
+            colorStop.put("color", color2);
+            colorObj.put(colorStop);
 
-                colorStop = new JSONObject();
-                colorStop.put("point", .5);
-                colorStop.put("color", color);
-                colorObj.put(colorStop);
+            colorStop = new JSONObject();
+            colorStop.put("point", .5);
+            colorStop.put("color", color);
+            colorObj.put(colorStop);
 
-                colorStop = new JSONObject();
-                colorStop.put("point", .9);
-                colorStop.put("color", color);
-                colorObj.put(colorStop);
+            colorStop = new JSONObject();
+            colorStop.put("point", .9);
+            colorStop.put("color", color);
+            colorObj.put(colorStop);
 
-                colorStop = new JSONObject();
-                colorStop.put("point", 1);
-                colorStop.put("color", color2);
-                colorObj.put(colorStop);
+            colorStop = new JSONObject();
+            colorStop.put("point", 1);
+            colorStop.put("color", color2);
+            colorObj.put(colorStop);
 
 //                colorObj.put("first", "'" + color + "'");
 //                colorObj.put("second", "'" + color2 + "'");
-                jsonParams.put("seriesColors", new JSONArray(Arrays.asList(colorObj)));
+            jsonParams.put("seriesColors", new JSONArray(Arrays.asList(colorObj)));
 
 
 

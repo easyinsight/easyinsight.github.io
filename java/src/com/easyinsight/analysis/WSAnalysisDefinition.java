@@ -1064,6 +1064,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         customField2 = findStringProperty(properties, "customField2", "");
         cachePartitionFilter = findStringProperty(properties, "cachePartitionFilter", "");
         enableLocalStorage = findBooleanProperty(properties, "enableLocalStorage", false);
+        colorScheme = findStringProperty(properties, "reportColorScheme", "None");
         exportString = findStringProperty(properties, "exportString", "");
     }
 
@@ -1533,20 +1534,35 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void applyStyling(EIConnection conn, int dataSourceType)  {
         Session session = Database.instance().createSession(conn);
+        ApplicationSkin applicationSkin;
         try {
-            PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-            ps.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            boolean exchangeAuthor = rs.getBoolean(1);
-            ps.close();
-            ApplicationSkin applicationSkin;
-            if (exchangeAuthor) {
-                applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+            if (SecurityUtil.getAccountID(false) == 0) {
+                PreparedStatement uStmt = conn.prepareStatement("SELECT USER.USER_ID, ACCOUNT_ID FROM USER, user_to_analysis WHERE user_to_analysis.analysis_id = ? AND " +
+                        "user_to_analysis.user_id = user.user_id");
+                uStmt.setLong(1, getAnalysisID());
+                ResultSet uRS = uStmt.executeQuery();
+                uRS.next();
+                long userID = uRS.getLong(1);
+                long accountID = uRS.getLong(2);
+                applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
+                uRS.close();
             } else {
-                applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+                ps.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                boolean exchangeAuthor = rs.getBoolean(1);
+                ps.close();
+
+                if (exchangeAuthor) {
+                    applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+                } else {
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                }
             }
-            renderConfig(applicationSkin);
+            if (applicationSkin != null) {
+                renderConfig(applicationSkin);
+            }
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
@@ -1558,23 +1574,36 @@ public abstract class WSAnalysisDefinition implements Serializable {
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
-            PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-            ps.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            boolean exchangeAuthor = rs.getBoolean(1);
-            ps.close();
             ApplicationSkin applicationSkin;
-            if (exchangeAuthor) {
-                PreparedStatement typeStmt = conn.prepareStatement("SELECT FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
-                typeStmt.setLong(1, getDataFeedID());
-                ResultSet typeRS = typeStmt.executeQuery();
-                typeRS.next();
-                int dataSourceType = typeRS.getInt(1);
-                typeStmt.close();
-                applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+            if (SecurityUtil.getAccountID(false) == 0) {
+                PreparedStatement uStmt = conn.prepareStatement("SELECT USER.USER_ID, ACCOUNT_ID FROM USER, user_to_analysis WHERE user_to_analysis.analysis_id = ? AND " +
+                        "user_to_analysis.user_id = user.user_id");
+                uStmt.setLong(1, getAnalysisID());
+                ResultSet uRS = uStmt.executeQuery();
+                uRS.next();
+                long userID = uRS.getLong(1);
+                long accountID = uRS.getLong(2);
+                applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
+                uRS.close();
             } else {
-                applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+                ps.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                boolean exchangeAuthor = rs.getBoolean(1);
+                ps.close();
+
+                if (exchangeAuthor) {
+                    PreparedStatement typeStmt = conn.prepareStatement("SELECT FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                    typeStmt.setLong(1, getDataFeedID());
+                    ResultSet typeRS = typeStmt.executeQuery();
+                    typeRS.next();
+                    int dataSourceType = typeRS.getInt(1);
+                    typeStmt.close();
+                    applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+                } else {
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                }
             }
             if (applicationSkin != null) {
                 renderConfig(applicationSkin);

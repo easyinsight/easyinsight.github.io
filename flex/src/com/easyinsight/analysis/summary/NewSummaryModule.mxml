@@ -532,6 +532,7 @@
             }
         }
 
+
         private function onStretch(event:Event):void {
             var hierarchy:AnalysisHierarchyItem = treeDef.hierarchy as AnalysisHierarchyItem;
             var hierarchyIndex:int = findColumnIndex(hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName());
