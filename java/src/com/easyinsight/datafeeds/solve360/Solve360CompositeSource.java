@@ -137,6 +137,11 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
         return fields;
     }
 
+    @Override
+    public boolean checkDateTime(String name, Key key) {
+        return false;
+    }
+
     public Map<Integer, Company> getOrCreateCompanyCache(Map<String, Key> keyMap) {
         if (companyMap == null) {
             createCustomCompanyFields(keyMap);

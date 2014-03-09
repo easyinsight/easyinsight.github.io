@@ -126,7 +126,8 @@ public class StyleConfiguration {
                     false, function(dashboardReport:DashboardReport):Boolean {
                         return dashboardReport.report.reportType == AnalysisDefinition.LIST || dashboardReport.report.reportType == AnalysisDefinition.FORM ||
                                 dashboardReport.report.reportType == AnalysisDefinition.CROSSTAB || dashboardReport.report.reportType == AnalysisDefinition.YTD ||
-                                dashboardReport.report.reportType == AnalysisDefinition.VERTICAL_LIST || dashboardReport.report.reportType == AnalysisDefinition.COMPARE_YEARS;
+                                dashboardReport.report.reportType == AnalysisDefinition.VERTICAL_LIST || dashboardReport.report.reportType == AnalysisDefinition.COMPARE_YEARS ||
+                                dashboardReport.report.reportType == AnalysisDefinition.TEXT;
                     }));
             //items.addItem(new CheckBoxReportFormItem("Space Sides", "spaceSides", DashboardReport(dashboardElement).spaceSides, dashboardElement));
         }
@@ -195,6 +196,7 @@ public class StyleConfiguration {
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
             items.addItem(new NumericReportFormItem("Max Rows To Display", "generalSizeLimit", report.generalSizeLimit, report, 0, 10000000));
             items.addItem(new ComboBoxReportFormItem("Default Alignment", "defaultColumnAlignment", ListDefinition(report).defaultColumnAlignment, report, ["left", "center", "right"]));
+            items.addItem(new ComboBoxReportFormItem("Color Set", "colorScheme", report.colorScheme, report, [ "Primary", "Secondary", "None"]));
         }
         if (report is CrosstabDefinition) {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
@@ -224,17 +226,20 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
             items.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", TreeDefinition(report).summaryBackgroundColor, report));
             items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", TreeDefinition(report).summaryTextColor, report));
+            items.addItem(new ComboBoxReportFormItem("Color Set", "colorScheme", report.colorScheme, report, [ "Primary", "Secondary", "None"]));
         }
         if (report is SummaryDefinition) {
             items.addItem(new CheckBoxReportFormItem("Separate Summary Line", "headerMode", SummaryDefinition(report).headerMode, report));
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
         }
         if (report is ChartDefinition) {
+            items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
             items.addItem(new CheckBoxReportFormItem("Show Legend", "showLegend", ChartDefinition(report).showLegend, report));
             items.addItem(new TextReportFormItem("X Axis Label", "xAxisLabel", ChartDefinition(report).xAxisLabel, report));
             items.addItem(new TextReportFormItem("Y Axis Label", "yAxisLabel", ChartDefinition(report).yAxisLabel, report));
             items.addItem(new CheckBoxReportFormItem("X Axis Base At Zero", "xAxisBaseAtZero", ChartDefinition(report).xAxisBaseAtZero, report));
             items.addItem(new CheckBoxReportFormItem("Y Axis Base At Zero", "yAxisBaseAtZero", ChartDefinition(report).yAxisBaseAtZero, report));
+            items.addItem(new ComboBoxReportFormItem("Color Set", "colorScheme", report.colorScheme, report, [ "Primary", "Secondary", "None"]));
         }
         if (report is HeatMapDefinition) {
             items.addItem(new NumericReportFormItem("Precision", "precision", HeatMapDefinition(report).precision, report, 0, 3));
@@ -283,6 +288,7 @@ public class StyleConfiguration {
                     report, ["callout", "insideWithCallout", "inside", "outside", "none"]));
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", PieChartDefinition(report).legendMaxWidth, report, 10, 400));
             items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", PieChartDefinition(report).multiColors, report));
+
         }
         if (report is BarChartDefinition) {
             items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", BarChartDefinition(report).chartColor, report, "useChartColor"));
@@ -320,9 +326,6 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", ColumnChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
             items.addItem(new ColorReportFormItem("Label Outside Font Color", "labelOutsideFontColor", ColumnChartDefinition(report).labelOutsideFontColor, report, "useOutsideLabelFontColor"));
             items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", ColumnChartDefinition(report).multiColors, report));
-            items.addItem(new CheckBoxReportFormItem("Use Color 1", "usePrimaryColor", report.usePrimaryColor, report));
-            items.addItem(new CheckBoxReportFormItem("Use Color 2", "useSecondaryColor", report.useSecondaryColor, report));
-            items.addItem(new CheckBoxReportFormItem("Use Color 3", "useTertiaryColor", report.useTertiaryColor, report));
         }
 
         if (report is StackedBarChartDefinition) {
@@ -397,9 +400,18 @@ public class StyleConfiguration {
         if (report is TrendGridDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show KPI Name", "showKPIName", TrendGridDefinition(report).showKPIName, report));
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
+            items.addItem(new ColorReportFormItem("Text Color", "textColor", TrendGridDefinition(report).textColor, report));
+            items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", TrendGridDefinition(report).headerTextColor, report));
+            items.addItem(new ColorReportFormItem("Alternating Row Color 1", "rowColor1", TrendGridDefinition(report).rowColor1, report));
+            items.addItem(new ColorReportFormItem("Alternating Row Color 2", "rowColor2", TrendGridDefinition(report).rowColor2, report));
+            items.addItem(new ColorReportFormItem("Header Top Color", "headerColor1", TrendGridDefinition(report).headerColor1, report));
+            items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", TrendGridDefinition(report).headerColor2, report));
+            items.addItem(new ColorReportFormItem("Summary Row Text Color", "summaryRowTextColor", TrendGridDefinition(report).summaryRowTextColor, report));
+            items.addItem(new ColorReportFormItem("Summary Row Background Color", "summaryRowBackgroundColor", TrendGridDefinition(report).summaryRowBackgroundColor, report));
         }
         if (report is TextReport) {
             items.addItem(new ColorReportFormItem("Text Color", "fontColor", TextReport(report).fontColor, report));
+            items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
         }
         items.addItem(new TextReportFormItem("Custom Field 1", "customField1", report.customField1, report));
         items.addItem(new TextReportFormItem("Custom Field 2", "customField2", report.customField2, report));
