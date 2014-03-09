@@ -1534,18 +1534,19 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void applyStyling(EIConnection conn, int dataSourceType)  {
         Session session = Database.instance().createSession(conn);
-        ApplicationSkin applicationSkin;
+        ApplicationSkin applicationSkin = null;
         try {
             if (SecurityUtil.getAccountID(false) == 0) {
                 PreparedStatement uStmt = conn.prepareStatement("SELECT USER.USER_ID, ACCOUNT_ID FROM USER, user_to_analysis WHERE user_to_analysis.analysis_id = ? AND " +
                         "user_to_analysis.user_id = user.user_id");
                 uStmt.setLong(1, getAnalysisID());
                 ResultSet uRS = uStmt.executeQuery();
-                uRS.next();
-                long userID = uRS.getLong(1);
-                long accountID = uRS.getLong(2);
-                applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
-                uRS.close();
+                if (uRS.next()) {
+                    long userID = uRS.getLong(1);
+                    long accountID = uRS.getLong(2);
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
+                }
+                uStmt.close();
             } else {
                 PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
                 ps.setLong(1, SecurityUtil.getAccountID());
