@@ -682,7 +682,7 @@ public class ExportService {
         } catch (Exception e) {
             LogClass.error(e);
         }
-        return null;
+        return exportString;
     }
 
     public byte[] toPDFBytes(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
@@ -712,13 +712,15 @@ public class ExportService {
         }
 
         try {
-            String string = filterTransformForReport(analysisDefinition);
-            com.itextpdf.text.Font phraseFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL,
-                    new BaseColor(20, 20, 20));
-            Phrase phrase = new Phrase(string, phraseFont);
-            Paragraph paragraph = new Paragraph(phrase);
-            paragraph.setAlignment(Element.ALIGN_CENTER);
-            document.add(paragraph);
+            if (analysisDefinition.getExportString() != null && !"".equals(analysisDefinition.getExportString())) {
+                String string = filterTransformForReport(analysisDefinition);
+                com.itextpdf.text.Font phraseFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL,
+                        new BaseColor(20, 20, 20));
+                Phrase phrase = new Phrase(string, phraseFont);
+                Paragraph paragraph = new Paragraph(phrase);
+                paragraph.setAlignment(Element.ALIGN_CENTER);
+                document.add(paragraph);
+            }
         } catch (Exception e) {
             LogClass.error(e);
         }
@@ -2149,7 +2151,7 @@ public class ExportService {
                     }
                 } else if (alwaysShow) {
                     for (int i = 0; i < maxColumns; i++) {
-                        sb.append("<td style=\"").append(cellStyle).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\"></td>");
                     }
                     if (hasBenchmark) {
                         sb.append("<td style=\"").append(cellStyle).append("\"></td>");
