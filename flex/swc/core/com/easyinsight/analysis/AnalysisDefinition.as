@@ -108,6 +108,7 @@ import mx.collections.ArrayCollection;
     public var useSecondaryColor:Boolean;
     public var useTertiaryColor:Boolean;
     public var canSave:Boolean;
+    public var colorScheme:String = "Primary";
     public var filterSets:ArrayCollection;
     public var exportString:String;
 
