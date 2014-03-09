@@ -128,7 +128,8 @@ public class StyleConfiguration {
                     false, function(dashboardReport:DashboardReport):Boolean {
                         return dashboardReport.report.reportType == AnalysisDefinition.LIST || dashboardReport.report.reportType == AnalysisDefinition.FORM ||
                                 dashboardReport.report.reportType == AnalysisDefinition.CROSSTAB || dashboardReport.report.reportType == AnalysisDefinition.YTD ||
-                                dashboardReport.report.reportType == AnalysisDefinition.VERTICAL_LIST || dashboardReport.report.reportType == AnalysisDefinition.COMPARE_YEARS;
+                                dashboardReport.report.reportType == AnalysisDefinition.VERTICAL_LIST || dashboardReport.report.reportType == AnalysisDefinition.COMPARE_YEARS ||
+                                dashboardReport.report.reportType == AnalysisDefinition.TEXT;
                     }));
             //items.addItem(new CheckBoxReportFormItem("Space Sides", "spaceSides", DashboardReport(dashboardElement).spaceSides, dashboardElement));
         }
@@ -401,9 +402,18 @@ public class StyleConfiguration {
         if (report is TrendGridDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show KPI Name", "showKPIName", TrendGridDefinition(report).showKPIName, report));
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
+            items.addItem(new ColorReportFormItem("Text Color", "textColor", TrendGridDefinition(report).textColor, report));
+            items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", TrendGridDefinition(report).headerTextColor, report));
+            items.addItem(new ColorReportFormItem("Alternating Row Color 1", "rowColor1", TrendGridDefinition(report).rowColor1, report));
+            items.addItem(new ColorReportFormItem("Alternating Row Color 2", "rowColor2", TrendGridDefinition(report).rowColor2, report));
+            items.addItem(new ColorReportFormItem("Header Top Color", "headerColor1", TrendGridDefinition(report).headerColor1, report));
+            items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", TrendGridDefinition(report).headerColor2, report));
+            items.addItem(new ColorReportFormItem("Summary Row Text Color", "summaryRowTextColor", TrendGridDefinition(report).summaryRowTextColor, report));
+            items.addItem(new ColorReportFormItem("Summary Row Background Color", "summaryRowBackgroundColor", TrendGridDefinition(report).summaryRowBackgroundColor, report));
         }
         if (report is TextReport) {
             items.addItem(new ColorReportFormItem("Text Color", "fontColor", TextReport(report).fontColor, report));
+            items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
         }
         items.addItem(new TextReportFormItem("Custom Field 1", "customField1", report.customField1, report));
         items.addItem(new TextReportFormItem("Custom Field 2", "customField2", report.customField2, report));

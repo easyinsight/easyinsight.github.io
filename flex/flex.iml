@@ -5,7 +5,7 @@
       <configuration name="flex" target-platform="Desktop" main-class="AirTest" output-folder="$MODULE_DIR$/../../apache-tomcat-6.0.14/webapps/app/easyui-debug" skip-build="true">
         <dependencies>
           <entries>
-            <entry library-id="0313e9b1-7be7-40b3-b460-f8acca893f4c">
+            <entry library-id="700745e4-9845-4e9e-9fbd-3370bed23957">
               <dependency linkage="Merged" />
             </entry>
           </entries>
