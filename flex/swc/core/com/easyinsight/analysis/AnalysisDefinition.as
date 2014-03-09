@@ -106,6 +106,7 @@ import mx.collections.ArrayCollection;
     public var enableLocalStorage:Boolean;
     public var colorScheme:String = "Primary";
     public var canSave:Boolean;
+    public var colorScheme:String = "Primary";
     public var filterSets:ArrayCollection;
     public var exportString:String;
 
