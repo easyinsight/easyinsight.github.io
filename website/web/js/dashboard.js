@@ -24,6 +24,46 @@ var multi_field_value_results;
 
 var saveConfiguration;
 
+function drillThrough(params) {
+    $.ajax( {
+        dataType: "json",
+        url: '/app/drillThrough',
+        data: JSON.stringify(params),
+        success: function(data) {
+            var url = data["url"];
+            window.location.href = url;
+        },
+        error: function(a, b, c) {
+            window.location.href = "/app/serverError.jsp"
+        },
+        contentType: "application/json; charset=UTF-8",
+        type: "POST"
+});
+}
+
+function drillThroughParameterized(params, val) {
+    var first = true;
+    var s = "";
+    var p = function(p, param) {
+        if(params[param] != null) {
+            s = s + (first ? "" : "&") + p + "=" + params[param];
+            first = false;
+        }
+    }
+    p("embedded", "embedded");
+    p("drillthroughID", "id");
+    p("reportID", "reportID");
+    p("sourceField", "source");
+    if(val != null) {
+        if(!first) {
+            s = s + "&";
+            first = false;
+        }
+        s = s + "f" + params["xaxis"] + "=" + encodeURI(val);
+    }
+    drillThrough(s);
+}
+
 var millisecondFormatter = function(format, val) {
     if(val ==  0)
         return String("");
@@ -224,7 +264,7 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     if (obj.metadata.type == "pie") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getPieChartCallback(id, w, {})) }));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getPieChartCallback(id, w, {}, fullFilters)) }));
     }
     else if (obj.metadata.type == "diagram") {
         $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
@@ -239,24 +279,24 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     } else if (obj.metadata.type == "bar") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getBarChartCallback(id, w, true, obj.metadata.styles))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getBarChartCallback(id, w, true, obj.metadata.styles, fullFilters))}));
     } else if (obj.metadata.type == "column") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getColumnChartCallback(id, w, obj.metadata.styles)) }));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getColumnChartCallback(id, w, obj.metadata.styles, fullFilters)) }));
     }
     else if (obj.metadata.type == "area" || obj.metadata.type == "bubble" || obj.metadata.type == "plot" || obj.metadata.type == "line") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getCallback(id, w, true, obj.metadata.styles))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getCallback(id, w, true, obj.metadata.styles, fullFilters))}));
     } else if (obj.metadata.type == "stacked_bar") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedBarChart(id, w, obj.metadata.styles))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedBarChart(id, w, obj.metadata.styles, fullFilters))}));
     } else if (obj.metadata.type == "stacked_column") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedColumnChart(id, w, obj.metadata.styles)) }));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedColumnChart(id, w, obj.metadata.styles, fullFilters)) }));
     } else if (obj.metadata.type == "gauge") {
         $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: null }))
         var v = JSON.stringify(obj.metadata.properties).replace(/\"/g, "");

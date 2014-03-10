@@ -3004,7 +3004,7 @@
                 if (ax.xaxis.show) {
                     gridPadding.bottom += ax.xaxis.getHeight();
                 }
-                
+
                 // end of gridPadding adjustments.
 
                 // if user passed in gridDimensions option, check against calculated gridPadding
@@ -3030,7 +3030,7 @@
                         this._gridPadding[arr[n]] = this._defaultGridPadding[arr[n]];
                     }
                 }
-                
+
                 var legendPadding = this._gridPadding;
                 
                 if (this.legend.placement === 'outsideGrid') {
@@ -3040,7 +3040,7 @@
                         legendPadding.right = this._gridPadding.right;
                     }
                 }
-                
+
                 ax.xaxis.pack({position:'absolute', bottom:this._gridPadding.bottom - ax.xaxis.getHeight(), left:0, width:this._width}, {min:this._gridPadding.left, max:this._width - this._gridPadding.right});
                 ax.yaxis.pack({position:'absolute', top:0, left:this._gridPadding.left - ax.yaxis.getWidth(), height:this._height}, {min:this._height - this._gridPadding.bottom, max: this._gridPadding.top});
                 ax.x2axis.pack({position:'absolute', top:this._gridPadding.top - ax.x2axis.getHeight(), left:0, width:this._width}, {min:this._gridPadding.left, max:this._width - this._gridPadding.right});
@@ -4134,7 +4134,7 @@
         if (Number(this.label)) {
             this._elem.css('white-space', 'nowrap');
         }
-        
+
         if (!this.escapeHTML) {
             this._elem.html(this.label);
         }
@@ -6213,7 +6213,7 @@
     };
     
     // called with scope of axis
-    $.jqplot.LinearAxisRenderer.prototype.set = function() { 
+    $.jqplot.LinearAxisRenderer.prototype.set = function() {
         var dim = 0;
         var temp;
         var w = 0;
@@ -6241,7 +6241,7 @@
             
             if (lshow) {
                 w = this._label._elem.outerWidth(true);
-                h = this._label._elem.outerHeight(true); 
+                h = this._label._elem.outerHeight(true);
             }
             if (this.name == 'xaxis') {
                 dim = dim + h;
@@ -6292,7 +6292,7 @@
         
         // if we already have ticks, use them.
         // ticks must be in order of increasing value.
-        
+
         if (userTicks.length) {
             // ticks could be 1D or 2D array of [val, val, ,,,] or [[val, label], [val, label], ...] or mixed
             for (i=0; i<userTicks.length; i++){

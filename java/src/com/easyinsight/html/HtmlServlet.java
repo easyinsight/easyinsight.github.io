@@ -47,7 +47,10 @@ public class HtmlServlet extends HttpServlet {
 
             InputStream is = req.getInputStream();
             JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-            JSONObject filterObject = (JSONObject) parser.parse(is);
+            Object o = parser.parse(is);
+            JSONObject filterObject = (JSONObject) o;
+            if(reportIDString == null)
+                reportIDString = (String) filterObject.get("reportID");
             InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
             long reportID;
             if (insightResponse.getStatus() == InsightResponse.SUCCESS) {

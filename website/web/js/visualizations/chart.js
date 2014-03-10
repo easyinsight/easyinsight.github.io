@@ -1,5 +1,5 @@
 Chart = {
-    getCallback:function (target, params, showLabels, styleProps, extras) {
+    getCallback:function (target, params, showLabels, styleProps, filters, extras) {
 
         return function (data) {
             Utils.noData(data["values"].flatten(), function () {
@@ -39,13 +39,12 @@ Chart = {
                         var tt = $("#" + target);
                         tt.bind("jqplotDataClick", function (event, seriesIndex, pointIndex, curData) {
                             var drillthrough = data["drillthrough"];
-                            var s = 'reportID=' + dtOptions["reportID"] + '&drillthroughID=' + dtOptions["id"] + '&embedded=' + dtOptions["embedded"] + '&sourceField=' +
-                                dtOptions["source"] + '&f' + dtOptions["xaxis"] + "=" + encodeURI(data["ticks"][pointIndex]);
-                            if (drillthrough["stack"]) {
-                                s = s + "&f" + drillthrough["stack"] + "=" + encodeURI(data["series"][seriesIndex].label);
-                            }
-                            drillThrough(s);
-
+                            var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "filters": filters,
+                            "drillthrough_values": {}};
+                            f["drillthrough_values"][dtOptions["xaxis"]] = encodeURI(data["ticks"][pointIndex]);
+                            if(drillthrough["stack"])
+                                f["drillthrough_values"][drillthrough["stack"]] = encodeURI(data["series"][seriesIndex].label);
+                            drillThrough(f);
                         });
                     }
                 }
@@ -70,8 +69,8 @@ Chart = {
         }
     },
 
-    getStackedBarChart:function (target, params, styleProps) {
-        return Chart.getCallback(target, params, true, styleProps, function (data) {
+    getStackedBarChart:function (target, params, styleProps, filters) {
+        return Chart.getCallback(target, params, true, styleProps, filters, function (data) {
             params.jqplotOptions.series = data["series"];
             params.jqplotOptions.axes.yaxis.ticks = data["ticks"];
             var sums = {};
@@ -90,16 +89,16 @@ Chart = {
         })
     },
 
-    getBarChartCallback:function (target, params, styleProps) {
-        return Chart.getCallback(target, params, false, styleProps, function (data) {
+    getBarChartCallback:function (target, params, styleProps, filters) {
+        return Chart.getCallback(target, params, false, styleProps, filters, function (data) {
             var tt = $("#" + target);
             tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"], 0));
             tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
         })
     },
 
-    getStackedColumnChart:function (target, params, styleProps) {
-        return Chart.getCallback(target, params, true, styleProps, function (data) {
+    getStackedColumnChart:function (target, params, styleProps, filters) {
+        return Chart.getCallback(target, params, true, styleProps, filters, function (data) {
             params.jqplotOptions.series = data["series"];
             params.jqplotOptions.axes.xaxis.ticks = data["ticks"];
             var tt = $("#" + target);
@@ -116,8 +115,8 @@ Chart = {
         })
     },
 
-    getColumnChartCallback:function (target, params, styleProps) {
-        return Chart.getCallback(target, params, false, styleProps, function (data) {
+    getColumnChartCallback:function (target, params, styleProps, filters) {
+        return Chart.getCallback(target, params, false, styleProps, filters, function (data) {
             var tt = $("#" + target);
             tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"], 1));
             tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
@@ -185,7 +184,7 @@ Chart = {
 
     },
 
-    getPieChartCallback:function (target, params, styleProps) {
+    getPieChartCallback:function (target, params, styleProps, filters) {
         return Chart.getCallback(target, params, false, styleProps, function (data) {
             var tt = $("#" + target);
             tt.bind("jqplotDataMouseOver", Chart.pieToolTipHover(target));
