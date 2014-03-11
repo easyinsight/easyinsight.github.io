@@ -299,7 +299,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     }
 
     public static long findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
-        if (rollingFilterDefinition.getStartDate() != null) {
+        if (rollingFilterDefinition.getEndDate() != null) {
             return rollingFilterDefinition.getEndDate().getTime();
         }
         int interval = rollingFilterDefinition.getInterval();
