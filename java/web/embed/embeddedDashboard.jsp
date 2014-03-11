@@ -20,6 +20,7 @@
 
 
         String drillthroughKey = request.getParameter("drillthroughKey");
+
         List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
         long dashboardID = -1;
         String savedDashboardIDString = request.getParameter("savedDashboardID");
@@ -40,6 +41,8 @@
             dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
             dashboard = new DashboardService().getDashboardView(dashboardID);
         }
+        String noHeader = request.getParameter("noHeader");
+        boolean showHeader = noHeader == null || !"1".equals(noHeader);
         String showToolbarString = request.getParameter("showToolbar");
         boolean showToolbar = showToolbarString != null && "1".equals(showToolbarString);
         dashboard.getFilters().addAll(drillthroughFilters);
@@ -111,7 +114,7 @@
 <% } %>
 
 <div class="container">
-    <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>
+    <%= showHeader ? uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) : "" %>
     <jsp:include page="../html/refreshingDataSource.jsp"/>
     <div id="base"/>
 </div>
