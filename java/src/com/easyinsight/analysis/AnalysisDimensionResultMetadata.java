@@ -46,6 +46,8 @@ public class AnalysisDimensionResultMetadata extends AnalysisItemResultMetadata 
             strings.add(toFilterString(value));
         }
         strings.remove("");
+        strings.remove("(Empty)");
+        strings.remove("[ No Value ]");
         Collections.sort(strings, new Comparator<String>() {
 
             public int compare(String s, String s1) {
