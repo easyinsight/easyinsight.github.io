@@ -78,6 +78,9 @@
         jj.put("metadata", report.toJSON(md, new ArrayList<FilterDefinition>()));
         intermediate.put("report", jj);
 
+        String noHeader = request.getParameter("noHeader");
+        boolean showHeader = noHeader == null || !"1".equals(noHeader);
+
         EIConnection c = Database.instance().getConnection();
         JSONObject userObject = new JSONObject();
         try {
@@ -200,7 +203,7 @@
     </jsp:include>
     <jsp:include page="../html/emailReportWindow.jsp"/>
     <jsp:include page="../html/refreshingDataSource.jsp"/>
-    <%= uiData.createHeader(report.getName()) %>
+    <%= showHeader ? uiData.createHeader(report.getName()) : "" %>
     <div id="base"/>
 </div>
 </body>
