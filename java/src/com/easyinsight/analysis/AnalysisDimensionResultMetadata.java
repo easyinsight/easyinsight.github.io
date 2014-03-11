@@ -43,7 +43,7 @@ public class AnalysisDimensionResultMetadata extends AnalysisItemResultMetadata 
 
 
         for (Value value : values) {
-            strings.add(FilterUtils.toFilterString(value));
+            strings.add(toFilterString(value));
         }
         strings.remove("");
         Collections.sort(strings, new Comparator<String>() {
@@ -54,5 +54,21 @@ public class AnalysisDimensionResultMetadata extends AnalysisItemResultMetadata 
         });
         strings.add(0, "[ No Value ]");
         values = null;
+    }
+
+    public static String toFilterString(Value value) {
+        String valueString;
+        if (value.type() == Value.NUMBER) {
+            int intValue = value.toDouble().intValue();
+            double doubleValue = value.toDouble().doubleValue();
+            if (intValue == doubleValue) {
+                valueString = String.valueOf(intValue);
+            } else {
+                valueString = value.toString();
+            }
+        } else {
+            valueString = value.toString();
+        }
+        return valueString;
     }
 }
