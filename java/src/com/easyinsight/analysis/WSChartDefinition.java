@@ -185,10 +185,17 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         legendObj.put("show", "true");
         legendObj.put("placement", "'outsideGrid'");
         legendObj.put("location", "'e'");
-        // TODO: Replace with font
-        legendObj.put("fontFamily", "'Helvetica Neue'");
+
+        legendObj.put("fontFamily", fontName());
         legendObj.put("border", "'none'");
         return legendObj;
+    }
+
+    protected String fontName() {
+        if (isUseCustomFontFamily() && !"".equals(getCustomFontFamily())) {
+            return "'" + getCustomFontFamily() + "'";
+        }
+        return "'Helvetica Neue'";
     }
 
     protected JSONObject getGrid() throws JSONException {
@@ -241,10 +248,8 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
             tickOptions.put("formatter", "$.jqplot.tickNumberFormatter");
         }
         JSONObject labelOptions = new JSONObject();
-        // TODO: Replace with font
-        labelOptions.put("fontFamily", "'Helvetica Neue'");
-        // TODO: Replace with font
-        tickOptions.put("fontFamily", "'Helvetica Neue'");
+        labelOptions.put("fontFamily", fontName());
+        tickOptions.put("fontFamily", fontName());
         yAxis.put("labelOptions", labelOptions);
         yAxis.put("tickOptions", tickOptions);
         return yAxis;
@@ -259,14 +264,12 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         xAxis.put("label", "'"+analysisItem.toUnqualifiedDisplay()+"'");
 
         JSONObject labelOptions = new JSONObject();
-        // TODO: Replace with font
-        labelOptions.put("fontFamily", "'Helvetica Neue'");
+        labelOptions.put("fontFamily", fontName());
         xAxis.put("labelOptions", labelOptions);
         JSONObject xAxisTicketOptions = new JSONObject();
         xAxisTicketOptions.put("angle", 0);
         xAxisTicketOptions.put("showGridline", "false");
-        // TODO: Replace with font
-        xAxisTicketOptions.put("fontFamily", "'Helvetica Neue'");
+        xAxisTicketOptions.put("fontFamily", fontName());
         xAxis.put("tickOptions", xAxisTicketOptions);
         return xAxis;
     }
