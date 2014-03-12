@@ -149,4 +149,6 @@ public abstract class ScheduleType {
 
     @Nullable
     public abstract Date runTime(Date lastTime, Date now);
+
+    public abstract String when();
 }

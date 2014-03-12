@@ -17,4 +17,9 @@ public class NeverScheduleType extends ScheduleType {
     public Date runTime(Date lastTime, Date now) {
         return null;
     }
+
+    @Override
+    public String when() {
+        return "Disabled";
+    }
 }

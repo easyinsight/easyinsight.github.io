@@ -87,4 +87,27 @@ public class WeeklyScheduleType extends ScheduleType {
         insertStmt.setLong(2, getScheduleID());
         insertStmt.execute();
     }
+
+    @Override
+    public String when() {
+        String day;
+        if (dayOfWeek == 1) {
+            day = "Sunday";
+        } else if (dayOfWeek == 2) {
+            day = "Monday";
+        } else if (dayOfWeek == 3) {
+            day = "Tuesday";
+        } else if (dayOfWeek == 4) {
+            day = "Wednesday";
+        } else if (dayOfWeek == 5) {
+            day = "Thursday";
+        } else if (dayOfWeek == 6) {
+            day = "Friday";
+        } else if (dayOfWeek == 7) {
+            day = "Saturday";
+        } else {
+            day = "";
+        }
+        return "Every " + day + "  on " + getHour() + ":" + getMinute() + " GMT";
+    }
 }

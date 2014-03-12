@@ -28,6 +28,10 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
     private int intervalNumber;
     private int intervalUnits;
 
+    public String toURL() {
+        return "dataSourceRefreshSetup.jsp?activityID=" + getScheduledActivityID();
+    }
+
     public int getIntervalUnits() {
         return intervalUnits;
     }
@@ -153,5 +157,10 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
         } finally {
             session.close();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Refresh " + dataSourceName;
     }
 }

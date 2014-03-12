@@ -54,7 +54,7 @@ public class SeleniumLauncher {
             url += deliveryExtension.toURL();
         }
         queryStmt.close();
-        System.out.println(url);
+        System.out.println("https://localhost:4443" + url);
         launchRequest(url);
         return id;
     }
@@ -85,7 +85,7 @@ public class SeleniumLauncher {
         if (deliveryExtension != null) {
             url += deliveryExtension.toURL();
         }
-        System.out.println(url);
+        System.out.println("https://localhost:4443" + url);
         queryStmt.close();
         launchRequest(url);
         return id;

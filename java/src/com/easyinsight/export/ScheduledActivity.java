@@ -233,4 +233,12 @@ public abstract class ScheduledActivity {
     public void taskNow(EIConnection connection) throws Exception {
 
     }
+
+    public String when() {
+        return scheduleType.when();
+    }
+
+    public String toURL() {
+        return "";
+    }
 }
