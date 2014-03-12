@@ -150,8 +150,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private boolean aggregateQueryIfPossible = true;
 
-    private boolean newFilterStrategy;
-
     private boolean rowsEditable;
 
     private int fetchSize;
@@ -280,14 +278,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setAggregateQueryIfPossible(boolean aggregateQueryIfPossible) {
         this.aggregateQueryIfPossible = aggregateQueryIfPossible;
-    }
-
-    public boolean isNewFilterStrategy() {
-        return newFilterStrategy;
-    }
-
-    public void setNewFilterStrategy(boolean newFilterStrategy) {
-        this.newFilterStrategy = newFilterStrategy;
     }
 
     public String getDefaultDate() {

@@ -27,7 +27,6 @@ public class InsightRequestMetadata implements Serializable {
     private boolean traverseAllJoins;
     private boolean logReport;
     private Collection<AnalysisItem> reportItems;
-    private boolean lookupTableAggregate;
     private List<AnalysisItem> additionalAnalysisItems = new ArrayList<AnalysisItem>();
     private transient Map<UniqueKey, AnalysisItem> uniqueIteMap = new HashMap<UniqueKey, AnalysisItem>();
     private transient Map<String, UniqueKey> fieldToUniqueMap = new HashMap<String, UniqueKey>();
@@ -315,14 +314,6 @@ public class InsightRequestMetadata implements Serializable {
 
     public void setFieldToUniqueMap(Map<String, UniqueKey> fieldToUniqueMap) {
         this.fieldToUniqueMap = fieldToUniqueMap;
-    }
-
-    public boolean isLookupTableAggregate() {
-        return lookupTableAggregate;
-    }
-
-    public void setLookupTableAggregate(boolean lookupTableAggregate) {
-        this.lookupTableAggregate = lookupTableAggregate;
     }
 
     public Collection<AnalysisItem> getReportItems() {
