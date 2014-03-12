@@ -167,6 +167,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
         axes.put("xaxis", xAxis);
         if (getMeasure() != null) {
             axes.put("yaxis", getMeasureAxis(getMeasure()));
+            axisConfigure((JSONObject) axes.get("yaxis"), getyAxisMininum(), isyAxisMinimumDefined(), getyAxisMaximum(), isyAxisMaximumDefined());
         }
         return axes;
     }

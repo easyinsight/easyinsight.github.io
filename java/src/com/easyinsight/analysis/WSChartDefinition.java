@@ -17,6 +17,7 @@ import java.util.*;
  */
 public abstract class WSChartDefinition extends WSAnalysisDefinition {
     private LimitsMetadata limitsMetadata;
+    private boolean limitOther;
 
     private double rotationAngle;
     private double elevationAngle;
@@ -26,12 +27,32 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
     private String xAxisLabel;
     private String yAxisLabel;
 
+    private double xAxisMinimum;
+    private boolean xAxisMinimumDefined;
+
+    private double xAxisMaximum;
+    private boolean xAxisMaximumDefined;
+
+    private double yAxisMininum;
+    private boolean yAxisMinimumDefined;
+
+    private double yAxisMaximum;
+    private boolean yAxisMaximumDefined;
+
     private boolean xAxisBaseAtZero;
     private boolean yAxisBaseAtZero;
 
     public abstract int getChartType();
 
     public abstract int getChartFamily();
+
+    public boolean isLimitOther() {
+        return limitOther;
+    }
+
+    public void setLimitOther(boolean limitOther) {
+        this.limitOther = limitOther;
+    }
 
     public boolean isxAxisBaseAtZero() {
         return xAxisBaseAtZero;
@@ -150,6 +171,15 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         yAxisLabel = findStringProperty(properties, "yAxisLabel", "");
         xAxisBaseAtZero = findBooleanProperty(properties, "xAxisBaseAtZero", true);
         yAxisBaseAtZero = findBooleanProperty(properties, "yAxisBaseAtZero", true);
+        limitOther = findBooleanProperty(properties, "limitOther", true);
+        xAxisMinimum = findNumberProperty(properties, "xAxisMinimum", 0);
+        xAxisMinimumDefined = findBooleanProperty(properties, "xAxisMinimumDefined", false);
+        xAxisMaximum = findNumberProperty(properties, "xAxisMaximum", 0);
+        xAxisMaximumDefined = findBooleanProperty(properties, "xAxisMaximumDefined", false);
+        yAxisMininum = findNumberProperty(properties, "yAxisMinimum", 0);
+        yAxisMinimumDefined = findBooleanProperty(properties, "yAxisMinimumDefined", false);
+        yAxisMaximum = findNumberProperty(properties, "yAxisMaximum", 0);
+        yAxisMaximumDefined = findBooleanProperty(properties, "yAxisMaximumDefined", false);
     }
 
     @Override
@@ -160,6 +190,15 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         properties.add(new ReportStringProperty("yAxisLabel", yAxisLabel));
         properties.add(new ReportBooleanProperty("xAxisBaseAtZero", xAxisBaseAtZero));
         properties.add(new ReportBooleanProperty("yAxisBaseAtZero", yAxisBaseAtZero));
+        properties.add(new ReportBooleanProperty("limitOther", limitOther));
+        properties.add(new ReportNumericProperty("xAxisMinimum", xAxisMinimum));
+        properties.add(new ReportNumericProperty("xAxisMaximum", xAxisMaximum));
+        properties.add(new ReportNumericProperty("yAxisMininum", yAxisMininum));
+        properties.add(new ReportNumericProperty("yAxisMaximum", yAxisMaximum));
+        properties.add(new ReportBooleanProperty("xAxisMinimumDefined", xAxisMinimumDefined));
+        properties.add(new ReportBooleanProperty("xAxisMaximumDefined", xAxisMaximumDefined));
+        properties.add(new ReportBooleanProperty("yAxisMinimumDefined", yAxisMinimumDefined));
+        properties.add(new ReportBooleanProperty("yAxisMaximumDefined", yAxisMaximumDefined));
         return properties;
     }
 
@@ -229,6 +268,79 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
     protected JSONArray getSeriesColors() {
         return new JSONArray(Arrays.asList("'#a6bc59'", "'#597197'", "'#d6ab2a'", "'#d86068'", "'#5d9942'",
                 "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'"));
+    }
+
+    public double getxAxisMinimum() {
+        return xAxisMinimum;
+    }
+
+    public void setxAxisMinimum(double xAxisMinimum) {
+        this.xAxisMinimum = xAxisMinimum;
+    }
+
+    public boolean isxAxisMinimumDefined() {
+        return xAxisMinimumDefined;
+    }
+
+    public void setxAxisMinimumDefined(boolean xAxisMinimumDefined) {
+        this.xAxisMinimumDefined = xAxisMinimumDefined;
+    }
+
+    public double getxAxisMaximum() {
+        return xAxisMaximum;
+    }
+
+    public void setxAxisMaximum(double xAxisMaximum) {
+        this.xAxisMaximum = xAxisMaximum;
+    }
+
+    public boolean isxAxisMaximumDefined() {
+        return xAxisMaximumDefined;
+    }
+
+    public void setxAxisMaximumDefined(boolean xAxisMaximumDefined) {
+        this.xAxisMaximumDefined = xAxisMaximumDefined;
+    }
+
+    public double getyAxisMininum() {
+        return yAxisMininum;
+    }
+
+    public void setyAxisMininum(double yAxisMininum) {
+        this.yAxisMininum = yAxisMininum;
+    }
+
+    public boolean isyAxisMinimumDefined() {
+        return yAxisMinimumDefined;
+    }
+
+    public void setyAxisMinimumDefined(boolean yAxisMinimumDefined) {
+        this.yAxisMinimumDefined = yAxisMinimumDefined;
+    }
+
+    public double getyAxisMaximum() {
+        return yAxisMaximum;
+    }
+
+    public void setyAxisMaximum(double yAxisMaximum) {
+        this.yAxisMaximum = yAxisMaximum;
+    }
+
+    public boolean isyAxisMaximumDefined() {
+        return yAxisMaximumDefined;
+    }
+
+    public void setyAxisMaximumDefined(boolean yAxisMaximumDefined) {
+        this.yAxisMaximumDefined = yAxisMaximumDefined;
+    }
+
+    protected void axisConfigure(JSONObject axisObject, double min, boolean minEnabled, double max, boolean maxEnabled) throws JSONException {
+        if (minEnabled) {
+            axisObject.put("min", min);
+        }
+        if (maxEnabled) {
+            axisObject.put("max", max);
+        }
     }
 
     protected JSONObject getMeasureAxis(AnalysisItem analysisItem) throws JSONException {

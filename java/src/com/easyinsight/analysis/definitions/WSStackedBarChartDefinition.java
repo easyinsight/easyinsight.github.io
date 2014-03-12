@@ -1,6 +1,9 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.*;
+import com.easyinsight.dataset.DataSet;
+import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +29,158 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     private String labelFontWeight;
     private List<MultiColor> multiColors = new ArrayList<MultiColor>();
     private String stackSort;
+    private int stackLimit = 15;
+
+    public LimitsResults applyLimits(DataSet dataSet) {
+        LimitsResults limitsResults;
+        LimitsMetadata limitsMetadata = getLimitsMetadata();
+        if (limitsMetadata != null && limitsMetadata.isLimitEnabled()) {
+
+            AnalysisItem xAxisItem = getYaxis();
+            AnalysisItem measureItem = getMeasures().get(0);
+            AnalysisItem stackAxisItem = getStackItem();
+            final Map<Value, Aggregation> aggregationMap = new HashMap<Value, Aggregation>();
+            AggregationFactory aggregationFactory = new AggregationFactory((AnalysisMeasure) measureItem, false);
+            for (IRow row : dataSet.getRows()) {
+                Value yAxisValue = row.getValue(xAxisItem);
+                Aggregation aggregation = aggregationMap.get(yAxisValue);
+                if (aggregation == null) {
+                    aggregation = aggregationFactory.getAggregation();
+                    aggregationMap.put(yAxisValue, aggregation);
+                }
+                aggregation.addValue(row.getValue(measureItem));
+            }
+            List<Value> aggregationValues = new ArrayList<Value>(aggregationMap.keySet());
+            if (aggregationValues.size() > limitsMetadata.getNumber()) {
+                Collections.sort(aggregationValues, new Comparator<Value>() {
+
+                    public int compare(Value value, Value value1) {
+                        return aggregationMap.get(value1).getValue().toDouble().compareTo(aggregationMap.get(value).toDouble());
+                    }
+                });
+                aggregationValues = aggregationValues.subList(0, limitsMetadata.getNumber());
+                //IRow otherRow = dataSet.createRow();
+                Iterator<IRow> iter = dataSet.getRows().iterator();
+
+
+                Map<Value, Aggregation> aggregateMap = new HashMap<Value, Aggregation>();
+                while (iter.hasNext()) {
+                    IRow row = iter.next();
+                    //if (row != otherRow) {
+                    Value value = row.getValue(xAxisItem);
+                    /*if (aggregationValues.contains(value)) {
+
+                    } else {
+                        row.addValue(xAxisItem.createAggregateKey(), new StringValue("Other"));
+                    }*/
+                    //}
+                    if (!aggregationValues.contains(value)) {
+                        //row.addValue(yAxisItem.createAggregateKey(), new StringValue("Other"));
+                        Value stackValue = row.getValue(stackItem.createAggregateKey());
+                        Aggregation aggregation = aggregateMap.get(stackValue);
+                        if (aggregation == null) {
+                            aggregation = aggregationFactory.getAggregation();
+                            aggregateMap.put(stackValue, aggregation);
+                        }
+                        aggregation.addValue(row.getValue(measureItem));
+                        //others.add(row);
+                        iter.remove();
+                    }
+                }
+
+                if (isLimitOther()) {
+
+                    for (Map.Entry<Value, Aggregation> entry : aggregateMap.entrySet()) {
+                        IRow otherRow = dataSet.createRow();
+                        otherRow.addValue(xAxisItem.createAggregateKey(), new StringValue("Other"));
+                        otherRow.addValue(stackItem.createAggregateKey(), entry.getKey());
+                        otherRow.addValue(measureItem.createAggregateKey(), entry.getValue().getValue());
+                    }
+
+                }
+
+                limitsResults = new LimitsResults(true, limitsMetadata.getNumber(), aggregationValues.size());
+            } else {
+                limitsResults = super.applyLimits(dataSet);
+            }
+        } else {
+            limitsResults = super.applyLimits(dataSet);
+        }
+        if (stackLimit > 0) {
+            AnalysisItem xAxisItem = getYaxis();
+            AnalysisItem measureItem = getMeasures().get(0);
+            AnalysisItem stackAxisItem = getStackItem();
+            final Map<Value, Aggregation> aggregationMap = new HashMap<Value, Aggregation>();
+            AggregationFactory aggregationFactory = new AggregationFactory((AnalysisMeasure) measureItem, false);
+            for (IRow row : dataSet.getRows()) {
+                Value yAxisValue = row.getValue(stackAxisItem);
+                Aggregation aggregation = aggregationMap.get(yAxisValue);
+                if (aggregation == null) {
+                    aggregation = aggregationFactory.getAggregation();
+                    aggregationMap.put(yAxisValue, aggregation);
+                }
+                aggregation.addValue(row.getValue(measureItem));
+            }
+            List<Value> aggregationValues = new ArrayList<Value>(aggregationMap.keySet());
+            if (aggregationValues.size() > stackLimit) {
+                Collections.sort(aggregationValues, new Comparator<Value>() {
+
+                    public int compare(Value value, Value value1) {
+                        return aggregationMap.get(value1).getValue().toDouble().compareTo(aggregationMap.get(value).toDouble());
+                    }
+                });
+                aggregationValues = aggregationValues.subList(0, stackLimit);
+                //IRow otherRow = dataSet.createRow();
+                Iterator<IRow> iter = dataSet.getRows().iterator();
+
+
+                Map<Value, Aggregation> aggregateMap = new HashMap<Value, Aggregation>();
+                while (iter.hasNext()) {
+                    IRow row = iter.next();
+                    //if (row != otherRow) {
+                    Value value = row.getValue(stackAxisItem);
+                    /*if (aggregationValues.contains(value)) {
+
+                    } else {
+                        row.addValue(xAxisItem.createAggregateKey(), new StringValue("Other"));
+                    }*/
+                    //}
+                    if (!aggregationValues.contains(value)) {
+                        //row.addValue(yAxisItem.createAggregateKey(), new StringValue("Other"));
+                        Value stackValue = row.getValue(xAxisItem.createAggregateKey());
+                        Aggregation aggregation = aggregateMap.get(stackValue);
+                        if (aggregation == null) {
+                            aggregation = aggregationFactory.getAggregation();
+                            aggregateMap.put(stackValue, aggregation);
+                        }
+                        aggregation.addValue(row.getValue(measureItem));
+                        //others.add(row);
+                        iter.remove();
+                    }
+                }
+
+                if (isLimitOther()) {
+
+                    for (Map.Entry<Value, Aggregation> entry : aggregateMap.entrySet()) {
+                        IRow otherRow = dataSet.createRow();
+                        otherRow.addValue(stackItem.createAggregateKey(), new StringValue("Other"));
+                        otherRow.addValue(xAxisItem.createAggregateKey(), entry.getKey());
+                        otherRow.addValue(measureItem.createAggregateKey(), entry.getValue().getValue());
+                    }
+
+                }
+            }
+        }
+        return limitsResults;
+    }
+
+    public int getStackLimit() {
+        return stackLimit;
+    }
+
+    public void setStackLimit(int stackLimit) {
+        this.stackLimit = stackLimit;
+    }
 
     public String getStackSort() {
         return stackSort;
@@ -135,6 +290,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         labelPosition = findStringProperty(properties, "labelPosition", "none");
         labelInsideFontColor = (int) findNumberProperty(properties, "labelInsideFontColor", 0);
         useInsideLabelFontColor = findBooleanProperty(properties, "useInsideLabelFontColor", false);
+        stackLimit = (int) findNumberProperty(properties, "stackLimit", 15);
         multiColors = multiColorProperty(properties, "multiColors");
     }
 
@@ -150,6 +306,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         properties.add(new ReportStringProperty("labelPosition", labelPosition));
         properties.add(new ReportBooleanProperty("useInsideLabelFontColor", useInsideLabelFontColor));
         properties.add(new ReportNumericProperty("labelInsideFontColor", labelInsideFontColor));
+        properties.add(new ReportNumericProperty("stackLimit", stackLimit));
         properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         return properties;
     }
@@ -237,6 +394,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     public JSONObject getAxes() throws JSONException {
         JSONObject axes = new JSONObject();
         axes.put("xaxis", getMeasureAxis(getMeasures().get(0)));
+        axisConfigure((JSONObject) axes.get("xaxis"), getxAxisMinimum(), isxAxisMinimumDefined(), getxAxisMaximum(), isxAxisMaximumDefined());
         axes.put("yaxis", getGroupingAxis(getYaxis()));
         return axes;
     }

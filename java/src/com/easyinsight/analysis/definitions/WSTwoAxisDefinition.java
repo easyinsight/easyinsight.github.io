@@ -1,6 +1,9 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.*;
+import com.easyinsight.dataset.DataSet;
+import com.easyinsight.dataset.LimitsResults;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,6 +20,86 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
     private AnalysisItem yaxis;
     private List<AnalysisItem> measures;
     private boolean multiMeasure;
+
+    public LimitsResults applyLimits(DataSet dataSet) {
+        LimitsResults limitsResults;
+        LimitsMetadata limitsMetadata = getLimitsMetadata();
+        if (limitsMetadata != null && limitsMetadata.isLimitEnabled()) {
+            if (!isMultiMeasure()) {
+                AnalysisItem yAxisItem = getYaxis();
+                AnalysisItem measureItem = getMeasure();
+                final Map<Value, Aggregation> aggregationMap = new HashMap<Value, Aggregation>();
+                AggregationFactory aggregationFactory = new AggregationFactory((AnalysisMeasure) measureItem, false);
+                for (IRow row : dataSet.getRows()) {
+                    Value yAxisValue = row.getValue(yAxisItem);
+                    Aggregation aggregation = aggregationMap.get(yAxisValue);
+                    if (aggregation == null) {
+                        aggregation = aggregationFactory.getAggregation();
+                        aggregationMap.put(yAxisValue, aggregation);
+                    }
+                    aggregation.addValue(row.getValue(measureItem));
+                }
+                List<Value> aggregationValues = new ArrayList<Value>(aggregationMap.keySet());
+                if (aggregationValues.size() > limitsMetadata.getNumber()) {
+                    Collections.sort(aggregationValues, new Comparator<Value>() {
+
+                        public int compare(Value value, Value value1) {
+                            return aggregationMap.get(value1).getValue().toDouble().compareTo(aggregationMap.get(value).toDouble());
+                        }
+                    });
+                    aggregationValues = aggregationValues.subList(0, limitsMetadata.getNumber());
+                    //IRow otherRow = dataSet.createRow();
+                    Iterator<IRow> iter = dataSet.getRows().iterator();
+
+
+                    Map<Value, Aggregation> aggregateMap = new HashMap<Value, Aggregation>();
+                    while (iter.hasNext()) {
+                        IRow row = iter.next();
+                        //if (row != otherRow) {
+                        Value value = row.getValue(yAxisItem);
+                        /*if (aggregationValues.contains(value)) {
+
+                        } else {
+                            row.addValue(xAxisItem.createAggregateKey(), new StringValue("Other"));
+                        }*/
+                        //}
+                        if (!aggregationValues.contains(value)) {
+                            //row.addValue(yAxisItem.createAggregateKey(), new StringValue("Other"));
+                            Value xAxisValue = row.getValue(getXaxis());
+                            Aggregation aggregation = aggregateMap.get(xAxisValue);
+                            if (aggregation == null) {
+                                aggregation = aggregationFactory.getAggregation();
+                                aggregateMap.put(xAxisValue, aggregation);
+                            }
+                            aggregation.addValue(row.getValue(measureItem));
+                            //others.add(row);
+                            iter.remove();
+                        }
+                    }
+
+                    if (isLimitOther()) {
+
+                        for (Map.Entry<Value, Aggregation> entry : aggregateMap.entrySet()) {
+                            IRow otherRow = dataSet.createRow();
+                            otherRow.addValue(yAxisItem.createAggregateKey(), new StringValue("Other"));
+                            otherRow.addValue(getXaxis().createAggregateKey(), entry.getKey());
+                            otherRow.addValue(getMeasure().createAggregateKey(), entry.getValue().getValue());
+                        }
+
+                    }
+
+                    limitsResults = new LimitsResults(true, limitsMetadata.getNumber(), aggregationValues.size());
+                } else {
+                    limitsResults = super.applyLimits(dataSet);
+                }
+            } else {
+                limitsResults = super.applyLimits(dataSet);
+            }
+            return limitsResults;
+        } else {
+            return super.applyLimits(dataSet);
+        }
+    }
 
     public List<AnalysisItem> getMeasures() {
         return measures;
@@ -142,6 +225,7 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
 
         } else {
             axes.put("yaxis", getMeasureAxis(getMeasure()));
+            axisConfigure((JSONObject) axes.get("yaxis"), getyAxisMininum(), isyAxisMinimumDefined(), getyAxisMaximum(), isyAxisMaximumDefined());
         }
 
         return axes;

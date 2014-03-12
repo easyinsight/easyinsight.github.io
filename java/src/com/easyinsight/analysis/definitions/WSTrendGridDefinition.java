@@ -15,7 +15,7 @@ import java.util.List;
  * Time: 9:44 AM
  */
 public class WSTrendGridDefinition extends WSKPIDefinition {
-
+    private LimitsMetadata limitsMetadata;
     private long trendReportID;
     private int sortIndex;
     private boolean sortAscending;
@@ -27,6 +27,15 @@ public class WSTrendGridDefinition extends WSKPIDefinition {
     private int headerTextColor = 0x000000;
     private int summaryRowTextColor = 0x000000;
     private int summaryRowBackgroundColor = 0x6699ff;
+    private int maxRecords;
+
+    public int getMaxRecords() {
+        return maxRecords;
+    }
+
+    public void setMaxRecords(int maxRecords) {
+        this.maxRecords = maxRecords;
+    }
 
     public int getRowColor1() {
         return rowColor1;
