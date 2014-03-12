@@ -824,25 +824,11 @@ public class DataStorage implements IDataStorage {
         }
         filters = eligibleFilters(filters, keyStrings, insightRequestMetadata);
 
-        if (insightRequestMetadata.isNewFilterStrategy()) {
-            for (FilterDefinition filter : filters) {
-                if (filter instanceof FilterValueDefinition) {
-                    FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
-                    if (filterValueDefinition.getFilteredValues().size() > 50) {
-                        KeyMetadata keyMetadata = keys.get(filter.getField().createAggregateKey(false));
-                        if (keyMetadata != null && keyMetadata.getType() == Value.STRING) {
-                            int type = keyMetadata.getType();
-                            String table = tempTableIt(filterValueDefinition, type);
-                            insightRequestMetadata.getFilterPropertiesMap().put(filterValueDefinition, new AdvancedFilterProperties(table, "blah"));
-                        }
-                    }
-                }
-            }
-        }
+
 
         boolean distinctValid = true;
         for (AnalysisItem item : reportItems) {
-            distinctValid = distinctValid && insightRequestMetadata.getDistinctFieldMap().get(item) != null && insightRequestMetadata.getDistinctFieldMap().get(item) == true;
+            distinctValid = distinctValid && insightRequestMetadata.getDistinctFieldMap().get(item) != null && insightRequestMetadata.getDistinctFieldMap().get(item);
         }
 
         StringBuilder queryBuilder = new StringBuilder();
@@ -896,84 +882,6 @@ public class DataStorage implements IDataStorage {
         }
         //System.out.println("took " + (System.currentTimeMillis() - startTime));
         return dataSet;
-    }
-
-    private String tempTableIt(FilterValueDefinition filterValueDefinition, int type) throws SQLException {
-        Statement stmt = storageConn.createStatement();
-        String name = "dtt" + System.currentTimeMillis();
-        stmt.execute("CREATE TEMPORARY TABLE " + name + " ( BLAH VARCHAR(20)) ENGINE=MEMORY");
-        stmt.execute("LOCK TABLES " + name + " WRITE");
-
-        PreparedStatement preparedStatement = storageConn.prepareStatement("INSERT INTO " + name + " (BLAH) VALUES (?)");
-        Set<Value> valueSet = new LinkedHashSet<Value>(filterValueDefinition.getFilteredValues().size());
-        for (Object valueObject : filterValueDefinition.getFilteredValues()) {
-            Value value;
-            if (valueObject instanceof Value) {
-                value = (Value) valueObject;
-            } else if (valueObject instanceof String) {
-                value = new StringValue((String) valueObject);
-            } else if (valueObject instanceof Number) {
-                value = new NumericValue((Number) valueObject);
-            } else if (valueObject instanceof Date) {
-                value = new DateValue((Date) valueObject);
-            } else if (valueObject == null) {
-                value = new EmptyValue();
-            } else {
-                throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
-            }
-            if (value instanceof StringValue) {
-                StringValue stringValue = (StringValue) value;
-                if ("(No Value)".equals(stringValue.getValue())) {
-                    value = new EmptyValue();
-                }
-            }
-            valueSet.add(value);
-        }
-        if (type == Value.NUMBER) {
-            for (Value value : valueSet) {
-                preparedStatement.setDouble(1, value.toDouble());
-                preparedStatement.execute();
-                // 16,777,216
-            }
-        } else if (type == Value.DATE) {
-            for (Value value : valueSet) {
-                if (value.type() == Value.DATE) {
-                    DateValue dateValue = (DateValue) value;
-                    preparedStatement.setTimestamp(1, new java.sql.Timestamp(dateValue.getDate().getTime()));
-                } else {
-                    preparedStatement.setNull(1, Types.TIMESTAMP);
-                }
-                preparedStatement.execute();
-            }
-        } else if (type == Value.STRING) {
-            int i = 0;
-            for (Value value : valueSet) {
-                preparedStatement.setString(1, value.toString());
-                preparedStatement.addBatch();
-                i++;
-                if (i == 1000) {
-                    i = 0;
-                    preparedStatement.executeBatch();
-                }
-            }
-            if (i > 0) {
-                preparedStatement.executeBatch();
-            }
-        } else if (type == Value.EMPTY) {
-            for (Value value : valueSet) {
-                preparedStatement.setString(1, value.toString());
-                preparedStatement.execute();
-            }
-        } else {
-            for (Value value : valueSet) {
-                preparedStatement.setString(1, value.toString());
-                preparedStatement.execute();
-            }
-        }
-        preparedStatement.close();
-        stmt.execute("UNLOCK TABLES");
-        stmt.close();
-        return name;
     }
 
     @NotNull
