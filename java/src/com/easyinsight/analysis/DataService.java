@@ -70,7 +70,8 @@ public class DataService {
                             dataSourceID = dashboardRS.getLong(1);
                             dashboardID = dashboardRS.getLong(2);
                         } else {
-                            throw new RuntimeException();
+                            return new ArrayList<AnalysisItemSelection>();
+                            //throw new RuntimeException();
                         }
                     }
 
@@ -682,6 +683,8 @@ public class DataService {
             //trendOutcomes = targetOutcomes;
             EmbeddedTrendDataResults trendDataResults = new EmbeddedTrendDataResults();
             trendDataResults.setTrendOutcomes(trendResult.trendOutcomes);
+            trendDataResults.setNowString(trendResult.nowString);
+            trendDataResults.setPreviousString(trendResult.previousString);
             trendDataResults.setDataSourceInfo(trendResult.dataSourceInfo);
             analysisDefinition.setFilterDefinitions(customFilters);
             trendDataResults.setDefinition(analysisDefinition);
@@ -1364,10 +1367,10 @@ public class DataService {
                     throw new ReportException(new GenericReportFault("You need to choose a date for " + analysisItem.toDisplay() + " for trend analysis to work."));
                 }
                 dateMap.put(date.toDisplay(), date);
-                List<AnalysisMeasure> measures = trendMap.get(analysisItem.getDefaultDate());
+                List<AnalysisMeasure> measures = trendMap.get(date.toDisplay());
                 if (measures == null) {
                     measures = new ArrayList<AnalysisMeasure>();
-                    trendMap.put(analysisItem.getDefaultDate(), measures);
+                    trendMap.put(date.toDisplay(), measures);
                 }
                 measures.add((AnalysisMeasure) analysisItem);
             } else if (analysisItem.getReportFieldExtension() != null && reportFilter != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
@@ -1452,9 +1455,48 @@ public class DataService {
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
             dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+            int limit = 0;
+            if (analysisDefinition instanceof WSTrendGridDefinition) {
+                WSTrendGridDefinition trendGridDefinition = (WSTrendGridDefinition) analysisDefinition;
+                limit = trendGridDefinition.getMaxRecords();
+            }
+            List<Value> aggregationValues = null;
+            if (limit > 0 && analysisDefinition.getGroupings().size() > 0) {
+                final Map<Value, Value> ranks = new HashMap<Value, Value>();
+                for (IRow row : nowSet.getRows()) {
+                    Value value = row.getValue(analysisDefinition.getGroupings().get(0).createAggregateKey());
+                    Value measureValue = row.getValue(analysisDefinition.getMeasures().get(0).createAggregateKey());
+                    ranks.put(value, measureValue);
+                }
+
+                aggregationValues = new ArrayList<Value>(ranks.keySet());
+                if (aggregationValues.size() > limit) {
+                    Collections.sort(aggregationValues, new Comparator<Value>() {
+
+                        public int compare(Value value, Value value1) {
+                            return ranks.get(value1).toDouble().compareTo(ranks.get(value).toDouble());
+                        }
+                    });
+
+                    Aggregation other = new AggregationFactory((AnalysisMeasure) analysisDefinition.getMeasures().get(0), false).getAggregation();
+
+                    aggregationValues = aggregationValues.subList(0, limit);
+                    Iterator<IRow> iter = nowSet.getRows().iterator();
+                    while (iter.hasNext()) {
+                        IRow row = iter.next();
+                        Value value = row.getValue(analysisDefinition.getGroupings().get(0).createAggregateKey());
+                        if (!aggregationValues.contains(value)) {
+                            iter.remove();
+                            other.addValue(row.getValue(analysisDefinition.getMeasures().get(0)));
+                        }
+                    }
+                    IRow otherRow = nowSet.createRow();
+                    otherRow.addValue(analysisDefinition.getGroupings().get(0).createAggregateKey(), "Other");
+                    otherRow.addValue(analysisDefinition.getMeasures().get(0).createAggregateKey(), other.getValue());
+                }
+            }
             DataSet pastSet;
             if (previousFilter != null) {
-                tempReport.setFilterDefinitions(analysisDefinition.getFilterDefinitions());
 
                 List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
@@ -1476,6 +1518,23 @@ public class DataService {
                 reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
                 dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
                 pastSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+
+                if (limit > 0 && analysisDefinition.getGroupings().size() > 0) {
+                    Aggregation other = new AggregationFactory((AnalysisMeasure) analysisDefinition.getMeasures().get(0), false).getAggregation();
+                    Iterator<IRow> iter = pastSet.getRows().iterator();
+                    while (iter.hasNext()) {
+                        IRow row = iter.next();
+                        Value value = row.getValue(analysisDefinition.getGroupings().get(0).createAggregateKey());
+                        if (!aggregationValues.contains(value)) {
+                            iter.remove();
+                            other.addValue(row.getValue(analysisDefinition.getMeasures().get(0)));
+                        }
+                    }
+                    IRow otherRow = pastSet.createRow();
+                    otherRow.addValue(analysisDefinition.getGroupings().get(0).createAggregateKey(), "Other");
+                    otherRow.addValue(analysisDefinition.getMeasures().get(0).createAggregateKey(), other.getValue());
+                }
+
                 nowString = nowFilter.asString(insightRequestMetadata);
                 previousString = previousFilter.asString(insightRequestMetadata);
             } else if (nowFilter != null) {
@@ -1932,6 +1991,9 @@ public class DataService {
                         Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
                         Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);
                         for (Map.Entry<String, AnalysisItem> entry : structureCopy.entrySet()) {
+                            /*if (entry.getValue() instanceof AnalysisHierarchyItem) {
+                                continue;
+                            }*/
                             if (entry.getValue().toDisplay().equals(filter.getField().toDisplay())) {
                                 if (!fieldsReplaced.contains(entry.getValue())) {
                                     if (insightRequestMetadata.getBaseDate() != null && insightRequestMetadata.getBaseDate().qualifiedName().equals(filter.getField().qualifiedName())) {
@@ -1943,6 +2005,18 @@ public class DataService {
                             }
                         }
                         analysisDefinition.populateFromReportStructure(structure);
+                        for (AnalysisItem item : analysisDefinition.createStructure().values()) {
+                            if (item.toDisplay().equals(filter.getField().toDisplay()) && item instanceof AnalysisHierarchyItem) {
+                                AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) item;
+                                HierarchyLevel targetLevel = null;
+                                for (HierarchyLevel level : analysisHierarchyItem.getHierarchyLevels()) {
+                                    if (level.getAnalysisItem().toDisplay().equals(analysisItemFilterDefinition.getTargetItem().toDisplay())) {
+                                        targetLevel = level;
+                                    }
+                                }
+                                analysisHierarchyItem.setHierarchyLevel(targetLevel);
+                            }
+                        }
                     }
                 } else if (filter instanceof MultiFieldFilterDefinition) {
                     MultiFieldFilterDefinition multiFieldFilterDefinition = (MultiFieldFilterDefinition) filter;
@@ -2056,6 +2130,40 @@ public class DataService {
                     fieldMap.put(field.toOriginalDisplayName(), field.getTags());
                 }
             }
+
+            /*if (analysisDefinition.getAnalysisID() > 0) {
+                for (AnalysisItem analysisItem : items) {
+                    if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                        AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                        if (hierarchyItem.getHierarchyLevels().indexOf(hierarchyItem.getHierarchyLevel()) == (hierarchyItem.getHierarchyLevels().size() - 1)) {
+
+                        } else {
+                            DrillThrough drillThrough = new DrillThrough();
+                            AnalysisItemHandle handle = new AnalysisItemHandle();
+                            handle.setName(hierarchyItem.getHierarchyLevel().getAnalysisItem().toDisplay());
+                            drillThrough.setPassThroughField(handle);
+                            drillThrough.setReportID(analysisDefinition.getAnalysisID());
+                            drillThrough.setDefaultLink(true);
+                            drillThrough.setLabel("hierarchy");
+                            drillThrough.setShowDrillThroughFilters(false);
+                            analysisItem.setLinks(Arrays.asList((Link) drillThrough));
+                        }
+                    } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                        AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                        if (date.getDateLevel() < AnalysisDateDimension.DAY_LEVEL) {
+                            DrillThrough drillThrough = new DrillThrough();
+                            drillThrough.setReportID(analysisDefinition.getAnalysisID());
+                            drillThrough.setFilterRowGroupings(true);
+                            drillThrough.setAddAllFilters(true);
+                            drillThrough.setDefaultLink(true);
+                            drillThrough.setLabel("date");
+                            drillThrough.setShowDrillThroughFilters(false);
+                            analysisItem.setLinks(Arrays.asList((Link) drillThrough));
+                        }
+                    }
+                }
+            }*/
+
             for (AnalysisItem analysisItem : items) {
                 analysisItem.setTags(fieldMap.get(analysisItem.toOriginalDisplayName()));
             }
