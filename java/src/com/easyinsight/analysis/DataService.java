@@ -1430,7 +1430,7 @@ public class DataService {
                         filters.add(filter);
                     }
                 }
-                FilterDefinition nowFilterClone = null;
+                FilterDefinition nowFilterClone;
                 try {
                     nowFilterClone = nowFilter.clone();
                 } catch (CloneNotSupportedException e) {
@@ -1539,16 +1539,8 @@ public class DataService {
                 previousString = previousFilter.asString(insightRequestMetadata);
             } else if (nowFilter != null) {
                 pastSet = new DataSet();
-            } else if ("".equals(key)) {
-                pastSet = nowSet;
             } else {
-                Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
-                metadata = new InsightRequestMetadata();
-                metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
-                metadata.setNow(cal.getTime());
-                ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(metadata, tempReport, conn);
-                pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
+                pastSet = nowSet;
             }
             trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
         }

@@ -26,28 +26,13 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
     @JoinColumn(name="trend_date_id")
     private AnalysisItem date;
 
-    @OneToOne (fetch = FetchType.LAZY)
-    @JoinColumn(name="trend_comparison_id")
-    private AnalysisItem trendComparisonField;
-
     @Column(name="icon_image")
     private String iconImage;
 
     @Column(name="high_low")
     private int highLow;
 
-    public AnalysisItem getTrendComparisonField() {
-        return trendComparisonField;
-    }
-
-    public void setTrendComparisonField(AnalysisItem trendComparisonField) {
-        this.trendComparisonField = trendComparisonField;
-    }
-
     public void validate(Set<Long> sourceIDs) {
-        if (trendComparisonField != null) {
-            trendComparisonField.validate(sourceIDs);
-        }
         if (date != null) {
             date.validate(sourceIDs);
         }
@@ -104,18 +89,12 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
         if (date != null) {
             date = replacementMap.getField(date);
         }
-        if (trendComparisonField != null) {
-            trendComparisonField = replacementMap.getField(trendComparisonField);
-        }
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
         if (getEverything && date != null) {
             items.addAll(date.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
-        }
-        if (trendComparisonField != null) {
-            items.addAll(trendComparisonField.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
         }
         return items;
     }
@@ -127,10 +106,6 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
             date.reportSave(session);
             session.saveOrUpdate(date);
         }
-        if (trendComparisonField != null) {
-            trendComparisonField.reportSave(session);
-            session.saveOrUpdate(trendComparisonField);
-        }
     }
 
     @Override
@@ -139,10 +114,6 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
         if (date != null) {
             setDate((AnalysisItem) Database.deproxy(getDate()));
             date.afterLoad();
-        }
-        if (trendComparisonField != null) {
-            setTrendComparisonField((AnalysisItem) Database.deproxy(getTrendComparisonField()));
-            trendComparisonField.afterLoad();
         }
     }
 }

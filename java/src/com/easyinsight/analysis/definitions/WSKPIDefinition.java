@@ -16,7 +16,6 @@ import java.util.*;
 public abstract class WSKPIDefinition extends WSAnalysisDefinition {
     private List<AnalysisItem> measures;
     private String filterName;
-    private int dayWindow;
     private List<AnalysisItem> groupings;
     private String nowDate;
     private String previousDate;
@@ -72,14 +71,6 @@ public abstract class WSKPIDefinition extends WSAnalysisDefinition {
 
     public void setFilterName(String filterName) {
         this.filterName = filterName;
-    }
-
-    public int getDayWindow() {
-        return dayWindow;
-    }
-
-    public void setDayWindow(int dayWindow) {
-        this.dayWindow = dayWindow;
     }
 
     public List<AnalysisItem> getMeasures() {

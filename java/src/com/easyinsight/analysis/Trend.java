@@ -35,22 +35,10 @@ public class Trend {
                     }
                     TrendOutcome trendOutcome = new TrendOutcome();
                     trendOutcome.setNow(row.getValue(analysisMeasure.createAggregateKey()));
-                    if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension &&
-                            ((TrendReportFieldExtension) analysisItem.getReportFieldExtension()).getTrendComparisonField() != null) {
-                        Value previousValue = row.getValue(((TrendReportFieldExtension) analysisItem.getReportFieldExtension()).getTrendComparisonField());
-                        trendOutcome.setHistorical(previousValue);
-                    }
                     outcomeMap.put(map, trendOutcome);
                 }
-
-                //newValue = trendOutcome.getNow().toDouble();
             }
-            boolean needPastSet = true;
-            if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension &&
-                    ((TrendReportFieldExtension) analysisItem.getReportFieldExtension()).getTrendComparisonField() != null) {
-                needPastSet = false;
-            }
-            if (needPastSet && pastSet.getRows().size() > 0) {
+            if (pastSet.getRows().size() > 0) {
                 for (IRow row : pastSet.getRows()) {
                     Map<String, Value> map = new HashMap<String, Value>();
                     if (groupings != null) {
@@ -66,9 +54,6 @@ public class Trend {
                     trendOutcome.setHistorical(row.getValue(analysisMeasure.createAggregateKey()));
                     outcomeMap.put(map, trendOutcome);
                 }
-
-                /*trendOutcome.setHistorical(pastSet.getRow(0).getValue(analysisMeasure.createAggregateKey()));
-                oldValue = trendOutcome.getHistorical().toDouble();*/
             }
             for (Map.Entry<Map<String, Value>, TrendOutcome> entry : outcomeMap.entrySet()) {
                 TrendOutcome trendOutcome = entry.getValue();
