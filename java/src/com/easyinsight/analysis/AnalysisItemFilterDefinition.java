@@ -231,6 +231,9 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
                 session.update(analysisItem);
             }
         }
+        if (targetItem.getAnalysisItemID() == 0) {
+            session.save(targetItem);
+        }
         for (AnalysisItemHandle analysisItem : availableHandles) {
             analysisItem.save();
         }
