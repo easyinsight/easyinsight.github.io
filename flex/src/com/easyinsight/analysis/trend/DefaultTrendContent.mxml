@@ -57,7 +57,7 @@
                     if (trendDef.nowDate != null) {
                         previousText = "compared to";
                     } else {
-                        previousText = trendDef.dayWindow + " days ago";
+                        previousText = "";
                     }
                 }
                 var trends:ArrayCollection = new ArrayCollection();

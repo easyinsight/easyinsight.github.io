@@ -15,11 +15,9 @@ import mx.collections.ArrayCollection;
 public class KPIDefinition extends AnalysisDefinition {
 
     public var measures:ArrayCollection;
-    public var filterName:String;
     public var groupings:ArrayCollection;
     public var nowDate:String;
     public var previousDate:String;
-    public var dayWindow:int = 30;
 
     public function KPIDefinition() {
     }

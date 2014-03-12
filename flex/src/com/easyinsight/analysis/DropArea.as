@@ -250,6 +250,11 @@ public class DropArea extends HBox
         }
     }
 
+
+    public function get analysisItems():ArrayCollection {
+        return _analysisItems;
+    }
+
     public function accept(analysisItem:AnalysisItem):Boolean {
         return true;
     }
