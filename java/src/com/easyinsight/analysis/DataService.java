@@ -2276,7 +2276,6 @@ public class DataService {
             }
             insightRequestMetadata.setTargetCurrency(currency);
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
-            insightRequestMetadata.setLookupTableAggregate(analysisDefinition.isLookupTableOptimization());
             insightRequestMetadata.setReportItems(analysisDefinition.getAllAnalysisItems());
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
 
