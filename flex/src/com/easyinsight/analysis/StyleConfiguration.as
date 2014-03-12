@@ -29,6 +29,7 @@ import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.trend.TrendDefinition;
 import com.easyinsight.analysis.trend.TrendGridDefinition;
+import com.easyinsight.analysis.trend.TrendGridDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.analysis.ytd.CompareYearsDefinition;
 import com.easyinsight.analysis.ytd.YTDDefinition;
@@ -154,6 +155,16 @@ public class StyleConfiguration {
             limitsFormItem.report = report;
             limitsFormItem.allFields = allFields;
             items.addItem(limitsFormItem);
+            items.addItem(new CheckBoxReportFormItem("Other", "limitOther", ChartDefinition(report).limitOther, report));
+        }
+        if (report is StackedColumnChartDefinition) {
+            items.addItem(new NumericReportFormItem("Maximum Number of Stack Items", "stackLimit", StackedColumnChartDefinition(report).stackLimit, report, 0, 1000));
+        }
+        if (report is StackedBarChartDefinition) {
+            items.addItem(new NumericReportFormItem("Maximum Number of Stack Items", "stackLimit", StackedBarChartDefinition(report).stackLimit, report, 0, 1000));
+        }
+        if (report is TrendGridDefinition) {
+            items.addItem(new NumericReportFormItem("Limit", "maxRecords", TrendGridDefinition(report).maxRecords, report, 0, 10000));
         }
         return items;
     }
@@ -248,6 +259,11 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("X Axis Base At Zero", "xAxisBaseAtZero", ChartDefinition(report).xAxisBaseAtZero, report));
             items.addItem(new CheckBoxReportFormItem("Y Axis Base At Zero", "yAxisBaseAtZero", ChartDefinition(report).yAxisBaseAtZero, report));
             items.addItem(new ComboBoxReportFormItem("Color Set", "colorScheme", report.colorScheme, report, [ "Primary", "Secondary", "None"]));
+
+            items.addItem(new NumericReportFormItem("X Axis Max", "xAxisMaximum", ChartDefinition(report).xAxisMaximum, report, int.MIN_VALUE, int.MAX_VALUE, "xAxisMaximumDefined"));
+            items.addItem(new NumericReportFormItem("Y Axis Max", "yAxisMaximum", ChartDefinition(report).yAxisMaximum, report, int.MIN_VALUE, int.MAX_VALUE, "yAxisMaximumDefined"));
+            items.addItem(new NumericReportFormItem("X Axis Min", "xAxisMinimum", ChartDefinition(report).xAxisMinimum, report, int.MIN_VALUE, int.MAX_VALUE, "xAxisMinimumDefined"));
+            items.addItem(new NumericReportFormItem("Y Axis Min", "yAxisMininum", ChartDefinition(report).yAxisMininum, report, int.MIN_VALUE, int.MAX_VALUE, "yAxisMinimumDefined"));
         }
         if (report is HeatMapDefinition) {
             items.addItem(new NumericReportFormItem("Precision", "precision", HeatMapDefinition(report).precision, report, 0, 3));

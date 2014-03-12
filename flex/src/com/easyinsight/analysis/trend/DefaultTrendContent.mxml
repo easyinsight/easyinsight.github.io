@@ -71,7 +71,9 @@
                     var trendOutcome:TrendOutcome = dataSet.getItemAt(i) as TrendOutcome;
                     if (tGrouping != null) {
                         var val:Value = trendOutcome.dimensions[tGrouping.qualifiedName()];
-                        maxGroupingSize = Math.max(maxGroupingSize, measureText(val.toString()).width);
+                        if (val != null) {
+                            maxGroupingSize = Math.max(maxGroupingSize, measureText(val.toString()).width);
+                        }
                     }
                     trendOutcome.dataSourceID = trendDef.dataFeedID;
                     trendOutcome.report = trendDef;

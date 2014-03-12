@@ -33,30 +33,31 @@ public class KPIDefinition extends AnalysisDefinition {
         var o:Object = new Object();
         var toAdd:ArrayCollection = new ArrayCollection();
         var fields:ArrayCollection = new ArrayCollection();
-        if (filterName == null) {
-            if (analysisID == 0 && nowDate == null) {
-                //baseDate = "Date";
-                nowDate = "Now";
-                previousDate = "Against";
-                var date:DerivedAnalysisDateDimension = new DerivedAnalysisDateDimension();
-                date.concrete = false;
-                date.applyBeforeAggregation = true;
-                date.derivationCode = "nowdate()";
-                var key:NamedKey = new NamedKey();
-                key.name = "Date";
-                date.key = key;
-                fields.addItem(date);
-                var filter1:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
-                filter1.field = date;
-                filter1.interval = RollingDateRangeFilterDefinition.ALL;
-                filter1.filterName = "Now";
-                toAdd.addItem(filter1);
-                var filter2:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
-                filter2.field = date;
-                filter2.interval = RollingDateRangeFilterDefinition.ALL;
-                filter2.filterName = "Against";
-                toAdd.addItem(filter2);
-            }
+
+        if (nowDate == null) {
+            //baseDate = "Date";
+            nowDate = "Now";
+            previousDate = "Against";
+            var date:DerivedAnalysisDateDimension = new DerivedAnalysisDateDimension();
+            date.concrete = false;
+            date.applyBeforeAggregation = true;
+            date.derivationCode = "nowdate()";
+            var key:NamedKey = new NamedKey();
+            key.name = "Trend Date";
+            date.key = key;
+            fields.addItem(date);
+            var filter1:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
+            filter1.field = date;
+            filter1.toggleEnabled = true;
+            filter1.interval = RollingDateRangeFilterDefinition.ALL;
+            filter1.filterName = "Now";
+            toAdd.addItem(filter1);
+            var filter2:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
+            filter2.field = date;
+            filter2.toggleEnabled = true;
+            filter2.interval = RollingDateRangeFilterDefinition.ALL;
+            filter2.filterName = "Against";
+            toAdd.addItem(filter2);
         }
         o["filters"] = toAdd;
         o["fields"] = fields;

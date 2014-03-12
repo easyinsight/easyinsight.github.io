@@ -30,6 +30,7 @@ public class TrendGridDefinition extends KPIDefinition {
     public var headerTextColor:int = 0x000000;
     public var summaryRowTextColor:int = 0x000000;
     public var summaryRowBackgroundColor:int = 0x6699ff;
+    public var maxRecords:int;
 
     public function TrendGridDefinition() {
     }
@@ -65,8 +66,12 @@ public class TrendGridDefinition extends KPIDefinition {
     override public function populate(fields:ArrayCollection):void {
         measures = new ArrayCollection();
         for each (var field:AnalysisItem in fields) {
-            if (field != null && field.hasType(AnalysisItemTypes.MEASURE) && field.reportFieldExtension != null && field.reportFieldExtension is TrendReportFieldExtension) {
+            if (field != null && field.hasType(AnalysisItemTypes.MEASURE)) {
                 measures.addItem(field);
+            } else if (field.hasType(AnalysisItemTypes.DIMENSION) && !field.hasType(AnalysisItemTypes.DATE) && !field.hasType(AnalysisItemTypes.TEXT)) {
+                if (groupings.length == 0) {
+                    groupings.addItem(field);
+                }
             }
         }
     }
