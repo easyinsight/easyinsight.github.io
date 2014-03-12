@@ -35,6 +35,10 @@
                 dataSources = CompositeFeedDefinition(dataSource).compositeFeedNodes;
             }
             this.dataSources = dataSources;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("dataSourceName")];
+            this.dataSources.sort = sort;
+            this.dataSources.refresh();
         }
 
         private var dataSource:FeedDefinitionData;

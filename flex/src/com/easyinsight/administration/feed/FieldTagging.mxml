@@ -219,9 +219,9 @@
     </mx:HBox>
     <util:TagBox tags="{tags}" onTagSelect="onTagSelect(event)" id="tagBox" width="100%"/>
     <mx:HBox>
-        <mx:Button label="Select All" click="selectAll()"/>
+        <util:SaveButton label="Select All Shown" click="selectAll()" fontSize="12"/>
         <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onTagItemClick(event)" width="160" id="tagButton"
-                            dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
+                            dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" fontSize="12"/>
     </mx:HBox>
 
     <mx:DataGrid dataProvider="{filteredFields}" wordWrap="true" variableRowHeight="true" height="350" id="dataGrid">
