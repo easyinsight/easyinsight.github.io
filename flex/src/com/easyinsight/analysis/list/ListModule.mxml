@@ -608,29 +608,33 @@
                 item.sort = 0;
                 var columnIndex:int = findColumnIndex(item.qualifiedName());
                 item.itemPosition = columnIndex;
-                var column:AdvancedDataGridColumn = dataGrid.columns[columnIndex];
-                if (column != null) {
-                    item.width = column.width;
-                    var sortInfo:SortInfo = dataGrid.getFieldSortInfo(column);
-                    if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
-                        item.sortSequence = sortInfo.sequenceNumber;
-                        if (sortInfo.descending) {
-                            item.sort = 2;
+                if (dataGrid != null) {
+                    var column:AdvancedDataGridColumn = dataGrid.columns[columnIndex];
+                    if (column != null) {
+                        item.width = column.width;
+                        var sortInfo:SortInfo = dataGrid.getFieldSortInfo(column);
+                        if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
+                            item.sortSequence = sortInfo.sequenceNumber;
+                            if (sortInfo.descending) {
+                                item.sort = 2;
+                            } else {
+                                item.sort = 1;
+                            }
                         } else {
-                            item.sort = 1;
+                            item.sort = 0;
                         }
-                    } else {
-                        item.sort = 0;
                     }
                 }
             }
         }
 
         private function findColumnIndex(qualifiedName:String):int {
-            for (var i:int = 0; i < dataGrid.columns.length; i++) {
-                var column:AdvancedDataGridColumn = dataGrid.columns[i];
-                if (column.dataField == qualifiedName) {
-                    return i;
+            if (dataGrid != null && dataGrid.columns != null && dataGrid.columns.length > 0) {
+                for (var i:int = 0; i < dataGrid.columns.length; i++) {
+                    var column:AdvancedDataGridColumn = dataGrid.columns[i];
+                    if (column.dataField == qualifiedName) {
+                        return i;
+                    }
                 }
             }
             return -1;

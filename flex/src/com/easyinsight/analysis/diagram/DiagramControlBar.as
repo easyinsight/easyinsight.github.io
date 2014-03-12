@@ -16,28 +16,18 @@ import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.DiagramDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
-import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.analysis.ReportRendererEvent;
-import com.easyinsight.analysis.TrendDropArea;
 
 import mx.collections.ArrayCollection;
 
-import mx.containers.HBox;
-
-import mx.containers.VBox;
-
 import mx.controls.Label;
-
-import mx.controls.TextInput;
 
 public class DiagramControlBar extends ReportControlBar implements IReportControlBar {
 
     private var listViewGrouping:ListDropAreaGrouping;
     private var listDefinition:DiagramDefinition;
-
-    private var timeInput:TextInput;
 
     public function DiagramControlBar() {
         super();
@@ -62,19 +52,6 @@ public class DiagramControlBar extends ReportControlBar implements IReportContro
         listViewGrouping.report = listDefinition;
         addDropAreaGrouping(listViewGrouping);
 
-        var vbox:VBox = new VBox();
-        var timeLabel:Label = new Label();
-        timeLabel.text = "Compare Against ";
-        var daysLabel:Label = new Label();
-        daysLabel.text = "days ago";
-        timeInput = new TextInput();
-        timeInput.text = String(listDefinition.dayWindow);
-        var timeBox:HBox = new HBox();
-        timeBox.addChild(timeLabel);
-        timeBox.addChild(timeInput);
-        timeBox.addChild(daysLabel);
-        vbox.addChild(timeBox);
-        addChild(vbox);
         var columns:ArrayCollection = listDefinition.measures;
         if (columns != null) {
             for (var i:int = 0; i < columns.length; i++) {
@@ -109,7 +86,6 @@ public class DiagramControlBar extends ReportControlBar implements IReportContro
             }
         }
         listDefinition.measures = new ArrayCollection(listViewGrouping.getListColumns());
-        listDefinition.dayWindow = int(timeInput.text);
         return listDefinition;
     }
 
