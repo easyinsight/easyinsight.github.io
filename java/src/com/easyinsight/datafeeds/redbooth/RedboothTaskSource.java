@@ -69,7 +69,7 @@ public class RedboothTaskSource extends RedboothBaseSource {
         RedboothCompositeSource redboothCompositeSource = (RedboothCompositeSource) parentDefinition;
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
-        Map base = (Map) queryList("/api/1/tasks", redboothCompositeSource, httpClient);
+        Map base = (Map) queryList("/api/1/tasks?count=0", redboothCompositeSource, httpClient);
         List<Map> references = (List<Map>) base.get("references");
         Map<String, String> users = new HashMap<String, String>();
         for (Map ref : references) {

@@ -46,7 +46,7 @@ public class RedboothTaskListSource extends RedboothBaseSource {
         RedboothCompositeSource redboothCompositeSource = (RedboothCompositeSource) parentDefinition;
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
-        Map base = (Map) queryList("/api/1/projects", redboothCompositeSource, httpClient);
+        Map base = (Map) queryList("/api/1/task_lists?count=0", redboothCompositeSource, httpClient);
         List<Map> organizations = (List<Map>) base.get("objects");
         for (Map org : organizations) {
             IRow row = dataSet.createRow();

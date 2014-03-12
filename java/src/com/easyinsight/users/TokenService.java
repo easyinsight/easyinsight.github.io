@@ -7,6 +7,7 @@ import com.easyinsight.datafeeds.constantcontact.ConstantContactCompositeSource;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksCompositeSource;
 import com.easyinsight.datafeeds.github.GithubCompositeSource;
 import com.easyinsight.datafeeds.harvest.HarvestCompositeSource;
+import com.easyinsight.datafeeds.redbooth.RedboothCompositeSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 //import com.easyinsight.datafeeds.xero.XeroCompositeSource;
 import com.easyinsight.datafeeds.smartsheet.SmartsheetBaseSource;
@@ -158,6 +159,18 @@ public class TokenService {
                 session.setAttribute("redirectTarget", redirectType);
                 session.setAttribute("dataSourceID", dataSource.getApiKey());
                 return new OAuthResponse(request.getLocationUri(), true);
+            } else if (type == FeedType.REDBOOTH_COMPOSITE.getType()) {
+                OAuthClientRequest request;
+                request = OAuthClientRequest
+                            .authorizationLocation("https://redbooth.com/oauth/authorize")
+                            .setClientId(RedboothCompositeSource.CLIENT_KEY)
+                            .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
+                            .buildQueryMessage();
+                session.setAttribute("redirectTarget", redirectType);
+                session.setAttribute("dataSourceID", dataSource.getApiKey());
+                String uri = request.getLocationUri();
+                uri = uri + "&scope=read_projects";
+                return new OAuthResponse(uri, true);
             } else if (type == FeedType.GITHUB_COMPOSITE.getType()) {
                 GithubCompositeSource githubSource = (GithubCompositeSource) dataSource;
                 OAuthClientRequest request;

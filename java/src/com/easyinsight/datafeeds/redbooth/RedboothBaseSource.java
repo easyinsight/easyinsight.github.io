@@ -64,17 +64,17 @@ public abstract class RedboothBaseSource extends ServerDataSourceDefinition {
     }
 
     public static HttpClient getHttpClient(RedboothCompositeSource source) {
-        HttpClient client = new HttpClient();
-        client.getParams().setAuthenticationPreemptive(true);
-        String username = "jboe";
-        String password = "Meese antlers";
-        Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
-        client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
-        return client;
+        return new HttpClient();
     }
 
     protected Object queryList(String queryString, RedboothCompositeSource redboothCompositeSource, HttpClient client) {
-        HttpMethod restMethod = new GetMethod("https://redbooth.com" + queryString);
+        String url = "https://redbooth.com" + queryString;
+        if (url.contains("?")) {
+            url += ("&access_token=" + redboothCompositeSource.getAccessToken());
+        } else {
+            url += "?access_token=" + redboothCompositeSource.getAccessToken();
+        }
+        HttpMethod restMethod = new GetMethod(url);
         restMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
         restMethod.setRequestHeader("User-Agent", "Easy Insight (http://www.easy-insight.com/)");
         boolean successful = false;
