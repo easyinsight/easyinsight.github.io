@@ -2278,7 +2278,6 @@ public class DataService {
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             insightRequestMetadata.setLookupTableAggregate(analysisDefinition.isLookupTableOptimization());
             insightRequestMetadata.setReportItems(analysisDefinition.getAllAnalysisItems());
-            insightRequestMetadata.setNewFilterStrategy(analysisDefinition.isNewFilterStrategy());
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
 
             timeshift(validQueryItems, filters, feed, insightRequestMetadata);

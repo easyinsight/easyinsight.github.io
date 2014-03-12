@@ -118,8 +118,6 @@ public class InsightRequestMetadata implements Serializable {
 
     private transient Map<String, Boolean> filterOverrideMap = new HashMap<String, Boolean>();
 
-    private transient boolean newFilterStrategy;
-
     private transient int fetchSize;
 
     private transient Map<AnalysisItem, Boolean> distinctFieldMap = new HashMap<AnalysisItem, Boolean>();
@@ -184,14 +182,6 @@ public class InsightRequestMetadata implements Serializable {
 
     public void setFetchSize(int fetchSize) {
         this.fetchSize = fetchSize;
-    }
-
-    public boolean isNewFilterStrategy() {
-        return newFilterStrategy;
-    }
-
-    public void setNewFilterStrategy(boolean newFilterStrategy) {
-        this.newFilterStrategy = newFilterStrategy;
     }
 
     public Map<FilterDefinition, AdvancedFilterProperties> getFilterPropertiesMap() {
