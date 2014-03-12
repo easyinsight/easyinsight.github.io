@@ -21,6 +21,11 @@ Application {
     font-family: "Helvetica Neue", "Helvetica";
 }
 
+.fallThroughFontsBold {
+    font-family: "Helvetica Neue", "Helvetica";
+    font-weight: bold;
+}
+
 .fallThroughFontsButton {
     font-family: "Helvetica Neue", "Helvetica";
     font-size: 11px;
