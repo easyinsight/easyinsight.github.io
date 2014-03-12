@@ -4,6 +4,7 @@ import com.easyinsight.PasswordStorage;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
@@ -265,5 +266,12 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     protected void refreshDone() {
         super.refreshDone();
         comments = null;
+    }
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Zendesk URL", "url", "Your Highrise URL is the browser URL you normally use to connect to Highrise. For example, if you access Highrise as yourcompanyname.highrisehq.com, put yourcompanyname in as the Highrise URL.");
+        factory.addField("Zendesk User Name", "zdUserName", "You can find the token on your Highrise page under My Info - API Token.");
+        factory.addField("Zendesk API Authentication Token:", "zdApiKey", "You can find the token on your Highrise page under My Info - API Token.");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 }

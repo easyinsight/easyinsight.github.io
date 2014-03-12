@@ -89,6 +89,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
             }
         }
+        queryStmt.close();
     }
 
     protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
