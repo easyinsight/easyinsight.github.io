@@ -82,21 +82,6 @@ public class GithubCompositeSource extends CompositeServerDataSource {
         }
     }
 
-    /*@Override
-    protected void beforeRefresh(Date lastRefreshTime) {
-        super.beforeRefresh(lastRefreshTime);
-
-        if (lastRefreshTime != null) {
-            try {
-                refreshTokenInfo();
-            } catch (ReportException re) {
-                throw re;
-            } catch (Exception e) {
-                throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), this));
-            }
-        }
-    }*/
-
     public void refreshTokenInfo() throws OAuthSystemException, OAuthProblemException {
         try {
             OAuthClientRequest.TokenRequestBuilder tokenRequestBuilder = OAuthClientRequest.tokenLocation("https://github.com/login/oauth/access_token").

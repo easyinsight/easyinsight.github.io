@@ -387,6 +387,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.REDBOOTH_PROJECT, RedboothProjectSource.class);
         registerType(FeedType.REDBOOTH_TASK_LIST, RedboothTaskListSource.class);
         registerType(FeedType.REDBOOTH_TASK, RedboothTaskSource.class);
+        registerType(FeedType.REDBOOTH_COMMENT, RedboothCommentSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
