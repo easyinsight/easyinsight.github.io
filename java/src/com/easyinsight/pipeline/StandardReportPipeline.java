@@ -119,8 +119,7 @@ public class StandardReportPipeline extends Pipeline {
                     if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
                         continue;
                     }
-                    if ((!filterDefinition.validForQuery()) &&
-                            filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
+                    if (filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
                         compFilters.add(filterDefinition);
                     }
                 }
