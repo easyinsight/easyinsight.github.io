@@ -165,6 +165,7 @@
                 // define the Y axis
 
                 yAxis = new LinearAxis();
+
                 yAxis.title = yAxisTitle;
                 yAxis.labelFunction = renderAxis;
                 var verticalAxisRenderer:AxisRenderer = new AxisRenderer();
@@ -232,6 +233,13 @@
 
                 xField = columnChartDef.xaxis.qualifiedName();
                 createChart();
+
+                if (columnChartDef.yAxisMinimumDefined) {
+                    LinearAxis(yAxis).minimum = columnChartDef.yAxisMininum;
+                }
+                if (columnChartDef.yAxisMaximumDefined) {
+                    LinearAxis(yAxis).maximum = columnChartDef.yAxisMaximum;
+                }
 
 
                 stackItem = columnChartDef.stackItem;

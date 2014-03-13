@@ -145,6 +145,12 @@
                 lineChart.backgroundElements = ChartUtil.gridLine("horizontal");
                 lineChart.dataTipFunction = dataTipFunction;
                 var verticalAxis:LinearAxis = new LinearAxis();
+                if (lineChartDef.yAxisMinimumDefined) {
+                    LinearAxis(verticalAxis).minimum = lineChartDef.yAxisMininum;
+                }
+                if (lineChartDef.yAxisMaximumDefined) {
+                    LinearAxis(verticalAxis).maximum = lineChartDef.yAxisMaximum;
+                }
                 if (lineChartDef.multiMeasure) {
                     if (lineChartDef.measures.length == 1) {
                         verticalAxis.labelFunction = renderAxis;
