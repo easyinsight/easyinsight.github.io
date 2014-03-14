@@ -1,4 +1,4 @@
-window.drawDiagram = function (j, selector, reportID, embedded, afterRefresh) {
+window.drawDiagram = function (j, selector, reportID, embedded, afterRefresh, fullFilters, drillthrough) {
     var diagram = j;
 
     function createNode(node, key) {
@@ -12,7 +12,9 @@ window.drawDiagram = function (j, selector, reportID, embedded, afterRefresh) {
         if (node["drillthrough"] != null) {
             $(e).addClass("drillthrough");
             $(e).bind("click", function (e) {
-                drillThrough('reportID=' + reportID + "&drillthroughID=" + node["drillthrough"] + "&sourceField=" + key + "&embedded=" + embedded);
+                var drillthrough = data["drillthrough"];
+                var f = { "reportID": reportID, "drillthroughID": node["drillthrough"], "embedded": embedded, "source": key, "drillthroughKey": drillthrough, "filters": fullFilters };
+                drillThrough(f);
             })
         }
 
@@ -153,12 +155,8 @@ window.drawDiagram = function (j, selector, reportID, embedded, afterRefresh) {
         var fromCenter = centerXY(fromNode);
         var upperRight = upperRightXY(fromNode);
         var toCenter = centerXY(toNode);
-//        console.log(fromXY.x + ", " + fromXY.y + " " + fromCenter.x + ", " + fromCenter.y)
-//        console.log(toCenter.x + ", " + toCenter.y);
         var inequality1 = pointPoint(fromXY.x, fromXY.y, fromCenter.x, fromCenter.y)(toCenter.x, toCenter.y);
-//        console.log(inequality1)
         var inequality2 = pointPoint(fromCenter.x, fromCenter.y, upperRight.x, upperRight.y)(toCenter.x, toCenter.y);
-//        console.log(inequality2);
 
         if (inequality1 > 0 && inequality2 > 0) {
             return Direction.TOP;
@@ -190,7 +188,6 @@ window.drawDiagram = function (j, selector, reportID, embedded, afterRefresh) {
         selector.show();
         if (Object.keys(diagram).length == 0) {
             $("#reportWell").hide();
-            $("#reportWell")
         } else {
 
         }
