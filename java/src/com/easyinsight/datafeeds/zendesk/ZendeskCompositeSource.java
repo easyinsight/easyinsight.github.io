@@ -8,6 +8,7 @@ import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
+import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.users.Account;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
@@ -46,6 +47,12 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
 
     public void setHackMethod(boolean hackMethod) {
         this.hackMethod = hackMethod;
+    }
+
+    public List<CustomFieldTag> customFieldTags() {
+        List<CustomFieldTag> customTags = new ArrayList<CustomFieldTag>();
+        customTags.add(new CustomFieldTag(ZendeskTicketSource.CUSTOM_FIELD_TICKET, "Custom Ticket Field"));
+        return customTags;
     }
 
     @Override
