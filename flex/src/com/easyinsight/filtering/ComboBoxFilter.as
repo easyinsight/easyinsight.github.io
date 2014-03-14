@@ -348,6 +348,9 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
         } else {
             selectedValue = filterObj as String;
         }
+        if (newValue == "[ No Value ]") {
+            newValue = "";
+        }
         if (newValue != selectedValue) {
             var newFilteredValues:ArrayCollection = new ArrayCollection();
             newFilteredValues.addItem(newValue);
