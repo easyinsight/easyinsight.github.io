@@ -20,6 +20,7 @@ import org.hibernate.Session;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -96,7 +97,7 @@ public class DrillthroughServlet extends HtmlServlet {
             Object v = dtValues.get(String.valueOf(analysisItem.getAnalysisItemID()));
             if (v != null) {
                 if(data.get(analysisItem.qualifiedName()) == null)
-                    data.put(analysisItem.qualifiedName(), v.toString());
+                    data.put(analysisItem.qualifiedName(), URLDecoder.decode(String.valueOf(v), "UTF-8"));
             }
             //String value = getValue(jsonObject, "f" + analysisItem.getAnalysisItemID());
 
