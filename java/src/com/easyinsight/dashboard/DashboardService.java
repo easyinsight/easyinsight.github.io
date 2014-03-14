@@ -820,7 +820,8 @@ public class DashboardService {
                 }
             }
             if (applicationSkin != null) {
-                if ("Primary".equals(dashboard.getColorSet())) {
+                if ("Primary".equals(dashboard.getColorSet()) && (applicationSkin.getDashboardStack1ColorStart() > 0 || applicationSkin.getDashboardStackColor2Start() > 0 ||
+                    applicationSkin.getDashboardStack1ColorEnd() > 0 || applicationSkin.getDashboardStackColor2End() > 0)) {
                     dashboard.setStackFill1Start(applicationSkin.getDashboardStack1ColorStart());
                     dashboard.setStackFill1SEnd(applicationSkin.getDashboardStack1ColorEnd());
                     dashboard.setStackFill2Start(applicationSkin.getDashboardStackColor2Start());
@@ -852,6 +853,8 @@ public class DashboardService {
         FilterVisitor filterVisitor = new FilterVisitor(dashboard.getDataSourceID(), dashboardID);
         dashboard.visit(filterVisitor);
         filterVisitor.done();
+        DashboardTextVisitor textVisitor = new DashboardTextVisitor();
+        dashboard.visit(textVisitor);
         if (dashboardStackPositions != null) {
             Map<String, FilterDefinition> overriddenFilters = new HashMap<String, FilterDefinition>();
             for (FilterDefinition filter : dashboard.getFilters()) {
@@ -1061,6 +1064,16 @@ public class DashboardService {
                         filters.add((FlatDateFilter) filter);
                     }
                 }
+            }
+        }
+    }
+
+    private static class DashboardTextVisitor implements IDashboardVisitor {
+
+        public void accept(DashboardElement dashboardElement) {
+            if (dashboardElement instanceof DashboardText) {
+                DashboardText dashboardText = (DashboardText) dashboardElement;
+                dashboardText.setHtml(dashboardText.createHTML());
             }
         }
     }

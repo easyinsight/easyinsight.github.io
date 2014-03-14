@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -150,8 +151,8 @@ public class DataSourceDescriptor extends EIDescriptor {
         this.dataSourceBehavior = dataSourceBehavior;
     }
 
-    public JSONObject toJSON() throws JSONException {
-        JSONObject jo = super.toJSON();
+    public JSONObject toJSON(DateFormat dateFormat) throws JSONException {
+        JSONObject jo = super.toJSON(dateFormat);
         JSONArray ja = new JSONArray();
         for(Tag t : getTags()) {
             JSONObject to = new JSONObject();
@@ -160,6 +161,11 @@ public class DataSourceDescriptor extends EIDescriptor {
             ja.put(to);
         }
         jo.put("tags", ja);
+        if (lastDataTime != null) {
+            jo.put("last_refresh_time", dateFormat.format(lastDataTime));
+        } else {
+            jo.put("last_refresh_time", "");
+        }
         return jo;
     }
 }

@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.text.DateFormat;
 import java.util.Date;
 
 /**
@@ -161,7 +162,7 @@ public abstract class EIDescriptor implements Serializable {
         this.urlKey = urlKey;
     }
 
-    public JSONObject toJSON() throws JSONException {
+    public JSONObject toJSON(DateFormat dateFormat) throws JSONException {
         JSONObject jo = new JSONObject();
         jo.put("name", getName());
         jo.put("url_key", getUrlKey());

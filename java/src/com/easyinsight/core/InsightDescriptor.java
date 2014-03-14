@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -143,8 +144,8 @@ public class InsightDescriptor extends EIDescriptor {
     }
 
     @Override
-    public JSONObject toJSON() throws JSONException {
-        JSONObject jo = super.toJSON();
+    public JSONObject toJSON(DateFormat dateFormat) throws JSONException {
+        JSONObject jo = super.toJSON(dateFormat);
         jo.put("type", "report");
         JSONArray tags = new JSONArray();
         if(getTags() != null) {
