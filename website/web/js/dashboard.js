@@ -309,6 +309,20 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
             Utils.noData(data, function () {
                 $('#' + id + " .reportArea").html(data);
             }, null, id);
+            $('#' + id + " .reportArea .list_drillthrough").click(function(e) {
+                e.preventDefault();
+                var x = $(e.target);
+                var f = {"reportID": x.data("reportid"), "drillthroughID": x.data("drillthroughid"), "embedded": x.data("embedded"), "source": x.data("source"), "drillthroughKey": drillthroughID, "filters": fullFilters,
+                    "drillthrough_values": {}};
+                f["drillthrough_values"] = _.inject(x.data(), function(m, e, i, l) {
+
+                    if(i.match(/^drillthrough/))
+                        m[i.replace(/^drillthrough/, "")] = decodeURI(e);
+                    return m; },
+                    {});
+
+                drillThrough(f);
+            })
         })}));
 
     }
