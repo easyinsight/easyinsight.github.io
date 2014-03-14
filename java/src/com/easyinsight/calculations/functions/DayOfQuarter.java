@@ -16,6 +16,14 @@ import java.util.TimeZone;
  * Time: 1:15 PM
  */
 public class DayOfQuarter extends Function {
+
+
+    public static int quarter(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return (int) Math.floor(cal.get(Calendar.MONTH) / 3);
+    }
+
     public Value evaluate() {
         Date startDate = null;
         if (params.size() == 0) {

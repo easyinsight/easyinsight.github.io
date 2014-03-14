@@ -4,6 +4,7 @@ import com.easyinsight.analysis.definitions.WSStackedBarChartDefinition;
 import com.easyinsight.analysis.definitions.WSStackedColumnChartDefinition;
 import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.*;
+import com.easyinsight.calculations.functions.DayOfQuarter;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.*;
 import com.easyinsight.database.EIConnection;
@@ -23,6 +24,7 @@ import com.easyinsight.database.Database;
 import java.io.ByteArrayInputStream;
 import java.sql.*;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -56,6 +58,8 @@ import org.hibernate.Session;
 public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
+
+
 
     public void reportUses(long reportID) {
         analysisStorage.getAnalysisDefinition(reportID);
@@ -159,7 +163,6 @@ public class AnalysisService {
     public String getBaseDocs() {
         try {
             String html = DocReader.toHTML(null, FlexContext.getHttpRequest());
-            System.out.println(html);
             html = html.replace("<h2 id=\"Easy_Insight_Documentation\">", "<b>");
             html = html.replace("</h2>", "</b>");
             html = html.replace("Connections<ol>", "Connections<textformat leftmargin=\"50\">");
@@ -1572,10 +1575,18 @@ public class AnalysisService {
 
                 }
                 if (drillThrough.isAddAllFilters() || drillThrough.getPassThroughField() != null) {
-                    filters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
+                    List<FilterDefinition> reportFilters = new ArrayList<FilterDefinition>();
+                    reportFilters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
                             analysisItem));
+                    Iterator<FilterDefinition> iter = reportFilters.iterator();
+                    while (iter.hasNext()) {
+                        FilterDefinition filter = iter.next();
+                        if (filter.getField().toDisplay().equals(analysisItem.toDisplay() + " for Drillthrough")) {
+                            iter.remove();
+                        }
+                    }
                 }
-                if (drillThrough.isFilterRowGroupings() || drillThrough.getPassThroughField() != null) {
+                if (drillThrough.isFilterRowGroupings()) {
 
                     /*for (FilterDefinition filter : filters) {
                         if (filter.getField() != null) {
@@ -1666,6 +1677,28 @@ public class AnalysisService {
                 multi.setSingleValue(false);
                 multi.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
                 multi.setToggleEnabled(true);
+                List<FilterDefinition> targetFilters = new ArrayList<FilterDefinition>();
+                if (drillThrough.getReportID() == report.getAnalysisID()) {
+                    if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                        AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                        AnalysisHierarchyItem clonedHierarchy = (AnalysisHierarchyItem) hierarchyItem.clone();
+                        int currentIndex = hierarchyItem.getHierarchyLevels().indexOf(hierarchyItem.getHierarchyLevel());
+                        AnalysisItem next = hierarchyItem.getHierarchyLevels().get(currentIndex + 1).getAnalysisItem();
+                        AnalysisItemFilterDefinition analysisItemFilterDefinition = new AnalysisItemFilterDefinition();
+                        analysisItemFilterDefinition.setField(clonedHierarchy);
+                        analysisItemFilterDefinition.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>());
+                        analysisItemFilterDefinition.setAvailableHandles(new ArrayList<AnalysisItemHandle>());
+                        analysisItemFilterDefinition.setAvailableItems(new ArrayList<AnalysisItem>());
+                        //analysisItemFilterDefinition.setTargetItem();
+                        analysisItemFilterDefinition.setTargetItem(next);
+                        analysisItemFilterDefinition.setShowOnReportView(false);
+                        analysisItemFilterDefinition.setEnabled(true);
+                        targetFilters.add(analysisItemFilterDefinition);
+                        targetFilters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
+                                analysisItem));
+                    }
+                }
+                targetFilters.add(multi);
                 //filters.add(multi);
                 DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
                 EIDescriptor descriptor;
@@ -1680,8 +1713,32 @@ public class AnalysisService {
                     descriptor = dashboardDescriptor;
                 }
                 drillThroughResponse.setDescriptor(descriptor);
-                drillThroughResponse.setFilters(Arrays.asList((FilterDefinition) multi));
+                drillThroughResponse.setFilters(targetFilters);
                 return drillThroughResponse;
+            } else {
+                if (drillThrough.getReportID() == report.getAnalysisID()) {
+                    if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                        AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                        AnalysisDateDimension copy;
+                        try {
+                            copy = (AnalysisDateDimension) date.clone();
+                        } catch (CloneNotSupportedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        copy.setLinks(new ArrayList<Link>());
+                        int existingLevel = date.getDateLevel();
+                        copy.setDateLevel(existingLevel + 1);
+                        AnalysisItemFilterDefinition analysisItemFilterDefinition = new AnalysisItemFilterDefinition();
+                        analysisItemFilterDefinition.setField(date);
+                        analysisItemFilterDefinition.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>());
+                        analysisItemFilterDefinition.setAvailableHandles(new ArrayList<AnalysisItemHandle>());
+                        analysisItemFilterDefinition.setAvailableItems(new ArrayList<AnalysisItem>());
+                        analysisItemFilterDefinition.setTargetItem(copy);
+                        analysisItemFilterDefinition.setShowOnReportView(false);
+                        analysisItemFilterDefinition.setEnabled(true);
+                        filters.add(analysisItemFilterDefinition);
+                    }
+                }
             }
 
             DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
@@ -1708,13 +1765,47 @@ public class AnalysisService {
 
     private FilterDefinition constructDrillthroughFilter(DrillThrough drillThrough, AnalysisItem analysisItem, Map<String, Object> data, Value value, boolean multiValue, List<AnalysisItem> additionalAnalysisItems) {
         FilterDefinition filterDefinition;
+        AnalysisItem targetItem;
+        if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+            AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+            targetItem = hierarchyItem.getHierarchyLevel().getAnalysisItem();
+        } else {
+            targetItem = analysisItem;
+        }
         if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
             DerivedAnalysisDimension asTextDimension = new DerivedAnalysisDimension();
             additionalAnalysisItems.add(asTextDimension);
-            asTextDimension.setKey(new NamedKey(dateDimension.toDisplay() + " for Drillthrough"));
+            asTextDimension.setKey(new NamedKey(dateDimension.toDisplay() + dateDimension.getDateLevel() + " for Drillthrough"));
             asTextDimension.setApplyBeforeAggregation(true);
-            asTextDimension.setDerivationCode("dateformatnoshift(datelevel([" + dateDimension.toDisplay() + "], \"" + dateDimension.getDateLevel()+"\"), \"yyyy-MM-dd\")");
+            String format = "yyyy-MM-dd";
+            if (dateDimension.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
+                format = "yyyy";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+                format = "yyyy-MM";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
+                format = "yyyy-MM-dd";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL) {
+                format = "yyyy-MM-dd HH";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
+                format = "yyyy-MM-dd HH:mm";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL) {
+                format = "yyyy-ww";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.WEEK_OF_YEAR_FLAT) {
+                format = "ww";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MONTH_FLAT) {
+                format = "MM";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.DAY_OF_WEEK_FLAT) {
+                format = "EE";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.DAY_OF_YEAR_FLAT) {
+                format = "DD";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+                format = "QQ";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT) {
+                format = "qq";
+            }
+            asTextDimension.setDerivationCode(MessageFormat.format("dateformatnoshift([{0}], \"{1}\")", dateDimension.toDisplay(), format));
+            //asTextDimension.setDerivationCode("dateformatnoshift(datelevel([" + dateDimension.toDisplay() + "], \"" + dateDimension.getDateLevel()+"\"), \"yyyy-MM-dd\")");
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
             filterValueDefinition.setField(asTextDimension);
             filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
@@ -1724,12 +1815,39 @@ public class AnalysisService {
             filterValueDefinition.setToggleEnabled(true);
 
             filterValueDefinition.setSingleValue(true);
+            if (value.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) value;
+                String result;
+                if ("QQ".equals(format)) {
+                    int quarter = DayOfQuarter.quarter(dateValue.getDate());
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(dateValue.getDate());
+                    int year = cal.get(Calendar.YEAR);
+                    result = quarter + "-" + year;
+                } else if ("qq".equals(format)) {
+                    int quarter = DayOfQuarter.quarter(dateValue.getDate());
+                    result = String.valueOf(quarter);
+                } else {
+                    result = new SimpleDateFormat(format).format(dateValue.getDate());
+                }
+                filterValueDefinition.setFilteredValues(Arrays.asList((Object) result));
+            } else {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Date date = sdf.parse(value.toString());
+                    String result = new SimpleDateFormat(format).format(date);
+                    filterValueDefinition.setFilteredValues(Arrays.asList((Object) result));
+                } catch (ParseException e) {
+                    LogClass.error(e);
+                }
+                //filterValueDefinition.setFilteredValues(Arrays.asList((Object) value.toString()));
+            }
 
-            filterValueDefinition.setFilteredValues(Arrays.asList((Object) value.toString()));
             filterDefinition = filterValueDefinition;
         } else {
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-            filterValueDefinition.setField(analysisItem);
+
+            filterValueDefinition.setField(targetItem);
             filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
 
             filterValueDefinition.setEnabled(true);
@@ -2579,6 +2697,7 @@ public class AnalysisService {
                     new UserUploadService().deleteUserUpload(existingID);
                 }
                 queryStmt.close();
+                // TODO: maybe pare back?
                 PreparedStatement parentStmt = conn.prepareStatement("SELECT COMPOSITE_FEED.DATA_FEED_ID FROM COMPOSITE_FEED, COMPOSITE_NODE WHERE " +
                         "COMPOSITE_FEED.COMPOSITE_FEED_ID = COMPOSITE_NODE.COMPOSITE_FEED_ID AND COMPOSITE_NODE.DATA_FEED_ID = ?");
                 PreparedStatement reportSourceQuery = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM distinct_cached_addon_report_source WHERE REPORT_ID = ?");
