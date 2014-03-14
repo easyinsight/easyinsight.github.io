@@ -23,6 +23,9 @@
 <%@ page import="com.easyinsight.tag.Tag" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.json.JSONArray" %>
+<%@ page import="java.text.DateFormat" %>
+<%@ page import="com.easyinsight.export.ExportService" %>
+<%@ page import="com.easyinsight.analysis.AnalysisDateDimension" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -71,6 +74,7 @@
                 return name1.compareTo(name2);
             }
         });
+        DateFormat dateFormat = ExportService.getDateFormatForAccount(AnalysisDateDimension.MINUTE_LEVEL, null);
         for (EIDescriptor desc : descriptors) {
             int folder = desc.getFolder();
             if (folder == 1) {
@@ -86,7 +90,7 @@
                 reportList.put(String.valueOf(folder), new JSONArray());
             }
             JSONArray list = (JSONArray) reportList.get(String.valueOf(folder));
-            list.put(desc.toJSON());
+            list.put(desc.toJSON(dateFormat));
 
         }
 
