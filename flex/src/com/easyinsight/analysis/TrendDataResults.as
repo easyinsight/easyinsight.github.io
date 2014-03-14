@@ -7,6 +7,8 @@ import mx.collections.ArrayCollection;
 	public class TrendDataResults extends DataResults
 	{
 		public var trendOutcomes:ArrayCollection;
+    public var nowString:String;
+    public var previousString:String;
 
 		public function TrendDataResults()
 		{			

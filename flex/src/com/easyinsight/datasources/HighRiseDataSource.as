@@ -1,4 +1,5 @@
 package com.easyinsight.datasources {
+import com.easyinsight.administration.feed.ServerDataSourceConfiguration;
 import com.easyinsight.customupload.HighRiseDataSourceCreation;
 
 
@@ -33,7 +34,6 @@ public class HighRiseDataSource extends CompositeServerDataSource {
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
         var config:HighriseConfiguration = new HighriseConfiguration();
-        config.dataSourceDefinition = this;
         config.label = "Highrise Server Configuration";
         pages.addItem(config);
         return pages;
@@ -41,6 +41,10 @@ public class HighRiseDataSource extends CompositeServerDataSource {
 
     override public function configClass():Class {
         return HighRiseDataSourceCreation;
+    }
+
+    override public function hasCustomFields():Boolean {
+        return true;
     }
 }
 }

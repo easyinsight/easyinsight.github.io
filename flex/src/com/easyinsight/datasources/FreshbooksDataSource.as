@@ -28,7 +28,6 @@ public class FreshbooksDataSource extends CompositeServerDataSource {
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
         var config:FreshBooksConfiguration = new FreshBooksConfiguration();
-        config.dataSourceDefinition = this;
         config.label = "FreshBooks Server Configuration";
         pages.addItem(config);
         return pages;

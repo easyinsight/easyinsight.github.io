@@ -1,6 +1,7 @@
 package com.easyinsight.analysis {
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
+import com.easyinsight.listing.Tag;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.PopUpUtil;
@@ -9,6 +10,8 @@ import flash.events.ContextMenuEvent;
 import flash.geom.Point;
 import flash.ui.ContextMenu;
 import flash.ui.ContextMenuItem;
+
+import mx.collections.ArrayCollection;
 
 import mx.controls.Alert;
 
@@ -22,11 +25,15 @@ public class AvailableFieldTextRenderer extends UITextField implements IListItem
     private var wrapper:AnalysisItemWrapper;
     private var _dataSourceID:int;
     private var _calcRefactor:Boolean;
+    private var _tags:ArrayCollection;
 
     public function AvailableFieldTextRenderer() {
         super();
     }
 
+    public function set tags(value:ArrayCollection):void {
+        _tags = value;
+    }
 
     public function validateProperties():void {
     }
@@ -112,6 +119,14 @@ public class AvailableFieldTextRenderer extends UITextField implements IListItem
                 items.push(calculateItem);
             }
 
+            if (_tags != null) {
+                for each (var t:Tag in _tags) {
+                    var tagItem:ContextMenuItem = new ContextMenuItem("Tag as " + t.name);
+                    tagItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, createTagHandler(wrapper, t));
+                    items.push(tagItem);
+                }
+            }
+
             PopupMenuFactory.assignMenu(this, items);
         } else {
             var folderItems:Array = [];
@@ -123,6 +138,12 @@ public class AvailableFieldTextRenderer extends UITextField implements IListItem
                 folderItems.push(reportNavItem);
             }
             PopupMenuFactory.assignMenu(this, folderItems);
+        }
+    }
+
+    private function createTagHandler(wrapper:AnalysisItemWrapper, tag:Tag):Function {
+        return function(event:ContextMenuEvent):void {
+            dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.TAG_ITEM, wrapper, 0, 0, tag));
         }
     }
 }

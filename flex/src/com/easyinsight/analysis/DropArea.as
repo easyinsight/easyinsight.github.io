@@ -45,6 +45,8 @@ public class DropArea extends HBox
 
     private var _dataSourceID:int;
 
+    public var defaultBackgroundColor:uint = 0xFFFFFF;
+
     public function set dataSourceID(value:int):void {
         _dataSourceID = value;
     }
@@ -104,7 +106,7 @@ public class DropArea extends HBox
 
     public function normal():void {
         setStyle("borderColor", 0xB7BABC);
-        setStyle("backgroundColor", 0xFFFFFF);
+        setStyle("backgroundColor", defaultBackgroundColor);
     }
 
     private function createNoDataLabel():UIComponent {
@@ -115,6 +117,12 @@ public class DropArea extends HBox
 
     private function onDelete(event:Event):void {
         deletion();
+    }
+
+    private var _dataSourceFields:ArrayCollection;
+
+    public function set dataSourceFields(value:ArrayCollection):void {
+        _dataSourceFields = value;
     }
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -200,6 +208,13 @@ public class DropArea extends HBox
             addChildAt(component, 0);
             currentState = "Configured";
         }
+        if (analysisItem != null && analysisItem.kpi) {
+            defaultBackgroundColor = 0xDDDDDD;
+            setStyle("backgroundColor", defaultBackgroundColor);
+        } else {
+            defaultBackgroundColor = 0xFFFFFF;
+            setStyle("backgroundColor", defaultBackgroundColor);
+        }
     }
 
     protected function getNoDataLabel():String {
@@ -233,6 +248,11 @@ public class DropArea extends HBox
             //setStyle("borderColor", "green");
             DragManager.acceptDragDrop(event.currentTarget as IUIComponent);
         }
+    }
+
+
+    public function get analysisItems():ArrayCollection {
+        return _analysisItems;
     }
 
     public function accept(analysisItem:AnalysisItem):Boolean {
@@ -273,11 +293,8 @@ public class DropArea extends HBox
     }
 
     public function dragDropHandler(event:DragEvent):void {
-        //setStyle("borderThickness", 0);
-        //setStyle("borderColor", 0xB7BABC);
         if (event.dragInitiator is DataGrid) {
-            var initialList:DataGrid = event.dragInitiator as DataGrid;
-            var newAnalysisItem:AnalysisItemWrapper = initialList.selectedItem as AnalysisItemWrapper;
+            var newAnalysisItem:AnalysisItemWrapper = event.dragSource.dataForFormat("items")[0] as AnalysisItemWrapper;
             if (this.analysisItem == null) {
                 dispatchEvent(new CommandEvent(new DropAreaAddedCommand(this, newAnalysisItem.analysisItem)));
             } else {
@@ -287,8 +304,7 @@ public class DropArea extends HBox
             var dropArea:DropArea = event.dragInitiator as DropArea;
             dispatchEvent(new CommandEvent(new DropAreaSwapCommand(dropArea, this)));
         } else if (event.dragInitiator is AdvancedDataGrid) {
-            var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
-            newAnalysisItem = analysisItemLabel.selectedItem as AnalysisItemWrapper;
+            newAnalysisItem = event.dragSource.dataForFormat("treeDataGridItems")[0] as AnalysisItemWrapper;
             if (newAnalysisItem.isAnalysisItem()) {
                 if (this.analysisItem == null) {
                     dispatchEvent(new CommandEvent(new DropAreaAddedCommand(this, newAnalysisItem.analysisItem)));
@@ -298,7 +314,6 @@ public class DropArea extends HBox
             }
         } else if (event.dragInitiator is List) {
             var list:List = event.dragInitiator as List;
-            var data:ArrayCollection = ArrayCollection(list.dataProvider);
             var newListItem:AnalysisItem = event.dragSource.dataForFormat("items")[0];
             if (this.analysisItem == null) {
                 dispatchEvent(new CommandEvent(new DropAreaAddedCommand(this, newListItem)));

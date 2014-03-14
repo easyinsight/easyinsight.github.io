@@ -7,7 +7,6 @@
         import com.easyinsight.analysis.CustomChangeEvent;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.formatters.Formatter;
 
         [Bindable]
@@ -56,7 +55,7 @@
                 var reportVal:Number = Number(row[gaugeDefinition.measure.qualifiedName()]);
                 value = Math.min(maxValue, reportVal);
                 gauge.alertRatios = [ gaugeDefinition.alertPoint1, gaugeDefinition.alertPoint2 ];
-                gauge.alertColors = [ gaugeDefinition.color1, gaugeDefinition.color2,  gaugeDefinition.color3 ];
+                gauge.alertColors = [ gaugeDefinition.color1, gaugeDefinition.color2, gaugeDefinition.color3 ];
                 numFormatter = gaugeDefinition.measure.getFormatter();
                 if (gaugeDefinition.benchmarkMeasure != null) {
                     benchmarkValue = "Benchmark: " + gaugeDefinition.benchmarkMeasure.getFormatter().format(row[gaugeDefinition.benchmarkMeasure.qualifiedName()]);
@@ -87,10 +86,10 @@
     </mx:Script>
     <mx:Canvas id="canvas">
         <bttc:Gauge id="gauge"
-           width="100"
-           verticalCenter="0" horizontalCenter="0"  valueFormatter="{numFormatter}"
-           minValue="0"  maxValue="{maxValue}" value="{value}"
-           bigTicks="9" smallTicks="45" showMinMax="true" showValue="true" fontColor="#FFFFFF" visible="false"/>
+                    width="100"
+                    verticalCenter="0" horizontalCenter="0"  valueFormatter="{numFormatter}"
+                    minValue="0"  maxValue="{maxValue}" value="{value}"
+                    bigTicks="9" smallTicks="45" showMinMax="true" showValue="true" fontColor="#FFFFFF" visible="false"/>
         <mx:Label text="{benchmarkValue}" id="benchmarkValueLabel" width="100%" textAlign="center" fontSize="24" visible="{benchmarkValue != null}"/>
     </mx:Canvas>
 </mx:Module>

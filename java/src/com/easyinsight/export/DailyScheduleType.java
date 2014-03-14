@@ -28,4 +28,9 @@ public class DailyScheduleType extends ScheduleType {
         }
         return null;
     }
+
+    @Override
+    public String when() {
+        return "Daily on " + getHour() + ":" + getMinute() + " GMT";
+    }
 }

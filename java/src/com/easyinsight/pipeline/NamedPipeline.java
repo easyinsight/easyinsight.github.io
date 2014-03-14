@@ -26,7 +26,7 @@ public class NamedPipeline extends Pipeline {
     @Override
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems, InsightRequestMetadata insightRequestMetadata) {
         List<IComponent> components = new ArrayList<IComponent>();
-        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, name, getStructure()));
+        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, name, getStructure(), insightRequestMetadata));
         // after this...
         // drop everything not relevant, that's what we're missing atm
         components.add(new ReworkedCleanupComponent(name));

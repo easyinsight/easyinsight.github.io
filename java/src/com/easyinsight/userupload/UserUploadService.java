@@ -124,6 +124,53 @@ public class UserUploadService {
         }
     }
 
+    public List<Tag> getDataSourceTags() {
+        List<Tag> tags = new ArrayList<Tag>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG_NAME, ACCOUNT_TAG_ID,DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? AND DATA_SOURCE_TAG = ? ORDER BY TAG_INDEX");
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            getTagsStmt.setBoolean(2, true);
+            ResultSet rs = getTagsStmt.executeQuery();
+            while (rs.next()) {
+                String tagName = rs.getString(1);
+                long tagID = rs.getLong(2);
+                boolean dataSourceTag = rs.getBoolean(3);
+                boolean reportTag = rs.getBoolean(4);
+                boolean fieldTag = rs.getBoolean(5);
+                tags.add(new Tag(tagID, tagName, dataSourceTag, reportTag, fieldTag));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return tags;
+    }
+
+    public List<Tag> getReportTags() {
+        List<Tag> tags = new ArrayList<Tag>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG_NAME, ACCOUNT_TAG_ID,DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? AND REPORT_TAG = ? ORDER BY TAG_INDEX");
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            getTagsStmt.setBoolean(2, true);
+            ResultSet rs = getTagsStmt.executeQuery();
+            while (rs.next()) {
+                String tagName = rs.getString(1);
+                long tagID = rs.getLong(2);
+                boolean dataSourceTag = rs.getBoolean(3);
+                boolean reportTag = rs.getBoolean(4);
+                boolean fieldTag = rs.getBoolean(5);
+                tags.add(new Tag(tagID, tagName, dataSourceTag, reportTag, fieldTag));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return tags;
+    }
 
 
     public List<Tag> saveTags(List<Tag> tags) {
@@ -193,8 +240,8 @@ public class UserUploadService {
         try {
             PreparedStatement existingReportStmt = conn.prepareStatement("SELECT tag_id FROM report_to_tag WHERE report_id = ?");
             PreparedStatement existingDashboardStmt = conn.prepareStatement("SELECT tag_id FROM dashboard_to_tag WHERE dashboard_id = ?");
-            PreparedStatement saveReportStmt = conn.prepareStatement("INSERT INTO report_to_tag (tag_id, report_id) values (?, ?)");
-            PreparedStatement saveDashboardStmt = conn.prepareStatement("INSERT INTO dashboard_to_tag (tag_id, dashboard_id) values (?, ?)");
+            PreparedStatement saveReportStmt = conn.prepareStatement("INSERT INTO report_to_tag (tag_id, report_id) VALUES (?, ?)");
+            PreparedStatement saveDashboardStmt = conn.prepareStatement("INSERT INTO dashboard_to_tag (tag_id, dashboard_id) VALUES (?, ?)");
             for (EIDescriptor dsd : descriptors) {
                 if (dsd.getType() == EIDescriptor.REPORT) {
                     Set<Long> existingIDs = new HashSet<Long>();
@@ -264,7 +311,7 @@ public class UserUploadService {
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement existingStmt = conn.prepareStatement("SELECT account_tag_id FROM data_source_to_tag WHERE data_source_id = ?");
-            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO data_source_to_tag (account_tag_id, data_source_id) values (?, ?)");
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO data_source_to_tag (account_tag_id, data_source_id) VALUES (?, ?)");
             for (DataSourceDescriptor dsd : dataSources) {
                 Set<Long> existingIDs = new HashSet<Long>();
                 existingStmt.setLong(1, dsd.getId());
@@ -393,7 +440,7 @@ public class UserUploadService {
         }
     }
 
-    public List<SolutionInstallInfo> copyDataSource(List<DataSourceDescriptor> dataSources, String newTag, boolean copyData) {
+    /*public List<SolutionInstallInfo> copyDataSource(List<DataSourceDescriptor> dataSources, String newTag, boolean copyData) {
 
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -482,7 +529,7 @@ public class UserUploadService {
             }
             Database.closeConnection(conn);
         }
-    }
+    }*/
 
     private boolean keep(EIDescriptor descriptor, boolean onlyMyData) {
         return !onlyMyData || descriptor.getRole() == Roles.OWNER;
@@ -499,7 +546,6 @@ public class UserUploadService {
             throw new RuntimeException();
         }
     }
-
 
 
     public MyDataTree getFeedAnalysisTree(boolean onlyMyData) {
@@ -519,10 +565,22 @@ public class UserUploadService {
             boolean testAccountVisible = FeedService.testAccountVisible(conn);
 
             AnalysisStorage analysisStorage = new AnalysisStorage();
-
-            objects.addAll(new DashboardStorage().getDashboardsForDataSource(userID, accountID, conn, dataSourceDescriptor.getId(), testAccountVisible).values());
-            objects.addAll(analysisStorage.getInsightDescriptorsForDataSource(userID, accountID, dataSourceDescriptor.getId(), conn, testAccountVisible));
+            List<DashboardDescriptor> dashboards = new DashboardStorage().getDashboardsForDataSource(userID, accountID, conn, dataSourceDescriptor.getId(), testAccountVisible).values();
+            List<InsightDescriptor> reports = analysisStorage.getInsightDescriptorsForDataSource(userID, accountID, dataSourceDescriptor.getId(), conn, testAccountVisible);
+            objects.addAll(dashboards);
+            objects.addAll(reports);
             objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn, testAccountVisible).values());
+
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? ORDER BY TAG_INDEX");
+
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet tagRS = getTagsStmt.executeQuery();
+            Map<Long, Tag> tags = new LinkedHashMap<Long, Tag>();
+            while (tagRS.next()) {
+                tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5)));
+            }
+            addTagsToDashboards(dashboards, conn, tags);
+            addTagsToReports(reports, conn, tags);
 
             Iterator<EIDescriptor> iter = objects.iterator();
             while (iter.hasNext()) {
@@ -581,6 +639,58 @@ public class UserUploadService {
             Database.closeConnection(conn);
         }
     }
+
+    private void addTagsToDashboards(List<DashboardDescriptor> dashboards, EIConnection conn, Map<Long, Tag> tags) throws SQLException {
+        PreparedStatement getTagsToDashboardStmt = conn.prepareStatement("SELECT DASHBOARD_TO_TAG.TAG_ID, DASHBOARD_ID FROM dashboard_to_tag, account_tag WHERE " +
+                "account_tag.account_tag_id = dashboard_to_tag.tag_id AND account_tag.account_id = ?");
+        getTagsToDashboardStmt.setLong(1, SecurityUtil.getAccountID());
+        ResultSet dashboardTagRS = getTagsToDashboardStmt.executeQuery();
+        Map<Long, List<Tag>> dashboardToTagMap = new HashMap<Long, List<Tag>>();
+        while (dashboardTagRS.next()) {
+            long dataSourceID = dashboardTagRS.getLong(2);
+            long tagID = dashboardTagRS.getLong(1);
+            Tag tag = tags.get(tagID);
+            List<Tag> t = dashboardToTagMap.get(dataSourceID);
+            if (t == null) {
+                t = new ArrayList<Tag>();
+                dashboardToTagMap.put(dataSourceID, t);
+            }
+            t.add(tag);
+        }
+        getTagsToDashboardStmt.close();
+
+        for (DashboardDescriptor d : dashboards) {
+            d.setTags(dashboardToTagMap.get(d.getId()));
+        }
+
+    }
+
+    private void addTagsToReports(List<InsightDescriptor> reports, EIConnection conn, Map<Long, Tag> tags) throws SQLException {
+        PreparedStatement getTagsToReportsStmt = conn.prepareStatement("SELECT REPORT_TO_TAG.TAG_ID, REPORT_ID FROM report_to_tag, account_tag WHERE " +
+                "account_tag.account_tag_id = report_to_tag.tag_id AND account_tag.account_id = ?");
+        getTagsToReportsStmt.setLong(1, SecurityUtil.getAccountID());
+        ResultSet reportTagRS = getTagsToReportsStmt.executeQuery();
+        Map<Long, List<Tag>> reportToTagMap = new HashMap<Long, List<Tag>>();
+        while (reportTagRS.next()) {
+            long dataSourceID = reportTagRS.getLong(2);
+            long tagID = reportTagRS.getLong(1);
+            Tag tag = tags.get(tagID);
+            List<Tag> t = reportToTagMap.get(dataSourceID);
+            if (t == null) {
+                t = new ArrayList<Tag>();
+                reportToTagMap.put(dataSourceID, t);
+            }
+            t.add(tag);
+        }
+        getTagsToReportsStmt.close();
+
+        for(InsightDescriptor d : reports) {
+            d.setTags(reportToTagMap.get(d.getId()));
+        }
+
+
+    }
+
 
     public void renameFolder(long folderID, String name) {
         EIConnection conn = Database.instance().getConnection();
@@ -667,11 +777,11 @@ public class UserUploadService {
 
             PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? ORDER BY TAG_INDEX");
             PreparedStatement getTagsToDataSourcesStmt = conn.prepareStatement("SELECT DATA_SOURCE_TO_TAG.ACCOUNT_TAG_ID, DATA_SOURCE_ID FROM data_source_to_tag, account_tag WHERE " +
-                    "account_tag.account_tag_id = data_source_to_tag.account_tag_id and account_tag.account_id = ?");
+                    "account_tag.account_tag_id = data_source_to_tag.account_tag_id AND account_tag.account_id = ?");
             PreparedStatement getTagsToReportsStmt = conn.prepareStatement("SELECT REPORT_TO_TAG.TAG_ID, REPORT_ID FROM report_to_tag, account_tag WHERE " +
-                    "account_tag.account_tag_id = report_to_tag.tag_id and account_tag.account_id = ?");
+                    "account_tag.account_tag_id = report_to_tag.tag_id AND account_tag.account_id = ?");
             PreparedStatement getTagsToDashboardStmt = conn.prepareStatement("SELECT DASHBOARD_TO_TAG.TAG_ID, DASHBOARD_ID FROM dashboard_to_tag, account_tag WHERE " +
-                    "account_tag.account_tag_id = dashboard_to_tag.tag_id and account_tag.account_id = ?");
+                    "account_tag.account_tag_id = dashboard_to_tag.tag_id AND account_tag.account_id = ?");
             getTagsStmt.setLong(1, SecurityUtil.getAccountID());
             ResultSet tagRS = getTagsStmt.executeQuery();
             Map<Long, Tag> tags = new LinkedHashMap<Long, Tag>();
@@ -740,7 +850,6 @@ public class UserUploadService {
             }
 
 
-
             AnalysisStorage analysisStorage = new AnalysisStorage();
 
             if (groupID == 0) {
@@ -804,7 +913,7 @@ public class UserUploadService {
             PreparedStatement stmt = conn.prepareStatement("SELECT DATA_FEED.FEED_NAME, DATA_FEED.FEED_TYPE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, refresh_behavior FROM DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID WHERE " +
                     "DATA_FEED_ID = ?");
             PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT FIRST_NAME, NAME FROM USER, UPLOAD_POLICY_USERS WHERE UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
-                "UPLOAD_POLICY_USERS.FEED_ID = ?");
+                    "UPLOAD_POLICY_USERS.FEED_ID = ?");
 
             DataSourceDescriptor placeholder = new DataSourceDescriptor("Not Tied to a Data Source", 0, 0, false, 0);
             descriptorMap.put(0L, placeholder);
@@ -1071,7 +1180,7 @@ public class UserUploadService {
                 byte[] bytes = null;
                 if (uploadContext instanceof FlatFileUploadContext) {
                     AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-                    S3Object object = s3.getObject(new GetObjectRequest("archival1", ((FlatFileUploadContext)uploadContext).getUploadKey()+".zip"));
+                    S3Object object = s3.getObject(new GetObjectRequest("archival1", ((FlatFileUploadContext) uploadContext).getUploadKey() + ".zip"));
                     byte retrieveBuf[];
                     retrieveBuf = new byte[1];
                     InputStream bfis = object.getObjectContent();
@@ -1136,7 +1245,7 @@ public class UserUploadService {
             if (uploadContext instanceof FlatFileUploadContext) {
                 FlatFileUploadContext flatFileUploadContext = (FlatFileUploadContext) uploadContext;
                 AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-                S3Object object = s3.getObject(new GetObjectRequest("archival1", flatFileUploadContext.getUploadKey()+".zip"));
+                S3Object object = s3.getObject(new GetObjectRequest("archival1", flatFileUploadContext.getUploadKey() + ".zip"));
 
                 byte retrieveBuf[];
                 retrieveBuf = new byte[1];
@@ -1280,12 +1389,10 @@ public class UserUploadService {
         try {
             conn.setAutoCommit(false);
             result = retrieveRawData(uploadID, conn);
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
-        }
-        finally {
+        } finally {
             Database.closeConnection(conn);
         }
         return result;
@@ -1294,18 +1401,18 @@ public class UserUploadService {
     public static RawUploadData retrieveRawData(long uploadID, Connection conn) throws SQLException {
         RawUploadData rawUploadData = rawDataMap.get(uploadID);
         if (rawUploadData == null) {
-                PreparedStatement rawDataStmt = conn.prepareStatement("SELECT ACCOUNT_ID, DATA_NAME, USER_DATA FROM " +
-                        "USER_UPLOAD WHERE USER_UPLOAD_ID = ?");
-                rawDataStmt.setLong(1, uploadID);
-                ResultSet dataRS = rawDataStmt.executeQuery();
-                if (dataRS.next()) {
-                    long accountID = dataRS.getLong(1);
-                    String dataName = dataRS.getString(2);
-                    byte[] userData = dataRS.getBytes(3);
-                    rawUploadData = new RawUploadData(accountID, dataName, userData);
-                } else {
-                    throw new RuntimeException("Couldn't find upload info");
-                }
+            PreparedStatement rawDataStmt = conn.prepareStatement("SELECT ACCOUNT_ID, DATA_NAME, USER_DATA FROM " +
+                    "USER_UPLOAD WHERE USER_UPLOAD_ID = ?");
+            rawDataStmt.setLong(1, uploadID);
+            ResultSet dataRS = rawDataStmt.executeQuery();
+            if (dataRS.next()) {
+                long accountID = dataRS.getLong(1);
+                String dataName = dataRS.getString(2);
+                byte[] userData = dataRS.getBytes(3);
+                rawUploadData = new RawUploadData(accountID, dataName, userData);
+            } else {
+                throw new RuntimeException("Couldn't find upload info");
+            }
 
         }
         return rawUploadData;
@@ -1497,7 +1604,7 @@ public class UserUploadService {
                     final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                     final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
                     final String personaName = SecurityUtil.getPersonaName();
-                    new Thread(new Runnable() {
+                    DataSourceThreadPool.instance().addActivity(new Runnable() {
 
                         public void run() {
                             SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
@@ -1563,7 +1670,7 @@ public class UserUploadService {
                                 SecurityUtil.clearThreadLocal();
                             }
                         }
-                    }).start();
+                    });
                 } else {
                     credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
                     credentialsResponse.setEstimatedDuration(avgTime);
@@ -1598,7 +1705,7 @@ public class UserUploadService {
             conn.setAutoCommit(false);
             FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
             AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-            S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey+".zip"));
+            S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey + ".zip"));
 
             byte retrieveBuf[];
             retrieveBuf = new byte[1];
@@ -1693,7 +1800,7 @@ public class UserUploadService {
             FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
 
             AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-            S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey+".zip"));
+            S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey + ".zip"));
 
             byte retrieveBuf[];
             retrieveBuf = new byte[1];
@@ -1811,6 +1918,7 @@ public class UserUploadService {
             Database.closeConnection(conn);
         }
     }
+
     public static User retrieveUser(Connection conn) {
         long userID = SecurityUtil.getUserID();
         return retrieveUser(conn, userID);
@@ -1853,13 +1961,13 @@ public class UserUploadService {
         Credentials c = new Credentials();
         String s = PasswordStorage.decryptString(creds.getUserName());
         int i = s.lastIndexOf(":" + SecurityUtil.getUserName());
-        if(i == -1) {
+        if (i == -1) {
             throw new MalformedCredentialsException();
         }
         c.setUserName(s.substring(0, i));
         s = PasswordStorage.decryptString(creds.getPassword());
         i = s.lastIndexOf(":" + SecurityUtil.getUserName());
-        if(i == -1)
+        if (i == -1)
             throw new MalformedCredentialsException();
         c.setPassword(s.substring(0, i));
         return c;
@@ -1917,7 +2025,7 @@ public class UserUploadService {
                 final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                 final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
                 final String personaName = SecurityUtil.getPersonaName();
-                new Thread(new Runnable() {
+                DataSourceThreadPool.instance().addActivity(new Runnable() {
 
                     public void run() {
                         SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
@@ -1949,7 +2057,7 @@ public class UserUploadService {
                             SecurityUtil.clearThreadLocal();
                         }
                     }
-                }).start();
+                });
             }
             return credentialsResponse;
         } catch (ReportException re) {

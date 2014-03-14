@@ -74,6 +74,7 @@ public class GenericFilter extends HBox implements IFilter {
 		}
 
 		private function onFilterEdit(event:FilterEditEvent):void {
+            labelText.text = NamedFilterReference(event.filterDefinition).referenceName;
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
 		}
 

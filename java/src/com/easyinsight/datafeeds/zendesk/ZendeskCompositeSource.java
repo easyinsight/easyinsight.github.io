@@ -4,9 +4,11 @@ import com.easyinsight.PasswordStorage;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
+import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.users.Account;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
@@ -45,6 +47,12 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
 
     public void setHackMethod(boolean hackMethod) {
         this.hackMethod = hackMethod;
+    }
+
+    public List<CustomFieldTag> customFieldTags() {
+        List<CustomFieldTag> customTags = new ArrayList<CustomFieldTag>();
+        customTags.add(new CustomFieldTag(ZendeskTicketSource.CUSTOM_FIELD_TICKET, "Custom Ticket Field"));
+        return customTags;
     }
 
     @Override
@@ -265,5 +273,12 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     protected void refreshDone() {
         super.refreshDone();
         comments = null;
+    }
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Zendesk URL", "url", "Your Highrise URL is the browser URL you normally use to connect to Highrise. For example, if you access Highrise as yourcompanyname.highrisehq.com, put yourcompanyname in as the Highrise URL.");
+        factory.addField("Zendesk User Name", "zdUserName", "You can find the token on your Highrise page under My Info - API Token.");
+        factory.addField("Zendesk API Authentication Token:", "zdApiKey", "You can find the token on your Highrise page under My Info - API Token.");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 }

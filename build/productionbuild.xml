@@ -418,7 +418,7 @@
     <target name="modules4" depends="app.embeddeddashboard, app.seleniumdashboard"/>
     <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail, perspective.spreadsheetupdatewizard"/>
     <target name="modules7" depends="perspective.kpiwindow,perspective.datasourceadmin, app.embeddedcomponentapplication"/>
-    <target name="modules8" depends="report.heatmap, report.gantt"/>
+    <target name="modules8" depends="report.heatmap, report.gantt, app.connectionadmin"/>
     <target name="apps" depends="compileFlexOptimized, app.embeddedreport, app.selenium, app.admin"/>
 
     <target name="compileFlexOptimized">
@@ -483,6 +483,10 @@
 
     <target name="perspective.groupdetail">
         <buildSWF mainMXML="com/easyinsight/groups/GroupDetail.mxml" swfName="GroupDetail" buildFile="perspectives/group-detail-module.xml"/>
+    </target>
+
+    <target name="app.connectionadmin">
+        <buildSWF mainMXML="ConnectionApplication.mxml" swfName="ConnectionApplication" buildFile="connection-admin.xml"/>
     </target>
 
     <target name="perspective.analysisitemeditor">

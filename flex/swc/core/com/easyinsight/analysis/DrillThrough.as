@@ -19,5 +19,12 @@ public class DrillThrough extends Link{
     override public function get type():String {
         return "Drillthrough";
     }
+
+    override public function createString(name:String = null):String {
+        if (name != null) {
+            return "drillthrough to " + name;
+        }
+        return "drillthrough";
+    }
 }
 }

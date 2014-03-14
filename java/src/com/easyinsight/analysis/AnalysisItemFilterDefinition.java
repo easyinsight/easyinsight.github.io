@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
+import com.easyinsight.tag.Tag;
 import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
@@ -28,6 +29,18 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name="target_item_id")
     private AnalysisItem targetItem;
+
+    // better field choice filters, being able to point to "all" fields
+    // better tag management wherever possible
+    // links to docs
+    // markdown on dashboard text
+    // anything else on text reports
+    // the various connections
+    // the prebuilts themselves
+    // anything on html5 side we can do
+    // import users from connection
+    // better stuff on home page
+    //
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "analysis_item_filter_to_analysis_item",
@@ -104,6 +117,15 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
     }
 
     @Override
+    public FilterDefinition clone() throws CloneNotSupportedException {
+        AnalysisItemFilterDefinition clone = (AnalysisItemFilterDefinition) super.clone();
+        clone.setAvailableHandles(new ArrayList<AnalysisItemHandle>(getAvailableHandles()));
+        clone.setAvailableItems(new ArrayList<AnalysisItem>(getAvailableItems()));
+        clone.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>(getAvailableTags()));
+        return clone;
+    }
+
+    @Override
     public void updateIDs(ReplacementMap replacementMap) {
         super.updateIDs(replacementMap);
         if (targetItem != null) {
@@ -125,12 +147,16 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
 
         List<WeNeedToReplaceHibernateTag> replaceTags = new ArrayList<WeNeedToReplaceHibernateTag>();
         for (WeNeedToReplaceHibernateTag tag : availableTags) {
-            WeNeedToReplaceHibernateTag newTag = replacementMap.findReplacementTag(tag.getTagID());
-            if (newTag == null) {
-                newTag = new WeNeedToReplaceHibernateTag();
+            Tag newTag1 = replacementMap.findReplacementTag(tag.getTagID());
+            if (newTag1 == null) {
+                WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
                 newTag.setTagID(tag.getTagID());
+                replaceTags.add(newTag);
+            } else {
+                WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
+                newTag.setTagID(newTag1.getId());
+                replaceTags.add(newTag);
             }
-            replaceTags.add(newTag);
         }
         this.availableTags = replaceTags;
     }
@@ -204,6 +230,9 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
             } else {
                 session.update(analysisItem);
             }
+        }
+        if (targetItem.getAnalysisItemID() == 0) {
+            session.save(targetItem);
         }
         for (AnalysisItemHandle analysisItem : availableHandles) {
             analysisItem.save();

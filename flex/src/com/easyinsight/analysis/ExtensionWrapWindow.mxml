@@ -2,6 +2,7 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.AnalysisItemConfiguration;
+        import com.easyinsight.administration.feed.FieldRuleEvent;
         import com.easyinsight.analysis.ytd.VerticalListReportExtension;
         import com.easyinsight.analysis.ytd.YTDReportFieldExtension;
 
@@ -62,7 +63,7 @@
                 var vExt:ReportFieldExtension = item.reportFieldExtension;
                 config.verticalListExtension = vExt as VerticalListReportExtension;
             }
-
+            dispatchEvent(new FieldRuleEvent(FieldRuleEvent.DEFINE_EXTENSION, null, null, item.reportFieldExtension));
             PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>

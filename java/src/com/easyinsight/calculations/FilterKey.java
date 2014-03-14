@@ -1,10 +1,10 @@
 package com.easyinsight.calculations;
 
 /**
- * User: jamesboe
- * Date: 3/7/14
- * Time: 9:00 AM
- */
+* User: jamesboe
+* Date: 3/7/14
+* Time: 9:00 AM
+*/
 public class FilterKey {
     private String filterLabel;
     private String source;
@@ -42,4 +42,3 @@ public class FilterKey {
         return result;
     }
 }
-

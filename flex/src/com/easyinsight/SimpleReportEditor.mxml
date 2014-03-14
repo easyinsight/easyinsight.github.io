@@ -49,11 +49,13 @@
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.analysis.FeedNode;
+        import com.easyinsight.analysis.FieldDataSourceOrigin;
         import com.easyinsight.analysis.FieldDoubleClickEvent;
         import com.easyinsight.analysis.FieldEditorEvent;
         import com.easyinsight.analysis.FieldFilterWindow;
         import com.easyinsight.analysis.FilterSetManageWindow;
         import com.easyinsight.analysis.FilterSetReportEvent;
+        import com.easyinsight.analysis.FolderNode;
         import com.easyinsight.analysis.GenericDefinitionEditWindow;
         import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.IReportController;
@@ -94,6 +96,7 @@
         import com.easyinsight.report.ReportExportWindow;
         import com.easyinsight.report.ReportNavigationEvent;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.suggestion.DataSourceLevelFieldReport;
         import com.easyinsight.suggestion.IntentionListWindow;
         import com.easyinsight.suggestion.IntentionSuggestion;
         import com.easyinsight.suggestion.IntentionTriggerEvent;
@@ -241,6 +244,7 @@
             var errors:ArrayCollection = new ArrayCollection();
             var warnings:ArrayCollection = new ArrayCollection();
             var quickActions:ArrayCollection = new ArrayCollection();
+            var shouldDoThis:ArrayCollection = new ArrayCollection();
             if (suggests != null) {
 
                 for each (var intentionSuggestion:IntentionSuggestion in suggests) {
@@ -248,6 +252,9 @@
                         errors.addItem(intentionSuggestion);
                     } else if (intentionSuggestion.priority == IntentionSuggestion.WARNING) {
                         warnings.addItem(intentionSuggestion);
+                    } else if (intentionSuggestion.priority == IntentionSuggestion.YOU_SHOULD_REALLY_DO_THIS) {
+                        shouldDoThis.addItem(intentionSuggestion);
+                        quickActions.addItem(intentionSuggestion);
                     } else {
                         quickActions.addItem(intentionSuggestion);
                     }
@@ -264,7 +271,7 @@
                 multiProblemBar = null;
             }
 
-            if ((errors.length + warnings.length) > 1) {
+            if ((errors.length + warnings.length + shouldDoThis) > 1) {
                 multiProblemBar = new MultiProblemBar();
                 multiProblemBar.simpleReportEditor = this;
                 multiProblemBar.warnings = warnings;
@@ -274,26 +281,22 @@
                 multiProblemBar.fields = getWrappers();
                 rightBox.addChildAt(multiProblemBar, 0);
             }
-            else if (errors.length == 1 || warnings.length == 1) {
+            else if (errors.length == 1 || warnings.length == 1 || shouldDoThis.length == 1) {
                 majorProblemBar = new MajorProblemBar();
                 majorProblemBar.simpleReportEditor = this;
                 if (errors.length == 1) {
                     majorProblemBar.intentionSuggestion = errors.getItemAt(0) as IntentionSuggestion;
-                } else {
+                } else if (warnings.length == 1) {
                     majorProblemBar.intentionSuggestion = warnings.getItemAt(0) as IntentionSuggestion;
+                } else {
+                    majorProblemBar.intentionSuggestion = shouldDoThis.getItemAt(0) as IntentionSuggestion;
                 }
 
                 majorProblemBar.fields = getWrappers();
                 majorProblemBar.dataSourceID = dataService.dataFeedID;
                 rightBox.addChildAt(majorProblemBar, 0);
             }
-            //this.suggestions = suggestions;
             this.quickActions = quickActions;
-            /*if (suggestions != null && suggestions.length > 0) {
-                currentState = "showSuggestions";
-            } else {
-                currentState = "";
-            }*/
         }
 
         private function gotIntentions():void {
@@ -344,10 +347,6 @@
             var toRemove:ArrayCollection = analysisDefinition.cleanupReport(transformContainer.getFilterDefinitions());
             for each (var toRemoveFilter:FilterDefinition in toRemove) {
                 transformContainer.removeFilter(toRemoveFilter);
-            }
-            var newFilters:ArrayCollection = analysisDefinition.newFilters(transformContainer.getFilterDefinitions());
-            for each (var filterDefinition:FilterDefinition in newFilters) {
-                transformContainer.addFilterDefinition(filterDefinition);
             }
             dataView = dataViewFactory;
             dataView.adHocMode = !defaultManualRun;
@@ -585,7 +584,7 @@
                 //this.dataSourceFields = feedMetadata.dataSourceFields;
                 this.admin = feedMetadata.dataSourceAdmin;
                 var cFactory:ClassFactory = new ClassFactory(AvailableFieldRenderer);
-                cFactory.properties = { dataSourceID:dataSourceID, calcRefactor:feedMetadata.allowRefactor };
+                cFactory.properties = { dataSourceID:dataSourceID, calcRefactor:feedMetadata.allowRefactor, tags: feedMetadata.tags };
                 rendererFactory = cFactory;
                 dataSourceName = this.feedMetadata.dataSourceName;
                 joinsCustomizable = this.feedMetadata.customJoinsAllowed;
@@ -606,12 +605,24 @@
                 availableFields = new ArrayCollection();
                 wrappers = new ArrayCollection();
                 for each (var feedNode:FeedNode in feedMetadata.fieldHierarchy) {
-                    var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(feedNode);
+                    var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(feedNode, analysisDefinition != null ? analysisDefinition.analysisID : 0);
+                    if (analysisWrapper.feedNode != null && analysisWrapper.feedNode is FolderNode && analysisWrapper.children != null && analysisWrapper.children.length == 0) {
+                        continue;
+                    }
                     if (!analysisWrapper.hidden) {
                         availableFields.addItem(analysisWrapper);
                     }
                 }
+                // TODO: x
                 for each (var listItem:AnalysisItem in feedMetadata.fields) {
+                    if (analysisDefinition != null) {
+                        var origin:FieldDataSourceOrigin = listItem.origin;
+                        if (origin != null) {
+                            if (origin.report == analysisDefinition.analysisID) {
+                                continue;
+                            }
+                        }
+                    }
                     var analysisNode:AnalysisItemNode = new AnalysisItemNode();
                     analysisNode.analysisItem = listItem;
                     //listItem.fieldListField = true;
@@ -651,6 +662,10 @@
                     assignSuggestions(feedMetadata.suggestions);
 
                 } else {
+                    if (analysisDefinition.dataSourceFieldReport) {
+                        var df:DataSourceLevelFieldReport = new DataSourceLevelFieldReport();
+                        rightBox.addChildAt(df, 0);
+                    }
                     //this.title = analysisDefinition.name;
                     if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
                         saveAllowed = false;
@@ -830,6 +845,21 @@
             dispatchEvent(new AnalyzeEvent(new ReportEditorAnalyzeSource(report, 0)));
         }
 
+        private function tagField(event:ReportEditorFieldEvent):void {
+            var wrapper:AnalysisItemWrapper = event.item as AnalysisItemWrapper;
+            var tag:Tag = event.tag as Tag;
+            if (wrapper.analysisItem.tags == null) {
+                wrapper.analysisItem.tags = new ArrayCollection();
+            }
+            wrapper.analysisItem.tags.addItem(tag);
+            ProgressAlert.alert(this, "Tagging the field...", null, feedService.tagField);
+            feedService.tagField.send(wrapper.displayName, dataService.dataFeedID, tag);
+        }
+
+        private function taggedField():void {
+
+        }
+
         public function initializeForWorksheet():void {
             try {
                 if (User.getInstance().reportMode) {
@@ -854,6 +884,7 @@
                 addEventListener(ReportEditorFieldEvent.ITEM_DELETE, fieldEventHandler.deleteField);
                 addEventListener(ReportEditorFieldEvent.ITEM_EDIT, fieldEventHandler.editField);
                 addEventListener(ReportEditorFieldEvent.ITEM_FILTER, filterField);
+                addEventListener(ReportEditorFieldEvent.TAG_ITEM, tagField);
                 addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
                 addEventListener(AnalysisItemCopyEvent.ITEM_COPY, onCopy);
 
@@ -1287,14 +1318,14 @@
             window.definition = analysisDefinition;
             window.allFields = getWrappers();
             window.startIndex = index;
-            window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, function (event:ReportPreferencesEvent):void {
+            /*window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, function (event:ReportPreferencesEvent):void {
                 dispatchEvent(new AnalysisChangedEvent());
                 if (event.refreshData) {
                     dataView.forceRetrieve();
                 } else {
                     dataView.rerender();
                 }
-            }, false, 0, true);
+            }, false, 0, true);*/
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -1415,7 +1446,7 @@
             window.y = customFieldButton.y + customFieldButton.height + 10;
         }
 
-        private function onAnalysisItemEdit(event:AnalysisItemEditEvent):void {
+        public function onAnalysisItemEdit(event:AnalysisItemEditEvent):void {
             var node:AnalysisItemNode = new AnalysisItemNode();
             node.analysisItem = event.analysisItem;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
@@ -1464,29 +1495,6 @@
                 dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID , urlKey: feedMetadata.urlKey})));
             }
         }
-
-        /*private function onChange():void {
-         IHierarchicalCollectionView(fieldGrid.dataProvider).refresh();
-         }
-
-         private function onDataChange():void {
-         IHierarchicalCollectionView(fieldGrid.dataProvider).filterFunction = filterFields;
-         }*/
-
-        /*private function filterFields(item:Object):Boolean {
-         if (findFieldInput.text != null && findFieldInput.text.length > 0) {
-         var wrapper:AnalysisItemWrapper = item as AnalysisItemWrapper;
-         var children:ICollectionView = IHierarchicalCollectionView(fieldGrid.dataProvider).getChildren(wrapper);
-         children.filterFunction = filterFields;
-         children.refresh();
-         if (children.length > 0 || wrapper.displayName.toLowerCase().indexOf(findFieldInput.text.toLowerCase()) != -1) {
-         return true;
-         } else {
-         return false;
-         }
-         }
-         return true;
-         }*/
 
         [Bindable]
         private var reportMode:String = "all";
@@ -1582,6 +1590,7 @@
     </mx:RemoteObject>
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="fieldToDataSourceLevel" result="promoted()"/>
+        <mx:method name="tagField" result="taggedField()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="coreDataService" destination="data">
         <mx:method name="addonFields" result="onBolt()"/>

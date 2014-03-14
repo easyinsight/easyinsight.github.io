@@ -3,11 +3,9 @@ import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.ChartDefinition;
-import com.easyinsight.analysis.MultiColor;
 import com.easyinsight.analysis.Value;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.yaxisbased.YAxisDefinition;
-import com.easyinsight.skin.ApplicationSkin;
 
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
@@ -27,17 +25,10 @@ public class StackedBarChartDefinition extends YAxisDefinition{
     public var legendMaxWidth:int = 200;
     public var multiColors:ArrayCollection = new ArrayCollection();
     public var stackSort:String = ChartDefinition.SORT_UNSORTED;
+    public var stackLimit:int = 10;
 
     public function StackedBarChartDefinition() {
         super();
-    }
-
-    override public function initialConfig():void {
-        super.initialConfig();
-        if  (ApplicationSkin.instance().multiColors != null && ApplicationSkin.instance().multiColors.length > 0 &&
-                MultiColor(ApplicationSkin.instance().multiColors.getItemAt(0)).color1StartEnabled) {
-            multiColors = ApplicationSkin.instance().multiColors;
-        }
     }
 
     override public function supportsEmbeddedFonts():Boolean {

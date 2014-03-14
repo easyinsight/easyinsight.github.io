@@ -2,7 +2,9 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSStackedBarChartDefinition;
 import com.easyinsight.analysis.definitions.WSStackedColumnChartDefinition;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.*;
+import com.easyinsight.calculations.functions.DayOfQuarter;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.*;
 import com.easyinsight.database.EIConnection;
@@ -22,6 +24,7 @@ import com.easyinsight.database.Database;
 import java.io.ByteArrayInputStream;
 import java.sql.*;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -32,6 +35,7 @@ import com.easyinsight.storage.CachedCalculationTransform;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IDataTransform;
 import com.easyinsight.tag.Tag;
+import com.easyinsight.userupload.DataSourceThreadPool;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.util.RandomTextGenerator;
@@ -54,6 +58,126 @@ import org.hibernate.Session;
 public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
+
+
+
+    public void reportUses(long reportID) {
+        analysisStorage.getAnalysisDefinition(reportID);
+    }
+
+    public Usage whatUsesReport(WSAnalysisDefinition report) {
+        EIConnection conn = Database.instance().getConnection();
+        List<InsightDescriptor> reportsUsingAsAddon = new ArrayList<InsightDescriptor>();
+        List<DataSourceDescriptor> dataSourcesBasedOn = new ArrayList<DataSourceDescriptor>();
+        List<DashboardDescriptor> dashboardsUsing = new ArrayList<DashboardDescriptor>();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.URL_KEY FROM ANALYSIS, REPORT_TO_REPORT_STUB, REPORT_STUB WHERE " +
+                    "ANALYSIS.ANALYSIS_ID = REPORT_TO_REPORT_STUB.REPORT_ID AND REPORT_TO_REPORT_STUB.REPORT_STUB_ID = REPORT_STUB.REPORT_STUB_ID AND REPORT_STUB.REPORT_ID = ?");
+            queryStmt.setLong(1, report.getAnalysisID());
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long reportID = rs.getLong(1);
+                String title = rs.getString(2);
+                String urlKey = rs.getString(3);
+                reportsUsingAsAddon.add(new InsightDescriptor(reportID, title, report.getDataFeedID(), 0, urlKey, 0, true));
+            }
+            PreparedStatement dataSourceStmt = conn.prepareStatement("SELECT data_feed.feed_name, data_feed.data_feed_id, data_feed.api_key FROM distinct_cached_addon_report_source, data_feed WHERE " +
+                    "distinct_cached_addon_report_source.report_id = ? AND distinct_cached_addon_report_source.data_source_id = data_feed.data_feed_id");
+            dataSourceStmt.setLong(1, report.getAnalysisID());
+            ResultSet dataSourceRS = dataSourceStmt.executeQuery();
+            while (dataSourceRS.next()) {
+                String dataSourceName = dataSourceRS.getString(1);
+                long dataSourceID = dataSourceRS.getLong(2);
+                DataSourceDescriptor dsd = new DataSourceDescriptor(dataSourceName, dataSourceID, 0, true, 0);
+                dsd.setUrlKey(dataSourceRS.getString(3));
+                dataSourcesBasedOn.add(dsd);
+            }
+
+            PreparedStatement dashboardStmt = conn.prepareStatement("SELECT dashboard_report.dashboard_element_id FROM dashboard_report WHERE dashboard_report.report_id = ?");
+            PreparedStatement dashboardDetailStmt = conn.prepareStatement("SELECT dashboard.dashboard_name, dashboard.url_key FROM dashboard WHERE dashboard_id = ?");
+            dashboardStmt.setLong(1, report.getAnalysisID());
+            ResultSet elementRS = dashboardStmt.executeQuery();
+            while (elementRS.next()) {
+                long dashboardElementID = elementRS.getLong(1);
+                PreparedStatement rootStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DATA_SOURCE_ID FROM DASHBOARD, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ELEMENT_ID = ? AND " +
+                        "DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ID = DASHBOARD.DASHBOARD_ID");
+                PreparedStatement findParentInGridStmt = conn.prepareStatement("SELECT DASHBOARD_GRID.DASHBOARD_ELEMENT_ID  FROM " +
+                        "DASHBOARD_GRID, DASHBOARD_GRID_ITEM WHERE DASHBOARD_GRID_ITEM.DASHBOARD_ELEMENT_ID = ? AND DASHBOARD_GRID_ITEM.DASHBOARD_GRID_ID = DASHBOARD_GRID.DASHBOARD_GRID_ID");
+                PreparedStatement findParentInStackStmt = conn.prepareStatement("SELECT DASHBOARD_STACK.DASHBOARD_ELEMENT_ID  FROM " +
+                        "DASHBOARD_STACK, DASHBOARD_STACK_ITEM WHERE DASHBOARD_STACK_ITEM.DASHBOARD_ELEMENT_ID = ? AND DASHBOARD_STACK_ITEM.DASHBOARD_STACK_ID = DASHBOARD_STACK.DASHBOARD_STACK_ID");
+                Blah blah = findDashboard(dashboardElementID, rootStmt, findParentInGridStmt, findParentInStackStmt);
+                if (blah == null) {
+                    throw new RuntimeException();
+                }
+                long dashboardID = blah.dashboardID;
+                rootStmt.close();
+                findParentInGridStmt.close();
+                findParentInStackStmt.close();
+                dashboardDetailStmt.setLong(1, dashboardID);
+                ResultSet dashboardRS = dashboardDetailStmt.executeQuery();
+                if (dashboardRS.next()) {
+                    String dashboardName = dashboardRS.getString(1);
+                    String urlKey = dashboardRS.getString(2);
+                    DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey, 0, 0, null, false);
+                    dashboardsUsing.add(dashboardDescriptor);
+                }
+            }
+            dashboardDetailStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return new Usage(reportsUsingAsAddon, dataSourcesBasedOn, dashboardsUsing);
+    }
+
+    private Blah findDashboard(long dashboardElementID, PreparedStatement rootStmt, PreparedStatement findParentInGridStmt, PreparedStatement findParentInStackStmt) throws SQLException {
+        rootStmt.setLong(1, dashboardElementID);
+        ResultSet rootRS = rootStmt.executeQuery();
+        if (rootRS.next()) {
+            return new Blah(rootRS.getLong(1), rootRS.getLong(2));
+        }
+        findParentInGridStmt.setLong(1, dashboardElementID);
+        ResultSet gridRS = findParentInGridStmt.executeQuery();
+        if (gridRS.next()) {
+            return findDashboard(gridRS.getLong(1), rootStmt, findParentInGridStmt, findParentInStackStmt);
+        }
+        findParentInStackStmt.setLong(1, dashboardElementID);
+        ResultSet stackRS = findParentInStackStmt.executeQuery();
+        if (stackRS.next()) {
+            return findDashboard(stackRS.getLong(1), rootStmt, findParentInGridStmt, findParentInStackStmt);
+        }
+        return null;
+    }
+
+    private static class Blah {
+        long dashboardID;
+        long dataSourceID;
+
+        private Blah(long dashboardID, long dataSourceID) {
+            this.dashboardID = dashboardID;
+            this.dataSourceID = dataSourceID;
+        }
+    }
+
+    public String getBaseDocs() {
+        try {
+            String html = DocReader.toHTML(null, FlexContext.getHttpRequest());
+            html = html.replace("<h2 id=\"Easy_Insight_Documentation\">", "<b>");
+            html = html.replace("</h2>", "</b>");
+            html = html.replace("Connections<ol>", "Connections<textformat leftmargin=\"50\">");
+            html = html.replace("</ol>", "</textformat>");
+            System.out.println(html);
+            return html;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void dashboardUses(long dashboardID) {
+
+    }
 
     /*public String generateDescription(WSAnalysisDefinition report) {
         try {
@@ -433,10 +557,40 @@ public class AnalysisService {
                              CompositeFeedDefinition compositeFeedDefinition, List<AnalysisItem> items, EIConnection conn) throws SQLException, CloneNotSupportedException {
         List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
 
+        Map<Long, AnalysisItem> sourceMap = new HashMap<Long, AnalysisItem>();
+        for (AnalysisItem field : compositeFeedDefinition.getFields()) {
+            if (field.isConcrete()) {
+                sourceMap.put(field.getKey().toBaseKey().getKeyID(), field);
+            }
+        }
+
         configurableDataSources.add(new DataSourceDescriptor(compositeFeedDefinition.getFeedName(), compositeFeedDefinition.getDataFeedID(), compositeFeedDefinition.getFeedType().getType(),
                 false, compositeFeedDefinition.getDataSourceBehavior()));
         Feed feed = FeedRegistry.instance().getFeed(compositeFeedDefinition.getDataFeedID(), conn);
         for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
+            AnalysisItem sourceItem = connection.getSourceItem();
+            AnalysisItem targetItem = connection.getTargetItem();
+
+            AnalysisItem sourceResult;
+            if (connection.getSourceItem() == null) {
+                sourceResult = sourceMap.get(connection.getSourceJoin().getKeyID());
+            } else {
+                sourceResult = sourceMap.get(sourceItem.getKey().toBaseKey().getKeyID());
+                System.out.println("\tSearching for " + sourceResult.toDisplay());
+            }
+
+
+            AnalysisItem targetResult;
+            if (connection.getTargetItem() == null) {
+                targetResult = sourceMap.get(connection.getTargetJoin().getKeyID());
+            } else {
+                targetResult = sourceMap.get(targetItem.getKey().toBaseKey().getKeyID());
+                System.out.println("\tSearching for " + targetResult.toDisplay());
+            }
+
+            System.out.println("Source Feed ID = " + connection.getSourceFeedID());
+            System.out.println("Target Feed ID = " + connection.getTargetFeedID());
+
             JoinOverride joinOverride = new JoinOverride();
             String sourceName;
             String targetName;
@@ -471,8 +625,8 @@ public class AnalysisService {
                 stmt.close();
             }
             joinOverride.setDataSourceID(compositeFeedDefinition.getDataFeedID());
-            joinOverride.setSourceItem(findSourceItem(connection, items == null ? feed.getFields() : items));
-            joinOverride.setTargetItem(findTargetItem(connection, items == null ? feed.getFields() : items));
+            joinOverride.setSourceItem(sourceResult);
+            joinOverride.setTargetItem(targetResult);
             if (joinOverride.getSourceItem() != null && joinOverride.getTargetItem() != null) {
                 joinOverride.setSourceName(sourceName);
                 joinOverride.setTargetName(targetName);
@@ -1304,32 +1458,7 @@ public class AnalysisService {
                                              WSAnalysisDefinition report, String altKey, List altValues) {
         try {
             List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
-            if (drillThrough.getPassThroughField() != null) {
-                FilterValueDefinition multi = new FilterValueDefinition();
-                multi.setField(drillThrough.getPassThroughField().reconcileToAnalysisItem(report.getDataFeedID()));
-                multi.setFilteredValues(altValues);
-                multi.setInclusive(true);
-                multi.setNewType(true);
-                multi.setSingleValue(false);
-                multi.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                multi.setToggleEnabled(true);
-                filters.add(multi);
-                DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
-                EIDescriptor descriptor;
-                if (drillThrough.getReportID() != null && drillThrough.getReportID() != 0) {
-                    InsightResponse insightResponse = openAnalysisIfPossibleByID(drillThrough.getReportID());
-                    descriptor = insightResponse.getInsightDescriptor();
-                } else {
-                    DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
-                    String urlKey = new DashboardStorage().urlKeyForID(drillThrough.getDashboardID());
-                    dashboardDescriptor.setId(drillThrough.getDashboardID());
-                    dashboardDescriptor.setUrlKey(urlKey);
-                    descriptor = dashboardDescriptor;
-                }
-                drillThroughResponse.setDescriptor(descriptor);
-                drillThroughResponse.setFilters(filters);
-                return drillThroughResponse;
-            }
+
             Map<String, Object> data;
             if (dataObj instanceof Map) {
                 data = (Map<String, Object>) dataObj;
@@ -1460,9 +1589,17 @@ public class AnalysisService {
                     }
 
                 }
-                if (drillThrough.isAddAllFilters()) {
-                    filters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
+                if (drillThrough.isAddAllFilters() || drillThrough.getPassThroughField() != null) {
+                    List<FilterDefinition> reportFilters = new ArrayList<FilterDefinition>();
+                    reportFilters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
                             analysisItem));
+                    Iterator<FilterDefinition> iter = reportFilters.iterator();
+                    while (iter.hasNext()) {
+                        FilterDefinition filter = iter.next();
+                        if (filter.getField().toDisplay().equals(analysisItem.toDisplay() + " for Drillthrough")) {
+                            iter.remove();
+                        }
+                    }
                 }
                 if (drillThrough.isFilterRowGroupings()) {
 
@@ -1527,6 +1664,98 @@ public class AnalysisService {
                 }
             }*/
 
+            if (drillThrough.getPassThroughField() != null) {
+                AnalysisItem item = drillThrough.getPassThroughField().reconcileToAnalysisItem(report.getDataFeedID());
+                report.getFilterDefinitions().addAll(filters);
+                EIConnection conn = Database.instance().getConnection();
+                DataSet dataSet;
+
+                try {
+                    dataSet = DataService.listDataSet(report, new InsightRequestMetadata(), conn);
+                } finally {
+                    Database.closeConnection(conn);
+                }
+                Set<Value> allValues = new HashSet<Value>();
+                for (IRow row : dataSet.getRows()) {
+                    Set<Value> values = row.getPassthroughRow().get(item.qualifiedName());
+                    allValues.addAll(values);
+                }
+                FilterValueDefinition multi = new FilterValueDefinition();
+                List<Object> valueList = new ArrayList<Object>(allValues.size());
+                for (Value value : allValues) {
+                    valueList.add(value);
+                }
+                multi.setField(item);
+                multi.setFilteredValues(valueList);
+                multi.setInclusive(true);
+                multi.setNewType(true);
+                multi.setSingleValue(false);
+                multi.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                multi.setToggleEnabled(true);
+                List<FilterDefinition> targetFilters = new ArrayList<FilterDefinition>();
+                if (drillThrough.getReportID() == report.getAnalysisID()) {
+                    if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                        AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                        AnalysisHierarchyItem clonedHierarchy = (AnalysisHierarchyItem) hierarchyItem.clone();
+                        int currentIndex = hierarchyItem.getHierarchyLevels().indexOf(hierarchyItem.getHierarchyLevel());
+                        AnalysisItem next = hierarchyItem.getHierarchyLevels().get(currentIndex + 1).getAnalysisItem();
+                        AnalysisItemFilterDefinition analysisItemFilterDefinition = new AnalysisItemFilterDefinition();
+                        analysisItemFilterDefinition.setField(clonedHierarchy);
+                        analysisItemFilterDefinition.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>());
+                        analysisItemFilterDefinition.setAvailableHandles(new ArrayList<AnalysisItemHandle>());
+                        analysisItemFilterDefinition.setAvailableItems(new ArrayList<AnalysisItem>());
+                        //analysisItemFilterDefinition.setTargetItem();
+                        analysisItemFilterDefinition.setTargetItem(next);
+                        analysisItemFilterDefinition.setShowOnReportView(false);
+                        analysisItemFilterDefinition.setEnabled(true);
+                        targetFilters.add(analysisItemFilterDefinition);
+                        targetFilters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
+                                analysisItem));
+                    }
+                }
+                targetFilters.add(multi);
+                //filters.add(multi);
+                DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
+                EIDescriptor descriptor;
+                if (drillThrough.getReportID() != null && drillThrough.getReportID() != 0) {
+                    InsightResponse insightResponse = openAnalysisIfPossibleByID(drillThrough.getReportID());
+                    descriptor = insightResponse.getInsightDescriptor();
+                } else {
+                    DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
+                    String urlKey = new DashboardStorage().urlKeyForID(drillThrough.getDashboardID());
+                    dashboardDescriptor.setId(drillThrough.getDashboardID());
+                    dashboardDescriptor.setUrlKey(urlKey);
+                    descriptor = dashboardDescriptor;
+                }
+                drillThroughResponse.setDescriptor(descriptor);
+                drillThroughResponse.setFilters(targetFilters);
+                return drillThroughResponse;
+            } else {
+                if (drillThrough.getReportID() == report.getAnalysisID()) {
+                    if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                        AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                        AnalysisDateDimension copy;
+                        try {
+                            copy = (AnalysisDateDimension) date.clone();
+                        } catch (CloneNotSupportedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        copy.setLinks(new ArrayList<Link>());
+                        int existingLevel = date.getDateLevel();
+                        copy.setDateLevel(existingLevel + 1);
+                        AnalysisItemFilterDefinition analysisItemFilterDefinition = new AnalysisItemFilterDefinition();
+                        analysisItemFilterDefinition.setField(date);
+                        analysisItemFilterDefinition.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>());
+                        analysisItemFilterDefinition.setAvailableHandles(new ArrayList<AnalysisItemHandle>());
+                        analysisItemFilterDefinition.setAvailableItems(new ArrayList<AnalysisItem>());
+                        analysisItemFilterDefinition.setTargetItem(copy);
+                        analysisItemFilterDefinition.setShowOnReportView(false);
+                        analysisItemFilterDefinition.setEnabled(true);
+                        filters.add(analysisItemFilterDefinition);
+                    }
+                }
+            }
+
             DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
             EIDescriptor descriptor;
             if (drillThrough.getReportID() != null && drillThrough.getReportID() != 0) {
@@ -1551,13 +1780,47 @@ public class AnalysisService {
 
     private FilterDefinition constructDrillthroughFilter(DrillThrough drillThrough, AnalysisItem analysisItem, Map<String, Object> data, Value value, boolean multiValue, List<AnalysisItem> additionalAnalysisItems) {
         FilterDefinition filterDefinition;
+        AnalysisItem targetItem;
+        if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+            AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+            targetItem = hierarchyItem.getHierarchyLevel().getAnalysisItem();
+        } else {
+            targetItem = analysisItem;
+        }
         if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
             DerivedAnalysisDimension asTextDimension = new DerivedAnalysisDimension();
             additionalAnalysisItems.add(asTextDimension);
-            asTextDimension.setKey(new NamedKey(dateDimension.toDisplay() + " for Drillthrough"));
+            asTextDimension.setKey(new NamedKey(dateDimension.toDisplay() + dateDimension.getDateLevel() + " for Drillthrough"));
             asTextDimension.setApplyBeforeAggregation(true);
-            asTextDimension.setDerivationCode("dateformatnoshift(datelevel([" + dateDimension.toDisplay() + "], \"" + dateDimension.getDateLevel()+"\"), \"yyyy-MM-dd\")");
+            String format = "yyyy-MM-dd";
+            if (dateDimension.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
+                format = "yyyy";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+                format = "yyyy-MM";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
+                format = "yyyy-MM-dd";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL) {
+                format = "yyyy-MM-dd HH";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
+                format = "yyyy-MM-dd HH:mm";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL) {
+                format = "yyyy-ww";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.WEEK_OF_YEAR_FLAT) {
+                format = "ww";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MONTH_FLAT) {
+                format = "MM";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.DAY_OF_WEEK_FLAT) {
+                format = "EE";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.DAY_OF_YEAR_FLAT) {
+                format = "DD";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+                format = "QQ";
+            } else if (dateDimension.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT) {
+                format = "qq";
+            }
+            asTextDimension.setDerivationCode(MessageFormat.format("dateformatnoshift([{0}], \"{1}\")", dateDimension.toDisplay(), format));
+            //asTextDimension.setDerivationCode("dateformatnoshift(datelevel([" + dateDimension.toDisplay() + "], \"" + dateDimension.getDateLevel()+"\"), \"yyyy-MM-dd\")");
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
             filterValueDefinition.setField(asTextDimension);
             filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
@@ -1567,12 +1830,39 @@ public class AnalysisService {
             filterValueDefinition.setToggleEnabled(true);
 
             filterValueDefinition.setSingleValue(true);
+            if (value.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) value;
+                String result;
+                if ("QQ".equals(format)) {
+                    int quarter = DayOfQuarter.quarter(dateValue.getDate());
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(dateValue.getDate());
+                    int year = cal.get(Calendar.YEAR);
+                    result = quarter + "-" + year;
+                } else if ("qq".equals(format)) {
+                    int quarter = DayOfQuarter.quarter(dateValue.getDate());
+                    result = String.valueOf(quarter);
+                } else {
+                    result = new SimpleDateFormat(format).format(dateValue.getDate());
+                }
+                filterValueDefinition.setFilteredValues(Arrays.asList((Object) result));
+            } else {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Date date = sdf.parse(value.toString());
+                    String result = new SimpleDateFormat(format).format(date);
+                    filterValueDefinition.setFilteredValues(Arrays.asList((Object) result));
+                } catch (ParseException e) {
+                    LogClass.error(e);
+                }
+                //filterValueDefinition.setFilteredValues(Arrays.asList((Object) value.toString()));
+            }
 
-            filterValueDefinition.setFilteredValues(Arrays.asList((Object) value.toString()));
             filterDefinition = filterValueDefinition;
         } else {
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-            filterValueDefinition.setField(analysisItem);
+
+            filterValueDefinition.setField(targetItem);
             filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
 
             filterValueDefinition.setEnabled(true);
@@ -1637,12 +1927,14 @@ public class AnalysisService {
                     copy instanceof DerivedAnalysisDimension) {
                 Key key = new NamedKey("Copy of " + analysisItem.toDisplay());
                 copy.setKey(key);
-                copy.setDisplayName("Copy of " + analysisItem.toDisplay());
+                copy.setDisplayName("Copy of " + analysisItem.toUnqualifiedDisplay());
+                copy.setUnqualifiedDisplayName("Copy of " + analysisItem.toUnqualifiedDisplay());
             } else {
                 if (!(analysisItem.getKey() instanceof ReportKey)) {
                     copy.setOriginalDisplayName(analysisItem.toDisplay());
                 }
-                copy.setDisplayName("Copy of " + analysisItem.toDisplay());
+                copy.setDisplayName("Copy of " + analysisItem.toUnqualifiedDisplay());
+                copy.setUnqualifiedDisplayName("Copy of " + analysisItem.toUnqualifiedDisplay());
             }
             copy.setConcrete(false);
             return copy;
@@ -1923,6 +2215,14 @@ public class AnalysisService {
                     filtered.add(insightDescriptors);
                 }
             }
+
+            Collections.sort(filtered, new Comparator<InsightDescriptor>() {
+
+                public int compare(InsightDescriptor insightDescriptor, InsightDescriptor insightDescriptor1) {
+                    return insightDescriptor.getName().compareToIgnoreCase(insightDescriptor1.getName());
+                }
+            });
+
             return new ReportResults(filtered, reportTags);
         } catch (Exception e) {
             LogClass.error(e);
@@ -2035,8 +2335,11 @@ public class AnalysisService {
             conn.setAutoCommit(false);
             Session session = Database.instance().createSession(conn);
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
-            Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
-            AnalysisDefinition clone = analysisDefinition.clone(null, feed.getFields(), false);
+            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(saveDefinition.getDataFeedID(), conn);
+            List<AnalysisItem> allFields = feedDefinition.allFields(conn);
+            AnalysisDefinition.SaveMetadata metadata = analysisDefinition.clone(allFields, false);
+            AnalysisDefinition clone = metadata.analysisDefinition;
+            AnalysisDefinition.updateFromMetadata(null, metadata.replacementMap, clone, allFields, metadata.added);
             clone.setAuthorName(SecurityUtil.getUserName());
             clone.setTitle(newName);
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
@@ -2091,7 +2394,11 @@ public class AnalysisService {
             FeedDefinition targetDataSource = new FeedStorage().getFeedDefinitionData(targetID);
             Session session = Database.instance().createSession(conn);
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
-            AnalysisDefinition clone = analysisDefinition.clone(targetDataSource, targetDataSource.getFields(), true);
+            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(saveDefinition.getDataFeedID(), conn);
+            List<AnalysisItem> allFields = feedDefinition.allFields(conn);
+            AnalysisDefinition.SaveMetadata metadata = analysisDefinition.clone(allFields, false);
+            AnalysisDefinition clone = metadata.analysisDefinition;
+            AnalysisDefinition.updateFromMetadata(null, metadata.replacementMap, clone, allFields, metadata.added);
             clone.setDataFeedID(targetDataSource.getDataFeedID());
             clone.setAuthorName(SecurityUtil.getUserName());
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
@@ -2135,7 +2442,7 @@ public class AnalysisService {
             AnalysisDefinition baseReport = analysisStorage.getPersistableReport(reportID, session);
             Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
             Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
-            SolutionService.recurseReport(reports, dashboards, baseReport, session, conn, new HashSet<Long>());
+            SolutionService.recurseReport(reports, dashboards, baseReport, session, conn);
 
             for (AnalysisDefinition report : reports.values()) {
                 report.setTemporaryReport(false);
@@ -2405,12 +2712,38 @@ public class AnalysisService {
                     new UserUploadService().deleteUserUpload(existingID);
                 }
                 queryStmt.close();
+                // TODO: maybe pare back?
+                PreparedStatement parentStmt = conn.prepareStatement("SELECT COMPOSITE_FEED.DATA_FEED_ID FROM COMPOSITE_FEED, COMPOSITE_NODE WHERE " +
+                        "COMPOSITE_FEED.COMPOSITE_FEED_ID = COMPOSITE_NODE.COMPOSITE_FEED_ID AND COMPOSITE_NODE.DATA_FEED_ID = ?");
+                PreparedStatement reportSourceQuery = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM distinct_cached_addon_report_source WHERE REPORT_ID = ?");
+                reportSourceQuery.setLong(1, reportID);
+                ResultSet reportRS = reportSourceQuery.executeQuery();
+                Set<Long> parents = new HashSet<Long>();
+                while (reportRS.next()) {
+                    FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(reportRS.getLong(1), conn);
+                    ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) dataSource;
+                    serverDataSourceDefinition.migrations(conn, null);
+                    parentStmt.setLong(1, dataSource.getDataFeedID());
+                    ResultSet parentRS = parentStmt.executeQuery();
+                    while (parentRS.next()) {
+                        parents.add(parentRS.getLong(1));
+                    }
+                }
+                for (Long parentID : parents) {
+                    FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(parentID, conn);
+                    new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
+                }
+                reportSourceQuery.close();
+                parentStmt.close();
             } catch (Exception e) {
                 LogClass.error(e);
             } finally {
                 conn.setAutoCommit(true);
                 Database.closeConnection(conn);
             }
+        }
+        if (wsAnalysisDefinition.isDataSourceFieldReport()) {
+            MemCachedManager.delete("ds" + wsAnalysisDefinition.getDataFeedID());
         }
         session = Database.instance().createSession();
         try {
@@ -2434,7 +2767,7 @@ public class AnalysisService {
         final long accountID = SecurityUtil.getAccountID();
         final int accountType = SecurityUtil.getAccountTier();
         final boolean accountAdmin = SecurityUtil.isAccountAdmin();
-        new Thread(new Runnable() {
+        DataSourceThreadPool.instance().addActivity(new Runnable() {
 
             public void run() {
                 SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, 0, null);
@@ -2475,7 +2808,7 @@ public class AnalysisService {
                     SecurityUtil.clearThreadLocal();
                 }
             }
-        }).start();
+        });
     }
 
     public void deleteAnalysisDefinition(long reportID) {
@@ -2661,7 +2994,7 @@ public class AnalysisService {
         Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID());
         suggestions.addAll(commonIntentions());
         DataSourceInfo dataSourceInfo = feed.createSourceInfo(conn);
-        FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID(), conn);
+        FeedDefinition dataSource = feed.getDataSource();
         suggestions.addAll(dataSource.suggestIntentions(report, dataSourceInfo));
         suggestions.addAll(report.suggestIntentions(report));
         Collections.sort(suggestions, new Comparator<IntentionSuggestion>() {

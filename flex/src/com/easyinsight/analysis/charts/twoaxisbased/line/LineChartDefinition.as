@@ -1,10 +1,7 @@
 package com.easyinsight.analysis.charts.twoaxisbased.line {
 import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.FeedMetadata;
-import com.easyinsight.analysis.MultiColor;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
-import com.easyinsight.skin.ApplicationSkin;
 
 import mx.collections.ArrayCollection;
 
@@ -14,7 +11,7 @@ public class LineChartDefinition extends TwoAxisDefinition{
 
     public var autoScale:Boolean = true;
     public var autoScaled:Boolean = true;
-    public var xAxisMaximum:Date = null;
+
 
     public var strokeWeight:int = 2;
     public var alignLabelsToUnits:Boolean = true;
@@ -36,14 +33,6 @@ public class LineChartDefinition extends TwoAxisDefinition{
 
     public function LineChartDefinition() {
         super();
-    }
-
-    override public function initialConfig():void {
-        super.initialConfig();
-        if  (ApplicationSkin.instance().multiColors != null && ApplicationSkin.instance().multiColors.length > 0 &&
-                MultiColor(ApplicationSkin.instance().multiColors.getItemAt(0)).color1StartEnabled) {
-            multiColors = ApplicationSkin.instance().multiColors;
-        }
     }
 
     override public function supportsEmbeddedFonts():Boolean {

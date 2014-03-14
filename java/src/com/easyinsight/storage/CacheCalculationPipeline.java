@@ -26,7 +26,8 @@ public class CacheCalculationPipeline extends Pipeline {
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems, InsightRequestMetadata insightRequestMetadata) {
         List<IComponent> components = new ArrayList<IComponent>();
         //components.add(new TypeTransformComponent());
-        components.addAll(new CalcGraph().doFunGraphStuff(new HashSet<AnalysisItem>(calculations), allItems, new HashSet<AnalysisItem>(calculations), Pipeline.BEFORE, getStructure()));
+        components.addAll(new CalcGraph().doFunGraphStuff(new HashSet<AnalysisItem>(calculations), allItems, new HashSet<AnalysisItem>(calculations), Pipeline.BEFORE, getStructure(),
+                insightRequestMetadata));
         return components;
     }
 }

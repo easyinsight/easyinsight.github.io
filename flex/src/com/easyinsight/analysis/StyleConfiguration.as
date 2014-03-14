@@ -29,6 +29,7 @@ import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.trend.TrendDefinition;
 import com.easyinsight.analysis.trend.TrendGridDefinition;
+import com.easyinsight.analysis.trend.TrendGridDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.analysis.ytd.CompareYearsDefinition;
 import com.easyinsight.analysis.ytd.YTDDefinition;
@@ -65,17 +66,20 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Stack Fill Headers", "fillStackHeaders",  dashboard.fillStackHeaders, dashboard));
         items.addItem(new ImageReportFormItem("Header Image", "headerImage", dashboard.headerImage, dashboard));
         items.addItem(new CheckBoxReportFormItem("Full-Size Header Image", "imageFullHeader", dashboard.imageFullHeader, dashboard));
+        items.addItem(new ComboBoxReportFormItem("Color Set", "colorSet", dashboard.colorSet, dashboard, [ "Primary", "Secondary", "None"]));
         return items;
     }
 
     public static function getDataSourceItems(dataSource:FeedDefinitionData):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
-        items.addItem(new CheckBoxReportFormItem("Field Cleanup Enabled", "fieldCleanupEnabled", dataSource.fieldCleanupEnabled, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Should this data source be visible to everyone in the account?", "accountVisible", dataSource.accountVisible, dataSource));
+        items.addItem(new TextReportFormItem("What should this data source be named?", "feedName", dataSource.feedName, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Should the data source clean up old, duplicate fields when saved?", "fieldCleanupEnabled", dataSource.fieldCleanupEnabled, dataSource));
         items.addItem(new CheckBoxReportFormItem("Field Lookup Enabled", "fieldLookupEnabled", dataSource.fieldLookupEnabled, dataSource));
-        items.addItem(new CheckBoxReportFormItem("Manual Report Run", "manualReportRun", dataSource.manualReportRun, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Should reports in the editor on this data source run manually?", "manualReportRun", dataSource.manualReportRun, dataSource));
         var dashboardService:RemoteObject = new RemoteObject();
         dashboardService.destination = "analysisDefinition";
-        items.addItem(new ServerLoadComboBoxReportFormItem("Preferred Tag", "defaultFieldTag", dataSource.defaultFieldTag, dataSource, dashboardService.getFieldTags));
+        items.addItem(new ServerLoadComboBoxReportFormItem("Should the field list default to showing only fields matching a certain tag?", "defaultFieldTag", dataSource.defaultFieldTag, dataSource, dashboardService.getFieldTags));
         return items;
     }
 
@@ -151,6 +155,16 @@ public class StyleConfiguration {
             limitsFormItem.report = report;
             limitsFormItem.allFields = allFields;
             items.addItem(limitsFormItem);
+            items.addItem(new CheckBoxReportFormItem("Other", "limitOther", ChartDefinition(report).limitOther, report));
+        }
+        if (report is StackedColumnChartDefinition) {
+            items.addItem(new NumericReportFormItem("Maximum Number of Stack Items", "stackLimit", StackedColumnChartDefinition(report).stackLimit, report, 0, 1000));
+        }
+        if (report is StackedBarChartDefinition) {
+            items.addItem(new NumericReportFormItem("Maximum Number of Stack Items", "stackLimit", StackedBarChartDefinition(report).stackLimit, report, 0, 1000));
+        }
+        if (report is TrendGridDefinition) {
+            items.addItem(new NumericReportFormItem("Limit", "maxRecords", TrendGridDefinition(report).maxRecords, report, 0, 10000));
         }
         return items;
     }
@@ -175,6 +189,7 @@ public class StyleConfiguration {
          }*/
         items.addItem(new NumericReportFormItem("Font Size", "fontSize", report.fontSize, report, 8, 48));
         items.addItem(new TextReportFormItem("Export String", "exportString", report.exportString, report));
+        items.addItem(new TextReportFormItem("Base Date", "baseDate", report.baseDate, report));
         items.addItem(new NumericReportFormItem("Header Font Size", "headerFontSize", report.headerFontSize, report, 8, 48));
         items.addItem(new NumericReportFormItem("Max Header Width", "maxHeaderWidth", report.maxHeaderWidth, report, 100, 1500));
         items.addItem(new NumericReportFormItem("Background Alpha", "backgroundAlpha", report.backgroundAlpha, report, 0, 1));
@@ -197,6 +212,10 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Max Rows To Display", "generalSizeLimit", report.generalSizeLimit, report, 0, 10000000));
             items.addItem(new ComboBoxReportFormItem("Default Alignment", "defaultColumnAlignment", ListDefinition(report).defaultColumnAlignment, report, ["left", "center", "right"]));
             items.addItem(new ComboBoxReportFormItem("Color Set", "colorScheme", report.colorScheme, report, [ "Primary", "Secondary", "None"]));
+        }
+        if (report is KPIDefinition) {
+            items.addItem(new TextReportFormItem("Now Date", "nowDate", KPIDefinition(report).nowDate, report));
+            items.addItem(new TextReportFormItem("Previous Date", "previousDate", KPIDefinition(report).previousDate, report));
         }
         if (report is CrosstabDefinition) {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
@@ -240,6 +259,11 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("X Axis Base At Zero", "xAxisBaseAtZero", ChartDefinition(report).xAxisBaseAtZero, report));
             items.addItem(new CheckBoxReportFormItem("Y Axis Base At Zero", "yAxisBaseAtZero", ChartDefinition(report).yAxisBaseAtZero, report));
             items.addItem(new ComboBoxReportFormItem("Color Set", "colorScheme", report.colorScheme, report, [ "Primary", "Secondary", "None"]));
+
+            items.addItem(new NumericReportFormItem("X Axis Max", "xAxisMaximum", ChartDefinition(report).xAxisMaximum, report, int.MIN_VALUE, int.MAX_VALUE, "xAxisMaximumDefined"));
+            items.addItem(new NumericReportFormItem("Y Axis Max", "yAxisMaximum", ChartDefinition(report).yAxisMaximum, report, int.MIN_VALUE, int.MAX_VALUE, "yAxisMaximumDefined"));
+            items.addItem(new NumericReportFormItem("X Axis Min", "xAxisMinimum", ChartDefinition(report).xAxisMinimum, report, int.MIN_VALUE, int.MAX_VALUE, "xAxisMinimumDefined"));
+            items.addItem(new NumericReportFormItem("Y Axis Min", "yAxisMininum", ChartDefinition(report).yAxisMininum, report, int.MIN_VALUE, int.MAX_VALUE, "yAxisMinimumDefined"));
         }
         if (report is HeatMapDefinition) {
             items.addItem(new NumericReportFormItem("Precision", "precision", HeatMapDefinition(report).precision, report, 0, 3));
@@ -400,14 +424,14 @@ public class StyleConfiguration {
         if (report is TrendGridDefinition) {
             items.addItem(new CheckBoxReportFormItem("Show KPI Name", "showKPIName", TrendGridDefinition(report).showKPIName, report));
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
-            /*items.addItem(new ColorReportFormItem("Text Color", "textColor", TrendGridDefinition(report).textColor, report));
+            items.addItem(new ColorReportFormItem("Text Color", "textColor", TrendGridDefinition(report).textColor, report));
             items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", TrendGridDefinition(report).headerTextColor, report));
             items.addItem(new ColorReportFormItem("Alternating Row Color 1", "rowColor1", TrendGridDefinition(report).rowColor1, report));
             items.addItem(new ColorReportFormItem("Alternating Row Color 2", "rowColor2", TrendGridDefinition(report).rowColor2, report));
             items.addItem(new ColorReportFormItem("Header Top Color", "headerColor1", TrendGridDefinition(report).headerColor1, report));
             items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", TrendGridDefinition(report).headerColor2, report));
             items.addItem(new ColorReportFormItem("Summary Row Text Color", "summaryRowTextColor", TrendGridDefinition(report).summaryRowTextColor, report));
-            items.addItem(new ColorReportFormItem("Summary Row Background Color", "summaryRowBackgroundColor", TrendGridDefinition(report).summaryRowBackgroundColor, report));*/
+            items.addItem(new ColorReportFormItem("Summary Row Background Color", "summaryRowBackgroundColor", TrendGridDefinition(report).summaryRowBackgroundColor, report));
         }
         if (report is TextReport) {
             items.addItem(new ColorReportFormItem("Text Color", "fontColor", TextReport(report).fontColor, report));

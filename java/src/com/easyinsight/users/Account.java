@@ -158,6 +158,9 @@ public class Account {
     @Column(name="account_state")
     private int accountState;
 
+    @Column(name="account_locale")
+    private String accountLocale;
+
     @Column(name="account_key")
     private String accountKey;
 
@@ -323,6 +326,14 @@ public class Account {
 
     public void setUseHTMLVersion(boolean useHTMLVersion) {
         this.useHTMLVersion = useHTMLVersion;
+    }
+
+    public String getAccountLocale() {
+        return accountLocale;
+    }
+
+    public void setAccountLocale(String accountLocale) {
+        this.accountLocale = accountLocale;
     }
 
     public boolean isSendEmailsToNewUsers() {

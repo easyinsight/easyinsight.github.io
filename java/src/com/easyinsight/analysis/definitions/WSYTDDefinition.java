@@ -206,7 +206,7 @@ public class WSYTDDefinition extends WSAnalysisDefinition {
         setMeasures(result);
     }
 
-    protected int extensionType() {
+    public int extensionType() {
         return ReportFieldExtension.YTD;
     }
 

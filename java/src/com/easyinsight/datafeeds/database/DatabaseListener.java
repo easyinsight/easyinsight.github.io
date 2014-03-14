@@ -71,7 +71,7 @@ public class DatabaseListener implements Runnable {
                 Message message = messageQueue.receiveMessage();
                 if (message == null) {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(5000);
                     } catch (InterruptedException ex) {
                         // ignore
                     }

@@ -337,7 +337,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
                 labels.put("location", "'n'");
                 labels.put("show", "true");
                 labels.put("edgetolerance", -15);
-                //labels.put("fontFamily", fontName());
+                labels.put("fontFamily", fontName());
                 seriesDefaults.put("pointLabels", labels);
             }
         } catch (JSONException e) {
@@ -353,6 +353,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         axes.put("xaxis", xAxis);
 
         axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
+        axisConfigure((JSONObject) axes.get("yaxis"), getyAxisMininum(), isyAxisMinimumDefined(), getyAxisMaximum(), isyAxisMaximumDefined());
         return axes;
     }
 

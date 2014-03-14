@@ -15,7 +15,7 @@ import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.DimensionDropArea;
 import com.easyinsight.analysis.IReportControlBar;
-import com.easyinsight.analysis.ListDropArea;
+
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
@@ -23,19 +23,14 @@ import com.easyinsight.analysis.TrendDropArea;
 
 
 import mx.collections.ArrayCollection;
-import mx.containers.HBox;
-import mx.containers.VBox;
 
 import mx.controls.Label;
-import mx.controls.TextInput;
 
 public class TrendGridControlBar extends ReportControlBar implements IReportControlBar {
 
     private var listViewGrouping:ListDropAreaGrouping;
     private var dimensionViewGrouping:ListDropAreaGrouping;
     private var listDefinition:TrendGridDefinition;
-
-    private var timeInput:TextInput;
 
     public function TrendGridControlBar() {
         super();
@@ -68,19 +63,6 @@ public class TrendGridControlBar extends ReportControlBar implements IReportCont
         listViewGrouping.report = listDefinition;
         addDropAreaGrouping(listViewGrouping);
 
-        var vbox:VBox = new VBox();
-        var timeLabel:Label = new Label();
-        timeLabel.text = "Compare Against ";
-        var daysLabel:Label = new Label();
-        daysLabel.text = "days ago";
-        timeInput = new TextInput();
-        timeInput.text = String(listDefinition.dayWindow);
-        var timeBox:HBox = new HBox();
-        timeBox.addChild(timeLabel);
-        timeBox.addChild(timeInput);
-        timeBox.addChild(daysLabel);
-        vbox.addChild(timeBox);
-        addChild(vbox);
         var columns:ArrayCollection = listDefinition.measures;
         if (columns != null) {
             for (var i:int = 0; i < columns.length; i++) {
@@ -114,7 +96,6 @@ public class TrendGridControlBar extends ReportControlBar implements IReportCont
     public function createAnalysisDefinition():AnalysisDefinition {
         listDefinition.measures = new ArrayCollection(listViewGrouping.getListColumns());
         listDefinition.groupings = new ArrayCollection(dimensionViewGrouping.getListColumns());
-        listDefinition.dayWindow = int(timeInput.text);
         return listDefinition;
     }
 

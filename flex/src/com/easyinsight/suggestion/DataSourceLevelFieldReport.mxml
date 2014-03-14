@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="center" width="100%">
+    <mx:Script><![CDATA[
+        ]]></mx:Script>
+    <mx:Text htmlText="This report provides fields as data source level fields. Any fields shown highlighted are included as data source level fields. You can configure which fields are included as data source levels by going to the Data Source Field Config tab in the field editor." fontSize="14" styleName="fallThroughFonts"
+            selectable="false" maxWidth="600"/>
+</mx:HBox>

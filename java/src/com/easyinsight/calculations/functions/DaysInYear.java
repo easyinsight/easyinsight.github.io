@@ -51,4 +51,3 @@ public class DaysInYear extends Function {
         return -1;
     }
 }
-

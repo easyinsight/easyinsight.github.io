@@ -14,7 +14,10 @@ public class GenericGridCheckbox extends GridCheckbox {
     }
 
     override protected function isSelected():Boolean {
-        return data["selected"];
+        if (data != null) {
+            return data["selected"];
+        }
+        return false;
     }
 }
 }

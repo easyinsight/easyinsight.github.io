@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:feed="com.easyinsight.administration.feed.*"
+                       xmlns:util="com.easyinsight.util.*" width="1000">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+
+        private function save():void {
+            window.updateDataSource(dataSource);
+            saveSource();
+        }
+
+        private var window:FederatedEditor;
+
+        private function onCreation(event:FlexEvent):void {
+            PopUpUtil.centerPopUp(this);
+        }
+
+        override protected function gotSource():void {
+            window = new FederatedEditor();
+            window.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
+            window.federatedSource = dataSource as FederatedDataSource;
+            window.dataSources = FederatedDataSource(dataSource).sources;
+            addChildAt(window, 0);
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</feed:DataSourceWindow>

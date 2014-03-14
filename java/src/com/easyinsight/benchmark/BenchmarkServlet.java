@@ -39,9 +39,11 @@ public class BenchmarkServlet extends HttpServlet {
 
     @Override
     public void destroy() {
+        System.out.println("Destroying benchmark servlet...");
         super.destroy();
         if (timer != null) {
             timer.cancel();
         }
+        System.out.println("Destroyed benchmark servlet");
     }
 }

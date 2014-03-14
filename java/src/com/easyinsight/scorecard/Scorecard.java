@@ -60,7 +60,7 @@ public class Scorecard implements Cloneable {
     }
     
     private void createTrendReport(WSKPIDefinition kpiDefinition) throws CloneNotSupportedException {
-        kpiDefinition.setDayWindow(7);
+        //kpiDefinition.setDayWindow(7);
         List<AnalysisItem> measures = new ArrayList<AnalysisItem>();
         for (KPI kpi : kpis) {
             measures.add(kpi.createMeasure());

@@ -183,7 +183,7 @@ public class WSVerticalListDefinition extends WSAnalysisDefinition {
         setMeasures(result);
     }
 
-    protected int extensionType() {
+    public int extensionType() {
         return ReportFieldExtension.VERTICAL_LIST;
     }
 

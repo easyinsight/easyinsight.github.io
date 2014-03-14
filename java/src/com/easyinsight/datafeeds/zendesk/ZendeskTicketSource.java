@@ -5,6 +5,7 @@ import com.easyinsight.core.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
@@ -27,6 +28,8 @@ import java.util.*;
  * Time: 6:39 PM
  */
 public class ZendeskTicketSource extends ZendeskBaseSource {
+
+    public static final int CUSTOM_FIELD_TICKET = 1;
 
     public static final String ASSIGNED_AT = "Assigned At";
     public static final String ASSIGNEE = "Assignee";
@@ -64,7 +67,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
 
     private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZ");
     private final DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    // 2013-11-24T17:01:23Z
+
+
 
     @NotNull
     @Override
@@ -116,14 +120,21 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                         customKey = new NamedKey("zd" + id);
                     }
                     String type = String.valueOf(recordNode.get("type"));
+                    AnalysisItem item;
                     if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type) || "FieldTagger".equals(type) || "tagger".equals(type) ||
                             "checkbox".equals(type) || "dropdown".equals(type) || "text".equals(type)) {
-                        items.add(new AnalysisDimension(customKey, title));
+                        item = new AnalysisDimension(customKey, title);
                     } else if ("MultiLineField".equals(type) || "FieldTextarea".equals(type) || "textarea".equals(type)) {
-                        items.add(new AnalysisText(customKey, title));
+                        item = new AnalysisText(customKey, title);
                     } else if ("NumericField".equals(type) || "FieldDecimal".equals(type) || "FieldInteger".equals(type) || "FieldNumeric".equals(type) ||
                             "integer".equals(type) || "decimal".equals(type) || "numeric".equals(type)) {
-                        items.add(new AnalysisMeasure(customKey, title, AggregationTypes.SUM));
+                        item = new AnalysisMeasure(customKey, title, AggregationTypes.SUM);
+                    } else {
+                        item = null;
+                    }
+                    if (item != null) {
+                        item.setCustomFlag(CUSTOM_FIELD_TICKET);
+                        items.add(item);
                     }
                 }
                 nextPage = (String) m.get("next_page");

@@ -1,0 +1,384 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                   xmlns:suggestion="com.easyinsight.suggestion.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemHandle;
+        import com.easyinsight.analysis.AnalysisItemNode;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.ExtensionWrapWindow;
+        import com.easyinsight.analysis.Link;
+        import com.easyinsight.analysis.ReportFieldExtension;
+        import com.easyinsight.analysis.TextReportFieldExtension;
+        import com.easyinsight.analysis.ytd.VerticalListReportExtension;
+        import com.easyinsight.analysis.ytd.YTDReportFieldExtension;
+        import com.easyinsight.listing.Tag;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+
+        import mx.controls.Alert;
+
+        import mx.managers.PopUpManager;
+
+        // for all fields matching criteria...
+        // add a link to X
+        // set the following extension
+
+        public var fieldRule:FieldRule;
+
+        [Bindable]
+        public var dates:ArrayCollection;
+
+        [Bindable]
+        private var defaultDate:String;
+
+        [Bindable]
+        private var ruleType:String = "[ Choose an Option ]";
+
+        [Bindable]
+        private var fieldType:String;
+
+        [Bindable]
+        private var linkLabel:String = "Define the Link";
+
+        [Bindable]
+        private var defaultExtensionLabel:String = "default report behav";
+
+        [Bindable]
+        private var selectedAction:String = "[ Choose an Option ]";
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (fieldRule != null) {
+                createLabel = "Update Rule";
+                if (fieldRule.tag != null) {
+                    ruleType = "tagged as";
+                    selectedTag = fieldRule.tag.id;
+                    index1 = 1;
+                } else if (fieldRule.explicitField != null) {
+                    ruleType = "named";
+                    selectedField = fieldRule.explicitField.name;
+                    index1 = 2;
+                } else if (fieldRule.type > 0) {
+                    ruleType = "of type";
+                    index1 = 3;
+                    if (fieldRule.type == AnalysisItemTypes.DIMENSION) {
+                        selectedType = "Grouping";
+                    } else if (fieldRule.type == AnalysisItemTypes.MEASURE) {
+                        selectedType = "Measure";
+                    } else if (fieldRule.type == AnalysisItemTypes.DATE) {
+                        selectedType = "Date";
+                    }
+                } else if (fieldRule.dataSourceID > 0) {
+                    ruleType = "on data source";
+                    index1 = 4;
+                    selectedDataSource = fieldRule.dataSourceID;
+                }
+                if (fieldRule.link != null) {
+                    selectedAction = "add a link";
+                    link = fieldRule.link;
+                    linkLabel = link.createString();
+                    index2 = 1;
+                } else if (fieldRule.extension != null) {
+                    selectedAction = "configure";
+                    reportFieldExtension = fieldRule.extension;
+                    index2 = 2;
+                    if (reportFieldExtension is YTDReportFieldExtension) {
+                        selectedReportType = "YTD";
+                    } else {
+                        selectedReportType = "Text";
+                    }
+                    index3 = 1;
+                } else if (fieldRule.defaultDate != null && fieldRule.defaultDate != "") {
+                    selectedAction = "set default date";
+                    index2 = 3;
+                    defaultDate = fieldRule.defaultDate;
+                }
+            }
+        }
+
+        [Bindable]
+        private var index1:int;
+
+        [Bindable]
+        public var dataSources:ArrayCollection;
+
+        [Bindable]
+        private var selectedDataSource:int;
+
+        private function createRule():void {
+            var newRule:Boolean = false;
+            if (fieldRule == null) {
+                newRule = true;
+                fieldRule = new FieldRule();
+            }
+            if (index1 == 1) {
+                fieldRule.tag = tagBox.selectedItem as Tag;
+                fieldRule.explicitField = null;
+                fieldRule.type = 0;
+            } else if (index1 == 2) {
+                var handle:AnalysisItemHandle = new AnalysisItemHandle();
+                handle.name = fieldBox.selectedItem.display;
+                fieldRule.explicitField = handle;
+                fieldRule.tag = null;
+                fieldRule.type = 0;
+            } else if (index1 == 3) {
+                if (typeBox.selectedItem == "Measure") {
+                    fieldRule.type = AnalysisItemTypes.MEASURE;
+                } else if (typeBox.selectedItem == "Grouping") {
+                    fieldRule.type = AnalysisItemTypes.DIMENSION;
+                } else if (typeBox.selectedItem == "Date") {
+                    fieldRule.type = AnalysisItemTypes.DATE;
+                }
+                fieldRule.tag = null;
+                fieldRule.explicitField = null;
+            } else if (index1 == 4) {
+                fieldRule.dataSourceName = dataSourceBox.selectedItem.dataSourceName;
+                fieldRule.dataSourceID = dataSourceBox.selectedItem.dataFeedID;
+                fieldRule.tag = null;
+                fieldRule.explicitField = null;
+                fieldRule.type = 0;
+            } else {
+                Alert.show("You need to choose a criteria.");
+                return;
+            }
+            if (index2 == 1) {
+                fieldRule.link = link;
+                fieldRule.extension = null;
+                fieldRule.defaultDate = null;
+            } else if (index2 == 2) {
+                fieldRule.extension = reportFieldExtension;
+                fieldRule.link = null;
+                fieldRule.defaultDate = null;
+            } else if (index2 == 3) {
+                fieldRule.link = null;
+                fieldRule.extension = null;
+                fieldRule.defaultDate = defaultDateBox.selectedItem.display;
+            } else {
+                Alert.show("You need to choose an action.");
+            }
+            dispatchEvent(new FieldRuleEvent(newRule ? FieldRuleEvent.FIELD_RULE_ADD : FieldRuleEvent.FIELD_RULE_EDIT, fieldRule));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function ruleTypeChange():void {
+            var selectedRule:String = ruleTypeBox.selectedItem as String;
+            if (selectedRule == "tagged as") {
+                index1 = 1;
+            } else if (selectedRule == "named") {
+                index1 = 2;
+            } else if (selectedRule == "of type") {
+                index1 = 3;
+            } else if (selectedRule == "on data source") {
+                index1 = 4;
+            } else {
+                index1 = 0;
+            }
+        }
+
+        private var link:Link;
+
+        private var reportFieldExtension:ReportFieldExtension;
+
+        private function actionChange():void {
+            var selectedRule:String = actionBox.selectedItem as String;
+            if (selectedRule == "add a link") {
+                index2 = 1;
+            } else if (selectedRule == "configure") {
+                index2 = 2;
+            } else if (selectedRule == "set default date") {
+                index2 = 3;
+            } else {
+                index2 = 0;
+            }
+        }
+
+        [Bindable]
+        private var selectedTag:int;
+
+        [Bindable]
+        private var selectedField:String;
+
+        [Bindable]
+        private var selectedType:String = "Measure";
+
+        [Bindable]
+        private var index2:int;
+
+        [Bindable]
+        public var fields:ArrayCollection;
+
+        [Bindable]
+        public var tags:ArrayCollection;
+
+        public var dataSourceID:int;
+
+        private function defineLink():void {
+            var window:LinkWrapperWindow = new LinkWrapperWindow();
+            var wrappers:ArrayCollection = new ArrayCollection();
+            for each (var item:AnalysisItem in fields) {
+                wrappers.addItem(new AnalysisItemWrapper(new AnalysisItemNode(item)));
+            }
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("displayName", true)];
+            wrappers.sort = sort;
+            wrappers.refresh();
+            window.link = link;
+            window.dataSourceID = dataSourceID;
+            window.analysisItems = wrappers;
+            window.addEventListener(FieldRuleEvent.DEFINE_LINK, onLink, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onLink(event:FieldRuleEvent):void {
+            link = event.link;
+            linkLabel = link.createString();
+        }
+
+        private function onExtension(event:FieldRuleEvent):void {
+            reportFieldExtension = event.extension;
+        }
+
+        [Bindable]
+        private var selectedReportType:String = "[ Choose a Report Type ]";
+
+        private function reportTypeChanged():void {
+            if (reportBox.selectedItem != "[ Choose an Option ]") {
+                index3 = 1;
+            } else {
+                index3 = 0;
+            }
+        }
+
+        [Bindable]
+        private var createLabel:String = "Create Rule";
+
+        private function defaultBehavior():void {
+            var reportType:int;
+            var config:AnalysisItemConfiguration = new AnalysisItemConfiguration();
+            if (reportBox.selectedItem == "Text") {
+                reportType = ReportFieldExtension.TEXT;
+                if (reportFieldExtension is TextReportFieldExtension) {
+                    config.textExtension = reportFieldExtension as TextReportFieldExtension;
+                }
+            } else if (reportBox.selectedItem == "YTD") {
+                reportType = ReportFieldExtension.YTD;
+                if (reportFieldExtension is YTDReportFieldExtension) {
+                    config.ytdExtension = reportFieldExtension as YTDReportFieldExtension;
+                }
+            } else if (reportBox.selectedItem == "Vertical List") {
+                reportType = ReportFieldExtension.VERTICAL_LIST;
+                if (reportFieldExtension is VerticalListReportExtension) {
+                    config.verticalListExtension = reportFieldExtension as VerticalListReportExtension;
+                }
+            } else {
+                return;
+            }
+            var window:ExtensionWrapWindow = new ExtensionWrapWindow();
+            window.addEventListener(FieldRuleEvent.DEFINE_EXTENSION, onExtension, false, 0, true);
+            window.config = config;
+            window.reportType = reportType;
+            var wrappers:ArrayCollection = new ArrayCollection();
+            for each (var item:AnalysisItem in fields) {
+                wrappers.addItem(new AnalysisItemWrapper(new AnalysisItemNode(item)));
+            }
+            window.analysisItems = wrappers;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        [Bindable]
+        private var index3:int;
+
+        ]]></mx:Script>
+    <mx:HBox verticalAlign="middle">
+    <mx:Text text="For all fields "/>
+    <mx:ComboBox id="ruleTypeBox" selectedItem="{ruleType}" change="ruleTypeChange()">
+        <mx:dataProvider>
+            <mx:ArrayCollection>
+                <mx:Array>
+                    <mx:String>[ Choose an Option ]</mx:String>
+                    <mx:String>tagged as</mx:String>
+                    <mx:String>named</mx:String>
+                    <mx:String>of type</mx:String>
+                    <mx:String>on data source</mx:String>
+                </mx:Array>
+            </mx:ArrayCollection>
+        </mx:dataProvider>
+    </mx:ComboBox>
+    <mx:ViewStack resizeToContent="true" selectedIndex="{index1}">
+        <mx:Box/>
+        <mx:Box>
+            <util:SmartComboBox id="tagBox" selectedValue="{selectedTag}" selectedProperty="id" dataProvider="{tags}" labelField="name"/>
+        </mx:Box>
+        <mx:Box>
+            <util:SmartComboBox id="fieldBox" selectedValue="{selectedField}" selectedProperty="display" dataProvider="{fields}" labelField="display"/>
+        </mx:Box>
+        <mx:Box>
+            <mx:ComboBox id="typeBox" selectedItem="{selectedType}">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>Measure</mx:String>
+                            <mx:String>Grouping</mx:String>
+                            <mx:String>Date</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
+        </mx:Box>
+        <mx:Box>
+            <util:SmartComboBox id="dataSourceBox" selectedValue="{selectedDataSource}" selectedProperty="dataFeedID" dataProvider="{dataSources}" labelField="dataSourceName"/>
+        </mx:Box>
+    </mx:ViewStack>
+    <mx:ComboBox id="actionBox" selectedItem="{selectedAction}" change="actionChange()">
+        <mx:dataProvider>
+            <mx:ArrayCollection>
+                <mx:Array>
+                    <mx:String>[ Choose an Option ]</mx:String>
+                    <mx:String>add a link</mx:String>
+                    <mx:String>configure</mx:String>
+                    <mx:String>set default date</mx:String>
+                </mx:Array>
+            </mx:ArrayCollection>
+        </mx:dataProvider>
+    </mx:ComboBox>
+    <mx:ViewStack resizeToContent="true" selectedIndex="{index2}">
+        <mx:Box/>
+        <mx:Box>
+            <mx:LinkButton label="{linkLabel}" click="defineLink()"/>
+        </mx:Box>
+        <mx:HBox>
+            <mx:ComboBox id="reportBox" selectedItem="{selectedReportType}" change="reportTypeChanged()">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>[ Choose a Report Type ]</mx:String>
+                            <mx:String>Text</mx:String>
+                            <mx:String>YTD</mx:String>
+                            <mx:String>Vertical List</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
+            <mx:ViewStack resizeToContent="true" selectedIndex="{index3}">
+                <mx:Box/>
+                <mx:Box>
+                    <mx:LinkButton label="default behavior" click="defaultBehavior()"/>
+                </mx:Box>
+            </mx:ViewStack>
+        </mx:HBox>
+        <mx:HBox>
+            <util:SmartComboBox id="defaultDateBox" selectedValue="{defaultDate}" selectedProperty="display" dataProvider="{dates}" labelField="display"/>
+        </mx:HBox>
+    </mx:ViewStack>
+    </mx:HBox>
+    <mx:HBox>
+        <util:SaveButton label="{createLabel}" click="createRule()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

@@ -10,6 +10,7 @@ import com.easyinsight.database.migration.Migrations;
 import com.easyinsight.datafeeds.CacheTimer;
 import com.easyinsight.datafeeds.DataSourceTypeRegistry;
 import com.easyinsight.datafeeds.FeedRegistry;
+import com.easyinsight.datafeeds.custom.ThreadDumpWatcher;
 import com.easyinsight.datafeeds.database.DatabaseListener;
 import com.easyinsight.datafeeds.migration.MigrationManager;
 import com.easyinsight.logging.LogClass;
@@ -17,6 +18,7 @@ import com.easyinsight.scheduler.Scheduler;
 import com.easyinsight.security.DefaultSecurityProvider;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DatabaseManager;
+import com.easyinsight.userupload.DataSourceThreadPool;
 import com.easyinsight.util.ServiceUtil;
 
 import javax.servlet.ServletContextEvent;
@@ -45,7 +47,7 @@ public class EIContextListener implements ServletContextListener {
                 Database.initialize();
                 SystemSettings.initialize();
                 ServiceUtil.initialize();
-
+                DataSourceThreadPool.initialize();
                 CurrencyRetrieval.initialize();
                 if (ConfigLoader.instance().isDatabaseListener()) {
                     DatabaseListener.initialize();
@@ -60,6 +62,7 @@ public class EIContextListener implements ServletContextListener {
                 migrationManager.migrate();
                 FeedRegistry.initialize();
                 ReportCache.initialize();
+
                 if (ConfigLoader.instance().isTaskRunner()) {
                     Scheduler.initialize();
                     scheduler = Scheduler.instance();
@@ -82,6 +85,7 @@ public class EIContextListener implements ServletContextListener {
                     CacheTimer.initialize();
                     CacheTimer.instance().start();
                 }
+                ThreadDumpWatcher.initialize();
             }
             LogClass.info("Started the server.");
         } catch (Throwable e) {
@@ -93,25 +97,31 @@ public class EIContextListener implements ServletContextListener {
 
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         LogClass.info("Shutting down...");
-
-        if (CacheTimer.instance() != null) {
-            CacheTimer.instance().stop();
-        }
         try {
-            MemCachedManager.instance().shutdown();
+            healthListener.stop();
+            healthThread.interrupt();
         } catch (Exception e) {
             LogClass.error(e);
         }
-
-        if (DatabaseListener.instance() != null) {
-            DatabaseListener.instance().stop();
+        if (DataSourceThreadPool.instance() != null) {
+            DataSourceThreadPool.instance().shutdown();
         }
         if (scheduler != null) {
             scheduler.stop();
         }
+        if (CacheTimer.instance() != null) {
+            CacheTimer.instance().stop();
+        }
+        if (DatabaseListener.instance() != null) {
+            DatabaseListener.instance().stop();
+        }
+
+        if (ThreadDumpWatcher.instance() != null) {
+            ThreadDumpWatcher.instance().stop();
+        }
+
         try {
-            healthListener.stop();
-            healthThread.interrupt();
+            MemCachedManager.instance().shutdown();
         } catch (Exception e) {
             LogClass.error(e);
         }

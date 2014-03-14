@@ -8,9 +8,13 @@
         import mx.collections.ArrayCollection;
         import mx.formatters.Formatter;
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition):void {
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, additionalProperties:Object):void {
             vbox.removeAllChildren();
             if (dataSet.length > 0) {
+                var previousString:String = additionalProperties["previousString"];
+                if (previousString == "") {
+                    previousString = null;
+                }
                 var trendDef:TrendDefinition = analysisDefinition as TrendDefinition;
                 vbox.direction = trendDef.direction;
                 var trends:ArrayCollection = new ArrayCollection();
@@ -26,9 +30,8 @@
                 }
                 for each (var updateOutcome:TrendOutcome in trends) {
                     updateOutcome.leftTextWidth = width + 10;
-                    if (updateOutcome.measure.reportFieldExtension != null && updateOutcome.measure.reportFieldExtension is TrendReportFieldExtension &&
-                            (TrendReportFieldExtension(updateOutcome.measure.reportFieldExtension).date ||
-                                    TrendReportFieldExtension(updateOutcome.measure.reportFieldExtension).trendComparisonField)) {
+                    if (previousString != null || (updateOutcome.measure.reportFieldExtension != null && updateOutcome.measure.reportFieldExtension is TrendReportFieldExtension &&
+                            TrendReportFieldExtension(updateOutcome.measure.reportFieldExtension).date)) {
                         var r:AltTrendRenderer = new AltTrendRenderer();
                         r.trendDefinition = trendDef;
                         r.data = updateOutcome;

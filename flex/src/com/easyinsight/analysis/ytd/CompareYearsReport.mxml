@@ -30,7 +30,7 @@
             intervalColumn.dataField = field;
             intervalColumn.width = metrics.width + metrics.x + metrics.x + 5;
             var factory:ClassFactory = new ClassFactory(VerticalListRenderer);
-            factory.properties = { qualifiedName:field, report: report };
+            factory.properties = { qualifiedName:field, report:report };
             intervalColumn.itemRenderer = factory;
             intervalColumn.sortable = false;
             var headerFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
@@ -87,7 +87,7 @@
             var labelColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
             labelColumn.sortable = false;
             var cf:ClassFactory = new ClassFactory(VerticalListRowHeaderRenderer);
-            cf.properties = { report: vert};
+            cf.properties = { report:vert};
             labelColumn.itemRenderer = cf;
             var labelHeaderFactory:ClassFactory = new ClassFactory(VerticalListHeaderRenderer);
             labelHeaderFactory.properties = { headerText:"" };

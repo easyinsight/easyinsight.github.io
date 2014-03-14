@@ -97,6 +97,11 @@
     </rule>
 
     <rule>
+        <from>^/html/report/([A-Za-z0-9]+)/doc$</from>
+        <to>/html/reportInfo.jsp?reportID=$1</to>
+    </rule>
+
+    <rule>
         <from>^/html/report/([A-Za-z0-9]+)/config/([A-Za-z0-9]+)$</from>
         <to>/html/report.jsp?reportID=$1&amp;reportConfig=$2</to>
     </rule>
@@ -354,14 +359,35 @@
     -->
 
     <rule>
+        <from>^/html/dataSources/([A-Za-z0-9]+)/basecampAccountSelection</from>
+        <to>/html/basecampAccountSelection.jsp?dataSourceID=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/html/dataSources/([A-Za-z0-9]+)/basecampAccountChoice/([A-Za-z0-9]+)</from>
+        <to>/html/basecampAccountChoice.jsp?dataSourceID=$1&amp;accountID=$2</to>
+    </rule>
+
+    <rule>
+        <from>^/html/dataSources/([A-Za-z0-9]+)/smartsheetAccountSelection</from>
+        <to>/html/smartsheetTableSelection.jsp?dataSourceID=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/html/dataSources/([A-Za-z0-9]+)/smartsheetAccountChoice/([A-Za-z0-9]+)/([A-Za-z0-9]+)</from>
+        <to>/html/smartsheetAccountChoice.jsp?dataSourceID=$1&amp;accountID=$2&amp;tableName=$3</to>
+    </rule>
+
+    <rule>
         <from>^/connectionImage/([A-Za-z0-9]+)</from>
         <to>/connectionImage?connectionID=$1</to>
     </rule>
 
     <rule>
-        <from>^/docs/(.*?)</from>
+        <from>^/docs/([A-Za-z0-9_\\-]+)</from>
         <to>/docs/index.jsp?doc=$1</to>
     </rule>
+
 
 </urlrewrite>
 

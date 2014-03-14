@@ -9,12 +9,9 @@
     </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-
-
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.ChartDefinition;
         import com.easyinsight.analysis.ClickUtil;
-
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.Link;
@@ -22,21 +19,13 @@
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.EILegend;
-        import com.easyinsight.analysis.charts.xaxisbased.column.BetterBoxBarRenderer;
-        import com.easyinsight.analysis.charts.xaxisbased.column.ContextMenuBoxItemRenderer;
         import com.easyinsight.analysis.charts.xaxisbased.column.StackedBetterBoxBarRenderer;
-
-
-        import com.easyinsight.filtering.FilterRawData;
-
 
         import mx.binding.utils.BindingUtils;
         import mx.charts.AxisRenderer;
-
         import mx.charts.BarChart;
         import mx.charts.CategoryAxis;
         import mx.charts.ChartItem;
-        import mx.charts.Legend;
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
@@ -49,7 +38,6 @@
         import mx.collections.SortField;
         import mx.events.FlexEvent;
         import mx.formatters.Formatter;
-        import mx.graphics.IFill;
         import mx.graphics.SolidColor;
 
         [Bindable]
@@ -204,6 +192,13 @@
                 yField = barChartDef.yaxis.qualifiedName();
                 createChart();
 
+                if (barChartDef.xAxisMinimumDefined) {
+                    LinearAxis(xAxis).minimum = barChartDef.xAxisMinimum;
+                }
+                if (barChartDef.xAxisMaximumDefined) {
+                    LinearAxis(xAxis).maximum = barChartDef.xAxisMaximum;
+                }
+
                 barChartDef.styleChart(barChart);
                 legend.maxWidth = barChartDef.legendMaxWidth;
 
@@ -241,8 +236,8 @@
                     var uniqueLineSeries:BarSeries = new BarSeries();
                     if (barChartDef.labelPosition == "inside") {
                         var cFactory:ClassFactory = new ClassFactory(StackedBetterBoxBarRenderer);
-                        cFactory.properties = { labelFontSize:barChartDef.labelFontSize, labelFontWeight:barChartDef.labelFontWeight, formatter: measureFormatter,
-                            labelInsideFontColor: barChartDef.useInsideLabelFontColor ? barChartDef.labelInsideFontColor : 0xFFFFFF};
+                        cFactory.properties = { labelFontSize:barChartDef.labelFontSize, labelFontWeight:barChartDef.labelFontWeight, formatter:measureFormatter,
+                            labelInsideFontColor:barChartDef.useInsideLabelFontColor ? barChartDef.labelInsideFontColor : 0xFFFFFF};
                         //cFactory.properties = { stackItem: barChartDef.stackItem, seriesField: key, report: barChartDef};
                         uniqueLineSeries.setStyle("itemRenderer", cFactory);
                     }

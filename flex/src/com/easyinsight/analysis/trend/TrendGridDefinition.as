@@ -22,12 +22,32 @@ public class TrendGridDefinition extends KPIDefinition {
     public var sortIndex:int = 3;
     public var sortAscending:Boolean = false;
     public var showKPIName:Boolean = false;
+    public var rowColor1:int = 0xF7F7F7;
+    public var rowColor2:int = 0xFFFFFF;
+    public var headerColor1:int = 0xFFFFFF;
+    public var headerColor2:int = 0xEFEFEF;
+    public var textColor:int = 0x000000;
+    public var headerTextColor:int = 0x000000;
+    public var summaryRowTextColor:int = 0x000000;
+    public var summaryRowBackgroundColor:int = 0x6699ff;
+    public var maxRecords:int;
 
     public function TrendGridDefinition() {
     }
 
     override public function supportsEmbeddedFonts():Boolean {
         return true;
+    }
+
+    override public function getFont():String {
+        if (customFontFamily != null && customFontFamily != "" && useCustomFontFamily) {
+            return customFontFamily;
+        }
+        if (fontName == "Lucida Grande" || fontName == "Open Sans") {
+            return fontName;
+        } else {
+            return "Lucida Grande";
+        }
     }
 
     override public function fromSave(savedDef:AnalysisDefinition):void {
@@ -46,8 +66,12 @@ public class TrendGridDefinition extends KPIDefinition {
     override public function populate(fields:ArrayCollection):void {
         measures = new ArrayCollection();
         for each (var field:AnalysisItem in fields) {
-            if (field != null && field.hasType(AnalysisItemTypes.MEASURE) && field.reportFieldExtension != null && field.reportFieldExtension is TrendReportFieldExtension) {
+            if (field != null && field.hasType(AnalysisItemTypes.MEASURE)) {
                 measures.addItem(field);
+            } else if (field.hasType(AnalysisItemTypes.DIMENSION) && !field.hasType(AnalysisItemTypes.DATE) && !field.hasType(AnalysisItemTypes.TEXT)) {
+                if (groupings.length == 0) {
+                    groupings.addItem(field);
+                }
             }
         }
     }

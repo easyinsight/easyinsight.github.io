@@ -31,7 +31,6 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
         var config:SQLServerDataSourceConfiguration = new SQLServerDataSourceConfiguration();
-        config.dataSourceDefinition = this;
         config.label = "SQL Server Configuration";
         pages.addItem(config);
         return pages;

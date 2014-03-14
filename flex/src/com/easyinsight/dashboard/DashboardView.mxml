@@ -143,11 +143,10 @@
             dashboardRenderer.positionsPopulate(pos);
             _breadCrumbs.push(new BreadCrumb(dashboardDesc, dashboardRenderer.getFilterDefinitions(), pos));
             if (event.descriptor is InsightDescriptor) {
-                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, null, null, 0, _breadCrumbs)));
+                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, _breadCrumbs)));
             } else if (event.descriptor is DashboardDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
-                    initialFilters:event.filters, breadCrumbs:_breadCrumbs, exchangeItem:exchangeItem, reportList:reportList, reportIndex:reportIndex,
-                    originalExchangeItem:originalExchangeItem != null ? originalExchangeItem : dashboardDesc })));
+                    initialFilters:event.filters, breadCrumbs:_breadCrumbs })));
             }
         }
 
@@ -224,7 +223,7 @@
                 options.addItem({ label: sc.name, data: sc });
             }
 
-            if (!_forceDefault && dashboard.enableLocalStorage && exchangeItem == null && selectedConfiguration == null) {
+            if (!_forceDefault && dashboard.enableLocalStorage && selectedConfiguration == null) {
                 var delegate:DashboardStackPositionsRetrievalState = null;
                 if (dashboardStackPositions != null) {
                     delegate = new DashboardStackPositionsRetrievalState(dashboardStackPositions);
@@ -239,7 +238,7 @@
                 var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                 BrowserManager.getInstance().setFragment(feedFragmentString);
             }
-            if (dashboard.borderThickness == 0 && exchangeItem == null) {
+            if (dashboard.borderThickness == 0) {
                 headerArea.includeInLayout = false;
                 headerArea.visible = false;
                 descriptionBox.includeInLayout = false;
@@ -260,12 +259,12 @@
             rootView = dashboardRenderer.createDashboard();
             if (dashboardHeader != null) {
                 dashboardHeader.dashboard = dashboard;
-                dashboardHeader.generateState(description, exchangeItem, this);
+                dashboardHeader.generateState(description, this);
                 if (!dashboard.absoluteSizing) {
                     vbox.percentHeight = 100;
                 }
             }
-            if (_dashboardID != 0 && exchangeItem == null && _breadCrumbs == null) {
+            if (_dashboardID != 0 && _breadCrumbs == null) {
                 UserAudit.instance().log(new ActionDashboardLog(ActionDashboardLog.VIEW, _dashboardID));
             }
             generateState();
@@ -285,11 +284,10 @@
                 backButton.addEventListener(MouseEvent.CLICK, function (event:MouseEvent):void {
                     _breadCrumbs.pop();
                     if (crumb.eiDescriptor is InsightDescriptor) {
-                        dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), crumb.filters, null, null, 0, _breadCrumbs)));
+                        dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), crumb.filters, _breadCrumbs)));
                     } else {
                         dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:crumb.eiDescriptor.id,
-                            initialFilters:crumb.filters, breadCrumbs:_breadCrumbs, exchangeItem:exchangeItem, reportList:reportList, reportIndex:reportIndex,
-                            originalExchangeItem:originalExchangeItem != null ? originalExchangeItem : desc, dashboardStackPositions:crumb.stackPositions })));
+                            initialFilters:crumb.filters, breadCrumbs:_breadCrumbs, dashboardStackPositions:crumb.stackPositions })));
                     }
                 });
                 breadCrumbBox.addChild(backButton);
@@ -340,12 +338,6 @@
 
         override protected function myID():int {
             return dashboard.id;
-        }
-
-        override protected function keptEntity():void {
-            exchangeItem = null;
-            _showAddBar = false;
-            generateState();
         }
 
         [Bindable]
@@ -426,8 +418,8 @@
 
         override protected function generateState():void {
             super.generateState();
-            showReportInfoButton = !_showAddBar && description != null && description != "";
-            if (descriptionBox != null && !_showAddBar && contains(descriptionBox)) {
+            showReportInfoButton = description != null && description != "";
+            if (descriptionBox != null && contains(descriptionBox)) {
                 vbox.removeChild(descriptionBox);
             }
             if (descriptionBox != null) {
@@ -435,11 +427,7 @@
             }
             if (!_fixedID) {
                 var feedFragmentObject:Object = new Object();
-                if (exchangeItem == null) {
-                    feedFragmentObject.dashboardID = String(dashboard.urlKey);
-                } else {
-                    feedFragmentObject.reportTemplateID = String(exchangeItem.descriptor.urlKey);
-                }
+                feedFragmentObject.dashboardID = String(dashboard.urlKey);
             }
             if (selectedConfiguration == null) {
                 if (dashboardStackPositions == null || dashboardStackPositions.urlKey == null) {
@@ -640,9 +628,7 @@
         </mx:HBox>
         <mx:Spacer height="10"/>
         <mx:Box width="100%" styleName="descriptionContainer" id="descriptionBox" visible="false" includeInLayout="false">
-            <report:DefaultDescriptionArea previousReportLabel="{previousReportLabel}" previousReportAvailable="{previousReportAvailable}"
-                                       nextReportAvailable="{nextReportAvailable}" nextReportLabel="{nextReportLabel}" showAdd="{_showAddBar}" description="{description}"
-                                       previousReport="toPreviousReport()" nextReport="toNextReport()" saveToAccount="keepEntity()"/>
+            <report:DefaultDescriptionArea description="{description}"/>
         </mx:Box>
         <dashboard:DashboardRenderer id="dashboardRenderer" dashboard="{dashboard}" dashboardID="{_dashboardID}"
                 dataSourceID="{dataSourceID}" initialFilters="{_initialFilters}" filterIndex="{filterIndex}"

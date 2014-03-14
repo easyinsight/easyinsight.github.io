@@ -14,7 +14,6 @@ import java.util.List;
 public class WS3DPieChartDefinition extends WSXAxisDefinition {
 
     private String labelPosition;
-    private String colorScheme;
 
     public String getLabelPosition() {
         return labelPosition;
@@ -22,14 +21,6 @@ public class WS3DPieChartDefinition extends WSXAxisDefinition {
 
     public void setLabelPosition(String labelPosition) {
         this.labelPosition = labelPosition;
-    }
-
-    public String getColorScheme() {
-        return colorScheme;
-    }
-
-    public void setColorScheme(String colorScheme) {
-        this.colorScheme = colorScheme;
     }
 
     public int getChartType() {
@@ -44,14 +35,12 @@ public class WS3DPieChartDefinition extends WSXAxisDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         labelPosition = findStringProperty(properties, "labelPosition", "outside");
-        colorScheme = findStringProperty(properties, "colorScheme", "Bright Gradients");
     }
 
     @Override
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportStringProperty("labelPosition", labelPosition));
-        properties.add(new ReportStringProperty("colorScheme", colorScheme));
         return properties;
     }
 }

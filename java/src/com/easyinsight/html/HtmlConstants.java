@@ -10,4 +10,5 @@ public class HtmlConstants {
     public static final int ACCOUNT = 2;
     public static final int WHATS_NEW = 3;
     public static final int NONE = 4;
+    public static final int CONNECTIONS = 5;
 }

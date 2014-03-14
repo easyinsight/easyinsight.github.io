@@ -76,6 +76,15 @@ public class Dashboard implements Cloneable, Serializable {
     private long tabletVersion;
     private long phoneVersion;
     private List<SavedConfiguration> configurations;
+    private String colorSet;
+
+    public String getColorSet() {
+        return colorSet;
+    }
+
+    public void setColorSet(String colorSet) {
+        this.colorSet = colorSet;
+    }
 
     public boolean isPublicWithKey() {
         return publicWithKey;

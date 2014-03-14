@@ -27,6 +27,10 @@ import mx.formatters.NumberBaseRoundType;
 			switch (formattingType) {
 				case NUMBER:
 					var numberFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();
+                    if (User.getInstance() != null) {
+                        numberFormatter.decimalSeparatorTo = User.getInstance().decimalSeperator;
+                        numberFormatter.thousandsSeparatorTo = User.getInstance().thousandsSeperator;
+                    }
 					numberFormatter.precision = precision;
                     numberFormatter.minPrecision = minPrecision;
                     numberFormatter.rounding = NumberBaseRoundType.NEAREST;
@@ -34,6 +38,10 @@ import mx.formatters.NumberBaseRoundType;
 					break;
 				case CURRENCY:
 					var currencyFormatter:CurrencyFormatter = new EICurrencyFormatter();
+                    if (User.getInstance() != null) {
+                        currencyFormatter.decimalSeparatorTo = User.getInstance().decimalSeperator;
+                        currencyFormatter.thousandsSeparatorTo = User.getInstance().thousandsSeperator;
+                    }
 					currencyFormatter.precision = precision;
                     currencyFormatter.currencySymbol = User.getInstance() == null ? "$" : User.getInstance().currencySymbol;
                     currencyFormatter.rounding = NumberBaseRoundType.NEAREST;
@@ -41,6 +49,10 @@ import mx.formatters.NumberBaseRoundType;
 					break;
 				case PERCENTAGE:
                     var percentageFormatter:PercentageNumberFormatter = new PercentageNumberFormatter();
+                    if (User.getInstance() != null) {
+                        percentageFormatter.decimalSeparatorTo = User.getInstance().decimalSeperator;
+                        percentageFormatter.thousandsSeparatorTo = User.getInstance().thousandsSeperator;
+                    }
                     percentageFormatter.precision = precision;
                     percentageFormatter.minPrecision = minPrecision;
                     percentageFormatter.rounding = NumberBaseRoundType.NEAREST;
@@ -57,6 +69,10 @@ import mx.formatters.NumberBaseRoundType;
                     break;
 				default:
 					var defaultFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();
+                    if (User.getInstance() != null) {
+                        defaultFormatter.decimalSeparatorTo = User.getInstance().decimalSeperator;
+                        defaultFormatter.thousandsSeparatorTo = User.getInstance().thousandsSeperator;
+                    }
 					defaultFormatter.precision = precision;
                     defaultFormatter.rounding = NumberBaseRoundType.NEAREST;
 					formatter = defaultFormatter;

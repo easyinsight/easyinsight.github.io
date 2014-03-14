@@ -2,8 +2,13 @@ package com.easyinsight.core;
 
 import com.easyinsight.tag.Tag;
 import com.easyinsight.userupload.CustomFolder;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -26,6 +31,15 @@ public class DataSourceDescriptor extends EIDescriptor {
     private List<CustomFolder> customFolders = new ArrayList<CustomFolder>();
     private List<Tag> tags;
     private int rowCount;
+    private Collection<EIDescriptor> prebuilts;
+
+    public Collection<EIDescriptor> getPrebuilts() {
+        return prebuilts;
+    }
+
+    public void setPrebuilts(Collection<EIDescriptor> prebuilts) {
+        this.prebuilts = prebuilts;
+    }
 
     public List<Tag> getTags() {
         return tags;
@@ -135,5 +149,23 @@ public class DataSourceDescriptor extends EIDescriptor {
         super(name, id, accountVisible);
         this.dataSourceType = dataSourceType;
         this.dataSourceBehavior = dataSourceBehavior;
+    }
+
+    public JSONObject toJSON(DateFormat dateFormat) throws JSONException {
+        JSONObject jo = super.toJSON(dateFormat);
+        JSONArray ja = new JSONArray();
+        for(Tag t : getTags()) {
+            JSONObject to = new JSONObject();
+            to.put("name", t.getName());
+            to.put("id", t.getId());
+            ja.put(to);
+        }
+        jo.put("tags", ja);
+        if (lastDataTime != null) {
+            jo.put("last_refresh_time", dateFormat.format(lastDataTime));
+        } else {
+            jo.put("last_refresh_time", "");
+        }
+        return jo;
     }
 }

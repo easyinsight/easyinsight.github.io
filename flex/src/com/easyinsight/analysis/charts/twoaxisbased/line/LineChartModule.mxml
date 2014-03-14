@@ -12,17 +12,14 @@
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisMeasure;
-
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.MultiColor;
         import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.EILegend;
-
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
         import mx.charts.AxisRenderer;
-
         import mx.charts.CategoryAxis;
         import mx.charts.DateTimeAxis;
         import mx.charts.HitData;
@@ -148,6 +145,12 @@
                 lineChart.backgroundElements = ChartUtil.gridLine("horizontal");
                 lineChart.dataTipFunction = dataTipFunction;
                 var verticalAxis:LinearAxis = new LinearAxis();
+                if (lineChartDef.yAxisMinimumDefined) {
+                    LinearAxis(verticalAxis).minimum = lineChartDef.yAxisMininum;
+                }
+                if (lineChartDef.yAxisMaximumDefined) {
+                    LinearAxis(verticalAxis).maximum = lineChartDef.yAxisMaximum;
+                }
                 if (lineChartDef.multiMeasure) {
                     if (lineChartDef.measures.length == 1) {
                         verticalAxis.labelFunction = renderAxis;
@@ -175,7 +178,6 @@
                 hAxisRenderer.axis = verticalAxis;
                 lineChart.verticalAxisRenderer = hAxisRenderer;
                 lineChart.verticalAxis = verticalAxis;
-
 
 
                 var strokes:Array = [];

@@ -11,6 +11,7 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 
+import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.intention.*;
 import com.easyinsight.security.SecurityUtil;
 
@@ -42,6 +43,9 @@ import org.apache.commons.httpclient.auth.AuthScope;
  */
 public class HighRiseCompositeSource extends CompositeServerDataSource {
 
+    public static final int CUSTOM_FIELD_CONTACT = 1;
+    public static final int CUSTOM_FIELD_COMPANY = 2;
+
     private String url = "";
     private boolean includeEmails;
     private boolean joinDealsToContacts;
@@ -52,6 +56,13 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private boolean joinTasksToContacts;
     private String token;
     private List<HighriseAdditionalToken> additionalTokens = new ArrayList<HighriseAdditionalToken>();
+
+    public List<CustomFieldTag> customFieldTags() {
+        List<CustomFieldTag> customTags = new ArrayList<CustomFieldTag>();
+        customTags.add(new CustomFieldTag(HighRiseCompositeSource.CUSTOM_FIELD_COMPANY, "Company Custom Field"));
+        customTags.add(new CustomFieldTag(HighRiseCompositeSource.CUSTOM_FIELD_CONTACT, "Contact Custom Field"));
+        return customTags;
+    }
 
     public void configureFactory(HTMLConnectionFactory factory) {
         factory.addField("Highrise URL", "url", "Your Highrise URL is the browser URL you normally use to connect to Highrise. For example, if you access Highrise as yourcompanyname.highrisehq.com, put yourcompanyname in as the Highrise URL.");
@@ -78,6 +89,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
             }
         }
+        queryStmt.close();
     }
 
     protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
@@ -512,16 +524,21 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             if (analysisItem.getLinks() == null) {
                 analysisItem.setLinks(new ArrayList<Link>());
             }
+            if (analysisItem.getLinks().size() > 0) {
+                return;
+            }
             if (isContactLinkable(analysisItem)) {
                 removeURLLinkIfExists("/people/["+HighRiseContactSource.CONTACT_ID+"]", analysisItem);
                 URLLink urlLink = new URLLink();
                 urlLink.setDefaultLink(true);
+                urlLink.setCodeGenerated(true);
                 urlLink.setUrl(getUrl() + "/people/["+HighRiseContactSource.CONTACT_ID+"]");
                 urlLink.setLabel("View Contact in Highrise...");
                 analysisItem.getLinks().add(urlLink);
             } else if (isCompanyLinkable(analysisItem)) {
                 URLLink urlLink = new URLLink();
                 urlLink.setDefaultLink(true);
+                urlLink.setCodeGenerated(true);
                 removeURLLinkIfExists("/companies/["+HighRiseCompanySource.COMPANY_ID+"]", analysisItem);
                 urlLink.setUrl(getUrl() + "/companies/["+HighRiseCompanySource.COMPANY_ID+"]");
                 urlLink.setLabel("View Company in Highrise...");
@@ -530,6 +547,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 removeURLLinkIfExists("/deals/["+HighRiseDealSource.DEAL_ID+"]", analysisItem);
                 URLLink urlLink = new URLLink();
                 urlLink.setDefaultLink(true);
+                urlLink.setCodeGenerated(true);
                 urlLink.setUrl(getUrl() + "/deals/["+HighRiseDealSource.DEAL_ID+"]");
                 urlLink.setLabel("View Deal in Highrise...");
                 analysisItem.getLinks().add(urlLink);
@@ -537,20 +555,24 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 removeURLLinkIfExists("/kases/["+HighRiseCaseSource.CASE_ID+"]", analysisItem);
                 URLLink urlLink = new URLLink();
                 urlLink.setDefaultLink(true);
+                urlLink.setCodeGenerated(true);
                 urlLink.setUrl(getUrl() + "/kases/["+HighRiseCaseSource.CASE_ID+"]");
                 urlLink.setLabel("View Case in Highrise...");
                 analysisItem.getLinks().add(urlLink);
             } else if (isTaskLinkable(analysisItem)) {
                 removeURLLinkIfExists("/tasks", analysisItem);
                 URLLink upcomingTasks = new URLLink();
+                upcomingTasks.setCodeGenerated(true);
                 upcomingTasks.setUrl(getUrl() + "/tasks");
                 upcomingTasks.setLabel("View Upcoming Tasks in Highrise...");
                 analysisItem.getLinks().add(upcomingTasks);
                 URLLink completedTasks = new URLLink();
                 completedTasks.setUrl(getUrl() + "/tasks?collection=completed");
+                completedTasks.setCodeGenerated(true);
                 completedTasks.setLabel("View Completed Tasks in Highrise...");
                 analysisItem.getLinks().add(completedTasks);
                 URLLink assignedTasks = new URLLink();
+                assignedTasks.setCodeGenerated(true);
                 assignedTasks.setUrl(getUrl() + "/tasks?collection=assigned");
                 assignedTasks.setLabel("View Assigned Tasks in Highrise...");
                 analysisItem.getLinks().add(assignedTasks);

@@ -3,6 +3,8 @@ import flash.display.DisplayObject;
 
 import flash.events.MouseEvent;
 
+import mx.collections.ArrayCollection;
+
 import mx.controls.advancedDataGridClasses.AdvancedDataGridGroupItemRenderer;
 import mx.core.IUITextField;
 
@@ -12,6 +14,13 @@ public class AvailableFieldRenderer extends AdvancedDataGridGroupItemRenderer {
         super();
         mouseEnabled = true;
         addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
+    }
+
+    private var _tags:ArrayCollection;
+
+
+    public function set tags(value:ArrayCollection):void {
+        _tags = value;
     }
 
     private var _dataSourceID:int;
@@ -36,6 +45,7 @@ public class AvailableFieldRenderer extends AdvancedDataGridGroupItemRenderer {
         AvailableFieldTextRenderer(label).data = data;
         AvailableFieldTextRenderer(label).dataSourceID = _dataSourceID;
         AvailableFieldTextRenderer(label).calcRefactor = _calcRefactor;
+        AvailableFieldTextRenderer(label).tags = _tags;
     }
 
     override protected function createLabel(childIndex:int):void {

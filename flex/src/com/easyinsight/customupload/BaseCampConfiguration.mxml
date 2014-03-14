@@ -1,8 +1,12 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%"
+                       height="100%"
+                       xmlns:feed="com.easyinsight.administration.feed.*" label="Basecamp Configuration">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.BaseCampDataSource;
+
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var url:String;
@@ -15,8 +19,9 @@
         [Bindable]
         private var todoCommentsIncluded:Boolean;
 
-        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
-            var ds:BaseCampDataSource = feedDefinition as BaseCampDataSource;
+
+        override protected function gotSource():void {
+            var ds:BaseCampDataSource = dataSource as BaseCampDataSource;
             url = ds.url;
             archivedIncluded = ds.includeArchived;
             inactiveIncluded = ds.includeInactive;
@@ -28,19 +33,17 @@
         [Bindable]
         private var joinProjects:Boolean;
 
-        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var ds:BaseCampDataSource = feedDefinition as BaseCampDataSource;
+        private function save():void {
+            var ds:BaseCampDataSource = dataSource as BaseCampDataSource;
             ds.url = urlInput.text;
             ds.includeArchived = archivedCheckbox.selected;
             ds.includeMilestoneComments = milestoneCommentsCheckbox.selected;
             ds.includeTodoComments = todoCommentsCheckbox.selected;
             ds.includeInactive = inactiveCheckbox.selected;
             ds.companyProjectJoinMode = joinCheckbox.selected;
+            saveSource();
         }
-
-        public function validate():Boolean {
-            return true;
-        }]]></mx:Script>
+        ]]></mx:Script>
     <mx:Form paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
         <mx:FormItem label="Basecamp URL:">
             <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
@@ -66,4 +69,8 @@
             <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="Easy Insight used to join your projects to all companies capable of seeing those projects. We recently changed to instead match Basecamp's behavior and only show the primary company for that project. If you wish to enable the old behavior, check this checkbox."/>
         </mx:FormItem>
 	</mx:Form>
-</mx:VBox>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</feed:DataSourceWindow>

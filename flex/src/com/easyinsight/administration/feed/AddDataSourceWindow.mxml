@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.datasources.DataSourceType;
+        import com.easyinsight.listing.DataSourceEvent;
+        import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        public var dataSourceID:int;
+
+        private function onCreation():void {
+            ProgressAlert.alert(this, "Retrieving data sources...", null, feedService.addonDataSources);
+            feedService.addonDataSources.send(dataSourceID);
+        }
+
+        [Bindable]
+        private var dataSources:ArrayCollection;
+
+        private function addSource():void {
+            var source:DataSourceDescriptor = dataSourceBox.selectedItem as DataSourceDescriptor;
+            dispatchEvent(new DataSourceEvent(DataSourceEvent.ADD_DATA_SOURCE, source));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function gotFeeds():void {
+            dataSources = feedService.addonDataSources.lastResult as ArrayCollection;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="addonDataSources" result="gotFeeds()"/>
+    </mx:RemoteObject>
+    <mx:ComboBox id="dataSourceBox" labelField="name" dataProvider="{dataSources}"/>
+    <mx:HBox>
+        <util:SaveButton label="Add" click="addSource()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" horizontalAlign="center" horizontalGap="2">
+<containers:FlowBox xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="center" horizontalGap="2" xmlns:containers="flexlib.containers.*"
+                    updateComplete="adapterFlowBoxUpdateCompleteHandler(event)" creationComplete="adapterFlowBoxUpdateCompleteHandler(event)" width="100%">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.EmbeddedViewFactory;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -11,6 +12,8 @@
         import com.easyinsight.util.PopUpUtil;
 
         import mx.core.Application;
+        import mx.core.UIComponent;
+        import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
 
         public var viewFactory:EmbeddedViewFactory;
@@ -37,6 +40,50 @@
             }
         }
 
+        protected static function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
+        {
+            // resize the FlowBox manually, as the internal calculation doesn't work
+
+            var fb:FlowBox = event.target as FlowBox;
+
+            if (fb != null)
+            {
+                if (fb.numChildren > 0)
+                {
+                    // default the needed height to the top view metric
+
+                    var maxBottom:int = fb.viewMetrics.top;
+
+                    // Iterate over the children of the FlowBox to find the bottom-most bottom, so
+                    // we can determine how big / small we can make the FlowBox.
+                    // If it's a UIComponent, include it if the includeInLayout property is true.
+                    // If it's not a UIComponent, include it if the visible property is true.
+
+                    for (var idx:int = 0; idx < fb.numChildren; idx++)
+                    {
+                        var displayObject:DisplayObject = fb.getChildAt(idx);
+
+                        if ((displayObject is UIComponent && (displayObject as
+                                UIComponent).includeInLayout) ||
+                                (!(displayObject is UIComponent) && displayObject.visible))
+                        {
+                            var thisBottom:int = fb.getChildAt(idx).y + fb.getChildAt(idx).height;
+
+                            if (thisBottom > maxBottom)
+                                maxBottom = thisBottom;
+                        }
+                    }
+
+                    fb.height = maxBottom + fb.viewMetrics.bottom +
+                            fb.getStyle("paddingBottom") + 1;
+                }
+                else
+                {
+                    fb.height = fb.viewMetrics.top + fb.viewMetrics.bottom;
+                }
+            }
+        }
+
         override protected function createChildren():void {
             super.createChildren();
             if (dashboardReportViewComponent.dashboardEditorMetadata.fixedID) {
@@ -50,7 +97,7 @@
             var _breadCrumbs:Array = [];
             _breadCrumbs.push(new BreadCrumb(dashboardDescriptor, null, pos));
             // need to preserve stack position + filters, but if we're doing that as is...
-            viewFactory.dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, null, null, 0, _breadCrumbs)));
+            viewFactory.dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, _breadCrumbs)));
             PopUpManager.removePopUp(this);
         }
 
@@ -60,8 +107,13 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
+        private function allFilters():void {
+            dashboardReportViewComponent.toggleAllFilters();
+        }
         ]]></mx:Script>
     <mx:Button label="Export Report" click="exportReport()" styleName="dashboardGrayButton" id="exportButton"/>
     <mx:Button label="Navigate to Report" click="navigateToReport()" styleName="dashboardGrayButton" id="navigateButton"/>
-    <!--<mx:Button label="Configure" click="configure()" styleName="dashboardGrayButton" id="configureButton"/>-->
-</mx:HBox>
+    <mx:Button label="Configure" click="configure()" styleName="dashboardGrayButton" id="configureButton"/>
+    <!--<mx:Button label="All Filters" click="allFilters()" styleName="dashboardGrayButton" id="allButton"/>-->
+</containers:FlowBox>

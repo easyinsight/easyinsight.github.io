@@ -7,10 +7,7 @@ import nu.xom.Element;
 import org.hibernate.Session;
 
 import javax.persistence.*;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -134,5 +131,15 @@ public class YTDReportFieldExtension extends ReportFieldExtension {
             setDateField((AnalysisItem) Database.deproxy(getDateField()));
             dateField.afterLoad();
         }*/
+    }
+
+    public int extensionType() {
+        return ReportFieldExtension.YTD;
+    }
+
+    public void validate(Set<Long> sourceIDs) {
+        if (benchmark != null) {
+            benchmark.validate(sourceIDs);
+        }
     }
 }

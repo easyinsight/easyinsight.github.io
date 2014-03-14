@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.tag.Tag;
 import org.hibernate.Session;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -167,6 +168,16 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
     }
 
     @Override
+    public FilterDefinition clone() throws CloneNotSupportedException {
+        MultiFieldFilterDefinition clone = (MultiFieldFilterDefinition) super.clone();
+        clone.setAvailableHandles(new ArrayList<AnalysisItemHandle>(getAvailableHandles()));
+        clone.setFieldOrdering(new ArrayList<AnalysisItemHandle>(getFieldOrdering()));
+        clone.setSelectedItems(new ArrayList<AnalysisItemHandle>(selectedItems()));
+        clone.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>(getAvailableTags()));
+        return clone;
+    }
+
+    @Override
     public void updateIDs(ReplacementMap replacementMap) {
         super.updateIDs(replacementMap);
 
@@ -180,12 +191,16 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
 
         List<WeNeedToReplaceHibernateTag> replaceTags = new ArrayList<WeNeedToReplaceHibernateTag>();
         for (WeNeedToReplaceHibernateTag tag : availableTags) {
-            WeNeedToReplaceHibernateTag newTag = replacementMap.findReplacementTag(tag.getTagID());
-            if (newTag == null) {
-                newTag = new WeNeedToReplaceHibernateTag();
+            Tag newTag1 = replacementMap.findReplacementTag(tag.getTagID());
+            if (newTag1 == null) {
+                WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
                 newTag.setTagID(tag.getTagID());
+                replaceTags.add(newTag);
+            } else {
+                WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
+                newTag.setTagID(newTag1.getId());
+                replaceTags.add(newTag);
             }
-            replaceTags.add(newTag);
         }
         this.availableTags = replaceTags;
 

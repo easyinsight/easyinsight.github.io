@@ -31,10 +31,16 @@ public class ConnectionInstalledServlet extends HttpServlet {
             String dataSourceKey = req.getParameter("dataSourceID");
             long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
             FeedDefinition dataSource = new FeedService().getFeedDefinition(dataSourceID);
-            SolutionKPIData solutionKPIData = new SolutionKPIData();
-            solutionKPIData.setDataSourceID(dataSourceID);
-            new SolutionService().addKPIData(solutionKPIData);
-            String endURL = RedirectUtil.getURL(req, "/app/html/reports/" + dataSource.getApiKey());
+            String endURL;
+            if (dataSource.rebuildFieldWindow()) {
+                endURL = RedirectUtil.getURL(req, "/app/html/fieldSetup.jsp?dataSourceID=" + dataSourceKey);
+            } else {
+                SolutionKPIData solutionKPIData = new SolutionKPIData();
+                solutionKPIData.setDataSourceID(dataSourceID);
+                new SolutionService().addKPIData(solutionKPIData);
+
+                endURL = RedirectUtil.getURL(req, "/app/html/reports/" + dataSource.getApiKey());
+            }
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("url", endURL);
             response.setContentType("application/json");

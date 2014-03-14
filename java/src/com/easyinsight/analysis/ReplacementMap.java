@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.tag.Tag;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,13 +17,16 @@ public class ReplacementMap {
 
     private Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
     private Map<String, AnalysisItem> qualifiedNameReplacementMap = new HashMap<String, AnalysisItem>();
-    private Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap = new HashMap<Long, WeNeedToReplaceHibernateTag>();
+    private Map<Long, Tag> tagReplacementMap = new HashMap<Long, Tag>();
 
-    public WeNeedToReplaceHibernateTag findReplacementTag(long tagID) {
+    public Tag findReplacementTag(long tagID) {
+        if (tagReplacementMap == null) {
+            return null;
+        }
         return tagReplacementMap.get(tagID);
     }
 
-    public void setTagReplacementMap(Map<Long, WeNeedToReplaceHibernateTag> tagReplacementMap) {
+    public void setTagReplacementMap(Map<Long, Tag> tagReplacementMap) {
         this.tagReplacementMap = tagReplacementMap;
     }
 

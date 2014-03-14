@@ -52,7 +52,6 @@ public class RemoveDashboardElement extends Function {
                 };
                 calculationMetadata.getDashboard().visit(findStackVisitor);
             }
-
         }
         return new EmptyValue();
     }

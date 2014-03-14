@@ -1,7 +1,6 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
-//import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.FunctionFactory;
@@ -18,7 +17,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.StandardReportPipeline;
-//import net.spy.memcached.MemcachedClient;
 import com.easyinsight.tag.Tag;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
@@ -42,6 +40,7 @@ public class DataService {
     public List<AnalysisItemSelection> possibleFields(IFieldChoiceFilter filter, @Nullable WSAnalysisDefinition reportEditorReport, @Nullable Dashboard dashboardEditorDashboard,
                                                       @Nullable FilterSet filterSet) {
         WSAnalysisDefinition report = null;
+        EIConnection conn = Database.instance().getConnection();
         long dashboardID = 0;
         try {
             long dataSourceID;
@@ -53,9 +52,9 @@ public class DataService {
             } else if (filterSet != null) {
                 dataSourceID = filterSet.getDataSourceID();
             } else {
-                EIConnection conn = Database.instance().getConnection();
 
-                try {
+
+
                     PreparedStatement stmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM analysis_to_filter_join WHERE FILTER_ID = ?");
                     stmt.setLong(1, filter.getFilterID());
                     ResultSet rs = stmt.executeQuery();
@@ -71,12 +70,11 @@ public class DataService {
                             dataSourceID = dashboardRS.getLong(1);
                             dashboardID = dashboardRS.getLong(2);
                         } else {
-                            throw new RuntimeException();
+                            return new ArrayList<AnalysisItemSelection>();
+                            //throw new RuntimeException();
                         }
                     }
-                } finally {
-                    Database.closeConnection(conn);
-                }
+
 
                 if (report != null) {
                     SecurityUtil.authorizeInsight(report.getAnalysisID());
@@ -85,11 +83,12 @@ public class DataService {
                 }
             }
 
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
             Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
             Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
             final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
-            for (AnalysisItem field : dataSource.getFields()) {
+            List<AnalysisItem> allFields = dataSource.allFields(conn);
+            for (AnalysisItem field : allFields) {
                 map.put(field.getAnalysisItemID(), field);
                 mapByName.put(field.toDisplay(), field);
             }
@@ -132,9 +131,26 @@ public class DataService {
 
             List<WeNeedToReplaceHibernateTag> tags = filter.getAvailableTags();
 
-            EIConnection conn = Database.instance().getConnection();
+            PreparedStatement customFieldQueryStmt = conn.prepareStatement("SELECT custom_flag_to_tag.custom_flag FROM custom_flag_to_tag WHERE tag_id = ? AND data_source_id = ?");
+
+            for (WeNeedToReplaceHibernateTag tag : tags) {
+                customFieldQueryStmt.setLong(1, tag.getTagID());
+                customFieldQueryStmt.setLong(2, dataSourceID);
+                ResultSet rs = customFieldQueryStmt.executeQuery();
+                while (rs.next()) {
+                    int customFlag = rs.getInt(1);
+                    for (AnalysisItem analysisItem : allFields) {
+                        if (analysisItem.getCustomFlag() == customFlag) {
+                            positions.put(analysisItem, i++);
+                            set.add(analysisItem);
+                        }
+                    }
+                }
+            }
+            customFieldQueryStmt.close();
+
             PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ? AND field_to_tag.data_source_id = ?");
-            try {
+
                 for (WeNeedToReplaceHibernateTag tag : tags) {
                     queryStmt.setLong(1, tag.getTagID());
                     queryStmt.setLong(2, dataSourceID);
@@ -143,8 +159,10 @@ public class DataService {
                         String fieldName = rs.getString(1);
                         AnalysisItem analysisItem = mapByName.get(fieldName);
                         //if (report == null || report.accepts(analysisItem)) {
-                        positions.put(analysisItem, i++);
-                        set.add(analysisItem);
+                        if (analysisItem != null) {
+                            positions.put(analysisItem, i++);
+                            set.add(analysisItem);
+                        }
                             /*PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
                                     "extension_type = ?");
                             extStmt.setLong(1, fieldID);
@@ -169,9 +187,7 @@ public class DataService {
 
                 queryStmt.close();
 
-            } finally {
-                Database.closeConnection(conn);
-            }
+
 
 
             i = 0;
@@ -234,6 +250,8 @@ public class DataService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
@@ -531,10 +549,8 @@ public class DataService {
             Collection<AnalysisItem> feedItems = feed.getFields();
             // need to apply renames from the com.easyinsight.analysis definition here?
             List<AnalysisItem> sortedList = new ArrayList<AnalysisItem>(feedItems);
-            Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
-            for (AnalysisItem item : feedItems) {
-                map.put(item.toDisplay(), item);
-            }
+
+
             Collections.sort(sortedList, new Comparator<AnalysisItem>() {
 
                 public int compare(AnalysisItem o1, AnalysisItem o2) {
@@ -542,6 +558,7 @@ public class DataService {
                 }
             });
             AnalysisItem[] feedItemArray = new AnalysisItem[sortedList.size()];
+
             sortedList.toArray(feedItemArray);
             FeedMetadata feedMetadata = new FeedMetadata();
             feedMetadata.setFilterExampleMessage(feed.getFilterExampleMessage());
@@ -558,32 +575,18 @@ public class DataService {
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
             feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
             feedMetadata.setDefaultManualRun(feed.getDataSource().isManualReportRun());
-            long defaultTag = feed.getDataSource().getDefaultFieldTag();
-            PreparedStatement tagStmt = conn.prepareStatement("SELECT account_tag.account_tag_id, account_tag.tag_name, field_to_tag.display_name FROM " +
-                    "field_to_tag, account_tag WHERE field_to_tag.account_tag_id = account_tag.account_tag_id AND " +
-                    "field_to_tag.data_source_id = ?");
-            tagStmt.setLong(1, feedID);
-            ResultSet tagRS = tagStmt.executeQuery();
-            Set<Tag> tags = new HashSet<Tag>();
-            while (tagRS.next()) {
-                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), false, false, false);
-                if (!tags.contains(tag)) {
-                    tags.add(tag);
-                    if (tag.getId() == defaultTag) {
-                        feedMetadata.setTagDefault(tag);
+
+            //List<FieldRule> rules = FieldRule.load(conn, feedID);
+
+            /*for (AnalysisItem analysisItem : feedItems) {
+                for (FieldRule rule : rules) {
+                    if (rule.matches(analysisItem)) {
+                        rule.update(analysisItem);
                     }
                 }
-                String name = tagRS.getString(3);
-                AnalysisItem item = map.get(name);
-                if (item != null) {
-                    if (item.getTags() == null) {
-                        item.setTags(new ArrayList<Tag>());
-                    }
-                    item.getTags().add(tag);
-                }
-            }
-            feedMetadata.setTags(new ArrayList<Tag>(tags));
-            tagStmt.close();
+            }*/
+            feedMetadata.setTagDefault(feed.getDefaultTag());
+            feedMetadata.setTags(feed.getTags());
             PreparedStatement ps = conn.prepareStatement("SELECT DEFAULT_MAX_RECORDS FROM ACCOUNT WHERE ACCOUNT_ID = ?");
             ps.setLong(1, SecurityUtil.getAccountID());
             ResultSet rs = ps.executeQuery();
@@ -676,147 +679,13 @@ public class DataService {
                     return (EmbeddedTrendDataResults) embeddedResults;
                 }
             }
-            RollingFilterDefinition reportFilter = null;
-            for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
-                if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
-                    reportFilter = (RollingFilterDefinition) customFilter;
-                }
-            }
-            if (reportFilter == null) {
-                for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
-                    if (customFilter instanceof RollingFilterDefinition) {
-                        if (analysisDefinition.getFilterName().equals(customFilter.getField().qualifiedName()) ||
-                                analysisDefinition.getFilterName().equals(customFilter.getField().toDisplay())) {
-                            reportFilter = (RollingFilterDefinition) customFilter;
-                        }
-                    }
-                }
-            }
-            Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
-            Map<String, Boolean> passthroughMap = new HashMap<String, Boolean>();
-
-            for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-                String keyLabel;
-                String fieldSourcing;
-                boolean passthrough = false;
-
-                if (analysisItem.getKey() instanceof ReportKey) {
-                    ReportKey reportKey = (ReportKey) analysisItem.getKey();
-                    fieldSourcing = String.valueOf(reportKey.getReportID());
-                    passthrough = true;
-                } else {
-                    AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
-                    structure.setReport(analysisDefinition);
-                    structure.setConn(conn);
-                    structure.setInsightRequestMetadata(insightRequestMetadata);
-                    List<AnalysisItem> fields = new ArrayList<AnalysisItem>(FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn).getFields());
-                    fields.addAll(analysisDefinition.allAddedItems(insightRequestMetadata));
-                    Collection<AnalysisItem> needed = analysisItem.getAnalysisItems(fields, Arrays.asList(analysisItem), false, true,
-                            new ArrayList<AnalysisItem>(), structure);
-                    Long addonReportID = null;
-                    for (AnalysisItem analysisItem1 : needed) {
-                        if (analysisItem1.getKey() instanceof ReportKey) {
-                            ReportKey reportKey = (ReportKey) analysisItem1.getKey();
-                            addonReportID = reportKey.getReportID();
-                        }
-                    }
-                    if (addonReportID == null) {
-                        fieldSourcing = "";
-                    } else {
-                        fieldSourcing = String.valueOf(addonReportID);
-                        passthrough = true;
-                    }
-                }
-
-                if (analysisItem.getReportFieldExtension() != null && reportFilter != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
-                    TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
-                    if (trendReportFieldExtension.getDate() != null) {
-                        AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
-                        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
-                        rollingFilterDefinition.setField(dateDimension);
-                        rollingFilterDefinition.setInterval(reportFilter.getInterval());
-                        if (reportFilter.getInterval() == MaterializedRollingFilterDefinition.CUSTOM) {
-                            rollingFilterDefinition.setCustomBeforeOrAfter(reportFilter.getCustomBeforeOrAfter());
-                            rollingFilterDefinition.setCustomIntervalAmount(reportFilter.getCustomIntervalAmount());
-                            rollingFilterDefinition.setCustomIntervalType(reportFilter.getCustomIntervalType());
-                        }
-                        analysisItem.getFilters().add(rollingFilterDefinition);
-                        keyLabel = dateDimension.qualifiedName();
-                    } else {
-                        keyLabel = "";
-                    }
-                } else {
-                    keyLabel = "";
-                }
-                String fullKey = keyLabel + fieldSourcing;
-                List<AnalysisMeasure> measures = trendMap.get(fullKey);
-                if (measures == null) {
-                    measures = new ArrayList<AnalysisMeasure>();
-                    trendMap.put(fullKey, measures);
-                }
-                measures.add((AnalysisMeasure) analysisItem);
-                if (passthrough) {
-                    passthroughMap.put(fullKey, true);
-                }
-            }
-
-            List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
-            DataSourceInfo dataSourceInfo = null;
-            for (Map.Entry<String, List<AnalysisMeasure>> entry : trendMap.entrySet()) {
-                String key = entry.getKey();
-                List<AnalysisMeasure> measures = entry.getValue();
-                WSListDefinition tempReport = new WSListDefinition();
-                // what's the logic to use on this?
-                Boolean passthrough = passthroughMap.get(key);
-                if (passthrough != null && passthrough) {
-                    tempReport.setPassThroughFilters(true);
-                }
-                //
-                List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
-                columns.addAll(measures);
-                if (analysisDefinition.getGroupings() != null) {
-                    columns.addAll(analysisDefinition.getGroupings());
-                }
-                tempReport.setFilterDefinitions(analysisDefinition.getFilterDefinitions());
-                tempReport.setColumns(columns);
-                tempReport.setDataFeedID(analysisDefinition.getDataFeedID());
-                tempReport.setAddonReports(analysisDefinition.getAddonReports());
-                tempReport.setAddedItems(analysisDefinition.getAddedItems());
-                tempReport.setMarmotScript(analysisDefinition.getMarmotScript());
-                tempReport.setReportRunMarmotScript(analysisDefinition.getReportRunMarmotScript());
-                tempReport.setJoinOverrides(analysisDefinition.getJoinOverrides());
-                InsightRequestMetadata metadata = new InsightRequestMetadata();
-                metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
-                ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(metadata, tempReport, conn, customFilters, new ArrayList<FilterDefinition>());
-                dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
-                DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
-                DataSet pastSet;
-                if ("".equals(key)) {
-                    pastSet = nowSet;
-                } else {
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
-                    metadata = new InsightRequestMetadata();
-                    metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
-                    metadata.setNow(cal.getTime());
-                    ReportRetrieval reportRetrievalPast = ReportRetrieval.reportView(metadata, tempReport, conn, customFilters, new ArrayList<FilterDefinition>());
-                    pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
-                }
-                trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
-            }
-            List<TrendOutcome> targetOutcomes = new ArrayList<TrendOutcome>();
-            /*for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-                for (TrendOutcome trendOutcome : trendOutcomes) {
-                    if (trendOutcome.getMeasure().equals(analysisItem)) {
-                        targetOutcomes.add(trendOutcome);
-                        break;
-                    }
-                }
-            }*/
+            TrendResult trendResult = createTrendOutcomes(analysisDefinition, insightRequestMetadata, conn);
             //trendOutcomes = targetOutcomes;
             EmbeddedTrendDataResults trendDataResults = new EmbeddedTrendDataResults();
-            trendDataResults.setTrendOutcomes(trendOutcomes);
-            trendDataResults.setDataSourceInfo(dataSourceInfo);
+            trendDataResults.setTrendOutcomes(trendResult.trendOutcomes);
+            trendDataResults.setNowString(trendResult.nowString);
+            trendDataResults.setPreviousString(trendResult.previousString);
+            trendDataResults.setDataSourceInfo(trendResult.dataSourceInfo);
             analysisDefinition.setFilterDefinitions(customFilters);
             trendDataResults.setDefinition(analysisDefinition);
             if (cacheKey != null) {
@@ -1180,113 +1049,13 @@ public class DataService {
     }
 
     public static TrendDataResults getTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
-        RollingFilterDefinition reportFilter = null;
-        for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
-            if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
-                reportFilter = (RollingFilterDefinition) customFilter;
-            }
-        }
-        if (reportFilter == null) {
-            for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
-                if (customFilter instanceof RollingFilterDefinition) {
-                    if (analysisDefinition.getFilterName().equals(customFilter.getField().qualifiedName()) ||
-                            analysisDefinition.getFilterName().equals(customFilter.getField().toDisplay())) {
-                        reportFilter = (RollingFilterDefinition) customFilter;
-                    }
-                }
-            }
-        }
-        Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
-
-        for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-            if (analysisItem.getReportFieldExtension() != null && reportFilter != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
-                TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
-                if (trendReportFieldExtension.getDate() != null) {
-                    AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
-                    RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
-                    rollingFilterDefinition.setField(dateDimension);
-                    rollingFilterDefinition.setInterval(reportFilter.getInterval());
-                    if (reportFilter.getInterval() == MaterializedRollingFilterDefinition.CUSTOM) {
-                        rollingFilterDefinition.setCustomBeforeOrAfter(reportFilter.getCustomBeforeOrAfter());
-                        rollingFilterDefinition.setCustomIntervalAmount(reportFilter.getCustomIntervalAmount());
-                        rollingFilterDefinition.setCustomIntervalType(reportFilter.getCustomIntervalType());
-                    }
-                    analysisItem.getFilters().add(rollingFilterDefinition);
-                    List<AnalysisMeasure> measures = trendMap.get(dateDimension.qualifiedName());
-                    if (measures == null) {
-                        measures = new ArrayList<AnalysisMeasure>();
-                        trendMap.put(dateDimension.qualifiedName(), measures);
-                    }
-                    measures.add((AnalysisMeasure) analysisItem);
-                } else {
-                    List<AnalysisMeasure> measures = trendMap.get("");
-                    if (measures == null) {
-                        measures = new ArrayList<AnalysisMeasure>();
-                        trendMap.put("", measures);
-                    }
-                    measures.add((AnalysisMeasure) analysisItem);
-                }
-            } else {
-                List<AnalysisMeasure> measures = trendMap.get("");
-                if (measures == null) {
-                    measures = new ArrayList<AnalysisMeasure>();
-                    trendMap.put("", measures);
-                }
-                measures.add((AnalysisMeasure) analysisItem);
-            }
-        }
-        List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
-        DataSourceInfo dataSourceInfo = null;
-        for (Map.Entry<String, List<AnalysisMeasure>> entry : trendMap.entrySet()) {
-            String key = entry.getKey();
-            List<AnalysisMeasure> measures = entry.getValue();
-            WSListDefinition tempReport = new WSListDefinition();
-            List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
-            columns.addAll(measures);
-            if (analysisDefinition.getGroupings() != null) {
-                columns.addAll(analysisDefinition.getGroupings());
-            }
-            tempReport.setFilterDefinitions(analysisDefinition.getFilterDefinitions());
-            tempReport.setColumns(columns);
-            tempReport.setDataFeedID(analysisDefinition.getDataFeedID());
-            tempReport.setAddedItems(analysisDefinition.getAddedItems());
-            tempReport.setMarmotScript(analysisDefinition.getMarmotScript());
-            tempReport.setReportRunMarmotScript(analysisDefinition.getReportRunMarmotScript());
-            tempReport.setJoinOverrides(analysisDefinition.getJoinOverrides());
-            tempReport.setAddonReports(analysisDefinition.getAddonReports());
-            InsightRequestMetadata metadata = new InsightRequestMetadata();
-            metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
-            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
-            dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
-            DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
-            DataSet pastSet;
-            if ("".equals(key)) {
-                pastSet = nowSet;
-            } else {
-                Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
-                metadata = new InsightRequestMetadata();
-                metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
-                metadata.setNow(cal.getTime());
-                ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(metadata, tempReport, conn);
-                pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
-            }
-            trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
-        }
-        List<TrendOutcome> targetOutcomes = new ArrayList<TrendOutcome>();
-        /*for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-            for (TrendOutcome trendOutcome : trendOutcomes) {
-                if (trendOutcome.getMeasure().equals(analysisItem)) {
-                    targetOutcomes.add(trendOutcome);
-                    break;
-                }
-            }
-        }*/
-        //trendOutcomes = targetOutcomes;
+        TrendResult trendResult = createTrendOutcomes(analysisDefinition, insightRequestMetadata, conn);
         TrendDataResults trendDataResults = new TrendDataResults();
-        trendDataResults.setTrendOutcomes(trendOutcomes);
+        trendDataResults.setTrendOutcomes(trendResult.trendOutcomes);
+        trendDataResults.setNowString(trendResult.nowString);
+        trendDataResults.setPreviousString(trendResult.previousString);
         trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
-        trendDataResults.setDataSourceInfo(dataSourceInfo);
+        trendDataResults.setDataSourceInfo(trendResult.dataSourceInfo);
         return trendDataResults;
     }
 
@@ -1496,19 +1265,17 @@ public class DataService {
         }
     }
 
-    public TrendDataResults getTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            long start = System.currentTimeMillis();
-            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
-            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
-            RollingFilterDefinition reportFilter = null;
+    private static TrendResult createTrendOutcomes(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+        LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+        RollingFilterDefinition reportFilter = null;
+        if (analysisDefinition.getFilterName() != null) {
             for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
                 if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
                     reportFilter = (RollingFilterDefinition) customFilter;
                 }
             }
+
             if (reportFilter == null) {
                 for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
                     if (customFilter instanceof RollingFilterDefinition) {
@@ -1519,36 +1286,113 @@ public class DataService {
                     }
                 }
             }
-            Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
+        }
+        Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
+        Map<String, AnalysisDateDimension> dateMap = new HashMap<String, AnalysisDateDimension>();
+        String nowDateFilterName = analysisDefinition.getNowDate();
+        String previousDateFilterName = analysisDefinition.getPreviousDate();
+        FilterDefinition nowFilter = null;
+        FilterDefinition previousFilter = null;
+        if (nowDateFilterName != null && previousDateFilterName != null) {
+            for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                if (nowDateFilterName.equals(filter.getFilterName())) {
+                    nowFilter = filter;
+                } else if (previousDateFilterName.equals(filter.getFilterName())) {
+                    previousFilter = filter;
+                }
+            }
+        }
+        if (previousFilter instanceof RollingFilterDefinition) {
+            RollingFilterDefinition rf = (RollingFilterDefinition) previousFilter;
+            if (rf.getInterval() == MaterializedRollingFilterDefinition.ALL) {
+                previousFilter = null;
+            }
+        }
 
-            for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-                if (analysisItem.getReportFieldExtension() != null && reportFilter != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
+        List<FieldRule> rules = FieldRule.load(conn, analysisDefinition.getDataFeedID());
+
+        Map<String, List<Tag>> fieldMap = new HashMap<String, List<Tag>>();
+        Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
+        for (AnalysisItem field : feed.getFields()) {
+            if (field.getTags() != null) {
+                fieldMap.put(field.toOriginalDisplayName(), field.getTags());
+            }
+        }
+        for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+            analysisItem.setTags(fieldMap.get(analysisItem.toOriginalDisplayName()));
+        }
+
+        for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+            for (FieldRule rule : rules) {
+                if (rule.matches(analysisItem)) {
+                    rule.update(analysisItem, analysisDefinition, insightRequestMetadata);
+                }
+            }
+        }
+
+        List<AnalysisItem> allItems = new ArrayList<AnalysisItem>(feed.getFields());
+        if (analysisDefinition.getAddedItems() != null) {
+            allItems.addAll(analysisDefinition.getAddedItems());
+        }
+
+        for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+
+            if (nowFilter != null) {
+                AnalysisDateDimension date = null;
+                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
                     TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
                     if (trendReportFieldExtension.getDate() != null) {
-                        AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
-                        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
-                        rollingFilterDefinition.setField(dateDimension);
-                        rollingFilterDefinition.setInterval(reportFilter.getInterval());
-                        if (reportFilter.getInterval() == MaterializedRollingFilterDefinition.CUSTOM) {
-                            rollingFilterDefinition.setCustomBeforeOrAfter(reportFilter.getCustomBeforeOrAfter());
-                            rollingFilterDefinition.setCustomIntervalAmount(reportFilter.getCustomIntervalAmount());
-                            rollingFilterDefinition.setCustomIntervalType(reportFilter.getCustomIntervalType());
-                        }
-                        analysisItem.getFilters().add(rollingFilterDefinition);
-                        List<AnalysisMeasure> measures = trendMap.get(dateDimension.qualifiedName());
-                        if (measures == null) {
-                            measures = new ArrayList<AnalysisMeasure>();
-                            trendMap.put(dateDimension.qualifiedName(), measures);
-                        }
-                        measures.add((AnalysisMeasure) analysisItem);
-                    } else {
-                        List<AnalysisMeasure> measures = trendMap.get("");
-                        if (measures == null) {
-                            measures = new ArrayList<AnalysisMeasure>();
-                            trendMap.put("", measures);
-                        }
-                        measures.add((AnalysisMeasure) analysisItem);
+                        date = (AnalysisDateDimension) trendReportFieldExtension.getDate();
                     }
+                }
+                if (date == null) {
+                    if (analysisItem.getDefaultDate() != null) {
+                        for (AnalysisItem item : allItems) {
+                            if (item.hasType(AnalysisItemTypes.DATE_DIMENSION) && (item.toDisplay().equals(analysisItem.getDefaultDate()) || item.toOriginalDisplayName().equals(analysisItem.getDefaultDate()))) {
+                                date = (AnalysisDateDimension) item;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (date == null) {
+                    for (AnalysisItem item : allItems) {
+                        if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                            date = (AnalysisDateDimension) item;
+                            break;
+                        }
+                    }
+                }
+                if (date == null) {
+                    throw new ReportException(new GenericReportFault("You need to choose a date for " + analysisItem.toDisplay() + " for trend analysis to work."));
+                }
+                dateMap.put(date.toDisplay(), date);
+                List<AnalysisMeasure> measures = trendMap.get(date.toDisplay());
+                if (measures == null) {
+                    measures = new ArrayList<AnalysisMeasure>();
+                    trendMap.put(date.toDisplay(), measures);
+                }
+                measures.add((AnalysisMeasure) analysisItem);
+            } else if (analysisItem.getReportFieldExtension() != null && reportFilter != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
+                TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
+                if (trendReportFieldExtension.getDate() != null) {
+                    AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
+
+                    RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
+                    rollingFilterDefinition.setField(dateDimension);
+                    rollingFilterDefinition.setInterval(reportFilter.getInterval());
+                    if (reportFilter.getInterval() == MaterializedRollingFilterDefinition.CUSTOM) {
+                        rollingFilterDefinition.setCustomBeforeOrAfter(reportFilter.getCustomBeforeOrAfter());
+                        rollingFilterDefinition.setCustomIntervalAmount(reportFilter.getCustomIntervalAmount());
+                        rollingFilterDefinition.setCustomIntervalType(reportFilter.getCustomIntervalType());
+                    }
+                    analysisItem.getFilters().add(rollingFilterDefinition);
+                    List<AnalysisMeasure> measures = trendMap.get(dateDimension.qualifiedName());
+                    if (measures == null) {
+                        measures = new ArrayList<AnalysisMeasure>();
+                        trendMap.put(dateDimension.qualifiedName(), measures);
+                    }
+                    measures.add((AnalysisMeasure) analysisItem);
                 } else {
                     List<AnalysisMeasure> measures = trendMap.get("");
                     if (measures == null) {
@@ -1557,59 +1401,178 @@ public class DataService {
                     }
                     measures.add((AnalysisMeasure) analysisItem);
                 }
-            }
-            List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
-            DataSourceInfo dataSourceInfo = null;
-            for (Map.Entry<String, List<AnalysisMeasure>> entry : trendMap.entrySet()) {
-                String key = entry.getKey();
-                List<AnalysisMeasure> measures = entry.getValue();
-                WSListDefinition tempReport = new WSListDefinition();
-                List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
-                columns.addAll(measures);
-                if (analysisDefinition.getGroupings() != null) {
-                    columns.addAll(analysisDefinition.getGroupings());
+            } else {
+                List<AnalysisMeasure> measures = trendMap.get("");
+                if (measures == null) {
+                    measures = new ArrayList<AnalysisMeasure>();
+                    trendMap.put("", measures);
                 }
-                tempReport.setFilterDefinitions(analysisDefinition.getFilterDefinitions());
-                tempReport.setColumns(columns);
-                tempReport.setDataFeedID(analysisDefinition.getDataFeedID());
-                tempReport.setAddedItems(analysisDefinition.getAddedItems());
-                tempReport.setMarmotScript(analysisDefinition.getMarmotScript());
-                tempReport.setReportRunMarmotScript(analysisDefinition.getReportRunMarmotScript());
-                tempReport.setAddonReports(analysisDefinition.getAddonReports());
-                tempReport.setJoinOverrides(analysisDefinition.getJoinOverrides());
-                InsightRequestMetadata metadata = new InsightRequestMetadata();
-                metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
-                ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
-                dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
-                DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
-                DataSet pastSet;
-                if ("".equals(key)) {
-                    pastSet = nowSet;
-                } else {
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.DAY_OF_YEAR, -analysisDefinition.getDayWindow());
-                    metadata = new InsightRequestMetadata();
-                    metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
-                    metadata.setNow(cal.getTime());
-                    ReportRetrieval reportRetrievalPast = ReportRetrieval.reportEditor(metadata, tempReport, conn);
-                    pastSet = reportRetrievalPast.getPipeline().toDataSet(reportRetrievalPast.getDataSet());
-                }
-                trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
+                measures.add((AnalysisMeasure) analysisItem);
             }
-            List<TrendOutcome> targetOutcomes = new ArrayList<TrendOutcome>(trendOutcomes);
-            /*for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
-                for (TrendOutcome trendOutcome : trendOutcomes) {
-                    if (trendOutcome.getMeasure().equals(analysisItem)) {
-                        targetOutcomes.add(trendOutcome);
-                        break;
+        }
+        List<TrendOutcome> trendOutcomes = new ArrayList<TrendOutcome>();
+        DataSourceInfo dataSourceInfo = null;
+        String nowString = null;
+        String previousString = null;
+        for (Map.Entry<String, List<AnalysisMeasure>> entry : trendMap.entrySet()) {
+            String key = entry.getKey();
+            List<AnalysisMeasure> measures = entry.getValue();
+            WSListDefinition tempReport = new WSListDefinition();
+            List<AnalysisItem> columns = new ArrayList<AnalysisItem>();
+            columns.addAll(measures);
+            if (analysisDefinition.getGroupings() != null) {
+                columns.addAll(analysisDefinition.getGroupings());
+            }
+            if (nowFilter != null) {
+                List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+                for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                    if (filter != nowFilter && filter != previousFilter) {
+                        filters.add(filter);
                     }
                 }
-            }*/
-            trendOutcomes = targetOutcomes;
+                FilterDefinition nowFilterClone;
+                try {
+                    nowFilterClone = nowFilter.clone();
+                } catch (CloneNotSupportedException e) {
+                    throw new RuntimeException(e);
+                }
+                nowFilterClone.setField(dateMap.get(key));
+                filters.add(nowFilterClone);
+                tempReport.setFilterDefinitions(filters);
+            } else {
+                tempReport.setFilterDefinitions(analysisDefinition.getFilterDefinitions());
+            }
+            tempReport.setColumns(columns);
+            tempReport.setDataFeedID(analysisDefinition.getDataFeedID());
+            tempReport.setAddedItems(analysisDefinition.getAddedItems());
+            tempReport.setMarmotScript(analysisDefinition.getMarmotScript());
+            tempReport.setBaseDate(analysisDefinition.getBaseDate());
+            tempReport.setReportRunMarmotScript(analysisDefinition.getReportRunMarmotScript());
+            tempReport.setAddonReports(analysisDefinition.getAddonReports());
+            tempReport.setJoinOverrides(analysisDefinition.getJoinOverrides());
+            InsightRequestMetadata metadata = new InsightRequestMetadata();
+            metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+            ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
+            dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
+            DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+            int limit = 0;
+            if (analysisDefinition instanceof WSTrendGridDefinition) {
+                WSTrendGridDefinition trendGridDefinition = (WSTrendGridDefinition) analysisDefinition;
+                limit = trendGridDefinition.getMaxRecords();
+            }
+            List<Value> aggregationValues = null;
+            if (limit > 0 && analysisDefinition.getGroupings().size() > 0) {
+                final Map<Value, Value> ranks = new HashMap<Value, Value>();
+                for (IRow row : nowSet.getRows()) {
+                    Value value = row.getValue(analysisDefinition.getGroupings().get(0).createAggregateKey());
+                    Value measureValue = row.getValue(analysisDefinition.getMeasures().get(0).createAggregateKey());
+                    ranks.put(value, measureValue);
+                }
+
+                aggregationValues = new ArrayList<Value>(ranks.keySet());
+                if (aggregationValues.size() > limit) {
+                    Collections.sort(aggregationValues, new Comparator<Value>() {
+
+                        public int compare(Value value, Value value1) {
+                            return ranks.get(value1).toDouble().compareTo(ranks.get(value).toDouble());
+                        }
+                    });
+
+                    Aggregation other = new AggregationFactory((AnalysisMeasure) analysisDefinition.getMeasures().get(0), false).getAggregation();
+
+                    aggregationValues = aggregationValues.subList(0, limit);
+                    Iterator<IRow> iter = nowSet.getRows().iterator();
+                    while (iter.hasNext()) {
+                        IRow row = iter.next();
+                        Value value = row.getValue(analysisDefinition.getGroupings().get(0).createAggregateKey());
+                        if (!aggregationValues.contains(value)) {
+                            iter.remove();
+                            other.addValue(row.getValue(analysisDefinition.getMeasures().get(0)));
+                        }
+                    }
+                    IRow otherRow = nowSet.createRow();
+                    otherRow.addValue(analysisDefinition.getGroupings().get(0).createAggregateKey(), "Other");
+                    otherRow.addValue(analysisDefinition.getMeasures().get(0).createAggregateKey(), other.getValue());
+                }
+            }
+            DataSet pastSet;
+            if (previousFilter != null) {
+
+                List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+                for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                    if (filter != nowFilter && filter != previousFilter) {
+                        filters.add(filter);
+                    }
+                }
+                FilterDefinition previousFilterClone;
+                try {
+                    previousFilterClone = previousFilter.clone();
+                } catch (CloneNotSupportedException e) {
+                    throw new RuntimeException(e);
+                }
+                previousFilterClone.setField(dateMap.get(key));
+                filters.add(previousFilterClone);
+                tempReport.setFilterDefinitions(filters);
+                metadata = new InsightRequestMetadata();
+                metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+                reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
+                dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
+                pastSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+
+                if (limit > 0 && analysisDefinition.getGroupings().size() > 0) {
+                    Aggregation other = new AggregationFactory((AnalysisMeasure) analysisDefinition.getMeasures().get(0), false).getAggregation();
+                    Iterator<IRow> iter = pastSet.getRows().iterator();
+                    while (iter.hasNext()) {
+                        IRow row = iter.next();
+                        Value value = row.getValue(analysisDefinition.getGroupings().get(0).createAggregateKey());
+                        if (!aggregationValues.contains(value)) {
+                            iter.remove();
+                            other.addValue(row.getValue(analysisDefinition.getMeasures().get(0)));
+                        }
+                    }
+                    IRow otherRow = pastSet.createRow();
+                    otherRow.addValue(analysisDefinition.getGroupings().get(0).createAggregateKey(), "Other");
+                    otherRow.addValue(analysisDefinition.getMeasures().get(0).createAggregateKey(), other.getValue());
+                }
+
+                nowString = nowFilter.asString(insightRequestMetadata);
+                previousString = previousFilter.asString(insightRequestMetadata);
+            } else if (nowFilter != null) {
+                pastSet = new DataSet();
+            } else {
+                pastSet = nowSet;
+            }
+            trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
+        }
+        return new TrendResult(new ArrayList<TrendOutcome>(trendOutcomes), dataSourceInfo, nowString, previousString);
+    }
+
+    private static class TrendResult {
+        private List<TrendOutcome> trendOutcomes;
+        private DataSourceInfo dataSourceInfo;
+        private String nowString;
+        private String previousString;
+
+        private TrendResult(List<TrendOutcome> trendOutcomes, DataSourceInfo dataSourceInfo, String nowString, String previousString) {
+            this.trendOutcomes = trendOutcomes;
+            this.dataSourceInfo = dataSourceInfo;
+            this.nowString = nowString;
+            this.previousString = previousString;
+        }
+    }
+
+    public TrendDataResults getTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            long start = System.currentTimeMillis();
+            TrendResult trendResult = createTrendOutcomes(analysisDefinition, insightRequestMetadata, conn);
             TrendDataResults trendDataResults = new TrendDataResults();
-            trendDataResults.setTrendOutcomes(trendOutcomes);
+            trendDataResults.setTrendOutcomes(trendResult.trendOutcomes);
             trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
-            trendDataResults.setDataSourceInfo(dataSourceInfo);
+            trendDataResults.setDataSourceInfo(trendResult.dataSourceInfo);
+            trendDataResults.setNowString(trendResult.nowString);
+            trendDataResults.setPreviousString(trendResult.previousString);
             if (!insightRequestMetadata.isNoLogging()) {
                 reportEditorBenchmark(analysisDefinition, System.currentTimeMillis() - insightRequestMetadata.getDatabaseTime() - start, insightRequestMetadata.getDatabaseTime(), conn);
             }
@@ -1820,6 +1783,7 @@ public class DataService {
             long processingTime = elapsed - insightRequestMetadata.getDatabaseTime();
             results.setProcessingTime(processingTime);
             results.setDatabaseTime(insightRequestMetadata.getDatabaseTime());
+            results.setFieldEvents(insightRequestMetadata.getFieldAudits());
             if (insightRequestMetadata.isLogReport()) {
                 results.setAuditMessages(events);
             }
@@ -1963,6 +1927,14 @@ public class DataService {
             insightRequestMetadata.setNoDataOnNoJoin(analysisDefinition.isNoDataOnNoJoin());
             insightRequestMetadata.setLogReport(analysisDefinition.isLogReport());
 
+            if (analysisDefinition.getBaseDate() != null && !"".equals(analysisDefinition.getBaseDate())) {
+                for (AnalysisItem item : analysisDefinition.getAddedItems()) {
+                    if (item.toDisplay().equals(analysisDefinition.getBaseDate())) {
+                        insightRequestMetadata.setBaseDate((AnalysisDateDimension) item);
+                    }
+                }
+            }
+
             if (insightRequestMetadata.getHierarchyOverrides() != null) {
                 for (AnalysisItemOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
                     hierarchyOverride.apply(analysisDefinition.getAllAnalysisItems());
@@ -2011,14 +1983,32 @@ public class DataService {
                         Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
                         Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);
                         for (Map.Entry<String, AnalysisItem> entry : structureCopy.entrySet()) {
+                            /*if (entry.getValue() instanceof AnalysisHierarchyItem) {
+                                continue;
+                            }*/
                             if (entry.getValue().toDisplay().equals(filter.getField().toDisplay())) {
                                 if (!fieldsReplaced.contains(entry.getValue())) {
+                                    if (insightRequestMetadata.getBaseDate() != null && insightRequestMetadata.getBaseDate().qualifiedName().equals(filter.getField().qualifiedName())) {
+                                        insightRequestMetadata.setBaseDate((AnalysisDateDimension) analysisItemFilterDefinition.getTargetItem());
+                                    }
                                     structure.put(entry.getKey(), analysisItemFilterDefinition.getTargetItem());
                                     fieldsReplaced.add(entry.getValue());
                                 }
                             }
                         }
                         analysisDefinition.populateFromReportStructure(structure);
+                        for (AnalysisItem item : analysisDefinition.createStructure().values()) {
+                            if (item.toDisplay().equals(filter.getField().toDisplay()) && item instanceof AnalysisHierarchyItem) {
+                                AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) item;
+                                HierarchyLevel targetLevel = null;
+                                for (HierarchyLevel level : analysisHierarchyItem.getHierarchyLevels()) {
+                                    if (level.getAnalysisItem().toDisplay().equals(analysisItemFilterDefinition.getTargetItem().toDisplay())) {
+                                        targetLevel = level;
+                                    }
+                                }
+                                analysisHierarchyItem.setHierarchyLevel(targetLevel);
+                            }
+                        }
                     }
                 } else if (filter instanceof MultiFieldFilterDefinition) {
                     MultiFieldFilterDefinition multiFieldFilterDefinition = (MultiFieldFilterDefinition) filter;
@@ -2043,13 +2033,24 @@ public class DataService {
                 }
             }
 
-
-            feed.getDataSource().decorateLinks(new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values()));
-
             analysisDefinition.tweakReport(aliases);
 
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
+
+            Iterator<AnalysisItem> iter = allFields.iterator();
+            while (iter.hasNext()) {
+                AnalysisItem item = iter.next();
+                if (item.getOrigin() != null) {
+                    if (item.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
+                        System.out.println("Removing " + item.toDisplay() + " from the list of available fields");
+                        iter.remove();
+                    }
+                }
+            }
+
             allFields.addAll(analysisDefinition.allAddedItems(insightRequestMetadata));
+
+
 
             KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields);
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
@@ -2111,10 +2112,73 @@ public class DataService {
             }
             insightRequestMetadata.setFieldToUniqueMap(analysisDefinition.getFieldToUniqueMap());
 
+            Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
+
+            List<FieldRule> rules = FieldRule.load(conn, analysisDefinition.getDataFeedID());
+
+            Map<String, List<Tag>> fieldMap = new HashMap<String, List<Tag>>();
+            for (AnalysisItem field : feed.getFields()) {
+                if (field.getTags() != null) {
+                    fieldMap.put(field.toOriginalDisplayName(), field.getTags());
+                }
+            }
+
+            /*if (analysisDefinition.getAnalysisID() > 0) {
+                for (AnalysisItem analysisItem : items) {
+                    if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                        AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                        if (hierarchyItem.getHierarchyLevels().indexOf(hierarchyItem.getHierarchyLevel()) == (hierarchyItem.getHierarchyLevels().size() - 1)) {
+
+                        } else {
+                            DrillThrough drillThrough = new DrillThrough();
+                            AnalysisItemHandle handle = new AnalysisItemHandle();
+                            handle.setName(hierarchyItem.getHierarchyLevel().getAnalysisItem().toDisplay());
+                            drillThrough.setPassThroughField(handle);
+                            drillThrough.setReportID(analysisDefinition.getAnalysisID());
+                            drillThrough.setDefaultLink(true);
+                            drillThrough.setLabel("hierarchy");
+                            drillThrough.setShowDrillThroughFilters(false);
+                            analysisItem.setLinks(Arrays.asList((Link) drillThrough));
+                        }
+                    } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                        AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                        if (date.getDateLevel() < AnalysisDateDimension.DAY_LEVEL) {
+                            DrillThrough drillThrough = new DrillThrough();
+                            drillThrough.setReportID(analysisDefinition.getAnalysisID());
+                            drillThrough.setFilterRowGroupings(true);
+                            drillThrough.setAddAllFilters(true);
+                            drillThrough.setDefaultLink(true);
+                            drillThrough.setLabel("date");
+                            drillThrough.setShowDrillThroughFilters(false);
+                            analysisItem.setLinks(Arrays.asList((Link) drillThrough));
+                        }
+                    }
+                }
+            }*/
+
+            for (AnalysisItem analysisItem : items) {
+                analysisItem.setTags(fieldMap.get(analysisItem.toOriginalDisplayName()));
+            }
+
+            for (AnalysisItem analysisItem : items) {
+                for (FieldRule rule : rules) {
+                    if (rule.matches(analysisItem)) {
+                        rule.update(analysisItem, analysisDefinition, insightRequestMetadata);
+                    }
+                }
+            }
+
+            feed.getDataSource().decorateLinks(new ArrayList<AnalysisItem>(items));
+
             AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
             structure.setReport(analysisDefinition);
+
             structure.setConn(conn);
             structure.setInsightRequestMetadata(insightRequestMetadata);
+
+            insightRequestMetadata.setAllItems(allFields);
+            insightRequestMetadata.setStructure(structure);
+
             Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields, structure, insightRequestMetadata);
             if (analysisDefinition.isDataSourceFields()) {
                 Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
@@ -2184,8 +2248,9 @@ public class DataService {
 
 
             boolean aggregateQuery = analysisDefinition.isAggregateQueryIfPossible();
-            Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
+
             items.remove(null);
+
             for (AnalysisItem analysisItem : items) {
                 if (analysisItem.blocksDBAggregation()) {
                     aggregateQuery = false;
@@ -2211,9 +2276,7 @@ public class DataService {
             }
             insightRequestMetadata.setTargetCurrency(currency);
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
-            insightRequestMetadata.setLookupTableAggregate(analysisDefinition.isLookupTableOptimization());
             insightRequestMetadata.setReportItems(analysisDefinition.getAllAnalysisItems());
-            insightRequestMetadata.setNewFilterStrategy(analysisDefinition.isNewFilterStrategy());
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
 
             timeshift(validQueryItems, filters, feed, insightRequestMetadata);

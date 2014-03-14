@@ -68,6 +68,8 @@ public class AnalysisDimensionResultMetadata extends AnalysisItemResultMetadata 
             } else {
                 valueString = value.toString();
             }
+        } else if (value.type() == Value.EMPTY) {
+            valueString = "[ No Value ]";
         } else {
             valueString = value.toString();
         }

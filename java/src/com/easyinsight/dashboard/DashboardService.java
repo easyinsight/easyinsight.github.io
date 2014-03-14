@@ -13,9 +13,9 @@ import com.easyinsight.html.FilterUtils;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.ApplicationSkinSettings;
+import com.easyinsight.preferences.PreferencesService;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.tag.Tag;
 import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
@@ -531,62 +531,6 @@ public class DashboardService {
         }
     }
 
-    public void keepDashboard(long dashboardID, long sourceDashboardID) {
-        SecurityUtil.authorizeDashboard(dashboardID);
-        EIConnection conn = Database.instance().getConnection();
-        Session session = Database.instance().createSession(conn);
-        try {
-            conn.setAutoCommit(false);
-            Dashboard dashboard = getDashboard(dashboardID);
-            Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
-            Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
-            SolutionService.recurseDashboard(reports, dashboards, dashboard, session, conn, new HashSet<Long>());
-
-            for (AnalysisDefinition report : reports.values()) {
-                report.setTemporaryReport(false);
-                session.update(report);
-            }
-            session.flush();
-            for (Dashboard tDashboard : dashboards.values()) {
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET TEMPORARY_DASHBOARD = ? WHERE dashboard_id = ?");
-                updateStmt.setBoolean(1, false);
-                updateStmt.setLong(2, tDashboard.getId());
-                updateStmt.executeUpdate();
-            }
-            try {
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT EXCHANGE_DASHBOARD_INSTALL_ID FROM EXCHANGE_DASHBOARD_INSTALL WHERE USER_ID = ? AND " +
-                        "dashboard_id = ?");
-                queryStmt.setLong(1, SecurityUtil.getUserID());
-                queryStmt.setLong(2, dashboardID);
-                ResultSet rs = queryStmt.executeQuery();
-                if (rs.next()) {
-                    long id = rs.getLong(1);
-                    PreparedStatement updateTimeStmt = conn.prepareStatement("UPDATE EXCHANGE_DASHBOARD_INSTALL SET install_date = ? WHERE EXCHANGE_DASHBOARD_INSTALL_ID = ?");
-                    updateTimeStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-                    updateTimeStmt.setLong(2, id);
-                    updateTimeStmt.executeUpdate();
-                } else {
-                    PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCHANGE_DASHBOARD_INSTALL (USER_ID, DASHBOARD_ID, INSTALL_DATE) VALUES (?, ?, ?)");
-                    insertStmt.setLong(1, SecurityUtil.getUserID());
-                    insertStmt.setLong(2, sourceDashboardID);
-                    insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-                    insertStmt.execute();
-                }
-            } catch (SQLException e) {
-                LogClass.error("Error updating exchange info for dashboard " + sourceDashboardID, e);
-            }
-            conn.commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
-    }
-
     public Dashboard saveAs(Dashboard dashboard, String name) {
         SecurityUtil.authorizeDashboard(dashboard.getId());
         try {
@@ -828,12 +772,6 @@ public class DashboardService {
         int role = SecurityUtil.authorizeDashboard(dashboardID);
         long startTime = System.currentTimeMillis();
 
-        /*if (dashboardCache != null) {
-            Dashboard dashboard = (Dashboard) dashboardCache.get(cacheKey);
-            if (dashboard != null) {
-                return dashboard;
-            }
-        }*/
         Dashboard dashboard = null;
         byte[] bytes = (byte[]) MemCachedManager.get("dashboard" + dashboardID);
         if (bytes != null) {
@@ -848,11 +786,54 @@ public class DashboardService {
         if (dashboard == null) {
             dashboard = dashboardStorage.getDashboard(dashboardID, conn);
         }
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(dashboard);
         oos.flush();
         MemCachedManager.add("dashboard" + dashboardID, 10000, baos.toByteArray());
+
+        Session session = Database.instance().createSession(conn);
+        try {
+            ApplicationSkin applicationSkin;
+            if (SecurityUtil.getAccountID(false) == 0) {
+                UserStub user = (UserStub) dashboard.getAdministrators().get(0);
+                applicationSkin = ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccountID());
+            } else {
+                PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+                ps.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                boolean exchangeAuthor = rs.getBoolean(1);
+                ps.close();
+
+                if (exchangeAuthor) {
+                    PreparedStatement typeStmt = conn.prepareStatement("SELECT FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                    typeStmt.setLong(1, dashboard.getDataSourceID());
+                    ResultSet typeRS = typeStmt.executeQuery();
+                    typeRS.next();
+                    int dataSourceType = typeRS.getInt(1);
+                    typeStmt.close();
+                    applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+                } else {
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                }
+            }
+            if (applicationSkin != null) {
+                if ("Primary".equals(dashboard.getColorSet()) && (applicationSkin.getDashboardStack1ColorStart() > 0 || applicationSkin.getDashboardStackColor2Start() > 0 ||
+                    applicationSkin.getDashboardStack1ColorEnd() > 0 || applicationSkin.getDashboardStackColor2End() > 0)) {
+                    dashboard.setStackFill1Start(applicationSkin.getDashboardStack1ColorStart());
+                    dashboard.setStackFill1SEnd(applicationSkin.getDashboardStack1ColorEnd());
+                    dashboard.setStackFill2Start(applicationSkin.getDashboardStackColor2Start());
+                    dashboard.setStackFill2End(applicationSkin.getDashboardStackColor2End());
+                }
+            }
+        } finally {
+            session.close();
+        }
+
+
+
         dashboard.setRole(role);
         dashboard.setConfigurations(getConfigurationsForDashboard(dashboardID));
         Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
@@ -872,6 +853,8 @@ public class DashboardService {
         FilterVisitor filterVisitor = new FilterVisitor(dashboard.getDataSourceID(), dashboardID);
         dashboard.visit(filterVisitor);
         filterVisitor.done();
+        DashboardTextVisitor textVisitor = new DashboardTextVisitor();
+        dashboard.visit(textVisitor);
         if (dashboardStackPositions != null) {
             Map<String, FilterDefinition> overriddenFilters = new HashMap<String, FilterDefinition>();
             for (FilterDefinition filter : dashboard.getFilters()) {
@@ -884,6 +867,7 @@ public class DashboardService {
             dashboard.setOverridenFilters(overriddenFilters);
             dashboard.visit(new StateVisitor(dashboardStackPositions));
         }
+        dashboard.setDataSourceInfo(feed.createSourceInfo(conn));
         BenchmarkManager.recordBenchmarkForDashboard("DashboardView", System.currentTimeMillis() - startTime, SecurityUtil.getUserID(false), dashboardID);
         return dashboard;
     }
@@ -1080,6 +1064,16 @@ public class DashboardService {
                         filters.add((FlatDateFilter) filter);
                     }
                 }
+            }
+        }
+    }
+
+    private static class DashboardTextVisitor implements IDashboardVisitor {
+
+        public void accept(DashboardElement dashboardElement) {
+            if (dashboardElement instanceof DashboardText) {
+                DashboardText dashboardText = (DashboardText) dashboardElement;
+                dashboardText.setHtml(dashboardText.createHTML());
             }
         }
     }

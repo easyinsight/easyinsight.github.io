@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%"
+                       height="100%"
+                       xmlns:feed="com.easyinsight.administration.feed.*">
     <mx:Script><![CDATA[
-        import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.datasources.HighRiseDataSource;
         import com.easyinsight.datasources.HighriseTaskWindow;
@@ -14,19 +15,20 @@
         [Bindable]
         private var url:String;
 
-        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
-            var ds:HighRiseDataSource = feedDefinition as HighRiseDataSource;
+
+        override protected function gotSource():void {
+            var ds:HighRiseDataSource = dataSource as HighRiseDataSource;
             includeEmails = ds.includeEmails;
             includeContactNotes = ds.includeContactNotes;
             includeCompanyNotes = ds.includeCompanyNotes;
             includeDealNotes = ds.includeDealNotes;
-            includeCaseNotes= ds.includeCaseNotes;
+            includeCaseNotes = ds.includeCaseNotes;
             additionalTokens = ds.additionalTokens;
             url = ds.url;
         }
 
-        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var ds:HighRiseDataSource = feedDefinition as HighRiseDataSource;
+        private function save():void {
+            var ds:HighRiseDataSource = dataSource as HighRiseDataSource;
             ds.url = urlInput.text;
             ds.includeEmails = emailsCheckbox.selected;
             ds.includeContactNotes = contactNotesCheckbox.selected;
@@ -34,6 +36,7 @@
             ds.includeDealNotes = dealNotesCheckbox.selected;
             ds.includeCaseNotes = caseNotesCheckbox.selected;
             ds.additionalTokens = additionalTokens;
+            saveSource();
         }
 
         [Bindable]
@@ -65,9 +68,7 @@
             dispatchEvent(event);
         }
 
-        public function validate():Boolean {
-            return true;
-        }]]></mx:Script>
+        ]]></mx:Script>
     <mx:Form paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
         <mx:FormItem label="Highrise URL:">
             <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
@@ -88,7 +89,11 @@
             <mx:CheckBox id="caseNotesCheckbox" selected="{includeCaseNotes}"/>
         </mx:FormItem>
         <mx:FormItem label="">
-            <mx:Button label="Configure Task Access..." click="configureTasks()" styleName="grayButton"/>
+            <mx:Button label="Add Additional API Tokens for Tasks..." click="configureTasks()" styleName="grayButton"/>
         </mx:FormItem>
     </mx:Form>
-</mx:VBox>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</feed:DataSourceWindow>

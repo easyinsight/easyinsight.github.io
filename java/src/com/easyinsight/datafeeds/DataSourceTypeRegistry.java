@@ -40,6 +40,7 @@ import com.easyinsight.datafeeds.pivotaltrackerv5.*;
 import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseDatabaseSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseUserSource;
+import com.easyinsight.datafeeds.redbooth.*;
 import com.easyinsight.datafeeds.redirect.RedirectDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceSObjectSource;
@@ -54,6 +55,8 @@ import com.easyinsight.datafeeds.solve360.Solve360ContactsSource;
 import com.easyinsight.datafeeds.solve360.Solve360OpportunitiesSource;*/
 import com.easyinsight.datafeeds.smartsheet.SmartsheetTableSource;
 import com.easyinsight.datafeeds.solve360.*;
+import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoCompositeSource;
+import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoFormSource;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
@@ -374,8 +377,17 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.PIVOTAL_V5_LABEL, PivotalTrackerV5LabelSource.class);
         registerType(FeedType.PIVOTAL_V5_ITERATION, PivotalTrackerV5IterationSource.class);
         registerType(FeedType.PIVOTAL_V5_STORY_TO_LABEL, PivotalTrackerV5StoryToLabelSource.class);
+        registerType(FeedType.SURVEYGIZMO_COMPOSITE, SurveyGizmoCompositeSource.class);
+        registerType(FeedType.SURVEYGIZMO_FORM, SurveyGizmoFormSource.class);
+
         registerType(FeedType.INSIGHTLY_NOTES, InsightlyNoteSource.class);
         registerType(FeedType.INSIGHTLY_NOTE_LINKS, InsightlyNoteLinkSource.class);
+        registerType(FeedType.REDBOOTH_COMPOSITE, RedboothCompositeSource.class);
+        registerType(FeedType.REDBOOTH_ORGANIZATION, RedboothOrganizationSource.class);
+        registerType(FeedType.REDBOOTH_PROJECT, RedboothProjectSource.class);
+        registerType(FeedType.REDBOOTH_TASK_LIST, RedboothTaskListSource.class);
+        registerType(FeedType.REDBOOTH_TASK, RedboothTaskSource.class);
+        registerType(FeedType.REDBOOTH_COMMENT, RedboothCommentSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

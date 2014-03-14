@@ -60,6 +60,8 @@ public class User extends EventDispatcher
     public var accountOverSize:Boolean;
     public var hourlyRefreshEnabled:Boolean;
     public var accountReports:Boolean;
+    public var decimalSeperator:String;
+    public var thousandsSeperator:String;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -156,6 +158,8 @@ public class User extends EventDispatcher
         _user.accountOverSize = response.accountOverSize;
         _user.hourlyRefreshEnabled = response.hourlyRefreshEnabled;
         _user.accountReports = response.accountReports;
+        _user.thousandsSeperator = response.thousandsSeperator;
+        _user.decimalSeperator = response.decimalSeperator;
         if (response.reportImage != null) {
             _user.loadBytes(response.reportImage);
         }

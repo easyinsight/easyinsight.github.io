@@ -53,7 +53,7 @@ public class StandardReportPipeline extends Pipeline {
                     } else if (lookupTable.getSourceField().hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                         Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
                         analysisItems.add(lookupTable.getSourceField());
-                        components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, Pipeline.BEFORE, getStructure()));
+                        components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, Pipeline.BEFORE, getStructure(), insightRequestMetadata));
                     }
                     components.add(new LookupTableComponent(lookupTable));
                 }
@@ -84,7 +84,7 @@ public class StandardReportPipeline extends Pipeline {
 
 
 
-        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.BEFORE, getStructure()));
+        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.BEFORE, getStructure(), insightRequestMetadata));
 
         if (report instanceof WSHeatMap) {
             WSHeatMap heatMap = (WSHeatMap) report;
@@ -119,8 +119,7 @@ public class StandardReportPipeline extends Pipeline {
                     if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
                         continue;
                     }
-                    if ((!insightRequestMetadata.isLookupTableAggregate() || !filterDefinition.validForQuery()) &&
-                            filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
+                    if (filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
                         compFilters.add(filterDefinition);
                     }
                 }
@@ -132,7 +131,7 @@ public class StandardReportPipeline extends Pipeline {
                     if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
                         continue;
                     }
-                    if ((!insightRequestMetadata.isLookupTableAggregate() || !filterDefinition.validForQuery()) &&
+                    if ((!filterDefinition.validForQuery()) &&
                             filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
                         components.addAll(filterDefinition.createComponents(Pipeline.BEFORE, new DefaultFilterProcessor(), null, false));
                     }
@@ -181,7 +180,7 @@ public class StandardReportPipeline extends Pipeline {
 
         for (String name : intermediatePipelineNames) {
             //String name = "";
-            components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, name, getStructure()));
+            components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, name, getStructure(), insightRequestMetadata));
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 if (name.equals(filterDefinition.getPipelineName())) {
                     components.addAll(filterDefinition.createComponents(name, new DefaultFilterProcessor(), null, false));
@@ -219,7 +218,7 @@ public class StandardReportPipeline extends Pipeline {
             endComponent.add(new NormalizationComponent());
             endComponent.add(new AggregationComponent(AggregationComponent.OTHER));
 
-            List<IComponent> postAggCalculations = new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.AFTER, getStructure());
+            List<IComponent> postAggCalculations = new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.AFTER, getStructure(), insightRequestMetadata);
             endComponent.addAll(postAggCalculations);
 
             // need another cleanup component here...

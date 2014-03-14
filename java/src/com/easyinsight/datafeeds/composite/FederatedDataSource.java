@@ -31,7 +31,7 @@ public class FederatedDataSource extends FeedDefinition {
         return DataSourceInfo.COMPOSITE;
     }
 
-    @Override
+    /*@Override
     public Map<Long, SolutionInstallInfo> cloneDataSource(Connection conn) throws Exception {
         Map<Long, SolutionInstallInfo> infos = super.cloneDataSource(conn);
         FederatedDataSource federatedDataSource = (FederatedDataSource) infos.get(getDataFeedID()).getNewDataSource();
@@ -52,7 +52,7 @@ public class FederatedDataSource extends FeedDefinition {
         }
         federatedDataSource.setSources(clonedFederationSources);
         return infos;
-    }
+    }*/
 
     public List<FederationSource> getSources() {
         return sources;

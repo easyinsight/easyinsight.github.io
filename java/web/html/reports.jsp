@@ -21,8 +21,100 @@
 <%@ page import="com.easyinsight.core.DataFolder" %>
 <%@ page import="com.easyinsight.html.Utils" %>
 <%@ page import="com.easyinsight.tag.Tag" %>
+<%@ page import="org.json.JSONObject" %>
+<%@ page import="org.json.JSONArray" %>
+<%@ page import="java.text.DateFormat" %>
+<%@ page import="com.easyinsight.export.ExportService" %>
+<%@ page import="com.easyinsight.analysis.AnalysisDateDimension" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
+<%
+    String userName = (String) session.getAttribute("userName");
+    com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+    try {
+        boolean phone = Utils.isPhone(request);
+        boolean iPad = Utils.isTablet(request);
+        boolean designer = Utils.isDesigner();
+
+        String dataSourceKey = request.getParameter("dataSourceID");
+        long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
+        DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dataSourceID);
+        Map<Long, CustomFolder> folderMap = new HashMap<Long, CustomFolder>();
+        EIConnection conn = Database.instance().getConnection();
+        JSONObject folderList = new JSONObject();
+        try {
+            PreparedStatement getFoldersStmt = conn.prepareStatement("SELECT REPORT_FOLDER_ID, FOLDER_NAME, DATA_SOURCE_ID FROM REPORT_FOLDER WHERE DATA_SOURCE_ID = ?");
+            getFoldersStmt.setLong(1, dataSourceID);
+
+            ResultSet folderRS = getFoldersStmt.executeQuery();
+            while (folderRS.next()) {
+                long id = folderRS.getLong(1);
+                String name = folderRS.getString(2);
+                CustomFolder customFolder = new CustomFolder();
+                customFolder.setName(name);
+                customFolder.setId(id);
+                folderMap.put(id, customFolder);
+                folderList.put(String.valueOf(id), customFolder.toJSON());
+            }
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+
+        List<EIDescriptor> descriptors = new UserUploadService().getFeedAnalysisTreeForDataSource(new DataSourceDescriptor(null, dataSourceID, 0, false, 0));
+        JSONObject reportList = new JSONObject();
+        List<EIDescriptor> forThisLevel = new ArrayList<EIDescriptor>();
+        boolean additionalViewsUsed = false;
+
+        Collections.sort(descriptors, new Comparator<EIDescriptor>() {
+
+            public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
+                String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName().toLowerCase() : "";
+                String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName().toLowerCase() : "";
+                return name1.compareTo(name2);
+            }
+        });
+        DateFormat dateFormat = ExportService.getDateFormatForAccount(AnalysisDateDimension.MINUTE_LEVEL, null);
+        for (EIDescriptor desc : descriptors) {
+            int folder = desc.getFolder();
+            if (folder == 1) {
+                forThisLevel.add(desc);
+
+            } else if (folder == 2) {
+                additionalViewsUsed = true;
+            } else {
+
+            }
+
+            if(!(reportList.get(String.valueOf(folder)) instanceof JSONArray)) {
+                reportList.put(String.valueOf(folder), new JSONArray());
+            }
+            JSONArray list = (JSONArray) reportList.get(String.valueOf(folder));
+            list.put(desc.toJSON(dateFormat));
+
+        }
+
+        JSONObject folderInfo = new JSONObject();
+        folderInfo.put("reports", reportList);
+        folderInfo.put("folders", folderList);
+
+
+
+        List<DataFolder> folders = new ArrayList<DataFolder>();
+        if (additionalViewsUsed) {
+            DataFolder dataFolder = new DataFolder();
+            dataFolder.setName("Additional Views");
+            dataFolder.setUrlKey("AdditionalViews");
+            folders.add(dataFolder);
+        }
+        for (CustomFolder customFolder : folderMap.values()) {
+            DataFolder dataFolder = new DataFolder();
+            dataFolder.setName(customFolder.getName());
+            dataFolder.setUrlKey(String.valueOf(customFolder.getId()));
+            folders.add(dataFolder);
+        }
+
+%>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
@@ -36,24 +128,14 @@
     <jsp:include page="bootstrapHeader.jsp"/>
     <jsp:include page="reportDashboardHeader.jsp"/>
     <script type="text/javascript" src="/js/dashboard.js"></script>
+    <script type="text/javascript" src="/js/reports.js"></script>
     <script type="text/javascript">
         var dashboardJSON = {"base": {"type": "text"}};
+        var folderInfo = <%= folderInfo.toString() %>;
     </script>
 </head>
 <body>
-<%
-    String userName = (String) session.getAttribute("userName");
-    com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
-    try {
-        boolean phone = Utils.isPhone(request);
-        boolean iPad = Utils.isTablet(request);
-        boolean designer = Utils.isDesigner();
 
-        String dataSourceKey = request.getParameter("dataSourceID");
-        long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
-        DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dataSourceID);
-
-%>
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
@@ -66,7 +148,8 @@
 
                 <div class="row">
                     <div class="col-md-12">
-                        <h2><%= dataSourceDescriptor.getName() %></h2>
+                        <h2><%= dataSourceDescriptor.getName() %>
+                        </h2>
                     </div>
                 </div>
                 <% if (designer && !phone && !iPad) { %>
@@ -99,105 +182,31 @@
                     <div class="col-md-6">
                         <div class="btn-toolbar pull-right">
                             <div class="btn-group reportControlBtnGroup">
-                                <a class="reportControl" href="#" onclick="refreshDataSource('<%= dataSourceDescriptor.getUrlKey() %>')">Refresh the Data Source</a>
+                                <a class="reportControl" href="#"
+                                   onclick="refreshDataSource('<%= dataSourceDescriptor.getUrlKey() %>')">Refresh the
+                                    Data Source</a>
                             </div>
                             <div class="btn-group reportControlBtnGroup">
-                                <a class="reportControl" href="/app/embeddedConfigureDataSource.jsp?dataSourceID=<%= dataSourceDescriptor.getUrlKey() %>">Configure the Data Source</a>
+                                <a class="reportControl"
+                                   href="/app/embeddedConfigureDataSource.jsp?dataSourceID=<%= dataSourceDescriptor.getUrlKey() %>">Configure
+                                    the Data Source</a>
                             </div>
                         </div>
                     </div>
                 </div>
                 <% } %>
                 <div class="row">
-                    <div class="col-md-12">
-                        <%
-                            Map<Long, CustomFolder> folderMap = new HashMap<Long, CustomFolder>();
-                            EIConnection conn = Database.instance().getConnection();
-                            try {
-                                PreparedStatement getFoldersStmt = conn.prepareStatement("SELECT REPORT_FOLDER_ID, FOLDER_NAME, DATA_SOURCE_ID FROM REPORT_FOLDER WHERE DATA_SOURCE_ID = ?");
-                                getFoldersStmt.setLong(1, dataSourceID);
-
-                                ResultSet folderRS = getFoldersStmt.executeQuery();
-                                while (folderRS.next()) {
-                                    long id = folderRS.getLong(1);
-                                    String name = folderRS.getString(2);
-                                    CustomFolder customFolder = new CustomFolder();
-                                    customFolder.setName(name);
-                                    customFolder.setId(id);
-                                    folderMap.put(id, customFolder);
-                                }
-                            } finally {
-                                Database.closeConnection(conn);
-                            }
-
-
-                            List<EIDescriptor> descriptors = new UserUploadService().getFeedAnalysisTreeForDataSource(new DataSourceDescriptor(null, dataSourceID, 0, false, 0));
-
-                            List<EIDescriptor> forThisLevel = new ArrayList<EIDescriptor>();
-                            boolean additionalViewsUsed = false;
-                            for (EIDescriptor desc : descriptors) {
-                                int folder = desc.getFolder();
-                                if (folder == 1) {
-                                    forThisLevel.add(desc);
-                                } else if (folder == 2) {
-                                    additionalViewsUsed = true;
-                                } else {
-
-                                }
-                            }
-
-                            Collections.sort(forThisLevel, new Comparator<EIDescriptor>() {
-
-                                public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
-                                    String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName().toLowerCase() : "";
-                                    String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName().toLowerCase() : "";
-                                    return name1.compareTo(name2);
-                                }
-                            });
-                            List<DataFolder> folders = new ArrayList<DataFolder>();
-                            if (additionalViewsUsed) {
-                                DataFolder dataFolder = new DataFolder();
-                                dataFolder.setName("Additional Views");
-                                dataFolder.setUrlKey("AdditionalViews");
-                                folders.add(dataFolder);
-                            }
-                            for (CustomFolder customFolder : folderMap.values()) {
-                                DataFolder dataFolder = new DataFolder();
-                                dataFolder.setName(customFolder.getName());
-                                dataFolder.setUrlKey(String.valueOf(customFolder.getId()));
-                                folders.add(dataFolder);
-                            }
-
-                            if (forThisLevel.size() > 0) {
-                        %>
-                        <table class="table table-striped table-bordered">
-                            <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Type</th>
-                            </tr>
-                            </thead>
-                            <%
-
-
-                                for (EIDescriptor descriptor : forThisLevel) {
-                                    if (descriptor instanceof InsightDescriptor || descriptor instanceof DashboardDescriptor) {
-                                        out.println("<tr>");
-                                        if (descriptor instanceof InsightDescriptor) {
-                                            out.println("<td><a href=\"../report/" + descriptor.getUrlKey() + "\">" + StringEscapeUtils.escapeHtml(descriptor.getName()) + "</td>");
-                                            out.println("<td>Report</td>");
-                                        } else if (descriptor instanceof DashboardDescriptor) {
-                                            out.println("<tr><td><a href=\"../dashboard/" + descriptor.getUrlKey() + "\">" + StringEscapeUtils.escapeHtml(descriptor.getName()) + "</td>");
-                                            out.println("<td>Dashboard</td>");
-                                        }
-                                        out.println("</tr>");
-                                    }
-                                }
-                            %>
-                        </table>
-                        <% } else { %>
-                            You don't have any reports yet for this data source.
+                    <div class="tag-list">
+                        <% for (Tag t : new UserUploadService().getReportTags()) { %>
+                        <a class="btn btn-default tag-select" data-toggle="button" data-tag-id="<%= t.getId() %>"
+                           href="#"><%= StringEscapeUtils.escapeHtml(t.getName()) %>
+                        </a>
                         <% } %>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="report_list_target"></div>
                         <%
                             if (folders.size() > 0) {
                         %>
@@ -208,9 +217,9 @@
                             </tr>
                             </thead>
                             <%
-                                for (DataFolder dataFolder : folders) {
-                                    out.println("<tr><td><a href=\"../reportsFolder/" + dataSourceDescriptor.getUrlKey() + "/" + dataFolder.getUrlKey() + "\">" + StringEscapeUtils.escapeHtml(dataFolder.getName()) + "</td></tr>");
-                                }
+                                for (DataFolder dataFolder : folders) { %>
+                                    <tr><td><a class="folder" data-folder-id="<%= dataFolder.getUrlKey() %>" href="../reportsFolder/<%= dataSourceDescriptor.getUrlKey() %>/<%= dataFolder.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataFolder.getName()) %></td></tr>
+                                <% }
                             %>
                         </table>
                         <%
@@ -218,9 +227,31 @@
                         %>
                     </div>
                 </div>
+            </div>
         </div>
     </div>
-</div>
+    <script type="text/template" id="report_list_template">
+        <@ if(reports.length > 0) { @>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                <@ _.each(reports, function(e, i, l) { @>
+                    <tr>
+                        <td><a href="../<@= (e.type == "report") ? "report" : "dashboard" @>/<@= e.url_key @>"><@- e.name @></a></td>
+                        <td><@= (e.type == "report") ? "Report" : "Dashboard" @></td>
+                    </tr>
+                <@ }) @>
+            </tbody>
+        </table>
+        <@ } else { @>
+        You don't have any reports yet for this data source.
+        <@ } @>
+    </script>
 </body>
 <%
     } finally {

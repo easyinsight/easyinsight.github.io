@@ -37,6 +37,7 @@
             defaultMaxResults = String(accountSettings.maxResults);
             sendEmail = accountSettings.sendEmail;
             htmlView = accountSettings.htmlView;
+            selectedLocale = accountSettings.locale;
         }
 
         private function save():void {
@@ -47,6 +48,7 @@
             accountSettings.maxResults = int(defaultMaxResultsInput.text);
             accountSettings.sendEmail = emailSetupCheckbox.selected;
             accountSettings.htmlView = htmlViewCheckbox.selected;
+            accountSettings.locale = localeBox.selectedItem.data;
             ProgressAlert.alert(this, "Saving settings...", null, userService.saveAccountSettings);
             User.getInstance().dateFormat = accountSettings.dateFormat;
             userService.saveAccountSettings.send(accountSettings);
@@ -75,6 +77,9 @@
 
         [Bindable]
         private var htmlView:Boolean;
+
+        [Bindable]
+        private var selectedLocale:String;
         ]]></mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
         <mx:method name="getAccountSettings" result="gotSettings()"/>
@@ -85,6 +90,16 @@
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+            <mx:FormItem label="Locale:">
+                <util:SmartComboBox id="localeBox" rowCount="6" selectedValue="{selectedLocale}" selectedProperty="data">
+                    <util:dataProvider>
+                        <mx:Array>
+                            <mx:Object label="US/America" data="EN"/>
+                            <mx:Object label="Spain" data="ES"/>
+                        </mx:Array>
+                    </util:dataProvider>
+                </util:SmartComboBox>
+            </mx:FormItem>
             <mx:FormItem label="Date Formatting:">
                 <util:SmartComboBox id="dateBox" rowCount="6" selectedValue="{dateFormat}" selectedProperty="data">
                     <util:dataProvider>

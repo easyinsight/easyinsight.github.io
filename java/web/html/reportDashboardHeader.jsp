@@ -7,8 +7,6 @@
 <link href="/css/diagram.css" rel="stylesheet" />
 <script type="text/javascript" src="/js/diagram.js"></script>
 <script type="text/javascript" src="/js/filters.js"></script>
-<script type="text/javascript" src="/js/reportDashboardCommon.js"></script>
-<script type="text/javascript" src="/js/underscore-min.js"></script>
 <script type="text/javascript" src="/js/visualizations/util.js"></script>
 <script type="text/javascript" src="/js/visualizations/chart.js"></script>
 <script type="text/javascript" src="/js/visualizations/list.js"></script>

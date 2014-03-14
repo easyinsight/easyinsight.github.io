@@ -145,7 +145,7 @@ public class AnalysisStorage {
             retries++;
             Session session = Database.instance().createSession(conn);
             try {
-                session.beginTransaction();
+
                 List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
                 if (results.size() > 0) {
                     AnalysisDefinition savedReport = (AnalysisDefinition) results.get(0);
@@ -168,9 +168,8 @@ public class AnalysisStorage {
                         }
                     }
                 }
-                session.getTransaction().commit();
+
             } catch (Exception e) {
-                session.getTransaction().rollback();
                 if (e instanceof LockAcquisitionException && retries < MAX_RETRIES) {
                     // lock acquisition exception, ignore
                 } else {
@@ -593,5 +592,27 @@ public class AnalysisStorage {
         } finally {
             session.close();
         }
+    }
+
+    public Set<ValidationID> populateValidationIDs(long reportID, Set<Long> ids) {
+        Set<ValidationID> validationIDs;
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, reportID).list();
+            if (results.size() > 0) {
+                AnalysisDefinition analysisDefinition = (AnalysisDefinition) results.get(0);
+                validationIDs = analysisDefinition.populateValidationIDs(ids);
+            } else {
+                throw new RuntimeException();
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return validationIDs;
     }
 }

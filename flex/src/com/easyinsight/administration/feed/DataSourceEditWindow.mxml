@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="600" horizontalAlign="center">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.ReportFormItem;
+        import com.easyinsight.analysis.StyleConfiguration;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+
+        private var _dashboardElement:DashboardElement;
+
+        private var items:ArrayCollection;
+
+        protected override function createChildren():void {
+            super.createChildren();
+            items = StyleConfiguration.getDashboardElementItems(_dashboardElement);
+            var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
+            lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
+            for each (var item:ReportFormItem in items) {
+                form.addChild(item);
+            }
+        }
+
+        private function onDone(event:FlexEvent):void {
+            PopUpUtil.centerPopUp(this);
+        }
+
+        private function save():void {
+            var valid:Boolean = true;
+            for each (var validateItem:ReportFormItem in items) {
+                valid = valid && validateItem.validate();
+            }
+            if (valid) {
+                for each (var item:ReportFormItem in items) {
+                    item.save();
+                }
+            }
+            PopUpManager.removePopUp(this);
+        }
+
+        public function set dashboardElement(value:DashboardElement):void {
+            _dashboardElement = value;
+        }
+        ]]></mx:Script>
+    <mx:Box width="100%" height="100%" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
+            horizontalAlign="center" maxHeight="300">
+        <mx:Form id="form">
+
+        </mx:Form>
+    </mx:Box>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

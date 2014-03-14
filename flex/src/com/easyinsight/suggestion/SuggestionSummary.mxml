@@ -125,7 +125,7 @@
                 items.addItem(wrapper.analysisItem);
             }
             var intentions:ArrayCollection = analysisService.getIntentions.lastResult as ArrayCollection;
-            var metadata:SuggestionMetadata = new SuggestionMetadata(_report, _transformContainer, _availableFields, _fields, _dataSource);
+            var metadata:SuggestionMetadata = new SuggestionMetadata(_report, _transformContainer, _availableFields, _fields, _dataSource, _simpleReportEditor);
             for each (var intention:Intention in intentions) {
                 intention.addEventListener(IntentionTriggerEvent.INTENTION_TRIGGER, onIntentionEvent);
                 intention.apply(metadata);

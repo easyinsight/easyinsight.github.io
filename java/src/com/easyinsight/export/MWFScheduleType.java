@@ -33,4 +33,9 @@ public class MWFScheduleType extends ScheduleType {
         }
         return null;
     }
+
+    @Override
+    public String when() {
+        return "M/W/F on " + getHour() + ":" + getMinute() + " GMT";
+    }
 }

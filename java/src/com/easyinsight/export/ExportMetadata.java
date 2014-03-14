@@ -1,6 +1,7 @@
 package com.easyinsight.export;
 
 import java.util.Calendar;
+import java.util.Locale;
 
 /**
 * User: jamesboe
@@ -10,11 +11,13 @@ import java.util.Calendar;
 public class ExportMetadata {
     public int dateFormat;
     public String currencySymbol;
+    public Locale locale;
     public Calendar cal;
 
-    ExportMetadata(int dateFormat, String currencySymbol, Calendar cal) {
+    ExportMetadata(int dateFormat, String currencySymbol, Calendar cal, Locale locale) {
         this.dateFormat = dateFormat;
         this.currencySymbol = currencySymbol;
+        this.locale = locale;
         this.cal = cal;
     }
 }

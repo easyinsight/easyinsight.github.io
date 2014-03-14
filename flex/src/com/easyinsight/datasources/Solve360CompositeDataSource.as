@@ -24,5 +24,9 @@ public class Solve360CompositeDataSource extends CompositeServerDataSource {
     override public function configClass():Class {
         return Solve360DataSourceCreation;
     }
+
+    override public function hasCustomFields():Boolean {
+        return true;
+    }
 }
 }

@@ -93,13 +93,14 @@ public class InsightlyCompositeSource extends CompositeServerDataSource {
     @Override
     protected Collection<ChildConnection> getChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.INSIGHTLY_OPPORTUNITIES, FeedType.INSIGHTLY_PROJECTS, InsightlyOpportunitySource.OPPORTUNITY_ID, InsightlyProjectSource.OPPORTUNITY_ID),
-                new ChildConnection(FeedType.INSIGHTLY_PROJECTS, FeedType.INSIGHTLY_TASKS, InsightlyProjectSource.PROJECT_ID, InsightlyTaskSource.PROJECT_ID),
-                new ChildConnection(FeedType.INSIGHTLY_OPPORTUNITIES, FeedType.INSIGHTLY_TASKS, InsightlyOpportunitySource.OPPORTUNITY_ID, InsightlyTaskSource.OPPORTUNITY_ID),
-                new ChildConnection(FeedType.INSIGHTLY_ORGANIZATIONS, FeedType.INSIGHTLY_CONTACTS, InsightlyOrganisationSource.ORGANIZATION_ID, InsightlyContactSource.ORGANIZATION_ID),
-                new ChildConnection(FeedType.INSIGHTLY_ORGANIZATIONS, FeedType.INSIGHTLY_NOTE_LINKS, InsightlyOrganisationSource.ORGANIZATION_ID, InsightlyNoteLinkSource.ORGANIZATION_ID),
-                new ChildConnection(FeedType.INSIGHTLY_CONTACTS, FeedType.INSIGHTLY_NOTE_LINKS, InsightlyContactSource.CONTACT_ID, InsightlyNoteLinkSource.CONTACT_ID),
-                new ChildConnection(FeedType.INSIGHTLY_OPPORTUNITIES, FeedType.INSIGHTLY_NOTE_LINKS, InsightlyOpportunitySource.OPPORTUNITY_ID, InsightlyNoteLinkSource.OPPORTUNITY_ID),
-                new ChildConnection(FeedType.INSIGHTLY_PROJECTS, FeedType.INSIGHTLY_NOTE_LINKS, InsightlyProjectSource.PROJECT_ID, InsightlyNoteLinkSource.PROJECT_ID),
-                new ChildConnection(FeedType.INSIGHTLY_NOTE_LINKS, FeedType.INSIGHTLY_NOTES, InsightlyNoteLinkSource.NOTE_ID, InsightlyNoteSource.NOTE_ID));
+            new ChildConnection(FeedType.INSIGHTLY_OPPORTUNITIES, FeedType.INSIGHTLY_ORGANIZATIONS, InsightlyOpportunitySource.LINKED_ORGANIZATION, InsightlyOrganisationSource.ORGANIZATION_ID),
+            new ChildConnection(FeedType.INSIGHTLY_PROJECTS, FeedType.INSIGHTLY_TASKS, InsightlyProjectSource.PROJECT_ID, InsightlyTaskSource.PROJECT_ID),
+            new ChildConnection(FeedType.INSIGHTLY_OPPORTUNITIES, FeedType.INSIGHTLY_TASKS, InsightlyOpportunitySource.OPPORTUNITY_ID, InsightlyTaskSource.OPPORTUNITY_ID),
+            new ChildConnection(FeedType.INSIGHTLY_ORGANIZATIONS, FeedType.INSIGHTLY_CONTACTS, InsightlyOrganisationSource.ORGANIZATION_ID, InsightlyContactSource.ORGANIZATION_ID),
+            new ChildConnection(FeedType.INSIGHTLY_ORGANIZATIONS, FeedType.INSIGHTLY_NOTE_LINKS, InsightlyOrganisationSource.ORGANIZATION_ID, InsightlyNoteLinkSource.ORGANIZATION_ID),
+            new ChildConnection(FeedType.INSIGHTLY_CONTACTS, FeedType.INSIGHTLY_NOTE_LINKS, InsightlyContactSource.CONTACT_ID, InsightlyNoteLinkSource.CONTACT_ID),
+            new ChildConnection(FeedType.INSIGHTLY_OPPORTUNITIES, FeedType.INSIGHTLY_NOTE_LINKS, InsightlyOpportunitySource.OPPORTUNITY_ID, InsightlyNoteLinkSource.OPPORTUNITY_ID),
+            new ChildConnection(FeedType.INSIGHTLY_PROJECTS, FeedType.INSIGHTLY_NOTE_LINKS, InsightlyProjectSource.PROJECT_ID, InsightlyNoteLinkSource.PROJECT_ID),
+            new ChildConnection(FeedType.INSIGHTLY_NOTE_LINKS, FeedType.INSIGHTLY_NOTES, InsightlyNoteLinkSource.NOTE_ID, InsightlyNoteSource.NOTE_ID));
     }
 }

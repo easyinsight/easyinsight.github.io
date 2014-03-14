@@ -1,18 +1,18 @@
 package com.easyinsight.analysis
 {
-import mx.collections.ArrayCollection;
+	import mx.collections.ArrayCollection;
+	
+	[Bindable]
+	[RemoteClass(alias="com.easyinsight.analysis.AnalysisDimensionResultMetadata")]
+	public class AnalysisDimensionResultMetadata extends AnalysisItemResultMetadata
+	{
+		public var values:ArrayCollection;
+		public var strings:ArrayCollection;
 
-[Bindable]
-[RemoteClass(alias="com.easyinsight.analysis.AnalysisDimensionResultMetadata")]
-public class AnalysisDimensionResultMetadata extends AnalysisItemResultMetadata
-{
-    public var values:ArrayCollection;
-    public var strings:ArrayCollection;
-
-    public function AnalysisDimensionResultMetadata()
-    {
-        super();
-    }
-
-}
+		public function AnalysisDimensionResultMetadata()
+		{
+			super();
+		}
+		
+	}
 }

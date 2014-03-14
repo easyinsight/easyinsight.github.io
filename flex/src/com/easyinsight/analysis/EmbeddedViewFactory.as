@@ -507,7 +507,7 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
     }
 
     public function updateExportMetadata():void {
-        _reportRenderer.updateExportMetadata();
+        _reportRenderer.updateExportMetadata(null);
     }
 
     private function forceRender(event:ReportRendererEvent):void {

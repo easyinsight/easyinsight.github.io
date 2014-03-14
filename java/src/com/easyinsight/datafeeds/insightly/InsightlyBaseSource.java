@@ -4,6 +4,7 @@ import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -12,6 +13,7 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.xml.security.utils.Base64;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +46,13 @@ public abstract class InsightlyBaseSource extends ServerDataSourceDefinition {
             } else if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", insightlyCompositeSource));
             }
-            return (List) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+            Object obj = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+            try {
+                return (List) obj;
+            } catch (ClassCastException e) {
+                System.out.println(obj);
+                throw e;
+            }
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {

@@ -10,5 +10,9 @@ public class URLLink extends Link{
     override public function get type():String {
         return "URL";
     }
+
+    override public function createString(name:String = null):String {
+        return "URL to " + url;
+    }
 }
 }

@@ -177,4 +177,9 @@ public class FlatDateFilter extends FilterDefinition {
         FlatDateFilter f = (FlatDateFilter) overrideFilter;
         this.setValue(f.getValue());
     }
+
+    @Override
+    public String asString(InsightRequestMetadata insightRequestMetadata) {
+        return String.valueOf(value);
+    }
 }

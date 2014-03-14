@@ -609,7 +609,7 @@ public class ExportService {
                         } else {
                             sb.append("<td style=\"" + dataCell + "\">");
                         }
-                        sb.append(createValue(exportMetadata.dateFormat, measure, crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                        sb.append(createValue(exportMetadata.dateFormat, measure, crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                     } else {
                         sb.append("<td style=\"" + headerCell + "\">");
                         sb.append(crosstabValue.getValue());
@@ -682,7 +682,7 @@ public class ExportService {
         } catch (Exception e) {
             LogClass.error(e);
         }
-        return exportString;
+        return null;
     }
 
     public byte[] toPDFBytes(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
@@ -712,15 +712,13 @@ public class ExportService {
         }
 
         try {
-            if (analysisDefinition.getExportString() != null && !"".equals(analysisDefinition.getExportString())) {
-                String string = filterTransformForReport(analysisDefinition);
-                com.itextpdf.text.Font phraseFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL,
-                        new BaseColor(20, 20, 20));
-                Phrase phrase = new Phrase(string, phraseFont);
-                Paragraph paragraph = new Paragraph(phrase);
-                paragraph.setAlignment(Element.ALIGN_CENTER);
-                document.add(paragraph);
-            }
+            String string = filterTransformForReport(analysisDefinition);
+            com.itextpdf.text.Font phraseFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL,
+                    new BaseColor(20, 20, 20));
+            Phrase phrase = new Phrase(string, phraseFont);
+            Paragraph paragraph = new Paragraph(phrase);
+            paragraph.setAlignment(Element.ALIGN_CENTER);
+            document.add(paragraph);
         } catch (Exception e) {
             LogClass.error(e);
         }
@@ -734,8 +732,6 @@ public class ExportService {
         } else {
             listReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, document, exportMetadata);
         }
-
-
 
 
         document.close();
@@ -811,7 +807,6 @@ public class ExportService {
         }
 
 
-
         for (AnalysisItem analysisItem : items) {
             for (AnalysisItem headerItem : listDataResults.getHeaders()) {
                 if (headerItem == analysisItem) {
@@ -872,7 +867,7 @@ public class ExportService {
                                 }
                             }
                             com.itextpdf.text.Font cellFont = new com.itextpdf.text.Font(fontFamily, fontSize, fontStyle, pdfTextColor);
-                            String valueString = createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, true);
+                            String valueString = createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, true);
                             Phrase phrase = new Phrase(valueString, cellFont);
                             PdfPCell valueCell = new PdfPCell(phrase);
                             if (pdfBackgroundColor != null) {
@@ -934,16 +929,16 @@ public class ExportService {
                 for (i = 0; i < kpiDefinition.getGroupings().size(); i++) {
                     AnalysisItem grouping = kpiDefinition.getGroupings().get(i);
                     Value value = trendOutcome.getDimensions().get(grouping.qualifiedName());
-                    PdfPCell groupingCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, grouping, value, exportMetadata.cal, exportMetadata.currencySymbol, false)));
+                    PdfPCell groupingCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, grouping, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)));
                     groupingCell.setMinimumHeight(20f);
                     table.addCell(groupingCell);
                 }
             }
             PdfPCell labelDataCell = new PdfPCell(new Phrase(trendOutcome.getMeasure().toUnqualifiedDisplay()));
             PdfPCell nowMeasureStyle = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(),
-                    exportMetadata.cal, exportMetadata.currencySymbol, false)));
+                    exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)));
             PdfPCell previousMeasureStyle = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(),
-                    exportMetadata.cal, exportMetadata.currencySymbol, false)));
+                    exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)));
 
             String percentChangeString;
             if (trendOutcome.getHistorical().toDouble() != 0) {
@@ -1032,7 +1027,7 @@ public class ExportService {
                     if (crosstabValue.getHeader() == null) {
                         Value value = crosstabValue.getValue();
                         cellValue = createValue(exportMetadata.dateFormat, measure, value, exportMetadata.cal,
-                                exportMetadata.currencySymbol, false);
+                                exportMetadata.currencySymbol, exportMetadata.locale,  false);
                     } else {
                         cellValue = crosstabValue.getValue().toString();
                     }
@@ -1105,11 +1100,11 @@ public class ExportService {
         return baos.toByteArray();
     }
 
-    public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, boolean pdf) {
-        return createValue(dateFormat, headerItem, value, cal, currencySymbol, pdf, null);
+    public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, Locale locale, boolean pdf) {
+        return createValue(dateFormat, headerItem, value, cal, currencySymbol, locale, pdf, null);
     }
 
-    public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, boolean pdf, @Nullable String explicitDateFormat) {
+    public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, Locale locale, boolean pdf, @Nullable String explicitDateFormat) {
         String valueString;
         if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
             AnalysisMeasure analysisMeasure = (AnalysisMeasure) headerItem;
@@ -1119,12 +1114,15 @@ public class ExportService {
             }
             if (analysisMeasure.getFormattingType() == FormattingConfiguration.CURRENCY) {
                 String symbolToUse = currencySymbol;
+                NumberFormat currencyFormatter;
                 if (!pdf && symbolToUse.length() > 0 && symbolToUse.charAt(0) == 8364) {
                     symbolToUse = "&euro;";
                 }
-                NumberFormat currencyFormatter = new DecimalFormat("###,###.##");
+                currencyFormatter = DecimalFormat.getInstance(locale);
+                //currencyFormatter = new DecimalFormat("###.###,##");
                 currencyFormatter.setMaximumFractionDigits(analysisMeasure.getPrecision());
                 currencyFormatter.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
+
                 valueString = symbolToUse + currencyFormatter.format(doubleValue);
             } else if (analysisMeasure.getFormattingType() == FormattingConfiguration.MILLISECONDS) {
                 double absoluteValue = Math.abs(doubleValue);
@@ -1168,12 +1166,12 @@ public class ExportService {
                     valueString = days + "d:" + hours + "h";
                 }
             } else if (analysisMeasure.getFormattingType() == FormattingConfiguration.PERCENTAGE) {
-                NumberFormat numberFormat = NumberFormat.getNumberInstance();
+                NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
                 numberFormat.setMaximumFractionDigits(analysisMeasure.getPrecision());
                 numberFormat.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
                 valueString = numberFormat.format(doubleValue) + "%";
             } else {
-                NumberFormat numberFormat = NumberFormat.getNumberInstance();
+                NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
                 numberFormat.setMaximumFractionDigits(analysisMeasure.getPrecision());
                 numberFormat.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
                 valueString = numberFormat.format(doubleValue);
@@ -1219,7 +1217,9 @@ public class ExportService {
         return valueString;
     }
 
-    public @Nullable static DateFormat getDateFormat(int dateLevel, @Nullable String explicitDateFormat) {
+    public
+    @Nullable
+    static DateFormat getDateFormat(int dateLevel, @Nullable String explicitDateFormat) {
         long accountID = SecurityUtil.getAccountID();
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -1238,7 +1238,9 @@ public class ExportService {
         }
     }
 
-    public static @Nullable DateFormat getDateFormatForAccount(int dateLevel, @Nullable String explicitDateFormat) {
+    public static
+    @Nullable
+    DateFormat getDateFormatForAccount(int dateLevel, @Nullable String explicitDateFormat) {
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement accountStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
@@ -1255,7 +1257,9 @@ public class ExportService {
         }
     }
 
-    public static @Nullable DateFormat getDateFormatForAccount(int dateLevel, @Nullable String explicitDateFormat, int dateFormat) {
+    public static
+    @Nullable
+    DateFormat getDateFormatForAccount(int dateLevel, @Nullable String explicitDateFormat, int dateFormat) {
         DateFormat sdf = null;
         if (explicitDateFormat != null && !"".equals(explicitDateFormat.trim())) {
             sdf = new SimpleDateFormat(explicitDateFormat);
@@ -1488,7 +1492,7 @@ public class ExportService {
                     Value measureValue = (Value) map.get(columnName);
                     String text;
                     if (measureValue != null && measureValue.type() == Value.NUMBER) {
-                        text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, false);
+                        text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
                     } else {
                         text = "";
                     }
@@ -1551,7 +1555,7 @@ public class ExportService {
                     Value measureValue = (Value) map.get(columnName);
                     String text;
                     if (measureValue != null && measureValue.type() == Value.NUMBER) {
-                        text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, false);
+                        text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
                     } else {
                         text = "";
                     }
@@ -1719,14 +1723,14 @@ public class ExportService {
                 }
             }
             sb.append("<td style=\"" + tdStyle + "left\">").append(trendOutcome.getMeasure().toUnqualifiedDisplay()).append("</td>");
-            String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, false);
+            String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
             sb.append("<td style=\"" + tdStyle + "right\">").append(nowValue).append("</td>");
-            String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, false);
+            String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
             sb.append("<td style=\"" + tdStyle + "right\">").append(previousValue).append("</td>");
             sb.append("<td style=\"" + tdStyle + "right\">");
             if (trendOutcome.getHistorical().toDouble() != 0) {
                 double percentChange = (trendOutcome.getNow().toDouble() - trendOutcome.getHistorical().toDouble()) / trendOutcome.getHistorical().toDouble() * 100;
-                sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
             }
             sb.append("</td>");
             sb.append("</tr>");
@@ -1800,13 +1804,13 @@ public class ExportService {
             sb.append(trendOutcome.getMeasure().toUnqualifiedDisplay());
             sb.append("</span>");
             sb.append("</td>");
-            String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, false);
+            String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
             sb.append("<td style=\"" + tdStyle + "right\">").append(nowValue);
             sb.append("<span class='sortData'>");
             sb.append(trendOutcome.getNow().toDouble());
             sb.append("</span>");
             sb.append("</td>");
-            String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, false);
+            String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
             sb.append("<td style=\"" + tdStyle + "right\">").append(previousValue);
             sb.append("<span class='sortData'>");
             sb.append(trendOutcome.getHistorical().toDouble());
@@ -1815,7 +1819,7 @@ public class ExportService {
             sb.append("<td style=\"" + tdStyle + "right\">");
             if (trendOutcome.getHistorical().toDouble() != 0) {
                 double percentChange = (trendOutcome.getNow().toDouble() - trendOutcome.getHistorical().toDouble()) / trendOutcome.getHistorical().toDouble() * 100;
-                sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                 sb.append("<span class='sortData'>");
                 sb.append(percentChange);
                 sb.append("</span>");
@@ -1925,12 +1929,12 @@ public class ExportService {
                     if (compareYearsResult.isPercentChange()) {
                         String tempStyle = cellStyle + ";color:#880000";
                         if (compareYearsResult.getValue().toDouble() < 0) {
-                            sb.append("<td style=\"").append(tempStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                            sb.append("<td style=\"").append(tempStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                         } else {
-                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                         }
                     } else {
-                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getMeasure(), value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getMeasure(), value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                     }
                 }
             }
@@ -2017,9 +2021,9 @@ public class ExportService {
 
                     Value value = compareYearsResult.getValue();
                     if (compareYearsResult.isPercentChange()) {
-                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                     } else {
-                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getMeasure(), value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getMeasure(), value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                     }
                 }
             }
@@ -2061,7 +2065,7 @@ public class ExportService {
         sb.append("<thead><tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<th></th>");
         for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
-            String date = createValue(exportMetadata.dateFormat, verticalList.getTimeDimension(), ytdStuff.getIntervals().get(i), exportMetadata.cal, exportMetadata.currencySymbol, false, "MMM");
+            String date = createValue(exportMetadata.dateFormat, verticalList.getTimeDimension(), ytdStuff.getIntervals().get(i), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false, "MMM");
             sb.append("<th style=\"").append(thStyle).append("\">").append(date).append("</th>");
         }
         sb.append("<th style=\"").append(thStyle).append("\">").append("YTD").append("</th>");
@@ -2132,18 +2136,18 @@ public class ExportService {
                         TimeIntervalValue timeIntervalValue = map.get(ytdStuff.getIntervals().get(i));
                         if (timeIntervalValue != null) {
                             Value value = timeIntervalValue.getValue();
-                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                         } else {
                             sb.append("<td style=\"").append(cellStyle).append("</td>");
                         }
                     }
-                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
+                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
 
                     if (hasBenchmark) {
                         if (ytdValue.getBenchmarkMeasure() != null) {
-                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                         } else {
                             sb.append("<td style=\"").append(cellStyle).append("\"></td>");
                             sb.append("<td style=\"").append(cellStyle).append("\"></td>");
@@ -2151,7 +2155,7 @@ public class ExportService {
                     }
                 } else if (alwaysShow) {
                     for (int i = 0; i < maxColumns; i++) {
-                        sb.append("<td style=\"").append(cellStyle).append("\"></td>");
+                        sb.append("<td style=\"").append(cellStyle).append("</td>");
                     }
                     if (hasBenchmark) {
                         sb.append("<td style=\"").append(cellStyle).append("\"></td>");
@@ -2195,7 +2199,7 @@ public class ExportService {
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<th></th>");
         for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
-            String date = createValue(exportMetadata.dateFormat, verticalList.getTimeDimension(), ytdStuff.getIntervals().get(i), exportMetadata.cal, exportMetadata.currencySymbol, false, "MMM");
+            String date = createValue(exportMetadata.dateFormat, verticalList.getTimeDimension(), ytdStuff.getIntervals().get(i), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false, "MMM");
             sb.append("<th style=\"").append(thStyle).append("\">").append(date).append("</th>");
         }
         sb.append("<th>").append("YTD").append("</th>");
@@ -2260,17 +2264,17 @@ public class ExportService {
                         TimeIntervalValue timeIntervalValue = map.get(ytdStuff.getIntervals().get(i));
                         if (timeIntervalValue != null) {
                             Value value = timeIntervalValue.getValue();
-                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                         } else {
                             sb.append("<td style=\"").append(cellStyle).append("</td>");
                         }
                     }
-                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
+                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
 
                     if (ytdValue.getBenchmarkMeasure() != null) {
-                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                     } else {
                         sb.append("<td style=\"").append(cellStyle).append("</td>");
                         sb.append("<td style=\"").append(cellStyle).append("</td>");
@@ -2791,7 +2795,7 @@ public class ExportService {
                 }
                 if (analysisItem.getFormattingType() == FormattingConfiguration.MILLISECONDS || analysisItem.getFormattingType() == FormattingConfiguration.SECONDS) {
                     String result;
-                    if(analysisItem.getFormattingType() == FormattingConfiguration.SECONDS) {
+                    if (analysisItem.getFormattingType() == FormattingConfiguration.SECONDS) {
                         doubleValue = doubleValue * 1000;
                     }
                     double unsigned = Math.abs(doubleValue);
@@ -2799,7 +2803,7 @@ public class ExportService {
                         int seconds = (int) (unsigned / 1000);
                         int milliseconds = (int) (unsigned % 1000);
                         result = seconds + "s:";
-                        if(analysisItem.getFormattingType() == FormattingConfiguration.MILLISECONDS)
+                        if (analysisItem.getFormattingType() == FormattingConfiguration.MILLISECONDS)
                             result = result + milliseconds + "ms";
                     } else if (unsigned < (60000 * 60)) {
                         int minutes = (int) (unsigned / 60000);
@@ -3067,20 +3071,24 @@ public class ExportService {
     public static ExportMetadata createExportMetadata(long accountID, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         int dateFormat;
         String currencySymbol;
+        String locale;
         try {
-            PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT, CURRENCY_SYMBOL FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT, CURRENCY_SYMBOL, ACCOUNT_LOCALE FROM ACCOUNT WHERE ACCOUNT_ID = ?");
             dateFormatStmt.setLong(1, accountID);
             ResultSet rs = dateFormatStmt.executeQuery();
             if (rs.next()) {
                 dateFormat = rs.getInt(1);
                 currencySymbol = rs.getString(2);
+                locale = rs.getString(3);
             } else {
                 dateFormat = 1;
                 currencySymbol = "$";
+                locale = "EN";
             }
         } catch (com.easyinsight.security.SecurityException e) {
             dateFormat = 1;
             currencySymbol = "$";
+            locale = "EN";
         }
         int time = insightRequestMetadata.getUtcOffset() / 60;
         String string;
@@ -3094,7 +3102,25 @@ public class ExportService {
         TimeZone timeZone = TimeZone.getTimeZone(string);
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(timeZone);
-        return new ExportMetadata(dateFormat, currencySymbol, cal);
+        Locale localeObject;
+        localeObject = createLocale(locale);
+        return new ExportMetadata(dateFormat, currencySymbol, cal, localeObject);
+    }
+
+    public static Locale createLocale(String locale) {
+        Locale localeObject;
+        if ("EN".equals(locale)) {
+            localeObject = new Locale("en", "US");
+        } else if ("UK".equals(locale)) {
+            localeObject = new Locale("en", "GB");
+        } else if ("DE".equals(locale)) {
+            localeObject = new Locale("de", "DEU");
+        } else if ("ES".equals(locale)) {
+            localeObject = new Locale("es", "ESP");
+        } else {
+            localeObject = new Locale("en", "US");
+        }
+        return localeObject;
     }
 
     private static final String headerLabelStyle = "text-align:center;padding-top:15px;padding-bottom:15px;font-size:14px";
@@ -3329,7 +3355,7 @@ public class ExportService {
                                 DrillThrough drillThrough = (DrillThrough) defaultLink;
                                 paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.createID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
                                 if (exportProperties.getEmbedKey() != null) {
-                                    paramBuilder.append("&embedKey=" + exportProperties.getEmbedKey()+"&");
+                                    paramBuilder.append("&embedKey=" + exportProperties.getEmbedKey() + "&");
                                 }
                                 for (AnalysisItem dataItem : items) {
                                     for (int k = 0; k < listDataResults.getHeaders().length; k++) {
@@ -3361,7 +3387,7 @@ public class ExportService {
                         }
 
 
-                        sb.append(createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+                        sb.append(createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                         if (showLink) {
                             sb.append("</a>");
                         }
@@ -3408,7 +3434,7 @@ public class ExportService {
                                     styleString.append(align);
                                 }
                                 sb.append("<td style=\"").append(styleString.toString()).append("\">");
-                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                                 sb.append("</td>");
                             } else {
                                 sb.append("<td></td>");
@@ -3440,13 +3466,17 @@ public class ExportService {
         StringBuilder sb = new StringBuilder();
         java.util.List<AnalysisItem> items = new java.util.ArrayList<AnalysisItem>(report.getAllAnalysisItems());
         items.remove(null);
-        java.util.Collections.sort(items, new java.util.Comparator<AnalysisItem>() {
+        Comparator sortOrder = new java.util.Comparator<AnalysisItem>() {
 
             public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
                 return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
             }
-        });
+        };
 
+        java.util.Collections.sort(items, sortOrder);
+        List<AnalysisItem> headers = new ArrayList(Arrays.asList(listDataResults.getHeaders()));
+        List<AnalysisItem> unsortedHeaders = Arrays.asList(listDataResults.getHeaders());
+        java.util.Collections.sort(headers, sortOrder);
 
         if (includeTitle && report.getName() != null) {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(report.getName()).append("</h0>").append("</div>");
@@ -3473,11 +3503,15 @@ public class ExportService {
         sb.append("<thead>");
         sb.append("<tr>");
         Map<AnalysisItem, Link> linkMap = new HashMap<AnalysisItem, Link>();
-        for (AnalysisItem analysisItem : items) {
-            if (analysisItem.getLinks() != null) {
+
+        for (AnalysisItem headerItem : headers) {
+            sb.append("<th style=\"text-align:center\">");
+            sb.append(headerItem.toUnqualifiedDisplay());
+            sb.append("</th>");
+            if (headerItem.getLinks() != null) {
                 Link defaultLink = null;
                 if (includeTitle) {
-                    for (Link link : analysisItem.getLinks()) {
+                    for (Link link : headerItem.getLinks()) {
                         if (link.isDefaultLink() && link instanceof URLLink) {
                             defaultLink = link;
                         } else if (defaultLink == null && link instanceof URLLink) {
@@ -3485,24 +3519,17 @@ public class ExportService {
                         }
                     }
                 } else {
-                    for (Link link : analysisItem.getLinks()) {
+                    for (Link link : headerItem.getLinks()) {
                         if (link.isDefaultLink()) {
                             defaultLink = link;
                         }
                     }
-                    if (defaultLink == null && analysisItem.getLinks().size() == 1) {
-                        defaultLink = analysisItem.getLinks().get(0);
+                    if (defaultLink == null && headerItem.getLinks().size() == 1) {
+                        defaultLink = headerItem.getLinks().get(0);
                     }
                 }
 
-                linkMap.put(analysisItem, defaultLink);
-            }
-            for (AnalysisItem headerItem : listDataResults.getHeaders()) {
-                if (headerItem == analysisItem) {
-                    sb.append("<th style=\"text-align:center\">");
-                    sb.append(headerItem.toUnqualifiedDisplay());
-                    sb.append("</th>");
-                }
+                linkMap.put(headerItem, defaultLink);
             }
         }
         sb.append("</tr>");
@@ -3510,115 +3537,133 @@ public class ExportService {
         sb.append("<tbody>");
         for (com.easyinsight.analysis.ListRow listRow : listDataResults.getRows()) {
             sb.append("<tr>");
-            for (AnalysisItem analysisItem : items) {
-                for (int i = 0; i < listDataResults.getHeaders().length; i++) {
-                    AnalysisItem headerItem = listDataResults.getHeaders()[i];
-                    if (headerItem == analysisItem) {
-                        StringBuilder styleString = new StringBuilder("text-align:");
-                        String align = "left";
-                        if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
-                            TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
-                            if (textReportFieldExtension.getAlign() != null) {
-                                if ("Left".equals(textReportFieldExtension.getAlign())) {
-                                    align = "left";
-                                } else if ("Center".equals(textReportFieldExtension.getAlign())) {
-                                    align = "center";
-                                } else if ("Right".equals(textReportFieldExtension.getAlign())) {
-                                    align = "right";
-                                }
-                            }
-                            styleString.append(align);
-                            if (textReportFieldExtension.getFixedWidth() > 0) {
-                                styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
-                            }
-                        } else {
-                            styleString.append(align);
-                        }
-                        com.easyinsight.core.Value value = listRow.getValues()[i];
-                        if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
-                            TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
-                            if (textValueExtension.getColor() != 0) {
-                                String hexString = createHexString(textValueExtension.getColor());
-                                styleString.append(";color:").append(hexString);
-                            }
-                            if (textValueExtension.getBackgroundColor() != TextValueExtension.WHITE) {
-                                String hexString = createHexString(textValueExtension.getBackgroundColor());
-                                styleString.append(";background-color:").append(hexString);
-                            }
-                            if (textValueExtension.isBold()) {
-                                styleString.append(";font-weight:bold");
+            for (AnalysisItem analysisItem : headers) {
+                AnalysisItem headerItem = analysisItem;
+                if (headerItem == analysisItem) {
+                    StringBuilder styleString = new StringBuilder("text-align:");
+                    String align = "left";
+                    if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                        TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
+                        if (textReportFieldExtension.getAlign() != null) {
+                            if ("Left".equals(textReportFieldExtension.getAlign())) {
+                                align = "left";
+                            } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                                align = "center";
+                            } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                                align = "right";
                             }
                         }
+                        styleString.append(align);
+                        if (textReportFieldExtension.getFixedWidth() > 0) {
+                            styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
+                        }
+                    } else {
+                        styleString.append(align);
+                    }
+                    com.easyinsight.core.Value value = listRow.getValues()[unsortedHeaders.indexOf(analysisItem)];
+                    if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
+                        TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
+                        if (textValueExtension.getColor() != 0) {
+                            String hexString = createHexString(textValueExtension.getColor());
+                            styleString.append(";color:").append(hexString);
+                        }
+                        if (textValueExtension.getBackgroundColor() != TextValueExtension.WHITE) {
+                            String hexString = createHexString(textValueExtension.getBackgroundColor());
+                            styleString.append(";background-color:").append(hexString);
+                        }
+                        if (textValueExtension.isBold()) {
+                            styleString.append(";font-weight:bold");
+                        }
+                    }
 
-                        sb.append("<td style=\"").append(styleString).append("\">");
-                        //sb.append("<td>");
-                        if (!exportProperties.isEmailed()) {
-                            sb.append("<span class='sortData'>");
-                            Value v = value;
-                            if (value.getSortValue() != null) {
-                                v = value.getSortValue();
-                            }
-                            sb.append(StringEscapeUtils.escapeHtml(v.toHTMLString()));
-                            sb.append("</span>");
+                    sb.append("<td style=\"").append(styleString).append("\">");
+                    if (!exportProperties.isEmailed()) {
+                        sb.append("<span class='sortData'>");
+                        Value v = value;
+                        if (value.getSortValue() != null) {
+                            v = value.getSortValue();
                         }
+                        sb.append(StringEscapeUtils.escapeHtml(v.toHTMLString()));
+                        sb.append("</span>");
+                    }
 
-                        Link defaultLink = linkMap.get(analysisItem);
-                        boolean showLink = false;
-                        if (defaultLink != null) {
-                            if (defaultLink instanceof URLLink) {
-                                showLink = defaultLink != null && value.getLinks() != null && value.getLinks().get(defaultLink.getLabel()) != null;
-                                if (showLink) {
-                                    sb.append("<a href=\"");
-                                    sb.append(value.getLinks().get(defaultLink.getLabel()));
-                                    sb.append("\">");
-                                }
-                            } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
-                                StringBuilder paramBuilder = new StringBuilder();
-                                DrillThrough drillThrough = (DrillThrough) defaultLink;
-                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.createID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
-                                if (exportProperties.getEmbedKey() != null) {
-                                    paramBuilder.append("&embedKey=" + exportProperties.getEmbedKey()+"&");
-                                }
-                                for (AnalysisItem dataItem : items) {
-                                    for (int k = 0; k < listDataResults.getHeaders().length; k++) {
+                    Link defaultLink = linkMap.get(analysisItem);
+                    boolean showLink = false;
+                    if (defaultLink != null) {
+                        if (defaultLink instanceof URLLink) {
+                            showLink = defaultLink != null && value.getLinks() != null && value.getLinks().get(defaultLink.getLabel()) != null;
+                            if (showLink) {
+                                sb.append("<a href=\"");
+                                sb.append(value.getLinks().get(defaultLink.getLabel()));
+                                sb.append("\">");
+                            }
+                        } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
+                            StringBuilder paramBuilder = new StringBuilder();
+                            DrillThrough drillThrough = (DrillThrough) defaultLink;
+//                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.createID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
+//                                if (exportProperties.getEmbedKey() != null) {
+//                                    paramBuilder.append("&embedKey=" + exportProperties.getEmbedKey()+"&");
+//                                }
+                            sb.append("<a class=\"list_drillthrough\" href=\"#\" data-reportid=\"");
+                                                            sb.append(report.getUrlKey());
+                                                            sb.append("\" data-drillthroughid=\"");
+                                                            sb.append(drillThrough.createID());
+                                                            sb.append("\" data-embedded=\"");
+                                                            sb.append(exportProperties.isEmbedded());
+                                                            sb.append("\" data-source=\"");
+                                                            sb.append(analysisItem.getAnalysisItemID());
+                                                            sb.append("\"");
+                            if (drillThrough.isFilterRowGroupings()) {
+
+
+                                for (AnalysisItem dataItem : headers) {
+                                    if (dataItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                                        int k = unsortedHeaders.indexOf(dataItem);
                                         AnalysisItem dataHeaderItem = listDataResults.getHeaders()[k];
                                         String encodedValue;
-                                        if (dataItem == dataHeaderItem) {
-                                            try {
-                                                Value drillthroughValue = listRow.getValues()[k];
-                                                String drillthroughValueString;
-                                                if (drillthroughValue.type() == Value.NUMBER) {
-                                                    drillthroughValueString = String.valueOf(drillthroughValue.toDouble().intValue());
-                                                } else {
-                                                    drillthroughValueString = drillthroughValue.toString();
-                                                }
-                                                encodedValue = StringEscapeUtils.escapeHtml(URLEncoder.encode(drillthroughValueString, "UTF-8"));
-                                            } catch (UnsupportedEncodingException e) {
-                                                throw new RuntimeException(e);
-                                            }
-                                            paramBuilder.append("f").append(dataItem.getAnalysisItemID()).append("=").append(encodedValue).append("&");
+
+                                        try {
+                                            encodedValue = toDrillthroughValue(listRow.getValues()[k]);
+                                            sb.append(" data-drillthrough");
+                                            sb.append(dataItem.getAnalysisItemID());
+                                            sb.append("=\"");
+                                            sb.append(encodedValue);
+                                            sb.append("\"");
+                                        } catch (UnsupportedEncodingException e) {
+                                            throw new RuntimeException(e);
                                         }
                                     }
+
                                 }
-                                paramBuilder.append("')");
-                                sb.append("<a href=\"#\" onclick=\"");
-                                sb.append(paramBuilder.toString());
-                                sb.append("\">");
-                                showLink = true;
+                            } else {
+                                sb.append(" data-drillthrough");
+                                sb.append(headerItem.getAnalysisItemID());
+                                sb.append("=\"");
+
+                                try {
+                                    sb.append(toDrillthroughValue(value));
+                                } catch (UnsupportedEncodingException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                sb.append("\"");
                             }
+                            sb.append(">");
+                            showLink = true;
                         }
+                    }
 
 
-                        sb.append(createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+                        sb.append(createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                         if (showLink) {
                             sb.append("</a>");
                         }
                         sb.append("</td>");
                     }
+                    sb.append("</td>");
                 }
-            }
             sb.append("</tr>");
         }
+
         sb.append("</tbody>");
         if (report.getReportType() == WSAnalysisDefinition.LIST) {
             WSListDefinition list = (WSListDefinition) report;
@@ -3656,7 +3701,7 @@ public class ExportService {
                                     styleString.append(align);
                                 }
                                 sb.append("<td style=\"").append(styleString.toString()).append("\">");
-                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                                 sb.append("</td>");
                             } else {
                                 sb.append("<td></td>");
@@ -3673,6 +3718,19 @@ public class ExportService {
         return sb.toString();
     }
 
+    private static String toDrillthroughValue(Value value) throws UnsupportedEncodingException {
+        String encodedValue;
+        Value drillthroughValue = value;
+        String drillthroughValueString;
+        if (drillthroughValue.type() == Value.NUMBER) {
+            drillthroughValueString = String.valueOf(drillthroughValue.toDouble().intValue());
+        } else {
+            drillthroughValueString = drillthroughValue.toString();
+        }
+        encodedValue = StringEscapeUtils.escapeHtml(URLEncoder.encode(drillthroughValueString, "UTF-8"));
+        return encodedValue;
+    }
+
     public static String createHexString(int color) {
         String hexString = Integer.toHexString(color);
         if (hexString.length() == 4) {
@@ -3681,70 +3739,6 @@ public class ExportService {
             hexString = "0000" + hexString;
         }
         return "#" + hexString;
-    }
-
-    public static String dataSetToHTMLTable(Collection<AnalysisItem> fields, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
-
-        try {
-            ExportMetadata exportMetadata;
-            if (conn == null) {
-                exportMetadata = new ExportMetadata(1, "$", Calendar.getInstance());
-            } else {
-                exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
-            }
-
-            StringBuilder sb = new StringBuilder();
-            List<AnalysisItem> items = new ArrayList<AnalysisItem>(fields);
-            items.remove(null);
-            Collections.sort(items, new Comparator<AnalysisItem>() {
-
-                public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
-                    return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
-                }
-            });
-
-            sb.append("<table style=\"").append(tableStyle).append("\">");
-            sb.append("<tr style=\"").append(headerTRStyle).append("\">");
-            for (AnalysisItem analysisItem : items) {
-                for (AnalysisItem headerItem : fields) {
-                    if (headerItem == analysisItem) {
-                        sb.append("<th style=\"").append(thStyle).append("\">");
-                        sb.append(headerItem.toUnqualifiedDisplay());
-                        sb.append("</th>");
-                    }
-                }
-            }
-            sb.append("</tr>");
-            for (IRow row : dataSet.getRows()) {
-                sb.append("<tr style=\">").append(summaryTRStyle).append("\">");
-                for (AnalysisItem analysisItem : items) {
-                    //for (int i = 0; i < fields.length; i++) {
-                    //AnalysisItem headerItem = listDataResults.getHeaders()[i];
-                    //if (headerItem == analysisItem) {
-                    StringBuilder styleString = new StringBuilder(tdStyle);
-                    String align = "left";
-                    styleString.append(align);
-                    Value value = row.getValue(analysisItem);
-                    if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
-                        TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
-                        if (textValueExtension.getColor() != 0) {
-                            String hexString = createHexString(textValueExtension.getColor());
-                            styleString.append(";color:").append(hexString);
-                        }
-                    }
-                    sb.append("<td style=\"").append(styleString.toString()).append("\">");
-
-                    sb.append(ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
-
-                    sb.append("</td>");
-                }
-                sb.append("</tr>");
-            }
-            sb.append("</table>");
-            return sb.toString();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public void exportScorecardToXLS(long scorecardID, InsightRequestMetadata insightRequestMetadata) throws Exception {
@@ -3880,7 +3874,7 @@ public class ExportService {
             sb.append(kpi.getName());
             sb.append("</td>");
             sb.append("<td style=\"").append(tdStyle).append("right\">");
-            sb.append(createValue(0, kpi.getAnalysisMeasure(), new NumericValue(kpi.getKpiOutcome().getOutcomeValue()), exportMetadata.cal, exportMetadata.currencySymbol, false));
+            sb.append(createValue(0, kpi.getAnalysisMeasure(), new NumericValue(kpi.getKpiOutcome().getOutcomeValue()), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
             sb.append("</td>");
             sb.append("<td style=\"").append(tdStyle).append("right\">");
             sb.append(kpi.getDayWindow());

@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.ColorReportFormItem;
+
+        import com.easyinsight.analysis.MultiColorReportFormItem;
+
+        import com.easyinsight.analysis.ReportFormItem;
+
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+
+        private var lfItems:ArrayCollection = new ArrayCollection();
+
+        private var skin:ApplicationSkinTO;
+
+        public var connectionType:int;
+
+        private function onCreation():void {
+            preferencesService.getConnectionSkin.send(connectionType);
+        }
+
+        private function gotSkin():void {
+            skin = preferencesService.getConnectionSkin.lastResult as ApplicationSkinTO;
+            gotSettings();
+        }
+
+        private function gotSettings():void {
+
+            if (skin == null) {
+                skin = new ApplicationSkinTO();
+            }
+
+            lfItems.addItem(new ColorReportFormItem("Primary Chart Color", "customChartColor", skin.customChartColor, skin, "customChartColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Primary Chart Color Gradient End", "gradientChartColor", skin.gradientChartColor, skin, "gradientChartColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Secondary Chart Color", "secondaryColor", skin.secondaryColor, skin, "secondaryColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", skin.summaryBackgroundColor, skin, "summaryBackgroundColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", skin.summaryTextColor, skin, "summaryTextColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Crosstab Header Background Color", "crosstabHeaderBackgroundColor", skin.crosstabHeaderBackgroundColor, skin, "crosstabHeaderBackgroundColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Crosstab Header Text Color", "crosstabHeaderTextColor", skin.crosstabHeaderTextColor, skin, "crosstabHeaderTextColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Grid Header Start Background", "headerStart", skin.headerStart, skin, "headerStartEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Grid Header End Background", "headerEnd", skin.headerEnd, skin, "headerEndEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Grid Row Background Color 1", "tableColorStart", skin.tableColorStart, skin, "tableColorStartEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Grid Row Background Color 2", "tableColorEnd", skin.tableColorEnd, skin, "tableColorEndEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Stack 1 Fill Start", "dashboardStack1ColorStart", skin.dashboardStack1ColorStart, skin));
+            lfItems.addItem(new ColorReportFormItem("Stack 1 Fill End", "dashboardStack1ColorEnd", skin.dashboardStack1ColorEnd, skin));
+            lfItems.addItem(new ColorReportFormItem("Stack 2 Fill Start", "dashboardStackColor2Start", skin.dashboardStackColor2Start, skin));
+            lfItems.addItem(new ColorReportFormItem("Stack 2 Fill End", "dashboardStackColor2End", skin.dashboardStackColor2End, skin));
+            lfItems.addItem(new MultiColorReportFormItem("Primary Multi Color Report", "multiColors", skin.multiColors, skin));
+            lfItems.addItem(new MultiColorReportFormItem("Secondary Multi Color Report", "multiColors", skin.secondaryMultiColors, skin));
+            var lastItem:ReportFormItem = lfItems.getItemAt(lfItems.length - 1) as ReportFormItem;
+            lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
+            for each (var item:ReportFormItem in lfItems) {
+                reportForm.addChild(item);
+            }
+        }
+
+        private function onDone(event:FlexEvent):void {
+            PopUpUtil.centerPopUp(this);
+        }
+
+        private function savedSettings():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function save():void {
+            var valid:Boolean = true;
+            for each (var validateItem:ReportFormItem in lfItems) {
+                valid = valid && validateItem.validate();
+            }
+            if (valid) {
+                for each (var item:ReportFormItem in lfItems) {
+                    item.save();
+                }
+                preferencesService.saveConnectionSkin.send(skin, connectionType);
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="preferencesService" id="preferencesService">
+        <mx:method name="getConnectionSkin" result="gotSkin()"/>
+        <mx:method name="saveConnectionSkin" result="savedSettings()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:Form id="reportForm" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+
+        </mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

@@ -1,11 +1,13 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.core.*;
+import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.solutions.SolutionInstallInfo;
 import com.easyinsight.storage.IDataStorage;
+import com.easyinsight.tag.Tag;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.SuggestedUser;
 import com.easyinsight.userupload.UploadPolicy;
@@ -45,7 +47,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private UploadPolicy uploadPolicy = new UploadPolicy();
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
-    private boolean accountVisible;
+    private boolean accountVisible = true;
     private long dataFeedID;
     private long size;
     private Date dateCreated;
@@ -70,14 +72,27 @@ public class FeedDefinition implements Cloneable, Serializable {
     private DataSourceInfo dataSourceInfo;
     private boolean kpiSource;
     private List<AddonReport> addonReports;
-    private boolean fieldCleanupEnabled;
+    private boolean fieldCleanupEnabled = true;
     private boolean fieldLookupEnabled;
     private long defaultFieldTag;
     private boolean manualReportRun;
     private boolean showTags;
+    private boolean visibleWithinParentConfiguration;
 
     public void configureFactory(HTMLConnectionFactory factory) {
 
+    }
+
+    public boolean isVisibleWithinParentConfiguration() {
+        return visibleWithinParentConfiguration;
+    }
+
+    public void setVisibleWithinParentConfiguration(boolean visibleWithinParentConfiguration) {
+        this.visibleWithinParentConfiguration = visibleWithinParentConfiguration;
+    }
+
+    public List<CustomFieldTag> customFieldTags() {
+        return null;
     }
 
     public boolean isShowTags() {
@@ -413,7 +428,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public Feed createFeed(EIConnection conn) {
-        FeedDefinition parentSource = null; 
+        FeedDefinition parentSource = null;
         if (getParentSourceID() > 0) {
             try {
                 parentSource = new FeedStorage().getFeedDefinitionData(getParentSourceID(), conn);
@@ -421,10 +436,15 @@ public class FeedDefinition implements Cloneable, Serializable {
                 throw new RuntimeException(e);
             }
         }
+        return createFeed(conn, parentSource);
+    }
+
+    public Feed createFeed(EIConnection conn, FeedDefinition parentSource) {
+
         Feed feed = createFeedObject(parentSource);
 
         // load from report
-        List<AnalysisItem> kpis = new ArrayList<AnalysisItem>();
+        Map<String, List<AnalysisItem>> kpis = new HashMap<String, List<AnalysisItem>>();
         if (!isKpiSource()) {
             loadKPIs(kpis, conn);
         }
@@ -434,26 +454,67 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setProperties(createProperties());
         feed.setFilterExampleMessage(getFilterExampleMessage());
         populateFeedFields(feed, kpis);
+        try {
+            Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+            for (AnalysisItem item : feed.getFields()) {
+                map.put(item.toDisplay(), item);
+            }
+            long defaultTag = getDefaultFieldTag();
+            PreparedStatement tagStmt = conn.prepareStatement("SELECT account_tag.account_tag_id, account_tag.tag_name, field_to_tag.display_name FROM " +
+                    "field_to_tag, account_tag WHERE field_to_tag.account_tag_id = account_tag.account_tag_id AND " +
+                    "field_to_tag.data_source_id = ?");
+            tagStmt.setLong(1, getDataFeedID());
+            ResultSet tagRS = tagStmt.executeQuery();
+            Set<Tag> tags = new HashSet<Tag>();
+            while (tagRS.next()) {
+                Tag tag = new Tag(tagRS.getLong(1), tagRS.getString(2), false, false, false);
+                if (!tags.contains(tag)) {
+                    tags.add(tag);
+                    if (tag.getId() == defaultTag) {
+                        feed.setDefaultTag(tag);
+                    }
+                }
+                String name = tagRS.getString(3);
+                AnalysisItem item = map.get(name);
+                if (item != null) {
+                    if (item.getTags() == null) {
+                        item.setTags(new ArrayList<Tag>());
+                    }
+                    item.getTags().add(tag);
+                }
+            }
+            feed.setTags(new ArrayList<Tag>(tags));
+            tagStmt.close();
+        } catch (SQLException e) {
+            LogClass.error(e);
+        }
         feed.setName(getFeedName());
         feed.setVisible(isVisible());
         feed.setType(getDataSourceType());
         feed.setFeedType(getFeedType());
         feed.setExchangeSave(new DataSourceTypeRegistry().isExchangeType(getFeedType().getType()));
+        try {
+            decorateFields(feed.getFields(), conn);
+        } catch (SQLException e) {
+            LogClass.error(e);
+        }
         return feed;
     }
 
     public List<AnalysisItem> allFields(EIConnection conn) {
         List<AnalysisItem> fields = new ArrayList<AnalysisItem>(getFields());
-        List<AnalysisItem> kpis = new ArrayList<AnalysisItem>();
+        Map<String, List<AnalysisItem>> kpis = new HashMap<String, List<AnalysisItem>>();
         loadKPIs(kpis, conn);
-        fields.addAll(kpis);
+        for (List<AnalysisItem> kpiList : kpis.values()) {
+            fields.addAll(kpiList);
+        }
         return fields;
     }
 
-    protected void loadKPIs(List<AnalysisItem> kpis, EIConnection conn) {
+    protected void loadKPIs(Map<String, List<AnalysisItem>> kpis, EIConnection conn) {
         Session session = Database.instance().createSession(conn);
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM ANALYSIS WHERE DATA_FEED_ID = ? AND data_source_field_report = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE FROM ANALYSIS WHERE DATA_FEED_ID = ? AND data_source_field_report = ?");
             PreparedStatement fieldStmt = conn.prepareStatement("SELECT analysis_item.ANALYSIS_ITEM_ID FROM report_structure, analysis_item WHERE analysis_id = ? AND " +
                     "report_structure.analysis_item_id = analysis_item.analysis_item_id and analysis_item.kpi = ?");
             queryStmt.setLong(1, getDataFeedID());
@@ -461,6 +522,8 @@ public class FeedDefinition implements Cloneable, Serializable {
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long reportID = rs.getLong(1);
+                String reportName = rs.getString(2);
+                List<AnalysisItem> kpiList = new ArrayList<AnalysisItem>();
                 fieldStmt.setLong(1, reportID);
                 fieldStmt.setBoolean(2, true);
                 ResultSet fieldRS = fieldStmt.executeQuery();
@@ -468,7 +531,13 @@ public class FeedDefinition implements Cloneable, Serializable {
                     long fieldID = fieldRS.getLong(1);
                     AnalysisItem analysisItem = (AnalysisItem) session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, fieldID).list().get(0);
                     analysisItem.afterLoad();
-                    kpis.add(analysisItem);
+                    FieldDataSourceOrigin origin = new FieldDataSourceOrigin();
+                    origin.setReport(reportID);
+                    analysisItem.setOrigin(origin);
+                    kpiList.add(analysisItem);
+                }
+                if (kpiList.size() > 0) {
+                    kpis.put(reportName, kpiList);
                 }
             }
             queryStmt.close();
@@ -547,12 +616,14 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     }
 
-    private void populateFeedFields(Feed feed, List<AnalysisItem> kpis) {
+    private void populateFeedFields(Feed feed, Map<String, List<AnalysisItem>> kpis) {
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>();
         allFields.addAll(fieldsForFeed());
-        allFields.addAll(kpis);
+        for (List<AnalysisItem> kpiList : kpis.values()) {
+            allFields.addAll(kpiList);
+        }
 
         for (AnalysisItem field : allFields) {
             try {
@@ -564,6 +635,9 @@ public class FeedDefinition implements Cloneable, Serializable {
                 if (!isKpiSource()) {
                     if (field.isKpi()) {
                         clone.setKpi(false);
+                        FieldDataSourceOrigin origin = new FieldDataSourceOrigin();
+                        origin.setReport(field.getOrigin().getReport());
+                        clone.setOrigin(origin);
                         clone.setFieldType(AnalysisItem.ORDER_KPI);
                         Key key = null;
                         AnalysisItem dataSourceItem = findAnalysisItemByDisplayName(clone.toDisplay());
@@ -657,11 +731,11 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setFields(clones);
     }
 
-    protected void addKPIs(List<AnalysisItem> kpis, Map<Long, AnalysisItem> replacementMap, List<FeedNode> feedNodes) {
-        if (kpis.size() > 0) {
+    protected void addKPIs(Map<String, List<AnalysisItem>> kpis, Map<Long, AnalysisItem> replacementMap, List<FeedNode> feedNodes) {
+        for (Map.Entry<String, List<AnalysisItem>> kpiEntry : kpis.entrySet()) {
             FeedFolder kpiFolder = new FeedFolder();
-            kpiFolder.setName("KPIs");
-            for (AnalysisItem kpi : kpis) {
+            kpiFolder.setName(kpiEntry.getKey());
+            for (AnalysisItem kpi : kpiEntry.getValue()) {
                 AnalysisItem targetKPI = replacementMap.remove(kpi.getAnalysisItemID());
                 kpiFolder.addAnalysisItem(targetKPI);
             }
@@ -996,5 +1070,9 @@ public class FeedDefinition implements Cloneable, Serializable {
             basecampUrl = basecampUrl + "." + end;
         }
         return basecampUrl;
+    }
+
+    public String postOAuthSetup(HttpServletRequest request) {
+        return null;
     }
 }

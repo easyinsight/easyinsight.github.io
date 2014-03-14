@@ -21,9 +21,12 @@ import java.util.*;
 public class CalcGraph {
 
     public List<IComponent> doFunGraphStuff(Set<AnalysisItem> allNeededAnalysisItems, List<AnalysisItem> allItems, Set<AnalysisItem> reportItems,
-                                            @Nullable String name, AnalysisItemRetrievalStructure structure) {
+                                            @Nullable String name, AnalysisItemRetrievalStructure structure, InsightRequestMetadata insightRequestMetadata) {
         List<AnalysisItem> derivedItems = new ArrayList<AnalysisItem>();
         for (AnalysisItem item : allNeededAnalysisItems) {
+            if (insightRequestMetadata.getBaseDate() != null && item == insightRequestMetadata.getBaseDate()) {
+                continue;
+            }
             if (item.hasType(AnalysisItemTypes.CALCULATION) || item.hasType(AnalysisItemTypes.DERIVED_DATE) || item.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                 if (name == null || structure.getInsightRequestMetadata().getDerived(item).equals(name)) {
                     derivedItems.add(item);

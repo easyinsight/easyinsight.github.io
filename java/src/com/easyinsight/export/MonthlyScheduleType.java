@@ -85,4 +85,9 @@ public class MonthlyScheduleType extends ScheduleType {
         insertStmt.setLong(2, getScheduleID());
         insertStmt.execute();
     }
+
+    @Override
+    public String when() {
+        return "Monthly on " +dayOfMonth + " day of month at " + getHour() + ":" + getMinute() + " GMT";
+    }
 }

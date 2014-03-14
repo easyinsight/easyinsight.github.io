@@ -33,9 +33,23 @@ public class EIDateFormatNoShiftFunction extends Function implements IFunction {
             throw new FunctionException("We couldn't parse the value of " + value.toString() + " as a date.");
         }
 
+        String string;
+        String formatString = minusQuotes(getParameter(1)).toString();
+        if (formatString.startsWith("QQ")) {
+            int quarter = DayOfQuarter.quarter(date);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            int year = cal.get(Calendar.YEAR);
+            string = quarter + "-" + year;
+        } else if ("qq".equals(formatString)) {
+            int quarter = DayOfQuarter.quarter(date);
+            string = String.valueOf(quarter);
+        } else {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(formatString);
+            string = simpleDateFormat.format(date);
+        }
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(minusQuotes(getParameter(1)).toString());
-        String string = simpleDateFormat.format(date);
+
         if (calculationMetadata.getInsightRequestMetadata() != null && calculationMetadata.getInsightRequestMetadata().isLogReport()) {
             System.out.println("Translated " + date + " to " + string);
         }

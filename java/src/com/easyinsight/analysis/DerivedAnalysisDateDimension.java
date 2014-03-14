@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.calculations.*;
+import com.easyinsight.core.ReportKey;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.logging.LogClass;
@@ -67,7 +68,15 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
 
         List<AnalysisItem> analysisItemList = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure);
 
+        if (structure.isNoCalcs()) {
+            return analysisItemList;
+        }
+
         if (!structure.onOrAfter(structure.getInsightRequestMetadata().getDerived(this))) {
+            return analysisItemList;
+        }
+
+        if (getKey() instanceof ReportKey) {
             return analysisItemList;
         }
 

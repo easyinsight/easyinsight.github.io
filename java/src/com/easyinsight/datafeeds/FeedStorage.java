@@ -102,8 +102,8 @@ public class FeedStorage {
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, INHERIT_ACCOUNT_API_SETTINGS," +
                 "CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE, last_refresh_start, marmotscript, " +
                 "concrete_fields_editable, refresh_marmot_script, refresh_behavior, kpi_source, field_cleanup_enabled, field_lookup_enabled," +
-                "manual_report_run, default_tag_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "manual_report_run, default_tag_id, visible_within_parent_configuration) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -149,10 +149,11 @@ public class FeedStorage {
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isFieldLookupEnabled());
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isManualReportRun());
         if (feedDefinition.getDefaultFieldTag() == 0) {
-            insertDataFeedStmt.setNull(i, Types.BIGINT);
+            insertDataFeedStmt.setNull(i++, Types.BIGINT);
         } else {
-            insertDataFeedStmt.setLong(i, feedDefinition.getDefaultFieldTag());
+            insertDataFeedStmt.setLong(i++, feedDefinition.getDefaultFieldTag());
         }
+        insertDataFeedStmt.setBoolean(i, feedDefinition.isVisibleWithinParentConfiguration());
 
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
@@ -497,7 +498,7 @@ public class FeedStorage {
         try {
             analysisItems = optimizedRetrieval(conn, feedID, analysisItemIDs);
         } catch (Exception e) {
-            //LogClass.error(e);
+            LogClass.userError("Retrieving fields for data source", e);
             analysisItems = slowRetrieval(conn, analysisItemIDs);
         }
         return analysisItems;
@@ -552,6 +553,8 @@ public class FeedStorage {
         }
         if (sb.length() > 0) {
             sb.deleteCharAt(sb.length() - 1);
+        } else {
+            return analysisItems;
         }
         //StringBuilder aIDs = new StringBuilder(sb.toString());
         Session session = Database.instance().createSession(conn);
@@ -680,6 +683,9 @@ public class FeedStorage {
                         filterDefinition.afterLoad();
                         long analysisItemID = lookup.get(filterDefinition.getFilterID());
                         AnalysisItem analysisItem = coreLookup.get(analysisItemID);
+                        if (analysisItem.getFilters() == null) {
+                            analysisItem.setFilters(new ArrayList<FilterDefinition>());
+                        }
                         analysisItem.getFilters().add(filterDefinition);
                     }
                 }
@@ -697,6 +703,15 @@ public class FeedStorage {
         updateDataFeedConfiguration(feedDefinition, conn, -1);
     }
 
+    public void flushCache(long dataSourceID) {
+        ReportCache.instance().flushResults(dataSourceID);
+        //feedCache.remove(feedDefinition.getDataFeedID());
+        MemCachedManager.delete("ds" + dataSourceID);
+        if (FeedRegistry.instance() != null) {
+            FeedRegistry.instance().flushCache(dataSourceID);
+        }
+    }
+
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn, int overrideType) throws Exception {
         ReportCache.instance().flushResults(feedDefinition.getDataFeedID());
         //feedCache.remove(feedDefinition.getDataFeedID());
@@ -710,7 +725,8 @@ public class FeedStorage {
                 "FEED_SIZE = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
                 "API_KEY = ?, unchecked_api_enabled = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ?," +
                 "CREATE_DATE = ?, UPDATE_DATE = ?, ACCOUNT_VISIBLE = ?, LAST_REFRESH_START = ?, MARMOTSCRIPT = ?, CONCRETE_FIELDS_EDITABLE = ?, REFRESH_MARMOT_SCRIPT = ?," +
-                "REFRESH_BEHAVIOR = ?, KPI_SOURCE = ?, field_cleanup_enabled = ?, field_lookup_enabled = ?, manual_report_run = ?, default_tag_id = ? " +
+                "REFRESH_BEHAVIOR = ?, KPI_SOURCE = ?, field_cleanup_enabled = ?, field_lookup_enabled = ?, manual_report_run = ?, default_tag_id = ?," +
+                "visible_within_parent_configuration = ? " +
                 "WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         int i = 1;
@@ -756,6 +772,7 @@ public class FeedStorage {
         } else {
             updateDataFeedStmt.setLong(i++, feedDefinition.getDefaultFieldTag());
         }
+        updateDataFeedStmt.setBoolean(i++, feedDefinition.isVisibleWithinParentConfiguration());
         updateDataFeedStmt.setLong(i, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
@@ -813,7 +830,7 @@ public class FeedStorage {
                 "UPDATE_DATE, FEED_SIZE," +
                 "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, API_KEY, unchecked_api_enabled, " +
                 "VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, LAST_REFRESH_START, MARMOTSCRIPT, CONCRETE_FIELDS_EDITABLE, refresh_marmot_script, kpi_source, " +
-                "field_cleanup_enabled, field_lookup_enabled, manual_report_run, default_tag_id " +
+                "field_cleanup_enabled, field_lookup_enabled, manual_report_run, default_tag_id, visible_within_parent_configuration " +
                 "FROM DATA_FEED WHERE " +
                 "DATA_FEED_ID = ?");
         queryFeedStmt.setLong(1, identifier);
@@ -864,7 +881,8 @@ public class FeedStorage {
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
             feedDefinition.setDataSourceBehavior(feedDefinition.getDataSourceType());
             feedDefinition.setManualReportRun(rs.getBoolean(i++));
-            feedDefinition.setDefaultFieldTag(rs.getLong(i));
+            feedDefinition.setDefaultFieldTag(rs.getLong(i++));
+            feedDefinition.setVisibleWithinParentConfiguration(rs.getBoolean(i));
             feedDefinition.customLoad(conn);
         } else {
             throw new RuntimeException("Could not find data source " + identifier);

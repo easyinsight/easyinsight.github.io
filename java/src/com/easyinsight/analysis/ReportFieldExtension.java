@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -29,6 +30,17 @@ public class ReportFieldExtension implements Cloneable, Serializable {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="report_field_extension_id")
     private long reportFieldExtensionID;
+
+    @Transient
+    private long fromFieldRuleID;
+
+    public long getFromFieldRuleID() {
+        return fromFieldRuleID;
+    }
+
+    public void setFromFieldRuleID(long fromFieldRuleID) {
+        this.fromFieldRuleID = fromFieldRuleID;
+    }
 
     public long getReportFieldExtensionID() {
         return reportFieldExtensionID;
@@ -80,6 +92,14 @@ public class ReportFieldExtension implements Cloneable, Serializable {
     }
 
     protected void subclassFromXML(Element extensionElement, XMLImportMetadata xmlImportMetadata) {
+
+    }
+
+    public int extensionType() {
+        return 0;
+    }
+
+    public void validate(Set<Long> sourceIDs) {
 
     }
 }

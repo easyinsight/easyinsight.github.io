@@ -1,0 +1,1 @@
+alter table dashboard_text add markdown tinyint(4) not null default 0;

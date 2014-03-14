@@ -5,10 +5,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.DataSourceMigration;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.IJoin;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.kpi.KPI;
@@ -55,6 +52,10 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
     private String accessToken;
     private String refreshToken;
 
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Harvest URL", "url", "Your Harvest URL is the browser URL you normally use to connect to Harvest. For example, if you access Harvest as yourcompanyname.harvestapp.com, put yourcompanyname in as the Harvest URL.");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
 
     private Document projects;
 
