@@ -1,6 +1,7 @@
 package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.dashboard.DashboardInfo;
 import com.easyinsight.dashboard.FilterPositionKey;
@@ -35,13 +36,22 @@ public class FilterUtils {
             if (value != null) {
                 filterValueDefinition.setPersistedValues(null);
                 if (filterValueDefinition.isSingleValue()) {
-                    filterValueDefinition.setFilteredValues(Arrays.asList((Object) value));
+                    if ("[ No Value ]".equals(value)) {
+                        filterValueDefinition.setFilteredValues(Arrays.asList((Object) new EmptyValue()));
+                    } else {
+                        filterValueDefinition.setFilteredValues(Arrays.asList((Object) value));
+                    }
                 } else {
                     JSONObject arr = (JSONObject) value;
                     List<Object> valueList = new ArrayList<Object>();
                     for (Object o : arr.keySet()) {
-                        if ((Boolean) arr.get(o))
-                            valueList.add(o);
+                        if ((Boolean) arr.get(o)) {
+                            if ("[ No Value ]".equals(o)) {
+                                valueList.add(new EmptyValue());
+                            } else {
+                                valueList.add(o);
+                            }
+                        }
                     }
                     filterValueDefinition.setFilteredValues(valueList);
                 }

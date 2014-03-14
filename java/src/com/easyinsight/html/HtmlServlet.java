@@ -1,6 +1,7 @@
 package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.database.Database;
@@ -90,6 +91,30 @@ public class HtmlServlet extends HttpServlet {
                     }
                 }
 
+                Object fromDTObject = filterObject.get("drillthroughKey");
+                if (fromDTObject != null) {
+
+                    String fromDT = fromDTObject.toString();
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT drillthrough_save_id FROM drillthrough_save WHERE url_key = ?");
+                    queryStmt.setString(1, fromDT);
+                    ResultSet rs = queryStmt.executeQuery();
+                    rs.next();
+                    long drillthroughSaveID = rs.getLong(1);
+                    PreparedStatement filterStmt = conn.prepareStatement("SELECT filter_id FROM drillthrough_report_save_filter WHERE drillthrough_save_id = ?");
+                    filterStmt.setLong(1, drillthroughSaveID);
+                    ResultSet filterRS = filterStmt.executeQuery();
+                    while (filterRS.next()) {
+                        Session hibernateSession = Database.instance().createSession(conn);
+                        FilterDefinition filter = (FilterDefinition) hibernateSession.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterRS.getLong(1)).list().get(0);
+                        filter.afterLoad();
+                        //drillthroughFilters.add(filter);
+                        hibernateSession.close();
+                        if (!filter.isShowOnReportView()) {
+                            report.getFilterDefinitions().add(filter);
+                        }
+                    }
+                }
+
                 filters.addAll(drillthroughFilters);
 
                 String dashboardIDString = req.getParameter("dashboardID");
@@ -100,14 +125,27 @@ public class HtmlServlet extends HttpServlet {
                 }
 
 
-                FilterUtils.adjustFilters(filters, filterObject, report.getName(), logReport);
+                if (filterObject.get("filters") != null) {
+                    JSONObject actualFilterObject = (JSONObject) filterObject.get("filters");
+                    FilterUtils.adjustFilters(filters, actualFilterObject, report.getName(), logReport);
+                } else {
+                    FilterUtils.adjustFilters(filters, filterObject, report.getName(), logReport);
+                }
+
+                /*
+                JSONObject actualFilterObject = (JSONObject) filterObject.get("filters");
+                FilterUtils.adjustFilters(filters, actualFilterObject, report.getName(), logReport);
+                 */
 
                 InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                 if (req.getParameter("timezoneOffset") != null) {
                     int timezoneOffset = Integer.parseInt(req.getParameter("timezoneOffset"));
                     insightRequestMetadata.setUtcOffset(timezoneOffset);
                 }
-                doStuff(req, resp, insightRequestMetadata, conn, report);
+                long start = System.currentTimeMillis();
+                doStuff(req, resp, insightRequestMetadata, conn, report, o);
+                BenchmarkManager.recordBenchmarkForReport("HTMLReportProcessingTime", System.currentTimeMillis() - start,
+                        SecurityUtil.getUserID(false), report.getAnalysisID(), conn);
                 resp.setHeader("Cache-Control", "no-cache"); //HTTP 1.1
                 resp.setHeader("Pragma", "no-cache"); //HTTP 1.0
                 resp.setDateHeader("Expires", 0); //prevents caching at the proxy server
@@ -212,9 +250,10 @@ public class HtmlServlet extends HttpServlet {
                         String value = req.getParameter("filter" + filter.getFilterID());
                         if (value != null) {
                             long fieldID = Long.parseLong(value);
-                            for (AnalysisItem item : analysisItemFilterDefinition.getAvailableItems()) {
-                                if (item.getAnalysisItemID() == fieldID) {
-                                    analysisItemFilterDefinition.setTargetItem(item);
+                            List<AnalysisItemSelection> possibles = new DataService().possibleFields(analysisItemFilterDefinition, null, null, null);
+                            for (AnalysisItemSelection possible : possibles) {
+                                if (possible.getAnalysisItem().getAnalysisItemID() == fieldID) {
+                                    analysisItemFilterDefinition.setTargetItem(possible.getAnalysisItem());
                                     break;
                                 }
                             }
@@ -289,5 +328,10 @@ public class HtmlServlet extends HttpServlet {
 
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report) throws Exception {
+    }
+
+    protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
+                           EIConnection conn, WSAnalysisDefinition report, Object jsonObject) throws Exception {
+        doStuff(request, response, insightRequestMetadata, conn, report);
     }
 }
