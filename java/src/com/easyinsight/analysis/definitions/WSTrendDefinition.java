@@ -148,7 +148,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
             sb.append(clickEvent);
             sb.append("'>");
         }
-        sb.append(ExportService.createValue(0, outcome.getMeasure(), outcome.getNow(), md.cal, md.currencySymbol, false));
+        sb.append(ExportService.createValue(0, outcome.getMeasure(), outcome.getNow(), md.cal, md.currencySymbol, md.locale, false));
 
         if (!clickEvent.isEmpty()) {
             sb.append("</a>");
@@ -199,7 +199,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
             sb.append(clickEvent);
             sb.append("'>");
         }
-        sb.append(ExportService.createValue(0, outcome.getMeasure(), outcome.getNow(), md.cal, md.currencySymbol, false));
+        sb.append(ExportService.createValue(0, outcome.getMeasure(), outcome.getNow(), md.cal, md.currencySymbol, md.locale, false));
 
         if (!clickEvent.isEmpty()) {
             sb.append("</a>");
