@@ -3,6 +3,7 @@ package com.easyinsight.analysis.definitions;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.LineChartComponent;
 import com.easyinsight.preferences.ApplicationSkin;
@@ -167,9 +168,9 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         int time = insightRequestMetadata.getUtcOffset() / 60;
         String string;
         if (time > 0) {
-            string = "GMT-"+Math.abs(time);
+            string = "GMT-" + Math.abs(time);
         } else if (time < 0) {
-            string = "GMT+"+Math.abs(time);
+            string = "GMT+" + Math.abs(time);
         } else {
             string = "GMT";
         }
@@ -177,9 +178,6 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         shiftedCal.setTimeZone(timeZone);
 
         Collections.sort(dates);
-
-
-
 
 
         if (isMultiMeasure()) {
@@ -251,71 +249,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         }
     }
 
-    /*public LimitsResults applyLimits(DataSet dataSet) {
-        LimitsResults limitsResults;
-        LimitsMetadata limitsMetadata = getLimitsMetadata();
-        if (limitsMetadata != null && limitsMetadata.isLimitEnabled()) {
-            if (!isMultiMeasure()) {
-                AnalysisItem xAxisItem = getXaxis();
-                AnalysisItem measureItem = getMeasure();
-                final Map<Value, Aggregation> aggregationMap = new HashMap<Value, Aggregation>();
-                AggregationFactory aggregationFactory = new AggregationFactory((AnalysisMeasure) measureItem, false);
-                for (IRow row : dataSet.getRows()) {
-                    Value xAxisValue = row.getValue(xAxisItem);
-                    Aggregation aggregation = aggregationMap.get(xAxisValue);
-                    if (aggregation == null) {
-                        aggregation = aggregationFactory.getAggregation();
-                        aggregationMap.put(xAxisValue, aggregation);
-                    }
-                    aggregation.addValue(row.getValue(measureItem));
-                }
-                List<Value> aggregationValues = new ArrayList<Value>(aggregationMap.keySet());
-                if (aggregationValues.size() > limitsMetadata.getNumber()) {
-                    Collections.sort(aggregationValues, new Comparator<Value>() {
 
-                        public int compare(Value value, Value value1) {
-                            return aggregationMap.get(value1).getValue().toDouble().compareTo(aggregationMap.get(value).toDouble());
-                        }
-                    });
-                    aggregationValues.subList(0, limitsMetadata.getNumber());
-                    IRow otherRow = dataSet.createRow();
-                    Iterator<IRow> iter = dataSet.getRows().iterator();
-                    while (iter.hasNext()) {
-                        IRow row = iter.next();
-                        if (row != otherRow) {
-                            Value value = row.getValue(xAxisItem);
-                            if (aggregationValues.contains(value)) {
-
-                            } else {
-                                row.addValue(xAxisItem.createAggregateKey(), new StringValue("Other"));
-                            }
-                        }
-                    }
-                } else {
-                    limitsResults = super.applyLimits(dataSet);
-                }
-            } else {
-                int count = dataSet.getRows().size();
-                limitsResults = new LimitsResults(count >= limitsMetadata.getNumber(), count, limitsMetadata.getNumber());
-                Map<String, AnalysisItem> structure = new HashMap<String, AnalysisItem>();
-                createReportStructure(structure);
-                AnalysisMeasure analysisMeasure = null;
-                for (AnalysisItem analysisItem : structure.values()) {
-                    if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                        analysisMeasure = (AnalysisMeasure) analysisItem;
-                        break;
-                    }
-                }
-                if (analysisMeasure != null) {
-                    dataSet.sort(analysisMeasure, limitsMetadata.isTop());
-                    dataSet.subset(limitsMetadata.getNumber());
-                }
-            //}
-        } else {
-            limitsResults = super.applyLimits(dataSet);
-        }
-        return limitsResults;
-    }*/
 
     public boolean isLineShadow() {
         return lineShadow;
@@ -413,10 +347,10 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
                     if (filterDefinition instanceof RollingFilterDefinition) {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
                         long now = System.currentTimeMillis();
-                        daysDuration = (int)((now - MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, new Date())) / (1000 * 60 * 60 * 24));
+                        daysDuration = (int) ((now - MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, new Date())) / (1000 * 60 * 60 * 24));
                     } else if (filterDefinition instanceof FilterDateRangeDefinition) {
                         FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filterDefinition;
-                        daysDuration = (int)((filterDateRangeDefinition.getEndDate().getTime() - filterDateRangeDefinition.getStartDate().getTime()) / (1000 * 60 * 60 * 24));
+                        daysDuration = (int) ((filterDateRangeDefinition.getEndDate().getTime() - filterDateRangeDefinition.getStartDate().getTime()) / (1000 * 60 * 60 * 24));
                     }
                 }
             }
@@ -518,7 +452,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         argh = argh.replaceAll("\"", "");
         String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
         String customHeight = htmlReportMetadata.createStyleProperties().toString();
-        argh = "$.getJSON('/app/twoAxisChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true,"+customHeight+"))";
+        argh = "$.getJSON('/app/twoAxisChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true," + customHeight + "))";
         return argh;
     }
 
@@ -553,6 +487,10 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
             jsonParams.put("grid", grid);
             JSONObject axes = getAxes();
             jsonParams.put("axes", axes);
+            JSONObject cursorObject = new JSONObject();
+            cursorObject.put("show", "true");
+            cursorObject.put("zoom", "true");
+            jsonParams.put("cursor", cursorObject);
 
             JSONObject legend = getLegend();
             jsonParams.put("legend", legend);

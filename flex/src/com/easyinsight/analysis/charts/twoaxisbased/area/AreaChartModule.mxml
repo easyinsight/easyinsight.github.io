@@ -119,6 +119,12 @@
             areaChart.type = areaChartDef.stackingType;
             legend.maxWidth = areaChartDef.legendMaxWidth;
             var verticalAxis:LinearAxis = new LinearAxis();
+            if (areaChartDef.yAxisMinimumDefined) {
+                LinearAxis(verticalAxis).minimum = areaChartDef.yAxisMininum;
+            }
+            if (areaChartDef.yAxisMaximumDefined) {
+                LinearAxis(verticalAxis).maximum = areaChartDef.yAxisMaximum;
+            }
             verticalAxis.baseAtZero = areaChartDef.baseAtZero == "true";
             if (!areaChartDef.multiMeasure && areaChartDef.measure != null) {
                 verticalAxis.title = areaChartDef.measure.unqualifiedDisplay;

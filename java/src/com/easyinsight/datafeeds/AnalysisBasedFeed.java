@@ -63,6 +63,7 @@ public class AnalysisBasedFeed extends Feed {
         localInsightRequestMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
         localInsightRequestMetadata.setIp(insightRequestMetadata.getIp());
         localInsightRequestMetadata.setNow(insightRequestMetadata.getNow());
+        localInsightRequestMetadata.setLogReport(insightRequestMetadata.isLogReport());
         List<FilterDefinition> reportFilters = new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions());
         if (insightRequestMetadata.getFilters() != null) {
             reportFilters.addAll(insightRequestMetadata.getFilters());
@@ -72,6 +73,7 @@ public class AnalysisBasedFeed extends Feed {
         Map<String, List<AnalysisItem>> fieldsGroupedByOriginalDisplayName = new HashMap<String, List<AnalysisItem>>();
         Map<Long, List<AnalysisItem>> fieldsGroupedByOriginalFieldID = new HashMap<Long, List<AnalysisItem>>();
         for (AnalysisItem analysisItem : analysisItems) {
+            System.out.println("item " + analysisItem.toDisplay() + " based on " + analysisItem.getBasedOnReportField() + " with original " + analysisItem.toOriginalDisplayName());
             if (analysisItem.getBasedOnReportField() != null && analysisItem.getBasedOnReportField() > 0) {
                 List<AnalysisItem> items = fieldsGroupedByOriginalFieldID.get(analysisItem.getBasedOnReportField());
                 if (items == null) {
@@ -168,13 +170,16 @@ public class AnalysisBasedFeed extends Feed {
             DataSet embeddedResults = ReportCache.instance().getAddonResults(analysisDefinition.getDataFeedID(), cacheKey, analysisDefinition.getCacheMinutes());
             if (embeddedResults != null) {
                 try {
-                    System.out.println("returning from cache");
+                    if (insightRequestMetadata.isLogReport()) {
+                        embeddedResults.getAudits().add(
+                                new ReportAuditEvent(ReportAuditEvent.QUERY, getName() + " retrieved " + embeddedResults.getRows().size() + " rows from cache."));
+                    }
                     return embeddedResults.clone();
                 } catch (CloneNotSupportedException e) {
                     throw new RuntimeException(e);
                 }
             } else {
-                System.out.println("not found in cache");
+
             }
         }
         if (insightRequestMetadata.getFilters() != null) {
@@ -203,6 +208,9 @@ public class AnalysisBasedFeed extends Feed {
         for (Map.Entry<FilterDefinition, AnalysisItem> entry : filterMap.entrySet()) {
             entry.getKey().setField(entry.getValue());
         }
+        List<String> addonWarnings = localInsightRequestMetadata.getWarnings();
+        List<ReportAuditEvent> events = dataSet.getAudits();
+
         if (cacheKey != null) {
             ReportCache.instance().storeAddonReport(analysisDefinition.getDataFeedID(), cacheKey, dataSet, analysisDefinition.getCacheMinutes());
         }

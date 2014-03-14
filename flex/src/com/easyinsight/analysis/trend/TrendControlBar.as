@@ -20,24 +20,13 @@ import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.analysis.TrendDropArea;
 
 import mx.collections.ArrayCollection;
-import mx.containers.HBox;
-import mx.containers.VBox;
 
 import mx.controls.Label;
-import mx.controls.TextInput;
 
 public class TrendControlBar extends ReportControlBar implements IReportControlBar {
 
     private var listViewGrouping:ListDropAreaGrouping;
     private var listDefinition:TrendDefinition;
-
-    private var timeInput:TextInput;
-
-    [Embed(source="../../../../../assets/table_edit.png")]
-    public var tableEditIcon:Class;
-
-    [Embed(source="../../../../../assets/find.png")]
-    public var findIcon:Class;
 
     public function TrendControlBar() {
         super();
@@ -56,20 +45,6 @@ public class TrendControlBar extends ReportControlBar implements IReportControlB
         addChild(measureLabel);
         listViewGrouping.report = listDefinition;
         addDropAreaGrouping(listViewGrouping);
-
-        var vbox:VBox = new VBox();
-        var timeLabel:Label = new Label();
-        timeLabel.text = "Compare Against ";
-        var daysLabel:Label = new Label();
-        daysLabel.text = "days ago";
-        timeInput = new TextInput();
-        timeInput.text = String(listDefinition.dayWindow);
-        var timeBox:HBox = new HBox();
-        timeBox.addChild(timeLabel);
-        timeBox.addChild(timeInput);
-        timeBox.addChild(daysLabel);
-        vbox.addChild(timeBox);
-        addChild(vbox);
         var columns:ArrayCollection = listDefinition.measures;
         if (columns != null) {
             for (var i:int = 0; i < columns.length; i++) {
@@ -96,7 +71,6 @@ public class TrendControlBar extends ReportControlBar implements IReportControlB
 
     public function createAnalysisDefinition():AnalysisDefinition {
         listDefinition.measures = new ArrayCollection(listViewGrouping.getListColumns());
-        listDefinition.dayWindow = int(timeInput.text);
         return listDefinition;
     }
 

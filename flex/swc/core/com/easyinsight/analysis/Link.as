@@ -23,7 +23,7 @@ public class Link {
         return link;
     }
 
-    public function createString():String {
+    public function createString(name:String = null):String {
         return null;
     }
 }

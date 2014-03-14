@@ -62,6 +62,7 @@
             return Validator.validateAll([hostValidator, portValidator, databaseNameValidator, queryValidator]).length == 0;
         }
         ]]></mx:Script>
+    <mx:HBox>
     <mx:VBox horizontalAlign="center" paddingTop="5"><mx:Form>
             <mx:FormItem label="Database Host:" labelWidth="150">
                 <mx:TextInput id="hostInput" fontWeight="normal" fontFamily="Lucida Grande" text="{host}" width="350"/>
@@ -92,6 +93,7 @@
         <mx:HRule width="100%"/>
         <mx:Text width="200" selectable="true" text="The query defines what fields and data to pull back into Easy Insight. For example, you might do 'select * from table_name', 'select a, b from table_name' or 'select a as A, b as B from table_name where X = Y'."/>
     </mx:VBox>
+    </mx:HBox>
     <mx:HBox>
         <util:SaveButton label="Save" click="save()"/>
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

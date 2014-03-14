@@ -1,12 +1,13 @@
 <?xml version="1.0"?>
 <mx:AdvancedDataGrid xmlns:mx="http://www.adobe.com/2006/mxml"
         fontSize="14"
-                selectable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off" styleName="myFontStyle" headerColors="[#EEEEEE, #EEEEEE]">
+                selectable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off" styleName="myFontStyle" headerColors="[#EEEEEE, #EEEEEE]" headerWordWrap="true">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.TrendOutcome;
         import com.easyinsight.analysis.Value;
+        import com.easyinsight.analysis.list.SizeOverrideEvent;
         import com.easyinsight.analysis.verticallist.VerticalListHeaderRenderer;
 
         import mx.collections.ArrayCollection;
@@ -16,12 +17,19 @@
         import mx.collections.SortField;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.controls.advancedDataGridClasses.SortInfo;
+        import mx.events.FlexEvent;
 
         private var firstLoad:Boolean = true;
 
         private var trend:TrendGridDefinition;
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition):void {
+        [Bindable]
+        private var nowWidth:int = 150;
+
+        [Bindable]
+        private var previousWidth:int = 150;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, additionalProperties:Object):void {
             if (dataSet.length > 0) {
                 var trendDef:TrendGridDefinition = analysisDefinition as TrendGridDefinition;
                 if (trendDef.useCustomFontFamily) {
@@ -31,7 +39,27 @@
                 setStyle("fontSize", trendDef.fontSize);
                 setStyle("color", 0x505050);
                 this.trend = trendDef;
-                previousText = trendDef.dayWindow + " days ago";
+                if (additionalProperties["nowString"] != null) {
+                    nowText = additionalProperties["nowString"];
+                    var nowWidth:int = measureText(nowText).width;
+                    this.nowWidth = nowWidth;
+
+                } else {
+                    nowText = "Latest";
+                }
+                if (additionalProperties["previousString"] != null && additionalProperties["previousString"] != "") {
+                    previousText = additionalProperties["previousString"];
+                    var previousWidth:int = measureText(previousText).width;
+                    this.previousWidth = previousWidth;
+                } else if (additionalProperties["nowString"] != null) {
+                    previousText = "";
+                } else {
+                    if (trendDef.nowDate != null) {
+                        previousText = "compared to";
+                    } else {
+                        previousText = "";
+                    }
+                }
                 var trends:ArrayCollection = new ArrayCollection();
                 var columns:Array = [];
                 var maxGroupingSize:int = 0;
@@ -43,7 +71,9 @@
                     var trendOutcome:TrendOutcome = dataSet.getItemAt(i) as TrendOutcome;
                     if (tGrouping != null) {
                         var val:Value = trendOutcome.dimensions[tGrouping.qualifiedName()];
-                        maxGroupingSize = Math.max(maxGroupingSize, measureText(val.toString()).width);
+                        if (val != null) {
+                            maxGroupingSize = Math.max(maxGroupingSize, measureText(val.toString()).width);
+                        }
                     }
                     trendOutcome.dataSourceID = trendDef.dataFeedID;
                     trendOutcome.report = trendDef;
@@ -57,7 +87,7 @@
                     var groupFactory:ClassFactory = new ClassFactory(TrendGroupingRenderer);
                     groupFactory.properties = { grouping: grouping };
                     column.itemRenderer = groupFactory;
-                    column.sortable = false;
+                    column.sortable = true;
                     column.width = maxGroupingSize;
                     column.headerText = grouping.display;
                     columns.push(column);
@@ -93,16 +123,37 @@
                     myDataSet.sort = sort;
                     myDataSet.refresh();
                 }
+                if (!updateListener) {
+                    updateListener = true;
+                    addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+                }
                 this.columns = columns;
                 this.dataProvider = trends;
-                this.height = trends.length * this.rowHeight + 6 + this.headerHeight;
+                //this.height = trends.length * this.rowHeight + 6 + this.headerHeight;
             }
+        }
+
+        private var updateListener:Boolean = false;
+
+        private function onUpdateComplete(event:FlexEvent):void {
+            //dataGrid.removeEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
+            callLater(recomp);
+        }
+
+        private function recomp():void {
+            var height:int = measureHeightOfItems(0, myDataSet.length) + headerHeight + 2;
+            this.height = height;
+            this.minHeight = height;
+            dispatchEvent(new SizeOverrideEvent(-1, height));
         }
 
         private var myDataSet:ArrayCollection;
 
         [Bindable]
         private var previousText:String;
+
+        [Bindable]
+        private var nowText:String;
 
         public function updateExportMetadata():void {
             var sortSet:Boolean = false;
@@ -128,10 +179,10 @@
                                sortable="false" width="40"/>
         <mx:AdvancedDataGridColumn headerText="KPI Name" dataField="name" itemRenderer="com.easyinsight.analysis.trend.TrendNameRenderer" width="300"
                 id="nameColumn"/>
-        <mx:AdvancedDataGridColumn headerText="Latest" dataField="nowValue"
-                               itemRenderer="com.easyinsight.analysis.trend.TrendValueRenderer" width="120"/>
+        <mx:AdvancedDataGridColumn headerText="{nowText}" dataField="nowValue"
+                               itemRenderer="com.easyinsight.analysis.trend.TrendValueRenderer" width="{nowWidth}" headerWordWrap="true"/>
         <mx:AdvancedDataGridColumn headerText="{previousText}" dataField="historicalValue"
-                               itemRenderer="com.easyinsight.analysis.trend.TrendHistoricalValueRenderer" width="120"/>
+                               itemRenderer="com.easyinsight.analysis.trend.TrendHistoricalValueRenderer" width="{previousWidth}" headerWordWrap="true"/>
         <mx:AdvancedDataGridColumn headerText="% Change" dataField="percentChange"
                                itemRenderer="com.easyinsight.analysis.trend.TrendChangeRenderer" width="100"/>
     </mx:ArrayCollection>

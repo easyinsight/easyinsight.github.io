@@ -100,15 +100,17 @@ import mx.collections.ArrayCollection;
     public var aggregateQueryIfPossible:Boolean = true;
     public var newFilterStrategy:Boolean = false;
     public var customField1:String;
+    public var baseDate:String;
     public var customField2:String;
     public var newFieldModel:Boolean;
     public var cachePartitionFilter:String;
     public var enableLocalStorage:Boolean;
     public var colorScheme:String = "Primary";
     public var canSave:Boolean;
-    public var colorScheme:String = "Primary";
     public var filterSets:ArrayCollection;
     public var exportString:String;
+
+    public var fieldEvents:Object;
 
 		public function AnalysisDefinition()
 		{
@@ -123,8 +125,8 @@ import mx.collections.ArrayCollection;
 
     }
 
-        public function newFilters(filterDefinitions:ArrayCollection):ArrayCollection {
-            return new ArrayCollection();
+        public function newFilters(filterDefinitions:ArrayCollection):Object {
+            return null;
         }
 
         public function cleanupReport(filterDefinitions:ArrayCollection):ArrayCollection {

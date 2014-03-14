@@ -7,9 +7,13 @@ import com.easyinsight.analysis.FilterHTMLMetadata;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.scorecard.Scorecard;
+import org.eclipse.mylyn.wikitext.core.parser.MarkupParser;
+import org.eclipse.mylyn.wikitext.core.parser.builder.HtmlDocumentBuilder;
+import org.eclipse.mylyn.wikitext.core.util.ServiceLocator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.StringWriter;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,6 +31,24 @@ public class DashboardText extends DashboardElement {
     private String text;
     private int fontSize;
     private int color;
+    private String html;
+    private boolean markdown;
+
+    public boolean isMarkdown() {
+        return markdown;
+    }
+
+    public void setMarkdown(boolean markdown) {
+        this.markdown = markdown;
+    }
+
+    public String getHtml() {
+        return html;
+    }
+
+    public void setHtml(String html) {
+        this.html = html;
+    }
 
     public int getFontSize() {
         return fontSize;
@@ -60,13 +82,15 @@ public class DashboardText extends DashboardElement {
     @Override
     public long save(EIConnection conn) throws SQLException {
         long id = super.save(conn);
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_TEXT (DASHBOARD_ELEMENT_ID, dashboard_text, color, font_size) " +
-                "VALUES (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_TEXT (DASHBOARD_ELEMENT_ID, dashboard_text, color, font_size, markdown) " +
+                "VALUES (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, getElementID());
         insertStmt.setString(2, text);
         insertStmt.setInt(3, color);
         insertStmt.setInt(4, fontSize);
+        insertStmt.setBoolean(5, markdown);
         insertStmt.execute();
+        insertStmt.close();
         return id;
     }
 
@@ -74,8 +98,25 @@ public class DashboardText extends DashboardElement {
     public JSONObject toJSON(FilterHTMLMetadata metadata, List<FilterDefinition> parentFilters) throws JSONException {
         JSONObject textObject = super.toJSON(metadata, parentFilters);
         textObject.put("type", "text");
-        textObject.put("item", text);
+        String html = createHTML();
+        textObject.put("item", html);
         return textObject;
+    }
+
+    public String createHTML() {
+        if (markdown) {
+            StringWriter writer = new StringWriter();
+            HtmlDocumentBuilder builder = new HtmlDocumentBuilder(writer);
+            MarkupParser parser = new MarkupParser(ServiceLocator.getInstance().getMarkupLanguage("MediaWiki"), builder);
+            parser.parse(text);
+            //String html = parser.parseToHtml(wikiText);
+            String html = writer.toString();
+            html = html.substring(169);
+            html = html.substring(0, html.length() - 14);
+            return html;
+        } else {
+            return text;
+        }
     }
 
     @Override
@@ -104,7 +145,7 @@ public class DashboardText extends DashboardElement {
 
     public static DashboardElement loadImage(long elementID, EIConnection conn) throws SQLException {
         DashboardText dashboardReport = null;
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_TEXT.dashboard_text, color, font_size from dashboard_text " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_TEXT.dashboard_text, color, font_size, markdown from dashboard_text " +
                 "where dashboard_element_id = ?");
         queryStmt.setLong(1, elementID);
         ResultSet rs = queryStmt.executeQuery();
@@ -113,8 +154,10 @@ public class DashboardText extends DashboardElement {
             dashboardReport.setText(rs.getString(1));
             dashboardReport.setColor(rs.getInt(2));
             dashboardReport.setFontSize(rs.getInt(3));
+            dashboardReport.setMarkdown(rs.getBoolean(4));
             dashboardReport.loadElement(elementID, conn);
         }
+        queryStmt.close();
         return dashboardReport;
     }
 }

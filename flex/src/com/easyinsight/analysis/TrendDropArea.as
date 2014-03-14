@@ -16,10 +16,6 @@ public class TrendDropArea extends MeasureDropArea {
 
     override public function set analysisItem(analysisItem:AnalysisItem):void {
 
-        var newField:Boolean = false;
-        if (this.analysisItem == null && analysisItem != null) {
-            newField = true;
-        }
         if (analysisItem != null) {
             if (!analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                 var analysisMeasure:AnalysisMeasure = new AnalysisMeasure();
@@ -32,11 +28,31 @@ public class TrendDropArea extends MeasureDropArea {
             }
         }
 
-        super.analysisItem = analysisItem;
         if (analysisItem != null && analysisItem.reportFieldExtension == null) {
-            analysisItem.reportFieldExtension = new TrendReportFieldExtension();
-            editEvent(null, AnalysisItemEditWindow.EXTENSION);
+            var ext:TrendReportFieldExtension = new TrendReportFieldExtension();
+            var dsID:int = 0;
+            if (analysisItem.key is DerivedKey) {
+                dsID = DerivedKey(analysisItem.key).feedID;
+            } else {
+
+            }
+            for each (var f:AnalysisItemWrapper in analysisItems) {
+                if (f.analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                    if (dsID > 0) {
+                        if (f.analysisItem.key is DerivedKey && DerivedKey(f.analysisItem.key).feedID == dsID) {
+                            ext.date = AnalysisDateDimension(f.analysisItem);
+                            break;
+                        }
+                    } else {
+                        ext.date = AnalysisDateDimension(f.analysisItem);
+                        break;
+                    }
+                }
+            }
+            analysisItem.reportFieldExtension = ext;
         }
+
+        super.analysisItem = analysisItem;
     }
 }
 }

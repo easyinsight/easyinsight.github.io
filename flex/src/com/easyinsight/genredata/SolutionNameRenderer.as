@@ -31,8 +31,6 @@ public class SolutionNameRenderer extends LinkButton {
     private var exchangeItem:ExchangeItem;
     private var solutionService:RemoteObject;
 
-    private var _grid:SolutionExchangeGridPage;
-
     public function SolutionNameRenderer() {
         solutionService = new RemoteObject();
         solutionService.destination = "solutionService";
@@ -43,13 +41,45 @@ public class SolutionNameRenderer extends LinkButton {
         setStyle("textAlign", "left");
     }
 
-    public function set grid(value:SolutionExchangeGridPage):void {
-        _grid = value;
+    private function viewReport(event:MouseEvent):void {
+        ProgressAlert.alert(this, "Determining data source for install...", null, solutionService.determineDataSourceForEntity);
+        solutionService.determineDataSourceForEntity.send(exchangeItem.descriptor);
     }
 
-    private function viewReport(event:MouseEvent):void {
-        ProgressAlert.alert(this, "Determining data source...", null, solutionService.determineDataSourceForEntity);
-        solutionService.determineDataSourceForEntity.send(exchangeItem.descriptor);
+    private function gotMatchingDataSources(event:ResultEvent):void {
+        var dataSources:ArrayCollection = solutionService.determineDataSourceForEntity.lastResult as ArrayCollection;
+        var validDataSources:ArrayCollection = new ArrayCollection();
+        for each (var ds:DataSourceDescriptor in dataSources) {
+            if (ds.prebuilts == null || ds.prebuilts.length == 0) {
+                validDataSources.addItem(ds);
+            }
+        }
+        if (validDataSources.length == 0 && dataSources.length == 1) {
+            Alert.show("You've already installed this prebuilt onto your data source.");
+        } else if (validDataSources.length == 0 && dataSources.length > 1) {
+            Alert.show("You've already installed this prebuilt onto all of your data sources.");
+        } else if (dataSources.length == 0) {
+            var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
+            window.solution = exchangeItem.solutionID;
+            window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        } else if (validDataSources.length == 1) {
+            var dsd:DataSourceDescriptor = dataSources.getItemAt(0) as DataSourceDescriptor;
+            ProgressAlert.alert(this, "Installing...", null, solutionService.installEntity);
+            solutionService.installEntity.send(exchangeItem.descriptor, dsd.id);
+        } else {
+            var dsWindow:DataSourceChoiceWindow = new DataSourceChoiceWindow();
+            dsWindow.sources = validDataSources;
+            dsWindow.addEventListener(DataSourceSelectionEvent.DATA_SOURCE_SELECTION, dataSourceChoice, false, 0, true);
+            PopUpManager.addPopUp(dsWindow, this, true);
+            PopUpUtil.centerPopUp(dsWindow);
+        }
+    }
+
+    private function dataSourceChoice(event:DataSourceSelectionEvent):void {
+        ProgressAlert.alert(this, "Installing...", null, solutionService.installEntity);
+        solutionService.installEntity.send(exchangeItem.descriptor, event.dataSource.id);
     }
 
     private function installedReport(event:ResultEvent):void {
@@ -64,36 +94,6 @@ public class SolutionNameRenderer extends LinkButton {
 
     private function onListingEvent(event:ListingChangeEvent):void {
         dispatchEvent(event);
-    }
-
-    private function gotMatchingDataSources(event:ResultEvent):void {
-        var dataSources:ArrayCollection = solutionService.determineDataSourceForEntity.lastResult as ArrayCollection;
-        if (dataSources.length == 0) {
-            var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
-            window.solution = exchangeItem.solutionID;
-            window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        } else if (dataSources.length == 1) {
-            var dsd:DataSourceDescriptor = dataSources.getItemAt(0) as DataSourceDescriptor;
-            if (dsd.prebuilts != null && dsd.prebuilts.length > 0) {
-                Alert.show("You've already installed this dashboard into your account.");
-            } else {
-                ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installEntity);
-                solutionService.installEntity.send(exchangeItem.descriptor, dsd.id);
-            }
-        } else {
-            var dsWindow:DataSourceChoiceWindow = new DataSourceChoiceWindow();
-            dsWindow.sources = dataSources;
-            dsWindow.addEventListener(DataSourceSelectionEvent.DATA_SOURCE_SELECTION, dataSourceChoice, false, 0, true);
-            PopUpManager.addPopUp(dsWindow, this, true);
-            PopUpUtil.centerPopUp(dsWindow);
-        }
-    }
-
-    private function dataSourceChoice(event:DataSourceSelectionEvent):void {
-        ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installEntity);
-        solutionService.installEntity.send(exchangeItem.descriptor, event.dataSource.id);
     }
 
     override public function set data(val:Object):void {

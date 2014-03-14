@@ -74,7 +74,8 @@ public class YTDUtil {
                 }
             }
         }
-        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, new AnalysisItemRetrievalStructure(null));
+        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, new AnalysisItemRetrievalStructure(null),
+                pipelineData.getInsightRequestMetadata());
         Iterator<IComponent> iter = components.iterator();
         while (iter.hasNext()) {
             IComponent component = iter.next();
@@ -244,7 +245,8 @@ public class YTDUtil {
         AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
         structure.setReport(wsytdDefinition);
         structure.setConn(conn);
-        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, structure);
+        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, structure,
+                pipelineData.getInsightRequestMetadata());
         Iterator<IComponent> iter = components.iterator();
         while (iter.hasNext()) {
             IComponent component = iter.next();

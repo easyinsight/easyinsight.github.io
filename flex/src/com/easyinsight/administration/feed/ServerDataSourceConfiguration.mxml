@@ -54,6 +54,11 @@
             node.dataFeedID = event.descriptor.id;
             node.dataSourceName = event.descriptor.name;
             dataSources.addItem(node);
+            var ds:DataSourceDescriptor = new DataSourceDescriptor();
+            ds.name = event.descriptor.name;
+            ds.id = event.descriptor.id;
+            ds.dataSourceType = event.descriptor.dataSourceType;
+            allSources.addItem(ds);
         }
 
         private function removeSelected():void {
@@ -65,6 +70,18 @@
             }
             for each (var s:CompositeFeedNode in selected) {
                 dataSources.removeItemAt(dataSources.getItemIndex(s));
+            }
+        }
+
+        private function removeSelectedConnections():void {
+            var selected:ArrayCollection = new ArrayCollection();
+            for each (var o:CompositeFeedConnection in connections) {
+                if (o.selected) {
+                    selected.addItem(o);
+                }
+            }
+            for each (var s:CompositeFeedConnection in selected) {
+                connections.removeItemAt(connections.getItemIndex(s));
             }
         }
 
@@ -113,7 +130,8 @@
             connections = (CompositeServerDataSource(dataSource).addonConnections == null) ? new ArrayCollection() : CompositeServerDataSource(dataSource).addonConnections;
         }
         ]]></mx:Script>
-
+    <mx:Text width="450" text="This window enables you to add a limited set of additional data sources to your data source. You can add report, spreadsheet and flat file sources. If you want to combine additional sources, you'll need to create a dedicated composite data source instead."/>
+    <mx:HRule width="100%"/>
     <mx:HBox>
         <util:SaveButton label="Add Data Source..." click="addDataSource()" fontSize="12"/>
         <util:SaveButton label="Removed Selected" click="removeSelected()" fontSize="12"/>
@@ -126,7 +144,7 @@
     </mx:DataGrid>
     <mx:HBox>
         <util:SaveButton label="Add Connection..." click="addConnection()" fontSize="12"/>
-        <util:SaveButton label="Removed Selected" click="removeSelected()" fontSize="12"/>
+        <util:SaveButton label="Removed Selected" click="removeSelectedConnections()" fontSize="12"/>
     </mx:HBox>
     <mx:DataGrid id="connectionGrid" dataProvider="{connections}">
         <mx:columns>

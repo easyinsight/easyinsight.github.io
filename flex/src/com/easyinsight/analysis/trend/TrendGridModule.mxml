@@ -41,7 +41,7 @@
             if (dataSet.length > 0) {
                 currentState = "";
                 box.setStyle("backgroundAlpha", def.backgroundAlpha);
-                defaultContent.renderReport(dataSet, analysisDefinition);
+                defaultContent.renderReport(dataSet, analysisDefinition, additionalProperties);
             } else {
                 if (def.measures.length > 0) {
                     currentState = "noData";
@@ -52,7 +52,9 @@
         }
 
         public function updateExportMetadata(report:AnalysisDefinition = null):void {
-            defaultContent.updateExportMetadata();
+            if (defaultContent != null) {
+                defaultContent.updateExportMetadata();
+            }
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {

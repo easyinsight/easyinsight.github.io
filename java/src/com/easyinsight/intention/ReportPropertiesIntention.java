@@ -8,6 +8,15 @@ package com.easyinsight.intention;
 public class ReportPropertiesIntention extends Intention {
     private boolean fullJoins;
     private boolean summaryRow;
+    private boolean trendSetup;
+
+    public boolean isTrendSetup() {
+        return trendSetup;
+    }
+
+    public void setTrendSetup(boolean trendSetup) {
+        this.trendSetup = trendSetup;
+    }
 
     public boolean isSummaryRow() {
         return summaryRow;

@@ -7,6 +7,8 @@ import mx.collections.ArrayCollection;
 	public class EmbeddedTrendDataResults extends EmbeddedResults
 	{
 		public var trendOutcomes:ArrayCollection;
+    public var nowString:String;
+    public var previousString:String;
 
 		public function EmbeddedTrendDataResults()
 		{			

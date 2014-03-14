@@ -25,6 +25,7 @@ public class StackedBarChartDefinition extends YAxisDefinition{
     public var legendMaxWidth:int = 200;
     public var multiColors:ArrayCollection = new ArrayCollection();
     public var stackSort:String = ChartDefinition.SORT_UNSORTED;
+    public var stackLimit:int = 10;
 
     public function StackedBarChartDefinition() {
         super();

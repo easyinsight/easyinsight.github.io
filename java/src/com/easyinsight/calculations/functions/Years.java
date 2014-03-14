@@ -24,4 +24,3 @@ public class Years extends Function {
         return 1;
     }
 }
-

@@ -13,6 +13,7 @@
         import com.easyinsight.code.DataSourceMarmotScriptWindow;
         import com.easyinsight.datasources.CompositeServerDataSource;
         import com.easyinsight.datasources.DataSourceInfo;
+        import com.easyinsight.feedassembly.CompositeFeedDefinition;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
@@ -91,6 +92,18 @@
             ownerID = owner.userID;
             BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
             this.feedType = feedDefinition.getFeedType();
+            if (!(feedDefinition is CompositeServerDataSource)) {
+                mainBox.removeChild(addonRule);
+                mainBox.removeChild(addonBox);
+            }
+            if (!(feedDefinition is CompositeFeedDefinition)) {
+                mainBox.removeChild(fieldReportRule);
+                mainBox.removeChild(fieldReportBox);
+            }
+            if (!feedDefinition.hasCustomFields()) {
+                mainBox.removeChild(customFieldMappingsBox);
+                mainBox.removeChild(customFieldMappingsRule);
+            }
             this.pages = feedDefinition.createAdminPages();
             for each (var page:DataSourceWindow in pages) {
                 var box:HBox = new HBox();
@@ -104,13 +117,15 @@
                 button.addEventListener(MouseEvent.CLICK, detailFunction(page, this));
                 canvas.addChild(button);
                 box.addChild(canvas);
+                var text:Text = new Text();
+                text.maxWidth = 400;
+                text.text = "Data source type specific configuration.";
+                box.addChild(text);
                 mainBox.addChildAt(box, 0);
                 var rule:HRule = new HRule();
                 rule.width = 700;
                 mainBox.addChildAt(rule, 1);
-                var text:Text = new Text();
-                text.maxWidth = 400;
-                text.text = "Data source type specific configuration."
+
             }
             this.feedAdminMode = true;
 
@@ -168,18 +183,6 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        override protected function commitProperties():void {
-            super.commitProperties();
-            if (feedDefinition != null && !(feedDefinition is CompositeServerDataSource)) {
-                if (addonBox && addonBox.parent) {
-                    removeChild(addonBox);
-                }
-                if (addonRule && addonRule.parent) {
-                    removeChild(addonRule);
-                }
-            }
-        }
-
         private function fieldExtensions():void {
             var window:ServerDataSourceConfiguration = new ServerDataSourceConfiguration();
             window.dataSourceID = feedDefinition.dataFeedID;
@@ -224,6 +227,13 @@
 
         private function caches():void {
             var window:DataSourceCacheWindow = new DataSourceCacheWindow();
+            window.dataSourceID = feedDefinition.dataFeedID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function customFieldMapping():void {
+            var window:CustomFieldTagWindow = new CustomFieldTagWindow();
             window.dataSourceID = feedDefinition.dataFeedID;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
@@ -275,8 +285,8 @@
                     </mx:Canvas>
                     <mx:Text width="400" text="Add additional data sources such as report based sources to this data source as children."/>
                 </mx:HBox>
-                <mx:HRule width="700"/>
-                <mx:HBox  verticalAlign="middle">
+                <mx:HRule width="700" id="fieldReportRule"/>
+                <mx:HBox  verticalAlign="middle" id="fieldReportBox">
                     <mx:Canvas width="300">
                         <mx:LinkButton label="Field Reports" fontWeight="bold" click="moreStuff()" fontSize="16"/>
                     </mx:Canvas>
@@ -302,6 +312,13 @@
                         <mx:LinkButton label="Scripting" fontWeight="bold" click="scripting()" fontSize="16"/>
                     </mx:Canvas>
                     <mx:Text width="400" text="Advanced customization of scripting to modify data source behavior."/>
+                </mx:HBox>
+                <mx:HRule width="700" id="customFieldMappingsRule"/>
+                <mx:HBox  verticalAlign="middle" id="customFieldMappingsBox">
+                    <mx:Canvas width="300">
+                        <mx:LinkButton label="Custom Field Mappings" fontWeight="bold" click="customFieldMapping()" fontSize="16"/>
+                    </mx:Canvas>
+                    <mx:Text width="400" text="Map custom fields to tags."/>
                 </mx:HBox>
             </mx:VBox>
         </mx:Box>

@@ -35,6 +35,17 @@ public class TextReport extends AnalysisDefinition {
         return columns;
     }
 
+    override public function getFont():String {
+        if (customFontFamily != null && customFontFamily != "" && useCustomFontFamily) {
+            return customFontFamily;
+        }
+        if (fontName == "Lucida Grande" || fontName == "Open Sans") {
+            return fontName;
+        } else {
+            return "Lucida Grande";
+        }
+    }
+
     override public function populate(fields:ArrayCollection):void {
         columns = new ArrayCollection();
         for each (var field:AnalysisItem in fields) {

@@ -30,16 +30,20 @@ public class RefreshStatusServlet extends HttpServlet {
             String callDataID = req.getParameter("callDataID");
             CallData callData = new AsyncService().getCallData(callDataID);
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("status", callData.getStatus());
-            String message = callData.getStatusMessage();
-            if (message == null && callData.getResult() instanceof DataSourceRefreshEvent) {
-                DataSourceRefreshEvent event = (DataSourceRefreshEvent) callData.getResult();
-                message = event.getDataSourceName();
-            }
-            jsonObject.put("statusMessage", message);
-            if (callData.getStatus() == ServiceUtil.FAILED) {
-                DataSourceConnectivityReportFault fault = (DataSourceConnectivityReportFault) callData.getResult();
-                jsonObject.put("problemHTML", fault.toHTML());
+            if (callData == null) {
+                jsonObject.put("status", 4);
+            } else {
+                jsonObject.put("status", callData.getStatus());
+                String message = callData.getStatusMessage();
+                if (message == null && callData.getResult() instanceof DataSourceRefreshEvent) {
+                    DataSourceRefreshEvent event = (DataSourceRefreshEvent) callData.getResult();
+                    message = event.getDataSourceName();
+                }
+                jsonObject.put("statusMessage", message);
+                if (callData.getStatus() == ServiceUtil.FAILED) {
+                    DataSourceConnectivityReportFault fault = (DataSourceConnectivityReportFault) callData.getResult();
+                    jsonObject.put("problemHTML", fault.toHTML());
+                }
             }
             response.setContentType("application/json");
             response.getOutputStream().write(jsonObject.toString().getBytes());

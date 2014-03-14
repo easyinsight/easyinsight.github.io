@@ -42,5 +42,9 @@ public class HighRiseDataSource extends CompositeServerDataSource {
     override public function configClass():Class {
         return HighRiseDataSourceCreation;
     }
+
+    override public function hasCustomFields():Boolean {
+        return true;
+    }
 }
 }

@@ -192,6 +192,13 @@
                 yField = barChartDef.yaxis.qualifiedName();
                 createChart();
 
+                if (barChartDef.xAxisMinimumDefined) {
+                    LinearAxis(xAxis).minimum = barChartDef.xAxisMinimum;
+                }
+                if (barChartDef.xAxisMaximumDefined) {
+                    LinearAxis(xAxis).maximum = barChartDef.xAxisMaximum;
+                }
+
                 barChartDef.styleChart(barChart);
                 legend.maxWidth = barChartDef.legendMaxWidth;
 

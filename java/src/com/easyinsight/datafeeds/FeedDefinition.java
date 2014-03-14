@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.core.*;
+import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.security.SecurityUtil;
@@ -46,7 +47,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private UploadPolicy uploadPolicy = new UploadPolicy();
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
-    private boolean accountVisible;
+    private boolean accountVisible = true;
     private long dataFeedID;
     private long size;
     private Date dateCreated;
@@ -71,14 +72,27 @@ public class FeedDefinition implements Cloneable, Serializable {
     private DataSourceInfo dataSourceInfo;
     private boolean kpiSource;
     private List<AddonReport> addonReports;
-    private boolean fieldCleanupEnabled;
+    private boolean fieldCleanupEnabled = true;
     private boolean fieldLookupEnabled;
     private long defaultFieldTag;
     private boolean manualReportRun;
     private boolean showTags;
+    private boolean visibleWithinParentConfiguration;
 
     public void configureFactory(HTMLConnectionFactory factory) {
 
+    }
+
+    public boolean isVisibleWithinParentConfiguration() {
+        return visibleWithinParentConfiguration;
+    }
+
+    public void setVisibleWithinParentConfiguration(boolean visibleWithinParentConfiguration) {
+        this.visibleWithinParentConfiguration = visibleWithinParentConfiguration;
+    }
+
+    public List<CustomFieldTag> customFieldTags() {
+        return null;
     }
 
     public boolean isShowTags() {
@@ -414,7 +428,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public Feed createFeed(EIConnection conn) {
-        FeedDefinition parentSource = null; 
+        FeedDefinition parentSource = null;
         if (getParentSourceID() > 0) {
             try {
                 parentSource = new FeedStorage().getFeedDefinitionData(getParentSourceID(), conn);
@@ -422,6 +436,11 @@ public class FeedDefinition implements Cloneable, Serializable {
                 throw new RuntimeException(e);
             }
         }
+        return createFeed(conn, parentSource);
+    }
+
+    public Feed createFeed(EIConnection conn, FeedDefinition parentSource) {
+
         Feed feed = createFeedObject(parentSource);
 
         // load from report

@@ -193,11 +193,14 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
         for (WeNeedToReplaceHibernateTag tag : availableTags) {
             Tag newTag1 = replacementMap.findReplacementTag(tag.getTagID());
             if (newTag1 == null) {
-                System.out.println("Could not find replacement tag for " + tag.getTagID());
+                WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
+                newTag.setTagID(tag.getTagID());
+                replaceTags.add(newTag);
+            } else {
+                WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
+                newTag.setTagID(newTag1.getId());
+                replaceTags.add(newTag);
             }
-            WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
-            newTag.setTagID(newTag1.getId());
-            replaceTags.add(newTag);
         }
         this.availableTags = replaceTags;
 

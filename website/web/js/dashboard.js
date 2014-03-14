@@ -15,7 +15,7 @@ var reportListTemplate;
 
 var dashboard;
 var email_modal;
-var short_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+var short_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 var currentReport;
 
@@ -23,6 +23,48 @@ var multi_value_results;
 var multi_field_value_results;
 
 var saveConfiguration;
+
+function drillThrough(params) {
+    if(typeof(userJSON.embedKey) != "undefined")
+        params["embedKey"] = userJSON.embedKey;
+    $.ajax( {
+        dataType: "json",
+        url: '/app/drillThrough',
+        data: JSON.stringify(params),
+        success: function(data) {
+            var url = data["url"];
+            window.location.href = url;
+        },
+        error: function(a, b, c) {
+            window.location.href = "/app/serverError.jsp"
+        },
+        contentType: "application/json; charset=UTF-8",
+        type: "POST"
+});
+}
+
+function drillThroughParameterized(params, val) {
+    var first = true;
+    var s = "";
+    var p = function(p, param) {
+        if(params[param] != null) {
+            s = s + (first ? "" : "&") + p + "=" + params[param];
+            first = false;
+        }
+    }
+    p("embedded", "embedded");
+    p("drillthroughID", "id");
+    p("reportID", "reportID");
+    p("sourceField", "source");
+    if(val != null) {
+        if(!first) {
+            s = s + "&";
+            first = false;
+        }
+        s = s + "f" + params["xaxis"] + "=" + encodeURI(val);
+    }
+    drillThrough(s);
+}
 
 var millisecondFormatter = function(format, val) {
     if(val ==  0)
@@ -224,39 +266,39 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     if (obj.metadata.type == "pie") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getPieChartCallback(id, w, {})) }));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getPieChartCallback(id, w, {}, fullFilters, drillthroughID)) }));
     }
     else if (obj.metadata.type == "diagram") {
         $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
-            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, afterRefresh($("#" + id + " .loading")));
+            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, typeof(userJSON.embedded) != "undefined" ? userJSON.embedded : false, afterRefresh($("#" + id + " .loading"), fullFilters, drillthroughID));
         }) }));
     }
-    else if (obj.metadata.type == "list") {
+    else if (obj.metadata.type == "list" || obj.metadata.type == "trend_grid") {
         $.ajax($.extend(postData, {
             dataType: "text",
-            success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns))
+            success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns, fullFilters, drillthroughID))
         }));
     } else if (obj.metadata.type == "bar") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getBarChartCallback(id, w, true, obj.metadata.styles))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getBarChartCallback(id, w, true, obj.metadata.styles, fullFilters, drillthroughID))}));
     } else if (obj.metadata.type == "column") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getColumnChartCallback(id, w, obj.metadata.styles)) }));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getColumnChartCallback(id, w, obj.metadata.styles, fullFilters, drillthroughID)) }));
     }
     else if (obj.metadata.type == "area" || obj.metadata.type == "bubble" || obj.metadata.type == "plot" || obj.metadata.type == "line") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getCallback(id, w, true, obj.metadata.styles))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getCallback(id, w, true, obj.metadata.styles, fullFilters, drillthroughID))}));
     } else if (obj.metadata.type == "stacked_bar") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedBarChart(id, w, obj.metadata.styles))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedBarChart(id, w, obj.metadata.styles, fullFilters, drillthroughID))}));
     } else if (obj.metadata.type == "stacked_column") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedColumnChart(id, w, obj.metadata.styles)) }));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedColumnChart(id, w, obj.metadata.styles, fullFilters, drillthroughID)) }));
     } else if (obj.metadata.type == "gauge") {
         $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: null }))
         var v = JSON.stringify(obj.metadata.properties).replace(/\"/g, "");
@@ -267,6 +309,20 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
             Utils.noData(data, function () {
                 $('#' + id + " .reportArea").html(data);
             }, null, id);
+            $('#' + id + " .reportArea .list_drillthrough").click(function(e) {
+                e.preventDefault();
+                var x = $(e.target);
+                var f = {"reportID": x.data("reportid"), "drillthroughID": x.data("drillthroughid"), "embedded": x.data("embedded"), "source": x.data("source"), "drillthroughKey": drillthroughID, "filters": fullFilters,
+                    "drillthrough_values": {}};
+                f["drillthrough_values"] = _.inject(x.data(), function(m, e, i, l) {
+
+                    if(i.match(/^drillthrough/))
+                        m[i.replace(/^drillthrough/, "")] = decodeURI(e);
+                    return m; },
+                    {});
+
+                drillThrough(f);
+            })
         })}));
 
     }
@@ -335,7 +391,7 @@ var buildReportGraph = function (obj, filterStack, filterMap, stackMap, reportMa
 }
 
 var hideFilter = function (id, filterMap) {
-    $(".filter" + id).addClass("hideFilter");
+    $("._dashboard_filter_" + id).addClass("hideFilter");
     for (var f in filterMap) {
         if (filterMap[f].filter.id == id) {
             filterMap[f].filter.override = true;
@@ -487,7 +543,8 @@ $(function () {
             }
         }
 
-        $("#configuration-dropdown").html(configurationDropdownTemplate({"dashboard": dashboardJSON, "user": userJSON}))
+        if(typeof(userJSON) != "undefined")
+            $("#configuration-dropdown").html(configurationDropdownTemplate({"dashboard": dashboardJSON, "user": userJSON}))
 
         if (Modernizr.localstorage && dashboardJSON["local_storage"] && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+$/)) {
             if (typeof(localStorage[dashboardKey]) != "undefined") {

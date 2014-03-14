@@ -124,7 +124,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
         if (l != null && l instanceof DrillThrough) {
             JSONObject drillthrough = new JSONObject();
             drillthrough.put("reportID", report.getUrlKey());
-            drillthrough.put("id", l.getLinkID());
+            drillthrough.put("id", l.createID());
             drillthrough.put("source", stackItem.getAnalysisItemID());
             drillthrough.put("xaxis", xAxisItem.getAnalysisItemID());
             drillthrough.put("stack", stackItem.getAnalysisItemID());

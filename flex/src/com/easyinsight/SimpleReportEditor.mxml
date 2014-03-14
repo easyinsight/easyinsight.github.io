@@ -244,6 +244,7 @@
             var errors:ArrayCollection = new ArrayCollection();
             var warnings:ArrayCollection = new ArrayCollection();
             var quickActions:ArrayCollection = new ArrayCollection();
+            var shouldDoThis:ArrayCollection = new ArrayCollection();
             if (suggests != null) {
 
                 for each (var intentionSuggestion:IntentionSuggestion in suggests) {
@@ -251,6 +252,9 @@
                         errors.addItem(intentionSuggestion);
                     } else if (intentionSuggestion.priority == IntentionSuggestion.WARNING) {
                         warnings.addItem(intentionSuggestion);
+                    } else if (intentionSuggestion.priority == IntentionSuggestion.YOU_SHOULD_REALLY_DO_THIS) {
+                        shouldDoThis.addItem(intentionSuggestion);
+                        quickActions.addItem(intentionSuggestion);
                     } else {
                         quickActions.addItem(intentionSuggestion);
                     }
@@ -267,7 +271,7 @@
                 multiProblemBar = null;
             }
 
-            if ((errors.length + warnings.length) > 1) {
+            if ((errors.length + warnings.length + shouldDoThis) > 1) {
                 multiProblemBar = new MultiProblemBar();
                 multiProblemBar.simpleReportEditor = this;
                 multiProblemBar.warnings = warnings;
@@ -277,26 +281,22 @@
                 multiProblemBar.fields = getWrappers();
                 rightBox.addChildAt(multiProblemBar, 0);
             }
-            else if (errors.length == 1 || warnings.length == 1) {
+            else if (errors.length == 1 || warnings.length == 1 || shouldDoThis.length == 1) {
                 majorProblemBar = new MajorProblemBar();
                 majorProblemBar.simpleReportEditor = this;
                 if (errors.length == 1) {
                     majorProblemBar.intentionSuggestion = errors.getItemAt(0) as IntentionSuggestion;
-                } else {
+                } else if (warnings.length == 1) {
                     majorProblemBar.intentionSuggestion = warnings.getItemAt(0) as IntentionSuggestion;
+                } else {
+                    majorProblemBar.intentionSuggestion = shouldDoThis.getItemAt(0) as IntentionSuggestion;
                 }
 
                 majorProblemBar.fields = getWrappers();
                 majorProblemBar.dataSourceID = dataService.dataFeedID;
                 rightBox.addChildAt(majorProblemBar, 0);
             }
-            //this.suggestions = suggestions;
             this.quickActions = quickActions;
-            /*if (suggestions != null && suggestions.length > 0) {
-                currentState = "showSuggestions";
-            } else {
-                currentState = "";
-            }*/
         }
 
         private function gotIntentions():void {
@@ -347,10 +347,6 @@
             var toRemove:ArrayCollection = analysisDefinition.cleanupReport(transformContainer.getFilterDefinitions());
             for each (var toRemoveFilter:FilterDefinition in toRemove) {
                 transformContainer.removeFilter(toRemoveFilter);
-            }
-            var newFilters:ArrayCollection = analysisDefinition.newFilters(transformContainer.getFilterDefinitions());
-            for each (var filterDefinition:FilterDefinition in newFilters) {
-                transformContainer.addFilterDefinition(filterDefinition);
             }
             dataView = dataViewFactory;
             dataView.adHocMode = !defaultManualRun;
@@ -588,7 +584,7 @@
                 //this.dataSourceFields = feedMetadata.dataSourceFields;
                 this.admin = feedMetadata.dataSourceAdmin;
                 var cFactory:ClassFactory = new ClassFactory(AvailableFieldRenderer);
-                cFactory.properties = { dataSourceID:dataSourceID, calcRefactor:feedMetadata.allowRefactor };
+                cFactory.properties = { dataSourceID:dataSourceID, calcRefactor:feedMetadata.allowRefactor, tags: feedMetadata.tags };
                 rendererFactory = cFactory;
                 dataSourceName = this.feedMetadata.dataSourceName;
                 joinsCustomizable = this.feedMetadata.customJoinsAllowed;
@@ -849,6 +845,21 @@
             dispatchEvent(new AnalyzeEvent(new ReportEditorAnalyzeSource(report, 0)));
         }
 
+        private function tagField(event:ReportEditorFieldEvent):void {
+            var wrapper:AnalysisItemWrapper = event.item as AnalysisItemWrapper;
+            var tag:Tag = event.tag as Tag;
+            if (wrapper.analysisItem.tags == null) {
+                wrapper.analysisItem.tags = new ArrayCollection();
+            }
+            wrapper.analysisItem.tags.addItem(tag);
+            ProgressAlert.alert(this, "Tagging the field...", null, feedService.tagField);
+            feedService.tagField.send(wrapper.displayName, dataService.dataFeedID, tag);
+        }
+
+        private function taggedField():void {
+
+        }
+
         public function initializeForWorksheet():void {
             try {
                 if (User.getInstance().reportMode) {
@@ -873,6 +884,7 @@
                 addEventListener(ReportEditorFieldEvent.ITEM_DELETE, fieldEventHandler.deleteField);
                 addEventListener(ReportEditorFieldEvent.ITEM_EDIT, fieldEventHandler.editField);
                 addEventListener(ReportEditorFieldEvent.ITEM_FILTER, filterField);
+                addEventListener(ReportEditorFieldEvent.TAG_ITEM, tagField);
                 addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
                 addEventListener(AnalysisItemCopyEvent.ITEM_COPY, onCopy);
 
@@ -1434,7 +1446,7 @@
             window.y = customFieldButton.y + customFieldButton.height + 10;
         }
 
-        private function onAnalysisItemEdit(event:AnalysisItemEditEvent):void {
+        public function onAnalysisItemEdit(event:AnalysisItemEditEvent):void {
             var node:AnalysisItemNode = new AnalysisItemNode();
             node.analysisItem = event.analysisItem;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
@@ -1578,6 +1590,7 @@
     </mx:RemoteObject>
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="fieldToDataSourceLevel" result="promoted()"/>
+        <mx:method name="tagField" result="taggedField()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="coreDataService" destination="data">
         <mx:method name="addonFields" result="onBolt()"/>

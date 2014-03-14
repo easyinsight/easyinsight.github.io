@@ -66,7 +66,8 @@ public class CommitServlet extends APIServlet {
                 try {
                     System.out.println("marking " + callDataID + " done");
                     PreparedStatement ps = conn.prepareStatement("UPDATE db_connection_cache SET status = ? WHERE call_data_id = ?");
-                    ps.setString(1, callDataID);
+                    ps.setInt(1, 1);
+                    ps.setString(2, callDataID);
                     ps.executeUpdate();
                     ps.close();
                 } catch (Exception e) {

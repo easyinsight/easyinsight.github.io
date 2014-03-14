@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()"
+        backgroundColor="#FFFFFF" horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
     <mx:Script><![CDATA[
         import com.easyinsight.util.ProgressAlert;
 
@@ -36,4 +37,4 @@
         <mx:method name="getFeedDefinition" result="gotFeedDefinition()"/>
         <mx:method name="updateFeedDefinition" result="updated()"/>
     </mx:RemoteObject>
-</util:EISlimWindow>
+</util:EITitleWindow>

@@ -87,6 +87,18 @@
             var plotChartDef:BubbleChartDefinition = analysisDefinition as BubbleChartDefinition;
             if (dataSet.length > 0) {
                 this.bubbleChart = plotChartDef;
+                if (plotChartDef.xAxisMinimumDefined) {
+                    xAxis.minimum = plotChartDef.xAxisMinimum;
+                }
+                if (plotChartDef.xAxisMaximumDefined) {
+                    xAxis.maximum = plotChartDef.xAxisMaximum;
+                }
+                if (plotChartDef.yAxisMinimumDefined) {
+                    yAxis.minimum = plotChartDef.yAxisMininum;
+                }
+                if (plotChartDef.yAxisMaximumDefined) {
+                    yAxis.maximum = plotChartDef.yAxisMaximum;
+                }
                 xAxisBaseAtZero = plotChartDef.xAxisBaseAtZero;
                 yAxisBaseAtZero = plotChartDef.yAxisBaseAtZero;
                 this.defaultLink = ChartUtil.setup(plotChartDef.dimension, plotChart, onChartClick);

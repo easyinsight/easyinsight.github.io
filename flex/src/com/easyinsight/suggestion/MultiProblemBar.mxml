@@ -3,6 +3,8 @@
         backgroundColor="#FEFEFE">
     <mx:Script><![CDATA[
         import com.easyinsight.SimpleReportEditor;
+        import com.easyinsight.analysis.DataViewFactory;
+        import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -12,6 +14,7 @@
 
         public var problems:ArrayCollection;
         public var warnings:ArrayCollection;
+        public var youShouldDoThis:ArrayCollection;
 
         override protected function createChildren():void {
             super.createChildren();
@@ -29,6 +32,13 @@
                 w1Button.label = warnings.length + "" + ((warnings.length > 1) ? " warnings" : "warning");
                 addChild(w1Button);
             }
+            if (youShouldDoThis.length > 0) {
+                var y1Button:LinkButton = new LinkButton();
+                y1Button.styleName = "boldRecommendedButton";
+                y1Button.addEventListener(MouseEvent.CLICK, warningClick);
+                y1Button.label = youShouldDoThis.length + "" + ((youShouldDoThis.length > 1) ? " recommendations" : "recommendation");
+                addChild(y1Button);
+            }
         }
 
         private function problemClick(event:MouseEvent):void {
@@ -37,7 +47,8 @@
                 if (suggestion.type == IntentionSuggestion.WARNING) {
                     Alert.show(suggestion.description);
                 } else {
-                    new SuggestionFactory(simpleReportEditor).argh(suggestion.type, fields, dataSourceID);
+                    resolve(suggestion);
+                    //new SuggestionFactory(simpleReportEditor).argh(suggestion.type, fields, dataSourceID);
                 }
             } else {
                 var window:IntentionListWindow = new IntentionListWindow();
@@ -49,13 +60,34 @@
             }
         }
 
+        private function youShouldDoThisClick(event:MouseEvent):void {
+            if (youShouldDoThis.length == 1) {
+                var suggestion:IntentionSuggestion = youShouldDoThis.getItemAt(0) as IntentionSuggestion;
+                if (suggestion.type == IntentionSuggestion.WARNING) {
+                    Alert.show(suggestion.description);
+                } else {
+                    resolve(suggestion);
+                    //new SuggestionFactory(simpleReportEditor).argh(suggestion.type, fields, dataSourceID);
+                }
+            } else {
+                var window:IntentionListWindow = new IntentionListWindow();
+                window.windowLabel = "We found the following recommendations:";
+                window.suggestions = youShouldDoThis;
+                window.simpleReportEditor = simpleReportEditor;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
+        }
+
+
         private function warningClick(event:MouseEvent):void {
             if (warnings.length == 1) {
                 var suggestion:IntentionSuggestion = warnings.getItemAt(0) as IntentionSuggestion;
                 if (suggestion.type == IntentionSuggestion.WARNING) {
                     Alert.show(suggestion.description);
                 } else {
-                    new SuggestionFactory(simpleReportEditor).argh(suggestion.type, fields, dataSourceID);
+                    resolve(suggestion);
+                    //new SuggestionFactory(simpleReportEditor).argh(suggestion.type, fields, dataSourceID);
                 }
             } else {
                 var window:IntentionListWindow = new IntentionListWindow();
@@ -67,10 +99,45 @@
             }
         }
 
+
+        private var _wrappers:ArrayCollection;
+
+        private var _dataSourceDisplay:DataSourceInfo;
+        private var _allFields:ArrayCollection;
+        private var _dataView:DataViewFactory;
+
         public var simpleReportEditor:SimpleReportEditor;
 
         public var fields:ArrayCollection;
 
         public var dataSourceID:int;
+
+        private function resolve(intentionSuggestion:IntentionSuggestion):void {
+            if (intentionSuggestion.requiresServerCallback) {
+                analysisService.getIntentions.send(simpleReportEditor.analysisDefinition, fields, intentionSuggestion.scope, intentionSuggestion.type);
+            } else {
+                new SuggestionFactory(simpleReportEditor).argh(intentionSuggestion.type, fields, simpleReportEditor.analysisDefinition.dataFeedID);
+            }
+        }
+
+        private function gotIntentions():void {
+            var intentions:ArrayCollection = analysisService.getIntentions.lastResult as ArrayCollection;
+            var metadata:SuggestionMetadata = new SuggestionMetadata(simpleReportEditor.analysisDefinition, simpleReportEditor.transformContainer,
+                    _allFields, _wrappers, _dataSourceDisplay, simpleReportEditor);
+            for each (var intention:Intention in intentions) {
+                intention.addEventListener(IntentionTriggerEvent.INTENTION_TRIGGER, onIntentionEvent);
+                intention.apply(metadata);
+            }
+            if (_dataView != null) {
+                _dataView.refresh();
+            }
+        }
+
+        private function onIntentionEvent(event:IntentionTriggerEvent):void {
+            dispatchEvent(event);
+        }
         ]]></mx:Script>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="getIntentions" result="gotIntentions()"/>
+    </mx:RemoteObject>
 </mx:HBox>

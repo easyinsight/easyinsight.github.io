@@ -352,7 +352,8 @@ public class TreeData {
                     }
                     sb.append("<td style=\"").append(styleString.toString()).append("\">");
 
-                    sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+                    sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol,
+                            exportMetadata.locale, false));
 
                     sb.append("</td>");
                 }
@@ -423,7 +424,8 @@ public class TreeData {
                 }
                 sb.append("<td style=\"").append(styleString.toString()).append("\">");
 
-                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol,
+                        exportMetadata.locale, false));
 
                 sb.append("</td>");
             }

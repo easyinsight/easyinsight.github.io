@@ -70,6 +70,7 @@
             parentChild = _filterDefinition.parentChildLabel;
             if (_filterDefinition.field != null) {
                 filterField = filterDefinition.field.display + " - " + filterDefinition.field.key.createString();
+                idData = filterDefinition.field.analysisItemID + " - " + filterDefinition.filterID;
             }
         }
 
@@ -228,6 +229,9 @@
                 rules.removeItemAt(rules.getItemIndex(selectedRule));
             }
         }
+
+        [Bindable]
+        private var idData:String;
         ]]>
 	</mx:Script>
     <mx:TabNavigator creationPolicy="all" resizeToContent="true" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
@@ -236,6 +240,9 @@
                 <mx:Form>
                     <mx:FormItem label="Which field is this filter based on?">
                         <mx:Label fontWeight="normal" fontFamily="Lucida Grande" text="{filterField}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="IDs">
+                        <mx:Label fontWeight="normal" fontFamily="Lucida Grande" text="{idData}"/>
                     </mx:FormItem>
                     <mx:FormItem label="Should this filter be applied before data is aggregated?">
                         <mx:CheckBox selected="{beforeAgg}" id="aggregationCheckbox"/>

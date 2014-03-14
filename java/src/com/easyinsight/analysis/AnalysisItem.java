@@ -35,6 +35,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     public static final int ORDER_DATA_SOURCE_LEVEL = 2;
     public static final int ORDER_KPI = 3;
 
+    @Column(name="custom_flag")
+    private int customFlag;
+
     // if we fold out key into its own class...
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -43,6 +46,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     @Transient
     private List<Tag> tags;
+
+    @Transient
+    private String defaultDate;
 
     @Transient
     private FieldDataSourceOrigin origin;
@@ -174,6 +180,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.formattingType = formattingType;
     }
 
+    public String getDefaultDate() {
+        return defaultDate;
+    }
+
+    public void setDefaultDate(String defaultDate) {
+        this.defaultDate = defaultDate;
+    }
+
     public FieldDataSourceOrigin getOrigin() {
         return origin;
     }
@@ -204,6 +218,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void setBasedOnReportField(Long basedOnReportField) {
         this.basedOnReportField = basedOnReportField;
+    }
+
+    public int getCustomFlag() {
+        return customFlag;
+    }
+
+    public void setCustomFlag(int customFlag) {
+        this.customFlag = customFlag;
     }
 
     public long getFlexID() {
@@ -611,6 +633,31 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             return null;
         } else {
             return items.get(0);
+        }
+    }
+
+    public void validate(Set<Long> sourceIDs) {
+        if (key instanceof DerivedKey) {
+            DerivedKey derivedKey = (DerivedKey) key;
+            if (!sourceIDs.contains(derivedKey.getFeedID())) {
+                throw new RuntimeException("Bad ID of " + derivedKey.getFeedID() + " on " + toDisplay());
+            }
+        }
+        if (getFilters() != null) {
+            for (FilterDefinition filter : getFilters()) {
+                if (filter.getField() != null) {
+                    filter.getField().validate(sourceIDs);
+                }
+            }
+        }
+        if (sortItem != null) {
+            sortItem.validate(sourceIDs);
+        }
+        if (fromField != null) {
+            fromField.validate(sourceIDs);
+        }
+        if (reportFieldExtension != null) {
+            reportFieldExtension.validate(sourceIDs);
         }
     }
 

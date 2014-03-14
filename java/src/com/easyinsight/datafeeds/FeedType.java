@@ -254,6 +254,15 @@ public class FeedType implements Serializable {
     public static final FeedType PIVOTAL_V5_STORY_TO_LABEL = new FeedType(225);
     public static final FeedType INSIGHTLY_NOTES = new FeedType(226);
     public static final FeedType INSIGHTLY_NOTE_LINKS = new FeedType(227);
+    public static final FeedType REDBOOTH_COMPOSITE = new FeedType(228);
+    public static final FeedType REDBOOTH_ORGANIZATION = new FeedType(229);
+    public static final FeedType REDBOOTH_PROJECT = new FeedType(230);
+    public static final FeedType REDBOOTH_TASK = new FeedType(231);
+    public static final FeedType REDBOOTH_TASK_LIST = new FeedType(232);
+    public static final FeedType REDBOOTH_COMMENT = new FeedType(233);
+    public static final FeedType SURVEYGIZMO_COMPOSITE = new FeedType(234);
+    public static final FeedType SURVEYGIZMO_FORM = new FeedType(235);
+    public static final FeedType SURVEYGIZMO_FORM_METADATA = new FeedType(236);
 
     public FeedType() {
     }

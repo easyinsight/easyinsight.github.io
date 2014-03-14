@@ -21,6 +21,7 @@
         import mx.charts.CategoryAxis;
         import mx.charts.ChartItem;
         import mx.charts.HitData;
+        import mx.charts.LinearAxis;
 
         import mx.charts.chartClasses.CartesianChart;
         import mx.charts.chartClasses.CartesianTransform;
@@ -142,6 +143,12 @@
         }
 
         override protected function assignMeasureAxis(axis:NumericAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
+            if (chartDef.xAxisMinimumDefined) {
+                LinearAxis(axis).minimum = chartDef.xAxisMinimum;
+            }
+            if (chartDef.xAxisMaximumDefined) {
+                LinearAxis(axis).maximum = chartDef.xAxisMaximum;
+            }
             CartesianChart(chart).horizontalAxisRenderers = [ axisRenderer ];
             CartesianChart(chart).horizontalAxis = axis;
             axis.baseAtZero = chartDef.xAxisBaseAtZero;

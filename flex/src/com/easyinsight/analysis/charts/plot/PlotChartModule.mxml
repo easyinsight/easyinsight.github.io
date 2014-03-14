@@ -99,6 +99,18 @@
                 if (additionalProperties != null) {
                     var correlation:Number = additionalProperties.correlation;
                 }
+                if (plotChartDef.xAxisMinimumDefined) {
+                    xAxis.minimum = plotChartDef.xAxisMinimum;
+                }
+                if (plotChartDef.xAxisMaximumDefined) {
+                    xAxis.maximum = plotChartDef.xAxisMaximum;
+                }
+                if (plotChartDef.yAxisMinimumDefined) {
+                    yAxis.minimum = plotChartDef.yAxisMininum;
+                }
+                if (plotChartDef.yAxisMaximumDefined) {
+                    yAxis.maximum = plotChartDef.yAxisMaximum;
+                }
                 this.correlation = new NumberFormatter().format(correlation);
                 plotChartDef.styleChart(plotChart);
                 measure1 = plotChartDef.xaxisMeasure.qualifiedName();

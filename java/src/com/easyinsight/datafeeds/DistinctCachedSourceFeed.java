@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,7 +35,13 @@ public class DistinctCachedSourceFeed extends Feed {
             stmt.setLong(1, reportID);
             ResultSet rs = stmt.executeQuery();
 
-            WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            WSAnalysisDefinition report;
+            try {
+                report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            } catch (Exception e) {
+                LogClass.error(e);
+                return new DataSet();
+            }
             Feed feed;
             if (rs.next()) {
                 CachedAnalysisBasedFeed cachedFeed = new CachedAnalysisBasedFeed();

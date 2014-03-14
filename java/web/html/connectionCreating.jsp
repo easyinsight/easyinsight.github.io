@@ -1,24 +1,6 @@
 <!DOCTYPE html>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
-<%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
-<%@ page import="com.easyinsight.core.EIDescriptor" %>
-<%@ page import="com.easyinsight.core.InsightDescriptor" %>
-<%@ page import="com.easyinsight.userupload.UserUploadService" %>
-<%@ page import="com.easyinsight.dashboard.DashboardDescriptor" %>
-<%@ page import="com.easyinsight.audit.ActionLog" %>
-<%@ page import="com.easyinsight.admin.AdminService" %>
-<%@ page import="com.easyinsight.audit.ActionReportLog" %>
-<%@ page import="com.easyinsight.audit.ActionDashboardLog" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
-<%@ page import="java.sql.PreparedStatement" %>
-<%@ page import="java.sql.ResultSet" %>
-<%@ page import="com.easyinsight.userupload.CustomFolder" %>
-<%@ page import="com.easyinsight.database.Database" %>
-<%@ page import="com.easyinsight.database.EIConnection" %>
-<%@ page import="java.util.*" %>
-<%@ page import="com.easyinsight.core.DataFolder" %>
-<%@ page import="com.easyinsight.html.Utils" %>
 <%@ page import="com.easyinsight.datafeeds.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
@@ -44,12 +26,17 @@
         // if it requires additional setup (i.e. Basecamp or Smartsheet, redirect appropriately)
 
         FeedResponse feedResponse = new FeedService().openFeedIfPossible(request.getParameter("dataSourceID"));
+        FeedDefinition dataSource;
         if (feedResponse.getStatus() == FeedResponse.SUCCESS) {
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(feedResponse.getFeedDescriptor().getId());
+
+            dataSource = new FeedStorage().getFeedDefinitionData(feedResponse.getFeedDescriptor().getId());
             if (dataSource.postOAuthSetup(request) != null) {
                 response.sendRedirect(dataSource.postOAuthSetup(request));
                 return;
             }
+        } else {
+            response.sendRedirect("/serverError.jsp");
+            return;
         }
 %>
 <script type="text/javascript">
@@ -77,6 +64,7 @@
                 window.location.replace(data["url"]);
             });
         } else {
+            window.location.replace("/app/html/connections/<%= dataSource.getFeedType().getType() %>?error=true");
             // problem
         }
     }

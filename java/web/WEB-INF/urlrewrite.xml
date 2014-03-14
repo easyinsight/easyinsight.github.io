@@ -97,6 +97,11 @@
     </rule>
 
     <rule>
+        <from>^/html/report/([A-Za-z0-9]+)/doc$</from>
+        <to>/html/reportInfo.jsp?reportID=$1</to>
+    </rule>
+
+    <rule>
         <from>^/html/report/([A-Za-z0-9]+)/config/([A-Za-z0-9]+)$</from>
         <to>/html/report.jsp?reportID=$1&amp;reportConfig=$2</to>
     </rule>
@@ -379,8 +384,10 @@
     </rule>
 
     <rule>
-        <from>^/docs/(.*?)</from>
+        <from>^/docs/([A-Za-z0-9_\\-]+)</from>
         <to>/docs/index.jsp?doc=$1</to>
     </rule>
+
+
 </urlrewrite>
 

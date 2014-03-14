@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.suggestion {
+import com.easyinsight.SimpleReportEditor;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.datasources.DataSourceDisplay;
 import com.easyinsight.datasources.DataSourceInfo;
@@ -20,14 +21,16 @@ public class SuggestionMetadata {
     public var allFields:ArrayCollection;
     public var wrappers:ArrayCollection;
     public var dataSource:DataSourceInfo;
+    public var reportEditor:SimpleReportEditor;
 
     public function SuggestionMetadata(report:AnalysisDefinition, transformContainer:TransformContainer, allFields:ArrayCollection,
-            wrappers:ArrayCollection, dataSource:DataSourceInfo) {
+            wrappers:ArrayCollection, dataSource:DataSourceInfo, reportEditor:SimpleReportEditor) {
         this.report = report;
         this.transformContainer = transformContainer;
         this.allFields = allFields;
         this.wrappers = wrappers;
         this.dataSource = dataSource;
+        this.reportEditor = reportEditor;
     }
 }
 }

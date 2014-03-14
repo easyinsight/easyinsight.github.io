@@ -136,6 +136,12 @@
         }
 
         override protected function assignMeasureAxis(axis:NumericAxis, chart:ChartBase, axisRenderer:IAxisRenderer):void {
+            if (chartDef.yAxisMinimumDefined) {
+                LinearAxis(axis).minimum = chartDef.yAxisMininum;
+            }
+            if (chartDef.yAxisMaximumDefined) {
+                LinearAxis(axis).maximum = chartDef.yAxisMaximum;
+            }
             CartesianChart(chart).verticalAxis = axis;
             CartesianChart(chart).verticalAxisRenderer = axisRenderer;
             axis.baseAtZero = chartDef.yAxisBaseAtZero;

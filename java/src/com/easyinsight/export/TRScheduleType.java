@@ -33,4 +33,9 @@ public class TRScheduleType extends ScheduleType {
         }
         return null;
     }
+
+    @Override
+    public String when() {
+        return "T/R on " + getHour() + ":" + getMinute() + " GMT";
+    }
 }

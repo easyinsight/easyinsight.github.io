@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                       backgroundColor="#FFFFFF" xmlns:feed="com.easyinsight.administration.feed.*">
+                       backgroundColor="#FFFFFF" xmlns:feed="com.easyinsight.administration.feed.*"
+        paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" horizontalAlign="center">
     <mx:Script><![CDATA[
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         override protected function gotSource():void {
@@ -11,12 +13,14 @@
 
         private function clearCaches():void {
             dataSource.lastRefreshStart = null;
+            Alert.show("Caches are now cleared.");
         }
 
         private function save():void {
             saveSource();
         }
         ]]></mx:Script>
+    <mx:Text text="The data source may store additional caches of information to ensure timely refresh of the data. You can clear this cache to ensure a completely clean refresh of the data source." maxWidth="400"/>
     <mx:Button label="Clear Caches" click="clearCaches()"/>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="Save" click="save()"/>

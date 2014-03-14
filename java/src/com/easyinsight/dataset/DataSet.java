@@ -259,6 +259,9 @@ public class DataSet implements Serializable, Cloneable {
         for (IRow row : getRows()) {
             int columnCount = 0;
             listRows[rowCount] = new ListRow();
+            for (Value value : row.getValues().values()) {
+                value.setDrillThroughValues(null);
+            }
             Value[] values = new Value[columns.size()];
             listRows[rowCount].setValues(values);
             for (AnalysisItem analysisItem : columns) {

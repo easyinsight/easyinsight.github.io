@@ -101,7 +101,9 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                 if (key == null) {
                     key = new NamedKey(entry.getKey());
                 }
-                analysisItems.add(new AnalysisDimension(key, "Contact " + entry.getValue()));
+                AnalysisDimension contactCustomDimension = new AnalysisDimension(key, "Contact " + entry.getValue());
+                contactCustomDimension.setCustomFlag(HighRiseCompositeSource.CUSTOM_FIELD_CONTACT);
+                analysisItems.add(contactCustomDimension);
             }
         } catch (ReportException re) {
             throw re;

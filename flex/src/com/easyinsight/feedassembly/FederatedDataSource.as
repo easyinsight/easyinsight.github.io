@@ -25,9 +25,7 @@ public class FederatedDataSource extends FeedDefinitionData {
 
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
-        var editor:FederatedEditor = new FederatedEditor();
-        editor.federatedSource = this;
-        editor.dataSources = this.sources;
+        var editor:FederatedDataSourceWindow = new FederatedDataSourceWindow();
         editor.label = "Federated Data Sources";
         pages.addItem(editor);
         return pages;

@@ -126,6 +126,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean manualButRunFirst;
     private String customFontFamily;
     private boolean useCustomFontFamily;
+    private String baseDate;
     private String exportString;
     private int generalSizeLimit;
     private boolean passThroughFilters;
@@ -149,8 +150,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private boolean aggregateQueryIfPossible = true;
 
-    private boolean newFilterStrategy;
-
     private boolean rowsEditable;
 
     private int fetchSize;
@@ -173,6 +172,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setDataSourceFieldReport(boolean dataSourceFieldReport) {
         this.dataSourceFieldReport = dataSourceFieldReport;
+    }
+
+    public String getBaseDate() {
+        return baseDate;
+    }
+
+    public void setBaseDate(String baseDate) {
+        this.baseDate = baseDate;
     }
 
     private List<FilterDefinition> filtersForDrillthrough;
@@ -271,14 +278,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setAggregateQueryIfPossible(boolean aggregateQueryIfPossible) {
         this.aggregateQueryIfPossible = aggregateQueryIfPossible;
-    }
-
-    public boolean isNewFilterStrategy() {
-        return newFilterStrategy;
-    }
-
-    public void setNewFilterStrategy(boolean newFilterStrategy) {
-        this.newFilterStrategy = newFilterStrategy;
     }
 
     public String getDefaultDate() {
@@ -1066,6 +1065,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         enableLocalStorage = findBooleanProperty(properties, "enableLocalStorage", false);
         colorScheme = findStringProperty(properties, "reportColorScheme", "None");
         exportString = findStringProperty(properties, "exportString", "");
+        baseDate = findStringProperty(properties, "baseDate", "");
     }
 
     public List<ReportProperty> createProperties() {
@@ -1084,6 +1084,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("dataSourceFields", dataSourceFields));
         properties.add(new ReportBooleanProperty("lookupTableOptimization", lookupTableOptimization));
         properties.add(new ReportStringProperty("exportString", exportString));
+        properties.add(new ReportStringProperty("baseDate", baseDate));
         properties.add(new ReportBooleanProperty("adHocExecution", adHocExecution));
         properties.add(new ReportBooleanProperty("cacheable", cacheable));
         properties.add(new ReportBooleanProperty("manualButRunFirst", manualButRunFirst));
@@ -1352,9 +1353,16 @@ public abstract class WSAnalysisDefinition implements Serializable {
         List<AnalysisItem> columns = reportFieldsForMultiField();
         long id = getDataFeedID();
         FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(id);
+        List<AnalysisItem> allFields;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            allFields = dataSource.allFields(conn);
+        } finally {
+            Database.closeConnection(conn);
+        }
         Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
         Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
-        for (AnalysisItem field : dataSource.getFields()) {
+        for (AnalysisItem field : allFields) {
             map.put(field.getAnalysisItemID(), field);
             mapByName.put(field.toDisplay(), field);
         }
@@ -1376,9 +1384,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
         Set<AnalysisItem> set = new HashSet<AnalysisItem>();
         final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
         if (multiFieldFilterDefinition.isAll()) {
+            System.out.println("Using all logic...");
             int i = 0;
             if (!multiFieldFilterDefinition.excludeReportFields()) {
                 for (AnalysisItem column : columns) {
+                    System.out.println("\tadded report field " + column.toDisplay());
                     set.add(column);
                     positions.put(column, i++);
                 }
@@ -1390,6 +1400,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     positions.put(item, i++);
                 } else {
                     item = mapByName.get(field.getName());
+                    System.out.println("\tadded by name " + item.toDisplay());
                     if (item != null) {
                         set.add(item);
                         positions.put(item, i++);
@@ -1399,9 +1410,27 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
             List<WeNeedToReplaceHibernateTag> tags = multiFieldFilterDefinition.getAvailableTags();
 
-            EIConnection conn = Database.instance().getConnection();
+            conn = Database.instance().getConnection();
 
             try {
+                PreparedStatement customFieldQueryStmt = conn.prepareStatement("SELECT custom_flag_to_tag.custom_flag FROM custom_flag_to_tag WHERE tag_id = ? AND data_source_id = ?");
+
+                for (WeNeedToReplaceHibernateTag tag : tags) {
+                    customFieldQueryStmt.setLong(1, tag.getTagID());
+                    customFieldQueryStmt.setLong(2, getDataFeedID());
+                    ResultSet rs = customFieldQueryStmt.executeQuery();
+                    while (rs.next()) {
+                        int customFlag = rs.getInt(1);
+                        for (AnalysisItem analysisItem : allFields) {
+                            if (analysisItem.getCustomFlag() == customFlag) {
+                                positions.put(analysisItem, i++);
+                                set.add(analysisItem);
+                            }
+                        }
+                    }
+                }
+                customFieldQueryStmt.close();
+
                 PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ? AND field_to_tag.data_source_id = ?");
                 for (WeNeedToReplaceHibernateTag tag : tags) {
                     queryStmt.setLong(1, tag.getTagID());
@@ -1419,6 +1448,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         }
                     }
                 }
+                queryStmt.close();
             } finally {
                 Database.closeConnection(conn);
             }
@@ -1445,50 +1475,36 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
 
         List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
-        EIConnection conn = Database.instance().getConnection();
-        try {
 
-            for (AnalysisItem analysisItem : fields) {
-                //long fieldID = analysisItem.getAnalysisItemID();
-                try {
-                    analysisItem = analysisItem.clone();
-                } catch (CloneNotSupportedException e) {
-                    throw new RuntimeException(e);
-                }
-                clones.add(analysisItem);
-
-                /*PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE display_name = ? and " +
-                        "extension_type = ? AND data_source_id = ?");
-                extStmt.setString(1, analysisItem.toDisplay());
-                extStmt.setInt(2, extensionType());
-                extStmt.setLong(3, dataFeedID);
-                ResultSet extRS = extStmt.executeQuery();
-                if (extRS.next()) {
-                    long extID = extRS.getLong(1);
-                    Session session = Database.instance().createSession(conn);
-                    try {
-                        ReportFieldExtension ext = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, extID).list().get(0);
-                        ext.afterLoad();
-                        analysisItem.setReportFieldExtension(ext);
-                    } finally {
-                        session.close();
-                    }
-                }
-                extStmt.close();*/
+        for (AnalysisItem analysisItem : fields) {
+            //long fieldID = analysisItem.getAnalysisItemID();
+            try {
+                analysisItem = analysisItem.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
             }
-        } finally {
-            Database.closeConnection(conn);
+            clones.add(analysisItem);
         }
 
         final Map<String, Integer> fieldOrderingMap = new HashMap<String, Integer>();
         if (multiFieldFilterDefinition.getFieldOrdering() != null && multiFieldFilterDefinition.getFieldOrdering().size() > 0) {
+            System.out.println("Using explicit field ordering...");
             int j = 0;
             for (AnalysisItemHandle handle : multiFieldFilterDefinition.getFieldOrdering()) {
+                System.out.println("\tHandle " + handle.getName() + " = " + j);
                 fieldOrderingMap.put(handle.getName(), j++);
             }
         }
 
         final boolean alphaSort = multiFieldFilterDefinition.isAlphaSort();
+
+        if (alphaSort) {
+            System.out.println("Using alpha sort");
+        } else if (fieldOrderingMap.isEmpty()) {
+            System.out.println("Using position sort");
+        } else {
+            System.out.println("Using field ordering sort");
+        }
 
         Collections.sort(clones, new Comparator<AnalysisItem>() {
 
@@ -1520,6 +1536,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
         });
 
         if (set.size() > 0) {
+            int i = 0;
+            System.out.println("Assigned results = " + clones);
+            for (AnalysisItem item : clones) {
+                item.setItemPosition(i++);
+            }
             assignResults(clones);
         }
     }
@@ -1534,19 +1555,18 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void applyStyling(EIConnection conn, int dataSourceType)  {
         Session session = Database.instance().createSession(conn);
-        ApplicationSkin applicationSkin = null;
+        ApplicationSkin applicationSkin;
         try {
             if (SecurityUtil.getAccountID(false) == 0) {
                 PreparedStatement uStmt = conn.prepareStatement("SELECT USER.USER_ID, ACCOUNT_ID FROM USER, user_to_analysis WHERE user_to_analysis.analysis_id = ? AND " +
                         "user_to_analysis.user_id = user.user_id");
                 uStmt.setLong(1, getAnalysisID());
                 ResultSet uRS = uStmt.executeQuery();
-                if (uRS.next()) {
-                    long userID = uRS.getLong(1);
-                    long accountID = uRS.getLong(2);
-                    applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
-                }
-                uStmt.close();
+                uRS.next();
+                long userID = uRS.getLong(1);
+                long accountID = uRS.getLong(2);
+                applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
+                uRS.close();
             } else {
                 PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
                 ps.setLong(1, SecurityUtil.getAccountID());

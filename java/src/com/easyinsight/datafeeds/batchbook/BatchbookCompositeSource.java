@@ -35,6 +35,12 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
         setFeedName("Batchbook");
     }
 
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Batchbook URL", "url", "Your Batchbook URL is the browser URL you normally use to connect to Batchbook. For example, if you access Batchbook as yourcompanyname.batchbook.com, put yourcompanyname in as the Batchbook URL.");
+        factory.addField("Batchbook API Authentication Token:", "bbApiKey", "You can find the token on your Batchbook page under My Info - API Token.");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
+
     public void setUrl(String url) {
         this.url = url;
     }

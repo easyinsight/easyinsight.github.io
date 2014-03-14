@@ -1,12 +1,12 @@
 package com.easyinsight.dashboard {
 
-import com.easyinsight.util.AutoSizeTextArea;
+
 
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
-import mx.controls.Alert;
+
 import mx.controls.Text;
-import mx.controls.TextArea;
+
 
 public class DashboardTextViewComponent extends Box implements IDashboardViewComponent  {
 
@@ -19,7 +19,7 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
     public function DashboardTextViewComponent() {
         super();
         styleName = "myFontStyle";
-        setStyle("horizontalAlign", "center");
+        setStyle("horizontalAlign", "left");
         setStyle("verticalAlign", "middle");
         /*setStyle("paddingLeft", 10);
          setStyle("paddingTop", 10);
@@ -27,21 +27,12 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
          setStyle("paddingBottom", 10);*/
         setStyle("backgroundColor", 0xFFFFFF);
         setStyle("backgroundAlpha", 1);
+        setStyle("paddingLeft", 20);
+        setStyle("paddingRight", 20);
+        setStyle("paddingBottom", 10);
     }
 
     public function stackPopulate(positions:DashboardStackPositions):void {
-        // christmas reset project/program
-        // each store gets a specific version of project/program based on dimensions
-        // project manager creates an order for a specific store (site)
-        // order will have multiple line items
-        // whatever parts are needed for display
-        // carriers will take shipments to store
-        // order will have site, shipment #, etc
-        // project is designed to go to some set of stores
-        // budgeting mechanism for showing that it's gone to 1000 / 2000
-        // volume graph
-        // within a shipment
-        // heat map of
     }
 
     public function obtainPreferredSizeInfo():SizeInfo {
@@ -52,34 +43,51 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
         super.createChildren();
         textArea = new Text();
         //textArea.setStyle("textAlign", "center");
+        textArea.setStyle("fontFamily", "Helvetica Neue, Helvetica");
         textArea.setStyle("fontSize", dashboardText.fontSize);
         textArea.setStyle("color", dashboardText.color);
         if (dashboardText.preferredHeight == 0) {
-            textArea.percentHeight = 100;
+            //textArea.percentHeight = 100;
             this.percentHeight = 100;
         } else {
             //textArea.height = dashboardText.preferredHeight;
             this.height = dashboardText.preferredHeight;
         }
         if (dashboardText.preferredWidth == 0) {
-            textArea.percentWidth = 100;
+            //textArea.percentWidth = 100;
             this.percentWidth = 100;
         } else {
             textArea.width = dashboardText.preferredWidth;
             this.width = dashboardText.preferredWidth;
         }
+        //Alert.show("text area max width = " + textArea.maxWidth);
         //textArea.editable = false;
-        textArea.htmlText = dashboardText.text;
+        //textArea.htmlText = dashboardText.text;
         addChild(textArea);
     }
 
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        if (textArea != null && (invalidatedTextSize || textArea.maxWidth == 10000)) {
+            textArea.maxWidth = unscaledWidth - 40;
+            textArea.htmlText = dashboardText.html;
+            invalidatedTextSize = false;
+        }
+    }
+
+    private var invalidatedTextSize:Boolean = false;
+
     public function refresh():void {
+        invalidatedTextSize = true;
+        invalidateDisplayList();
     }
 
     public function updateAdditionalFilters(filters:Object):void {
     }
 
     public function initialRetrieve():void {
+        invalidatedTextSize = true;
+        invalidateDisplayList();
     }
 
     public function reportCount():ArrayCollection {

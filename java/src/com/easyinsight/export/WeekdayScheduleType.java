@@ -33,4 +33,9 @@ public class WeekdayScheduleType extends ScheduleType {
         }
         return null;
     }
+
+    @Override
+    public String when() {
+        return "Every weekday on " + getHour() + ":" + getMinute() + " GMT";
+    }
 }

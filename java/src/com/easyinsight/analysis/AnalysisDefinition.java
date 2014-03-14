@@ -527,6 +527,7 @@ public class AnalysisDefinition implements Cloneable {
                 for (AnalysisItem clone : fields) {
                     clone.updateIDs(replacements);
                     allFields.add(clone);
+                    System.out.println("Adding report level clone " + clone.toDisplay());
                     added.add(clone);
                 }
             }
@@ -635,7 +636,10 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setProperties(clonedProperties);
         analysisDefinition.setTemporaryReport(temporaryReport);
 
-        Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
+        Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>();
+        for (Map.Entry<String, AnalysisItem> entry : getReportStructure().entrySet()) {
+            clonedStructure.put(entry.getKey(), replacementMap.getField(entry.getValue()));
+        }
 
         analysisDefinition.setReportStructure(clonedStructure);
         SaveMetadata saveMetadata = new SaveMetadata();
@@ -654,7 +658,7 @@ public class AnalysisDefinition implements Cloneable {
 
 
     public static void updateFromMetadata(FeedDefinition target, ReplacementMap replacementMap,
-                                          AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> additionalDataSourceFields, List<AnalysisItem> added) throws CloneNotSupportedException {
+                                          AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> added) throws CloneNotSupportedException {
         Map<String, AnalysisItem> clonedStructure = analysisDefinition.getReportStructure();
         /*Map<String, AnalysisItem> set = new HashMap<String, AnalysisItem>();
         if (additionalDataSourceFields != null) {
@@ -668,15 +672,34 @@ public class AnalysisDefinition implements Cloneable {
         }*/
 
         Map<String, AnalysisItem> targetFieldMap = new HashMap<String, AnalysisItem>();
+        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
         for (AnalysisItem item : allFields) {
             targetFieldMap.put(item.toDisplay(), item);
+            List<AnalysisItem> items = keyMap.get(item.getKey().toKeyString());
+            if (items == null) {
+                items = new ArrayList<AnalysisItem>();
+                keyMap.put(item.getKey().toKeyString(), items);
+            }
+            items.add(item);
         }
-        for (AnalysisItem item : added) {
+        /*for (AnalysisItem item : added) {
             targetFieldMap.put(item.toDisplay(), item);
-        }
+        }*/
         List<AnalysisItem> addedItems = analysisDefinition.getAddedItems();
         if (target != null) {
+
+            // here is where if it's a semantic link, we find the appropriate source and field
+
+            // so the challenge from there, dealing with partials/joins
+
+            // how do we handle that...
+
+            // other thing is that we really want to be able to join individual tables
+
+            //
+
             for (AnalysisItem analysisItem : replacementMap.getFields()) {
+                analysisItem.setBasedOnReportField(null);
                 //analysisItem.afterLoad();
                 Key key = null;
                 Key deproxiedKey = (Key) Database.deproxy(analysisItem.getKey());
@@ -684,30 +707,42 @@ public class AnalysisDefinition implements Cloneable {
 
                 } else {
                     AnalysisItem dataSourceItem = targetFieldMap.get(analysisItem.toDisplay());
-                    if (dataSourceItem == null) {
-                        dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
-                        if (dataSourceItem != null) {
+                    if (dataSourceItem != null && (dataSourceItem.getOrigin() == null || dataSourceItem.getOrigin().getReport() != analysisDefinition.getAnalysisID())) {
+                        key = dataSourceItem.getKey();
+                    } else {
+                        dataSourceItem = targetFieldMap.get(analysisItem.toOriginalDisplayName());
+                        if (dataSourceItem != null && (dataSourceItem.getOrigin() == null || dataSourceItem.getOrigin().getReport() != analysisDefinition.getAnalysisID())) {
                             key = dataSourceItem.getKey();
                         } else {
-                            if (analysisItem.getOriginalDisplayName() != null) {
-                                dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
-                            }
-                            if (dataSourceItem != null) {
-                                key = dataSourceItem.getKey();
-                            } else {
-                                dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                            dataSourceItem = null;
+                            List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
+                            if (items != null) {
+                                for (AnalysisItem item : items) {
+                                    if (item.getOrigin() != null && item.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
+
+                                    } else {
+                                        dataSourceItem = item;
+                                        break;
+                                    }
+                                }
                                 if (dataSourceItem != null) {
+
                                     key = dataSourceItem.getKey();
                                 }
                             }
                         }
                     }
                     if (key != null) {
+                        System.out.println("\t\tFound key for " + analysisItem.toDisplay());
                         analysisItem.setKey(key);
                         /*if (set.containsKey(analysisItem.toDisplay()) && !addedItems.contains(analysisItem)) {
                             addedItems.add(analysisItem);
                         }*/
                     } else {
+                        if (analysisItem.getKey() instanceof DerivedKey) {
+                            System.out.println("*** THIS IS BAAAAAAAAD ***");
+                        }
+                        System.out.println("\t\tCould not find " + analysisItem.toDisplay() + ", cloning key");
                         Key clonedKey = analysisItem.getKey().clone();
                         analysisItem.setKey(clonedKey);
                         if (!addedItems.contains(analysisItem)) {
@@ -901,8 +936,9 @@ public class AnalysisDefinition implements Cloneable {
 
     private void blah(AnalysisItem analysisItem, Map<Long, AnalysisDefinition> reportReplacementMap, Session session) {
             //Key key = (Key) Database.deproxy(analysisItem.getKey());
-            if (analysisItem.getKey() instanceof ReportKey) {
-                ReportKey reportKey = (ReportKey) analysisItem.getKey();
+        Key argh = (Key) Database.deproxy(analysisItem.getKey());
+        if (argh instanceof ReportKey) {
+                ReportKey reportKey = (ReportKey) argh;
                 //reportKey.afterLoad();
                 if (reportReplacementMap.containsKey(reportKey.getReportID())) {
                     ReportKey cloneKey = new ReportKey();
@@ -920,6 +956,45 @@ public class AnalysisDefinition implements Cloneable {
                     session.save(cloneKey);
                 }
             }
+    }
+
+    public Set<ValidationID>  populateValidationIDs(Set<Long> validFeedIDs) {
+        Set<ValidationID> validationIDs = new HashSet<ValidationID>();
+        for (AnalysisItem item : reportStructure.values()) {
+            validationIDs.add(new ValidationID(ValidationID.KEY, item.getKey().getKeyID()));
+            validationIDs.add(new ValidationID(ValidationID.FIELD, item.getAnalysisItemID()));
+            item.validate(validFeedIDs);
+        }
+        if (joinOverrides != null) {
+            for (JoinOverride joinOverride : joinOverrides) {
+                if (joinOverride.getSourceItem() != null) {
+                    joinOverride.getSourceItem().validate(validFeedIDs);
+                    validationIDs.add(new ValidationID(ValidationID.FIELD, joinOverride.getSourceItem().getAnalysisItemID()));
+                }
+                if (joinOverride.getTargetItem() != null) {
+                    joinOverride.getTargetItem().validate(validFeedIDs);
+                    validationIDs.add(new ValidationID(ValidationID.FIELD, joinOverride.getTargetItem().getAnalysisItemID()));
+                }
+            }
+        }
+        if (filterDefinitions != null) {
+            for (FilterDefinition filter : filterDefinitions) {
+                validationIDs.add(new ValidationID(ValidationID.FILTER, filter.getFilterID()));
+                if (filter.getField() != null) {
+                    filter.getField().validate(validFeedIDs);
+                    validationIDs.add(new ValidationID(ValidationID.KEY, filter.getField().getKey().getKeyID()));
+                    validationIDs.add(new ValidationID(ValidationID.FIELD, filter.getField().getAnalysisItemID()));
+                }
+            }
+        }
+        if (addedItems != null) {
+            for (AnalysisItem item : addedItems) {
+                item.validate(validFeedIDs);
+                validationIDs.add(new ValidationID(ValidationID.KEY, item.getKey().getKeyID()));
+                validationIDs.add(new ValidationID(ValidationID.FIELD, item.getAnalysisItemID()));
+            }
+        }
+        return validationIDs;
     }
 
     public Set<EIDescriptor> containedReportIDs() {

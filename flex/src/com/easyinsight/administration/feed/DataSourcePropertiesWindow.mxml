@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="600"
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="800"
                        horizontalAlign="center" xmlns:feed="com.easyinsight.administration.feed.*">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.ReportFormItem;
@@ -8,6 +8,7 @@
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
 
@@ -38,6 +39,10 @@
                 for each (var item:ReportFormItem in items) {
                     item.save();
                 }
+            }
+            if (dataSource.feedName == null || dataSource.feedName.length < 1) {
+                Alert.show("You must configure a data source name.");
+                return;
             }
             saveSource();
         }

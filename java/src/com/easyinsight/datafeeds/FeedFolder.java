@@ -89,9 +89,7 @@ public class FeedFolder implements Cloneable, Serializable {
             folderNode.getChildren().add(childFolder.toFeedNode());
         }
         for (AnalysisItem analysisItem : getChildItems()) {
-            if (!analysisItem.isHidden()) {
-                folderNode.getChildren().add(analysisItem.toFeedNode());
-            }
+            folderNode.getChildren().add(analysisItem.toFeedNode());
         }
         folderNode.sort();
         return folderNode;

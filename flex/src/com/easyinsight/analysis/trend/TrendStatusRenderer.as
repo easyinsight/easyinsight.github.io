@@ -26,10 +26,6 @@ public class TrendStatusRenderer extends UIComponent implements IListItemRendere
     private static var negativeDownIcon:Class;
 
     [Bindable]
-    [Embed(source="../../../../../assets/32x32/bullet_ball_blue.png")]
-    private static var neutralIcon:Class;
-
-    [Bindable]
     [Embed(source="../../../../../assets/32x32/arrow2_up_blue.png")]
     private static var neutralUpIcon:Class;
 
@@ -84,12 +80,12 @@ public class TrendStatusRenderer extends UIComponent implements IListItemRendere
                 } else if (kpi.direction == KPIOutcome.DOWN_DIRECTION) {
                     trendImage = neutralDownIcon;
                 } else {
-                    trendImage = neutralIcon;
+                    trendImage = null;
                 }
                 break;
             case KPIOutcome.NO_DATA:
             default:
-                trendImage = neutralIcon;
+                trendImage = null;
                 break;
         }
         return trendImage;

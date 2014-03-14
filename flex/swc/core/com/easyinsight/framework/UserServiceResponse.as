@@ -55,6 +55,8 @@ public class UserServiceResponse
     public var tagsAndCopyEnabled:Boolean;
     public var hourlyRefreshEnabled:Boolean;
     public var accountReports:Boolean;
+    public var decimalSeperator:String;
+    public var thousandsSeperator:String;
 
     public function UserServiceResponse()
         {

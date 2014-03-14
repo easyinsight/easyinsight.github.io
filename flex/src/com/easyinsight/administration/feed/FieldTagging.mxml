@@ -212,17 +212,18 @@
         <mx:method name="getFeedDefinition" result="gotDataSource()"/>
     </mx:RemoteObject>
     <mx:Text maxWidth="500" text="You can use these tags to reduce the fields shown in the report editor, set up multi field filters based on these tags, and use the tags to generally manage your fields."/>
-    <mx:HBox>
-        <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onTagItemClick(event)" width="160" id="tagButton"
-                            dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
-    </mx:HBox>
     <mx:HBox width="100%">
         <mx:Image source="@Embed('../../../../../assets/icon-search-black.png')"/>
         <mx:TextInput id="filterBox" width="100%" change="filterBox_changeHandler(event)"/>
         <mx:ComboBox id="dataSourceBox" dataProvider="{dataSources}" labelField="name" change="filteredFields.refresh()"/>
     </mx:HBox>
     <util:TagBox tags="{tags}" onTagSelect="onTagSelect(event)" id="tagBox" width="100%"/>
-    <mx:Button label="Select All" click="selectAll()"/>
+    <mx:HBox>
+        <util:SaveButton label="Select All Shown" click="selectAll()" fontSize="12"/>
+        <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onTagItemClick(event)" width="160" id="tagButton"
+                            dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" fontSize="12"/>
+    </mx:HBox>
+
     <mx:DataGrid dataProvider="{filteredFields}" wordWrap="true" variableRowHeight="true" height="350" id="dataGrid">
         <mx:columns>
             <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>

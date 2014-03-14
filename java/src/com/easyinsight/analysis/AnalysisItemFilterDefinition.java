@@ -30,6 +30,18 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
     @JoinColumn(name="target_item_id")
     private AnalysisItem targetItem;
 
+    // better field choice filters, being able to point to "all" fields
+    // better tag management wherever possible
+    // links to docs
+    // markdown on dashboard text
+    // anything else on text reports
+    // the various connections
+    // the prebuilts themselves
+    // anything on html5 side we can do
+    // import users from connection
+    // better stuff on home page
+    //
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "analysis_item_filter_to_analysis_item",
             joinColumns = @JoinColumn(name = "filter_id", nullable = false),
@@ -136,9 +148,15 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
         List<WeNeedToReplaceHibernateTag> replaceTags = new ArrayList<WeNeedToReplaceHibernateTag>();
         for (WeNeedToReplaceHibernateTag tag : availableTags) {
             Tag newTag1 = replacementMap.findReplacementTag(tag.getTagID());
-            WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
-            newTag.setTagID(newTag1.getId());
-            replaceTags.add(newTag);
+            if (newTag1 == null) {
+                WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
+                newTag.setTagID(tag.getTagID());
+                replaceTags.add(newTag);
+            } else {
+                WeNeedToReplaceHibernateTag newTag = new WeNeedToReplaceHibernateTag();
+                newTag.setTagID(newTag1.getId());
+                replaceTags.add(newTag);
+            }
         }
         this.availableTags = replaceTags;
     }
@@ -212,6 +230,9 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
             } else {
                 session.update(analysisItem);
             }
+        }
+        if (targetItem.getAnalysisItemID() == 0) {
+            session.save(targetItem);
         }
         for (AnalysisItemHandle analysisItem : availableHandles) {
             analysisItem.save();

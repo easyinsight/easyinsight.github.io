@@ -218,7 +218,7 @@ public class CompositeFeed extends Feed {
         // match each field with its appropriate ad hoc source
 
         for (CompositeFeedNode node : compositeFeedNodes) {
-            QueryStateNode queryStateNode = node.createQueryStateNode(conn, getFields(), insightRequestMetadata, filters);
+            QueryStateNode queryStateNode = node.createQueryStateNode(conn, getFields(), insightRequestMetadata, filters, this);
             QueryNodeKey queryNodeKey = node.createQueryNodeKey();
             queryNodeMap.put(queryNodeKey, queryStateNode);
             graph.addVertex(queryStateNode);
@@ -277,6 +277,9 @@ public class CompositeFeed extends Feed {
             try {
                 QueryStateNode source = queryNodeMap.get(connection.sourceQueryNodeKey());
                 QueryStateNode target = queryNodeMap.get(connection.targetQueryNodeKey());
+                if (source == target) {
+
+                }
                 Edge edge = new Edge(connection);
                 graph.addEdge(source, target, edge);
             } catch (NullPointerException e) {

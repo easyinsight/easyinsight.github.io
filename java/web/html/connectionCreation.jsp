@@ -27,13 +27,17 @@
 
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
-    <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.NONE %>"/>
 </jsp:include>
-<div class="container corePageWell">
+<div class="container corePageWell" style="margin-top: 20px">
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
             <form class="well" method="post" action="/app/html/connectionCreationAction.jsp">
-                <div><strong><%= factory.getTitle() %></strong></div>
+                <div style="margin-bottom: 10px"><strong><%= factory.getTitle() %></strong></div>
+                <%
+                    if (request.getParameter("error") != null) {
+                        %><div style="margin-bottom: 10px">Something went wrong in trying to create the connection. Check the configuration information you used.</div><%
+                }   %>
                 <input type="hidden" id="connectionType" name="connectionType" value="<%= connectionID%>"/>
                 <%
                     for (HTMLConnectionProperty property : factory.getProperties()) {
@@ -54,7 +58,7 @@
                 <%
                     }
                 %>
-                <button class="btn btn-inverse" style="margin-top: 10px" type="submit" value="Create"><%= factory.getType() == HTMLConnectionFactory.TYPE_OAUTH ? "Authorize Access" : "Create the Connection" %></button>
+                <button class="btn btn-inverse" style="margin-top: 20px" type="submit" value="Create"><%= factory.getType() == HTMLConnectionFactory.TYPE_OAUTH ? "Authorize Access" : "Create the Connection" %></button>
             </form>
         </div>
 

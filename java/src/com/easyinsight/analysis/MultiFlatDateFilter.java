@@ -217,4 +217,20 @@ public class MultiFlatDateFilter extends FilterDefinition {
         MultiFlatDateFilter f = (MultiFlatDateFilter) overrideFilter;
         this.setLevels(f.getLevels());
     }
+
+    @Override
+    public String asString(InsightRequestMetadata insightRequestMetadata) {
+        int minLevel = Calendar.DECEMBER;
+        int maxLevel = Calendar.JANUARY;
+        for (DateLevelWrapper wrapper : getLevels()) {
+            minLevel = Math.min(minLevel, wrapper.getDateLevel());
+            maxLevel = Math.max(maxLevel, wrapper.getDateLevel());
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MONTH, minLevel);
+        String firstMonth = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
+        calendar.set(Calendar.MONTH, maxLevel);
+        String endMonth = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
+        return firstMonth + " to " + endMonth;
+    }
 }

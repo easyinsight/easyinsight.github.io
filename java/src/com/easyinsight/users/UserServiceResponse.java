@@ -1,8 +1,10 @@
 package com.easyinsight.users;
 
+
 import com.easyinsight.analysis.ReportTypeOptions;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.export.ExportService;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.preferences.*;
 import org.hibernate.Session;
@@ -10,7 +12,9 @@ import org.hibernate.Session;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * User: jboe
@@ -64,6 +68,24 @@ public class UserServiceResponse {
     private boolean accountReports;
     private boolean tagsAndCopyEnabled;
     private boolean hourlyRefreshEnabled;
+    private String thousandsSeperator;
+    private String decimalSeperator;
+
+    public String getThousandsSeperator() {
+        return thousandsSeperator;
+    }
+
+    public void setThousandsSeperator(String thousandsSeperator) {
+        this.thousandsSeperator = thousandsSeperator;
+    }
+
+    public String getDecimalSeperator() {
+        return decimalSeperator;
+    }
+
+    public void setDecimalSeperator(String decimalSeperator) {
+        this.decimalSeperator = decimalSeperator;
+    }
 
     public boolean isHourlyRefreshEnabled() {
         return hourlyRefreshEnabled;
@@ -122,6 +144,22 @@ public class UserServiceResponse {
         if (applicationSkin.getReportHeaderImage() != null) {
             bytes = new PreferencesService().getImage(applicationSkin.getReportHeaderImage().getId(), conn);
         }
+        /*Session session = Database.instance().createSession(conn);
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT CUSTOM_ROLLING_INTERVAL_ID FROM ACCOUNT_TO_CUSTOM_ROLLING_INTERVAL WHERE ACCOUNT_ID = ?");
+            queryStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet intervalRS = queryStmt.executeQuery();
+            List<CustomRollingInterval> intervals = new ArrayList<CustomRollingInterval>();
+            while (intervalRS.next()) {
+                long intervalID = intervalRS.getLong(1);
+                CustomRollingInterval interval = (CustomRollingInterval) session.createQuery("from CustomRollingInterval where customRollingIntervalID = ?").setLong(0, intervalID).list().get(0);
+                intervals.add(interval);
+            }
+            applicationSkin.setRollingFilterOptions(intervals);
+            queryStmt.close();
+        } finally {
+            session.close();
+        }*/
         UserServiceResponse response = createResponse(user, applicationSkin, personaName);
         response.setReportImage(bytes);
         return response;
@@ -168,6 +206,14 @@ public class UserServiceResponse {
                 account.isHeatMapEnabled(), newsDate, user.getNewsDismissDate(), accountOverSize, user.isTestAccountVisible(), account.isTagsAndCopyEnabled(),
                 account.isHourlyRefreshEnabled());
         response.setReportImage(bytes);
+        Locale locale = ExportService.createLocale(account.getAccountLocale());
+        NumberFormat nf = NumberFormat.getInstance(locale);
+        String string = nf.format(5000.1);
+        String thousandsSeperator = String.valueOf(string.charAt(1));
+        String decimalSeperator = String.valueOf(string.charAt(5));
+        response.setThousandsSeperator(thousandsSeperator);
+        response.setDecimalSeperator(decimalSeperator);
+        System.out.println(thousandsSeperator + " and " + decimalSeperator);
         return response;
     }
 

@@ -29,12 +29,9 @@ import mx.states.State;
 public class SliderMeasureFilter extends HBox implements IFilter
 {
 
-    public static const OPERATOR_STRINGS:Object = {1: "<", 2: "<=" }
-    private var hslider:HSlider;
+    public static const OPERATOR_STRINGS:Object = {1: "<", 2: "<=" };
     private var _filterDefinition:FilterRangeDefinition;
     private var analysisItem:AnalysisItem;
-    private var lowValue:int;
-    private var highValue:int;
 
     private var _lowValueString:String;
     private var _highValueString:String;

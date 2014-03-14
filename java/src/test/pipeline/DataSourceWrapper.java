@@ -1,6 +1,7 @@
 package test.pipeline;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -129,11 +130,11 @@ public class DataSourceWrapper implements  ITestConstants {
     }
 
     public void join(DataSourceWrapper wrapper1, DataSourceWrapper wrapper2, ChildConnection childConnection) throws Exception {
-        CompositeFeedConnection connection = childConnection.createConnection((IServerDataSourceDefinition) wrapper1.getDataSource(),
-                (IServerDataSourceDefinition) wrapper2.getDataSource());
+        /*CompositeFeedConnection connection = childConnection.createConnection((IServerDataSourceDefinition) wrapper1.getDataSource(),
+                (IServerDataSourceDefinition) wrapper2.getDataSource(), null);
         CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) dataSource;
         compositeFeedDefinition.getConnections().add(connection);
-        new FeedStorage().updateDataFeedConfiguration(compositeFeedDefinition, conn);
+        new FeedStorage().updateDataFeedConfiguration(compositeFeedDefinition, conn);*/
     }
 
     public void join(DataSourceWrapper wrapper1, DataSourceWrapper wrapper2, String field1, String field2) throws Exception {
@@ -207,6 +208,8 @@ public class DataSourceWrapper implements  ITestConstants {
                     AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
                     SimpleDateFormat sdf = new SimpleDateFormat(date.getCustomDateFormat());
                     row.addValue(analysisItem.getKey(), sdf.parse((String) param));
+                } else if (param instanceof Number) {
+                    row.addValue(analysisItem.getKey(), new EmptyValue());
                 } else {
                     throw new RuntimeException();
                 }
@@ -220,8 +223,14 @@ public class DataSourceWrapper implements  ITestConstants {
         dataStorage.closeConnection();
     }
 
+    public ReportWrapper createReport(WSListDefinition existing) {
+        FeedMetadata feedMetadata = new DataService().getFeedMetadata(dataSource.getDataFeedID());
+        return new ReportWrapper(existing, feedMetadata);
+    }
+
     public ReportWrapper createReport() {
         WSListDefinition wsListDefinition = new WSListDefinition();
+        wsListDefinition.setReportType(WSAnalysisDefinition.LIST);
         wsListDefinition.setFilterDefinitions(new ArrayList<FilterDefinition>());
         wsListDefinition.setDataFeedID(dataSource.getDataFeedID());
         wsListDefinition.setColumns(new ArrayList<AnalysisItem>());

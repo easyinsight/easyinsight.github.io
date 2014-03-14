@@ -12,6 +12,7 @@ import com.easyinsight.dashboard.DelayedReportConfigurationLink;
 import com.easyinsight.dashboard.DelayedReportSaveLink;
 import com.easyinsight.etl.DelayedLookupTableLink;
 import com.easyinsight.genredata.AnalyzeEvent;
+import com.easyinsight.genredata.DelayedReportTemplate;
 import com.easyinsight.goals.DelayedDashboardAdminLink;
 import com.easyinsight.goals.DelayedScorecardAdminLink;
 import com.easyinsight.goals.DelayedScorecardViewLink;
@@ -104,12 +105,12 @@ public class FragmentParser {
                 delayedLookupTableLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 delayedLookupTableLink.execute();
             }),
-            /*new FragmentTester("reportTemplateID", function(key:String, workspace:PrimaryWorkspace, o:Object):void {
+            new FragmentTester("reportTemplateID", function(key:String, workspace:PrimaryWorkspace, o:Object):void {
                 var delayedTemplate:DelayedReportTemplate = new DelayedReportTemplate(key);
                 delayedTemplate.addEventListener(ListingChangeEvent.LISTING_CHANGE, workspace.changePerspective);
                 delayedTemplate.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 delayedTemplate.execute();
-            }),*/
+            }),
             new FragmentTester("connectionConfig", function(key:String, workspace:PrimaryWorkspace, o:Object):void {
                 var config:ConnectionConfig = new ConnectionConfig(key);
                 config.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);

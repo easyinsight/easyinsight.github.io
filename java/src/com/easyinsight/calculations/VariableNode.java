@@ -86,7 +86,7 @@ public class VariableNode extends CalculationTreeNode {
             throw new FunctionException("We could not find a filter named " + s + ".");
         }*/
     }
-
+    
     public void resolveVariableKey(Map<String, List<AnalysisItem>> keyItems, Map<String, List<AnalysisItem>> displayItems,
                                    Map<String, List<AnalysisItem>> unqualifiedDisplayItems, Map<String, UniqueKey> namespaces) {
         String s;
@@ -332,7 +332,7 @@ public class VariableNode extends CalculationTreeNode {
 
     @Override
     public void accept(ICalculationTreeVisitor visitor) {
-        visitor.visit(this);
+            visitor.visit(this);
     }
 
     private AnalysisItem analysisItem;

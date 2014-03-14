@@ -89,7 +89,7 @@
             <mx:CheckBox id="caseNotesCheckbox" selected="{includeCaseNotes}"/>
         </mx:FormItem>
         <mx:FormItem label="">
-            <mx:Button label="Configure Task Access..." click="configureTasks()" styleName="grayButton"/>
+            <mx:Button label="Add Additional API Tokens for Tasks..." click="configureTasks()" styleName="grayButton"/>
         </mx:FormItem>
     </mx:Form>
     <mx:HBox>

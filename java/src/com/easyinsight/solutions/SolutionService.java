@@ -108,7 +108,7 @@ public class SolutionService {
                     FeedDefinition source = new FeedStorage().getFeedDefinitionData(masterSourceID);
                     long targetID = solutionKPIData.getDataSourceID();
                     FeedDefinition target = new FeedStorage().getFeedDefinitionData(targetID);
-                    InstallMetadata.blah(source, target, conn, session, toInstall);
+                    InstallMetadata.install(source, target, conn, session, toInstall);
                 } finally {
                     session.close();
                 }
@@ -395,6 +395,37 @@ public class SolutionService {
         }
     }
 
+    public List<ReportValidation> validations(EIDescriptor descriptor, long targetID) {
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            FeedDefinition target = new FeedStorage().getFeedDefinitionData(targetID, conn);
+            FeedDefinition source;
+            if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                PreparedStatement dashboardQuery = conn.prepareStatement("SELECT DASHBOARD.data_source_id FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                dashboardQuery.setLong(1, descriptor.getId());
+                ResultSet rs = dashboardQuery.executeQuery();
+                rs.next();
+                long dataSourceID = rs.getLong(1);
+                source = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            } else {
+                PreparedStatement dashboardQuery = conn.prepareStatement("SELECT ANALYSIS.data_feed_id FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                dashboardQuery.setLong(1, descriptor.getId());
+                ResultSet rs = dashboardQuery.executeQuery();
+                rs.next();
+                long dataSourceID = rs.getLong(1);
+                source = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            }
+            return InstallMetadata.determine(source, target, conn, session, Arrays.asList(descriptor));
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+            Database.closeConnection(conn);
+        }
+    }
+
     public List<DataSourceDescriptor> determineDataSourceForEntity(EIDescriptor descriptor) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -416,7 +447,10 @@ public class SolutionService {
         }
     }
 
-    private Blah determineDataSourceForDashboard(long dashboardID, EIConnection conn) throws SQLException {
+    private ConnectionInstallOptions determineDataSourceForDashboard(long dashboardID, EIConnection conn) throws SQLException {
+
+        //
+
         PreparedStatement alreadyInstalledStmt = conn.prepareStatement("SELECT result_dashboard_id, data_feed.data_feed_id FROM dashboard, dashboard_install_info, data_feed, upload_policy_users, user " +
                 "WHERE origin_dashboard_id = ? AND dashboard_install_info.data_source_id = data_feed.data_feed_id and data_feed.data_feed_id = upload_policy_users.feed_id AND " +
                 "upload_policy_users.user_id = user.user_id and user.account_id = ? AND result_dashboard_id = dashboard.dashboard_id");
@@ -441,21 +475,22 @@ public class SolutionService {
         ResultSet dashboardRS = dashboardQuery.executeQuery();
         if (dashboardRS.next()) {
             long dataSourceID = dashboardRS.getLong(1);
-            Blah blah = determineDataSources(conn, dataSourceID);
-            for (DataSourceDescriptor d : blah.descriptors) {
+            ConnectionInstallOptions connectionInstallOptions = determineDataSources(conn, dataSourceID);
+            for (DataSourceDescriptor d : connectionInstallOptions.descriptors) {
+
                 d.setPrebuilts(map.get(d.getId()));
             }
-            return blah;
+            return connectionInstallOptions;
         }
         return null;
     }
 
-    private static class Blah {
+    private static class ConnectionInstallOptions {
         private List<DataSourceDescriptor> descriptors;
         private long connectionID;
         private String connectionName;
 
-        private Blah(List<DataSourceDescriptor> descriptors, long connectionID, String connectionName) {
+        private ConnectionInstallOptions(List<DataSourceDescriptor> descriptors, long connectionID, String connectionName) {
             this.descriptors = descriptors;
             this.connectionID = connectionID;
             this.connectionName = connectionName;
@@ -471,7 +506,7 @@ public class SolutionService {
                     "FROM ANALYSIS WHERE ANALYSIS.solution_visible = ? AND ANALYSIS.url_key = ?");
             reportQueryStmt.setBoolean(1, true);
             reportQueryStmt.setString(2, urlKey);
-            Blah blah;
+            ConnectionInstallOptions connectionInstallOptions;
             ResultSet rs = reportQueryStmt.executeQuery();
             if (rs.next()) {
                 long reportID = rs.getLong(1);
@@ -488,9 +523,9 @@ public class SolutionService {
                 ResultSet ratingRS = ratingStmt.executeQuery();
                 ratingRS.next();
                 int installs = ratingRS.getInt(1);
-                blah = determineDataSourceForReport(reportID, conn);
+                connectionInstallOptions = determineDataSourceForReport(reportID, conn);
                 srei = new ExchangeItem(reportName, reportID, installs, dateCreated, description,
-                        authorName, descriptor, blah.connectionID, blah.connectionName, recommended, 0);
+                        authorName, descriptor, connectionInstallOptions.connectionID, connectionInstallOptions.connectionName, recommended, 0);
             } else {
                 PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD_ID, URL_KEY, DASHBOARD_NAME, CREATION_DATE," +
                         "AUTHOR_NAME, DESCRIPTION, recommended_exchange FROM DASHBOARD WHERE DASHBOARD.exchange_visible = ? and " +
@@ -507,20 +542,20 @@ public class SolutionService {
                     String description = dashboardRS.getString(6);
                     boolean recommended = dashboardRS.getBoolean(7);
                     EIDescriptor descriptor = new DashboardDescriptor(null, dashboardID, dashboardURLKey, 0, Roles.NONE, null, false);
-                    blah = determineDataSourceForDashboard(dashboardID, conn);
+                    connectionInstallOptions = determineDataSourceForDashboard(dashboardID, conn);
                     PreparedStatement ratingStmt = conn.prepareStatement("SELECT count(exchange_dashboard_install_id) FROM EXCHANGE_DASHBOARD_INSTALL WHERE DASHBOARD_ID = ?");
                     ratingStmt.setLong(1, dashboardID);
                     ResultSet ratingRS = ratingStmt.executeQuery();
                     ratingRS.next();
                     int installs = ratingRS.getInt(1);
                     srei = new ExchangeItem(dashboardName, dashboardID, installs, dateCreated, description,
-                            authorName, descriptor, blah.connectionID, blah.connectionName, recommended, 0);
+                            authorName, descriptor, connectionInstallOptions.connectionID, connectionInstallOptions.connectionName, recommended, 0);
                 } else {
                     return null;
                 }
             }
             reportTemplateInfo.setExchangeData(srei);
-            reportTemplateInfo.setDataSources(blah.descriptors);
+            reportTemplateInfo.setDataSources(connectionInstallOptions.descriptors);
             return reportTemplateInfo;
         } catch (Exception e) {
             LogClass.error(e);
@@ -530,7 +565,7 @@ public class SolutionService {
         }
     }
 
-    private Blah determineDataSourceForReport(long reportID, EIConnection conn) throws SQLException {
+    private ConnectionInstallOptions determineDataSourceForReport(long reportID, EIConnection conn) throws SQLException {
         PreparedStatement reportQuery = conn.prepareStatement("SELECT ANALYSIS.data_feed_id " +
                 "FROM ANALYSIS WHERE ANALYSIS_ID = ?");
         reportQuery.setLong(1, reportID);
@@ -542,7 +577,7 @@ public class SolutionService {
         return null;
     }
 
-    private Blah determineDataSources(EIConnection conn, long originalDataSourceID) throws SQLException {
+    private ConnectionInstallOptions determineDataSources(EIConnection conn, long originalDataSourceID) throws SQLException {
         List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
         List<DataSourceDescriptor> dataSources = new FeedStorage().getDataSources(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
 
@@ -568,7 +603,7 @@ public class SolutionService {
         if (descriptors.size() > 1) {
             describe(descriptors, conn);
         }
-        return new Blah(descriptors, connectionID, connectionName);
+        return new ConnectionInstallOptions(descriptors, connectionID, connectionName);
     }
 
     private void describe(List<DataSourceDescriptor> descriptors, EIConnection conn) throws SQLException {
@@ -594,6 +629,9 @@ public class SolutionService {
             descriptor.setDescription(description);
         }
     }
+
+    public static final int FRESH_INSTALL = 1;
+    public static final int UPGRADE_CHANGES = 2;
 
     public EIDescriptor installEntity(EIDescriptor descriptor, long dataSourceID) {
         if (descriptor.getType() == EIDescriptor.DASHBOARD) {
@@ -626,7 +664,7 @@ public class SolutionService {
             DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
             dashboardDescriptor.setId(dashboardID);
             dashboardDescriptor.setName(dashboardName);
-            DashboardDescriptor result = (DashboardDescriptor) InstallMetadata.blah(sourceDataSource, targetDataSource, conn, session, Arrays.asList((EIDescriptor) dashboardDescriptor));
+            DashboardDescriptor result = (DashboardDescriptor) InstallMetadata.install(sourceDataSource, targetDataSource, conn, session, Arrays.asList((EIDescriptor) dashboardDescriptor));
 
             session.flush();
 
@@ -690,7 +728,7 @@ public class SolutionService {
             InsightDescriptor insightDescriptor = new InsightDescriptor();
             insightDescriptor.setId(reportID);
             insightDescriptor.setName(reportName);
-            InsightDescriptor result = (InsightDescriptor) InstallMetadata.blah(sourceDataSource, targetDataSource, conn, session, Arrays.asList((EIDescriptor) insightDescriptor));
+            InsightDescriptor result = (InsightDescriptor) InstallMetadata.install(sourceDataSource, targetDataSource, conn, session, Arrays.asList((EIDescriptor) insightDescriptor));
             conn.commit();
             session.close();
             return result;

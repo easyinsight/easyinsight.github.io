@@ -14,6 +14,7 @@ import java.util.*;
 public class CalculationLogic {
     public void calculate(String code, WSAnalysisDefinition report, Collection<AnalysisItem> allItems, InsightRequestMetadata insightRequestMetadata, PipelineData pipelineData) {
         CalculationMetadata calculationMetadata = new CalculationMetadata();
+        calculationMetadata.setConnection(pipelineData.getConn());
         calculationMetadata.setReport(report);
         calculationMetadata.setInsightRequestMetadata(insightRequestMetadata);
         calculationMetadata.setDataSourceFields(allItems);

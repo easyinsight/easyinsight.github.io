@@ -8,7 +8,7 @@ import mx.charts.chartClasses.ChartBase;
 public class ChartDefinition extends AnalysisDefinition {
     public var chartType:int;
     public var chartFamily:int;
-
+    public var limitOther:Boolean = true;
     public var rotationAngle:Number;
     public var elevationAngle:Number;
 
@@ -20,6 +20,18 @@ public class ChartDefinition extends AnalysisDefinition {
 
     public var xAxisBaseAtZero:Boolean = true;
     public var yAxisBaseAtZero:Boolean = true;
+
+    public var xAxisMinimum:Number= 0;
+    public var xAxisMinimumDefined:Boolean;
+
+    public var xAxisMaximum:Number = 0;
+    public var xAxisMaximumDefined:Boolean;
+
+    public var yAxisMininum:Number = 0;
+    public var yAxisMinimumDefined:Boolean;
+
+    public var yAxisMaximum:Number = 0;
+    public var yAxisMaximumDefined:Boolean;
 
     public static const SORT_X_DESCENDING:String = "X-Axis Descending";
     public static const SORT_X_ASCENDING:String = "X-Axis Ascending";
@@ -66,14 +78,14 @@ public class ChartDefinition extends AnalysisDefinition {
                 case ChartTypes.COLUMN_FAMILY:
                 case ChartTypes.BAR_FAMILY:
                 case ChartTypes.PIE_FAMILY:
-                        switch (chartType) {
-                            case ChartTypes.COLUMN_2D_STACKED:
-                            case ChartTypes.BAR_2D_STACKED:
-                                limitNumber = 100;
-                                break;
-                            default:
-                                limitNumber = 15;
-                        }
+                    switch (chartType) {
+                        case ChartTypes.COLUMN_2D_STACKED:
+                        case ChartTypes.BAR_2D_STACKED:
+                            limitNumber = 100;
+                            break;
+                        default:
+                            limitNumber = 15;
+                    }
                     break;
                 case ChartTypes.PLOT_FAMILY:
                 case ChartTypes.BUBBLE_FAMILY:

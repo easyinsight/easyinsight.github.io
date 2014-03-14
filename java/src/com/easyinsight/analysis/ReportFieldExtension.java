@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -96,5 +97,9 @@ public class ReportFieldExtension implements Cloneable, Serializable {
 
     public int extensionType() {
         return 0;
+    }
+
+    public void validate(Set<Long> sourceIDs) {
+
     }
 }

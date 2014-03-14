@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class InsightRequestMetadata implements Serializable {
     private Date now = new Date();
+    private AnalysisDateDimension baseDate;
+    private boolean dateJoin;
     private int utcOffset;
     private int version;
     private boolean refreshAllSources;
@@ -25,7 +27,6 @@ public class InsightRequestMetadata implements Serializable {
     private boolean traverseAllJoins;
     private boolean logReport;
     private Collection<AnalysisItem> reportItems;
-    private boolean lookupTableAggregate;
     private List<AnalysisItem> additionalAnalysisItems = new ArrayList<AnalysisItem>();
     private transient Map<UniqueKey, AnalysisItem> uniqueIteMap = new HashMap<UniqueKey, AnalysisItem>();
     private transient Map<String, UniqueKey> fieldToUniqueMap = new HashMap<String, UniqueKey>();
@@ -48,6 +49,55 @@ public class InsightRequestMetadata implements Serializable {
     private boolean noDataOnNoJoin;
     private String ip;
     private transient boolean noLogging;
+    private transient Map<String, List<String>> fieldAudits = new HashMap<String, List<String>>();
+
+    private transient List<AnalysisItem> allItems;
+    private transient AnalysisItemRetrievalStructure structure;
+
+    public List<AnalysisItem> getAllItems() {
+        return allItems;
+    }
+
+    public void setAllItems(List<AnalysisItem> allItems) {
+        this.allItems = allItems;
+    }
+
+    public AnalysisItemRetrievalStructure getStructure() {
+        return structure;
+    }
+
+    public void setStructure(AnalysisItemRetrievalStructure structure) {
+        this.structure = structure;
+    }
+
+    public Map<String, List<String>> getFieldAudits() {
+        return fieldAudits;
+    }
+
+    public boolean isDateJoin() {
+        return dateJoin;
+    }
+
+    public void setDateJoin(boolean dateJoin) {
+        this.dateJoin = dateJoin;
+    }
+
+    public AnalysisDateDimension getBaseDate() {
+        return baseDate;
+    }
+
+    public void setBaseDate(AnalysisDateDimension baseDate) {
+        this.baseDate = baseDate;
+    }
+
+    public void addAudit(AnalysisItem field, String audit) {
+        List<String> audits = fieldAudits.get(field.toDisplay());
+        if (audits == null) {
+            audits = new ArrayList<String>();
+            fieldAudits.put(field.toDisplay(), audits);
+        }
+        audits.add(audit);
+    }
 
     public List<ReportAuditEvent> getAuditEvents() {
         return auditEvents;
@@ -66,8 +116,6 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     private transient Map<String, Boolean> filterOverrideMap = new HashMap<String, Boolean>();
-
-    private transient boolean newFilterStrategy;
 
     private transient int fetchSize;
 
@@ -133,14 +181,6 @@ public class InsightRequestMetadata implements Serializable {
 
     public void setFetchSize(int fetchSize) {
         this.fetchSize = fetchSize;
-    }
-
-    public boolean isNewFilterStrategy() {
-        return newFilterStrategy;
-    }
-
-    public void setNewFilterStrategy(boolean newFilterStrategy) {
-        this.newFilterStrategy = newFilterStrategy;
     }
 
     public Map<FilterDefinition, AdvancedFilterProperties> getFilterPropertiesMap() {
@@ -274,14 +314,6 @@ public class InsightRequestMetadata implements Serializable {
 
     public void setFieldToUniqueMap(Map<String, UniqueKey> fieldToUniqueMap) {
         this.fieldToUniqueMap = fieldToUniqueMap;
-    }
-
-    public boolean isLookupTableAggregate() {
-        return lookupTableAggregate;
-    }
-
-    public void setLookupTableAggregate(boolean lookupTableAggregate) {
-        this.lookupTableAggregate = lookupTableAggregate;
     }
 
     public Collection<AnalysisItem> getReportItems() {

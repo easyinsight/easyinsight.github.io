@@ -3,7 +3,6 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.definitions.WSDiagramDefinition;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
-import nu.xom.Attribute;
 import nu.xom.Element;
 import org.hibernate.Session;
 
@@ -24,23 +23,13 @@ public class DiagramDefinitionState extends AnalysisDefinitionState {
     @Column(name="diagram_report_id")
     private long diagramReportID;
 
-    @Column(name="filter_name")
-    private String filterName;
-
-    @Column (name="day_window")
-    private String dayWindow;
-
     @Override
     public Element toXML(XMLMetadata xmlMetadata) {
         Element element = super.toXML(xmlMetadata);
-        element.addAttribute(new Attribute("filterName", String.valueOf(filterName)));
-        element.addAttribute(new Attribute("dayWindow", String.valueOf(dayWindow)));
         return element;
     }
 
     public void subclassFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
-        filterName = element.getAttribute("filterName").getValue();
-        dayWindow = element.getAttribute("dayWindow").getValue();
     }
 
     @OneToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
@@ -61,26 +50,8 @@ public class DiagramDefinitionState extends AnalysisDefinitionState {
     public WSAnalysisDefinition createWSDefinition() {
         WSDiagramDefinition trend = new WSDiagramDefinition();
         trend.setDiagramReportID(diagramReportID);
-        trend.setFilterName(filterName);
-        trend.setDayWindow(Integer.parseInt(dayWindow));
         trend.setLinks(links);
         return trend;
-    }
-
-    public String getDayWindow() {
-        return dayWindow;
-    }
-
-    public void setDayWindow(String dayWindow) {
-        this.dayWindow = dayWindow;
-    }
-
-    public String getFilterName() {
-        return filterName;
-    }
-
-    public void setFilterName(String filterName) {
-        this.filterName = filterName;
     }
 
     public long getDiagramReportID() {

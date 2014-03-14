@@ -72,6 +72,26 @@ public class FeedRegistry {
         return feed;
     }
 
+    public Feed getFeed(long identifier, EIConnection conn, FeedDefinition parentSource) {
+        Feed feed = (Feed) MemCachedManager.get("feed" + identifier);
+
+        try {
+            if (feed == null || !isLatestVersion(feed, identifier, conn)) {
+                LogClass.debug("Cache miss for feed id: " + identifier);
+                FeedDefinition feedDefinition;
+                feedDefinition = feedStorage.getFeedDefinitionData(identifier, conn);
+                feed = feedDefinition.createFeed(conn, parentSource);
+                feed.setVersion(getLatestVersion(identifier, conn));
+                MemCachedManager.add("feed" + identifier, 10000, feed);
+            }
+            else
+                LogClass.debug("Cache hit for feed id: " + identifier);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return feed;
+    }
+
     private boolean isLatestVersion(Feed feed, long identifier, EIConnection conn) throws SQLException {
         if(feed == null)
             return false;

@@ -61,6 +61,12 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         setFeedName("Basecamp");
     }
 
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Basecamp URL", "url", "Your Basecamp URL is the browser URL you normally use to connect to Basecamp. For example, if you access Basecamp as yourcompanyname.basecamphq.com, put yourcompanyname in as the Basecamp URL.");
+        factory.addField("Basecamp API Authentication Token:", "token", "You can find the token on your Basecamp page under My Info - API Token.");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
+
     public boolean isForceProjectRefresh() {
         return forceProjectRefresh;
     }

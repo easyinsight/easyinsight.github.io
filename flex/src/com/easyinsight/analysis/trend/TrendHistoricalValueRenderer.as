@@ -1,10 +1,9 @@
 package com.easyinsight.analysis.trend {
 import com.easyinsight.analysis.TrendOutcome;
 import com.easyinsight.analysis.TrendReportFieldExtension;
-import com.easyinsight.kpi.KPI;
 
-import mx.containers.HBox;
-import mx.controls.Label;
+
+
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
 import mx.core.UITextField;
@@ -33,8 +32,8 @@ public class TrendHistoricalValueRenderer extends UIComponent implements IListIt
     public function set data(val:Object):void {
         this.trendOutcome = val as TrendOutcome;
         if (trendOutcome != null) {
-            if (trendOutcome.measure.reportFieldExtension != null && trendOutcome.measure.reportFieldExtension is TrendReportFieldExtension &&
-                    (TrendReportFieldExtension(trendOutcome.measure.reportFieldExtension).date || TrendReportFieldExtension(trendOutcome.measure.reportFieldExtension).trendComparisonField)) {
+            if (trendOutcome.historical != null || (trendOutcome.measure.reportFieldExtension != null && trendOutcome.measure.reportFieldExtension is TrendReportFieldExtension &&
+                    (TrendReportFieldExtension(trendOutcome.measure.reportFieldExtension).date))) {
                 var formatter:Formatter = trendOutcome.measure.getFormatter();
                 valueLabel.text = formatter.format(trendOutcome.historical.getValue());
                 valueLabel.validateNow();

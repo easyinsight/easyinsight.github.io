@@ -13,7 +13,6 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
     public var date:AnalysisDateDimension;
     public var iconImage:String;
     public var highLow:int;
-    public var trendComparisonField:AnalysisItem;
 
     public function TrendReportFieldExtension() {
     }
@@ -22,9 +21,6 @@ public class TrendReportFieldExtension extends ReportFieldExtension {
         super.updateFromSaved(reportFieldExtension);
         if (date != null) {
             date.updateFromSaved(TrendReportFieldExtension(reportFieldExtension).date);
-        }
-        if (trendComparisonField != null) {
-            trendComparisonField.updateFromSaved(TrendReportFieldExtension(reportFieldExtension).trendComparisonField);
         }
     }
 }

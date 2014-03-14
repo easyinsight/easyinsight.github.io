@@ -11,7 +11,7 @@ public class LineChartDefinition extends TwoAxisDefinition{
 
     public var autoScale:Boolean = true;
     public var autoScaled:Boolean = true;
-    public var xAxisMaximum:Date = null;
+
 
     public var strokeWeight:int = 2;
     public var alignLabelsToUnits:Boolean = true;

@@ -36,6 +36,8 @@ public class ZendeskDataSource extends CompositeServerDataSource {
         return ZendeskDataSourceCreation;
     }
 
-
+    override public function hasCustomFields():Boolean {
+        return true;
+    }
 }
 }

@@ -94,7 +94,9 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                 if (key == null) {
                     key = new NamedKey(entry.getKey());
                 }
-                analysisItems.add(new AnalysisDimension(key, "Company " + entry.getValue()));
+                AnalysisDimension company = new AnalysisDimension(key, "Company " + entry.getValue());
+                company.setCustomFlag(HighRiseCompositeSource.CUSTOM_FIELD_COMPANY);
+                analysisItems.add(company);
             }
         } catch (ReportException re) {
             throw re;

@@ -35,7 +35,7 @@ public abstract class WSYAxisDefinition extends WSChartDefinition {
             if (analysisMeasure != null) {
                 dataSet.sort(analysisMeasure, getLimitsMetadata().isTop());
                 List<IRow> subset = dataSet.subset(getLimitsMetadata().getNumber());
-                if (subset.size() > 0) {
+                if (subset.size() > 0 && isLimitOther()) {
                     IRow other = dataSet.createRow();
                     Map<AnalysisItem, Aggregation> map = new HashMap<AnalysisItem, Aggregation>();
                     List<Value> otherValues = new ArrayList<Value>();

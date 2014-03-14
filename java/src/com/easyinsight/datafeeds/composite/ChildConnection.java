@@ -1,7 +1,10 @@
 package com.easyinsight.datafeeds.composite;
 
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.CompositeFeedConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 
@@ -102,30 +105,38 @@ public class ChildConnection {
         this.targetKey = targetKey;
     }
 
-    public CompositeFeedConnection createConnection(IServerDataSourceDefinition sourceDef, IServerDataSourceDefinition targetDef) {
-        if (fixedKey == null) {
-            if (sourceDef == null) {
-                return null;
+    private Key findKey(long id, String key, FeedDefinition dataSource) {
+        for (AnalysisItem field : dataSource.getFields()) {
+            if (field.getKey() instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) field.getKey();
+                if (derivedKey.getFeedID() == id) {
+                    if (derivedKey.getParentKey().toKeyString().equals(key)) {
+                        return derivedKey.getParentKey();
+                    }
+                }
             }
-            Key sourceKey = sourceDef.getField(getSourceKey());
+        }
+        return null;
+    }
+
+    public CompositeFeedConnection createConnection(Long sourceID, String sourceName, Long targetID, String targetName, FeedDefinition parentSource) {
+        if (fixedKey == null) {
+            Key sourceKey = findKey(sourceID, getSourceKey(), parentSource);
             if (sourceKey == null) {
                 return null;
             }
-            if (targetDef == null) {
-                return null;
-            }
-            Key targetKey = targetDef.getField(getTargetKey());
+            Key targetKey = findKey(targetID, getTargetKey(), parentSource);
             if (targetKey == null) {
                 return null;
             }
-            CompositeFeedConnection conn = new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
-                        sourceKey, targetKey, sourceDef.getFeedName(), targetDef.getFeedName(), leftJoin, rightJoin, leftOriginal, rightOriginal);
+            CompositeFeedConnection conn = new CompositeFeedConnection(sourceID, targetID,
+                        sourceKey, targetKey, sourceName, targetName, leftJoin, rightJoin, leftOriginal, rightOriginal);
             conn.setSourceCardinality(getSourceCardinality());
             conn.setTargetCardinality(getTargetCardinality());
             return conn;
         } else {
-            return new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
-                    fixedKey, fixedKey, sourceDef.getFeedName(), targetDef.getFeedName(), leftJoin, rightJoin, leftOriginal, rightOriginal);
+            return new CompositeFeedConnection(sourceID, targetID,
+                    fixedKey, fixedKey, sourceName, targetName, leftJoin, rightJoin, leftOriginal, rightOriginal);
         }
     }
 }

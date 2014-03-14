@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.DerivedKey;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
@@ -19,21 +20,45 @@ public class FieldRule {
     public static final int TAG_IN = 1;
     public static final int FIELD_IN = 2;
 
-    // we have the field rules
-    // copying the cached addons
-    // copying report level calculations
-    // "calculation" report
-
     private Link link;
     private ReportFieldExtension extension;
+    private long fieldRuleID;
 
     private AnalysisItemHandle explicitField;
     private Tag tag;
     private int type;
     private boolean all;
+    private long dataSourceID;
+    private String dataSourceName;
+    private String drillthroughName;
+    private String defaultDate;
+
+    public long getFieldRuleID() {
+        return fieldRuleID;
+    }
+
+    public void setFieldRuleID(long fieldRuleID) {
+        this.fieldRuleID = fieldRuleID;
+    }
+
+    public String getDrillthroughName() {
+        return drillthroughName;
+    }
+
+    public void setDrillthroughName(String drillthroughName) {
+        this.drillthroughName = drillthroughName;
+    }
+
+    public String getDefaultDate() {
+        return defaultDate;
+    }
+
+    public void setDefaultDate(String defaultDate) {
+        this.defaultDate = defaultDate;
+    }
 
     public static List<FieldRule> load(EIConnection conn, long dataSourceID) throws SQLException {
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT FIELD_RULE_ID, FIELD_TYPE, ALL_FIELDS, LINK_ID, EXTENSION_ID, TAG_ID, DISPLAY_NAME FROM FIELD_RULE WHERE DATA_SOURCE_ID = ? ORDER BY FIELD_ORDER ASC");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT FIELD_RULE_ID, FIELD_TYPE, ALL_FIELDS, LINK_ID, EXTENSION_ID, TAG_ID, DISPLAY_NAME, RULE_DATA_SOURCE_ID, DEFAULT_DATE FROM FIELD_RULE WHERE DATA_SOURCE_ID = ? ORDER BY FIELD_ORDER ASC");
         PreparedStatement getTagStmt = conn.prepareStatement("SELECT TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_TAG_ID = ?");
         loadStmt.setLong(1, dataSourceID);
         ResultSet rs = loadStmt.executeQuery();
@@ -59,6 +84,26 @@ public class FieldRule {
                 } finally {
                     session.close();
                 }
+                if (fieldRule.getLink() != null && fieldRule.getLink() instanceof DrillThrough) {
+                    DrillThrough drillThrough = (DrillThrough) fieldRule.getLink();
+                    if (drillThrough.getReportID() != null && drillThrough.getReportID() > 0) {
+                        PreparedStatement nameStmt = conn.prepareStatement("SELECT TITLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                        nameStmt.setLong(1, drillThrough.getReportID());
+                        ResultSet nameRS = nameStmt.executeQuery();
+                        if (nameRS.next()) {
+                            fieldRule.setDrillthroughName(nameRS.getString(1));
+                        }
+                        nameStmt.close();
+                    } else if (drillThrough.getDashboardID() != null && drillThrough.getDashboardID() > 0) {
+                        PreparedStatement nameStmt = conn.prepareStatement("SELECT DASHBOARD_NAME FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                        nameStmt.setLong(1, drillThrough.getDashboardID());
+                        ResultSet nameRS = nameStmt.executeQuery();
+                        if (nameRS.next()) {
+                            fieldRule.setDrillthroughName(nameRS.getString(1));
+                        }
+                        nameStmt.close();
+                    }
+                }
             }
             if (extensionID > 0) {
                 Session session = Database.instance().createSession(conn);
@@ -82,14 +127,45 @@ public class FieldRule {
                 String tagName = tagRS.getString(1);
                 fieldRule.setTag(new Tag(tagID, tagName, false, false, false));
             }
+            long dataSourceRuleID = rs.getLong(8);
+            if (!rs.wasNull()) {
+                PreparedStatement nameStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                nameStmt.setLong(1, dataSourceRuleID);
+                nameStmt.executeQuery();
+                ResultSet nameRS = nameStmt.executeQuery();
+                if (nameRS.next()) {
+                    fieldRule.setDataSourceName(nameRS.getString(1));
+                    fieldRule.setDataSourceID(dataSourceRuleID);
+                }
+                nameStmt.close();
+            }
+            fieldRule.setDefaultDate(rs.getString(9));
             rules.add(fieldRule);
         }
+        loadStmt.close();
+        getTagStmt.close();
         return rules;
+    }
+
+    public long getDataSourceID() {
+        return dataSourceID;
+    }
+
+    public void setDataSourceID(long dataSourceID) {
+        this.dataSourceID = dataSourceID;
+    }
+
+    public String getDataSourceName() {
+        return dataSourceName;
+    }
+
+    public void setDataSourceName(String dataSourceName) {
+        this.dataSourceName = dataSourceName;
     }
 
     public void save(EIConnection conn, long dataSourceID, int order) throws SQLException {
         PreparedStatement ps = conn.prepareStatement("INSERT INTO FIELD_RULE (DATA_SOURCE_ID, FIELD_TYPE, ALL_FIELDS, LINK_ID, FIELD_ORDER, " +
-                "EXTENSION_ID, TAG_ID, DISPLAY_NAME) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "EXTENSION_ID, TAG_ID, DISPLAY_NAME, rule_data_source_id, default_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         ps.setLong(1, dataSourceID);
         ps.setInt(2, type);
@@ -131,6 +207,12 @@ public class FieldRule {
         } else {
             ps.setNull(8, Types.VARCHAR);
         }
+        if (dataSourceID > 0) {
+            ps.setLong(9, getDataSourceID());
+        } else {
+            ps.setNull(9, Types.BIGINT);
+        }
+        ps.setString(10, getDefaultDate());
         ps.execute();
         ps.close();
     }
@@ -200,20 +282,36 @@ public class FieldRule {
             }
         } else if (getType() > 0 && analysisItem.hasType(getType())) {
             return true;
+        } else if (getDataSourceID() > 0) {
+            if (analysisItem.getKey() instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
+                if (derivedKey.getFeedID() == getDataSourceID()) {
+                    return true;
+                }
+            }
         }
         return false;
     }
 
-    public void update(AnalysisItem analysisItem, WSAnalysisDefinition report) {
+    public void update(AnalysisItem analysisItem, WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
         try {
             if (link != null) {
                 if (analysisItem.getLinks() != null && analysisItem.getLinks().size() > 0 && !(analysisItem.getLinks().get(0)).isDefinedByRule() &&
                         !(analysisItem.getLinks().get(0)).isCodeGenerated()) {
                     // already has a link
                 } else {
+                    if (link instanceof DrillThrough) {
+                        DrillThrough drillThrough = (DrillThrough) link;
+                        if (drillThrough.getReportID() != null && drillThrough.getReportID() == report.getAnalysisID()) {
+                            return;
+                        }
+                    }
                     Link clonedLink = link.clone();
                     clonedLink.setDefinedByRule(true);
-                    analysisItem.setLinks(Arrays.asList(clonedLink));
+                    List<Link> list = new ArrayList<Link>();
+                    list.add(clonedLink);
+                    analysisItem.setLinks(list);
+                    insightRequestMetadata.addAudit(analysisItem, "Field rule added link.");
                 }
             }
             if (extension != null) {
@@ -225,8 +323,12 @@ public class FieldRule {
                         ReportFieldExtension clone = extension.clone();
                         clone.setFromFieldRuleID(1);
                         analysisItem.setReportFieldExtension(clone);
+                        insightRequestMetadata.addAudit(analysisItem, "Field rule added field extension.");
                     }
                 }
+            }
+            if (defaultDate != null && !"".equals(defaultDate)) {
+                analysisItem.setDefaultDate(defaultDate);
             }
         } catch (Exception e) {
             LogClass.error(e);

@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.pivotaltrackerv5;
 
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
@@ -167,5 +168,10 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.PIVOTAL_V5_STORY_TO_LABEL, FeedType.PIVOTAL_V5_LABEL, PivotalTrackerV5StoryToLabelSource.LABEL_ID, PivotalTrackerV5LabelSource.ID),
                 new ChildConnection(FeedType.PIVOTAL_V5_STORY_TO_LABEL, FeedType.PIVOTAL_V5_STORY, PivotalTrackerV5StoryToLabelSource.STORY_ID, PivotalTrackerV5StorySource.ID),
                 new ChildConnection(FeedType.PIVOTAL_V5_ITERATION, FeedType.PIVOTAL_V5_STORY, PivotalTrackerV5IterationSource.ID, PivotalTrackerV5StorySource.ITERATION_ID));
+    }
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Pivotal Tracker API Authentication Token:", "token", "You can find the token on your Highrise page under My Info - API Token.");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 }

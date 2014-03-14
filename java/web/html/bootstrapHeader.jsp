@@ -6,3 +6,4 @@
 <link href="/css/bootstrap-theme.css" rel="stylesheet" />
 <link href="/css/app.css" rel="stylesheet" />
 <script type="text/javascript" src="/js/bootstrap.js"></script>
+<script type="text/javascript" src="/js/underscore-min.js"></script>

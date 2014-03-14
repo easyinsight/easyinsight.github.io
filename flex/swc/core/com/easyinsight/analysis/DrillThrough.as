@@ -20,7 +20,10 @@ public class DrillThrough extends Link{
         return "Drillthrough";
     }
 
-    override public function createString():String {
+    override public function createString(name:String = null):String {
+        if (name != null) {
+            return "drillthrough to " + name;
+        }
         return "drillthrough";
     }
 }

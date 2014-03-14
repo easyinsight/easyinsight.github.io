@@ -265,9 +265,6 @@ public class CompositeFeedDefinition extends FeedDefinition {
         stmt.close();
         for (AnalysisItem field : fields) {
             Key key = field.getKey();
-            if ("Won Deal Value".equals(field.toDisplay())) {
-                System.out.println("hrm");
-            }
             if (key instanceof DerivedKey) {
                 DerivedKey derivedKey = (DerivedKey) key;
                 CompositeFeedNode node = nodeMap.get(derivedKey.getFeedID());

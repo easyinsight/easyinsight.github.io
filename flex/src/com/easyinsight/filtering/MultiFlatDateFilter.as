@@ -18,6 +18,7 @@ import mx.controls.CheckBox;
 import mx.controls.Label;
 
 import mx.controls.LinkButton;
+import mx.core.UIComponent;
 import mx.managers.PopUpManager;
 
 	public class MultiFlatDateFilter extends HBox implements IFilter
@@ -87,7 +88,7 @@ import mx.managers.PopUpManager;
             }
         }
 
-        private var filterLabel:Label;
+        private var filterLabel:UIComponent;
 
         private var labelButton:LinkButton;
 
@@ -106,9 +107,18 @@ import mx.managers.PopUpManager;
 				_filterDefinition.field = analysisItem;
 			}
 
-            filterLabel = new Label();
-            filterLabel.styleName = "filterLabel";
-            filterLabel.text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+
+            if (_filterEditable) {
+                filterLabel = new LinkButton();
+                filterLabel.styleName = "filterLabel";
+                filterLabel.addEventListener(MouseEvent.CLICK, edit);
+                LinkButton(filterLabel).label = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            } else {
+                filterLabel = new Label();
+                filterLabel.styleName = "filterLabel";
+                Label(filterLabel).text = FilterDefinition.getLabel(_filterDefinition, analysisItem);
+            }
+
             addChild(filterLabel);
 
             var firstValue:int = 11;
@@ -131,11 +141,6 @@ import mx.managers.PopUpManager;
             addChild(labelButton);
 
             if (_filterEditable) {
-                var editButton:Button = new Button();
-                editButton.addEventListener(MouseEvent.CLICK, edit);
-                editButton.setStyle("icon", ImageConstants.EDIT_ICON);
-                editButton.toolTip = "Edit";
-                addChild(editButton);
 
                 var deleteButton:Button = new Button();
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
@@ -189,8 +194,8 @@ import mx.managers.PopUpManager;
             if (event.filterDefinition is FilterDateRangeDefinition) {
 
             }
-            if (filterLabel != null) {
-                filterLabel.text = FilterDefinition.getLabel(event.filterDefinition, analysisItem);
+            if (filterLabel is LinkButton) {
+                LinkButton(filterLabel).label = FilterDefinition.getLabel(event.filterDefinition, analysisItem);
             }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
 		}
