@@ -90,17 +90,17 @@ public class WSTrendDefinition extends WSKPIDefinition {
                 double v = ((outcome.getNow().toDouble() / outcome.getHistorical().toDouble()) - 1.0) * 100.0;
                 Link l = outcome.getMeasure().defaultLink();
                 String clickEvent = "";
+                Map<String, Object> j = null;
                 if (l != null && l instanceof DrillThrough) {
-                    JSONObject j = new JSONObject();
+                    j = new HashMap<String, Object>();
                     j.put("embedded", "false");
                     j.put("id", l.createID());
                     j.put("reportID", getUrlKey());
                     j.put("source", outcome.getMeasure().getAnalysisItemID());
-                    clickEvent = "drillThroughParameterized(" + j.toString() + ")";
                 }
 
                 //return old(fontColor, e, clickEvent, outcome, results, md, v);
-                return improved(fontColor, e, clickEvent, outcome, results, md, v);
+                return improved(fontColor, e, j, outcome, results, md, v);
 
             }
         } catch (Exception e) {
@@ -175,7 +175,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
         return sb.toString();
     }
 
-    private String improved(String fontColor, TextValueExtension e, String clickEvent, TrendOutcome outcome, TrendDataResults results, ExportMetadata md, double v) {
+    private String improved(String fontColor, TextValueExtension e, Map<String, Object> clickEvent, TrendOutcome outcome, TrendDataResults results, ExportMetadata md, double v) {
         StringBuilder sb = new StringBuilder();
         sb.append("<div style='text-align:center;");
         sb.append("color:");
@@ -187,21 +187,31 @@ public class WSTrendDefinition extends WSKPIDefinition {
         sb.append(";'>");
         sb.append("<div>");
 
-        //TrendReportFieldExtension extension = ((TrendReportFieldExtension) outcome.getMeasure().getReportFieldExtension());
-
-
+        StringBuilder drillthroughBuilder = new StringBuilder();
+        if(clickEvent != null) {
+            drillthroughBuilder.append("data-source=\"");
+            drillthroughBuilder.append(clickEvent.get("source"));
+            drillthroughBuilder.append("\" data-reportid=\"");
+            drillthroughBuilder.append(clickEvent.get("reportID"));
+            drillthroughBuilder.append("\" data-drillthroughid=\"");
+            drillthroughBuilder.append(clickEvent.get("id"));
+            drillthroughBuilder.append("\" data-reportid=\"");
+            drillthroughBuilder.append(clickEvent.get("reportID"));
+            drillthroughBuilder.append("\"");
+        }
 
         sb.append("<div style='font-size:");
         sb.append(getMajorFontSize());
         sb.append("px;display: inline-block;'> ");
-        if (!clickEvent.isEmpty()) {
-            sb.append("<a href='#' class='trendDrillthrough' onclick='");
-            sb.append(clickEvent);
-            sb.append("'>");
+        if (clickEvent != null) {
+            sb.append("<a href='#' class='trendDrillthrough list_drillthrough' ");
+            sb.append(drillthroughBuilder);
+            sb.append(">");
+
         }
         sb.append(ExportService.createValue(0, outcome.getMeasure(), outcome.getNow(), md.cal, md.currencySymbol, md.locale, false));
 
-        if (!clickEvent.isEmpty()) {
+        if (clickEvent != null) {
             sb.append("</a>");
         }
 
@@ -212,13 +222,13 @@ public class WSTrendDefinition extends WSKPIDefinition {
             sb.append("px;display: inline-block;'>");
             FormattingConfiguration c = new FormattingConfiguration();
             c.setFormattingType(FormattingConfiguration.PERCENTAGE);
-            if (!clickEvent.isEmpty()) {
-                sb.append("<a href='#' class='trendDrillthrough' onclick='");
-                sb.append(clickEvent);
-                sb.append("'>");
+            if (clickEvent != null) {
+                sb.append("<a href='#' class='trendDrillthrough list_drillthrough' ");
+                sb.append(drillthroughBuilder);
+                sb.append(">");
             }
             sb.append(FormattingConfiguration.createFormatter(c.getFormattingType()).format(v));
-            if (!clickEvent.isEmpty()) {
+            if (clickEvent != null) {
                 sb.append("</a>");
             }
 
@@ -229,13 +239,13 @@ public class WSTrendDefinition extends WSKPIDefinition {
 
         sb.append(getMinorFontSize());
         sb.append("px;'>");
-        if (!clickEvent.isEmpty()) {
-            sb.append("<a href='#' class='trendDrillthrough' onclick='");
-            sb.append(clickEvent);
-            sb.append("'>");
+        if (clickEvent != null) {
+            sb.append("<a href='#' class='trendDrillthrough list_drillthrough' ");
+            sb.append(drillthroughBuilder);
+            sb.append(">");
         }
         sb.append(outcome.getMeasure().toDisplay());
-        if (!clickEvent.isEmpty()) {
+        if (clickEvent != null) {
             sb.append("</a>");
         }
 

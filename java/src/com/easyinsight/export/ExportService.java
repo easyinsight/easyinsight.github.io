@@ -3604,17 +3604,17 @@ public class ExportService {
 //                                if (exportProperties.getEmbedKey() != null) {
 //                                    paramBuilder.append("&embedKey=" + exportProperties.getEmbedKey()+"&");
 //                                }
-
+                            sb.append("<a class=\"list_drillthrough\" href=\"#\" data-reportid=\"");
+                                                            sb.append(report.getUrlKey());
+                                                            sb.append("\" data-drillthroughid=\"");
+                                                            sb.append(drillThrough.createID());
+                                                            sb.append("\" data-embedded=\"");
+                                                            sb.append(exportProperties.isEmbedded());
+                                                            sb.append("\" data-source=\"");
+                                                            sb.append(analysisItem.getAnalysisItemID());
+                                                            sb.append("\"");
                             if (drillThrough.isFilterRowGroupings()) {
-                                sb.append("<a class=\"list_drillthrough\" href=\"#\" data-reportID=\"");
-                                sb.append(report.getUrlKey());
-                                sb.append("\" data-drillthroughID=\"");
-                                sb.append(drillThrough.createID());
-                                sb.append("\" data-embedded=\"");
-                                sb.append(exportProperties.isEmbedded());
-                                sb.append("\" data-source=\"");
-                                sb.append(analysisItem.getAnalysisItemID());
-                                sb.append("\"");
+
 
                                 for (AnalysisItem dataItem : headers) {
                                     if (dataItem.hasType(AnalysisItemTypes.DIMENSION)) {
@@ -3635,9 +3635,8 @@ public class ExportService {
                                     }
 
                                 }
-                                sb.append(">");
                             } else {
-                                sb.append("<a href=\"#\" data-drillthrough");
+                                sb.append(" data-drillthrough");
                                 sb.append(headerItem.getAnalysisItemID());
                                 sb.append("=\"");
 
@@ -3646,8 +3645,9 @@ public class ExportService {
                                 } catch (UnsupportedEncodingException e) {
                                     throw new RuntimeException(e);
                                 }
-                                sb.append("\">");
+                                sb.append("\"");
                             }
+                            sb.append(">");
                             showLink = true;
                         }
                     }
