@@ -4,7 +4,9 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
+import com.easyinsight.security.SecurityUtil;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,11 +33,13 @@ public class GaugeServlet extends HtmlServlet {
             NumberFormat nf = NumberFormat.getInstance();
             nf.setMaximumFractionDigits(analysisMeasure.getPrecision());
             nf.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
-            String string = ExportService.createValue(0, analysisMeasure, value, Calendar.getInstance(), "$", false);
+            ExportMetadata exportMetadata = ExportService.createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
+            String string = ExportService.createValue(0, analysisMeasure, value, Calendar.getInstance(), exportMetadata.currencySymbol, exportMetadata.locale, false);
             jsonObject.put("formattedValue", string);
             if (gaugeDefinition.getBenchmarkMeasure() != null) {
                 Value benchmarkValue = dataSet.getRow(0).getValue(gaugeDefinition.getBenchmarkMeasure());
-                jsonObject.put("benchmark", "Benchmark: " + ExportService.createValue(0, analysisMeasure, benchmarkValue, Calendar.getInstance(), "$", false));
+                jsonObject.put("benchmark", "Benchmark: " + ExportService.createValue(0, analysisMeasure, benchmarkValue, Calendar.getInstance(), exportMetadata.currencySymbol,
+                        exportMetadata.locale, false));
             }
         }
 

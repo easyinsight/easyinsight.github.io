@@ -3,7 +3,10 @@ package com.easyinsight.calculations.functions;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.core.*;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
+import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 
 import java.util.Calendar;
 
@@ -15,14 +18,14 @@ import java.util.Calendar;
 public class Format extends Function {
     public Value evaluate() {
         Value value = getParameter(0);
-        String fieldName = minusBrackets(getParameterName(0));
-        AnalysisItem field = null;
-        for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
-            if (fieldName.equals(analysisItem.toDisplay()) || fieldName.equals(analysisItem.getKey().toKeyString())) {
-                field = analysisItem;
-            }
+        AnalysisItem field = findDataSourceItem(0);
+        try {
+            ExportMetadata exportMetadata = ExportService.createExportMetadata(SecurityUtil.getAccountID(false), calculationMetadata.getConnection(), calculationMetadata.getInsightRequestMetadata());
+            return new StringValue(ExportService.createValue(1, field, value, Calendar.getInstance(), exportMetadata.currencySymbol, exportMetadata.locale, true));
+        } catch (Exception e) {
+            LogClass.error(e);
+            return new EmptyValue();
         }
-        return new StringValue(ExportService.createValue(1, field, value, Calendar.getInstance(), "$", true));
     }
 
     public int getParameterCount() {

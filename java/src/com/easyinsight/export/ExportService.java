@@ -609,7 +609,7 @@ public class ExportService {
                         } else {
                             sb.append("<td style=\"" + dataCell + "\">");
                         }
-                        sb.append(createValue(exportMetadata.dateFormat, measure, crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                        sb.append(createValue(exportMetadata.dateFormat, measure, crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                     } else {
                         sb.append("<td style=\"" + headerCell + "\">");
                         sb.append(crosstabValue.getValue());
@@ -870,7 +870,7 @@ public class ExportService {
                                 }
                             }
                             com.itextpdf.text.Font cellFont = new com.itextpdf.text.Font(fontFamily, fontSize, fontStyle, pdfTextColor);
-                            String valueString = createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, true);
+                            String valueString = createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, true);
                             Phrase phrase = new Phrase(valueString, cellFont);
                             PdfPCell valueCell = new PdfPCell(phrase);
                             if (pdfBackgroundColor != null) {
@@ -932,16 +932,16 @@ public class ExportService {
                 for (i = 0; i < kpiDefinition.getGroupings().size(); i++) {
                     AnalysisItem grouping = kpiDefinition.getGroupings().get(i);
                     Value value = trendOutcome.getDimensions().get(grouping.qualifiedName());
-                    PdfPCell groupingCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, grouping, value, exportMetadata.cal, exportMetadata.currencySymbol, false)));
+                    PdfPCell groupingCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, grouping, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)));
                     groupingCell.setMinimumHeight(20f);
                     table.addCell(groupingCell);
                 }
             }
             PdfPCell labelDataCell = new PdfPCell(new Phrase(trendOutcome.getMeasure().toUnqualifiedDisplay()));
             PdfPCell nowMeasureStyle = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(),
-                    exportMetadata.cal, exportMetadata.currencySymbol, false)));
+                    exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)));
             PdfPCell previousMeasureStyle = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(),
-                    exportMetadata.cal, exportMetadata.currencySymbol, false)));
+                    exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)));
 
             String percentChangeString;
             if (trendOutcome.getHistorical().toDouble() != 0) {
@@ -1030,7 +1030,7 @@ public class ExportService {
                     if (crosstabValue.getHeader() == null) {
                         Value value = crosstabValue.getValue();
                         cellValue = createValue(exportMetadata.dateFormat, measure, value, exportMetadata.cal,
-                                exportMetadata.currencySymbol, false);
+                                exportMetadata.currencySymbol, exportMetadata.locale,  false);
                     } else {
                         cellValue = crosstabValue.getValue().toString();
                     }
@@ -1103,11 +1103,11 @@ public class ExportService {
         return baos.toByteArray();
     }
 
-    public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, boolean pdf) {
-        return createValue(dateFormat, headerItem, value, cal, currencySymbol, pdf, null);
+    public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, Locale locale, boolean pdf) {
+        return createValue(dateFormat, headerItem, value, cal, currencySymbol, locale, pdf, null);
     }
 
-    public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, boolean pdf, @Nullable String explicitDateFormat) {
+    public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, Locale locale, boolean pdf, @Nullable String explicitDateFormat) {
         String valueString;
         if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
             AnalysisMeasure analysisMeasure = (AnalysisMeasure) headerItem;
@@ -1117,12 +1117,15 @@ public class ExportService {
             }
             if (analysisMeasure.getFormattingType() == FormattingConfiguration.CURRENCY) {
                 String symbolToUse = currencySymbol;
+                NumberFormat currencyFormatter;
                 if (!pdf && symbolToUse.length() > 0 && symbolToUse.charAt(0) == 8364) {
                     symbolToUse = "&euro;";
                 }
-                NumberFormat currencyFormatter = new DecimalFormat("###,###.##");
+                currencyFormatter = DecimalFormat.getInstance(locale);
+                //currencyFormatter = new DecimalFormat("###.###,##");
                 currencyFormatter.setMaximumFractionDigits(analysisMeasure.getPrecision());
                 currencyFormatter.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
+
                 valueString = symbolToUse + currencyFormatter.format(doubleValue);
             } else if (analysisMeasure.getFormattingType() == FormattingConfiguration.MILLISECONDS) {
                 double absoluteValue = Math.abs(doubleValue);
@@ -1166,12 +1169,12 @@ public class ExportService {
                     valueString = days + "d:" + hours + "h";
                 }
             } else if (analysisMeasure.getFormattingType() == FormattingConfiguration.PERCENTAGE) {
-                NumberFormat numberFormat = NumberFormat.getNumberInstance();
+                NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
                 numberFormat.setMaximumFractionDigits(analysisMeasure.getPrecision());
                 numberFormat.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
                 valueString = numberFormat.format(doubleValue) + "%";
             } else {
-                NumberFormat numberFormat = NumberFormat.getNumberInstance();
+                NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
                 numberFormat.setMaximumFractionDigits(analysisMeasure.getPrecision());
                 numberFormat.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
                 valueString = numberFormat.format(doubleValue);
@@ -1486,7 +1489,7 @@ public class ExportService {
                     Value measureValue = (Value) map.get(columnName);
                     String text;
                     if (measureValue != null && measureValue.type() == Value.NUMBER) {
-                        text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, false);
+                        text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
                     } else {
                         text = "";
                     }
@@ -1549,7 +1552,7 @@ public class ExportService {
                     Value measureValue = (Value) map.get(columnName);
                     String text;
                     if (measureValue != null && measureValue.type() == Value.NUMBER) {
-                        text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, false);
+                        text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
                     } else {
                         text = "";
                     }
@@ -1717,14 +1720,14 @@ public class ExportService {
                 }
             }
             sb.append("<td style=\"" + tdStyle + "left\">").append(trendOutcome.getMeasure().toUnqualifiedDisplay()).append("</td>");
-            String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, false);
+            String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
             sb.append("<td style=\"" + tdStyle + "right\">").append(nowValue).append("</td>");
-            String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, false);
+            String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
             sb.append("<td style=\"" + tdStyle + "right\">").append(previousValue).append("</td>");
             sb.append("<td style=\"" + tdStyle + "right\">");
             if (trendOutcome.getHistorical().toDouble() != 0) {
                 double percentChange = (trendOutcome.getNow().toDouble() - trendOutcome.getHistorical().toDouble()) / trendOutcome.getHistorical().toDouble() * 100;
-                sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
             }
             sb.append("</td>");
             sb.append("</tr>");
@@ -1798,13 +1801,13 @@ public class ExportService {
             sb.append(trendOutcome.getMeasure().toUnqualifiedDisplay());
             sb.append("</span>");
             sb.append("</td>");
-            String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, false);
+            String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
             sb.append("<td style=\"" + tdStyle + "right\">").append(nowValue);
             sb.append("<span class='sortData'>");
             sb.append(trendOutcome.getNow().toDouble());
             sb.append("</span>");
             sb.append("</td>");
-            String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, false);
+            String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
             sb.append("<td style=\"" + tdStyle + "right\">").append(previousValue);
             sb.append("<span class='sortData'>");
             sb.append(trendOutcome.getHistorical().toDouble());
@@ -1813,7 +1816,7 @@ public class ExportService {
             sb.append("<td style=\"" + tdStyle + "right\">");
             if (trendOutcome.getHistorical().toDouble() != 0) {
                 double percentChange = (trendOutcome.getNow().toDouble() - trendOutcome.getHistorical().toDouble()) / trendOutcome.getHistorical().toDouble() * 100;
-                sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                 sb.append("<span class='sortData'>");
                 sb.append(percentChange);
                 sb.append("</span>");
@@ -1923,12 +1926,12 @@ public class ExportService {
                     if (compareYearsResult.isPercentChange()) {
                         String tempStyle = cellStyle + ";color:#880000";
                         if (compareYearsResult.getValue().toDouble() < 0) {
-                            sb.append("<td style=\"").append(tempStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                            sb.append("<td style=\"").append(tempStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                         } else {
-                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                         }
                     } else {
-                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getMeasure(), value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getMeasure(), value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                     }
                 }
             }
@@ -2015,9 +2018,9 @@ public class ExportService {
 
                     Value value = compareYearsResult.getValue();
                     if (compareYearsResult.isPercentChange()) {
-                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                     } else {
-                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getMeasure(), value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getMeasure(), value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                     }
                 }
             }
@@ -2059,7 +2062,7 @@ public class ExportService {
         sb.append("<thead><tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<th></th>");
         for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
-            String date = createValue(exportMetadata.dateFormat, verticalList.getTimeDimension(), ytdStuff.getIntervals().get(i), exportMetadata.cal, exportMetadata.currencySymbol, false, "MMM");
+            String date = createValue(exportMetadata.dateFormat, verticalList.getTimeDimension(), ytdStuff.getIntervals().get(i), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false, "MMM");
             sb.append("<th style=\"").append(thStyle).append("\">").append(date).append("</th>");
         }
         sb.append("<th style=\"").append(thStyle).append("\">").append("YTD").append("</th>");
@@ -2130,18 +2133,18 @@ public class ExportService {
                         TimeIntervalValue timeIntervalValue = map.get(ytdStuff.getIntervals().get(i));
                         if (timeIntervalValue != null) {
                             Value value = timeIntervalValue.getValue();
-                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                         } else {
                             sb.append("<td style=\"").append(cellStyle).append("</td>");
                         }
                     }
-                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
+                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
 
                     if (hasBenchmark) {
                         if (ytdValue.getBenchmarkMeasure() != null) {
-                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                         } else {
                             sb.append("<td style=\"").append(cellStyle).append("\"></td>");
                             sb.append("<td style=\"").append(cellStyle).append("\"></td>");
@@ -2193,7 +2196,7 @@ public class ExportService {
         sb.append("<tr style=\"background: #333333; color: #FFFFFF\">");
         sb.append("<th></th>");
         for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
-            String date = createValue(exportMetadata.dateFormat, verticalList.getTimeDimension(), ytdStuff.getIntervals().get(i), exportMetadata.cal, exportMetadata.currencySymbol, false, "MMM");
+            String date = createValue(exportMetadata.dateFormat, verticalList.getTimeDimension(), ytdStuff.getIntervals().get(i), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false, "MMM");
             sb.append("<th style=\"").append(thStyle).append("\">").append(date).append("</th>");
         }
         sb.append("<th>").append("YTD").append("</th>");
@@ -2258,17 +2261,17 @@ public class ExportService {
                         TimeIntervalValue timeIntervalValue = map.get(ytdStuff.getIntervals().get(i));
                         if (timeIntervalValue != null) {
                             Value value = timeIntervalValue.getValue();
-                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                         } else {
                             sb.append("<td style=\"").append(cellStyle).append("</td>");
                         }
                     }
-                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
+                    sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
 
                     if (ytdValue.getBenchmarkMeasure() != null) {
-                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
-                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, false)).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
+                        sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
                     } else {
                         sb.append("<td style=\"").append(cellStyle).append("</td>");
                         sb.append("<td style=\"").append(cellStyle).append("</td>");
@@ -3065,20 +3068,24 @@ public class ExportService {
     public static ExportMetadata createExportMetadata(long accountID, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         int dateFormat;
         String currencySymbol;
+        String locale;
         try {
-            PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT, CURRENCY_SYMBOL FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT, CURRENCY_SYMBOL, ACCOUNT_LOCALE FROM ACCOUNT WHERE ACCOUNT_ID = ?");
             dateFormatStmt.setLong(1, accountID);
             ResultSet rs = dateFormatStmt.executeQuery();
             if (rs.next()) {
                 dateFormat = rs.getInt(1);
                 currencySymbol = rs.getString(2);
+                locale = rs.getString(3);
             } else {
                 dateFormat = 1;
                 currencySymbol = "$";
+                locale = "EN";
             }
         } catch (com.easyinsight.security.SecurityException e) {
             dateFormat = 1;
             currencySymbol = "$";
+            locale = "EN";
         }
         int time = insightRequestMetadata.getUtcOffset() / 60;
         String string;
@@ -3092,7 +3099,25 @@ public class ExportService {
         TimeZone timeZone = TimeZone.getTimeZone(string);
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(timeZone);
-        return new ExportMetadata(dateFormat, currencySymbol, cal);
+        Locale localeObject;
+        localeObject = createLocale(locale);
+        return new ExportMetadata(dateFormat, currencySymbol, cal, localeObject);
+    }
+
+    public static Locale createLocale(String locale) {
+        Locale localeObject;
+        if ("EN".equals(locale)) {
+            localeObject = new Locale("en", "US");
+        } else if ("UK".equals(locale)) {
+            localeObject = new Locale("en", "GB");
+        } else if ("DE".equals(locale)) {
+            localeObject = new Locale("de", "DEU");
+        } else if ("ES".equals(locale)) {
+            localeObject = new Locale("es", "ESP");
+        } else {
+            localeObject = new Locale("en", "US");
+        }
+        return localeObject;
     }
 
     private static final String headerLabelStyle = "text-align:center;padding-top:15px;padding-bottom:15px;font-size:14px";
@@ -3359,7 +3384,7 @@ public class ExportService {
                         }
 
 
-                        sb.append(createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+                        sb.append(createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                         if (showLink) {
                             sb.append("</a>");
                         }
@@ -3406,7 +3431,7 @@ public class ExportService {
                                     styleString.append(align);
                                 }
                                 sb.append("<td style=\"").append(styleString.toString()).append("\">");
-                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                                 sb.append("</td>");
                             } else {
                                 sb.append("<td></td>");
@@ -3607,7 +3632,7 @@ public class ExportService {
                         }
 
 
-                        sb.append(createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+                        sb.append(createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                         if (showLink) {
                             sb.append("</a>");
                         }
@@ -3654,7 +3679,7 @@ public class ExportService {
                                     styleString.append(align);
                                 }
                                 sb.append("<td style=\"").append(styleString.toString()).append("\">");
-                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, false));
+                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                                 sb.append("</td>");
                             } else {
                                 sb.append("<td></td>");
@@ -3679,70 +3704,6 @@ public class ExportService {
             hexString = "0000" + hexString;
         }
         return "#" + hexString;
-    }
-
-    public static String dataSetToHTMLTable(Collection<AnalysisItem> fields, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
-
-        try {
-            ExportMetadata exportMetadata;
-            if (conn == null) {
-                exportMetadata = new ExportMetadata(1, "$", Calendar.getInstance());
-            } else {
-                exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
-            }
-
-            StringBuilder sb = new StringBuilder();
-            List<AnalysisItem> items = new ArrayList<AnalysisItem>(fields);
-            items.remove(null);
-            Collections.sort(items, new Comparator<AnalysisItem>() {
-
-                public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
-                    return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
-                }
-            });
-
-            sb.append("<table style=\"").append(tableStyle).append("\">");
-            sb.append("<tr style=\"").append(headerTRStyle).append("\">");
-            for (AnalysisItem analysisItem : items) {
-                for (AnalysisItem headerItem : fields) {
-                    if (headerItem == analysisItem) {
-                        sb.append("<th style=\"").append(thStyle).append("\">");
-                        sb.append(headerItem.toUnqualifiedDisplay());
-                        sb.append("</th>");
-                    }
-                }
-            }
-            sb.append("</tr>");
-            for (IRow row : dataSet.getRows()) {
-                sb.append("<tr style=\">").append(summaryTRStyle).append("\">");
-                for (AnalysisItem analysisItem : items) {
-                    //for (int i = 0; i < fields.length; i++) {
-                    //AnalysisItem headerItem = listDataResults.getHeaders()[i];
-                    //if (headerItem == analysisItem) {
-                    StringBuilder styleString = new StringBuilder(tdStyle);
-                    String align = "left";
-                    styleString.append(align);
-                    Value value = row.getValue(analysisItem);
-                    if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
-                        TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
-                        if (textValueExtension.getColor() != 0) {
-                            String hexString = createHexString(textValueExtension.getColor());
-                            styleString.append(";color:").append(hexString);
-                        }
-                    }
-                    sb.append("<td style=\"").append(styleString.toString()).append("\">");
-
-                    sb.append(ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
-
-                    sb.append("</td>");
-                }
-                sb.append("</tr>");
-            }
-            sb.append("</table>");
-            return sb.toString();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public void exportScorecardToXLS(long scorecardID, InsightRequestMetadata insightRequestMetadata) throws Exception {
@@ -3878,7 +3839,7 @@ public class ExportService {
             sb.append(kpi.getName());
             sb.append("</td>");
             sb.append("<td style=\"").append(tdStyle).append("right\">");
-            sb.append(createValue(0, kpi.getAnalysisMeasure(), new NumericValue(kpi.getKpiOutcome().getOutcomeValue()), exportMetadata.cal, exportMetadata.currencySymbol, false));
+            sb.append(createValue(0, kpi.getAnalysisMeasure(), new NumericValue(kpi.getKpiOutcome().getOutcomeValue()), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
             sb.append("</td>");
             sb.append("<td style=\"").append(tdStyle).append("right\">");
             sb.append(kpi.getDayWindow());

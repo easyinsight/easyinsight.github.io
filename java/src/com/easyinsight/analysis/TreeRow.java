@@ -131,7 +131,7 @@ public class TreeRow {
                 } else {
                     Font font = new Font(Font.FontFamily.HELVETICA, treeDefinition.getFontSize());
                     font.setColor(new BaseColor(textColor));
-                    Phrase phrase = new Phrase(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, true), font);
+                    Phrase phrase = new Phrase(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, true), font);
                     PdfPCell valueCell = new PdfPCell(phrase);
                     if (backgroundColor != null) {
                         valueCell.setBackgroundColor(new BaseColor(backgroundColor));
@@ -203,7 +203,7 @@ public class TreeRow {
                     }
                     sb.append("<td style=\"").append(styleString.toString()).append("\">");
 
-                    sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+                    sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
 
                     sb.append("</td>");
                 }
@@ -271,7 +271,7 @@ public class TreeRow {
                         }
                         sb.append("<td style=\"").append(styleString.toString()).append("\">");
 
-                        sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, false));
+                        sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
 
                         sb.append("</td>");
                     }
