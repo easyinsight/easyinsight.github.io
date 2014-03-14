@@ -1211,6 +1211,7 @@ public class UserAccountAdminService {
             account.setMaxRecords(accountSettings.getMaxResults());
             account.setSendEmailsToNewUsers(accountSettings.isSendEmail());
             account.setUseHTMLVersion(accountSettings.isHtmlView());
+            account.setAccountLocale(accountSettings.getLocale());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -1239,6 +1240,7 @@ public class UserAccountAdminService {
             accountSettings.setDateFormat(account.getDateFormat());
             accountSettings.setReportSharing(account.isReportSharingEnabled());
             accountSettings.setCurrencySymbol(account.getCurrencySymbol());
+            accountSettings.setLocale(account.getAccountLocale());
             accountSettings.setMaxResults(account.getMaxRecords());
             accountSettings.setSendEmail(account.isSendEmailsToNewUsers());
             accountSettings.setHtmlView(account.isUseHTMLVersion());

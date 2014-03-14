@@ -7,6 +7,7 @@ package com.easyinsight.users;
  */
 public class AccountSettings {
     private boolean apiEnabled;
+    private String locale;
     private boolean publicData;
     private boolean marketplace;
     private boolean reportSharing;
@@ -19,6 +20,14 @@ public class AccountSettings {
     private boolean htmlView;
 
     public AccountSettings() {
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 
     public boolean isHtmlView() {

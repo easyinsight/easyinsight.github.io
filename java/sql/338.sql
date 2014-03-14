@@ -1,0 +1,1 @@
+alter table account add account_locale varchar(255) not null default 'EN';
