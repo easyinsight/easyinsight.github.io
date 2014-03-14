@@ -417,12 +417,21 @@ public class FeedService {
         clearStmt.executeUpdate();
         clearExtStmt.setLong(1, dataSourceID);
         clearExtStmt.executeUpdate();
+        Map<String, Set<Long>> map = new HashMap<String,Set<Long>>();
         for (AnalysisItemConfiguration configuration : configurations) {
             for (Tag tag : configuration.getTags()) {
-                saveStmt.setLong(1, tag.getId());
-                saveStmt.setString(2, configuration.getAnalysisItem().toDisplay());
-                saveStmt.setLong(3, dataSourceID);
-                saveStmt.execute();
+                Set<Long> ids = map.get(configuration.getAnalysisItem().toDisplay());
+                if (ids == null) {
+                    ids = new HashSet<Long>();
+                    map.put(configuration.getAnalysisItem().toDisplay(), ids);
+                }
+                if (!ids.contains(tag.getId())) {
+                    ids.add(tag.getId());
+                    saveStmt.setLong(1, tag.getId());
+                    saveStmt.setString(2, configuration.getAnalysisItem().toDisplay());
+                    saveStmt.setLong(3, dataSourceID);
+                    saveStmt.execute();
+                }
             }
             saveExtension(conn, saveExtStmt, configuration, configuration.getTextExtension(), ReportFieldExtension.TEXT, dataSourceID);
             saveExtension(conn, saveExtStmt, configuration, configuration.getYtdExtension(), ReportFieldExtension.YTD, dataSourceID);
