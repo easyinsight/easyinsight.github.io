@@ -167,7 +167,6 @@ public class AnalysisService {
             html = html.replace("</h2>", "</b>");
             html = html.replace("Connections<ol>", "Connections<textformat leftmargin=\"50\">");
             html = html.replace("</ol>", "</textformat>");
-            System.out.println(html);
             return html;
         } catch (Exception e) {
             LogClass.error(e);
@@ -177,30 +176,6 @@ public class AnalysisService {
 
     public void dashboardUses(long dashboardID) {
 
-    }
-
-    /*public String generateDescription(WSAnalysisDefinition report) {
-        try {
-            return report.generateDescription();
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }*/
-
-    public String getBaseDocs() {
-        try {
-            String html = DocReader.toHTML(null, FlexContext.getHttpRequest());
-            html = html.replace("<h2 id=\"Easy_Insight_Documentation\">", "<b>");
-            html = html.replace("</h2>", "</b>");
-            html = html.replace("Connections<ol>", "Connections<textformat leftmargin=\"50\">");
-            html = html.replace("</ol>", "</textformat>");
-            System.out.println(html);
-            return html;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
     }
 
     public List<FilterSetDescriptor> getFilterSetsForDataSource(long dataSourceID) {
