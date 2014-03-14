@@ -65,7 +65,7 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
             for (int i = 0; i < 20000; i++) {
                 IRow row = dataSet.createRow();
 
-                row.addValue(keys.get(CUSTOMER), String.valueOf(i));
+                row.addValue(keys.get(CUSTOMER), customerNames[i % customerNames.length]);
                 row.addValue(keys.get(PRODUCT), productNames[(int) (Math.random() * 5)]);
                 row.addValue(keys.get(QUANTITY), (int) (Math.random() * 3));
                 Calendar cal = Calendar.getInstance();

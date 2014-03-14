@@ -15,7 +15,7 @@ var reportListTemplate;
 
 var dashboard;
 var email_modal;
-var short_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+var short_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 var currentReport;
 
@@ -25,6 +25,8 @@ var multi_field_value_results;
 var saveConfiguration;
 
 function drillThrough(params) {
+    if(typeof(userJSON.embedKey) != "undefined")
+        params["embedKey"] = userJSON.embedKey;
     $.ajax( {
         dataType: "json",
         url: '/app/drillThrough',
@@ -264,17 +266,17 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     if (obj.metadata.type == "pie") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getPieChartCallback(id, w, {}, fullFilters)) }));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getPieChartCallback(id, w, {}, fullFilters, drillthroughID)) }));
     }
     else if (obj.metadata.type == "diagram") {
         $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
-            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, typeof(userJSON.embedded) != "undefined" ? userJSON.embedded : false, afterRefresh($("#" + id + " .loading")));
+            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, typeof(userJSON.embedded) != "undefined" ? userJSON.embedded : false, afterRefresh($("#" + id + " .loading"), fullFilters, drillthroughID));
         }) }));
     }
     else if (obj.metadata.type == "list" || obj.metadata.type == "trend_grid") {
         $.ajax($.extend(postData, {
             dataType: "text",
-            success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns))
+            success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns, fullFilters, drillthroughID))
         }));
     } else if (obj.metadata.type == "bar") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
