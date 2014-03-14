@@ -37,6 +37,7 @@ public class KPIDefinition extends AnalysisDefinition {
             nowDate = "Now";
             previousDate = "Against";
             var date:DerivedAnalysisDateDimension = new DerivedAnalysisDateDimension();
+            date.dateOnlyField = true;
             date.concrete = false;
             date.applyBeforeAggregation = true;
             date.derivationCode = "nowdate()";

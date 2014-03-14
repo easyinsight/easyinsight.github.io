@@ -87,7 +87,7 @@
                     var groupFactory:ClassFactory = new ClassFactory(TrendGroupingRenderer);
                     groupFactory.properties = { grouping: grouping };
                     column.itemRenderer = groupFactory;
-                    column.sortable = false;
+                    column.sortable = true;
                     column.width = maxGroupingSize;
                     column.headerText = grouping.display;
                     columns.push(column);
