@@ -95,8 +95,6 @@
                     <util:dataProvider>
                         <mx:Array>
                             <mx:Object label="US/America" data="EN"/>
-                            <mx:Object label="United Kingdom" data="UK"/>
-                            <mx:Object label="Germany" data="DE"/>
                             <mx:Object label="Spain" data="ES"/>
                         </mx:Array>
                     </util:dataProvider>
