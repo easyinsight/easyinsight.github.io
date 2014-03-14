@@ -130,7 +130,8 @@
             connections = (CompositeServerDataSource(dataSource).addonConnections == null) ? new ArrayCollection() : CompositeServerDataSource(dataSource).addonConnections;
         }
         ]]></mx:Script>
-
+    <mx:Text width="450" text="This window enables you to add a limited set of additional data sources to your data source. You can add report, spreadsheet and flat file sources. If you want to combine additional sources, you'll need to create a dedicated composite data source instead."/>
+    <mx:HRule width="100%"/>
     <mx:HBox>
         <util:SaveButton label="Add Data Source..." click="addDataSource()" fontSize="12"/>
         <util:SaveButton label="Removed Selected" click="removeSelected()" fontSize="12"/>

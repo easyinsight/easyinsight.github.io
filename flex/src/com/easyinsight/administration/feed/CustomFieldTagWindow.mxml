@@ -72,7 +72,10 @@
         <mx:method name="getCustomFieldTags" result="gotCustomFieldTags()"/>
         <mx:method name="getFieldTags" result="gotTags()"/>
     </mx:RemoteObject>
+    <mx:Text width="500" text="This window enables you to automatically map data source custom fields to tags. For example, if the data source has custom fields on the Company object, you could say that all such fields will be automatically mapped to the CompanyDimension tag."/>
+    <mx:HRule width="100%"/>
     <mx:VBox id="contents"/>
+    <mx:HRule width="100%"/>
     <mx:HBox>
         <util:SaveButton label="Save" click="save()"/>
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
