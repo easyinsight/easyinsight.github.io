@@ -99,8 +99,8 @@ public class WSTrendDefinition extends WSKPIDefinition {
                     j.put("source", outcome.getMeasure().getAnalysisItemID());
                 }
 
-                //return old(fontColor, e, clickEvent, outcome, results, md, v);
-                return improved(fontColor, e, j, outcome, results, md, v);
+                return old(fontColor, e, clickEvent, outcome, results, md, v);
+                //return improved(fontColor, e, j, outcome, results, md, v);
 
             }
         } catch (Exception e) {
