@@ -1571,11 +1571,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         "user_to_analysis.user_id = user.user_id");
                 uStmt.setLong(1, getAnalysisID());
                 ResultSet uRS = uStmt.executeQuery();
-                uRS.next();
-                long userID = uRS.getLong(1);
-                long accountID = uRS.getLong(2);
-                applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
-                uRS.close();
+                if (uRS.next()) {
+                    long userID = uRS.getLong(1);
+                    long accountID = uRS.getLong(2);
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, accountID);
+                } else {
+                    applicationSkin = null;
+                }
+                uStmt.close();
             } else {
                 PreparedStatement ps = conn.prepareStatement("SELECT EXCHANGE_AUTHOR FROM ACCOUNT WHERE ACCOUNT_ID = ?");
                 ps.setLong(1, SecurityUtil.getAccountID());
