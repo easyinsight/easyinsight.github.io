@@ -159,7 +159,7 @@ public class Account {
     private int accountState;
 
     @Column(name="account_locale")
-    private String accountLocale;
+    private String accountLocale = "EN";
 
     @Column(name="account_key")
     private String accountKey;
