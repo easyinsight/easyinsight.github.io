@@ -1822,7 +1822,14 @@ public class AnalysisService {
                     filterValueDefinition.setFilteredValues(Arrays.asList((Object) new EmptyValue()));
                 } else {
                     try {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        SimpleDateFormat sdf;
+                        if (dateDimension.getCustomDateFormat() != null && !"".equals(dateDimension.getCustomDateFormat())) {
+                            sdf = new SimpleDateFormat(dateDimension.getCustomDateFormat());
+                        } else {
+                            sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        }
+
+
                         Date date = sdf.parse(value.toString());
                         String result;
                         if ("QQ".equals(format)) {
