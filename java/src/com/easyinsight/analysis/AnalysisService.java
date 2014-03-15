@@ -174,10 +174,6 @@ public class AnalysisService {
         }
     }
 
-    public void dashboardUses(long dashboardID) {
-
-    }
-
     public List<FilterSetDescriptor> getFilterSetsForDataSource(long dataSourceID) {
         try {
             return new FilterSetStorage().getFilterSetsForDataSource(dataSourceID);
