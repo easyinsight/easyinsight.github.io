@@ -1818,13 +1818,29 @@ public class AnalysisService {
                 }
                 filterValueDefinition.setFilteredValues(Arrays.asList((Object) result));
             } else {
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    Date date = sdf.parse(value.toString());
-                    String result = new SimpleDateFormat(format).format(date);
-                    filterValueDefinition.setFilteredValues(Arrays.asList((Object) result));
-                } catch (ParseException e) {
-                    LogClass.error(e);
+                if ("(Empty)".equals(value.toString())) {
+                    filterValueDefinition.setFilteredValues(Arrays.asList((Object) new EmptyValue()));
+                } else {
+                    try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        Date date = sdf.parse(value.toString());
+                        String result;
+                        if ("QQ".equals(format)) {
+                            int quarter = DayOfQuarter.quarter(date);
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTime(date);
+                            int year = cal.get(Calendar.YEAR);
+                            result = quarter + "-" + year;
+                        } else if ("qq".equals(format)) {
+                            int quarter = DayOfQuarter.quarter(date);
+                            result = String.valueOf(quarter);
+                        } else {
+                            result = new SimpleDateFormat(format).format(date);
+                        }
+                        filterValueDefinition.setFilteredValues(Arrays.asList((Object) result));
+                    } catch (ParseException e) {
+                        LogClass.error(e);
+                    }
                 }
                 //filterValueDefinition.setFilteredValues(Arrays.asList((Object) value.toString()));
             }
