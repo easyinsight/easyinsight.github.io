@@ -131,7 +131,7 @@ public class StandardReportPipeline extends Pipeline {
                     if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
                         continue;
                     }
-                    if (filterDefinition.validForQuery() && filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
+                    if (filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
                         components.addAll(filterDefinition.createComponents(Pipeline.BEFORE, new DefaultFilterProcessor(), null, false));
                     }
                 }
@@ -150,9 +150,6 @@ public class StandardReportPipeline extends Pipeline {
                 }
                 for (FilterDefinition filterDefinition : analysisItem.getFilters()) {
                     if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
-                        continue;
-                    }
-                    if (!filterDefinition.validForQuery()) {
                         continue;
                     }
                     if (filterDefinition.getField() != null) {
