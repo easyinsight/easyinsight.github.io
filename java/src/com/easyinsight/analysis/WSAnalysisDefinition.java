@@ -1342,6 +1342,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     }
 
+    public void argh() {
+
+    }
+
     // data source fields
     // report fields
     //
