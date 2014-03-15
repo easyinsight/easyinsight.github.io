@@ -247,11 +247,11 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
                 /*Object actualCloseObj = contactMap.get("ACTUAL_CLOSE_DATE");
                 System.out.println(actualCloseObj);
                 if (actualCloseObj != null) {*/
-                    if ("Won".equals(opportunityState.toString())) {
-                        row.addValue(keys.get(ACTUAL_CLOSE_DATE), new DateValue(sdf.parse(contactMap.get("DATE_UPDATED_UTC").toString())));
-                    } else {
-                        //row.addValue(keys.get(ACTUAL_CLOSE_DATE), new DateValue(sdf.parse(actualCloseObj.toString())));
-                    }
+                if ("Won".equals(opportunityState.toString())) {
+                    row.addValue(keys.get(ACTUAL_CLOSE_DATE), new DateValue(sdf.parse(contactMap.get("DATE_UPDATED_UTC").toString())));
+                } else {
+                    //row.addValue(keys.get(ACTUAL_CLOSE_DATE), new DateValue(sdf.parse(actualCloseObj.toString())));
+                }
                 //}
                 row.addValue(keys.get(OPPORTUNITY_COUNT), 1);
             }

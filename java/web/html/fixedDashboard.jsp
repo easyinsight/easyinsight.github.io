@@ -8,6 +8,11 @@
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.html.*" %>
 <%@ page import="com.easyinsight.dashboard.*" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.ResultSet" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -19,15 +24,52 @@
     }
     try {
 
-        String dashboardIDString = request.getParameter("dashboardID");
-        long dashboardID = new DashboardService().canAccessDashboard(dashboardIDString);
+        long dashboardID;
+        long tabletID = 0;
+        long phoneID = 0;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement userStmt = conn.prepareStatement("SELECT FIXED_DASHBOARD_ID FROM USER WHERE USER_ID = ?");
+            userStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet rs = userStmt.executeQuery();
+            if (rs.next()) {
+                dashboardID = rs.getLong(1);
+                PreparedStatement ps = conn.prepareStatement("SELECT tablet_dashboard_id, phone_dashboard_id FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                ps.setLong(1, dashboardID);
+                ResultSet detailRS = ps.executeQuery();
+                if (detailRS.next()) {
+                    tabletID = detailRS.getLong(1);
+                    phoneID = detailRS.getLong(2);
+                }
+                ps.close();
+            } else {
+                throw new RuntimeException();
+            }
+            userStmt.close();
+        } finally {
+            Database.closeConnection(conn);
+        }
 
-        Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
+
+        if (tabletID > 0) {
+            dashboardID = tabletID;
+        } else if (phoneID > 0 && Utils.isPhone(request)) {
+            dashboardID = phoneID;
+        } else if (tabletID > 0 && Utils.isPhone(request)) {
+            dashboardID = tabletID;
+        }
+
+        Dashboard dashboard = new DashboardService().getDashboardView(dashboardID);
 
         FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, null, false);
-        DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
         UIData uiData = Utils.createUIData();
-
+        EIConnection c = Database.instance().getConnection();
+        JSONObject userObject = new JSONObject();
+        try {
+            userObject = SecurityUtil.getUserJSON(c, request);
+        } finally {
+            c.close();
+        }
 %>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,6 +79,7 @@
     <jsp:include page="bootstrapHeader.jsp"/>
     <jsp:include page="reportDashboardHeader.jsp"/>
     <script type="text/javascript">
+        var userJSON = <%= userObject %>;
         var dashboardJSON = <%= dashboard.toJSON(filterHTMLMetadata) %>;
         function afterRefresh() {
 

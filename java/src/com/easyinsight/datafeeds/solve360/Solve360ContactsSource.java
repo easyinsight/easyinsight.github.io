@@ -96,7 +96,7 @@ public class Solve360ContactsSource extends Solve360BaseSource {
                 row.addValue(keys.get(BUSINESS_PHONE_EXT), c.getBusinessPhoneExt());
                 row.addValue(keys.get(BUSINESS_PHONE_MAIN), c.getBusinessPhoneMain());
                 row.addValue(keys.get(CELLPHONE), c.getCellphone());
-                row.addValue(keys.get(COMPANY), c.getCompany());                
+                row.addValue(keys.get(COMPANY), c.getCompany());
                 row.addValue(keys.get(HOME_ADDRESS), c.getHomeAddress());
                 row.addValue(keys.get(HOME_PHONE), c.getHomePhone());
                 row.addValue(keys.get(OTHER_EMAIL), c.getOtherEmail());

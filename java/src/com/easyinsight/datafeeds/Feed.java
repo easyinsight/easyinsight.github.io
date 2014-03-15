@@ -243,8 +243,8 @@ public abstract class Feed implements Serializable {
 
         try {
             PreparedStatement dlsStmt = conn.prepareStatement("SELECT user_dls_to_filter.FILTER_ID FROM user_dls_to_filter, user_dls, dls where " +
-                        "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
-                        "user_dls.user_id = ?");
+                    "user_dls_to_filter.user_dls_id = user_dls.user_dls_id and user_dls.dls_id = dls.dls_id and dls.data_source_id = ? and " +
+                    "user_dls.user_id = ?");
             dlsStmt.setLong(1, feedID);
             dlsStmt.setLong(2, SecurityUtil.getUserID(false));
 
@@ -336,12 +336,12 @@ public abstract class Feed implements Serializable {
         if (versionRS.next()) {
             version = versionRS.getInt(1);
             PreparedStatement stmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.last_data_time FROM DATA_FEED," +
-                "FEED_PERSISTENCE_METADATA WHERE DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.feed_id AND " +
-                "(DATA_FEED.DATA_FEED_ID = ? OR DATA_FEED.PARENT_SOURCE_ID = ?) AND FEED_PERSISTENCE_METADATA.VERSION = ?");
+                    "FEED_PERSISTENCE_METADATA WHERE DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.feed_id AND " +
+                    "(DATA_FEED.DATA_FEED_ID = ? OR DATA_FEED.PARENT_SOURCE_ID = ?) AND FEED_PERSISTENCE_METADATA.VERSION = ?");
             stmt.setLong(1, getFeedID());
             stmt.setLong(2, getFeedID());
             stmt.setInt(3, version);
-            
+
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Date date1 = new Date(rs.getTimestamp(1).getTime());

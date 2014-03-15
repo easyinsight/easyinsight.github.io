@@ -139,7 +139,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         }
         if (endDateDimension != null) {
             endDateDimension = (AnalysisDateDimension) Database.deproxy(endDateDimension);
-            endDateDimension.afterLoad();            
+            endDateDimension.afterLoad();
         }
     }
 

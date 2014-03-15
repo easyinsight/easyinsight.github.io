@@ -11,6 +11,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.CacheDataTransform;
 
 import java.sql.PreparedStatement;
@@ -29,10 +30,13 @@ public class CacheFunction extends Function {
                 return null;
             }
             DataSourceCalculationMetadata dataSourceCalculationMetadata = (DataSourceCalculationMetadata) calculationMetadata;
-            
+
             String dataSourceName = minusQuotes(0);
-            PreparedStatement stmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE FEED_NAME = ?");
+            PreparedStatement stmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE " +
+                    "FEED_NAME = ? AND UPLOAD_POLICY_USERS.FEED_ID = DATA_FEED.DATA_FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
+                    "USER.ACCOUNT_ID = ?");
             stmt.setString(1, dataSourceName);
+            stmt.setLong(2, SecurityUtil.getAccountID());
             ResultSet rs = stmt.executeQuery();
             rs.next();
             long id = rs.getLong(1);

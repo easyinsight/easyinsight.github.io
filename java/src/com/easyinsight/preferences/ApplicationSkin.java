@@ -12,7 +12,7 @@ import java.util.List;
  * Time: 10:26:46 PM
  */
 public class ApplicationSkin implements Serializable {
-    
+
     public static final int APPLICATION = 1;
     public static final int ACCOUNT = 2;
     public static final int USER = 3;

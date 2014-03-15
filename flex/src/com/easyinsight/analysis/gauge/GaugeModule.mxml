@@ -86,10 +86,10 @@
     </mx:Script>
     <mx:Canvas id="canvas">
         <bttc:Gauge id="gauge"
-           width="100"
-           verticalCenter="0" horizontalCenter="0"  valueFormatter="{numFormatter}"
-           minValue="0"  maxValue="{maxValue}" value="{value}"
-           bigTicks="9" smallTicks="45" showMinMax="true" showValue="true" fontColor="#FFFFFF" visible="false"/>
+                    width="100"
+                    verticalCenter="0" horizontalCenter="0"  valueFormatter="{numFormatter}"
+                    minValue="0"  maxValue="{maxValue}" value="{value}"
+                    bigTicks="9" smallTicks="45" showMinMax="true" showValue="true" fontColor="#FFFFFF" visible="false"/>
         <mx:Label text="{benchmarkValue}" id="benchmarkValueLabel" width="100%" textAlign="center" fontSize="24" visible="{benchmarkValue != null}"/>
     </mx:Canvas>
 </mx:Module>

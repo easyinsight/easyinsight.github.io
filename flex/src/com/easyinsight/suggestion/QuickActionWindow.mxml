@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" backgroundColor="#FFFFFF" paddingBottom="10"
-        paddingLeft="10" paddingRight="10" paddingTop="10">
+                    paddingLeft="10" paddingRight="10" paddingTop="10">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
         import com.easyinsight.analysis.AnalysisItem;

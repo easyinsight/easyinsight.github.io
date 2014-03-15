@@ -3,7 +3,7 @@
     <mx:Metadata>
         [Event(name="gotMetadataComplete", type="flash.events.Event")]
     </mx:Metadata>
-	<mx:Script>
+    <mx:Script>
 		<![CDATA[
         import mx.binding.utils.BindingUtils;
         import mx.collections.Sort;
@@ -242,7 +242,7 @@
                     <mx:Label text="Available Values" fontSize="14"/>
                     <mx:TextInput id="availableSearch" change="sourceChange()"/>
                     <mx:List dataProvider="{sourceValues}" dragMoveEnabled="true" dropEnabled="true" dragEnabled="true" width="300"
-                            allowMultipleSelection="true" maxHeight="400"/>
+                             allowMultipleSelection="true" maxHeight="400"/>
                 </mx:VBox>
                 <mx:VBox>
                     <mx:Button label="Add All" click="addAll()"/>
@@ -252,7 +252,7 @@
                     <mx:Label text="Filtered Values" fontSize="14"/>
                     <mx:TextInput id="includedSearch" change="includedChange()"/>
                     <mx:List dataProvider="{targetValues}" dropEnabled="true" dragEnabled="true" dragMoveEnabled="true" id="targetList"
-                        width="300" allowMultipleSelection="true" maxHeight="400"/>
+                             width="300" allowMultipleSelection="true" maxHeight="400"/>
                 </mx:VBox>
             </mx:HBox>
         </mx:VBox>

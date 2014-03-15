@@ -80,7 +80,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
     private var _dashboard:Dashboard;
 
     public function ComboBoxFilter(feedID:int, analysisItem:AnalysisItem, reportID:int, dashboardID:int, report:AnalysisDefinition, otherFilters:ArrayCollection, dashboard:Dashboard,
-            retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
+                                   retrievalState:IRetrievalState, filterMetadata:FilterMetadata) {
         super();
         this._report = report;
         this._feedID = feedID;
@@ -155,9 +155,9 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
         comboBox.enabled = checkbox.selected;
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
     }
-    
+
     private var checkbox:CheckBox;
-    
+
     private var filterLabel:UIComponent;
 
     override protected function createChildren():void {
@@ -175,8 +175,8 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
         }
 
         /*var hbox:HBox = new HBox();
-        hbox.percentHeight = 100;
-        hbox.setStyle("verticalAlign", "middle");*/
+         hbox.percentHeight = 100;
+         hbox.setStyle("verticalAlign", "middle");*/
 
         if (_filterDefinition == null || !_filterDefinition.toggleEnabled) {
             checkbox = new CheckBox();
@@ -195,8 +195,8 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             Label(filterLabel).text = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
         }
         filterLabel.styleName = "filterLabel";
-        
-        
+
+
         //addChild(label);
 
         if (comboBox == null) {
@@ -212,11 +212,11 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
         if (_filterEditable) {
             filterLabel.addEventListener(MouseEvent.CLICK, edit);
             /*if (editButton == null) {
-                editButton = new Button();
-                editButton.addEventListener(MouseEvent.CLICK, edit);
-                editButton.setStyle("icon", ImageConstants.EDIT_ICON);
-                editButton.toolTip = "Edit";
-            }*/
+             editButton = new Button();
+             editButton.addEventListener(MouseEvent.CLICK, edit);
+             editButton.setStyle("icon", ImageConstants.EDIT_ICON);
+             editButton.toolTip = "Edit";
+             }*/
             //hbox.addChild(editButton);
             if (deleteButton == null) {
                 deleteButton = new Button();
@@ -230,8 +230,8 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
 
 
         /*var loadingBox:HBox = new HBox();
-        loadingBox.height = 23;
-        loadingBox.setStyle("verticalAlign", "middle");*/
+         loadingBox.height = 23;
+         loadingBox.setStyle("verticalAlign", "middle");*/
         if (_filterDefinition.cachedValues) {
             valuesSet = false;
             invalidateDisplayList();
@@ -268,13 +268,13 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
         valuesSet = false;
         invalidateDisplayList();
     }
-    
+
     private var loadingBar:ProgressBar;
 
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         if (valuesSet) {
-            
+
         } else {
             if (loadingBar) {
                 removeChild(loadingBar);
@@ -298,7 +298,7 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
             }
             filterLabel.x = xPos;
             filterLabel.y = (this.height - filterLabel.height) / 2;
-            filterLabel.setActualSize(filterLabel.measuredWidth, filterLabel.measuredHeight);            
+            filterLabel.setActualSize(filterLabel.measuredWidth, filterLabel.measuredHeight);
             xPos += filterLabel.measuredWidth + 3;
             comboBox.x = xPos;
             comboBox.y = (this.height - comboBox.height) / 2;

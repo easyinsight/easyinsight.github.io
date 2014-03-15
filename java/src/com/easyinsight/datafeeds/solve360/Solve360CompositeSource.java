@@ -355,6 +355,6 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.SOLVE360_CONTACTS, FeedType.SOLVE360_ACTIVITIES, Solve360ContactsSource.CONTACT_ID, Solve360ActivitiesSource.PARENT_CONTACT),
                 new ChildConnection(FeedType.SOLVE360_CONTACTS, FeedType.SOLVE360_OPPORTUNITIES, Solve360ContactsSource.CONTACT_ID, Solve360OpportunitiesSource.RELATED_CONTACT),
                 new ChildConnection(FeedType.SOLVE360_COMPANIES, FeedType.SOLVE360_CONTACTS, Solve360CompanySource.NAME, Solve360ContactsSource.COMPANY)
-                );
+        );
     }
 }

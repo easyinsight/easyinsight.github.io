@@ -163,9 +163,9 @@ public class RollingRangeFilter extends HBox implements IFilter
             checkbox.addEventListener(Event.CHANGE, onChange);
             addChild(checkbox);
             /*if (rollingFilter != null && (rollingFilter.intrinsic || rollingFilter.trendFilter)) {
-                checkbox.enabled = false;
-                checkbox.toolTip = "This filter is an intrinsic part of the data source and cannot be disabled.";
-            }*/
+             checkbox.enabled = false;
+             checkbox.toolTip = "This filter is an intrinsic part of the data source and cannot be disabled.";
+             }*/
 
         }
 
@@ -241,10 +241,10 @@ public class RollingRangeFilter extends HBox implements IFilter
                 deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
                 deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
                 /*if (rollingFilter.intrinsic) {
-                    deleteButton.enabled = false;
-                    deleteButton.toolTip = "This filter is an intrinsic part of the data source and cannot be deleted.";
-                } else {*/
-                    deleteButton.toolTip = "Delete";
+                 deleteButton.enabled = false;
+                 deleteButton.toolTip = "This filter is an intrinsic part of the data source and cannot be deleted.";
+                 } else {*/
+                deleteButton.toolTip = "Delete";
                 //}
             }
             addChild(deleteButton);
