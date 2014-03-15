@@ -1293,7 +1293,7 @@ public class DataService {
         String previousDateFilterName = analysisDefinition.getPreviousDate();
         FilterDefinition nowFilter = null;
         FilterDefinition previousFilter = null;
-        if (nowDateFilterName != null && previousDateFilterName != null) {
+        if (nowDateFilterName != null && previousDateFilterName != null && !"".equals(nowDateFilterName) && !"".equals(previousDateFilterName)) {
             for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                 if (nowDateFilterName.equals(filter.getFilterName())) {
                     nowFilter = filter;

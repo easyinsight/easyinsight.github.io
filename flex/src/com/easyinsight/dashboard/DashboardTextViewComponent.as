@@ -27,8 +27,8 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
          setStyle("paddingBottom", 10);*/
         setStyle("backgroundColor", 0xFFFFFF);
         setStyle("backgroundAlpha", 1);
-        setStyle("paddingLeft", 20);
-        setStyle("paddingRight", 20);
+        setStyle("paddingLeft", 0);
+        setStyle("paddingRight", 0);
         setStyle("paddingBottom", 10);
     }
 
