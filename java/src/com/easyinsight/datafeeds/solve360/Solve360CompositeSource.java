@@ -6,6 +6,7 @@ import com.easyinsight.core.NamedKey;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
+import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.users.Account;
 import nu.xom.*;
@@ -26,8 +27,18 @@ import java.util.*;
  */
 public class Solve360CompositeSource extends CompositeServerDataSource {
 
+    public static final int CUSTOM_FIELD_CONTACT = 1;
+    public static final int CUSTOM_FIELD_COMPANY = 2;
+
     public Solve360CompositeSource() {
         setFeedName("Solve360");
+    }
+
+    public List<CustomFieldTag> customFieldTags() {
+        List<CustomFieldTag> customTags = new ArrayList<CustomFieldTag>();
+        customTags.add(new CustomFieldTag(Solve360CompositeSource.CUSTOM_FIELD_COMPANY, "Company Custom Field"));
+        customTags.add(new CustomFieldTag(Solve360CompositeSource.CUSTOM_FIELD_CONTACT, "Contact Custom Field"));
+        return customTags;
     }
 
     private String userEmail;
@@ -86,13 +97,16 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
                     if (key == null) {
                         key = new NamedKey(keyName);
                     }
+                    AnalysisItem field;
                     if ("date".equals(type)) {
-                        fields.add(new AnalysisDateDimension(key, customFieldName, AnalysisDateDimension.DAY_LEVEL));
+                        field = new AnalysisDateDimension(key, customFieldName, AnalysisDateDimension.DAY_LEVEL);
                     } else if ("number".equals(type)) {
-                        fields.add(new AnalysisMeasure(key, customFieldName, AggregationTypes.SUM));
+                        field = new AnalysisMeasure(key, customFieldName, AggregationTypes.SUM);
                     } else {
-                        fields.add(new AnalysisDimension(key, customFieldName));
+                        field = new AnalysisDimension(key, customFieldName);
                     }
+                    field.setCustomFlag(CUSTOM_FIELD_COMPANY);
+                    fields.add(field);
                 }
             }
             customCompanyFields = fields;
@@ -121,13 +135,16 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
                     if (key == null) {
                         key = new NamedKey(keyName);
                     }
+                    AnalysisItem field;
                     if ("date".equals(type)) {
-                        fields.add(new AnalysisDateDimension(key, customFieldName, AnalysisDateDimension.DAY_LEVEL));
+                        field = new AnalysisDateDimension(key, customFieldName, AnalysisDateDimension.DAY_LEVEL);
                     } else if ("number".equals(type)) {
-                        fields.add(new AnalysisMeasure(key, customFieldName, AggregationTypes.SUM));
+                        field = new AnalysisMeasure(key, customFieldName, AggregationTypes.SUM);
                     } else {
-                        fields.add(new AnalysisDimension(key, customFieldName));
+                        field = new AnalysisDimension(key, customFieldName);
                     }
+                    field.setCustomFlag(CUSTOM_FIELD_CONTACT);
+                    fields.add(field);
                 }
             }
             customContactFields = fields;
