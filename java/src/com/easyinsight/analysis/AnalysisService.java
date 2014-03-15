@@ -1823,8 +1823,8 @@ public class AnalysisService {
                 } else {
                     try {
                         SimpleDateFormat sdf;
-                        if (dateDimension.getCustomDateFormat() != null && !"".equals(dateDimension.getCustomDateFormat())) {
-                            sdf = new SimpleDateFormat(dateDimension.getCustomDateFormat());
+                        if (dateDimension.getOutputDateFormat() != null && !"".equals(dateDimension.getOutputDateFormat())) {
+                            sdf = new SimpleDateFormat(dateDimension.getOutputDateFormat());
                         } else {
                             sdf = new SimpleDateFormat("yyyy-MM-dd");
                         }
