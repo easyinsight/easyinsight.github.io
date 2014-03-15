@@ -324,6 +324,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ReportInfoAPI</servlet-name>
+        <display-name>ReportInfoAPI</display-name>
+        <servlet-class>com.easyinsight.api.v3.ReportExtendedInfoServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>EIAdmin</servlet-name>
         <display-name>EIAdmin</display-name>
         <servlet-class>com.easyinsight.datafeeds.custom.EIAdminServlet</servlet-class>
@@ -575,6 +581,12 @@
         <servlet-name>ConnectionInstalled</servlet-name>
         <display-name>ConnectionInstalled</display-name>
         <servlet-class>com.easyinsight.html.ConnectionInstalledServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ConnectionImage</servlet-name>
+        <display-name>ConnectionImage</display-name>
+        <servlet-class>com.easyinsight.html.ConnectionImageServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -877,6 +889,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>ConnectionImage</servlet-name>
+        <url-pattern>/connectionImage</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>DataSourceRefresh</servlet-name>
         <url-pattern>/refreshDataSource</url-pattern>
     </servlet-mapping>
@@ -909,6 +926,11 @@
     <servlet-mapping>
         <servlet-name>LoadRows</servlet-name>
         <url-pattern>/xml/loadRows</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ReportInfoAPI</servlet-name>
+        <url-pattern>/json/reportInfo</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
@@ -1027,6 +1049,7 @@
         <error-code>404</error-code>
         <location>/pageNotFound.jsp</location>
     </error-page>
+
 
 
 </web-app>
