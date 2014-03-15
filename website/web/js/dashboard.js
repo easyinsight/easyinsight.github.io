@@ -281,7 +281,7 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     } else if (obj.metadata.type == "bar") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getBarChartCallback(id, w, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getBarChartCallback(id, w, obj.metadata.styles, fullFilters, drillthroughID))}));
     } else if (obj.metadata.type == "column") {
         var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
         eval("var w = " + v);
