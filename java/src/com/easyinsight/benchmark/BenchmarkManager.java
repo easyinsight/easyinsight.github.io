@@ -87,6 +87,9 @@ public class BenchmarkManager {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id) VALUES (?, ?, ?, ?)");
+            if (category.length() > 38) {
+                category = category.substring(0, 38);
+            }
             benchmarkStmt.setString(1, category);
             benchmarkStmt.setLong(2, time);
             benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
@@ -108,6 +111,9 @@ public class BenchmarkManager {
 
         try {
             PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, data_source_id) VALUES (?, ?, ?, ?, ?)");
+            if (category.length() > 38) {
+                category = category.substring(0, 38);
+            }
             benchmarkStmt.setString(1, category);
             benchmarkStmt.setLong(2, time);
             benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
@@ -127,6 +133,9 @@ public class BenchmarkManager {
     public static void recordBenchmarkForReport(String category, long time, long userID, long reportID, EIConnection conn) {
         try {
             PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, report_id) VALUES (?, ?, ?, ?, ?)");
+            if (category.length() > 38) {
+                category = category.substring(0, 38);
+            }
             benchmarkStmt.setString(1, category);
             benchmarkStmt.setLong(2, time);
             benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
@@ -148,6 +157,9 @@ public class BenchmarkManager {
         try {
             PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, report_id, html) " +
                     "VALUES (?, ?, ?, ?, ?, ?)");
+            if (category.length() > 38) {
+                category = category.substring(0, 38);
+            }
             benchmarkStmt.setString(1, category);
             benchmarkStmt.setLong(2, time);
             benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
@@ -171,6 +183,9 @@ public class BenchmarkManager {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, dashboard_id) VALUES (?, ?, ?, ?, ?)");
+            if (category.length() > 38) {
+                category = category.substring(0, 38);
+            }
             benchmarkStmt.setString(1, category);
             benchmarkStmt.setLong(2, time);
             benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
@@ -194,6 +209,9 @@ public class BenchmarkManager {
         try {
             PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, dashboard_id, html) " +
                     "VALUES (?, ?, ?, ?, ?, ?)");
+            if (category.length() > 38) {
+                category = category.substring(0, 38);
+            }
             benchmarkStmt.setString(1, category);
             benchmarkStmt.setLong(2, time);
             benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
