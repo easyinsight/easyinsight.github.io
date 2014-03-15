@@ -32,7 +32,7 @@ public class KPIDefinition extends AnalysisDefinition {
         var toAdd:ArrayCollection = new ArrayCollection();
         var fields:ArrayCollection = new ArrayCollection();
 
-        if (nowDate == null) {
+        if (nowDate == null || nowDate == "") {
             //baseDate = "Date";
             nowDate = "Now";
             previousDate = "Against";

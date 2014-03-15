@@ -1373,34 +1373,6 @@ public class DataService {
                     trendMap.put(date.toDisplay(), measures);
                 }
                 measures.add((AnalysisMeasure) analysisItem);
-            } else if (analysisItem.getReportFieldExtension() != null && reportFilter != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
-                TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
-                if (trendReportFieldExtension.getDate() != null) {
-                    AnalysisDateDimension dateDimension = (AnalysisDateDimension) trendReportFieldExtension.getDate();
-
-                    RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
-                    rollingFilterDefinition.setField(dateDimension);
-                    rollingFilterDefinition.setInterval(reportFilter.getInterval());
-                    if (reportFilter.getInterval() == MaterializedRollingFilterDefinition.CUSTOM) {
-                        rollingFilterDefinition.setCustomBeforeOrAfter(reportFilter.getCustomBeforeOrAfter());
-                        rollingFilterDefinition.setCustomIntervalAmount(reportFilter.getCustomIntervalAmount());
-                        rollingFilterDefinition.setCustomIntervalType(reportFilter.getCustomIntervalType());
-                    }
-                    analysisItem.getFilters().add(rollingFilterDefinition);
-                    List<AnalysisMeasure> measures = trendMap.get(dateDimension.qualifiedName());
-                    if (measures == null) {
-                        measures = new ArrayList<AnalysisMeasure>();
-                        trendMap.put(dateDimension.qualifiedName(), measures);
-                    }
-                    measures.add((AnalysisMeasure) analysisItem);
-                } else {
-                    List<AnalysisMeasure> measures = trendMap.get("");
-                    if (measures == null) {
-                        measures = new ArrayList<AnalysisMeasure>();
-                        trendMap.put("", measures);
-                    }
-                    measures.add((AnalysisMeasure) analysisItem);
-                }
             } else {
                 List<AnalysisMeasure> measures = trendMap.get("");
                 if (measures == null) {
@@ -1454,6 +1426,14 @@ public class DataService {
             metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
             dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
+            System.out.println("retrieving initial set for key " + key);
+            if (analysisDefinition.getFilterDefinitions() != null) {
+                for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                    if (filter.getField() != null) {
+                        System.out.println("\t" + filter.getField().toDisplay());
+                    }
+                }
+            }
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
             int limit = 0;
             if (analysisDefinition instanceof WSTrendGridDefinition) {
@@ -1542,6 +1522,7 @@ public class DataService {
             } else {
                 pastSet = nowSet;
             }
+            System.out.println("now set size = " + nowSet.getRows().size());
             trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
         }
         return new TrendResult(new ArrayList<TrendOutcome>(trendOutcomes), dataSourceInfo, nowString, previousString);

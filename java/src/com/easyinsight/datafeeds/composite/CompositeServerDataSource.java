@@ -286,14 +286,20 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             feedMap.put(new FeedType(child.getDataSourceType()), child);
         }
         List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
-            for (ChildConnection childConnection : getLiveChildConnections()) {
+        for (ChildConnection childConnection : getLiveChildConnections()) {
             CompositeFeedNode sourceDef = feedMap.get(childConnection.getSourceFeedType());
-                CompositeFeedNode targetDef = feedMap.get(childConnection.getTargetFeedType());
-            
-            CompositeFeedConnection connection = childConnection.createConnection(sourceDef.getDataFeedID(), sourceDef.getDataSourceName(),
-                    targetDef.getDataFeedID(), targetDef.getDataSourceName(), this);
-            if (connection != null) {
-                connections.add(connection);
+            CompositeFeedNode targetDef = feedMap.get(childConnection.getTargetFeedType());
+
+            if (sourceDef != null && targetDef != null) {
+                CompositeFeedConnection connection = childConnection.createConnection(sourceDef.getDataFeedID(), sourceDef.getDataSourceName(),
+                        targetDef.getDataFeedID(), targetDef.getDataSourceName(), this);
+                if (connection != null) {
+                    connections.add(connection);
+                }
+            } else if (sourceDef != null) {
+                LogClass.error("Could not find child of type " + childConnection.getSourceFeedType().getType());
+            } else if (targetDef != null) {
+                LogClass.error("Could not find child of type " + childConnection.getTargetFeedType().getType());
             }
         }
         connections.addAll(getAdditionalConnections());
@@ -359,7 +365,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 session.close();
             }
             if (results.size() > 0) {
-                user = (User) results.get(0);                
+                user = (User) results.get(0);
             }
             return user;
         } catch (Exception e) {
@@ -444,7 +450,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 }
                 tempTables.put(serverDataSourceDefinition.getDataFeedID(),
                         serverDataSourceDefinition.tempLoad(keyMap.get(serverDataSourceDefinition.getDataFeedID()), now,
-                        this, callDataID, lastRefreshTime, conn, fullRefresh, refreshProperties));
+                                this, callDataID, lastRefreshTime, conn, fullRefresh, refreshProperties));
             }
             conn.setAutoCommit(false);
             for (IServerDataSourceDefinition source : sources) {
