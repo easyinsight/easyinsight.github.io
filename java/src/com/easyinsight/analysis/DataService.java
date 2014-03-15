@@ -2168,6 +2168,8 @@ public class DataService {
                 }
             }
 
+            analysisDefinition.argh();
+
             feed.getDataSource().decorateLinks(new ArrayList<AnalysisItem>(items));
 
             AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);

@@ -139,6 +139,50 @@ public class WSVerticalListDefinition extends WSAnalysisDefinition {
         return measures;
     }
 
+    public void argh() {
+        Map<String, List<AnalysisItem>> map = new LinkedHashMap<String, List<AnalysisItem>>();
+        boolean firstPH = true;
+        for (AnalysisItem field : measures) {
+            boolean defined = false;
+            if (field.getReportFieldExtension() != null && field.getReportFieldExtension() instanceof VerticalListReportExtension) {
+                VerticalListReportExtension verticalListExtension = (VerticalListReportExtension) field.getReportFieldExtension();
+                if (verticalListExtension.getSection() != null && !"".equals(verticalListExtension.getSection().trim())) {
+                    defined = true;
+                    String section = verticalListExtension.getSection();
+                    List<AnalysisItem> items = map.get(section);
+                    if (items == null) {
+                        items = new ArrayList<AnalysisItem>();
+                        AnalysisMeasure placeHolder = new AnalysisMeasure(new NamedKey(section), AggregationTypes.SUM);
+                        VerticalListReportExtension ext = new VerticalListReportExtension();
+                        ext.setAlwaysShow(true);
+                        placeHolder.setReportFieldExtension(ext);
+                        items.add(placeHolder);
+                        map.put(section, items);
+                        if (firstPH) {
+                            firstPH = false;
+                        } else {
+                            ext.setLineAbove(true);
+                        }
+                    }
+                    items.add(field);
+                }
+            }
+            if (!defined) {
+                List<AnalysisItem> items = map.get(null);
+                if (items == null) {
+                    items = new ArrayList<AnalysisItem>();
+                    map.put(null, items);
+                }
+                items.add(field);
+            }
+        }
+        List<AnalysisItem> result = new ArrayList<AnalysisItem>();
+        for (List<AnalysisItem> list : map.values()) {
+            result.addAll(list);
+        }
+        setMeasures(result);
+    }
+
     protected void assignResults(List<AnalysisItem> fields) {
         Map<String, List<AnalysisItem>> map = new LinkedHashMap<String, List<AnalysisItem>>();
         boolean firstPH = true;
