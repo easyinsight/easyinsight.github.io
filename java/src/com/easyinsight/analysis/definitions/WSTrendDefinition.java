@@ -89,7 +89,6 @@ public class WSTrendDefinition extends WSKPIDefinition {
                 String fontColor = ExportService.getFontColor(outcome);
                 double v = ((outcome.getNow().toDouble() / outcome.getHistorical().toDouble()) - 1.0) * 100.0;
                 Link l = outcome.getMeasure().defaultLink();
-                String clickEvent = "";
                 Map<String, Object> j = null;
                 if (l != null && l instanceof DrillThrough) {
                     j = new HashMap<String, Object>();
@@ -99,8 +98,8 @@ public class WSTrendDefinition extends WSKPIDefinition {
                     j.put("source", outcome.getMeasure().getAnalysisItemID());
                 }
 
-                return old(fontColor, e, clickEvent, outcome, results, md, v);
-                //return improved(fontColor, e, j, outcome, results, md, v);
+                //return old(fontColor, e, clickEvent, outcome, results, md, v);
+                sb.append(improved(fontColor, e, j, outcome, results, md, v));
 
             }
         } catch (Exception e) {
@@ -177,7 +176,8 @@ public class WSTrendDefinition extends WSKPIDefinition {
 
     private String improved(String fontColor, TextValueExtension e, Map<String, Object> clickEvent, TrendOutcome outcome, TrendDataResults results, ExportMetadata md, double v) {
         StringBuilder sb = new StringBuilder();
-        sb.append("<div style='text-align:center;");
+        sb.append("<div style='text-align:center;margin-left:10px;margin-right:10px;");
+        sb.append("display:inline-block;");
         sb.append("color:");
         if (e != null) {
             sb.append(String.format("#%06X", (0xFFFFFF & e.getColor())));
