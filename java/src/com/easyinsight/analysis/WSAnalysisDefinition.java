@@ -1307,8 +1307,13 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     found = true;
                 }
             }
-            if (!found)
-                filters.put(f.toJSON(new FilterHTMLMetadata(this)));
+            if (!found) {
+                JSONObject j = f.toJSON(new FilterHTMLMetadata(this));
+                if (j != null) {
+                    filters.put(j);
+                }
+            }
+
 
         }
         jo.put("name", getName());
