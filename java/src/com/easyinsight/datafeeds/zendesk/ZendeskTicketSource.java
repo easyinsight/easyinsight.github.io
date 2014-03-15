@@ -5,7 +5,6 @@ import com.easyinsight.core.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
@@ -111,33 +110,37 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             do {
                 Map m = queryList(nextPage, zendeskCompositeSource, getHttpClient(zendeskCompositeSource));
                 JSONArray recordNodes = (JSONArray) m.get("ticket_fields");
-                for (int i = 0; i < recordNodes.size(); i++) {
-                    JSONObject recordNode = (JSONObject) recordNodes.get(i);
-                    String title = String.valueOf(recordNode.get("title"));
-                    String id = String.valueOf(recordNode.get("id"));
-                    Key customKey = keys.get("zd" + id);
-                    if (customKey == null) {
-                        customKey = new NamedKey("zd" + id);
+                if (recordNodes != null) {
+                    for (int i = 0; i < recordNodes.size(); i++) {
+                        JSONObject recordNode = (JSONObject) recordNodes.get(i);
+                        String title = String.valueOf(recordNode.get("title"));
+                        String id = String.valueOf(recordNode.get("id"));
+                        Key customKey = keys.get("zd" + id);
+                        if (customKey == null) {
+                            customKey = new NamedKey("zd" + id);
+                        }
+                        String type = String.valueOf(recordNode.get("type"));
+                        AnalysisItem item;
+                        if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type) || "FieldTagger".equals(type) || "tagger".equals(type) ||
+                                "checkbox".equals(type) || "dropdown".equals(type) || "text".equals(type)) {
+                            item = new AnalysisDimension(customKey, title);
+                        } else if ("MultiLineField".equals(type) || "FieldTextarea".equals(type) || "textarea".equals(type)) {
+                            item = new AnalysisText(customKey, title);
+                        } else if ("NumericField".equals(type) || "FieldDecimal".equals(type) || "FieldInteger".equals(type) || "FieldNumeric".equals(type) ||
+                                "integer".equals(type) || "decimal".equals(type) || "numeric".equals(type)) {
+                            item = new AnalysisMeasure(customKey, title, AggregationTypes.SUM);
+                        } else {
+                            item = null;
+                        }
+                        if (item != null) {
+                            item.setCustomFlag(CUSTOM_FIELD_TICKET);
+                            items.add(item);
+                        }
                     }
-                    String type = String.valueOf(recordNode.get("type"));
-                    AnalysisItem item;
-                    if ("FieldText".equals(type) || "DropDownField".equals(type) || "CheckboxField1".equals(type) || "FieldTagger".equals(type) || "tagger".equals(type) ||
-                            "checkbox".equals(type) || "dropdown".equals(type) || "text".equals(type)) {
-                        item = new AnalysisDimension(customKey, title);
-                    } else if ("MultiLineField".equals(type) || "FieldTextarea".equals(type) || "textarea".equals(type)) {
-                        item = new AnalysisText(customKey, title);
-                    } else if ("NumericField".equals(type) || "FieldDecimal".equals(type) || "FieldInteger".equals(type) || "FieldNumeric".equals(type) ||
-                            "integer".equals(type) || "decimal".equals(type) || "numeric".equals(type)) {
-                        item = new AnalysisMeasure(customKey, title, AggregationTypes.SUM);
-                    } else {
-                        item = null;
-                    }
-                    if (item != null) {
-                        item.setCustomFlag(CUSTOM_FIELD_TICKET);
-                        items.add(item);
-                    }
+                    nextPage = (String) m.get("next_page");
+                } else {
+                    nextPage = null;
                 }
-                nextPage = (String) m.get("next_page");
             } while (nextPage != null);
         } catch (ReportException re) {
             throw re;
