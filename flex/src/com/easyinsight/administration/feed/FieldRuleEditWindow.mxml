@@ -88,6 +88,8 @@
                     index2 = 2;
                     if (reportFieldExtension is YTDReportFieldExtension) {
                         selectedReportType = "YTD";
+                    } else if (reportFieldExtension is VerticalListReportExtension) {
+                        selectedReportType = "Vertical List";
                     } else {
                         selectedReportType = "Text";
                     }

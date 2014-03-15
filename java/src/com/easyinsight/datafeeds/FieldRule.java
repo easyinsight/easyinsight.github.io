@@ -315,11 +315,14 @@ public class FieldRule {
                 }
             }
             if (extension != null) {
-                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension().getFromFieldRuleID() == 0) {
+                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension().getFromFieldRuleID() == 0 &&
+                        analysisItem.getReportFieldExtension().extensionType() == report.extensionType()) {
+                    System.out.println("Skipping over " + analysisItem.toDisplay() + ", already defined");
                     // already has an extension defined
                 } else {
                     ReportFieldExtension extension = this.extension;
                     if (report.extensionType() == extension.extensionType()) {
+                        System.out.println("adding rule for " + analysisItem.toDisplay());
                         ReportFieldExtension clone = extension.clone();
                         clone.setFromFieldRuleID(1);
                         analysisItem.setReportFieldExtension(clone);
