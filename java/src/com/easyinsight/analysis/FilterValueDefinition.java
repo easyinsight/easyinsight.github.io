@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.html.FilterUtils;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.servlet.SystemSettings;
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -518,7 +519,16 @@ public class FilterValueDefinition extends FilterDefinition {
         WSAnalysisDefinition report = filterHTMLMetadata.getReport();
         long dashboardID = db == null ? 0 : db.getId();
         long reportID = report == null ? 0 : report.getAnalysisID();
-        AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, reportID, dashboardID, filterHTMLMetadata.getReport());
+        AnalysisItemResultMetadata metadata = null;
+        try {
+            metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, reportID, dashboardID, filterHTMLMetadata.getReport());
+        } catch (Exception e) {
+            LogClass.error(e);
+            jo.put("type", "single");
+            jo.put("values", new JSONArray());
+            jo.put("enabled", "false");
+            return jo;
+        }
         if (metadata.getReportFault() != null) {
             return null;
         }

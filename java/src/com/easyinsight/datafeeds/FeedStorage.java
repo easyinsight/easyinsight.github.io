@@ -498,7 +498,7 @@ public class FeedStorage {
         try {
             analysisItems = optimizedRetrieval(conn, feedID, analysisItemIDs);
         } catch (Exception e) {
-            LogClass.userError("Retrieving fields for data source", e);
+            //LogClass.userError("Retrieving fields for data source", e);
             analysisItems = slowRetrieval(conn, analysisItemIDs);
         }
         return analysisItems;
