@@ -524,10 +524,7 @@ public class FilterValueDefinition extends FilterDefinition {
             metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, reportID, dashboardID, filterHTMLMetadata.getReport());
         } catch (Exception e) {
             LogClass.error(e);
-            jo.put("type", "single");
-            jo.put("values", new JSONArray());
-            jo.put("enabled", "false");
-            return jo;
+            return null;
         }
         if (metadata.getReportFault() != null) {
             return null;
