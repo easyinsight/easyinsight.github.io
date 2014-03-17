@@ -75,11 +75,12 @@
         <mx:method name="getDataSourceReports" result="gotReports()"/>
         <mx:method name="updateDataSourceReports" result="saved()"/>
     </mx:RemoteObject>
+    <mx:Text text="This window enables you to reuse calculations from reports as fields on the data source."/>
     <mx:HBox>
         <util:SaveButton label="Add Report..." click="addReport()" fontSize="12"/>
         <util:SaveButton label="Remove Selected" click="removeSelected()" fontSize="12"/>
     </mx:HBox>
-    <mx:DataGrid dataProvider="{reports}" wordWrap="true" variableRowHeight="true" height="450" id="dataGrid">
+    <mx:DataGrid dataProvider="{reports}" wordWrap="true" variableRowHeight="true" height="250" id="dataGrid">
         <mx:columns>
             <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>
             <mx:DataGridColumn headerText="Field" dataField="name" width="400"/>
