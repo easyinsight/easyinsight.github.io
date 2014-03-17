@@ -28,6 +28,7 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
     public static final String TEAM_STRENGTH = "Team Strength";
     public static final String START = "Start Date";
     public static final String FINISH = "Finish Date";
+    public static final String CURRENT_STATE = "Iteration State";
 
     public PivotalTrackerV5IterationSource() {
         setFeedName("Iterations");
@@ -45,6 +46,7 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
         fieldBuilder.addField(NUMBER, new AnalysisDimension());
         fieldBuilder.addField(START, new AnalysisDateDimension());
         fieldBuilder.addField(FINISH, new AnalysisDateDimension());
+        fieldBuilder.addField(CURRENT_STATE, new AnalysisDimension());
     }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
@@ -79,6 +81,7 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
                 row.addValue(keys.get(TEAM_STRENGTH), getJSONValue(story, "team_strength"));
                 row.addValue(keys.get(START), getDate(story, "start"));
                 row.addValue(keys.get(FINISH), getDate(story, "finish"));
+                row.addValue(keys.get(CURRENT_STATE), getJSONValue(story, "current_state"));
             }
 
         }

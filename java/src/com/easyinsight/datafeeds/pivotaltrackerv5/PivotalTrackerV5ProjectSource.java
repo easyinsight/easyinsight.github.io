@@ -30,6 +30,7 @@ public class PivotalTrackerV5ProjectSource extends PivotalTrackerV5BaseSource {
     public static final String VELOCITY_AVERAGED = "Average Velocity";
     public static final String INITIAL_VELOCITY = "Initial Velocity";
     public static final String START_DATE = "Start Date";
+    public static final String START_TIME = "Start Time";
     public static final String CURRENT_ITERATION_NUMBER = "Current Iteration";
 
     public PivotalTrackerV5ProjectSource() {
@@ -52,6 +53,7 @@ public class PivotalTrackerV5ProjectSource extends PivotalTrackerV5BaseSource {
         fieldBuilder.addField(START_DATE, new AnalysisDateDimension());
         fieldBuilder.addField(INITIAL_VELOCITY, new AnalysisMeasure());
         fieldBuilder.addField(VELOCITY_AVERAGED, new AnalysisMeasure());
+        fieldBuilder.addField(START_TIME, new AnalysisDateDimension());
     }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
@@ -68,6 +70,7 @@ public class PivotalTrackerV5ProjectSource extends PivotalTrackerV5BaseSource {
             row.addValue(keys.get(CREATED_AT), getDate(project, "created_at"));
             row.addValue(keys.get(UPDATED_AT), getDate(project, "updated_at"));
             row.addValue(keys.get(START_DATE), getDate(project, "start_date"));
+            row.addValue(keys.get(START_TIME), getDate(project, "start_time"));
             row.addValue(keys.get(INITIAL_VELOCITY), getDate(project, "initial_velocity"));
             row.addValue(keys.get(VELOCITY_AVERAGED), getDate(project, "velocity_averaged_over"));
         }
