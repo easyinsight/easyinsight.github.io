@@ -14,6 +14,10 @@ public class TrendDropArea extends MeasureDropArea {
         return "Drag Metric Here";
     }
 
+    protected function createTrendExtension():TrendReportFieldExtension {
+        return new TrendReportFieldExtension();
+    }
+
     override public function set analysisItem(analysisItem:AnalysisItem):void {
 
         if (analysisItem != null) {
@@ -29,7 +33,7 @@ public class TrendDropArea extends MeasureDropArea {
         }
 
         if (analysisItem != null && analysisItem.reportFieldExtension == null) {
-            var ext:TrendReportFieldExtension = new TrendReportFieldExtension();
+            var ext:TrendReportFieldExtension = createTrendExtension();
             var dsID:int = 0;
             if (analysisItem.key is DerivedKey) {
                 dsID = DerivedKey(analysisItem.key).feedID;

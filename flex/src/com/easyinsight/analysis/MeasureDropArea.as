@@ -18,7 +18,7 @@ package com.easyinsight.analysis
 		}
 
         override public function accept(analysisItem:AnalysisItem):Boolean {
-            if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING) || analysisItem.hasType(AnalysisItemTypes.DATE)) {
+            if (analysisItem != null && (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING) || analysisItem.hasType(AnalysisItemTypes.DATE))) {
                 return false;
             }
             return true;
