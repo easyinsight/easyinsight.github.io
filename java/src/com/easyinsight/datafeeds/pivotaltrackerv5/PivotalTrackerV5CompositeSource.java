@@ -90,6 +90,7 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
         storyIDToLabelMap = null;
         epicIDToLabelMap = null;
         iterationToStoryMap = null;
+        iterationToStateMap = null;
         userMap = null;
     }
 
@@ -132,10 +133,19 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
         this.iterationToStoryMap = iterationToStoryMap;
     }
 
+    public Map<String, String> getIterationToStateMap() {
+        return iterationToStateMap;
+    }
+
+    public void setIterationToStateMap(Map<String, String> iterationToStateMap) {
+        this.iterationToStateMap = iterationToStateMap;
+    }
+
     private Map<String, String> userMap = new HashMap<String, String>();
     private Map<String, List<String>> storyIDToLabelMap = new HashMap<String, List<String>>();
     private Map<String, List<String>> epicIDToLabelMap = new HashMap<String, List<String>>();
     private Map<String, String> iterationToStoryMap = new HashMap<String, String>();
+    private Map<String, String> iterationToStateMap = new HashMap<String, String>();
 
     @Override
     public FeedType getFeedType() {

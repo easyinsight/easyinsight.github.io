@@ -54,6 +54,7 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
         HttpClient httpClient = new HttpClient();
         Map<String, String> iterationToStoryMap = new HashMap<String, String>();
         Map<String, String> userMap = new HashMap<String, String>();
+        Map<String, String> iterationToStateMap = new HashMap<String, String>();
         List<Map> projects = runRequestForList("projects", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
         for (Map project : projects) {
             String projectID = getJSONValue(project, "id");
@@ -64,29 +65,46 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
                 String id = person.get("id").toString();
                 userMap.put(id, name);
             }
-            List<Map> iterations = runRequestForList("/projects/" + projectID  + "/iterations", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
+            List<Map> iterations = runRequestForList("/projects/" + projectID  + "/iterations?scope=done", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
             for (Map story : iterations) {
-
-                List<Map> labels = (List<Map>) story.get("stories");
                 String id = projectID + "-" + getJSONValue(story, "number");
-                for (Map label : labels) {
-                    String labelID = label.get("id").toString();
-                    iterationToStoryMap.put(labelID, id);
-                }
-                IRow row = dataSet.createRow();
-
-                row.addValue(keys.get(ID), id);
-                row.addValue(keys.get(PROJECT_ID), projectID);
-                row.addValue(keys.get(NUMBER), getJSONValue(story, "number"));
-                row.addValue(keys.get(TEAM_STRENGTH), getJSONValue(story, "team_strength"));
-                row.addValue(keys.get(START), getDate(story, "start"));
-                row.addValue(keys.get(FINISH), getDate(story, "finish"));
-                row.addValue(keys.get(CURRENT_STATE), getJSONValue(story, "current_state"));
+                parseIterations(keys, dataSet, iterationToStoryMap, projectID, story, "done");
+                iterationToStateMap.put(id, "Done");
             }
-
+            iterations = runRequestForList("/projects/" + projectID  + "/iterations?scope=current", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
+            for (Map story : iterations) {
+                String id = projectID + "-" + getJSONValue(story, "number");
+                parseIterations(keys, dataSet, iterationToStoryMap, projectID, story, "current");
+                iterationToStateMap.put(id, "Current");
+            }
+            iterations = runRequestForList("/projects/" + projectID  + "/iterations?scope=backlog", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
+            for (Map story : iterations) {
+                String id = projectID + "-" + getJSONValue(story, "number");
+                parseIterations(keys, dataSet, iterationToStoryMap, projectID, story, "backlog");
+                iterationToStateMap.put(id, "Backlog");
+            }
         }
         ((PivotalTrackerV5CompositeSource) parentDefinition).setIterationToStoryMap(iterationToStoryMap);
         ((PivotalTrackerV5CompositeSource) parentDefinition).setUserMap(userMap);
+        ((PivotalTrackerV5CompositeSource) parentDefinition).setIterationToStateMap(iterationToStateMap);
         return dataSet;
+    }
+
+    private void parseIterations(Map<String, Key> keys, DataSet dataSet, Map<String, String> iterationToStoryMap, String projectID, Map story, String scope) {
+        List<Map> labels = (List<Map>) story.get("stories");
+        String id = projectID + "-" + getJSONValue(story, "number");
+        for (Map label : labels) {
+            String labelID = label.get("id").toString();
+            iterationToStoryMap.put(labelID, id);
+        }
+        IRow row = dataSet.createRow();
+
+        row.addValue(keys.get(ID), id);
+        row.addValue(keys.get(PROJECT_ID), projectID);
+        row.addValue(keys.get(NUMBER), getJSONValue(story, "number"));
+        row.addValue(keys.get(TEAM_STRENGTH), getJSONValue(story, "team_strength"));
+        row.addValue(keys.get(START), getDate(story, "start"));
+        row.addValue(keys.get(FINISH), getDate(story, "finish"));
+        row.addValue(keys.get(CURRENT_STATE), scope);
     }
 }
