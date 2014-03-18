@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <feeds:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml"
                         xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
-                        creationComplete="setupListeners()" height="600" width="900"
+                        creationComplete="setupListeners()" height="500" width="900"
                         xmlns:feeds="com.easyinsight.administration.feed.*">
     <mx:Metadata>
         [Event(name="disableControls", type="flash.events.Event")]

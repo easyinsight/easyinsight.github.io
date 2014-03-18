@@ -27,6 +27,7 @@ public class PivotalTrackerV5StorySource extends PivotalTrackerV5BaseSource {
     public static final String KIND = "Kind";
     public static final String URL = "URL";
     public static final String CURRENT_STATE = "Current State";
+    public static final String ITERATION_STATE = "Story Iteration State";
     public static final String STORY_TYPE = "Story Type";
     public static final String CREATED_AT = "Created At";
     public static final String UPDATED_AT = "Updated At";
@@ -62,6 +63,7 @@ public class PivotalTrackerV5StorySource extends PivotalTrackerV5BaseSource {
         fieldBuilder.addField(CREATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(DEADLINE, new AnalysisDateDimension());
         fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
+        fieldBuilder.addField(ITERATION_STATE, new AnalysisDimension());
         fieldBuilder.addField(ESTIMATE, new AnalysisMeasure());
         fieldBuilder.addField(COUNT, new AnalysisMeasure());
     }
@@ -81,11 +83,6 @@ public class PivotalTrackerV5StorySource extends PivotalTrackerV5BaseSource {
             do {
                 stories = runRequestForList("/projects/" + projectID + "/stories?limit=" + PAGE_SIZE + "&offset=" + (page * PAGE_SIZE), p, httpClient);
                 for (Map story : stories) {
-                    /*
-                    {"id":55842886,"owner_ids":[],"updated_at":"2013-08-26T19:36:12Z",
-                    "labels":[{"id":6391516,"updated_at":"2013-08-26T19:30:18Z","name":"a","project_id":736787,"created_at":"2013-08-26T19:30:18Z","kind":"label"},{"id":6391556,"updated_at":"2013-08-26T19:35:24Z","name":"epic team 3","project_id":736787,"created_at":"2013-08-26T19:35:24Z","kind":"label"}],
-                    "name":"a epic Story 3","project_id":736787,"created_at":"2013-08-26T19:33:18Z","requested_by_id":1050017,"current_state":"unscheduled","kind":"story","url":"https:\/\/www.pivotaltracker.com\/story\/show\/55842886","story_type":"feature"}
-                     */
                     String storyID = getJSONValue(story, "id");
                     List<Map> labels = (List<Map>) story.get("labels");
                     for (Map label : labels) {
@@ -100,9 +97,15 @@ public class PivotalTrackerV5StorySource extends PivotalTrackerV5BaseSource {
                     IRow row = dataSet.createRow();
                     row.addValue(keys.get(ID), storyID);
                     String iterationID = p.getIterationToStoryMap().get(storyID);
+                    String state = null;
                     if (iterationID != null) {
                         row.addValue(keys.get(ITERATION_ID), iterationID);
+                        state = p.getIterationToStateMap().get(iterationID);
                     }
+                    if (state == null) {
+                        state = "Icebox";
+                    }
+                    row.addValue(keys.get(ITERATION_STATE), state);
                     row.addValue(keys.get(PROJECT_ID), projectID);
                     row.addValue(keys.get(NAME), getJSONValue(story, "name"));
                     row.addValue(keys.get(KIND), getJSONValue(story, "kind"));

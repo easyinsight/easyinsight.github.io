@@ -170,7 +170,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     @Override
     protected void beforeRefresh(Date lastRefreshTime) {
         super.beforeRefresh(lastRefreshTime);
-        userCache = createUserCache();
+        //userCache = createUserCache();
     }
 
     private static final String REQUEST = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken></qdbapi>";
@@ -268,6 +268,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         insertStmt.setBoolean(10, rebuildFields);
         insertStmt.setBoolean(11, inlineUsers);
         insertStmt.execute();
+        insertStmt.close();
     }
 
     @Override
@@ -294,6 +295,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         applicationId = rs.getString(8);
         rebuildFields = rs.getBoolean(9);
         inlineUsers = rs.getBoolean(10);
+        queryStmt.close();
     }
 
     @Override
