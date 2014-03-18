@@ -2,16 +2,11 @@
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  borderStyle="solid" borderThickness="1" cornerRadius="8" verticalAlign="middle" width="100%" backgroundColor="#333333" borderColor="#333333">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
-        import com.easyinsight.util.PopUpUtil;
 
         import mx.formatters.DateFormatter;
 
-        import mx.managers.PopUpManager;
-
         private function showNews():void {
-            var window:WhatsNew = new WhatsNew();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+            navigateToURL(new URLRequest("https://www.easy-insight.com/app/whatsnew.jsp"));
         }
 
         override protected function commitProperties():void {
