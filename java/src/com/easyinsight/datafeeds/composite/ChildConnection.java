@@ -34,6 +34,14 @@ public class ChildConnection {
         this.targetKey = targetKey;
     }
 
+    public ChildConnection(FeedType sourceFeedType, FeedType targetFeedType, String sourceKey, String targetKey, boolean forceOuterJoin) {
+        this.sourceFeedType = sourceFeedType;
+        this.targetFeedType = targetFeedType;
+        this.sourceKey = sourceKey;
+        this.targetKey = targetKey;
+        this.forceOuterJoin = forceOuterJoin;
+    }
+
     public ChildConnection(FeedType sourceFeedType, FeedType targetFeedType, String sourceKey, String targetKey, int sourceCardinality, int targetCardinality) {
         this.sourceFeedType = sourceFeedType;
         this.targetFeedType = targetFeedType;
@@ -133,6 +141,7 @@ public class ChildConnection {
                         sourceKey, targetKey, sourceName, targetName, leftJoin, rightJoin, leftOriginal, rightOriginal);
             conn.setSourceCardinality(getSourceCardinality());
             conn.setTargetCardinality(getTargetCardinality());
+            conn.setForceOuterJoin(forceOuterJoin ? 1 : 0);
             return conn;
         } else {
             return new CompositeFeedConnection(sourceID, targetID,
