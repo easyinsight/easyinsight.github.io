@@ -2,6 +2,7 @@
 <util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.administration.feed.ReportEventsWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.controls.Alert;
@@ -114,6 +115,22 @@
                 rdRule.type = FilterRuleDefinition.REPORT_TO_DASHBOARD_LINK;
                 rdRule.label = "Apply the field used in this filter to any dashboard or dashboard stack level filter matching the property of " + _filterDefinition.childToParentLabel + ".";
                 rules.addItem(rdRule);
+            }
+
+            if (filterMetadata != null) {
+                Alert.show("fm not null");
+                if (filterMetadata.report != null) {
+                    Alert.show("fm report not null");
+                }
+            }
+            if (filterMetadata != null && filterMetadata.report != null && filterMetadata.report.filterEvents) {
+                Alert.show("filter events present, looking for " + FilterDefinition.getLabel(_filterDefinition, _filterDefinition.field));
+                var events:ArrayCollection = filterMetadata.report.filterEvents[FilterDefinition.getLabelWithEnd(_filterDefinition, _filterDefinition.field, "")];
+                if (events != null) {
+                    var reportsEventsWindow:ReportEventsWindow = new ReportEventsWindow();
+                    reportsEventsWindow.events = events;
+                    tabNavigator.addChild(reportsEventsWindow);
+                }
             }
 
             //coreBox.addChildAt(editor, index);
@@ -234,7 +251,8 @@
         private var idData:String;
         ]]>
 	</mx:Script>
-    <mx:TabNavigator creationPolicy="all" resizeToContent="true" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:TabNavigator creationPolicy="all" resizeToContent="true" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"
+            id="tabNavigator">
         <mx:VBox id="coreBox" label="Main Filter Options">
             <mx:HBox>
                 <mx:Form>

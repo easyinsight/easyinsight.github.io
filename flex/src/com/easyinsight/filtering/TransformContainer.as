@@ -261,6 +261,7 @@ public class TransformContainer extends HBox
         filterMetadata.key = _filterStorageKey;
         filterMetadata.context = _context;
         filterMetadata.filterSet = _filterSet;
+        filterMetadata.report = _report;
         if (filterDefinition.getType() == FilterDefinition.VALUE) {
             var filterValueDefinition:FilterValueDefinition = filterDefinition as FilterValueDefinition;
             if (filterValueDefinition.singleValue) {
@@ -384,6 +385,7 @@ public class TransformContainer extends HBox
         filterMetadata.filterSet = _filterSet;
         filterMetadata.key = _filterStorageKey;
         filterMetadata.context = _context;
+        filterMetadata.report = _report;
         window.filterMetadata = filterMetadata;
         window.filterSource = _filterSource;
         window.availableFields = new ArrayCollection(this._analysisItems.toArray());
@@ -438,6 +440,7 @@ public class TransformContainer extends HBox
         filterMetadata.key = _filterStorageKey;
         filterMetadata.context = _context;
         filterMetadata.filterSet = _filterSet;
+        filterMetadata.report = _report;
         if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
             var window:DateFilterWindow = new DateFilterWindow();
             window.filterMetadata = filterMetadata;
