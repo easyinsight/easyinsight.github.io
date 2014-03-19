@@ -302,7 +302,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             workingStartDate = startDate;
         }*/
         insightRequestMetadata.addAudit(this, "Start date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " + workingStartDate);
-        insightRequestMetadata.addAudit(this, "End date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " + workingStartDate);
+        insightRequestMetadata.addAudit(this, "End date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " + workingEndDate);
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate.getTime()));
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingEndDate.getTime()));
         return start;
