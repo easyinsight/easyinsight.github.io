@@ -125,6 +125,9 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _analysisDefinition = val;
     }
 
+    public function get updatedReport():AnalysisDefinition {
+        return _controlBar.createAnalysisDefinition();
+    }
 
     public function get analysisDefinition():AnalysisDefinition {
         return _analysisDefinition;
@@ -537,6 +540,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
                         _reportRenderer.renderReport(event.dataSet, event.report, new Object(), event.additionalProperties);
                     }
                     _analysisDefinition.fieldEvents = event.events;
+                    _analysisDefinition.filterEvents = event.filterEvents;
                 } else {
                     showNoData();
                 }
@@ -660,7 +664,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.fullJoins = source.fullJoins;
         target.optimized = source.optimized;
         target.dateUpdated = source.dateUpdated;
-        target.backgroundAlpha = source.backgroundAlpha;
         target.fontName = source.fontName;
         target.fontSize = source.fontSize;
         target.marmotScript = source.marmotScript;
