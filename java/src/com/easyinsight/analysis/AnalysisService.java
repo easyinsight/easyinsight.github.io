@@ -547,7 +547,6 @@ public class AnalysisService {
                 sourceResult = sourceMap.get(connection.getSourceJoin().getKeyID());
             } else {
                 sourceResult = sourceMap.get(sourceItem.getKey().toBaseKey().getKeyID());
-                System.out.println("\tSearching for " + sourceResult.toDisplay());
             }
 
 
@@ -556,7 +555,6 @@ public class AnalysisService {
                 targetResult = sourceMap.get(connection.getTargetJoin().getKeyID());
             } else {
                 targetResult = sourceMap.get(targetItem.getKey().toBaseKey().getKeyID());
-                System.out.println("\tSearching for " + targetResult.toDisplay());
             }
 
             System.out.println("Source Feed ID = " + connection.getSourceFeedID());
