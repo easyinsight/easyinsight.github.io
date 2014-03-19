@@ -7,7 +7,6 @@ import com.easyinsight.analysis.MaterializedFilterDefinition;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,6 +29,7 @@ public class BetterFilterComponent implements IComponent {
         for (FilterDefinition filter : filters) {
             MaterializedFilterDefinition materializedFilter = filter.materialize(pipelineData.getInsightRequestMetadata());
             materializedFilterDefinitionList.add(materializedFilter);
+            materializedFilter.log(pipelineData.getInsightRequestMetadata(), filter);
         }
         for (IRow row : dataSet.getRows()) {
             boolean valid = true;
