@@ -24,6 +24,12 @@ public class FieldFilterComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         for (FilterPair filterPair : filterPairs) {
             filterPair.materializedFilterDefinition = filterPair.filterDefinition.materialize(pipelineData.getInsightRequestMetadata());
+            StringBuilder sb = new StringBuilder();
+            for (AnalysisItem analysisItem : pipelineData.getAllRequestedItems()) {
+                sb.append(analysisItem.toDisplay()).append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            pipelineData.getInsightRequestMetadata().addAudit(filterPair.analysisItem, "Applied field filter on " + filterPair.filterDefinition.getField().toDisplay() + " with " + sb.toString() + " as other fields present.");
         }
         for (IRow row : dataSet.getRows()) {
             for (FilterPair filterPair : filterPairs) {
