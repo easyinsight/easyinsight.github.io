@@ -50,9 +50,20 @@ public class InsightRequestMetadata implements Serializable {
     private String ip;
     private transient boolean noLogging;
     private transient Map<String, List<String>> fieldAudits = new HashMap<String, List<String>>();
+    private transient Map<String, List<String>> filterAudits = new HashMap<String, List<String>>();
+
+    private transient boolean aggregationRowChanged;
 
     private transient List<AnalysisItem> allItems;
     private transient AnalysisItemRetrievalStructure structure;
+
+    public boolean isAggregationRowChanged() {
+        return aggregationRowChanged;
+    }
+
+    public void setAggregationRowChanged(boolean aggregationRowChanged) {
+        this.aggregationRowChanged = aggregationRowChanged;
+    }
 
     public List<AnalysisItem> getAllItems() {
         return allItems;
@@ -90,11 +101,28 @@ public class InsightRequestMetadata implements Serializable {
         this.baseDate = baseDate;
     }
 
+    public Map<String, List<String>> getFilterAudits() {
+        return filterAudits;
+    }
+
+    public void setFilterAudits(Map<String, List<String>> filterAudits) {
+        this.filterAudits = filterAudits;
+    }
+
     public void addAudit(AnalysisItem field, String audit) {
         List<String> audits = fieldAudits.get(field.toDisplay());
         if (audits == null) {
             audits = new ArrayList<String>();
             fieldAudits.put(field.toDisplay(), audits);
+        }
+        audits.add(audit);
+    }
+
+    public void addAudit(FilterDefinition filter, String audit) {
+        List<String> audits = filterAudits.get(filter.label(false));
+        if (audits == null) {
+            audits = new ArrayList<String>();
+            filterAudits.put(filter.label(false), audits);
         }
         audits.add(audit);
     }
@@ -491,5 +519,17 @@ public class InsightRequestMetadata implements Serializable {
                 filter.setPipelineName(name);
             }
         }
+    }
+
+    public List<IntentionSuggestion> generateSuggestions() {
+        List<IntentionSuggestion> suggestionList = new ArrayList<IntentionSuggestion>();
+        if (!isAggregationRowChanged()) {
+            /*suggestionList.add(new IntentionSuggestion("turn off aggregate query if possible", "We recommend turning off aggregate query if possible to speed up the report load time.",
+                    IntentionSuggestion.SCOPE_REPORT, IntentionSuggestion.TURN_OFF_AGGREGATE_QUERY, IntentionSuggestion.YOU_SHOULD_DO_THIS));*/
+        }
+        if (suggestions != null) {
+            suggestionList.addAll(suggestions);
+        }
+        return suggestionList;
     }
 }

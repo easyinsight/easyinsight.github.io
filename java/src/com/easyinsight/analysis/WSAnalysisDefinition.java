@@ -155,9 +155,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private int fetchSize;
     private boolean noDataOnNoJoin;
 
-    private String customField1;
-    private String customField2;
-
     public String getColorScheme() {
         return colorScheme;
     }
@@ -254,22 +251,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setPassThroughFilters(boolean passThroughFilters) {
         this.passThroughFilters = passThroughFilters;
-    }
-
-    public String getCustomField1() {
-        return customField1;
-    }
-
-    public void setCustomField1(String customField1) {
-        this.customField1 = customField1;
-    }
-
-    public String getCustomField2() {
-        return customField2;
-    }
-
-    public void setCustomField2(String customField2) {
-        this.customField2 = customField2;
     }
 
     public boolean isAggregateQueryIfPossible() {
@@ -1059,8 +1040,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
         noDataOnNoJoin = findBooleanProperty(properties, "noDataOnNoJoin", false);
         aggregateQueryIfPossible = findBooleanProperty(properties, "aggregateQueryIfPossible", true);
         cacheFilters = findBooleanProperty(properties, "cacheFilters", false);
-        customField1 = findStringProperty(properties, "customField1", "");
-        customField2 = findStringProperty(properties, "customField2", "");
         cachePartitionFilter = findStringProperty(properties, "cachePartitionFilter", "");
         enableLocalStorage = findBooleanProperty(properties, "enableLocalStorage", false);
         colorScheme = findStringProperty(properties, "reportColorScheme", "None");
@@ -1094,8 +1073,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportNumericProperty("fetchSize", fetchSize));
         properties.add(new ReportBooleanProperty("noDataOnNoJoin", noDataOnNoJoin));
         properties.add(new ReportBooleanProperty("aggregateQueryIfPossible", aggregateQueryIfPossible));
-        properties.add(new ReportStringProperty("customField1", customField1));
-        properties.add(new ReportStringProperty("customField2", customField2));
         properties.add(new ReportStringProperty("cachePartitionFilter", cachePartitionFilter));
         properties.add(new ReportBooleanProperty("cacheFilters", cacheFilters));
         properties.add(new ReportStringProperty("reportColorScheme", colorScheme));

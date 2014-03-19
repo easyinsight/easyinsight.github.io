@@ -37,6 +37,15 @@ public class FeedMetadata implements Serializable {
     private List<AnalysisItem> dataSourceFields;
     private List<Tag> tags;
     private Tag tagDefault;
+    private boolean forceOuterJoin;
+
+    public boolean isForceOuterJoin() {
+        return forceOuterJoin;
+    }
+
+    public void setForceOuterJoin(boolean forceOuterJoin) {
+        this.forceOuterJoin = forceOuterJoin;
+    }
 
     public Tag getTagDefault() {
         return tagDefault;

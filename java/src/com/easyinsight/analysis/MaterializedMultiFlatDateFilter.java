@@ -15,9 +15,6 @@ import java.util.Set;
  */
 public class MaterializedMultiFlatDateFilter extends MaterializedFilterDefinition {
 
-    private int type;
-    private int value;
-
     private Set<Integer> months;
 
     public MaterializedMultiFlatDateFilter(AnalysisItem key, Collection<DateLevelWrapper> wrappers) {

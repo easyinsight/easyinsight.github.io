@@ -334,9 +334,11 @@ public class RollingFilterDefinition extends FilterDefinition {
         if ((interval > MaterializedRollingFilterDefinition.ALL) || (interval < 0)) {
             if (startDate != null) {
                 preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startDate.getTime()));
+                insightRequestMetadata.addAudit(this, "Start date on database for " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " not time shifted  ") + " at query to " + new Date(startDate.getTime()));
             }
             if (endDate != null) {
                 preparedStatement.setTimestamp(start++, new java.sql.Timestamp(endDate.getTime()));
+                insightRequestMetadata.addAudit(this, "End date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " time shifted  ") + " at query to " + new Date(startDate.getTime()));
             }
         } else if (interval != MaterializedRollingFilterDefinition.LAST_DAY) {
             Date now = insightRequestMetadata.getNow();
@@ -360,11 +362,15 @@ public class RollingFilterDefinition extends FilterDefinition {
             //}
             if (customBeforeOrAfter == RollingFilterDefinition.AFTER) {
                 preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate));
+                insightRequestMetadata.addAudit(this, "Start date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " + new Date(workingStartDate));
             } else if (customBeforeOrAfter == RollingFilterDefinition.BEFORE) {
                 preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingEndDate));
+                insightRequestMetadata.addAudit(this, "End date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " +  new Date(workingEndDate));
             } else {
                 preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate));
+                insightRequestMetadata.addAudit(this, "Start date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " +  new Date(workingStartDate));
                 preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingEndDate));
+                insightRequestMetadata.addAudit(this, "End date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " +  new Date(workingEndDate));
             }
         }
         return start;

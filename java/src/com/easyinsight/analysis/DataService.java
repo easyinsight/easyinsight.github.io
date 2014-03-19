@@ -564,6 +564,7 @@ public class DataService {
             feedMetadata.setFilterExampleMessage(feed.getFilterExampleMessage());
             feedMetadata.setDataSourceName(feed.getName());
             feedMetadata.setFields(feedItemArray);
+            feedMetadata.setForceOuterJoin(feed.getDataSource().isDefaultToFullJoins());
             feedMetadata.setFieldHierarchy(feed.getFieldHierarchy());
             feedMetadata.setIntrinsicFilters(feed.getIntrinsicFilters(conn));
             feedMetadata.setDataFeedID(feedID);
@@ -1765,6 +1766,7 @@ public class DataService {
             results.setProcessingTime(processingTime);
             results.setDatabaseTime(insightRequestMetadata.getDatabaseTime());
             results.setFieldEvents(insightRequestMetadata.getFieldAudits());
+            results.setFilterEvents(insightRequestMetadata.getFilterAudits());
             if (insightRequestMetadata.isLogReport()) {
                 results.setAuditMessages(events);
             }

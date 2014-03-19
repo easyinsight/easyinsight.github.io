@@ -419,6 +419,16 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         return cal.getTimeInMillis();
     }
 
+    @Override
+    public void log(InsightRequestMetadata insightRequestMetadata, FilterDefinition filterDefinition) {
+        if (limitDate > 0) {
+            insightRequestMetadata.addAudit(filterDefinition, "Start date on processing in memory is " + (((AnalysisDateDimension) filterDefinition.getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " +  new Date(limitDate));
+        }
+        if (endDate > 0) {
+            insightRequestMetadata.addAudit(filterDefinition, "End date on processing in memory is " + (((AnalysisDateDimension) filterDefinition.getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " +  new Date(endDate));
+        }
+    }
+
     public boolean allows(Value value) {
         if (interval == MaterializedRollingFilterDefinition.ALL) {
             return true;
