@@ -94,7 +94,7 @@
                 }
 
                 columns = columns.concat(defaultColumns.toArray());
-                if (!trendDef.showKPIName && columns.indexOf(nameColumn) != -1) {
+                /*if (!trendDef.showKPIName && columns.indexOf(nameColumn) != -1) {
                     var c:ArrayCollection = new ArrayCollection(columns);
                     c.removeItemAt(c.getItemIndex(nameColumn));
                     columns = c.toArray();
@@ -102,7 +102,7 @@
                     var c1:ArrayCollection = new ArrayCollection(columns);
                     c1.addItemAt(nameColumn, c1.length - 3);
                     columns = c1.toArray();
-                }
+                }*/
                 if (firstLoad) {
                     myDataSet = trends;
                     if (trend.sortIndex > -1) {
