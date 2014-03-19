@@ -21,11 +21,12 @@ public class DataServiceEvent extends Event {
     public var hasData:Boolean = false;
     public var report:AnalysisDefinition;
     public var events:Object;
+    public var filterEvents:Object;
 
     public function DataServiceEvent(type:String, dataSet:ArrayCollection, dataSource:DataSourceInfo,
                                      additionalProperties:Object, reportAudit:ArrayCollection, reportFault:ReportFault,
                                      limitedResults:Boolean = false, limitResults:int = 0, maxResults:int = 0, suggestions:ArrayCollection = null,
-            hasData:Boolean = false, report:AnalysisDefinition = null, events:Object = null) {
+            hasData:Boolean = false, report:AnalysisDefinition = null, events:Object = null, filterEvents:Object = null) {
         super(type);
         this.dataSet = dataSet;
         this.dataSource = dataSource;
@@ -39,11 +40,12 @@ public class DataServiceEvent extends Event {
         this.hasData = hasData;
         this.report = report;
         this.events = events;
+        this.filterEvents = filterEvents;
     }
 
     override public function clone():Event {
         return new DataServiceEvent(type, dataSet, dataSource, additionalProperties, reportAudit, reportFault,
-                limitedResults, limitResults, maxResults, suggestions, hasData, report, events);
+                limitedResults, limitResults, maxResults, suggestions, hasData, report, events, filterEvents);
     }
 }
 }

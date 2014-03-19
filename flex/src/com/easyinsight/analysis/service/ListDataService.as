@@ -78,9 +78,6 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
                         endObject[linkKey + "_link"] = value.links[linkKey];
                     }
                 }
-                if (value.drillThroughValues != null) {
-                    endObject[key + "_drill"] = value.drillThroughValues;
-                }
                 /*if (value.drillThroughValue != null) {
                     value.drillThroughValue = "blah";
                 }*/
@@ -107,7 +104,8 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         var serviceData:ServiceData = translate(listData, report);
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, serviceData.data, 
                 listData.dataSourceInfo, listData.additionalProperties, listData.auditMessages, listData.reportFault,
-                listData.limitedResults, listData.maxResults, listData.limitResults, listData.suggestions, serviceData.data.length > 0, listData.report));
+                listData.limitedResults, listData.maxResults, listData.limitResults, listData.suggestions, serviceData.data.length > 0, listData.report, listData.fieldEvents,
+        listData.filterEvents));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
@@ -119,7 +117,8 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         var serviceData:ServiceData = translate(listData, report);
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, serviceData.data,
                 listData.dataSourceInfo, listData.additionalProperties, listData.auditMessages, listData.reportFault,
-                listData.limitedResults, listData.maxResults, listData.limitResults, listData.suggestions, serviceData.data.length > 0, listData.report));
+                listData.limitedResults, listData.maxResults, listData.limitResults, listData.suggestions, serviceData.data.length > 0, listData.report, listData.fieldEvents,
+        listData.filterEvents));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
