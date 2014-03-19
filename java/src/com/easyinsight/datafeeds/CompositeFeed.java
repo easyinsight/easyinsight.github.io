@@ -545,18 +545,21 @@ public class CompositeFeed extends Feed {
                 }
                 FilterDefinition joinFilter = null;
                 if (insightRequestMetadata.isOptimized() && last.connection instanceof CompositeFeedConnection) {
-                    joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, (CompositeFeedConnection) last.connection);
+                    CompositeFeedConnection c = (CompositeFeedConnection) last.connection;
+                    if (c.getForceOuterJoin() == 0) {
+                        joinFilter = createJoinFilter(sourceNode, sourceQueryData.dataSet, targetNode, (CompositeFeedConnection) last.connection);
+                    }
                 }
                 if (!swapped) {
                     if (targetQueryData.dataSet == null) {
-                        if (insightRequestMetadata.isOptimized() || last.connection.isOptimized()) {
+                        if (joinFilter != null) {
                             targetNode.addFilter(joinFilter);
                         }
                         targetQueryData.dataSet = targetNode.produceDataSet(insightRequestMetadata);
                     }
                 } else {
                     if (sourceQueryData.dataSet == null) {
-                        if (insightRequestMetadata.isOptimized() || last.connection.isOptimized()) {
+                        if (joinFilter != null) {
                             sourceNode.addFilter(joinFilter);
                         }
                         sourceQueryData.dataSet = sourceNode.produceDataSet(insightRequestMetadata);
