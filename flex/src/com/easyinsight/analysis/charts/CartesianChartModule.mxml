@@ -141,7 +141,6 @@
         }
 
         private function applyGeneralStyling():void {
-            canvas.setStyle("backgroundAlpha", chartDef.backgroundAlpha);
             chartDef.styleChart(chart);
         }
 

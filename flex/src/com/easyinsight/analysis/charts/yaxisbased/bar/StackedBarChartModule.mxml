@@ -172,7 +172,6 @@
 
             if (dataSet.length > 0) {
 
-                canvas.setStyle("backgroundAlpha", barChartDef.backgroundAlpha);
                 stackIndex = 0;
                 if (barChartDef.columnSort != ChartDefinition.SORT_UNSORTED) {
                     var sort:Sort = new Sort();

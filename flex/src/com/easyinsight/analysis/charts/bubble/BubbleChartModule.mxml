@@ -103,7 +103,6 @@
                 yAxisBaseAtZero = plotChartDef.yAxisBaseAtZero;
                 this.defaultLink = ChartUtil.setup(plotChartDef.dimension, plotChart, onChartClick);
                 plotChartDef.styleChart(plotChart);
-                plotChart.setStyle("backgroundAlpha", plotChartDef.backgroundAlpha);
                 measure1 = plotChartDef.xaxisMeasure.qualifiedName();
                 measure1Name = plotChartDef.xaxisMeasure.display;
                 measure2 = plotChartDef.yaxisMeasure.qualifiedName();

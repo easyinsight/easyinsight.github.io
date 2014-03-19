@@ -6,8 +6,6 @@
            creationComplete="onCreation()">
     <mx:Script>
 		<![CDATA[
-
-
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
         import mx.collections.XMLListCollection;
@@ -355,6 +353,19 @@
         public function normal():void {
             calculationInput.setStyle("borderColor", 0xB7BABC);
             calculationInput.setStyle("backgroundColor", 0xFFFFFF);
+        }
+
+        private var _editable:Boolean;
+
+        public function set editable(editable:Boolean):void {
+            _editable = editable;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (!_editable) {
+                this.enabled = false;
+            }
         }
         ]]>
 	</mx:Script>

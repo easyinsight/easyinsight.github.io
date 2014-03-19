@@ -33,7 +33,7 @@
                         }
                     }
                     var node:DiagramNode;
-                    if (trendOutcome.measure.reportFieldExtension != null && trendOutcome.measure.reportFieldExtension is DiagramReportFieldExtension &&
+                    if (diagramDef.nowDate != null && diagramDef.nowDate != "" && trendOutcome.measure.reportFieldExtension != null && trendOutcome.measure.reportFieldExtension is DiagramReportFieldExtension &&
                             DiagramReportFieldExtension(trendOutcome.measure.reportFieldExtension).date) {
                         node = new DiagramBaseNode();
                     } else {

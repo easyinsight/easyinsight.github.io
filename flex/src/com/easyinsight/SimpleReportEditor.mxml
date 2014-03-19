@@ -653,9 +653,10 @@
                 if (analysisDefinition == null) {
                     saveAsEnabled = false;
                     newAnalysis();
-                    if (feedMetadata.dataSourceType == DataSourceType.COMPOSITE) {
+                    if (feedMetadata.dataSourceType != DataSourceType.BASECAMP) {
                         analysisDefinition.optimized = true;
                     }
+                    analysisDefinition.fullJoins = feedMetadata.forceOuterJoin;
                     for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {
                         transformContainer.addFilterDefinition(filter);
                     }
@@ -999,7 +1000,7 @@
             window.closeAfterSave = closeAfterSave;
             window.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saveHandler, false, 0, true);
             window.coreView = dataView.getCoreView();
-            window.report = analysisDefinition;
+            window.report = dataView.updatedReport;
             window.exchangeSave = exchangeSave;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);

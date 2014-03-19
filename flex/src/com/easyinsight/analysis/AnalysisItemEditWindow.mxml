@@ -4,12 +4,15 @@
                     creationComplete="onCreation()" backgroundColor="#FFFFFF">
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.administration.feed.ReportEventsWindow;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.filtering.NewFilterWindow;
         import com.easyinsight.framework.PerspectiveInfo;
 
         import com.easyinsight.util.PopUpUtil;
+
+        import mx.controls.Alert;
 
         import mx.core.Application;
 
@@ -36,12 +39,17 @@
         [Bindable]
         public var report:AnalysisDefinition;
 
+        public var reportEvents:Object;
+
         private var _dataSourceID:int;
 
         public static const BASE:int = 1;
         public static const LINKS:int = 2;
         public static const FILTERS:int = 3;
         public static const EXTENSION:int = 4;
+
+        [Bindable]
+        public var editable:Boolean = true;
 
         private function onCreation():void {
             addEventListener(LinkMetadataEvent.LINK_EDITED, onLinkUpdate);
@@ -154,14 +162,16 @@
             super.createChildren();
             if (_editorClass == null) {
                 editor = new AnalysisItemEditorPerspective(new PerspectiveInfo(PerspectiveInfo.ANALYSIS_ITEM_EDITOR, {dataSourceID:_dataSourceID,
-                    analysisItem:_analysisItem, analysisItems:_analysisItems, fullEditable: fullEditable}));
+                    analysisItem:_analysisItem, analysisItems:_analysisItems, fullEditable: fullEditable, editable: this.editable}));
             } else {
                 editor = new _editorClass();
                 editor.dataSourceID = _dataSourceID;
                 editor.analysisItem = _analysisItem;
                 editor.analysisItems = _analysisItems;
+                editor.editable = this.editable;
                 editor.report = report;
             }
+
             UIComponent(editor).addEventListener(FlexEvent.UPDATE_COMPLETE, onEvent);
             Container(editor).label = "Item";
             tabNavigator.addChildAt(editor as DisplayObject, 0);
@@ -221,6 +231,14 @@
                     fieldAdminWindow = new FieldAdminWindow();
                     fieldAdminWindow.analysisItem = _analysisItem;
                     tabNavigator.addChild(fieldAdminWindow);
+                }
+                if (_analysisItem != null && report != null && report.fieldEvents) {
+                    var events:ArrayCollection = report.fieldEvents[_analysisItem.display];
+                    if (events != null) {
+                        var reportsEventsWindow:ReportEventsWindow = new ReportEventsWindow();
+                        reportsEventsWindow.events = events;
+                        tabNavigator.addChild(reportsEventsWindow);
+                    }
                 }
                 /*if (dataSourceFields != null) {
                     var advWindow:AdvancedFieldWindow = new AdvancedFieldWindow();
@@ -359,8 +377,7 @@
         <mx:TabNavigator creationPolicy="all" width="100%" height="100%" resizeToContent="true" tabWidth="120" id="tabNavigator">
             <mx:VBox label="Links" paddingBottom="5" paddingLeft="5" paddingRight="5"
                  paddingTop="5" horizontalAlign="center" width="700" height="380" updateComplete="onEvent(event)" id="linksBox">
-                <util:AutoSizeTextArea width="515" editable="false" selectable="false" backgroundAlpha="0"
-                                       borderStyle="none" fontSize="14"
+                <mx:Text width="515"  selectable="false" fontSize="14"
                                        text="Links allow you to connect your reports to other locations. You can create links to other reports (drillthroughs), as well as links to external URLs."/>
                 <mx:ViewStack selectedIndex="{linkIndex}" width="100%" height="100%">
                     <mx:VBox width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
@@ -388,12 +405,12 @@
                                        fontSize="14"
                                        text="You can define filters at the column level by dragging fields from the left hand list into the drop area below. Any filters you define here will only be applied to this column."/>
                 <mx:Button icon="@Embed(source='../../../../assets/funnel.png')"
-                           toolTip="Add New Filter..." click="transformContainer.addNewFilter()" label="New Filter"/>
+                           toolTip="Add New Filter..." click="transformContainer.addNewFilter()" label="New Filter" enabled="{editable}"/>
                 <filters:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                             paddingRight="10"
                                             width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"
                                             feedID="{dataSourceID}" filterSource="{NewFilterWindow.FIELD_LEVEL}"
-                                            analysisItems="{analysisItems}" report="{report}" borderStyle="solid" borderThickness="1"/>
+                                            analysisItems="{analysisItems}" report="{report}" borderStyle="solid" borderThickness="1" enabled="{editable}"/>
             </mx:VBox>
         </mx:TabNavigator>
         <mx:HBox width="100%" horizontalAlign="center">
