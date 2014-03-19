@@ -30,6 +30,7 @@ public abstract class RedboothBaseSource extends ServerDataSourceDefinition {
 
     private transient DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss Z");
     private transient DateTimeFormatter altDF = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private transient DateTimeFormatter yetAnotherDF = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
     protected Value getDate(Map n, String key) {
         if (df == null) {
@@ -47,6 +48,22 @@ public abstract class RedboothBaseSource extends ServerDataSourceDefinition {
         return new EmptyValue();
     }
 
+    protected Value getYetAnotherDate(Map n, String key) {
+        if (yetAnotherDF == null) {
+            yetAnotherDF = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        }
+        String value = getJSONValue(n, key);
+        if (value != null) {
+            try {
+                Date date = yetAnotherDF.parseDateTime(value).toDate();
+                return new DateValue(date);
+            } catch (Exception e) {
+                return new EmptyValue();
+            }
+        }
+        return new EmptyValue();
+    }
+
     protected Value getAlt(Map n, String key) {
         if (altDF == null) {
             altDF = DateTimeFormat.forPattern("yyyy-MM-dd");
@@ -54,7 +71,7 @@ public abstract class RedboothBaseSource extends ServerDataSourceDefinition {
         String value = getJSONValue(n, key);
         if (value != null) {
             try {
-                Date date = df.parseDateTime(value).toDate();
+                Date date = altDF.parseDateTime(value).toDate();
                 return new DateValue(date);
             } catch (Exception e) {
                 return new EmptyValue();

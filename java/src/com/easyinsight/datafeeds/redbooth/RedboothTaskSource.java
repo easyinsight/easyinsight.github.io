@@ -72,10 +72,14 @@ public class RedboothTaskSource extends RedboothBaseSource {
         Map base = (Map) queryList("/api/1/tasks?count=0", redboothCompositeSource, httpClient);
         List<Map> references = (List<Map>) base.get("references");
         Map<String, String> users = new HashMap<String, String>();
+        Map<String, String> persons = new HashMap<String, String>();
         for (Map ref : references) {
             String type = ref.get("type").toString();
+            System.out.println(type);
             if ("User".equals(type)) {
                 users.put(ref.get("id").toString(), ref.get("first_name").toString() + " " + ref.get("last_name").toString());
+            } else if ("Person".equals(type)) {
+                persons.put(ref.get("id").toString(), ref.get("user_id").toString());
             }
         }
         List<Map> organizations = (List<Map>) base.get("objects");
@@ -89,7 +93,7 @@ public class RedboothTaskSource extends RedboothBaseSource {
             row.addValue(keys.get(COMMENTS_COUNT), getJSONValue(org, "comments_count"));
             row.addValue(keys.get(URGENT), getJSONValue(org, "urgent"));
             row.addValue(keys.get(TYPE), getJSONValue(org, "type"));
-            row.addValue(keys.get(DUE_ON), getDate(org, "due_on"));
+            row.addValue(keys.get(DUE_ON), getAlt(org, "due_on"));
             String statusCode = getJSONValue(org, "status");
             String status = "";
             if ("0".equals(statusCode)) {
@@ -103,14 +107,17 @@ public class RedboothTaskSource extends RedboothBaseSource {
             } else if ("4".equals(statusCode)) {
                 status = "Rejected";
             }
-            String assignedID = getJSONValue(org, "user_id");
+            String assignedID = getJSONValue(org, "assigned_id");
             if (assignedID != null) {
-                row.addValue(ASSIGNED_TO, users.get(assignedID));
+                String userID = persons.get(assignedID);
+                if (userID != null) {
+                    row.addValue(ASSIGNED_TO, users.get(userID));
+                }
             }
             row.addValue(keys.get(STATUS), status);
             row.addValue(CREATED_AT, getDate(org, "created_at"));
             row.addValue(UPDATED_AT, getDate(org, "updated_at"));
-            row.addValue(COMPLETED_AT, getDate(org, "completed_at"));
+            row.addValue(COMPLETED_AT, getYetAnotherDate(org, "completed_at"));
             row.addValue(COUNT, 1);
         }
         return dataSet;
