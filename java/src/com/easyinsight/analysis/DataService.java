@@ -2227,10 +2227,6 @@ public class DataService {
                 }
             }
 
-            for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
-                filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
-            }
-
 
             boolean aggregateQuery = analysisDefinition.isAggregateQueryIfPossible();
 
@@ -2265,6 +2261,9 @@ public class DataService {
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
 
             timeshift(validQueryItems, filters, feed, insightRequestMetadata);
+            for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
+                filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+            }
             dataSet = retrieveDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
             pipeline = new StandardReportPipeline(insightRequestMetadata.getIntermediatePipelines());
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata, allFields, conn);
