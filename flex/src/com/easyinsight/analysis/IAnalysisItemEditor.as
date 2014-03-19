@@ -12,5 +12,6 @@ public interface IAnalysisItemEditor {
     function higlight():void;
     function normal():void;
     function set report(analysisDefinition:AnalysisDefinition):void;
+    function set editable(editable:Boolean):void;
 }
 }
