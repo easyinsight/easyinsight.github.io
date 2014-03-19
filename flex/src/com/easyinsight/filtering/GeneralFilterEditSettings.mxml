@@ -116,15 +116,7 @@
                 rdRule.label = "Apply the field used in this filter to any dashboard or dashboard stack level filter matching the property of " + _filterDefinition.childToParentLabel + ".";
                 rules.addItem(rdRule);
             }
-
-            if (filterMetadata != null) {
-                Alert.show("fm not null");
-                if (filterMetadata.report != null) {
-                    Alert.show("fm report not null");
-                }
-            }
             if (filterMetadata != null && filterMetadata.report != null && filterMetadata.report.filterEvents) {
-                Alert.show("filter events present, looking for " + FilterDefinition.getLabel(_filterDefinition, _filterDefinition.field));
                 var events:ArrayCollection = filterMetadata.report.filterEvents[FilterDefinition.getLabelWithEnd(_filterDefinition, _filterDefinition.field, "")];
                 if (events != null) {
                     var reportsEventsWindow:ReportEventsWindow = new ReportEventsWindow();
