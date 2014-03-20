@@ -1662,7 +1662,7 @@ public class AnalysisService {
                 multi.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
                 multi.setToggleEnabled(true);
                 List<FilterDefinition> targetFilters = new ArrayList<FilterDefinition>();
-                if (drillThrough.getReportID() == report.getAnalysisID()) {
+                if (drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
                     if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                         AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
                         AnalysisHierarchyItem clonedHierarchy = (AnalysisHierarchyItem) hierarchyItem.clone();
@@ -1700,7 +1700,7 @@ public class AnalysisService {
                 drillThroughResponse.setFilters(targetFilters);
                 return drillThroughResponse;
             } else {
-                if (drillThrough.getReportID() == report.getAnalysisID()) {
+                if (drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
                     if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                         AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
                         AnalysisDateDimension copy;

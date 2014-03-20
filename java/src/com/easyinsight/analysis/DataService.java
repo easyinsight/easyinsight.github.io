@@ -681,6 +681,7 @@ public class DataService {
                     return (EmbeddedTrendDataResults) embeddedResults;
                 }
             }
+            analysisDefinition.setFilterDefinitions(customFilters);
             TrendResult trendResult = createTrendOutcomes(analysisDefinition, insightRequestMetadata, conn);
             //trendOutcomes = targetOutcomes;
             EmbeddedTrendDataResults trendDataResults = new EmbeddedTrendDataResults();
@@ -688,7 +689,7 @@ public class DataService {
             trendDataResults.setNowString(trendResult.nowString);
             trendDataResults.setPreviousString(trendResult.previousString);
             trendDataResults.setDataSourceInfo(trendResult.dataSourceInfo);
-            analysisDefinition.setFilterDefinitions(customFilters);
+
             trendDataResults.setDefinition(analysisDefinition);
             if (cacheKey != null) {
                 ReportCache.instance().storeReport(dataSourceID, cacheKey, trendDataResults, analysisDefinition.getCacheMinutes());
@@ -1270,25 +1271,6 @@ public class DataService {
     private static TrendResult createTrendOutcomes(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
-        RollingFilterDefinition reportFilter = null;
-        if (analysisDefinition.getFilterName() != null) {
-            for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
-                if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
-                    reportFilter = (RollingFilterDefinition) customFilter;
-                }
-            }
-
-            if (reportFilter == null) {
-                for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
-                    if (customFilter instanceof RollingFilterDefinition) {
-                        if (analysisDefinition.getFilterName().equals(customFilter.getField().qualifiedName()) ||
-                                analysisDefinition.getFilterName().equals(customFilter.getField().toDisplay())) {
-                            reportFilter = (RollingFilterDefinition) customFilter;
-                        }
-                    }
-                }
-            }
-        }
         Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
         Map<String, AnalysisDateDimension> dateMap = new HashMap<String, AnalysisDateDimension>();
         String nowDateFilterName = analysisDefinition.getNowDate();
@@ -1398,7 +1380,7 @@ public class DataService {
                 columns.addAll(analysisDefinition.getGroupings());
             }
             if (nowFilter != null) {
-                List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+                List<FilterDefinition> filters = new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions());
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     if (filter != nowFilter && filter != previousFilter) {
                         filters.add(filter);
@@ -1480,7 +1462,7 @@ public class DataService {
             DataSet pastSet;
             if (previousFilter != null) {
 
-                List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+                List<FilterDefinition> filters = new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions());
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     if (filter != nowFilter && filter != previousFilter) {
                         filters.add(filter);
