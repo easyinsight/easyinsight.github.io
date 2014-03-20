@@ -56,6 +56,7 @@ import mx.collections.ArrayCollection;
     public var cacheFilters:Boolean;
 		public var dataScrubs:ArrayCollection = new ArrayCollection();
         public var logReport:Boolean;
+        public var dataDiscoveryEnabled:Boolean;
         public var reportType:int;
 		public var policy:int = 2;
 		public var dateCreated:Date;
