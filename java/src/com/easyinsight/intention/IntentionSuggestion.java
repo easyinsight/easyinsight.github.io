@@ -38,6 +38,7 @@ public class IntentionSuggestion {
     public static final int DISTINCT_COUNT = 19;
     public static final int WARNING_MESSAGE = 20;
     public static final int CONFIGURE_TRENDING = 21;
+    public static final int TURN_OFF_AGGREGATE_QUERY = 22;
 
     private String headline;
     private String description;
