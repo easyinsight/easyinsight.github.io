@@ -38,6 +38,15 @@ public class FeedMetadata implements Serializable {
     private List<Tag> tags;
     private Tag tagDefault;
     private boolean forceOuterJoin;
+    private boolean optimized;
+
+    public boolean isOptimized() {
+        return optimized;
+    }
+
+    public void setOptimized(boolean optimized) {
+        this.optimized = optimized;
+    }
 
     public boolean isForceOuterJoin() {
         return forceOuterJoin;

@@ -576,6 +576,7 @@ public class DataService {
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
             feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
             feedMetadata.setDefaultManualRun(feed.getDataSource().isManualReportRun());
+            feedMetadata.setOptimized(feed.getDataSource().isDefaultToOptimized());
 
             //List<FieldRule> rules = FieldRule.load(conn, feedID);
 
@@ -1743,8 +1744,7 @@ public class DataService {
                     tooManyResults = true;
                 }
             }
-            List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
-            suggestions.addAll(insightRequestMetadata.getSuggestions());
+            List<IntentionSuggestion> suggestions = insightRequestMetadata.generateSuggestions();
             if (analysisDefinition.isLogReport()) {
                 results.setReportLog(reportRetrieval.getPipeline().toLogString());
             }
@@ -1966,9 +1966,9 @@ public class DataService {
                         Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
                         Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);
                         for (Map.Entry<String, AnalysisItem> entry : structureCopy.entrySet()) {
-                            /*if (entry.getValue() instanceof AnalysisHierarchyItem) {
+                            if (entry.getValue() instanceof AnalysisHierarchyItem) {
                                 continue;
-                            }*/
+                            }
                             if (entry.getValue().toDisplay().equals(filter.getField().toDisplay())) {
                                 if (!fieldsReplaced.contains(entry.getValue())) {
                                     if (insightRequestMetadata.getBaseDate() != null && insightRequestMetadata.getBaseDate().qualifiedName().equals(filter.getField().qualifiedName())) {
@@ -2106,7 +2106,7 @@ public class DataService {
                 }
             }
 
-            /*if (analysisDefinition.getAnalysisID() > 0) {
+            if (analysisDefinition.getAnalysisID() > 0 && analysisDefinition.isDataDiscoveryEnabled()) {
                 for (AnalysisItem analysisItem : items) {
                     if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                         AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
@@ -2137,7 +2137,7 @@ public class DataService {
                         }
                     }
                 }
-            }*/
+            }
 
             for (AnalysisItem analysisItem : items) {
                 analysisItem.setTags(fieldMap.get(analysisItem.toOriginalDisplayName()));
@@ -2190,29 +2190,50 @@ public class DataService {
                 }
             }
 
-            if (SecurityUtil.getAccountID(false) > 0) {
-                try {
-                    boolean fieldLookupEnabled = feed.getDataSource().isFieldLookupEnabled();
-                    if (!fieldLookupEnabled) {
-                        PreparedStatement modelStmt = conn.prepareStatement("SELECT field_model FROM account WHERE account_id = ?");
-                        modelStmt.setLong(1, SecurityUtil.getAccountID());
-                        ResultSet modelRS = modelStmt.executeQuery();
-                        modelRS.next();
-                        fieldLookupEnabled = modelRS.getBoolean(1);
-                        modelStmt.close();
-                    }
+            try {
+                boolean fieldLookupEnabled = feed.getDataSource().isFieldLookupEnabled();
 
-                    if (fieldLookupEnabled) {
-                        for (AnalysisItem analysisItem : analysisItems) {
-                            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                                AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
-                                feed.originalField(dateDimension.getKey(), dateDimension);
+                if (fieldLookupEnabled) {
+                    Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+                    for (AnalysisItem field : feed.getFields()) {
+                        map.put(field.toDisplay(), field);
+                    }
+                    for (AnalysisItem analysisItem : analysisItems) {
+                        if (analysisItem.isConcrete()) {
+                            AnalysisItem dataSourceField = map.get(analysisItem.toOriginalDisplayName());
+                            if (dataSourceField != null) {
+                                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && dataSourceField.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                                    AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
+                                    AnalysisDateDimension parentDimension = (AnalysisDateDimension) dataSourceField;
+                                    dateDimension.setDateOnlyField(parentDimension.isDateOnlyField());
+                                } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION) && dataSourceField.hasType(AnalysisItemTypes.CALCULATION)) {
+                                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
+                                    AnalysisCalculation dataSourceCalculation = (AnalysisCalculation) dataSourceField;
+                                    analysisCalculation.setApplyBeforeAggregation(dataSourceCalculation.isApplyBeforeAggregation());
+                                    analysisCalculation.setCalculationString(dataSourceCalculation.getCalculationString());
+                                } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION) && dataSourceField.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                                    DerivedAnalysisDimension analysisCalculation = (DerivedAnalysisDimension) analysisItem;
+                                    DerivedAnalysisDimension dataSourceCalculation = (DerivedAnalysisDimension) dataSourceField;
+                                    analysisCalculation.setApplyBeforeAggregation(dataSourceCalculation.isApplyBeforeAggregation());
+                                    analysisCalculation.setDerivationCode(dataSourceCalculation.getDerivationCode());
+                                } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE) && dataSourceField.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+                                    DerivedAnalysisDateDimension analysisCalculation = (DerivedAnalysisDateDimension) analysisItem;
+                                    DerivedAnalysisDateDimension dataSourceCalculation = (DerivedAnalysisDateDimension) dataSourceField;
+                                    analysisCalculation.setApplyBeforeAggregation(dataSourceCalculation.isApplyBeforeAggregation());
+                                    analysisCalculation.setDerivationCode(dataSourceCalculation.getDerivationCode());
+                                }
                             }
                         }
                     }
-                } catch (Exception e) {
-                    LogClass.error(e);
+                    for (AnalysisItem analysisItem : analysisItems) {
+                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                            AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
+                            feed.originalField(dateDimension.getKey(), dateDimension);
+                        }
+                    }
                 }
+            } catch (Exception e) {
+                LogClass.error(e);
             }
 
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();

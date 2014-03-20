@@ -11,6 +11,7 @@ import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.NewHierarchyIntention;
+import com.easyinsight.intention.ReportPropertiesIntention;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.*;
 
@@ -134,6 +135,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean canSave;
     private boolean dataSourceFieldReport;
     private List<FilterSetDescriptor> filterSets;
+    private boolean dataDiscoveryEnabled;
 
     private String defaultDate;
 
@@ -169,6 +171,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setDataSourceFieldReport(boolean dataSourceFieldReport) {
         this.dataSourceFieldReport = dataSourceFieldReport;
+    }
+
+    public boolean isDataDiscoveryEnabled() {
+        return dataDiscoveryEnabled;
+    }
+
+    public void setDataDiscoveryEnabled(boolean dataDiscoveryEnabled) {
+        this.dataDiscoveryEnabled = dataDiscoveryEnabled;
     }
 
     public String getBaseDate() {
@@ -1042,6 +1052,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         cacheFilters = findBooleanProperty(properties, "cacheFilters", false);
         cachePartitionFilter = findStringProperty(properties, "cachePartitionFilter", "");
         enableLocalStorage = findBooleanProperty(properties, "enableLocalStorage", false);
+        dataDiscoveryEnabled = findBooleanProperty(properties, "dataDiscoveryEnabled", false);
         colorScheme = findStringProperty(properties, "reportColorScheme", "None");
         exportString = findStringProperty(properties, "exportString", "");
         baseDate = findStringProperty(properties, "baseDate", "");
@@ -1069,6 +1080,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("manualButRunFirst", manualButRunFirst));
         properties.add(new ReportBooleanProperty("logReport", logReport));
         properties.add(new ReportBooleanProperty("useCustomFontFamily", useCustomFontFamily));
+        properties.add(new ReportBooleanProperty("dataDiscoveryEnabled", dataDiscoveryEnabled));
         properties.add(new ReportNumericProperty("generalSizeLimit", generalSizeLimit));
         properties.add(new ReportNumericProperty("fetchSize", fetchSize));
         properties.add(new ReportBooleanProperty("noDataOnNoJoin", noDataOnNoJoin));
@@ -1164,6 +1176,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public List<Intention> createIntentions(List<AnalysisItem> fields, int type) throws SQLException {
         if (type == IntentionSuggestion.WARNING_JOIN_FAILURE) {
             return Arrays.asList((Intention) new NewHierarchyIntention(NewHierarchyIntention.CUSTOMIZE_JOINS));
+        } else if (type == IntentionSuggestion.TURN_OFF_AGGREGATE_QUERY) {
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
+            reportPropertiesIntention.setAggregateQueryIfPossible(true);
+            return Arrays.asList((Intention) reportPropertiesIntention);
         } else {
             return new ArrayList<Intention>();
         }
@@ -1321,6 +1337,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
     }
 
     protected void assignResults(List<AnalysisItem> fields) {
+
+    }
+
+    public void argh(List<AnalysisItem> fields) {
 
     }
 
