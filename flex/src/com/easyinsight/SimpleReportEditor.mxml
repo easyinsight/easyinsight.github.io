@@ -653,8 +653,10 @@
                 if (analysisDefinition == null) {
                     saveAsEnabled = false;
                     newAnalysis();
-                    if (feedMetadata.dataSourceType != DataSourceType.BASECAMP) {
+                    if (feedMetadata.dataSourceType == DataSourceType.COMPOSITE) {
                         analysisDefinition.optimized = true;
+                    } else {
+                        analysisDefinition.optimized = feedMetadata.optimized;
                     }
                     analysisDefinition.fullJoins = feedMetadata.forceOuterJoin;
                     for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {

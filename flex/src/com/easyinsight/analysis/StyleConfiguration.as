@@ -75,6 +75,7 @@ public class StyleConfiguration {
         items.addItem(new TextReportFormItem("What should this data source be named?", "feedName", dataSource.feedName, dataSource));
         items.addItem(new CheckBoxReportFormItem("Should the data source clean up old, duplicate fields when saved?", "fieldCleanupEnabled", dataSource.fieldCleanupEnabled, dataSource));
         items.addItem(new CheckBoxReportFormItem("Should the data source default to full joins?", "defaultToFullJoins", dataSource.defaultToFullJoins, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Should the data source default to optimized?", "defaultToOptimized", dataSource.defaultToOptimized, dataSource));
         items.addItem(new CheckBoxReportFormItem("Should the data source look up field levels?", "fieldLookupEnabled", dataSource.fieldLookupEnabled, dataSource));
         items.addItem(new CheckBoxReportFormItem("Should reports in the editor on this data source run manually?", "manualReportRun", dataSource.manualReportRun, dataSource));
         var dashboardService:RemoteObject = new RemoteObject();
@@ -439,6 +440,7 @@ public class StyleConfiguration {
         }
 
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
+        items.addItem(new CheckBoxReportFormItem("Data Discovery Enabled", "dataDiscoveryEnabled", report.dataDiscoveryEnabled, report));
 
         items.addItem(new CheckBoxReportFormItem("Aggregate Query if Possible", "aggregateQueryIfPossible", report.aggregateQueryIfPossible, report));
         items.addItem(new CheckBoxReportFormItem("No Data on No Join", "noDataOnNoJoin", report.noDataOnNoJoin, report));
