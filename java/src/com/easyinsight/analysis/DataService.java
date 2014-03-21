@@ -2126,12 +2126,22 @@ public class DataService {
 
             for (AnalysisItem analysisItem : items) {
                 analysisItem.setTags(fieldMap.get(analysisItem.toOriginalDisplayName()));
+                if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                    AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                    hierarchyItem.getHierarchyLevel().getAnalysisItem().setTags(fieldMap.get(hierarchyItem.getHierarchyLevel().getAnalysisItem().toOriginalDisplayName()));
+                }
             }
 
             for (AnalysisItem analysisItem : items) {
                 for (FieldRule rule : rules) {
                     if (rule.matches(analysisItem)) {
                         rule.update(analysisItem, analysisDefinition, insightRequestMetadata);
+                    }
+                    if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                        AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                        if (rule.matches(hierarchyItem.getHierarchyLevel().getAnalysisItem())) {
+                            rule.update(hierarchyItem, analysisDefinition, insightRequestMetadata);
+                        }
                     }
                 }
             }
