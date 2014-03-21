@@ -9,6 +9,7 @@
     </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisHierarchyItem;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.ChartDefinition;
@@ -200,7 +201,14 @@
                 dimensionFormatter = dimensionAxisItem.getFormatter();
                 dimensionAxis.categoryField = dimensionAxisItem.qualifiedName();
                 //dimensionAxis.title = dimensionAxisItem.display;
-                dimensionAxis.title = (chartDef.xAxisLabel != null && chartDef.xAxisLabel != "") ? chartDef.xAxisLabel : dimensionAxisItem.display;
+                var dimensionTitle:String;
+                if (dimensionAxisItem is AnalysisHierarchyItem) {
+                    var item:AnalysisHierarchyItem = dimensionAxisItem as AnalysisHierarchyItem;
+                    dimensionTitle = (chartDef.xAxisLabel != null && chartDef.xAxisLabel != "") ? chartDef.xAxisLabel : item.hierarchyLevel.analysisItem.display;
+                } else {
+                    dimensionTitle = (chartDef.xAxisLabel != null && chartDef.xAxisLabel != "") ? chartDef.xAxisLabel : dimensionAxisItem.display;
+                }
+                dimensionAxis.title = dimensionTitle;
 
                 var mySeries:Array = new Array();
                 for (var i:int = 0; i < getMeasures().length; i++) {
