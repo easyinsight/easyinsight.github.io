@@ -60,9 +60,6 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
                             endObject[linkKey + "_link"] = value.links[linkKey];
                         }
                     }
-                    if (value.drillThroughValues != null) {
-                        endObject[key + "_drill"] = value.drillThroughValues;
-                    }
                 }
                 data.push(endObject);
             }
