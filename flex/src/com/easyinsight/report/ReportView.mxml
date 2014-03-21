@@ -400,11 +400,20 @@
                 desc.dataFeedID = report.dataFeedID;
                 desc.reportType = report.reportType;
                 desc.urlKey = report.urlKey;
+                var i:int = 0;
                 var positions:DashboardStackPositions = new DashboardStackPositions();
                 for each (var filter:FilterDefinition in transformContainer.getFilterDefinitions()) {
-                    var str:String = FilterPositionKey.createString(FilterPositionKey.REPORT, filter.filterID);
-                    positions.filterMap[str] = filter;
+                    if (filter.filterID > 0) {
+                        var str:String = FilterPositionKey.createString(FilterPositionKey.REPORT, filter.filterID);
+                        positions.filterMap[str] = filter;
+                    } else {
+                        var str1:String = FilterPositionKey.REPORT + "|" + "filterTemp" + i;
+                        positions.filterMap[str1] = filter;
+                    }
+                    i++;
                 }
+                //Alert.show("but saved " + i + " filters");
+
                 _breadCrumbs.push(new BreadCrumb(desc, transformContainer.getFilterDefinitions(), positions, selectedConfiguration));
                 if (event.descriptor is InsightDescriptor) {
                     dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, _breadCrumbs,
@@ -680,6 +689,9 @@
                     for each (var eFilter:FilterDefinition in _parameterFilters) {
                         if (eFilter.getType() == FilterDefinition.ANALYSIS_ITEM) {
                             paramObj[eFilter.filterName] = eFilter;
+                            if (report.dataDiscoveryEnabled) {
+                                fObj[eFilter.qualifiedName()] = eFilter;
+                            }
                         } else {
                             fObj[eFilter.qualifiedName()] = eFilter;
                         }
