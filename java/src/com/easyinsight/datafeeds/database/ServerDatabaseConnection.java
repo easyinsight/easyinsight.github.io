@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.database;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
@@ -224,9 +225,17 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                             break;
 
                         case Types.DATE:
-                            Date d = rs.getDate(i);
-                            if(!rs.wasNull()) {
-                                row.addValue(analysisItem.getKey(), d);
+                            try {
+                                Date d = rs.getDate(i);
+                                if(!rs.wasNull()) {
+                                    row.addValue(analysisItem.getKey(), d);
+                                }
+                            } catch (SQLException e) {
+                                if ("Value Ô0000-00-00Õ can not be represented as java.sql.Date".equals(e.getMessage())) {
+                                    row.addValue(analysisItem.getKey(), new EmptyValue());
+                                } else {
+                                    LogClass.debug(e.getMessage());
+                                }
                             }
                             break;
                         case Types.TIME:
