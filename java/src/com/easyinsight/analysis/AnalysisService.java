@@ -1664,10 +1664,12 @@ public class AnalysisService {
                 List<FilterDefinition> targetFilters = new ArrayList<FilterDefinition>();
                 if (drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
                     if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                        System.out.println("at least creating hierarchy drillthrough...");
                         AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
                         AnalysisHierarchyItem clonedHierarchy = (AnalysisHierarchyItem) hierarchyItem.clone();
                         int currentIndex = hierarchyItem.getHierarchyLevels().indexOf(hierarchyItem.getHierarchyLevel());
                         AnalysisItem next = hierarchyItem.getHierarchyLevels().get(currentIndex + 1).getAnalysisItem();
+                        System.out.println("\twith next = " + next.toDisplay());
                         AnalysisItemFilterDefinition analysisItemFilterDefinition = new AnalysisItemFilterDefinition();
                         analysisItemFilterDefinition.setField(clonedHierarchy);
                         analysisItemFilterDefinition.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>());
