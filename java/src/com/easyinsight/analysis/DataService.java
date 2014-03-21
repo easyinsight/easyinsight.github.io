@@ -2185,7 +2185,7 @@ public class DataService {
                 }
             }
 
-            try {
+            /*try {
                 boolean fieldLookupEnabled = feed.getDataSource().isFieldLookupEnabled();
 
                 if (fieldLookupEnabled) {
@@ -2229,7 +2229,7 @@ public class DataService {
                 }
             } catch (Exception e) {
                 LogClass.error(e);
-            }
+            }*/
 
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
 
