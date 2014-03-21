@@ -340,7 +340,7 @@ public class RollingFilterDefinition extends FilterDefinition {
             }
             if (endDate != null) {
                 preparedStatement.setTimestamp(start++, new java.sql.Timestamp(endDate.getTime()));
-                insightRequestMetadata.addAudit(this, "End date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " not time shifted  ") + " at query to " + new Date(startDate.getTime()));
+                insightRequestMetadata.addAudit(this, "End date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " not time shifted  ") + " at query to " + new Date(endDate.getTime()));
             }
         } else if (interval != MaterializedRollingFilterDefinition.LAST_DAY) {
             Date now = insightRequestMetadata.getNow();
