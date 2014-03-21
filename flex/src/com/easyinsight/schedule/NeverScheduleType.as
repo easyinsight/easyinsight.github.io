@@ -6,6 +6,8 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.schedule {
+[Bindable]
+[RemoteClass(alias="com.easyinsight.export.NeverScheduleType")]
 public class NeverScheduleType extends ScheduleType {
 
     public function NeverScheduleType() {
