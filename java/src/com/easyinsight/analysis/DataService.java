@@ -1962,12 +1962,15 @@ public class DataService {
                             }
                         }
                         analysisDefinition.populateFromReportStructure(structure);
+                        System.out.println("okay, trying a field choice filter with target = " + analysisItemFilterDefinition.getTargetItem().toDisplay());
                         for (AnalysisItem item : analysisDefinition.createStructure().values()) {
                             if (item.toDisplay().equals(filter.getField().toDisplay()) && item instanceof AnalysisHierarchyItem) {
+                                System.out.println("found hierarchy " + item.toDisplay());
                                 AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) item;
                                 HierarchyLevel targetLevel = null;
                                 for (HierarchyLevel level : analysisHierarchyItem.getHierarchyLevels()) {
                                     if (level.getAnalysisItem().toDisplay().equals(analysisItemFilterDefinition.getTargetItem().toDisplay())) {
+                                        System.out.println("updating to level " + level.getAnalysisItem().toDisplay());
                                         targetLevel = level;
                                     }
                                 }
