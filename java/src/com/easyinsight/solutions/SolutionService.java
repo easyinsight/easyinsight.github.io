@@ -116,7 +116,7 @@ public class SolutionService {
 
             PostInstallSteps postInstallSteps = new PostInstallSteps();
 
-            copyLookAndFeel(solutionKPIData, conn, postInstallSteps);
+            //copyLookAndFeel(solutionKPIData, conn, postInstallSteps);
             conn.commit();
             return postInstallSteps;
         } catch (Exception e) {
