@@ -42,6 +42,8 @@ public class EmbeddedTrendService extends EmbeddedDataService implements IEmbedd
         var results:EmbeddedTrendDataResults = dataRemoteSource.getEmbeddedTrendDataResults.lastResult as EmbeddedTrendDataResults;
         var obj:Object = new Object();
         obj["reportEditor"] = false;
+        obj["nowString"] = results.nowString;
+        obj["previousString"] = results.previousString;
         dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, results.trendOutcomes, results.definition, results.dataSourceAccessible,
                 results.reportFault, results.dataSourceInfo, obj, results.trendOutcomes.length > 0));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
