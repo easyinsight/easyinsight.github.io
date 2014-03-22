@@ -103,7 +103,11 @@ public class DistinctCachedSource extends ServerDataSourceDefinition {
                 AnalysisMeasure baseMeasure = (AnalysisMeasure) item;
                 AnalysisMeasure measure = new AnalysisMeasure();
                 measure.setFormattingType(item.getFormattingType());
-                measure.setAggregation(baseMeasure.getAggregation());
+                if (baseMeasure.getAggregation() == AggregationTypes.COUNT_DISTINCT) {
+                    measure.setAggregation(AggregationTypes.SUM);
+                } else {
+                    measure.setAggregation(baseMeasure.getAggregation());
+                }
                 measure.setPrecision(baseMeasure.getPrecision());
                 measure.setMinPrecision(baseMeasure.getMinPrecision());
                 clone = measure;
