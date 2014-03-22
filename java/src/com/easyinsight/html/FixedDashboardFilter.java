@@ -26,26 +26,28 @@ public class FixedDashboardFilter implements Filter {
         if (servletRequest instanceof HttpServletRequest) {
             try {
                 HttpSession session = ((HttpServletRequest) servletRequest).getSession(false);
-                Long userID = (Long) session.getAttribute("userID");
-                if (userID != null) {
-                    EIConnection conn = Database.instance().getConnection();
-                    try {
-                        PreparedStatement ps = conn.prepareStatement("SELECT fixed_dashboard_id FROM USER WHERE user_id = ?");
-                        ps.setLong(1, userID);
-                        ResultSet rs = ps.executeQuery();
-                        rs.next();
-                        long fixedDashboardID = rs.getLong(1);
-                        ps.close();
-                        if (fixedDashboardID > 0) {
-                            HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-                            httpServletResponse.sendRedirect(RedirectUtil.getURL((HttpServletRequest) servletRequest, "/app/fixedDashboard"));
-                            return;
+                if (session != null) {
+                    Long userID = (Long) session.getAttribute("userID");
+                    if (userID != null) {
+                        EIConnection conn = Database.instance().getConnection();
+                        try {
+                            PreparedStatement ps = conn.prepareStatement("SELECT fixed_dashboard_id FROM USER WHERE user_id = ?");
+                            ps.setLong(1, userID);
+                            ResultSet rs = ps.executeQuery();
+                            rs.next();
+                            long fixedDashboardID = rs.getLong(1);
+                            ps.close();
+                            if (fixedDashboardID > 0) {
+                                HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
+                                httpServletResponse.sendRedirect(RedirectUtil.getURL((HttpServletRequest) servletRequest, "/app/fixedDashboard"));
+                                return;
+                            }
+                        } catch (Exception e) {
+                            LogClass.error(e);
+                            //throw new RuntimeException(e);
+                        } finally {
+                            Database.closeConnection(conn);
                         }
-                    } catch (Exception e) {
-                        LogClass.error(e);
-                        //throw new RuntimeException(e);
-                    } finally {
-                        Database.closeConnection(conn);
                     }
                 }
             }catch (Exception e){
