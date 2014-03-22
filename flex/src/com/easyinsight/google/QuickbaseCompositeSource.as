@@ -38,7 +38,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     }
 
     override public function createAdminPages():ArrayCollection {
-        var pages:ArrayCollection = new ArrayCollection();
+        var pages:ArrayCollection = super.createAdminPages();
         var index:FieldIndexing = new FieldIndexing();
         index.fields = fields;
 
