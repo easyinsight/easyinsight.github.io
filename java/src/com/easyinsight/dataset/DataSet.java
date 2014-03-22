@@ -261,6 +261,7 @@ public class DataSet implements Serializable, Cloneable {
             listRows[rowCount] = new ListRow();
             for (Value value : row.getValues().values()) {
                 value.setDrillThroughValues(null);
+                value.setDrillThroughs(null);
             }
             Value[] values = new Value[columns.size()];
             listRows[rowCount].setValues(values);

@@ -56,6 +56,7 @@ import mx.collections.ArrayCollection;
     public var cacheFilters:Boolean;
 		public var dataScrubs:ArrayCollection = new ArrayCollection();
         public var logReport:Boolean;
+        public var dataDiscoveryEnabled:Boolean;
         public var reportType:int;
 		public var policy:int = 2;
 		public var dateCreated:Date;
@@ -73,7 +74,6 @@ import mx.collections.ArrayCollection;
         public var temporaryReport:Boolean;
         public var fontName:String = "Tahoma";
         public var fontSize:int = 12;
-        public var backgroundAlpha:Number = 1;
         public var fixedWidth:int = 0;
         public var accountVisible:Boolean;
         public var joinOverrides:ArrayCollection;
@@ -84,7 +84,6 @@ import mx.collections.ArrayCollection;
         public var reportRunMarmotScript:String;
         public var headerImage:ImageDescriptor;
         public var folder:int = EIDescriptor.MAIN_VIEWS_FOLDER;
-        public var lookupTableOptimization:Boolean = false;
         public var rowsEditable:Boolean;
         public var adHocExecution:Boolean;
         public var cacheable:Boolean;
@@ -98,10 +97,7 @@ import mx.collections.ArrayCollection;
     public var fetchSize:int;
     public var noDataOnNoJoin:Boolean;
     public var aggregateQueryIfPossible:Boolean = true;
-    public var newFilterStrategy:Boolean = false;
-    public var customField1:String;
     public var baseDate:String;
-    public var customField2:String;
     public var newFieldModel:Boolean;
     public var cachePartitionFilter:String;
     public var enableLocalStorage:Boolean;
@@ -111,6 +107,7 @@ import mx.collections.ArrayCollection;
     public var exportString:String;
 
     public var fieldEvents:Object;
+    public var filterEvents:Object;
 
 		public function AnalysisDefinition()
 		{

@@ -35,5 +35,8 @@ public class AnalysisItemEditorPerspective extends ModulePerspective implements 
 
     public function set report(analysisDefinition:AnalysisDefinition):void {
     }
+
+    public function set editable(editable:Boolean):void {
+    }
 }
 }

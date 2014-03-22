@@ -564,6 +564,7 @@ public class DataService {
             feedMetadata.setFilterExampleMessage(feed.getFilterExampleMessage());
             feedMetadata.setDataSourceName(feed.getName());
             feedMetadata.setFields(feedItemArray);
+            feedMetadata.setForceOuterJoin(feed.getDataSource().isDefaultToFullJoins());
             feedMetadata.setFieldHierarchy(feed.getFieldHierarchy());
             feedMetadata.setIntrinsicFilters(feed.getIntrinsicFilters(conn));
             feedMetadata.setDataFeedID(feedID);
@@ -575,6 +576,7 @@ public class DataService {
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
             feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
             feedMetadata.setDefaultManualRun(feed.getDataSource().isManualReportRun());
+            feedMetadata.setOptimized(feed.getDataSource().isDefaultToOptimized());
 
             //List<FieldRule> rules = FieldRule.load(conn, feedID);
 
@@ -679,6 +681,7 @@ public class DataService {
                     return (EmbeddedTrendDataResults) embeddedResults;
                 }
             }
+            analysisDefinition.setFilterDefinitions(customFilters);
             TrendResult trendResult = createTrendOutcomes(analysisDefinition, insightRequestMetadata, conn);
             //trendOutcomes = targetOutcomes;
             EmbeddedTrendDataResults trendDataResults = new EmbeddedTrendDataResults();
@@ -686,7 +689,7 @@ public class DataService {
             trendDataResults.setNowString(trendResult.nowString);
             trendDataResults.setPreviousString(trendResult.previousString);
             trendDataResults.setDataSourceInfo(trendResult.dataSourceInfo);
-            analysisDefinition.setFilterDefinitions(customFilters);
+
             trendDataResults.setDefinition(analysisDefinition);
             if (cacheKey != null) {
                 ReportCache.instance().storeReport(dataSourceID, cacheKey, trendDataResults, analysisDefinition.getCacheMinutes());
@@ -1268,25 +1271,6 @@ public class DataService {
     private static TrendResult createTrendOutcomes(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
-        RollingFilterDefinition reportFilter = null;
-        if (analysisDefinition.getFilterName() != null) {
-            for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
-                if (analysisDefinition.getFilterName().equals(customFilter.getFilterName())) {
-                    reportFilter = (RollingFilterDefinition) customFilter;
-                }
-            }
-
-            if (reportFilter == null) {
-                for (FilterDefinition customFilter : analysisDefinition.getFilterDefinitions()) {
-                    if (customFilter instanceof RollingFilterDefinition) {
-                        if (analysisDefinition.getFilterName().equals(customFilter.getField().qualifiedName()) ||
-                                analysisDefinition.getFilterName().equals(customFilter.getField().toDisplay())) {
-                            reportFilter = (RollingFilterDefinition) customFilter;
-                        }
-                    }
-                }
-            }
-        }
         Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
         Map<String, AnalysisDateDimension> dateMap = new HashMap<String, AnalysisDateDimension>();
         String nowDateFilterName = analysisDefinition.getNowDate();
@@ -1396,7 +1380,7 @@ public class DataService {
                 columns.addAll(analysisDefinition.getGroupings());
             }
             if (nowFilter != null) {
-                List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+                List<FilterDefinition> filters = new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions());
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     if (filter != nowFilter && filter != previousFilter) {
                         filters.add(filter);
@@ -1478,7 +1462,7 @@ public class DataService {
             DataSet pastSet;
             if (previousFilter != null) {
 
-                List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+                List<FilterDefinition> filters = new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions());
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     if (filter != nowFilter && filter != previousFilter) {
                         filters.add(filter);
@@ -1742,8 +1726,7 @@ public class DataService {
                     tooManyResults = true;
                 }
             }
-            List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
-            suggestions.addAll(insightRequestMetadata.getSuggestions());
+            List<IntentionSuggestion> suggestions = insightRequestMetadata.generateSuggestions();
             if (analysisDefinition.isLogReport()) {
                 results.setReportLog(reportRetrieval.getPipeline().toLogString());
             }
@@ -1765,6 +1748,7 @@ public class DataService {
             results.setProcessingTime(processingTime);
             results.setDatabaseTime(insightRequestMetadata.getDatabaseTime());
             results.setFieldEvents(insightRequestMetadata.getFieldAudits());
+            results.setFilterEvents(insightRequestMetadata.getFilterAudits());
             if (insightRequestMetadata.isLogReport()) {
                 results.setAuditMessages(events);
             }
@@ -1964,9 +1948,9 @@ public class DataService {
                         Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
                         Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);
                         for (Map.Entry<String, AnalysisItem> entry : structureCopy.entrySet()) {
-                            /*if (entry.getValue() instanceof AnalysisHierarchyItem) {
+                            if (entry.getValue() instanceof AnalysisHierarchyItem) {
                                 continue;
-                            }*/
+                            }
                             if (entry.getValue().toDisplay().equals(filter.getField().toDisplay())) {
                                 if (!fieldsReplaced.contains(entry.getValue())) {
                                     if (insightRequestMetadata.getBaseDate() != null && insightRequestMetadata.getBaseDate().qualifiedName().equals(filter.getField().qualifiedName())) {
@@ -1978,12 +1962,15 @@ public class DataService {
                             }
                         }
                         analysisDefinition.populateFromReportStructure(structure);
+                        System.out.println("okay, trying a field choice filter with target = " + analysisItemFilterDefinition.getTargetItem().toDisplay());
                         for (AnalysisItem item : analysisDefinition.createStructure().values()) {
                             if (item.toDisplay().equals(filter.getField().toDisplay()) && item instanceof AnalysisHierarchyItem) {
+                                System.out.println("found hierarchy " + item.toDisplay());
                                 AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) item;
                                 HierarchyLevel targetLevel = null;
                                 for (HierarchyLevel level : analysisHierarchyItem.getHierarchyLevels()) {
                                     if (level.getAnalysisItem().toDisplay().equals(analysisItemFilterDefinition.getTargetItem().toDisplay())) {
+                                        System.out.println("updating to level " + level.getAnalysisItem().toDisplay());
                                         targetLevel = level;
                                     }
                                 }
@@ -2104,7 +2091,7 @@ public class DataService {
                 }
             }
 
-            /*if (analysisDefinition.getAnalysisID() > 0) {
+            if (analysisDefinition.getAnalysisID() > 0 && analysisDefinition.isDataDiscoveryEnabled()) {
                 for (AnalysisItem analysisItem : items) {
                     if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                         AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
@@ -2135,16 +2122,26 @@ public class DataService {
                         }
                     }
                 }
-            }*/
+            }
 
             for (AnalysisItem analysisItem : items) {
                 analysisItem.setTags(fieldMap.get(analysisItem.toOriginalDisplayName()));
+                if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                    AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                    hierarchyItem.getHierarchyLevel().getAnalysisItem().setTags(fieldMap.get(hierarchyItem.getHierarchyLevel().getAnalysisItem().toOriginalDisplayName()));
+                }
             }
 
             for (AnalysisItem analysisItem : items) {
                 for (FieldRule rule : rules) {
                     if (rule.matches(analysisItem)) {
                         rule.update(analysisItem, analysisDefinition, insightRequestMetadata);
+                    }
+                    if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                        AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                        if (rule.matches(hierarchyItem.getHierarchyLevel().getAnalysisItem())) {
+                            rule.update(hierarchyItem, analysisDefinition, insightRequestMetadata);
+                        }
                     }
                 }
             }
@@ -2188,30 +2185,51 @@ public class DataService {
                 }
             }
 
-            if (SecurityUtil.getAccountID(false) > 0) {
-                try {
-                    boolean fieldLookupEnabled = feed.getDataSource().isFieldLookupEnabled();
-                    if (!fieldLookupEnabled) {
-                        PreparedStatement modelStmt = conn.prepareStatement("SELECT field_model FROM account WHERE account_id = ?");
-                        modelStmt.setLong(1, SecurityUtil.getAccountID());
-                        ResultSet modelRS = modelStmt.executeQuery();
-                        modelRS.next();
-                        fieldLookupEnabled = modelRS.getBoolean(1);
-                        modelStmt.close();
-                    }
+            /*try {
+                boolean fieldLookupEnabled = feed.getDataSource().isFieldLookupEnabled();
 
-                    if (fieldLookupEnabled) {
-                        for (AnalysisItem analysisItem : analysisItems) {
-                            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                                AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
-                                feed.originalField(dateDimension.getKey(), dateDimension);
+                if (fieldLookupEnabled) {
+                    Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+                    for (AnalysisItem field : feed.getFields()) {
+                        map.put(field.toDisplay(), field);
+                    }
+                    for (AnalysisItem analysisItem : analysisItems) {
+                        if (analysisItem.isConcrete()) {
+                            AnalysisItem dataSourceField = map.get(analysisItem.toOriginalDisplayName());
+                            if (dataSourceField != null) {
+                                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && dataSourceField.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                                    AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
+                                    AnalysisDateDimension parentDimension = (AnalysisDateDimension) dataSourceField;
+                                    dateDimension.setDateOnlyField(parentDimension.isDateOnlyField());
+                                } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION) && dataSourceField.hasType(AnalysisItemTypes.CALCULATION)) {
+                                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
+                                    AnalysisCalculation dataSourceCalculation = (AnalysisCalculation) dataSourceField;
+                                    analysisCalculation.setApplyBeforeAggregation(dataSourceCalculation.isApplyBeforeAggregation());
+                                    analysisCalculation.setCalculationString(dataSourceCalculation.getCalculationString());
+                                } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION) && dataSourceField.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                                    DerivedAnalysisDimension analysisCalculation = (DerivedAnalysisDimension) analysisItem;
+                                    DerivedAnalysisDimension dataSourceCalculation = (DerivedAnalysisDimension) dataSourceField;
+                                    analysisCalculation.setApplyBeforeAggregation(dataSourceCalculation.isApplyBeforeAggregation());
+                                    analysisCalculation.setDerivationCode(dataSourceCalculation.getDerivationCode());
+                                } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE) && dataSourceField.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+                                    DerivedAnalysisDateDimension analysisCalculation = (DerivedAnalysisDateDimension) analysisItem;
+                                    DerivedAnalysisDateDimension dataSourceCalculation = (DerivedAnalysisDateDimension) dataSourceField;
+                                    analysisCalculation.setApplyBeforeAggregation(dataSourceCalculation.isApplyBeforeAggregation());
+                                    analysisCalculation.setDerivationCode(dataSourceCalculation.getDerivationCode());
+                                }
                             }
                         }
                     }
-                } catch (Exception e) {
-                    LogClass.error(e);
+                    for (AnalysisItem analysisItem : analysisItems) {
+                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                            AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
+                            feed.originalField(dateDimension.getKey(), dateDimension);
+                        }
+                    }
                 }
-            }
+            } catch (Exception e) {
+                LogClass.error(e);
+            }*/
 
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
 
@@ -2223,10 +2241,6 @@ public class DataService {
                         filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
                     }
                 }
-            }
-
-            for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
-                filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
             }
 
 
@@ -2263,6 +2277,9 @@ public class DataService {
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
 
             timeshift(validQueryItems, filters, feed, insightRequestMetadata);
+            for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
+                filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
+            }
             dataSet = retrieveDataSet(feed, validQueryItems, filters, insightRequestMetadata, feed.getFields(), conn);
             pipeline = new StandardReportPipeline(insightRequestMetadata.getIntermediatePipelines());
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata, allFields, conn);

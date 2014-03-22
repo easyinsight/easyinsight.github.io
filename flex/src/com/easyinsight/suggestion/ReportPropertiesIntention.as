@@ -20,6 +20,7 @@ public class ReportPropertiesIntention extends Intention {
     public var fullJoins:Boolean;
     public var summaryRow:Boolean;
     public var trendSetup:Boolean;
+    public var aggregateQueryIfPossible:Boolean;
 
     public function ReportPropertiesIntention() {
     }
@@ -43,6 +44,9 @@ public class ReportPropertiesIntention extends Intention {
                     suggestionMetadata.reportEditor.onAnalysisItemEdit(new AnalysisItemEditEvent(item, null));
                 }
             }
+        }
+        if (aggregateQueryIfPossible) {
+            suggestionMetadata.report.aggregateQueryIfPossible = false;
         }
     }
 }

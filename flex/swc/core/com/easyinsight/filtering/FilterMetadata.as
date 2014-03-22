@@ -6,11 +6,14 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.filtering {
+import com.easyinsight.analysis.AnalysisDefinition;
+
 public class FilterMetadata {
 
     public var key:String;
     public var context:int;
     public var filterSet:FilterSet;
+    public var report:AnalysisDefinition;
 
     public function FilterMetadata() {
     }

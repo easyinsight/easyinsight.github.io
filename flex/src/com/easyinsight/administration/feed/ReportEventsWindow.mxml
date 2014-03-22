@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" label="Events">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        public var events:ArrayCollection;
+        ]]></mx:Script>
+    <mx:Text text="This window shows you the list of what events happened to the field in the course of running the report." maxWidth="600"/>
+    <mx:List dataProvider="{events}" wordWrap="true" variableRowHeight="true" width="600" height="300"/>
+</mx:VBox>

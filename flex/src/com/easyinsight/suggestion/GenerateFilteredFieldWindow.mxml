@@ -7,7 +7,6 @@
         import com.easyinsight.filtering.FilterValueDefinition;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         private function generate():void {
@@ -29,7 +28,7 @@
                 filter.filteredValues = new ArrayCollection([string]);
                 filter.inclusive = true;
                 filter.field = groupings.selectedAnalysisItem();
-                filter.singleValue = true;
+                filter.singleValue = false;
                 fieldFilters.addItem(filter);
             }
             var measure:AnalysisItem = measures.selectedAnalysisItem();
@@ -39,7 +38,7 @@
         private function copied(fields:ArrayCollection):void {
             for (var i:int = 0; i < fields.length; i++) {
                 var field:AnalysisItem = fields[i] as AnalysisItem;
-                field.filters = new ArrayCollection([ fieldFilters.getItemAt(i)]);
+                field.filters.addItem(fieldFilters.getItemAt(i));
                 field.displayName = FilterValueDefinition(fieldFilters.getItemAt(i)).filteredValues.getItemAt(0).toString() + " " + measures.selectedAnalysisItem().display;
                 field.unqualifiedDisplayName = FilterValueDefinition(fieldFilters.getItemAt(i)).filteredValues.getItemAt(0).toString() + " " + measures.selectedAnalysisItem().display;
                 addField(field);

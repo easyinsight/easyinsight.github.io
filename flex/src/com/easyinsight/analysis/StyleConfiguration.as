@@ -29,7 +29,6 @@ import com.easyinsight.analysis.tree.TreeDefinition;
 import com.easyinsight.analysis.treemap.TreeMapDefinition;
 import com.easyinsight.analysis.trend.TrendDefinition;
 import com.easyinsight.analysis.trend.TrendGridDefinition;
-import com.easyinsight.analysis.trend.TrendGridDefinition;
 import com.easyinsight.analysis.verticallist.VerticalListDefinition;
 import com.easyinsight.analysis.ytd.CompareYearsDefinition;
 import com.easyinsight.analysis.ytd.YTDDefinition;
@@ -75,7 +74,9 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Should this data source be visible to everyone in the account?", "accountVisible", dataSource.accountVisible, dataSource));
         items.addItem(new TextReportFormItem("What should this data source be named?", "feedName", dataSource.feedName, dataSource));
         items.addItem(new CheckBoxReportFormItem("Should the data source clean up old, duplicate fields when saved?", "fieldCleanupEnabled", dataSource.fieldCleanupEnabled, dataSource));
-        items.addItem(new CheckBoxReportFormItem("Field Lookup Enabled", "fieldLookupEnabled", dataSource.fieldLookupEnabled, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Should the data source default to full joins?", "defaultToFullJoins", dataSource.defaultToFullJoins, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Should the data source default to optimized?", "defaultToOptimized", dataSource.defaultToOptimized, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Should the data source look up field levels?", "fieldLookupEnabled", dataSource.fieldLookupEnabled, dataSource));
         items.addItem(new CheckBoxReportFormItem("Should reports in the editor on this data source run manually?", "manualReportRun", dataSource.manualReportRun, dataSource));
         var dashboardService:RemoteObject = new RemoteObject();
         dashboardService.destination = "analysisDefinition";
@@ -105,6 +106,7 @@ public class StyleConfiguration {
         if (dashboardElement is DashboardTextElement) {
             items.addItem(new ColorReportFormItem("Font Color", "color",  DashboardTextElement(dashboardElement).color, dashboardElement));
             items.addItem(new NumericReportFormItem("Font Size", "fontSize", DashboardTextElement(dashboardElement).fontSize, dashboardElement, 8, 48));
+            items.addItem(new CheckBoxReportFormItem("Markdown", "markdown", DashboardTextElement(dashboardElement).markdown, dashboardElement));
         }
         if (dashboardElement is DashboardStack) {
             items.addItem(new CheckBoxReportFormItem("Consolidate Header Elements", "consolidateHeaderElements", DashboardStack(dashboardElement).consolidateHeaderElements, dashboardElement));
@@ -192,7 +194,6 @@ public class StyleConfiguration {
         items.addItem(new TextReportFormItem("Base Date", "baseDate", report.baseDate, report));
         items.addItem(new NumericReportFormItem("Header Font Size", "headerFontSize", report.headerFontSize, report, 8, 48));
         items.addItem(new NumericReportFormItem("Max Header Width", "maxHeaderWidth", report.maxHeaderWidth, report, 100, 1500));
-        items.addItem(new NumericReportFormItem("Background Alpha", "backgroundAlpha", report.backgroundAlpha, report, 0, 1));
         items.addItem(new NumericReportFormItem("Fixed Report Width", "fixedWidth", report.fixedWidth, report, 0, 5000));
         if (report is ListDefinition) {
             items.addItem(new CheckBoxReportFormItem("Summary Row", "summaryTotal", ListDefinition(report).summaryTotal, report, null, true));
@@ -437,14 +438,12 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Text Color", "fontColor", TextReport(report).fontColor, report));
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
         }
-        items.addItem(new TextReportFormItem("Custom Field 1", "customField1", report.customField1, report));
-        items.addItem(new TextReportFormItem("Custom Field 2", "customField2", report.customField2, report));
 
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
+        items.addItem(new CheckBoxReportFormItem("Data Discovery Enabled", "dataDiscoveryEnabled", report.dataDiscoveryEnabled, report));
 
         items.addItem(new CheckBoxReportFormItem("Aggregate Query if Possible", "aggregateQueryIfPossible", report.aggregateQueryIfPossible, report));
         items.addItem(new CheckBoxReportFormItem("No Data on No Join", "noDataOnNoJoin", report.noDataOnNoJoin, report));
-        items.addItem(new CheckBoxReportFormItem("Filter Optimization", "lookupTableOptimization", report.lookupTableOptimization, report));
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
         items.addItem(new CheckBoxReportFormItem("Log Report", "logReport", report.logReport, report));
         items.addItem(new CheckBoxReportFormItem("Data Source Fields", "dataSourceFields", report.dataSourceFields, report));
@@ -453,7 +452,6 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Run Before Manual", "manualButRunFirst", report.manualButRunFirst, report));
 
         items.addItem(new NumericReportFormItem("Fetch Size", "fetchSize", report.fetchSize, report, 0, 5000));
-        items.addItem(new CheckBoxReportFormItem("Filter Strategy", "newFilterStrategy", report.newFilterStrategy, report));
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];
         items.sort = sort;

@@ -305,7 +305,7 @@
         }
 
         /*[Bindable]
-        private var reload:Boolean;*/
+         private var reload:Boolean;*/
 
         public function higlight():void {
         }
@@ -321,6 +321,13 @@
 
         [Bindable]
         public var fullEditable:Boolean = false;
+
+        [Bindable]
+        private var _editable:Boolean = true;
+
+        public function set editable(editable:Boolean):void {
+            _editable = editable;
+        }
         ]]>
     </mx:Script>
     <mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick(event)" buttonWidth="100">
@@ -341,7 +348,7 @@
         <mx:FormItem label="Field Key: " direction="horizontal">
             <mx:TextInput fontWeight="normal" text="{fieldKeyString}" width="250" fontFamily="Lucida Grande" editable="{fullEditable}" id="keyInput"/>
         </mx:FormItem>
-        <mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
+        <mx:FormItem label="Field Type: " direction="horizontal" id="firstForm" enabled="{_editable}">
             <mx:ViewStack resizeToContent="true" creationPolicy="all" selectedIndex="{aggIndex}">
                 <mx:Box>
                     <mx:ComboBox id="groupingAggregationBox"

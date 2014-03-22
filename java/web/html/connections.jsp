@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
-<%@ page import="com.easyinsight.datafeeds.HTMLConnectionFactory" %>
-<%@ page import="com.easyinsight.datafeeds.HTMLConnectionProperty" %>
 <%@ page import="com.easyinsight.solutions.SolutionService" %>
 <%@ page import="com.easyinsight.solutions.Solution" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
     <%
@@ -13,6 +12,12 @@
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
         List<Solution> solutions = new SolutionService().getSolutions();
+        List<Solution> validSolutions = new ArrayList<Solution>();
+        for (Solution solution : solutions) {
+            if (solution.getCategory() == 1) {
+                validSolutions.add(solution);
+            }
+        }
 %>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,14 +35,14 @@
 </jsp:include>
 <div class="container corePageWell" style="margin-top: 20px">
     <div class="row">
-        <% for (Solution solution : solutions) { %>
+        <% for (Solution solution : validSolutions) { %>
         <div class="col-md-2" style="height:150px;text-align:center;border-style: solid; border-radius: 3px;margin: 5px">
             <div style="">
                 <div style="margin-bottom: 10px">
             <a href="/app/html/connections/<%= solution.getDataSourceType() %>"><%=solution.getName()%></a>
                 </div>
                 <div>
-                    <a href="/app/html/connections/<%= solution.getDataSourceType() %>"><img src="/app/connectionImage/<%= solution.getSolutionID()%>" style="max-width: 240px;max-height: 150px"/></a>
+                    <a href="/app/html/connections/<%= solution.getDataSourceType() %>"><img src="/app/connectionImage/<%= solution.getSolutionID()%>" style="max-width: 150px;max-height: 150px"/></a>
                 </div>
             </div>
         </div>

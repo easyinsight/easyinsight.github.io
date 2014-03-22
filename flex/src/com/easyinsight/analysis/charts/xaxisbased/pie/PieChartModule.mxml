@@ -70,7 +70,6 @@
                         endData.addItem(obj);
                     }
                 }
-                canvas.setStyle("backgroundAlpha", pieChartDef.backgroundAlpha);
                 if (pieChartDef.showLegend) {
                     currentState = "";
                 } else {

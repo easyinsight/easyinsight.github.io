@@ -41,7 +41,8 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
             }
         }
         XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-        config.setServerURL(new URL("https://"+infusionsoftCompositeSource.getUrl()+".infusionsoft.com:443/api/xmlrpc"));
+        String url = infusionsoftCompositeSource.getUrl()+":443/api/xmlrpc";
+        config.setServerURL(new URL(url));
         XmlRpcClient client = new XmlRpcClient();
         client.setConfig(config);
         DataSet dataSet = new DataSet();

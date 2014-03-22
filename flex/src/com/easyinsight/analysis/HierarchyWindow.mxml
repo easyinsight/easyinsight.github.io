@@ -38,6 +38,9 @@
                 _hierarchy.concrete = false;
                 _hierarchy.key = new NamedKey();
             }
+            if (!_editable) {
+                this.enabled = false;
+            }
         }
 
         public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -96,6 +99,12 @@
         }
 
         public function set report(analysisDefinition:AnalysisDefinition):void {
+        }
+
+        private var _editable:Boolean;
+
+        public function set editable(editable:Boolean):void {
+            _editable = editable;
         }
         ]]></mx:Script>
 

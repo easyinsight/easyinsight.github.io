@@ -49,7 +49,9 @@ import mx.collections.ArrayCollection;
         public var manualReportRun:Boolean;
         public var defaultFieldTag:int;
         public var visibleWithinParentConfiguration:Boolean;
-		
+        public var defaultToFullJoins:Boolean;
+        public var defaultToOptimized:Boolean;
+
 		public function FeedDefinitionData()
 		{
 			

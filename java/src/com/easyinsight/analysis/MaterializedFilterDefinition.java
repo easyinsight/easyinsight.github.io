@@ -60,4 +60,7 @@ public abstract class MaterializedFilterDefinition {
     public void handleEarlyData(List<IRow> rows) {
         throw new UnsupportedOperationException();
     }
+
+    public void log(InsightRequestMetadata insightRequestMetadata, FilterDefinition filterDefinition) {
+    }
 }

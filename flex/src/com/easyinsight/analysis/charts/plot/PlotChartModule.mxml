@@ -95,7 +95,6 @@
             this.plotChartDef = analysisDefinition as PlotChartDefinition;
             var seriesMap:Object = new Object();
             if (dataSet.length > 0) {
-                coreBox.setStyle("backgroundAlpha", plotChartDef.backgroundAlpha);
                 if (additionalProperties != null) {
                     var correlation:Number = additionalProperties.correlation;
                 }

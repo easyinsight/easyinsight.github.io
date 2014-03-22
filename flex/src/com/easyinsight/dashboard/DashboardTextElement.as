@@ -8,6 +8,7 @@ public class DashboardTextElement extends DashboardElement {
     public var html:String;
     public var fontSize:int = 12;
     public var color:uint;
+    public var markdown:Boolean;
 
     public function DashboardTextElement() {
         super();

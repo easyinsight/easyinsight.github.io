@@ -31,7 +31,9 @@ import mx.collections.ArrayCollection;
     public var dataSourceFields:ArrayCollection;
     public var tags:ArrayCollection;
     public var tagDefault:Tag;
-		
+    public var forceOuterJoin:Boolean;
+    public var optimized:Boolean;
+
 		public function FeedMetadata()
 			{
 			super();

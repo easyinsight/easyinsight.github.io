@@ -547,7 +547,6 @@ public class AnalysisService {
                 sourceResult = sourceMap.get(connection.getSourceJoin().getKeyID());
             } else {
                 sourceResult = sourceMap.get(sourceItem.getKey().toBaseKey().getKeyID());
-                System.out.println("\tSearching for " + sourceResult.toDisplay());
             }
 
 
@@ -556,7 +555,6 @@ public class AnalysisService {
                 targetResult = sourceMap.get(connection.getTargetJoin().getKeyID());
             } else {
                 targetResult = sourceMap.get(targetItem.getKey().toBaseKey().getKeyID());
-                System.out.println("\tSearching for " + targetResult.toDisplay());
             }
 
             System.out.println("Source Feed ID = " + connection.getSourceFeedID());
@@ -1664,12 +1662,14 @@ public class AnalysisService {
                 multi.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
                 multi.setToggleEnabled(true);
                 List<FilterDefinition> targetFilters = new ArrayList<FilterDefinition>();
-                if (drillThrough.getReportID() == report.getAnalysisID()) {
+                if (drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
                     if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                        System.out.println("at least creating hierarchy drillthrough...");
                         AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
                         AnalysisHierarchyItem clonedHierarchy = (AnalysisHierarchyItem) hierarchyItem.clone();
                         int currentIndex = hierarchyItem.getHierarchyLevels().indexOf(hierarchyItem.getHierarchyLevel());
                         AnalysisItem next = hierarchyItem.getHierarchyLevels().get(currentIndex + 1).getAnalysisItem();
+                        System.out.println("\twith next = " + next.toDisplay());
                         AnalysisItemFilterDefinition analysisItemFilterDefinition = new AnalysisItemFilterDefinition();
                         analysisItemFilterDefinition.setField(clonedHierarchy);
                         analysisItemFilterDefinition.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>());
@@ -1702,7 +1702,7 @@ public class AnalysisService {
                 drillThroughResponse.setFilters(targetFilters);
                 return drillThroughResponse;
             } else {
-                if (drillThrough.getReportID() == report.getAnalysisID()) {
+                if (drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
                     if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                         AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
                         AnalysisDateDimension copy;

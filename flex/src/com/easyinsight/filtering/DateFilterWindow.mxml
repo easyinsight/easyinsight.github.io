@@ -69,13 +69,13 @@
         }
 
         private function addAbsolute():void {
-            var sliderDateFilter:SliderDateFilter = new SliderDateFilter(_feedID, _item, 0, 0, null, null, _report);
+            var sliderDateFilter:SliderDateFilter = new SliderDateFilter(_feedID, _item, 0, 0, null, filterMetadata, _report);
             dispatchEvent(new FilterCreationEvent(sliderDateFilter));
             PopUpManager.removePopUp(this);
         }
 
         private function addRolling():void {
-            var rollingFilter:RollingRangeFilter = new RollingRangeFilter(_feedID, _item, null, null);
+            var rollingFilter:RollingRangeFilter = new RollingRangeFilter(_feedID, _item, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(rollingFilter));
             PopUpManager.removePopUp(this);
         }

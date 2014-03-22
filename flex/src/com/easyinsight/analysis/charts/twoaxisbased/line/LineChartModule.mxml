@@ -120,8 +120,6 @@
                     currentState = "hideLegend";
                 }
 
-                coreBox.setStyle("backgroundAlpha", lineChartDef.backgroundAlpha);
-
                 this.def = lineChartDef;
 
                 this.chartData = new ArrayCollection(dataSet.toArray());

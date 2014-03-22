@@ -9,6 +9,15 @@ public class ReportPropertiesIntention extends Intention {
     private boolean fullJoins;
     private boolean summaryRow;
     private boolean trendSetup;
+    private boolean aggregateQueryIfPossible;
+
+    public boolean isAggregateQueryIfPossible() {
+        return aggregateQueryIfPossible;
+    }
+
+    public void setAggregateQueryIfPossible(boolean aggregateQueryIfPossible) {
+        this.aggregateQueryIfPossible = aggregateQueryIfPossible;
+    }
 
     public boolean isTrendSetup() {
         return trendSetup;

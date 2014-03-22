@@ -16,6 +16,8 @@ public class DataResults {
     public var suggestions:ArrayCollection;
     public var uid:String;
     public var report:AnalysisDefinition;
+    public var fieldEvents:Object;
+    public var filterEvents:Object;
 
     public var databaseTime:int;
     public var processingTime:int;

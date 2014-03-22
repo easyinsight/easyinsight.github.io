@@ -14,10 +14,9 @@ import mx.collections.ArrayCollection;
 
         public var links:Object;
         //public var drillThroughs:Object;
-        public var drillThroughValues:Object;
         public var sortValue:Value;
         public var originalValue:Value;
-        public var otherValues:ArrayCollection;
+        //public var otherValues:ArrayCollection;
         public var summary:Boolean;
         public var valueExtension:ValueExtension;
 

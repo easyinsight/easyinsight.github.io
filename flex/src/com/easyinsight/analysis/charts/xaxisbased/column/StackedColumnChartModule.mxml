@@ -228,7 +228,6 @@
 
             if (dataSet.length > 0) {
 
-                canvas.setStyle("backgroundAlpha", columnChartDef.backgroundAlpha);
                 stackIndex = 0;
 
                 xField = columnChartDef.xaxis.qualifiedName();

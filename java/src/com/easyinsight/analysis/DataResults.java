@@ -24,6 +24,15 @@ public abstract class DataResults implements Cloneable {
     private long databaseTime;
     private long processingTime;
     private Map<String, List<String>> fieldEvents = new HashMap<String, List<String>>();
+    private Map<String, List<String>> filterEvents = new HashMap<String, List<String>>();
+
+    public Map<String, List<String>> getFilterEvents() {
+        return filterEvents;
+    }
+
+    public void setFilterEvents(Map<String, List<String>> filterEvents) {
+        this.filterEvents = filterEvents;
+    }
 
     public Map<String, List<String>> getFieldEvents() {
         return fieldEvents;

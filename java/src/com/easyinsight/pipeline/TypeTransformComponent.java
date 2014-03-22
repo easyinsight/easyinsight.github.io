@@ -29,6 +29,14 @@ public class TypeTransformComponent implements IComponent {
         Map<AnalysisItem, Calendar> map = new HashMap<AnalysisItem, Calendar>();
         for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
             map.put(analysisItem, Calendar.getInstance());
+            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                boolean shift = ((AnalysisDateDimension) analysisItem).isTimeshift();
+                if (shift) {
+                    pipelineData.getInsightRequestMetadata().addAudit(analysisItem, "Time shifted " + analysisItem.toDisplay() + ".");
+                } else {
+                    pipelineData.getInsightRequestMetadata().addAudit(analysisItem, "Did not time shift " + analysisItem.toDisplay() + ".");
+                }
+            }
         }
         for (IRow row : dataSet.getRows()) {
             //IRow targetRow = targetSet.createRow();

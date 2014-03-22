@@ -78,9 +78,27 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean manualReportRun;
     private boolean showTags;
     private boolean visibleWithinParentConfiguration;
+    private boolean defaultToFullJoins;
+    private boolean defaultToOptimized;
 
     public void configureFactory(HTMLConnectionFactory factory) {
 
+    }
+
+    public boolean isDefaultToOptimized() {
+        return defaultToOptimized;
+    }
+
+    public void setDefaultToOptimized(boolean defaultToOptimized) {
+        this.defaultToOptimized = defaultToOptimized;
+    }
+
+    public boolean isDefaultToFullJoins() {
+        return defaultToFullJoins;
+    }
+
+    public void setDefaultToFullJoins(boolean defaultToFullJoins) {
+        this.defaultToFullJoins = defaultToFullJoins;
     }
 
     public boolean isVisibleWithinParentConfiguration() {
