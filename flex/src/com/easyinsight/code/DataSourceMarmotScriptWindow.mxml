@@ -40,6 +40,7 @@
         private function save():void {
             dataSource.marmotScript = scriptArea.text;
             dataSource.refreshMarmotScript = afterScriptArea.text;
+            saveSource();
         }
         ]]></mx:Script>
     <mx:TabNavigator creationPolicy="all">
