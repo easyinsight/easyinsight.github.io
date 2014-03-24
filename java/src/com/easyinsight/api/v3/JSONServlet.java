@@ -14,6 +14,7 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.UserService;
 import com.easyinsight.users.UserServiceResponse;
 import com.easyinsight.userupload.UploadPolicy;
+import net.minidev.json.JSONArray;
 import net.minidev.json.parser.JSONParser;
 import nu.xom.ParsingException;
 import org.json.JSONException;
@@ -140,7 +141,89 @@ public abstract class JSONServlet extends HttpServlet {
                 InputStream is = req.getInputStream();
                 JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
                 Object o = parser.parse(is);
-                net.minidev.json.JSONObject postObject = (net.minidev.json.JSONObject) o;
+                net.minidev.json.JSONObject postObject;
+                if (o instanceof JSONArray) {
+                    postObject = new net.minidev.json.JSONObject();
+                    postObject.put("rows", o);
+                } else {
+                    postObject = (net.minidev.json.JSONObject) o;
+                }
+                EIConnection conn = Database.instance().getConnection();
+                ResponseInfo responseInfo;
+                try {
+                    conn.setAutoCommit(false);
+                    responseInfo = processJSON(postObject, conn, req);
+                    conn.commit();
+                } catch (ServiceRuntimeException sre) {
+                    conn.rollback();
+                    LogClass.error(sre);
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, sre.getMessage());
+                } catch (ParsingException spe) {
+                    conn.rollback();
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, spe.getMessage());
+                } catch (Exception e) {
+                    conn.rollback();
+                    LogClass.error(e);
+                    responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, "An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
+                } finally {
+                    conn.setAutoCommit(true);
+                    Database.closeConnection(conn);
+                    SecurityUtil.clearThreadLocal();
+                }
+                resp.setContentType("application/json");
+                resp.setStatus(responseInfo.getCode());
+                resp.getOutputStream().write(responseInfo.getXml().getBytes());
+                resp.getOutputStream().flush();
+            } catch (Exception e) {
+                sendError(400, "Your request was malformed.", resp);
+            }
+        }
+        Date end = new Date();
+        BenchmarkManager.recordBenchmark(this.getClass().getCanonicalName(), (end.getTime() - start.getTime()), userResponse.getUserID());
+        System.out.println("API Call: " + this.getClass().getCanonicalName() + " Duration: " + (end.getTime() - start.getTime()));
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String authHeader = req.getHeader("Authorization");
+        if (authHeader == null) {
+            resp.addHeader("WWW-Authenticate", "Basic realm=\"Easy Insight\"");
+            sendError(401, "Your credentials were rejected.", resp);
+            return;
+        }
+        String headerValue = authHeader.split(" ")[1];
+        BASE64Decoder decoder = new BASE64Decoder();
+        String userPass = new String(decoder.decodeBuffer(headerValue));
+        int p = userPass.indexOf(":");
+        UserServiceResponse userResponse = null;
+        if (p != -1) {
+            String userID = userPass.substring(0, p);
+            String password = userPass.substring(p + 1);
+            try {
+                userResponse = SecurityUtil.authenticateKeys(userID, password);
+            } catch (com.easyinsight.security.SecurityException se) {
+                userResponse = new UserService().authenticate(userID, password, false);
+            }
+        }
+
+        Date start = new Date();
+        if (userResponse == null || !userResponse.isSuccessful()) {
+            sendError(401, "Your credentials were rejected.", resp);
+        } else {
+            try {
+                SecurityUtil.populateThreadLocal(userResponse.getUserName(), userResponse.getUserID(), userResponse.getAccountID(),
+                        userResponse.getAccountType(), userResponse.isAccountAdmin(), userResponse.getFirstDayOfWeek(), userResponse.getPersonaName());
+
+                InputStream is = req.getInputStream();
+                JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+                Object o = parser.parse(is);
+                net.minidev.json.JSONObject postObject;
+                if (o instanceof JSONArray) {
+                    postObject = new net.minidev.json.JSONObject();
+                    postObject.put("rows", o);
+                } else {
+                    postObject = (net.minidev.json.JSONObject) o;
+                }
                 EIConnection conn = Database.instance().getConnection();
                 ResponseInfo responseInfo;
                 try {
