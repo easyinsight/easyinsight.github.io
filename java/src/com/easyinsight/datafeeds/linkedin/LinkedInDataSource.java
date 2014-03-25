@@ -200,6 +200,7 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
                 fromPerson(keys, dataSet, person);
             }
         } catch (IOException ioe) {
+            ioe.printStackTrace();
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your LinkedIn data.", this));
         } catch (Exception e) {
             throw new RuntimeException(e);
