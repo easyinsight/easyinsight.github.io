@@ -183,22 +183,29 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
             }
 
             // create an HTTP request to a protected resource
-            URL url = new URL("http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,headline,industry,public-profile-url,num-connections,positions)");
-            HttpURLConnection request = (HttpURLConnection) url.openConnection();
+            int start = 0;
+            int count;
+            do {
+                count = 0;
+                URL url = new URL("http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,headline,industry,public-profile-url,num-connections,positions)?start=" + start + "&count=250");
+                HttpURLConnection request = (HttpURLConnection) url.openConnection();
 
-            // sign the request
-            consumer.sign(request);
+                // sign the request
+                consumer.sign(request);
 
-            // send the request
-            request.connect();
+                // send the request
+                request.connect();
 
 
-            Document connectionDoc = builder.build(request.getInputStream());
-            Nodes people = connectionDoc.query("/connections/person");
-            for (int i = 0; i < people.size(); i++) {
-                Node person = people.get(i);
-                fromPerson(keys, dataSet, person);
-            }
+                Document connectionDoc = builder.build(request.getInputStream());
+                Nodes people = connectionDoc.query("/connections/person");
+                for (int i = 0; i < people.size(); i++) {
+                    Node person = people.get(i);
+                    start++;
+                    count++;
+                    fromPerson(keys, dataSet, person);
+                }
+            } while (count == 250);
         } catch (IOException ioe) {
             ioe.printStackTrace();
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your LinkedIn data.", this));
