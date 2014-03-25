@@ -1,6 +1,5 @@
 Chart = {
     getCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
-
         return function (data) {
             Utils.noData(data["values"].flatten(), function () {
                 if (showLabels) {
@@ -63,6 +62,8 @@ Chart = {
 
     cleanup:function (target) {
         if (Chart.charts[target]) {
+            var tt = $("#" + target);
+            tt.unbind("jqplotDataClick");
             Chart.charts[target].destroy();
             delete Chart.charts[target];
             Chart.charts[target] = null;
