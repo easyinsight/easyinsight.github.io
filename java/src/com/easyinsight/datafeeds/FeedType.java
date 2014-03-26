@@ -263,6 +263,15 @@ public class FeedType implements Serializable {
     public static final FeedType SURVEYGIZMO_COMPOSITE = new FeedType(234);
     public static final FeedType SURVEYGIZMO_FORM = new FeedType(235);
     public static final FeedType SURVEYGIZMO_FORM_METADATA = new FeedType(236);
+    public static final FeedType BATCHBOOK2_DEALS = new FeedType(237);
+    public static final FeedType SURVEYGIZMO_QUESTION = new FeedType(238);
+    public static final FeedType TRELLO_CHECKLISTS = new FeedType(239);
+    public static final FeedType TRELLO_LABELS = new FeedType(240);
+    public static final FeedType TRELLO_MEMBERSHIPS = new FeedType(241);
+    public static final FeedType INSIGHTLY_OPPORTUNITY_TO_ORGANIZATION = new FeedType(242);
+    public static final FeedType INSIGHTLY_OPPORTUNITY_TO_CONTACT = new FeedType(243);
+    public static final FeedType LINKEDIN_COMPOSITE = new FeedType(244);
+    public static final FeedType LINKEDIN_PEOPLE = new FeedType(245);
 
     public FeedType() {
     }
