@@ -7,37 +7,29 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.kpi.KPI;
-import com.easyinsight.kpi.KPIUtil;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
-import com.easyinsight.users.Account;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Node;
 import nu.xom.Nodes;
 import oauth.signpost.OAuthConsumer;
-import oauth.signpost.OAuthProvider;
 import oauth.signpost.basic.DefaultOAuthConsumer;
-import org.jetbrains.annotations.NotNull;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * User: jamesboe
- * Date: May 6, 2010
- * Time: 8:34:00 PM
+ * Date: 3/24/14
+ * Time: 7:53 AM
  */
-public class LinkedInDataSource extends ServerDataSourceDefinition {
-    
+public class LinkedInPeopleSource extends ServerDataSourceDefinition {
+
     public static final String NAME = "Name";
     public static final String HEADLINE = "Headline";
     public static final String CURRENT_TITLE = "Current Title";
@@ -48,127 +40,30 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
     public static final String COUNT = "Count";
     public static final String NUMBER_CONNECTIONS = "Number of Connections";
 
-    private String tokenKey;
-    private String tokenSecret;
+    public LinkedInPeopleSource() {
+        setFeedName("People");
+    }
 
-    private String myName;
-    
-    public LinkedInDataSource() {
-        setFeedName("LinkedIn");
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(NAME, new AnalysisDimension());
+        fieldBuilder.addField(HEADLINE, new AnalysisText());
+        fieldBuilder.addField(CURRENT_TITLE, new AnalysisDimension());
+        fieldBuilder.addField(CURRENT_COMPANY, new AnalysisDimension());
+        fieldBuilder.addField(START_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(INDUSTRY, new AnalysisDimension());
+        fieldBuilder.addField(PUBLIC_PROFILE_URL, new AnalysisDimension());
+        fieldBuilder.addField(COUNT, new AnalysisMeasure());
+        fieldBuilder.addField(NUMBER_CONNECTIONS, new AnalysisMeasure());
     }
 
     @Override
-    public String validateCredentials() {
-        return null;
-    }
-
-    @NotNull
-    @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(NAME, HEADLINE, INDUSTRY, PUBLIC_PROFILE_URL, COUNT, NUMBER_CONNECTIONS, CURRENT_TITLE,
-                CURRENT_COMPANY, START_DATE);
-    }
-
-    @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
-        URLLink nameLink = new URLLink();
-        nameLink.setUrl("[Public Profile URL]");
-        nameLink.setLabel("View in LinkedIn");
-        AnalysisDimension nameDimension = new AnalysisDimension(keys.get(NAME), true);
-        nameDimension.setLinks(Arrays.asList((Link) nameLink));
-        items.add(nameDimension);
-        items.add(new AnalysisDimension(keys.get(HEADLINE), true));
-        items.add(new AnalysisDimension(keys.get(INDUSTRY), true));
-        items.add(new AnalysisDimension(keys.get(PUBLIC_PROFILE_URL), true));
-        items.add(new AnalysisDimension(keys.get(CURRENT_TITLE), true));
-        items.add(new AnalysisDimension(keys.get(CURRENT_COMPANY), true));
-        items.add(new AnalysisDateDimension(keys.get(START_DATE), true, AnalysisDateDimension.MONTH_LEVEL));
-        items.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
-        items.add(new AnalysisMeasure(keys.get(NUMBER_CONNECTIONS), AggregationTypes.SUM));
-        return items;
-    }
-
-    public String getTokenKey() {
-        return tokenKey;
-    }
-
-    public void setTokenKey(String tokenKey) {
-        this.tokenKey = tokenKey;
-    }
-
-    public String getTokenSecret() {
-        return tokenSecret;
-    }
-
-    public void setTokenSecret(String tokenSecret) {
-        this.tokenSecret = tokenSecret;
-    }
-
-    @Override
-    public int getDataSourceType() {
-        return DataSourceInfo.STORED_PULL;
-    }
-
-    @Override
-    public FeedType getFeedType() {
-        return FeedType.LINKEDIN;
-    }
-
-    @Override
-    public int getRequiredAccountTier() {
-        return Account.PERSONAL;
-    }
-
-    @Override
-    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
-        try {
-            if (externalPin != null && !"".equals(externalPin)) {
-                OAuthConsumer consumer = (OAuthConsumer) request.getSession().getAttribute("oauthConsumer");
-                OAuthProvider provider = (OAuthProvider) request.getSession().getAttribute("oauthProvider");
-                provider.retrieveAccessToken(consumer, externalPin.trim());
-                tokenKey = consumer.getToken();
-                tokenSecret = consumer.getTokenSecret();
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void customStorage(Connection conn) throws SQLException {
-        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM LINKEDIN_DATA_SOURCE WHERE FEED_ID = ?");
-        clearStmt.setLong(1, getDataFeedID());
-        clearStmt.executeUpdate();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO LINKEDIN_DATA_SOURCE (TOKEN_KEY, TOKEN_SECRET_KEY, FEED_ID) VALUES (?, ?, ?)");
-        insertStmt.setString(1, tokenKey);
-        insertStmt.setString(2, tokenSecret);
-        insertStmt.setLong(3, getDataFeedID());
-        insertStmt.execute();
-    }
-
-    @Override
-    public void customLoad(Connection conn) throws SQLException {
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT TOKEN_KEY, TOKEN_SECRET_KEY FROM LINKEDIN_DATA_SOURCE WHERE FEED_ID = ?");
-        queryStmt.setLong(1, getDataFeedID());
-        ResultSet rs = queryStmt.executeQuery();
-        if (rs.next()) {
-            tokenKey = rs.getString(1);
-            tokenSecret = rs.getString(2);
-        }
-    }
-
-    public static final String CONSUMER_KEY = "pMAaMYgowzMITTDFzMoaIbHsCni3iBZKzz3bEvUYoIHlaSAEv78XoOsmpch9YkLq";
-    public static final String CONSUMER_SECRET = "leKpqRVV3M8CMup_x6dY8THBiKT-T4PXSs3cpSVXp0kaMS4AiZYW830yRvH6JU2O";
-
-    @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         try {
+            LinkedInCompositeSource linkedInCompositeSource = (LinkedInCompositeSource) parentDefinition;
             Builder builder = new Builder();
-            OAuthConsumer consumer = new DefaultOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
-            consumer.setTokenWithSecret(tokenKey, tokenSecret);
+            OAuthConsumer consumer = new DefaultOAuthConsumer(LinkedInCompositeSource.CONSUMER_KEY, LinkedInCompositeSource.CONSUMER_SECRET);
+            consumer.setTokenWithSecret(linkedInCompositeSource.getTokenKey(), linkedInCompositeSource.getTokenSecret());
 
             URL profileURL = new URL("http://api.linkedin.com/v1/people/~:(id,first-name,last-name,headline,industry,public-profile-url,num-connections,positions)");
             HttpURLConnection profileRequest = (HttpURLConnection) profileURL.openConnection();
@@ -262,9 +157,14 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
 
     protected static String queryField(Node n, String xpath) {
         Nodes results = n.query(xpath);
-        if(results.size() > 0)
+        if (results.size() > 0)
             return results.get(0).getValue();
         else
             return null;
+    }
+
+    @Override
+    public FeedType getFeedType() {
+        return FeedType.LINKEDIN_PEOPLE;
     }
 }

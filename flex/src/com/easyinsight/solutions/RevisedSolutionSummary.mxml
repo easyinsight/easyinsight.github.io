@@ -115,6 +115,7 @@
                     event.solution.dataSourceType == DataSourceType.PIVOTAL_TRACKER ||
                     event.solution.dataSourceType == DataSourceType.SMARTSHEET ||
                     event.solution.dataSourceType == DataSourceType.DISTINCT_CACHED ||
+                    event.solution.dataSourceType == DataSourceType.LINKEDIN ||
                     event.solution.dataSourceType == DataSourceType.FRESHDESK ||
                     event.solution.dataSourceType == DataSourceType.BLANK ||
                     event.solution.dataSourceType == DataSourceType.SENDGRID ||
@@ -125,6 +126,7 @@
                     event.solution.dataSourceType == DataSourceType.WUFOO ||
                     event.solution.dataSourceType == DataSourceType.INSIGHTLY ||
                     event.solution.dataSourceType == DataSourceType.INFUSIONSOFT ||
+                    event.solution.dataSourceType == DataSourceType.LINKEDIN_COMPOSITE ||
                     event.solution.dataSourceType == DataSourceType.REDBOOTH ||
                     event.solution.dataSourceType == DataSourceType.ZENDESK ||
                     event.solution.dataSourceType == DataSourceType.KASHOO ||

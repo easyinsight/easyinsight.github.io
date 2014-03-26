@@ -87,6 +87,7 @@ import com.easyinsight.datasources.InsightlyCompositeSource;
 import com.easyinsight.datasources.JSONDataSource;
 import com.easyinsight.datasources.KashooCompositeDataSource;
 import com.easyinsight.datasources.LinkedInDataSource;
+import com.easyinsight.datasources.LinkedinCompositeDataSource;
 import com.easyinsight.datasources.MySQLDatabaseConnection;
 import com.easyinsight.datasources.OracleDatabaseConnection;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
@@ -310,6 +311,7 @@ public class TORegistry {
         var rb:RedboothCompositeSource;
         var s360:Solve360CompositeDataSource;
         var piv:PivotalTrackerV5CompositeSource;
+        var lcomp:LinkedinCompositeDataSource;
     }
 }
 }

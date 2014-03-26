@@ -1380,7 +1380,7 @@ public class DataService {
                 columns.addAll(analysisDefinition.getGroupings());
             }
             if (nowFilter != null) {
-                List<FilterDefinition> filters = new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions());
+                List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     if (filter != nowFilter && filter != previousFilter) {
                         filters.add(filter);
@@ -1410,14 +1410,6 @@ public class DataService {
             metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
             dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
-            System.out.println("retrieving initial set for key " + key);
-            if (analysisDefinition.getFilterDefinitions() != null) {
-                for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
-                    if (filter.getField() != null) {
-                        System.out.println("\t" + filter.getField().toDisplay());
-                    }
-                }
-            }
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
             int limit = 0;
             if (analysisDefinition instanceof WSTrendGridDefinition) {
@@ -1462,7 +1454,7 @@ public class DataService {
             DataSet pastSet;
             if (previousFilter != null) {
 
-                List<FilterDefinition> filters = new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions());
+                List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     if (filter != nowFilter && filter != previousFilter) {
                         filters.add(filter);
@@ -1506,7 +1498,6 @@ public class DataService {
             } else {
                 pastSet = nowSet;
             }
-            System.out.println("now set size = " + nowSet.getRows().size());
             trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
         }
         return new TrendResult(new ArrayList<TrendOutcome>(trendOutcomes), dataSourceInfo, nowString, previousString);
@@ -1848,7 +1839,7 @@ public class DataService {
             ReportRetrieval reportRetrieval = new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn).toPipeline();
             // TODO: get this code out of EI entirely
             boolean acsType = ((reportRetrieval.getFeed().getFeedType().getType() == FeedType.DEFAULT.getType() || reportRetrieval.getFeed().getFeedType().getType() == FeedType.STATIC.getType()) && reportRetrieval.getFeed().getName().contains("Survey")) ||
-                    "ACS2".equals(reportRetrieval.getFeed().getName()) || "Therapy Works".equals(reportRetrieval.getFeed().getName());
+                    "ACS2".equals(reportRetrieval.getFeed().getName()) || "Therapy Works".equals(reportRetrieval.getFeed().getName()) || "ACS3".equals(reportRetrieval.getFeed().getName());
             if (acsType) {
                 String personaName = SecurityUtil.getPersonaName();
                 if ("Therapist".equals(personaName) || "Director".equals(personaName) || "CEO".equals(personaName) || "MLDirector".equals(personaName)) {
@@ -1962,15 +1953,12 @@ public class DataService {
                             }
                         }
                         analysisDefinition.populateFromReportStructure(structure);
-                        System.out.println("okay, trying a field choice filter with target = " + analysisItemFilterDefinition.getTargetItem().toDisplay());
                         for (AnalysisItem item : analysisDefinition.createStructure().values()) {
                             if (item.toDisplay().equals(filter.getField().toDisplay()) && item instanceof AnalysisHierarchyItem) {
-                                System.out.println("found hierarchy " + item.toDisplay());
                                 AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) item;
                                 HierarchyLevel targetLevel = null;
                                 for (HierarchyLevel level : analysisHierarchyItem.getHierarchyLevels()) {
                                     if (level.getAnalysisItem().toDisplay().equals(analysisItemFilterDefinition.getTargetItem().toDisplay())) {
-                                        System.out.println("updating to level " + level.getAnalysisItem().toDisplay());
                                         targetLevel = level;
                                     }
                                 }
@@ -2010,7 +1998,6 @@ public class DataService {
                 AnalysisItem item = iter.next();
                 if (item.getOrigin() != null) {
                     if (item.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
-                        System.out.println("Removing " + item.toDisplay() + " from the list of available fields");
                         iter.remove();
                     }
                 }

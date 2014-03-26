@@ -1,0 +1,61 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.LinkedinCompositeDataSource;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.controls.Alert;
+        import mx.controls.Button;
+
+        private var def:LinkedinCompositeDataSource;
+
+        private var installButton:Button;
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            return new LinkedinCompositeDataSource();
+        }
+
+        public function setupButton(button:Button):Function {
+            installButton = button;
+            button.label = "Authorize Easy Insight Access";
+            button.addEventListener(MouseEvent.CLICK, install);
+            return install;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            def = feedDefinition as LinkedinCompositeDataSource;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+        }
+
+        private function install(event:MouseEvent = null):void {
+            ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
+            tokenService.getOAuthURL.send(244, true, null, def, def.visible ? 2 : 1);
+        }
+
+        private function gotURL():void {
+            var response:OAuthResponse = tokenService.getOAuthURL.lastResult as OAuthResponse;
+            if (response.successful) {
+                var requestToken:String = response.requestToken;
+                navigateToURL(new URLRequest(requestToken), "_self");
+            } else {
+                Alert.show("We failed to connect to LinkedIn to perform authorization. Please wait a bit and try again. If this error continues, contact support@easy-insight.com");
+            }
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="tokenService" id="tokenService">
+        <mx:method name="getOAuthURL" result="gotURL()"/>
+    </mx:RemoteObject>
+    <mx:TextArea text="Clicking Authorize will navigate your browser to your LinkedIn account. Upon granting access, you will be redirected back to Easy Insight to finish the connection process." borderStyle="none"
+            backgroundAlpha="0" editable="false" selectable="false" width="450" height="50"/>
+</mx:VBox>
