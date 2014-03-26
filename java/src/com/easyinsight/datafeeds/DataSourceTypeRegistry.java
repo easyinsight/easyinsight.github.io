@@ -33,7 +33,9 @@ import com.easyinsight.datafeeds.kashoo.KashooAccountSource;
 import com.easyinsight.datafeeds.kashoo.KashooBusinessSource;
 import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;
 import com.easyinsight.datafeeds.kashoo.KashooRecordSource;
+import com.easyinsight.datafeeds.linkedin.LinkedInCompositeSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
+import com.easyinsight.datafeeds.linkedin.LinkedInPeopleSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
 import com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource;
 import com.easyinsight.datafeeds.pivotaltrackerv5.*;
@@ -57,6 +59,8 @@ import com.easyinsight.datafeeds.smartsheet.SmartsheetTableSource;
 import com.easyinsight.datafeeds.solve360.*;
 import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoCompositeSource;
 import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoFormSource;
+import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoMetadataSource;
+import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoQuestionSource;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
@@ -379,6 +383,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.PIVOTAL_V5_STORY_TO_LABEL, PivotalTrackerV5StoryToLabelSource.class);
         registerType(FeedType.SURVEYGIZMO_COMPOSITE, SurveyGizmoCompositeSource.class);
         registerType(FeedType.SURVEYGIZMO_FORM, SurveyGizmoFormSource.class);
+        registerType(FeedType.SURVEYGIZMO_FORM_METADATA, SurveyGizmoMetadataSource.class);
+        registerType(FeedType.SURVEYGIZMO_QUESTION, SurveyGizmoQuestionSource.class);
 
         registerType(FeedType.INSIGHTLY_NOTES, InsightlyNoteSource.class);
         registerType(FeedType.INSIGHTLY_NOTE_LINKS, InsightlyNoteLinkSource.class);
@@ -388,6 +394,14 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.REDBOOTH_TASK_LIST, RedboothTaskListSource.class);
         registerType(FeedType.REDBOOTH_TASK, RedboothTaskSource.class);
         registerType(FeedType.REDBOOTH_COMMENT, RedboothCommentSource.class);
+        registerType(FeedType.BATCHBOOK2_DEALS, Batchbook2DealSource.class);
+        /*registerType(FeedType.TRELLO_CHECKLISTS, TrelloChecklistSource.class);
+        registerType(FeedType.TRELLO_MEMBERSHIPS, TrelloMembershipSource.class);
+        registerType(FeedType.TRELLO_LABELS, TrelloLabelSource.class);
+        registerType(FeedType.INSIGHTLY_OPPORTUNITY_TO_CONTACT, InsightlyOpportunityToContactSource.class);
+        registerType(FeedType.INSIGHTLY_OPPORTUNITY_TO_ORGANIZATION, InsightlyOpportunityToOrganizationSource.class);*/
+        registerType(FeedType.LINKEDIN_COMPOSITE, LinkedInCompositeSource.class);
+        registerType(FeedType.LINKEDIN_PEOPLE, LinkedInPeopleSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
