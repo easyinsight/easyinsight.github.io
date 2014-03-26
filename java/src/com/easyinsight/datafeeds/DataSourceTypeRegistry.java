@@ -394,7 +394,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.REDBOOTH_TASK_LIST, RedboothTaskListSource.class);
         registerType(FeedType.REDBOOTH_TASK, RedboothTaskSource.class);
         registerType(FeedType.REDBOOTH_COMMENT, RedboothCommentSource.class);
-        registerType(FeedType.BATCHBOOK2_DEALS, Batchbook2DealSource.class);
+        //registerType(FeedType.BATCHBOOK2_DEALS, Batchbook2DealSource.class);
         /*registerType(FeedType.TRELLO_CHECKLISTS, TrelloChecklistSource.class);
         registerType(FeedType.TRELLO_MEMBERSHIPS, TrelloMembershipSource.class);
         registerType(FeedType.TRELLO_LABELS, TrelloLabelSource.class);
