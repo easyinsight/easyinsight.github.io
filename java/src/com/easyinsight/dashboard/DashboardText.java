@@ -7,6 +7,7 @@ import com.easyinsight.analysis.FilterHTMLMetadata;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.scorecard.Scorecard;
+import com.easyinsight.util.HTMLPolicy;
 import org.eclipse.mylyn.wikitext.core.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.core.parser.builder.HtmlDocumentBuilder;
 import org.eclipse.mylyn.wikitext.core.util.ServiceLocator;
@@ -99,6 +100,7 @@ public class DashboardText extends DashboardElement {
         JSONObject textObject = super.toJSON(metadata, parentFilters);
         textObject.put("type", "text");
         String html = createHTML();
+        html = HTMLPolicy.getPolicyFactory().sanitize(html);
         textObject.put("item", html);
         return textObject;
     }
