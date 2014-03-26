@@ -1522,18 +1522,20 @@ public class AnalysisService {
                         }
                         {
                             Object object = data.get(stackedColumnChartDefinition.getYaxis().qualifiedName() + "_ORIGINAL");
-                            Value val;
-                            if (object instanceof Value) {
-                                val = (Value) object;
-                            } else if (object == null) {
-                                val = new EmptyValue();
-                            } else {
-                                val = new StringValue(object.toString());
-                            }
-                            FilterDefinition filter = constructDrillthroughFilter(drillThrough, stackedColumnChartDefinition.getYaxis(), data, val,
-                                    false, additionalAnalysisItems);
-                            if (filter != null) {
-                                filters.add(filter);
+                            if (object != null) {
+                                Value val;
+                                if (object instanceof Value) {
+                                    val = (Value) object;
+                                } else if (object == null) {
+                                    val = new EmptyValue();
+                                } else {
+                                    val = new StringValue(object.toString());
+                                }
+                                FilterDefinition filter = constructDrillthroughFilter(drillThrough, stackedColumnChartDefinition.getYaxis(), data, val,
+                                        false, additionalAnalysisItems);
+                                if (filter != null) {
+                                    filters.add(filter);
+                                }
                             }
                         }
                     } else {

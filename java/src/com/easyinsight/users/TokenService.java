@@ -73,7 +73,7 @@ public class TokenService {
             }
 
 
-            if (type == FeedType.LINKEDIN.getType()) {
+            if (type == FeedType.LINKEDIN.getType() || type == FeedType.LINKEDIN_COMPOSITE.getType()) {
                 consumer = new DefaultOAuthConsumer("pMAaMYgowzMITTDFzMoaIbHsCni3iBZKzz3bEvUYoIHlaSAEv78XoOsmpch9YkLq",
                         "leKpqRVV3M8CMup_x6dY8THBiKT-T4PXSs3cpSVXp0kaMS4AiZYW830yRvH6JU2O");
                 provider = new DefaultOAuthProvider(

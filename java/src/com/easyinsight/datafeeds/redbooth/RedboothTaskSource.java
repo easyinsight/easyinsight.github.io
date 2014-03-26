@@ -53,7 +53,7 @@ public class RedboothTaskSource extends RedboothBaseSource {
         fieldBuilder.addField(ASSIGNED_TO, new AnalysisDimension());
         fieldBuilder.addField(CREATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(COMPLETED_AT, new AnalysisDateDimension());
-        fieldBuilder.addField(DUE_ON, new AnalysisDateDimension());
+        fieldBuilder.addField(DUE_ON, new AnalysisDateDimension(true));
         fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(COUNT, new AnalysisMeasure());
         fieldBuilder.addField(COMMENTS_COUNT, new AnalysisMeasure());

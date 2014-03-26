@@ -165,6 +165,10 @@ public class AnalysisDateDimension extends AnalysisDimension {
     public AnalysisDateDimension() {
     }
 
+    public AnalysisDateDimension(boolean dateOnly) {
+        this.dateOnlyField = dateOnly;
+    }
+
     public String getOutputDateFormat() {
         return outputDateFormat;
     }
