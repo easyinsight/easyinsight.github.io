@@ -7,6 +7,7 @@
  */
 package com.easyinsight.filtering {
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemHandle;
 
 import mx.collections.ArrayCollection;
 
@@ -18,6 +19,9 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
     public var availableItems:ArrayCollection  = new ArrayCollection();
     public var availableHandles:ArrayCollection = new ArrayCollection();
     public var availableTags:ArrayCollection = new ArrayCollection();
+    public var useFullyQualifiedNames:Boolean;
+    public var selectedName:String;
+    public var selectedFQN:String;
 
     public function AnalysisItemFilterDefinition() {
     }
@@ -51,18 +55,13 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
     }
 
     override public function getSaveValue():Object {
-        return targetItem.analysisItemID;
+        return {display: targetItem.unqualifiedDisplay, fqn: targetItem.display};
     }
 
     override public function loadFromSharedObject(value:Object):void {
-        var matchID:int = value as int;
-        if (matchID > 0) {
-            for each (var item:AnalysisItem in availableItems) {
-                if (item.analysisItemID == matchID) {
-                    targetItem = item;
-                    break;
-                }
-            }
+        if (value != null) {
+            selectedName = value.display;
+            selectedFQN = value.fqn;
         }
     }
 }
