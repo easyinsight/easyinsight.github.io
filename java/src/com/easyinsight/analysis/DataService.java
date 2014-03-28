@@ -255,6 +255,184 @@ public class DataService {
         }
     }
 
+    public static List<AnalysisItemSelection> possibleFields(IFieldChoiceFilter filter, @Nullable WSAnalysisDefinition reportEditorReport, long dataSourceID, EIConnection conn) {
+        WSAnalysisDefinition report = null;
+
+
+        try {
+
+
+
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
+            Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
+            final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
+            List<AnalysisItem> allFields = dataSource.allFields(conn);
+            for (AnalysisItem field : allFields) {
+                map.put(field.getAnalysisItemID(), field);
+                mapByName.put(field.toDisplay(), field);
+            }
+
+            if (report != null) {
+                if (report.getAddedItems() != null) {
+                    for (AnalysisItem item : report.getAddedItems()) {
+                        mapByName.put(item.toDisplay(), item);
+                        if (item.getAnalysisItemID() != 0) {
+                            map.put(item.getAnalysisItemID(), item);
+                        }
+                    }
+                }
+            }
+            Map<AnalysisItem, AnalysisItemHandle> selectedMap = new HashMap<AnalysisItem, AnalysisItemHandle>();
+
+
+            Set<AnalysisItem> set = new HashSet<AnalysisItem>();
+            int i = 0;
+            if (!filter.excludeReportFields() && report != null && report instanceof WSListDefinition) {
+                WSListDefinition list = (WSListDefinition) report;
+                set.addAll(list.getColumns());
+                for (AnalysisItem item : list.getColumns()) {
+                    positions.put(item, i++);
+                }
+            }
+            for (AnalysisItemHandle field : filter.getAvailableHandles()) {
+                AnalysisItem item = map.get(field.getAnalysisItemID());
+                if (item != null) {
+                    set.add(item);
+                    positions.put(item, i++);
+                } else {
+                    item = mapByName.get(field.getName());
+                    if (item != null) {
+                        set.add(item);
+                        positions.put(item, i++);
+                    }
+                }
+            }
+
+            List<WeNeedToReplaceHibernateTag> tags = filter.getAvailableTags();
+
+            PreparedStatement customFieldQueryStmt = conn.prepareStatement("SELECT custom_flag_to_tag.custom_flag FROM custom_flag_to_tag WHERE tag_id = ? AND data_source_id = ?");
+
+            for (WeNeedToReplaceHibernateTag tag : tags) {
+                customFieldQueryStmt.setLong(1, tag.getTagID());
+                customFieldQueryStmt.setLong(2, dataSourceID);
+                ResultSet rs = customFieldQueryStmt.executeQuery();
+                while (rs.next()) {
+                    int customFlag = rs.getInt(1);
+                    for (AnalysisItem analysisItem : allFields) {
+                        if (analysisItem.getCustomFlag() == customFlag) {
+                            positions.put(analysisItem, i++);
+                            set.add(analysisItem);
+                        }
+                    }
+                }
+            }
+            customFieldQueryStmt.close();
+
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ? AND field_to_tag.data_source_id = ?");
+
+            for (WeNeedToReplaceHibernateTag tag : tags) {
+                queryStmt.setLong(1, tag.getTagID());
+                queryStmt.setLong(2, dataSourceID);
+                ResultSet rs = queryStmt.executeQuery();
+                while (rs.next()) {
+                    String fieldName = rs.getString(1);
+                    AnalysisItem analysisItem = mapByName.get(fieldName);
+                    //if (report == null || report.accepts(analysisItem)) {
+                    if (analysisItem != null) {
+                        positions.put(analysisItem, i++);
+                        set.add(analysisItem);
+                    }
+                    /*PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
+                            "extension_type = ?");
+                    extStmt.setLong(1, fieldID);
+                    extStmt.setInt(2, report.extensionType());
+                    ResultSet extRS = extStmt.executeQuery();
+                    if (extRS.next()) {
+                        long extID = extRS.getLong(1);
+                        Session session = Database.instance().createSession(conn);
+                        try {
+                            ReportFieldExtension ext = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, extID).list().get(0);
+                            ext.afterLoad();
+                            analysisItem.setReportFieldExtension(ext);
+                        } finally {
+                            session.close();
+                        }
+                    }
+                    extStmt.close();*/
+                }
+                //}
+            }
+
+
+            queryStmt.close();
+
+
+
+
+            i = 0;
+            for (AnalysisItemHandle handle : filter.selectedItems()) {
+                AnalysisItem item = mapByName.get(handle.getName());
+                if (item != null) {
+                    positions.put(item, i++);
+                    selectedMap.put(item, handle);
+                }
+            }
+
+
+            List<AnalysisItemSelection> items = new ArrayList<AnalysisItemSelection>();
+
+            for (AnalysisItem item : set) {
+                AnalysisItemSelection selection = new AnalysisItemSelection();
+                selection.setAnalysisItem(item);
+                AnalysisItemHandle handle = selectedMap.get(item);
+                if (handle != null) {
+                    selection.setSelected(handle.isSelected());
+                }
+                items.add(selection);
+            }
+
+            final Map<String, Integer> fieldOrderingMap = new HashMap<String, Integer>();
+            if (filter.getFieldOrdering() != null && filter.getFieldOrdering().size() > 0) {
+                int j = 0;
+                for (AnalysisItemHandle handle : filter.getFieldOrdering()) {
+                    fieldOrderingMap.put(handle.getName(), j++);
+                }
+            }
+
+            Collections.sort(items, new Comparator<AnalysisItemSelection>() {
+
+                public int compare(AnalysisItemSelection analysisItem, AnalysisItemSelection analysisItem1) {
+                    if (fieldOrderingMap.isEmpty()) {
+                        Integer p1 = positions.get(analysisItem.getAnalysisItem());
+                        Integer p2 = positions.get(analysisItem1.getAnalysisItem());
+                        return p1.compareTo(p2);
+                    } else {
+                        Integer p1 = fieldOrderingMap.get(analysisItem.getAnalysisItem().toDisplay());
+                        Integer p2 = fieldOrderingMap.get(analysisItem1.getAnalysisItem().toDisplay());
+                        if (p1 == null && p2 != null) {
+                            return 1;
+                        }
+                        if (p2 == null && p1 != null) {
+                            return -1;
+                        }
+                        if (p1 == null && p2 == null) {
+                            p1 = positions.get(analysisItem.getAnalysisItem());
+                            p2 = positions.get(analysisItem1.getAnalysisItem());
+                            return p1.compareTo(p2);
+                        }
+                        return p1.compareTo(p2);
+                    }
+
+                }
+            });
+            return items;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID) {
         return getAnalysisItemMetadata(feedID, analysisItem, utfOffset, reportID, dashboardID, null);
     }
@@ -1935,6 +2113,16 @@ public class DataService {
                 if (filter instanceof AnalysisItemFilterDefinition) {
                     AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
                     if (analysisItemFilterDefinition.isEnabled()) {
+
+                        if (analysisItemFilterDefinition.getSelectedFQN() != null) {
+                            List<AnalysisItemSelection> selections = DataService.possibleFields(analysisItemFilterDefinition, analysisDefinition, analysisDefinition.getDataFeedID(), conn);
+                            for (AnalysisItemSelection selection : selections) {
+                                if (analysisItemFilterDefinition.getSelectedFQN().equals(selection.getAnalysisItem().toDisplay())) {
+                                    analysisItemFilterDefinition.setTargetItem(selection.getAnalysisItem());
+                                    break;
+                                }
+                            }
+                        }
 
                         Map<String, AnalysisItem> structure = analysisDefinition.createStructure();
                         Map<String, AnalysisItem> structureCopy = new HashMap<String, AnalysisItem>(structure);

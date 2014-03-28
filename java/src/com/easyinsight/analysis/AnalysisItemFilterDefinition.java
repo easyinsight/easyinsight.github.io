@@ -63,6 +63,39 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
             inverseJoinColumns = @JoinColumn(name = "hibernate_tag_id", nullable = false))
     private List<WeNeedToReplaceHibernateTag> availableTags;
 
+    @Column(name="use_fully_qualified_names")
+    private boolean useFullyQualifiedNames;
+
+    @Transient
+    private String selectedName;
+
+    @Transient
+    private String selectedFQN;
+
+    public String getSelectedName() {
+        return selectedName;
+    }
+
+    public void setSelectedName(String selectedName) {
+        this.selectedName = selectedName;
+    }
+
+    public String getSelectedFQN() {
+        return selectedFQN;
+    }
+
+    public void setSelectedFQN(String selectedFQN) {
+        this.selectedFQN = selectedFQN;
+    }
+
+    public boolean isUseFullyQualifiedNames() {
+        return useFullyQualifiedNames;
+    }
+
+    public void setUseFullyQualifiedNames(boolean useFullyQualifiedNames) {
+        this.useFullyQualifiedNames = useFullyQualifiedNames;
+    }
+
     public List<AnalysisItemHandle> getAvailableHandles() {
         if (availableHandles != null && availableHandles.size() > 0) {
             return availableHandles;
@@ -314,7 +347,7 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
         JSONArray available = new JSONArray();
         for(AnalysisItemSelection analysisItem : itemsAvailable) {
             JSONObject j = new JSONObject();
-            j.put("value", analysisItem.getAnalysisItem().getAnalysisItemID());
+            j.put("value", analysisItem.getAnalysisItem().toDisplay());
             j.put("label", analysisItem.getAnalysisItem().toUnqualifiedDisplay());
             available.put(j);
         }
