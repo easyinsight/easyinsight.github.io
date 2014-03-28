@@ -100,13 +100,14 @@
                 valid = valid && validateItem.validate();
             }
             if (valid) {
+                var changed:Boolean = orderWindow.save();
                 for each (var item:ReportFormItem in items) {
                     item.save();
                 }
                 _dashboardStack.effectType = animationComboBox.selectedItem.data;
                 _dashboardStack.effectDuration = int(transitionInput.text);
                 _dashboardStack.filters = transformContainer.getFilterDefinitions();
-                dispatchEvent(new GridDimensionEvent(0, 0));
+                dispatchEvent(new GridDimensionEvent(0, 0, changed));
                 PopUpManager.removePopUp(this);
                 //
             }

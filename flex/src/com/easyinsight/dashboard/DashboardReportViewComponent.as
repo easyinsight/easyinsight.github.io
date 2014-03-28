@@ -25,6 +25,7 @@ import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
+import mx.controls.Alert;
 
 import mx.controls.Label;
 import mx.controls.LinkButton;
@@ -137,6 +138,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         box = null;
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(dashboardReport.report.reportType);
         var controller:IEmbeddedReportController = new controllerClass();
+        viewFactory.adHocMode = !editorAdHocMode;
         viewFactory = controller.createEmbeddedView();
         viewFactory.styleCanvas = false;
         viewFactory.usePreferredHeight = dashboardReport.autoCalculateHeight;
@@ -226,6 +228,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(dashboardReport.report.reportType);
         var controller:IEmbeddedReportController = new controllerClass();
         viewFactory = controller.createEmbeddedView();
+        viewFactory.adHocMode = !editorAdHocMode;
         viewFactory.styleCanvas = false;
         viewFactory.usePreferredHeight = dashboardReport.autoCalculateHeight;
         viewFactory.reportID = dashboardReport.report.id;
@@ -394,10 +397,11 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
     private var hasFilters:Boolean = false;
 
-
+    public var editorAdHocMode:Boolean = false;
 
     private function onReportSetup(event:ReportSetupEvent):void {
         viewFactory.registerPostProcessor(new ReportDashboardPostProcessor(dashboardEditorMetadata));
+
         var filterDefinitions:ArrayCollection = event.reportInfo.report.filterDefinitions;
         //viewFactory.filterDefinitions = filterDefinitions;
         if (event.reportInfo.report.filterDefinitions.length > 0) {
@@ -411,13 +415,15 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
             var visibleFilters:int = 0;
             for each (var filterDefinition:FilterDefinition in filterDefinitions) {
                 var exists:Boolean = false;
-                for each (var existing:FilterDefinition in parentFilters) {
-                    if (existing.qualifiedName() == filterDefinition.qualifiedName()) {
-                        exists = true;
+                if (!filterDefinition.noDashboardOverride) {
+                    for each (var existing:FilterDefinition in parentFilters) {
+                        if (existing.qualifiedName() == filterDefinition.qualifiedName()) {
+                            exists = true;
+                        }
                     }
-                }
-                if (exists) {
-                    continue;
+                    if (exists) {
+                        continue;
+                    }
                 }
                 if (filterDefinition.showOnReportView) {
                     visibleFilters++;
@@ -495,6 +501,19 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
     }
 
     private var retrievedDataOnce:Boolean;
+
+    public function forceRetrieve():void {
+        if (dashboardEditorMetadata != null && !dashboardEditorMetadata.editor && dashboardEditorMetadata.transformContainer != null) {
+            dashboardEditorMetadata.transformContainer.hideFilters(dashboardReport.dashboardFilterOverrides);
+        }
+        if (setup) {
+            retrievedDataOnce = true;
+            viewFactory.additionalFilterDefinitions = createAdditionalFilters(filterMap);
+            viewFactory.forceRetrieve();
+        } else {
+            queued = true;
+        }
+    }
 
     public function initialRetrieve():void {
         if (dashboardEditorMetadata != null && !dashboardEditorMetadata.editor && dashboardEditorMetadata.transformContainer != null) {

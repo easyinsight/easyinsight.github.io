@@ -28,6 +28,7 @@ public class DashboardEditorMetadata {
     public var transformContainer:TransformContainer;
     public var editor:Boolean;
     public var retrievalState:IRetrievalState;
+    public var manualRun:Boolean;
 
     public function DashboardEditorMetadata() {
     }

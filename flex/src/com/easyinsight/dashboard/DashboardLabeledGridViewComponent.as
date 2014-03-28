@@ -228,6 +228,13 @@ public class DashboardLabeledGridViewComponent extends VBox implements IDashboar
         }
     }
 
+    public function forceRetrieve():void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.forceRetrieve();
+        }
+    }
+
+
 
     public function toggleFilters(showFilters:Boolean):void {
         for each (var comp:IDashboardViewComponent in viewChildren) {

@@ -4,6 +4,7 @@ import flash.events.Event;
 
 import mx.collections.ArrayCollection;
 import mx.containers.VBox;
+import mx.controls.Alert;
 import mx.managers.PopUpManager;
 
 public class DashboardReportEditorComponent extends VBox implements IDashboardEditorComponent {
@@ -27,6 +28,10 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
 
     }
 
+    public function forceRetrieve():void {
+        reportComp.forceRetrieve();
+    }
+
     private var reportComp:DashboardReportViewComponent = new DashboardReportViewComponent();
 
     protected override function createChildren():void {
@@ -37,6 +42,9 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
         reportComp.dashboardReport = report;
         reportComp.dashboardEditorMetadata = dashboardEditorMetadata;
         reportComp.elementID = String(DashboardElementFactory.counter++);
+        if (dashboardEditorMetadata.manualRun) {
+            reportComp.editorAdHocMode = true;
+        }
         addChild(reportComp);
     }
 

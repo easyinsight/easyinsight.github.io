@@ -2,6 +2,7 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:filtering="com.easyinsight.filtering.*" xmlns:easyinsight="com.easyinsight.*"
          xmlns:analysis="com.easyinsight.analysis.*" xmlns:report="com.easyinsight.report.*"
+         xmlns:util="com.easyinsight.util.*"
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%" creationComplete="populateData()"
          verticalScrollPolicy="off" horizontalScrollPolicy="off">
     <mx:Script><![CDATA[
@@ -192,19 +193,6 @@
                 var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                 BrowserManager.getInstance().setFragment(feedFragmentString);
             }
-            var box:DashboardBox = new DashboardBox();
-            rootView = box;
-            metadata.dashboard = _dashboard;
-            box.dashboardEditorMetadata = metadata;
-            box.element = _dashboard.rootElement;
-            //box.allowDelete = false;
-            UIComponent(box).addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent):void {
-                var filterMap:Object = new Object();
-                filterMap["master"] = _dashboard.filters;
-                box.updateAdditionalFilters(filterMap);
-                box.initialRetrieve();
-            });
-            dashboardCanvas.addChild(box);
             ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource,
                     dataService.getFeedMetadata);
             analysisService.getInsightDescriptorsForDataSource.send(_dashboard.dataSourceID);
@@ -217,10 +205,6 @@
         private var rootView:IDashboardViewComponent;
 
         private function setupNewDashboard():void {
-            var box:DashboardBox = new DashboardBox();
-            box.dashboardEditorMetadata = metadata;
-            rootView = box;
-            dashboardCanvas.addChild(box);
             _dashboard = new Dashboard();
             _dashboard.dataSourceID = _startDataSourceID;
             metadata.dashboard = _dashboard;
@@ -332,6 +316,12 @@
 
         private function gotFeedMetadata():void {
             var feedMetadata:FeedMetadata = dataService.getFeedMetadata.lastResult as FeedMetadata;
+            if (!feedMetadata.defaultManualRun) {
+                if (forceRunButton && forceRunButton.parent) {
+                    forceRunButton.parent.removeChild(forceRunButton);
+                }
+            }
+            metadata.manualRun = feedMetadata.defaultManualRun;
             this.feedMetadata = feedMetadata;
             if (_dashboard == null || _dashboard.id == 0) {
                 if (!embedded) {
@@ -360,6 +350,24 @@
             metadata.dataSourceID = dataSourceID;
             metadata.availableFields = availableDimensions;
             metadata.transformContainer = transformContainer;
+            /*
+             var box:DashboardBox = new DashboardBox();
+             box.dashboardEditorMetadata = metadata;
+             rootView = box;
+             dashboardCanvas.addChild(box);*/
+            var box:DashboardBox = new DashboardBox();
+            rootView = box;
+            metadata.dashboard = _dashboard;
+            box.dashboardEditorMetadata = metadata;
+            box.element = _dashboard.rootElement;
+            //box.allowDelete = false;
+            UIComponent(box).addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent):void {
+                var filterMap:Object = new Object();
+                filterMap["master"] = _dashboard.filters;
+                box.updateAdditionalFilters(filterMap);
+                box.initialRetrieve();
+            });
+            dashboardCanvas.addChild(box);
         }
 
         [Bindable]
@@ -531,6 +539,10 @@
             invalidateSize();
         }
 
+        private function forceRun():void {
+            rootView.forceRetrieve();
+        }
+
         [Bindable]
         [Embed(source="../../../../assets/refresh.png")]
         private var refreshIcon:Class;
@@ -609,6 +621,7 @@
         </mx:VBox>
         <mx:VBox width="100%" height="100%" horizontalAlign="center" verticalScrollPolicy="off"
                  horizontalScrollPolicy="off">
+            <util:SaveButton label="Run the Dashboard" click="forceRun()" id="forceRunButton" fontSize="12"/>
             <mx:HBox width="100%" id="filtersBox">
                 <mx:Button icon="@Embed(source='../../../../assets/funnel.png')"
                            toolTip="Create New Filter..." click="transformContainer.addNewFilter()" label="New Filter"/>

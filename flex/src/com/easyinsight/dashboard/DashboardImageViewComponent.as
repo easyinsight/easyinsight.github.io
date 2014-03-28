@@ -80,5 +80,8 @@ public class DashboardImageViewComponent extends Box implements IDashboardViewCo
 
     public function toggleFilters(showFilters:Boolean):void {
     }
+
+    public function forceRetrieve():void {
+    }
 }
 }

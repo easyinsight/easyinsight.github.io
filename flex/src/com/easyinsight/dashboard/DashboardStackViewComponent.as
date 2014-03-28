@@ -153,6 +153,11 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     private var defaultButtonsBox:Container;
 
     protected function createStackContents():void {
+        if (dashboardStack.consolidateHeaderElements) {
+            buttonsBox.removeAllChildren();
+        } else {
+            defaultButtonsBox.removeAllChildren();
+        }
         viewStack.removeAllChildren();
         viewChildren.removeAll();
         createStackChildren(dashboardStack.consolidateHeaderElements ? buttonsBox : defaultButtonsBox);
@@ -684,6 +689,15 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             } else {
                 IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).initialRetrieve();
             }
+        }
+    }
+
+    public function forceRetrieve():void {
+        if (!built && !(this is DashboardStackEditorComponent)) {
+            buildContents();
+        }
+        if (viewChildren != null && viewChildren.length > 0) {
+            IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).forceRetrieve();
         }
     }
 

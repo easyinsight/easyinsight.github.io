@@ -79,5 +79,8 @@ public class DashboardImageEditorComponent extends VBox implements IDashboardEdi
 
     public function toggleControls(show:Boolean):void {
     }
+
+    public function forceRetrieve():void {
+    }
 }
 }

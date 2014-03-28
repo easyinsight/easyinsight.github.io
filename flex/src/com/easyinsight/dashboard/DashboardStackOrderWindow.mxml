@@ -2,6 +2,7 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="500">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         private var _dashboardStack:DashboardStack;
@@ -24,8 +25,19 @@
                 index++;
             }
         }
+
+        private var changed:Boolean = false;
+
+        private function onDrag():void {
+            changed = true;
+        }
+
+        public function save():Boolean {
+            _dashboardStack.gridItems = ArrayCollection(stackGrid.dataProvider);
+            return changed;
+        }
         ]]></mx:Script>
-    <mx:DataGrid dataProvider="{stackChildren}" dragEnabled="true" dropEnabled="true" dragMoveEnabled="true" headerHeight="0" width="100%">
+    <mx:DataGrid dataProvider="{stackChildren}" dragEnabled="true" dropEnabled="true" dragMoveEnabled="true" headerHeight="0" width="100%" id="stackGrid" dragComplete="onDrag()">
         <mx:columns>
             <mx:DataGridColumn dataField="stackLabel" sortable="false"/>
         </mx:columns>

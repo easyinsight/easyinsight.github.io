@@ -17,7 +17,7 @@ public class DashboardStack extends DashboardElement {
 
     public var gridItems:ArrayCollection = new ArrayCollection();
     public var count:int;
-    public var effectType:int;
+    public var effectType:int = NONE;
     public var effectDuration:int = 1000;
     public var stackControl:int;
     public var consolidateHeaderElements:Boolean;
