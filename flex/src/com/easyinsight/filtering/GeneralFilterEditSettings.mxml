@@ -31,6 +31,9 @@
         [Bindable]
         private var showOnReportView:Boolean;
 
+        [Bindable]
+        private var noDashboardOverride:Boolean;
+
         public var filterMetadata:FilterMetadata;
 
         private var _detailClass:Class;
@@ -69,6 +72,7 @@
             customizable = _filterDefinition.customizable;
             childParent = _filterDefinition.childToParentLabel;
             parentChild = _filterDefinition.parentChildLabel;
+            noDashboardOverride = _filterDefinition.noDashboardOverride;
             if (_filterDefinition.field != null) {
                 filterField = filterDefinition.field.display + " - " + filterDefinition.field.key.createString();
                 idData = filterDefinition.field.analysisItemID + " - " + filterDefinition.filterID;
@@ -197,6 +201,7 @@
             _filterDefinition.section = sectionInput.value;
             _filterDefinition.parentChildLabel = parentChild;
             _filterDefinition.childToParentLabel = childParent;
+            _filterDefinition.noDashboardOverride = noDashboardOverrideCheckbox.selected;
             dispatchEvent(new FilterEditEvent(_filterDefinition, previousDefinition, null, rebuild));
             PopUpManager.removePopUp(this);
         }
@@ -271,6 +276,9 @@
                     </mx:FormItem>
                     <mx:FormItem label="Make This a 'Not' Filter:">
                         <mx:CheckBox id="inverseCheckbox" selected="{inverse}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Should this filter ignore any dashboard settings?">
+                        <mx:CheckBox id="noDashboardOverrideCheckbox" selected="{noDashboardOverride}"/>
                     </mx:FormItem>
                 </mx:Form>
             </mx:HBox>

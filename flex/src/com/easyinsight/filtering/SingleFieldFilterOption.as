@@ -45,9 +45,13 @@ public class SingleFieldFilterOption extends EventDispatcher {
         dispatchEvent(new Event("analysisItemChanged"));
     }
 
-    public function SingleFieldFilterOption(analysisItem:AnalysisItemSelection, selected:Boolean = false) {
+    public function SingleFieldFilterOption(analysisItem:AnalysisItemSelection, qualified:Boolean,  selected:Boolean = false) {
         this.analysisItem = analysisItem.analysisItem;
-        _label = analysisItem.analysisItem.display;
+        if (qualified) {
+            _label = analysisItem.analysisItem.display;
+        } else {
+            _label = analysisItem.analysisItem.unqualifiedDisplay;
+        }
         this.selected = selected;
     }
 
