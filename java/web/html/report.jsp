@@ -16,7 +16,8 @@
 <%@ page import="com.easyinsight.dashboard.SavedConfiguration" %>
 <%@ page import="com.easyinsight.dashboard.DashboardService" %>
 <%@ page import="com.easyinsight.dashboard.DashboardInfo" %>
-<%@ page import="com.easyinsight.dashboard.DashboardStackPositions" %>
+<%@ page import="com.easyinsight.admin.AdminService" %>
+<%@ page import="com.easyinsight.audit.ActionReportLog" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -111,12 +112,18 @@
         reportJSON.put("configuration_name", selectedConfiguration);
         reportJSON.put("configuration_key", configurationKey);
 
+        try {
+            new AdminService().logAction(new ActionReportLog(SecurityUtil.getUserID(false), ActionReportLog.VIEW, report.getAnalysisID()));
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+
         EIConnection c = Database.instance().getConnection();
         JSONObject userObject = new JSONObject();
         try {
             userObject = SecurityUtil.getUserJSON(c, request);
         } finally {
-            c.close();
+            Database.closeConnection(c);
         }
 %>
 
@@ -265,7 +272,7 @@
 </body>
 <%
     } catch (ReportAccessException rae) {
-        response.sendRedirect(RedirectUtil.getURL(request, "accessFault.jsp"));
+        response.sendRedirect(RedirectUtil.getURL(request, "/accessFault.jsp"));
     } catch (ReportNotFoundException e) {
         LogClass.error(e);
         response.sendError(404);
