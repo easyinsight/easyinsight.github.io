@@ -118,8 +118,8 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <button class="btn btn-inverse" type="button" onclick="refreshReport()"
-                                        style="padding:5px;margin:5px;width:150px">Refresh the Report
+                                <button class="btn btn-inverse full_refresh" type="button"
+                                        style="padding:5px;margin:5px;width:150px">Refresh the Dashboard
                                 </button>
                             </li>
                             <li>

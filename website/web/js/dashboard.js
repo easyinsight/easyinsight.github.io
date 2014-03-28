@@ -1082,6 +1082,10 @@ $(function () {
             })
         }
 
+        $(".full_refresh").click(function(e) {
+            renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+        })
+
         saveConfiguration = function (name, key) {
             var ac = _.reduce(reportMap, function(m, e, i) {
                 m[i] = e.report.report.id;
