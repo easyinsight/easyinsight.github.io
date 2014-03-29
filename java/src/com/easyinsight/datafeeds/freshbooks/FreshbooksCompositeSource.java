@@ -12,11 +12,9 @@ import oauth.signpost.OAuthProvider;
 import oauth.signpost.exception.OAuthCommunicationException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,12 +29,22 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
     public static final String CONSUMER_SECRET = "3gKm7ivgkPCeQZChh7ig9CDMBGratLg6yS";
 
     public void configureFactory(HTMLConnectionFactory factory) {
-        factory.addField("FreshBooks URL", "url", "Your Highrise URL is the browser URL you normally use to connect to Highrise. For example, if you access Highrise as yourcompanyname.highrisehq.com, put yourcompanyname in as the Highrise URL.");
+        factory.addField("FreshBooks URL", "url", "Your Freshbooks URL is the browser URL you normally use to connect to FreshBooks. For example, if you access FreshBooks as yourcompanyname.freshbooks.com, put yourcompanyname in as the FreshBooks URL.");
         factory.type(HTMLConnectionFactory.TYPE_OAUTH);
     }
 
     public FreshbooksCompositeSource() {
         setFeedName("FreshBooks");
+    }
+
+    private Date startDate;
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     private boolean liveDataSource;
@@ -153,19 +161,24 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO FRESHBOOKS (DATA_SOURCE_ID, TOKEN_KEY, TOKEN_SECRET_KEY, URL, LIVE_DATA_SOURCE) VALUES (?, ?, ?, ?, ?)");
+        PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO FRESHBOOKS (DATA_SOURCE_ID, TOKEN_KEY, TOKEN_SECRET_KEY, URL, LIVE_DATA_SOURCE, START_DATE) VALUES (?, ?, ?, ?, ?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
         basecampStmt.setString(2, tokenKey);
         basecampStmt.setString(3, tokenSecretKey);
         basecampStmt.setString(4, getUrl());
         basecampStmt.setBoolean(5, liveDataSource);
+        if (startDate == null) {
+            basecampStmt.setNull(6, Types.BIGINT);
+        } else {
+            basecampStmt.setDate(6, new java.sql.Date(startDate.getTime()));
+        }
         basecampStmt.execute();
         basecampStmt.close();
     }
 
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, TOKEN_KEY, TOKEN_SECRET_KEY, LIVE_DATA_SOURCE FROM FRESHBOOKS WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, TOKEN_KEY, TOKEN_SECRET_KEY, LIVE_DATA_SOURCE, START_DATE FROM FRESHBOOKS WHERE DATA_SOURCE_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
@@ -173,6 +186,10 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
             setTokenKey(rs.getString(2));
             setTokenSecretKey(rs.getString(3));
             setLiveDataSource(rs.getBoolean(4));
+            java.sql.Date date = rs.getDate(5);
+            if (date != null) {
+                setStartDate(date);
+            }
         }
         loadStmt.close();
     }

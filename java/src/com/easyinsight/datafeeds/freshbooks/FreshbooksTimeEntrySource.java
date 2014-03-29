@@ -84,9 +84,16 @@ public class FreshbooksTimeEntrySource extends FreshbooksBaseSource {
             int requestPage = 1;
             int pages;
             int currentPage;
+            Date startDate = freshbooksCompositeSource.getStartDate();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             do {
+                String string = "<page>" + requestPage + "</page>";
+                string += ("<per_page>100</per_page>");
+                if (startDate != null) {
+                    string += ("<date_from>" + sdf.format(startDate) + "</date_from>");
+                }
                 DataSet dataSet = new DataSet();
-                Document invoicesDoc = query("time_entry.list", "<page>" + requestPage + "</page><per_page>100</per_page>", freshbooksCompositeSource);
+                Document invoicesDoc = query("time_entry.list", string, freshbooksCompositeSource);
                 Nodes timeNodes = invoicesDoc.query("/response/time_entries");
                 if (timeNodes.size() == 0) {
                     return dataSet;

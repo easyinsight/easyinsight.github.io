@@ -78,8 +78,14 @@ public class FreshbooksExpenseSource extends FreshbooksBaseSource {
             int requestPage = 1;
             int pages;
             int currentPage;
+            Date startDate = freshbooksCompositeSource.getStartDate();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             do {
                 String string = "<page>" + requestPage + "</page>";
+                string += ("<per_page>100</per_page>");
+                if (startDate != null) {
+                    string += ("<date_from>" + sdf.format(startDate) + "</date_from>");
+                }
                 Document invoicesDoc = query("expense.list", string, freshbooksCompositeSource);
                 Nodes expenseNodes = invoicesDoc.query("/response/expenses");
                 if (expenseNodes.size() > 0) {
