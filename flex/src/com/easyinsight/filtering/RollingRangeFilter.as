@@ -69,6 +69,17 @@ public class RollingRangeFilter extends HBox implements IFilter
         rangeOptions.addItem(new RangeOption("Last Month to Current Day", RollingDateRangeFilterDefinition.LAST_MONTH_TO_NOW));
         rangeOptions.addItem(new RangeOption("Last Quarter to Current Day", RollingDateRangeFilterDefinition.LAST_QUARTER_TO_NOW));
         rangeOptions.addItem(new RangeOption("Last Year to Current Day", RollingDateRangeFilterDefinition.LAST_YEAR_TO_NOW));
+
+        rangeOptions.addItem(new RangeOption("Next Full Week", RollingDateRangeFilterDefinition.NEXT_FULL_WEEK));
+        rangeOptions.addItem(new RangeOption("Next Full Month", RollingDateRangeFilterDefinition.NEXT_FULL_MONTH));
+        rangeOptions.addItem(new RangeOption("Next Full Quarter", RollingDateRangeFilterDefinition.NEXT_FULL_QUARTER));
+        rangeOptions.addItem(new RangeOption("Next Full Year", RollingDateRangeFilterDefinition.NEXT_FULL_YEAR));
+
+        rangeOptions.addItem(new RangeOption("This Week", RollingDateRangeFilterDefinition.THIS_WEEK));
+        rangeOptions.addItem(new RangeOption("This Month", RollingDateRangeFilterDefinition.THIS_MONTH));
+        rangeOptions.addItem(new RangeOption("This Quarter", RollingDateRangeFilterDefinition.THIS_QUARTER));
+        rangeOptions.addItem(new RangeOption("This Year", RollingDateRangeFilterDefinition.THIS_YEAR));
+
         rangeOptions.addItem(new RangeOption("Custom", RollingDateRangeFilterDefinition.CUSTOM));
 
         this.filterMetadata = filterMetadata;

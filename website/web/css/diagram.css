@@ -14,6 +14,7 @@
 .diagram .node {
   position: absolute;
   display: block;
+  text-align: left;
   width: 152px;
 }
 
@@ -46,6 +47,8 @@
 
 .diagram .node .trend img {
     vertical-align: baseline;
+    width: 16px;
+    height: 16px;
 }
 
 .diagram .node .spacer {
@@ -62,7 +65,7 @@
 }
 
 .diagram .node > div div {
-    width: 108px;
+    width: 96px;
     vertical-align:middle;
     text-align: center;
     display: inline-block;

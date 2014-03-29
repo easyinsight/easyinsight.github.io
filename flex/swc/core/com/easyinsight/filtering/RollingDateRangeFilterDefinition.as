@@ -35,6 +35,14 @@ import mx.utils.ObjectUtil;
 		public static const PREVIOUS_FULL_QUARTER:int = -8;
 		public static const PREVIOUS_FULL_YEAR:int = -9;
 		public static const LAST_YEAR_TO_NOW:int = -10;
+        public static const NEXT_FULL_WEEK:int = -11;
+        public static const NEXT_FULL_MONTH:int = -12;
+        public static const NEXT_FULL_QUARTER:int = -13;
+        public static const NEXT_FULL_YEAR:int = -14;
+    public static const THIS_WEEK:int = -15;
+    public static const THIS_MONTH:int = -16;
+    public static const THIS_QUARTER:int = -17;
+    public static const THIS_YEAR:int = -18;
 
     /*
      intervals.addItem(createInterval("Last Full Quarter", "dayofmonth(nowdate() - quarters(1), 1)", "dayofmonth(nowdate() - quarters(1), daysinquarter(nowdate() - quarters(1))))"));

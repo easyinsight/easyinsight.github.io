@@ -79,5 +79,8 @@ public class DashboardScorecardViewComponent extends Canvas implements IDashboar
 
     public function toggleFilters(showFilters:Boolean):void {
     }
+
+    public function forceRetrieve():void {
+    }
 }
 }

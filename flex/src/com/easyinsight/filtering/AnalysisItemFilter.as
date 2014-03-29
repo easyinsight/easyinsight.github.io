@@ -17,7 +17,6 @@ import mx.containers.HBox;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.Label;
-import mx.controls.LinkButton;
 import mx.managers.PopUpManager;
 
 public class AnalysisItemFilter extends HBox implements IFilter {
@@ -189,7 +188,13 @@ public class AnalysisItemFilter extends HBox implements IFilter {
     }
 
     private function updateFilterLabel():void {
-        linkButton.label = _filterDefinition.targetItem.unqualifiedDisplay;
+        if (_filterDefinition.useFullyQualifiedNames && _filterDefinition.selectedFQN) {
+            linkButton.label = _filterDefinition.selectedFQN;
+        } else if (!_filterDefinition.useFullyQualifiedNames && _filterDefinition.selectedName) {
+            linkButton.label = _filterDefinition.selectedName;
+        } else {
+            linkButton.label = _filterDefinition.targetItem.unqualifiedDisplay;
+        }
     }
 
     private var _loadingFromReport:Boolean = false;

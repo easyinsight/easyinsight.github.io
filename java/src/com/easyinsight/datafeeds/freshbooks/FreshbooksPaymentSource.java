@@ -73,8 +73,15 @@ public class FreshbooksPaymentSource extends FreshbooksBaseSource {
             int requestPage = 1;
             int pages;
             int currentPage;
+            Date startDate = freshbooksCompositeSource.getStartDate();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             do {
-                Document invoicesDoc = query("payment.list", "<page>" + requestPage + "</page>", freshbooksCompositeSource);
+                String string = "<page>" + requestPage + "</page>";
+                string += ("<per_page>100</per_page>");
+                if (startDate != null) {
+                    string += ("<date_from>" + sdf.format(startDate) + "</date_from>");
+                }
+                Document invoicesDoc = query("payment.list", string, freshbooksCompositeSource);
                 Nodes paymentSummaryNodes = invoicesDoc.query("/response/payments");
                 if (paymentSummaryNodes.size() > 0) {
                     Node invoicesSummaryNode = paymentSummaryNodes.get(0);

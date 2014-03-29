@@ -137,6 +137,8 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
                 }
             }
             createStackContents();
+        } else if (event.changed) {
+            createStackContents();
         }
     }
 

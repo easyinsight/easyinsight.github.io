@@ -15,27 +15,35 @@
         [Bindable]
         private var liveDataSource:Boolean;
 
-        private var feedDefinition:FeedDefinitionData;
-
         private function save():void {
-            var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
+            var ds:FreshbooksDataSource = dataSource as FreshbooksDataSource;
             ds.url = urlInput.text;
             ds.liveDataSource = liveDataSourceCheckbox.selected;
+            if (initialImportCheckbox.selected) {
+                var date:Date = startDateChooser.selectedDate;
+                ds.startDate = date;
+            } else {
+                ds.startDate = null;
+            }
             saveSource();
         }
 
 
         override protected function gotSource():void {
-            var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
-            this.feedDefinition = ds;
+            var ds:FreshbooksDataSource = dataSource as FreshbooksDataSource;
             url = ds.url;
             liveDataSource = ds.liveDataSource;
+            startDate = ds.startDate;
+            initialDateSelected = ds.startDate != null;
         }
 
         private function reauthorize():void {
             ProgressAlert.alert(this, "Authorizing...", null, tokenService.getOAuthURL);
-            tokenService.getOAuthURL.send(feedDefinition.getFeedType(), true, null, feedDefinition, 2);
+            tokenService.getOAuthURL.send(dataSource.getFeedType(), true, null, dataSource, 2);
         }
+
+        [Bindable]
+        private var startDate:Date;
 
         private function gotURL():void {
             var response:OAuthResponse = tokenService.getOAuthURL.lastResult as OAuthResponse;
@@ -46,6 +54,9 @@
                 Alert.show("We had a problem with authorization setup. Please contact support@easy-insight.com.");
             }
         }
+
+        [Bindable]
+        private var initialDateSelected:Boolean;
         ]]></mx:Script>
     <mx:RemoteObject destination="tokenService" id="tokenService">
         <mx:method name="getOAuthURL" result="gotURL()"/>
@@ -57,6 +68,12 @@
         <mx:FormItem label="Live FreshBooks Connection:" direction="horizontal">
             <mx:CheckBox id="liveDataSourceCheckbox" selected="{liveDataSource}"/>
             <!--<mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on inactive projects, you can save time on your synchronization by not pulling those projects across into Easy Insight."/>-->
+        </mx:FormItem>
+        <mx:FormItem label="Should your initial import only include data from a certain start date?">
+            <mx:CheckBox id="initialImportCheckbox" selected="{initialDateSelected}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Start Date" enabled="{initialImportCheckbox.selected}">
+            <mx:DateField id="startDateChooser" selectedDate="{startDate}"/>
         </mx:FormItem>
 	</mx:Form>
     <mx:HBox>

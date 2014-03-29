@@ -226,9 +226,7 @@
     if(typeof(preferredHeight) != "undefined" || typeof(preferredWidth) != "undefined") { %> style="<% if(typeof(preferredHeight) != "undefined") { %>height:<%- preferredHeight %>px;<% } %><%
     if(typeof(preferredWidth) != "undefined") { %>width:<%- preferredWidth %>px;<% } %>"<% } %>>
     <% if(vCenter) {%><div class="inner_dashboard_text"><% } %>
-    <% _.each(item.split("\r"), function(e, i, l) { %>
-    <%- e %> <br/>
-    <% }) %>
+    <%= item %>
         <%if(vCenter){%></div><% } %>
     </div>
 </script>

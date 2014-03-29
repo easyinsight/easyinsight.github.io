@@ -12,6 +12,8 @@
 <%@ page import="java.sql.Connection" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="com.easyinsight.admin.AdminService" %>
+<%@ page import="com.easyinsight.audit.ActionDashboardLog" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -57,7 +59,11 @@
 
         dashboard = new DashboardService().getDashboardView(dashboardID, positions);
 
-
+        try {
+            new AdminService().logAction(new ActionDashboardLog(SecurityUtil.getUserID(false), ActionDashboardLog.VIEW, dashboard.getId()));
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
 
         FilterHTMLMetadata filterHTMLMetadata = new FilterHTMLMetadata(dashboard, request, drillthroughKey, false);
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dashboard.getDataSourceID());
@@ -118,8 +124,8 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <button class="btn btn-inverse" type="button" onclick="refreshReport()"
-                                        style="padding:5px;margin:5px;width:150px">Refresh the Report
+                                <button class="btn btn-inverse full_refresh" type="button"
+                                        style="padding:5px;margin:5px;width:150px">Refresh the Dashboard
                                 </button>
                             </li>
                             <li>

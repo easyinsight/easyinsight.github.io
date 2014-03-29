@@ -94,5 +94,8 @@ public class DashboardTextEditorComponent extends VBox implements IDashboardEdit
             setStyle("verticalAlign", "middle");
         }
     }
+
+    public function forceRetrieve():void {
+    }
 }
 }

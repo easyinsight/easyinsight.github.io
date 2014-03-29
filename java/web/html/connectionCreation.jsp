@@ -3,6 +3,7 @@
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page import="com.easyinsight.datafeeds.HTMLConnectionFactory" %>
 <%@ page import="com.easyinsight.datafeeds.HTMLConnectionProperty" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -10,8 +11,13 @@
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
         int connectionID = Integer.parseInt(request.getParameter("connectionID"));
-        HTMLConnectionFactory factory = new HTMLConnectionFactory(connectionID);
-
+        HTMLConnectionFactory factory;
+        try {
+            factory = new HTMLConnectionFactory(connectionID);
+        } catch (UnsupportedOperationException e) {
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/html/fullAppRequired.jsp"));
+            return;
+        }
 
 
 %>

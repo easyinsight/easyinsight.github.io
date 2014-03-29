@@ -9,11 +9,9 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.Connection;
@@ -66,7 +64,11 @@ public class TrelloCardSource extends TrelloBaseSource {
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
+        TrelloCompositeSource trelloCompositeSource = (TrelloCompositeSource) parentDefinition;
         DataSet dataSet = new DataSet();
+        List<CheckListData> cardCheckListData = new ArrayList<CheckListData>();
+        List<LabelObject> labelData = new ArrayList<LabelObject>();
+        List<Member> memberData = new ArrayList<Member>();
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -85,14 +87,40 @@ public class TrelloCardSource extends TrelloBaseSource {
                 "idAttachmentCover":null,"manualCoverAttachment":false,"labels":[],"name":"Card1","pos":65535,
                 "shortUrl":"https://trello.com/c/L6QNH8jP","subscribed":false,"url":"https://trello.com/card/card1/513f971071b738690e00044b/1"},{"id":"513f97241293ff7f0e00088a","badges":{"votes":0,"viewingMemberVoted":false,"subscribed":false,"fogbugz":"","checkItems":0,"checkItemsChecked":0,"comments":0,"attachments":0,"description":false,"due":null},"checkItemStates":[],"closed":false,"dateLastActivity":"2013-03-12T20:59:16.303Z","desc":"","due":null,"idBoard":"513f971071b738690e00044b","idChecklists":[],"idList":"513f971071b738690e00044c","idMembers":[],"idMembersVoted":[],"idShort":4,"idAttachmentCover":null,"manualCoverAttachment":false,"labels":[],"name":"Do Something Third","pos":262143,"shortUrl":"https://trello.com/c/ptUv8i8X","subscribed":false,"url":"https://trello.com/card/do-something-third/513f971071b738690e00044b/4"},{"id":"513f972f0aa20d1c15000772","badges":{"votes":0,"viewingMemberVoted":false,"subscribed":false,"fogbugz":"","checkItems":0,"checkItemsChecked":0,"comments":0,"attachments":0,"description":false,"due":null},"checkItemStates":[],"closed":false,"dateLastActivity":"2013-03-12T20:59:27.368Z","desc":"","due":null,"idBoard":"513f971071b738690e00044b","idChecklists":[],"idList":"513f971071b738690e00044d","idMembers":[],"idMembersVoted":[],"idShort":5,"idAttachmentCover":null,"manualCoverAttachment":false,"labels":[],"name":"Blah","pos":65535,"shortUrl":"https://trello.com/c/e6yCzVq1","subscribed":false,"url":"https://trello.com/card/blah/513f971071b738690e00044b/5"},{"id":"513f971adfcb0dde1f0007d4","badges":{"votes":0,"viewingMemberVoted":false,"subscribed":false,"fogbugz":"","checkItems":0,"checkItemsChecked":0,"comments":0,"attachments":0,"description":false,"due":null},"checkItemStates":[],"closed":false,"dateLastActivity":"2013-03-12T20:59:06.459Z","desc":"","due":null,"idBoard":"513f971071b738690e00044b","idChecklists":[],"idList":"513f971071b738690e00044d","idMembers":["513f97d645ba390a0e0008f3"],"idMembersVoted":[],"idShort":2,"idAttachmentCover":null,"manualCoverAttachment":false,"labels":[],"name":"Do Something!","pos":131071,"shortUrl":"https://trello.com/c/iGiwUO8P","subscribed":false,"url":"https://trello.com/card/do-something/513f971071b738690e00044b/2"},{"id":"513f971dc47f1953270008d1","badges":{"votes":0,"viewingMemberVoted":false,"subscribed":false,"fogbugz":"","checkItems":0,"checkItemsChecked":0,"comments":0,"attachments":0,"description":false,"due":null},"checkItemStates":[],"closed":false,"dateLastActivity":"2013-03-12T20:59:09.622Z","desc":"","due":null,"idBoard":"513f971071b738690e00044b","idChecklists":[],"idList":"513f971071b738690e00044e","idMembers":[],"idMembersVoted":[],"idShort":3,"idAttachmentCover":null,"manualCoverAttachment":false,"labels":[],"name":"Do Something Else","pos":196607,"shortUrl":"https://trello.com/c/qkX6xBMm","subscribed":false,"url":"https://trello.com/card/do-something-else/513f971071b738690e00044b/3"}]
                  */
-                JSONArray cards = runRequest("https://api.trello.com/1/boards/" + id + "/cards", httpClient, (TrelloCompositeSource) parentDefinition);
+                JSONArray cards = runRequest("https://api.trello.com/1/boards/" + id + "/cards?checklists=all", httpClient, (TrelloCompositeSource) parentDefinition);
                 for (int j = 0; j < cards.length(); j++) {
                     JSONObject card = (JSONObject) cards.get(j);
                     IRow row = dataSet.createRow();
                     row.addValue(CARD_ID, card.get("id").toString());
-                    if ("Blah".equals(card.get("name"))) {
+                    if ("Card 4".equals(card.get("name"))) {
                         System.out.println("argh");
                     }
+                    JSONArray checklists = (JSONArray) card.get("checklists");
+                    for (int k = 0; k < checklists.length(); k++) {
+                        JSONObject checkListObject = (JSONObject) checklists.get(k);
+                        String name = checkListObject.get("name").toString();
+                        JSONArray checkListItems = (JSONArray) checkListObject.get("checkItems");
+                        for (int l = 0; l < checkListItems.length(); l++) {
+                            JSONObject checkListItem = (JSONObject) checkListItems.get(l);
+                            String itemName = checkListItem.get("name").toString();
+                            String state = checkListItem.get("state").toString();
+                            cardCheckListData.add(new CheckListData(name, itemName, state, card.get("id").toString()));
+                        }
+                    }
+                    JSONArray labels = (JSONArray) card.get("labels");
+                    for (int k = 0; k < labels.length(); k++) {
+                        JSONObject jsonObject = (JSONObject) labels.get(k);
+                        String color = jsonObject.get("color").toString();
+                        String name = jsonObject.get("name").toString();
+                        labelData.add(new LabelObject(card.get("id").toString(), name, color));
+                    }
+
+                    JSONArray members = (JSONArray) card.get("idMembers");
+                    for (int k = 0; k < members.length(); k++) {
+                        String memberID = members.get(k).toString();
+                        memberData.add(new Member(card.get("id").toString(), memberID));
+                    }
+
                     row.addValue(CARD_NAME, card.get("name").toString());
                     row.addValue(CARD_BOARD_ID, card.get("idBoard").toString());
                     row.addValue(CARD_LIST_ID, card.get("idList").toString());
@@ -103,21 +131,15 @@ public class TrelloCardSource extends TrelloBaseSource {
                     } catch (ParseException e) {
                         // ignore
                     }
-                    /*JSONArray history = runRequest("https://api.trello.com/1/cards/"+card.get("id")+"/actions?filter=updateCard:idList", httpClient, (TrelloCompositeSource) parentDefinition);
-                    // for each item in history
-                    for (int k = 0; k < history.length(); k++) {
-                        JSONObject historyObject = (JSONObject) history.get(k);
-                        String oldList = ((JSONObject)((JSONObject) historyObject.get("data")).get("listBefore")).get("id").toString();
-                        String newList = ((JSONObject)((JSONObject) historyObject.get("data")).get("listAfter")).get("id").toString();
-                        System.out.println("Argh");
-                    }
-                    System.out.println("blah");*/
                 }
             }
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+        trelloCompositeSource.setCardCheckListData(cardCheckListData);
+        trelloCompositeSource.setMemberData(memberData);
+        trelloCompositeSource.setLabelData(labelData);
         return dataSet;
     }
 }

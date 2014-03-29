@@ -28,11 +28,14 @@
             }
             analysisItemFilter.availableHandles = handles;
             analysisItemFilter.availableTags = selectedTags;
+            analysisItemFilter.useFullyQualifiedNames = useFullyQualifiedNamesCheckbox.selected;
             return analysisItemFilter;
         }
 
         public function set filterDefinition(filterDefinition:FilterDefinition):void {
             analysisItemFilter = filterDefinition as AnalysisItemFilterDefinition;
+
+            useFullyQualifiedNames = analysisItemFilter.useFullyQualifiedNames;
 
             var selectedItems:ArrayCollection;
             if (analysisItemFilter.availableHandles != null && analysisItemFilter.availableHandles.length > 0) {
@@ -92,6 +95,9 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        [Bindable]
+        private var useFullyQualifiedNames:Boolean;
+
         private var selectedTags:ArrayCollection;
 
         private function onMultiTagUpdate(event:MultiFieldEvent):void {
@@ -102,4 +108,5 @@
         <mx:Button label="Configure Fields..." click="configureExplicitFields()" styleName="grayButton"/>
         <mx:Button label="Configure Tags..." click="configureTags()" styleName="grayButton"/>
     </mx:HBox>
+    <mx:CheckBox label="Use Fully Qualified Names" id="useFullyQualifiedNamesCheckbox" selected="{useFullyQualifiedNames}"/>
 </mx:VBox>

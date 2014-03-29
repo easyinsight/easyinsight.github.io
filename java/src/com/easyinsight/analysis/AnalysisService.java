@@ -596,6 +596,9 @@ public class AnalysisService {
             joinOverride.setDataSourceID(compositeFeedDefinition.getDataFeedID());
             joinOverride.setSourceItem(sourceResult);
             joinOverride.setTargetItem(targetResult);
+            joinOverride.setSourceCardinality(connection.getSourceCardinality());
+            joinOverride.setTargetCardinality(connection.getTargetCardinality());
+            joinOverride.setForceOuterJoin(connection.getForceOuterJoin());
             if (joinOverride.getSourceItem() != null && joinOverride.getTargetItem() != null) {
                 joinOverride.setSourceName(sourceName);
                 joinOverride.setTargetName(targetName);

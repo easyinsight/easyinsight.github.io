@@ -257,7 +257,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         newSource = newSource || getFeedType().getType() == FeedType.ZENDESK_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.CONSTANT_CONTACT.getType() ||
                 getFeedType().getType() == FeedType.HARVEST_COMPOSITE.getType() ||
+                getFeedType().getType() == FeedType.BATCHBOOK2_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.INSIGHTLY_COMPOSITE.getType() ||
+                getFeedType().getType() == FeedType.TRELLO_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.INFUSIONSOFT_COMPOSITE.getType();
 
         for (FeedType feedType : feedTypes) {
@@ -297,9 +299,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                     connections.add(connection);
                 }
             } else if (sourceDef != null) {
-                LogClass.error("Could not find child of type " + childConnection.getSourceFeedType().getType());
+                LogClass.debug("Could not find child of type " + childConnection.getSourceFeedType().getType());
             } else if (targetDef != null) {
-                LogClass.error("Could not find child of type " + childConnection.getTargetFeedType().getType());
+                LogClass.debug("Could not find child of type " + childConnection.getTargetFeedType().getType());
             }
         }
         connections.addAll(getAdditionalConnections());
@@ -319,23 +321,29 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         try {
             FeedDefinition feedDefinition = (FeedDefinition) definition;
             feedDefinition.setVisible(false);
-            Map<String, Key> keys = feedDefinition.newDataSourceFields(this);
-            DataSet dataSet = new DataSet();
-            List<AnalysisItem> fields = feedDefinition.createAnalysisItems(keys, conn, this);
-            feedDefinition.setFields(fields);
-            for (AnalysisItem field : fields) {
-                if (field.getFolder() != null) {
-                    FeedFolder folder = feedDefinition.defineFolder(field.getFolder());
-                    folder.addAnalysisItem(field);
+            if (feedDefinition instanceof CompositeServerDataSource) {
+                CompositeServerDataSource compositeServerDataSource = (CompositeServerDataSource) feedDefinition;
+                compositeServerDataSource.setParentSourceID(getDataFeedID());
+                compositeServerDataSource.create(conn, new ArrayList<AnalysisItem>(), this);
+            } else {
+                Map<String, Key> keys = feedDefinition.newDataSourceFields(this);
+                DataSet dataSet = new DataSet();
+                List<AnalysisItem> fields = feedDefinition.createAnalysisItems(keys, conn, this);
+                feedDefinition.setFields(fields);
+                for (AnalysisItem field : fields) {
+                    if (field.getFolder() != null) {
+                        FeedFolder folder = feedDefinition.defineFolder(field.getFolder());
+                        folder.addAnalysisItem(field);
+                    }
                 }
-            }
-            feedDefinition.setOwnerName(userName);
-            feedDefinition.setParentSourceID(getDataFeedID());
-            feedDefinition.setUploadPolicy(uploadPolicy);
-            FeedCreationResult feedCreationResult = new FeedCreation().createFeed(feedDefinition, conn, dataSet, uploadPolicy);
-            metadata = feedCreationResult.getTableDefinitionMetadata();
-            if (metadata != null) {
-                metadata.commit();
+                feedDefinition.setOwnerName(userName);
+                feedDefinition.setParentSourceID(getDataFeedID());
+                feedDefinition.setUploadPolicy(uploadPolicy);
+                FeedCreationResult feedCreationResult = new FeedCreation().createFeed(feedDefinition, conn, dataSet, uploadPolicy);
+                metadata = feedCreationResult.getTableDefinitionMetadata();
+                if (metadata != null) {
+                    metadata.commit();
+                }
             }
         } catch (SQLException e) {
             if (metadata != null) {
@@ -420,10 +428,22 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
             int nodeSize = getCompositeFeedNodes().size();
             List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn);
+            List<IServerDataSourceDefinition> childSources = new ArrayList<IServerDataSourceDefinition>();
+            for (IServerDataSourceDefinition source : sources) {
+                if (source instanceof CompositeServerDataSource) {
+                    CompositeServerDataSource compositeServerDataSource = (CompositeServerDataSource) source;
+                    boolean childChange = compositeServerDataSource.refreshData(accountID, now, conn, this, callDataID, lastRefreshTime, fullRefresh, warnings, refreshProperties);
+                    if (childChange) {
+                        changed = true;
+                    }
+                } else {
+                    childSources.add(source);
+                }
+            }
             int afterNodeSize = getCompositeFeedNodes().size();
             changed = nodeSize != afterNodeSize;
             Map<Long, Map<String, Key>> keyMap = new HashMap<Long, Map<String, Key>>();
-            for (IServerDataSourceDefinition source : sources) {
+            for (IServerDataSourceDefinition source : childSources) {
                 source.validateTableSetup(conn);
                 if (callDataID != null) {
                     DataSourceRefreshEvent info = new DataSourceRefreshEvent();
@@ -438,7 +458,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             conn.commit();
             conn.setAutoCommit(true);
             Map<Long, String> tempTables = new HashMap<Long, String>();
-            for (IServerDataSourceDefinition source : sources) {
+            for (IServerDataSourceDefinition source : childSources) {
                 ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
                 if (serverDataSourceDefinition.getDataSourceType() == DataSourceInfo.LIVE) {
                     continue;
@@ -453,7 +473,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                                 this, callDataID, lastRefreshTime, conn, fullRefresh, refreshProperties));
             }
             conn.setAutoCommit(false);
-            for (IServerDataSourceDefinition source : sources) {
+            for (IServerDataSourceDefinition source : childSources) {
                 ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
                 if (serverDataSourceDefinition.getDataSourceType() == DataSourceInfo.LIVE) {
                     continue;

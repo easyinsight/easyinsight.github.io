@@ -46,6 +46,10 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
         textArea.setStyle("fontFamily", "Helvetica Neue, Helvetica");
         textArea.setStyle("fontSize", dashboardText.fontSize);
         textArea.setStyle("color", dashboardText.color);
+        setStyle("paddingLeft", dashboardText.paddingLeft);
+        setStyle("paddingRight", dashboardText.paddingRight);
+        setStyle("paddingTop", dashboardText.paddingTop);
+        setStyle("paddingBottom", dashboardText.paddingBottom);
         if (dashboardText.preferredHeight == 0) {
             //textArea.percentHeight = 100;
             this.percentHeight = 100;
@@ -70,7 +74,16 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
         super.updateDisplayList(unscaledWidth, unscaledHeight);
         if (textArea != null && (invalidatedTextSize || textArea.maxWidth == 10000)) {
             textArea.maxWidth = unscaledWidth - 40;
-            textArea.htmlText = dashboardText.html;
+            var text:String = dashboardText.html;
+            var r1:RegExp = new RegExp("\\</p\\>", "g");
+            text = text.replace(r1, "</p>\n");
+            var r2:RegExp = new RegExp("\\</ul\\>", "g");
+            text = text.replace(r2, "</ul>\n");
+            /*var r3:RegExp = new RegExp("\\<h3\\>", "g");
+            text = text.replace(r3, "<b>\n");
+            var r4:RegExp = new RegExp("\\</h3\\>", "g");
+            text = text.replace(r4, "</b>\n");*/
+            textArea.htmlText = text;
             invalidatedTextSize = false;
         }
     }
@@ -95,6 +108,9 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
     }
 
     public function toggleFilters(showFilters:Boolean):void {
+    }
+
+    public function forceRetrieve():void {
     }
 }
 }

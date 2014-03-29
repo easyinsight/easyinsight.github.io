@@ -157,14 +157,20 @@ public abstract class JSONServlet extends HttpServlet {
                 } catch (ServiceRuntimeException sre) {
                     conn.rollback();
                     LogClass.error(sre);
-                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, sre.getMessage());
+                    JSONObject jo = new JSONObject();
+                    jo.put("error", sre.getMessage());
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, jo.toString());
                 } catch (ParsingException spe) {
                     conn.rollback();
-                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, spe.getMessage());
+                    JSONObject jo = new JSONObject();
+                    jo.put("error", spe.getMessage());
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, jo.toString());
                 } catch (Exception e) {
                     conn.rollback();
                     LogClass.error(e);
-                    responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, "An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
+                    JSONObject jo = new JSONObject();
+                    jo.put("error", "An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
+                    responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, jo.toString());
                 } finally {
                     conn.setAutoCommit(true);
                     Database.closeConnection(conn);

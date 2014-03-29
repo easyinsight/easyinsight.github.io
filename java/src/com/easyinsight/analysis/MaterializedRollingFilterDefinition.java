@@ -45,7 +45,14 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     public static final int PREVIOUS_FULL_MONTH = -4;
     public static final int PREVIOUS_FULL_QUARTER = -8;
     public static final int PREVIOUS_FULL_YEAR = -9;
-
+    public static final int NEXT_FULL_WEEK = -11;
+    public static final int NEXT_FULL_MONTH = -12;
+    public static final int NEXT_FULL_QUARTER = -13;
+    public static final int NEXT_FULL_YEAR = -14;
+    public static final int THIS_WEEK = -15;
+    public static final int THIS_MONTH = -16;
+    public static final int THIS_QUARTER = -17;
+    public static final int THIS_YEAR = -18;
 
     private long limitDate;
     private long endDate;

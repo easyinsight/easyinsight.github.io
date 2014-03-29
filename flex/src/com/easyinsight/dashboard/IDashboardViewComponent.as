@@ -13,5 +13,6 @@ public interface IDashboardViewComponent extends IRetrievable {
 
     function toggleFilters(showFilters:Boolean):void;
     function stackPopulate(positions:DashboardStackPositions):void;
+    function forceRetrieve():void;
 }
 }

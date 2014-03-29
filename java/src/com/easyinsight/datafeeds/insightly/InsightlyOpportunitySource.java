@@ -43,6 +43,7 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
     public static final String DATE_UPDATED = "Opportunity Date Updated";
     public static final String OPPORTUNITY_COUNT = "Opportunity Count";
     public static final String LINKED_ORGANIZATION = "Linked Organization";
+    public static final String LINKED_CONTACT = "Linked Contact";
 
     public InsightlyOpportunitySource() {
         setFeedName("Opportunities");
@@ -72,6 +73,11 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
             linkedKey = new NamedKey(LINKED_ORGANIZATION);
         }
         fields.add(new AnalysisDimension(linkedKey));
+        Key linkedContact = keys.get(LINKED_CONTACT);
+        if (linkedContact == null) {
+            linkedContact = new NamedKey(LINKED_CONTACT);
+        }
+        fields.add(new AnalysisDimension(linkedContact));
         InsightlyCompositeSource insightlyCompositeSource = (InsightlyCompositeSource) parentDefinition;
         HttpClient httpClient = getHttpClient(insightlyCompositeSource.getInsightlyApiKey(), "x");
         List customFields = runJSONRequest("customFields", insightlyCompositeSource, httpClient);
@@ -126,7 +132,8 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-
+            Map<String, List<InsightlyLink>> linkedOrgMap = new HashMap<String, List<InsightlyLink>>();
+            Map<String, List<InsightlyLink>> linkedContactMap = new HashMap<String, List<InsightlyLink>>();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             DataSet dataSet = new DataSet();
             InsightlyCompositeSource insightlyCompositeSource = (InsightlyCompositeSource) parentDefinition;
@@ -182,10 +189,38 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
                 row.addValue(keys.get(OPPORTUNITY_ID), contactMap.get("OPPORTUNITY_ID").toString());
                 row.addValue(keys.get(NAME), getValue(contactMap, "OPPORTUNITY_NAME"));
                 if (contactMap.get("LINKS") != null) {
-                    List links = (List) contactMap.get("LINKS");
+                    List<Map> links = (List<Map>) contactMap.get("LINKS");
                     if (links.size() > 0) {
-                        Map linkMap = (Map) links.get(0);
-                        row.addValue(keys.get(LINKED_ORGANIZATION), getValue(linkMap, "ORGANISATION_ID"));
+                        Value linkedOrganizationID = null;
+                        Value linkedContactID = null;
+                        for (Map linkMap : links) {
+                            if (linkedOrganizationID == null) {
+                                linkedOrganizationID = getValue(linkMap, "ORGANISATION_ID");
+                            }
+                            if (getValue(linkMap, "ORGANISATION_ID").type() != Value.EMPTY) {
+                                List<InsightlyLink> insightlyLinks = linkedOrgMap.get(contactMap.get("OPPORTUNITY_ID").toString());
+                                if (insightlyLinks == null) {
+                                    insightlyLinks = new ArrayList<InsightlyLink>();
+                                    linkedOrgMap.put(contactMap.get("OPPORTUNITY_ID").toString(), insightlyLinks);
+                                }
+                                Value roleValue = getValue(linkMap, "ROLE");
+                                insightlyLinks.add(new InsightlyLink(roleValue.type() == Value.EMPTY ? "" : roleValue.toString(), getValue(linkMap, "ORGANISATION_ID").toString()));
+                            }
+                            if (linkedContactID == null) {
+                                linkedContactID = getValue(linkMap, "CONTACT_ID");
+                            }
+                            if (getValue(linkMap, "CONTACT_ID").type() != Value.EMPTY) {
+                                List<InsightlyLink> insightlyLinks = linkedContactMap.get(contactMap.get("OPPORTUNITY_ID").toString());
+                                if (insightlyLinks == null) {
+                                    insightlyLinks = new ArrayList<InsightlyLink>();
+                                    linkedContactMap.put(contactMap.get("OPPORTUNITY_ID").toString(), insightlyLinks);
+                                }
+                                Value roleValue = getValue(linkMap, "ROLE");
+                                insightlyLinks.add(new InsightlyLink(roleValue.type() == Value.EMPTY ? "" : roleValue.toString(), getValue(linkMap, "CONTACT_ID").toString()));
+                            }
+                        }
+                        row.addValue(keys.get(LINKED_ORGANIZATION), linkedOrganizationID);
+                        row.addValue(keys.get(LINKED_CONTACT), linkedContactID);
                     }
                 }
                 row.addValue(keys.get(DETAILS), getValue(contactMap, "OPPORTUNITY_DETAILS"));
@@ -255,6 +290,8 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
                 //}
                 row.addValue(keys.get(OPPORTUNITY_COUNT), 1);
             }
+            insightlyCompositeSource.setLinkedContactMap(linkedContactMap);
+            insightlyCompositeSource.setLinkedOrgMap(linkedOrgMap);
             return dataSet;
         } catch (Exception e) {
             throw new RuntimeException(e);

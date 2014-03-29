@@ -82,7 +82,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean defaultToOptimized;
 
     public void configureFactory(HTMLConnectionFactory factory) {
-
+        throw new UnsupportedOperationException();
     }
 
     public boolean isDefaultToOptimized() {

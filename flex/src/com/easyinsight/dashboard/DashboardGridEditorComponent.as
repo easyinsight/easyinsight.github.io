@@ -241,6 +241,12 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         }
     }
 
+    public function forceRetrieve():void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.forceRetrieve();
+        }
+    }
+
     public function initialRetrieve():void {
         for each (var comp:IDashboardViewComponent in viewChildren) {
             comp.initialRetrieve();

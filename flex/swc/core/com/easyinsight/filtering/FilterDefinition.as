@@ -51,6 +51,7 @@ import mx.utils.ObjectUtil;
     public var parentChildLabel:String;
     public var childToParentLabel:String;
     public var fromFilterSet:int;
+    public var noDashboardOverride:Boolean;
 
 		public function FilterDefinition()
 			{

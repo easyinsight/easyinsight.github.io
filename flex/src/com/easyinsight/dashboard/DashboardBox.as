@@ -359,6 +359,12 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         }
     }
 
+    public function forceRetrieve():void {
+        if (editorComp != null) {
+            editorComp.forceRetrieve();
+        }
+    }
+
     public function reportCount():ArrayCollection {
         if (editorComp != null) {
             return editorComp.reportCount();

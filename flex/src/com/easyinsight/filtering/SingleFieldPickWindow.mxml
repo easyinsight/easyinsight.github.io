@@ -116,10 +116,23 @@
 
             loadedValuesBox.addChild(filterTileList);
 
-            var selectedName:String = _filterValueDefinition.targetItem.display;
+            var selectedName:String;
+            if (_filterValueDefinition.useFullyQualifiedNames && _filterValueDefinition.selectedFQN) {
+                selectedName = _filterValueDefinition.selectedFQN;
+            } else if (!_filterValueDefinition.useFullyQualifiedNames && _filterValueDefinition.selectedName) {
+                selectedName = _filterValueDefinition.selectedName;
+            } else {
+                if (_filterValueDefinition.useFullyQualifiedNames) {
+                    selectedName = _filterValueDefinition.targetItem.display;
+                } else {
+                    selectedName = _filterValueDefinition.targetItem.unqualifiedDisplay;
+                }
+            }
+
 
             var a:Array = strings.toArray().map(function (obj:Object, a:*, b:*):Object {
-                var m:MultiFieldFilterOption = new MultiFieldFilterOption(obj as AnalysisItemSelection, obj.analysisItem.display == selectedName);
+                var m:SingleFieldFilterOption = new SingleFieldFilterOption(obj as AnalysisItemSelection, _filterValueDefinition.useFullyQualifiedNames,
+                        _filterValueDefinition.useFullyQualifiedNames ? (obj.analysisItem.display == selectedName) : (obj.analysisItem.unqualifiedDisplay == selectedName));
                 m.addEventListener("selectedChanged", valueChanged, false, 0, true);
                 return m;
             });

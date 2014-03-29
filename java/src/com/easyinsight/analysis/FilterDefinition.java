@@ -74,6 +74,9 @@ public class FilterDefinition implements Serializable, Cloneable {
     @Column(name = "minimum_role")
     private int minimumRole = 4;
 
+    @Column(name = "no_dashboard_override")
+    private boolean noDashboardOverride;
+
     @Transient
     private long fromFilterSet;
 
@@ -118,6 +121,14 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     public void setFromFilterSet(long fromFilterSet) {
         this.fromFilterSet = fromFilterSet;
+    }
+
+    public boolean isNoDashboardOverride() {
+        return noDashboardOverride;
+    }
+
+    public void setNoDashboardOverride(boolean noDashboardOverride) {
+        this.noDashboardOverride = noDashboardOverride;
     }
 
     public String getChildToParentLabel() {
