@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.trello;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.UserMessageException;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
@@ -43,6 +44,9 @@ public class TrelloCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.TRELLO_CARD);
         types.add(FeedType.TRELLO_LIST);
         types.add(FeedType.TRELLO_CARD_HISTORY);
+        types.add(FeedType.TRELLO_MEMBERSHIPS);
+        types.add(FeedType.TRELLO_LABELS);
+        types.add(FeedType.TRELLO_CHECKLISTS);
         return types;
     }
 
@@ -65,6 +69,59 @@ public class TrelloCompositeSource extends CompositeServerDataSource {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
+        List<IServerDataSourceDefinition> end = new ArrayList<IServerDataSourceDefinition>();
+        Set<Integer> set = new HashSet<Integer>();
+        for (IServerDataSourceDefinition s : children) {
+            if (s.getFeedType().getType() == FeedType.TRELLO_CARD.getType()) {
+                set.add(s.getFeedType().getType());
+                end.add(s);
+            }
+        }
+        for (IServerDataSourceDefinition s : children) {
+            if (!set.contains(s.getFeedType().getType())) {
+                end.add(s);
+            }
+        }
+        return end;
+    }
+
+    @Override
+    protected void refreshDone() {
+        super.refreshDone();
+        cardCheckListData = null;
+        labelData = null;
+        memberData = null;
+    }
+
+    private List<CheckListData> cardCheckListData;
+    private List<LabelObject> labelData;
+    private List<Member> memberData;
+
+    public List<CheckListData> getCardCheckListData() {
+        return cardCheckListData;
+    }
+
+    public void setCardCheckListData(List<CheckListData> cardCheckListData) {
+        this.cardCheckListData = cardCheckListData;
+    }
+
+    public List<LabelObject> getLabelData() {
+        return labelData;
+    }
+
+    public void setLabelData(List<LabelObject> labelData) {
+        this.labelData = labelData;
+    }
+
+    public List<Member> getMemberData() {
+        return memberData;
+    }
+
+    public void setMemberData(List<Member> memberData) {
+        this.memberData = memberData;
     }
 
     @Override
