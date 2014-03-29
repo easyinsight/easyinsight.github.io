@@ -395,11 +395,11 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.REDBOOTH_TASK, RedboothTaskSource.class);
         registerType(FeedType.REDBOOTH_COMMENT, RedboothCommentSource.class);
         //registerType(FeedType.BATCHBOOK2_DEALS, Batchbook2DealSource.class);
-        /*registerType(FeedType.TRELLO_CHECKLISTS, TrelloChecklistSource.class);
+        registerType(FeedType.TRELLO_CHECKLISTS, TrelloChecklistSource.class);
         registerType(FeedType.TRELLO_MEMBERSHIPS, TrelloMembershipSource.class);
         registerType(FeedType.TRELLO_LABELS, TrelloLabelSource.class);
         registerType(FeedType.INSIGHTLY_OPPORTUNITY_TO_CONTACT, InsightlyOpportunityToContactSource.class);
-        registerType(FeedType.INSIGHTLY_OPPORTUNITY_TO_ORGANIZATION, InsightlyOpportunityToOrganizationSource.class);*/
+        registerType(FeedType.INSIGHTLY_OPPORTUNITY_TO_ORGANIZATION, InsightlyOpportunityToOrganizationSource.class);
         registerType(FeedType.LINKEDIN_COMPOSITE, LinkedInCompositeSource.class);
         registerType(FeedType.LINKEDIN_PEOPLE, LinkedInPeopleSource.class);
     }
