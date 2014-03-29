@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.insightly;
 
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.users.Account;
@@ -34,6 +35,49 @@ public class InsightlyCompositeSource extends CompositeServerDataSource {
     @Override
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
+    }
+
+    private Map<String, List<InsightlyLink>> linkedOrgMap;
+    private Map<String, List<InsightlyLink>> linkedContactMap;
+
+    @Override
+    protected void refreshDone() {
+        super.refreshDone();
+        linkedContactMap = null;
+        linkedOrgMap = null;
+    }
+
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
+        List<IServerDataSourceDefinition> end = new ArrayList<IServerDataSourceDefinition>();
+        Set<Integer> set = new HashSet<Integer>();
+        for (IServerDataSourceDefinition s : children) {
+            if (s.getFeedType().getType() == FeedType.INSIGHTLY_OPPORTUNITIES.getType()) {
+                set.add(s.getFeedType().getType());
+                end.add(s);
+            }
+        }
+        for (IServerDataSourceDefinition s : children) {
+            if (!set.contains(s.getFeedType().getType())) {
+                end.add(s);
+            }
+        }
+        return end;
+    }
+
+    public Map<String, List<InsightlyLink>> getLinkedOrgMap() {
+        return linkedOrgMap;
+    }
+
+    public void setLinkedOrgMap(Map<String, List<InsightlyLink>> linkedOrgMap) {
+        this.linkedOrgMap = linkedOrgMap;
+    }
+
+    public Map<String, List<InsightlyLink>> getLinkedContactMap() {
+        return linkedContactMap;
+    }
+
+    public void setLinkedContactMap(Map<String, List<InsightlyLink>> linkedContactMap) {
+        this.linkedContactMap = linkedContactMap;
     }
 
     @Override
@@ -87,6 +131,8 @@ public class InsightlyCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.INSIGHTLY_OPPORTUNITIES);
         types.add(FeedType.INSIGHTLY_PROJECTS);
         types.add(FeedType.INSIGHTLY_TASKS);
+        types.add(FeedType.INSIGHTLY_OPPORTUNITY_TO_ORGANIZATION);
+        types.add(FeedType.INSIGHTLY_OPPORTUNITY_TO_CONTACT);
         return types;
     }
 
