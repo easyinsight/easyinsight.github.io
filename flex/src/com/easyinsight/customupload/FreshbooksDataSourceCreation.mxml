@@ -23,6 +23,8 @@
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:FreshbooksDataSource = new FreshbooksDataSource();
             obj.url = urlInput.text;
+            var date:Date = startDateChooser.selectedDate;
+            obj.startDate = date;
             return obj;
         }
 
@@ -41,7 +43,13 @@
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
             ds.url = urlInput.text;
-            ds.liveDataSource = !cacheCheckBox.selected;
+            //ds.liveDataSource = !cacheCheckBox.selected;
+            if (initialImportCheckbox.selected) {
+                var date:Date = startDateChooser.selectedDate;
+                ds.startDate = date;
+            } else {
+                ds.startDate = null;
+            }
         }
 
         private function install(event:MouseEvent = null):void {
@@ -96,13 +104,24 @@
     <mx:RemoteObject destination="tokenService" id="tokenService">
         <mx:method name="getOAuthURL" result="gotURL()"/>
     </mx:RemoteObject>
-    <mx:HBox>
-        <mx:Label text="FreshBooks Account Name:"/>
-        <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="300"/>
-    </mx:HBox>
-    <mx:Label text="For example, if you access FreshBooks by https://easyinsight.freshbooks.com, your account name would be easyinsight."/>
-    <mx:CheckBox label="Cache FreshBooks data" id="cacheCheckBox" selected="true"/>
-    <mx:TextArea text="Clicking Authorize will navigate your browser to your FreshBooks account. Upon granting access, you will be redirected back to Easy Insight to finish the connection process." borderStyle="none"
-            backgroundAlpha="0" editable="false" selectable="false" width="100%" height="50"/>
+    <mx:Form>
+        <mx:FormItem label="FreshBooks Account Name:">
+            <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="300"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:Text text="For example, if you access FreshBooks by https://easyinsight.freshbooks.com, your account name would be easyinsight."/>
+    <mx:Form>
+        <mx:FormItem label="Should your initial import only include data from a certain start date?">
+            <mx:CheckBox id="initialImportCheckbox"/>
+        </mx:FormItem>
+        <mx:FormItem label="Start Date" enabled="{initialImportCheckbox.selected}">
+            <mx:DateField id="startDateChooser"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:Text width="700" text="If you have a considerable amount of historical data, you may find it quicker to create your Easy Insight connection to FreshBooks with a subset of that data. You can always change this date to pull back older data."/>
+    <!--<mx:CheckBox label="Cache FreshBooks data" id="cacheCheckBox" selected="true"/>-->
+    <mx:HRule width="100%"/>
+    <mx:Text width="700" text="Clicking Authorize will navigate your browser to your FreshBooks account. Upon granting access, you will be redirected back to Easy Insight to finish the connection process."
+            selectable="false" />
     <mx:StringValidator minLength="1" source="{urlInput}" property="text" id="nameValidator"/>
 </mx:VBox>

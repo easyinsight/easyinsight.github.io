@@ -15,6 +15,7 @@ public class FreshbooksDataSource extends CompositeServerDataSource {
     public var tokenKey:String;
     public var tokenSecretKey:String;
     public var liveDataSource:Boolean;
+    public var startDate:Date;
 
     public function FreshbooksDataSource() {
         super();
