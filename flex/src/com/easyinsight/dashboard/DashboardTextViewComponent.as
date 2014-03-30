@@ -46,10 +46,10 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
         textArea.setStyle("fontFamily", "Helvetica Neue, Helvetica");
         textArea.setStyle("fontSize", dashboardText.fontSize);
         textArea.setStyle("color", dashboardText.color);
-        setStyle("paddingLeft", dashboardText.paddingLeft);
+        /*setStyle("paddingLeft", dashboardText.paddingLeft);
         setStyle("paddingRight", dashboardText.paddingRight);
         setStyle("paddingTop", dashboardText.paddingTop);
-        setStyle("paddingBottom", dashboardText.paddingBottom);
+        setStyle("paddingBottom", dashboardText.paddingBottom);*/
         if (dashboardText.preferredHeight == 0) {
             //textArea.percentHeight = 100;
             this.percentHeight = 100;
