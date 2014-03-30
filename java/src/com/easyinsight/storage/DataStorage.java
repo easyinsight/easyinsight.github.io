@@ -875,7 +875,7 @@ public class DataStorage implements IDataStorage {
         }
         dataRS.close();
         queryStmt.close();
-        System.out.println("got " + dataSet.getRows() + " rows");
+        System.out.println("got " + dataSet.getRows().size() + " rows");
         insightRequestMetadata.addDatabaseTime(System.currentTimeMillis() - startTime);
         dataSet.setLastTime(metadata.getLastData());
         if (insightRequestMetadata.isLogReport()) {
