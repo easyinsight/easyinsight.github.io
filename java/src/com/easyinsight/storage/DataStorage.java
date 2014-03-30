@@ -854,7 +854,7 @@ public class DataStorage implements IDataStorage {
         }
         //System.out.println(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
-        System.out.println(queryBuilder.toString());
+        //System.out.println(queryBuilder.toString());
         DataSet dataSet = new DataSet();
 
 
