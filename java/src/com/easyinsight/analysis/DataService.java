@@ -1385,6 +1385,7 @@ public class DataService {
             ytdDataResults.setDataSet(ytdStuff.values);
             ytdDataResults.setDefinition(wsytdDefinition);
             reportViewBenchmark(wsytdDefinition, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
+            System.out.println("returning " + ytdDataResults.getDataSet().size() + " ytd results");
             return ytdDataResults;
         } catch (com.easyinsight.security.SecurityException se) {
             EmbeddedYTDDataResults results = new EmbeddedYTDDataResults();
