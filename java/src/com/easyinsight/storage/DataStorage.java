@@ -854,6 +854,7 @@ public class DataStorage implements IDataStorage {
         }
         //System.out.println(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
+        System.out.println(queryBuilder.toString());
         DataSet dataSet = new DataSet();
 
 
@@ -874,6 +875,7 @@ public class DataStorage implements IDataStorage {
         }
         dataRS.close();
         queryStmt.close();
+        System.out.println("got " + dataSet.getRows() + " rows");
         insightRequestMetadata.addDatabaseTime(System.currentTimeMillis() - startTime);
         dataSet.setLastTime(metadata.getLastData());
         if (insightRequestMetadata.isLogReport()) {
