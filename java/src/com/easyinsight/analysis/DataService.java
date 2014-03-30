@@ -1372,11 +1372,6 @@ public class DataService {
                 AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
                 date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
             }
-            if (customFilters != null) {
-                for (FilterDefinition filter : customFilters) {
-                    System.out.println("\tusing filter " + filter.getFilterName());
-                }
-            }
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, customFilters, drillthroughFilters);
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
             System.out.println("now set had size = " + nowSet.getRows().size());
