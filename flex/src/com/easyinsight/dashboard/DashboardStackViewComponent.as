@@ -83,11 +83,11 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         var currentComp:UIComponent = viewStack.selectedChild;
         var newComp:UIComponent = viewStack.getChildAt(targetIndex) as UIComponent;
         if (targetIndex > viewStack.selectedIndex) {
-            currentComp.setStyle("hideEffect", leftEffect);
-            newComp.setStyle("showEffect", rightEffect);
+            //currentComp.setStyle("hideEffect", leftEffect);
+            //newComp.setStyle("showEffect", rightEffect);
         } else if (targetIndex < viewStack.selectedIndex) {
-            currentComp.setStyle("hideEffect", rightEffect);
-            newComp.setStyle("showEffect", leftEffect);
+            //currentComp.setStyle("hideEffect", rightEffect);
+            //newComp.setStyle("showEffect", leftEffect);
         } else {
             return;
         }
@@ -125,8 +125,8 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         onChange(targetIndex);
     }
 
-    private var leftEffect:Effect;
-    private var rightEffect:Effect;
+    //private var leftEffect:Effect;
+    //private var rightEffect:Effect;
 
     protected var childFilterBox:Box;
 
@@ -141,7 +141,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             verticalScrollPolicy = "off";
             horizontalScrollPolicy = "off";
         }
-        buildEffects();
+        //buildEffects();
         if (this is DashboardStackEditorComponent) {
             buildContents();
         }
@@ -372,8 +372,8 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
                 } else if (report is DashboardReport) {
                     label = DashboardReport(report).report.name;
                     if (DashboardReport(report).report.reportType == AnalysisDefinition.HEATMAP) {
-                        leftEffect = null;
-                        rightEffect = null;
+                        /*leftEffect = null;
+                        rightEffect = null;*/
                     }
                 } else {
                     if (report.label != null && report.label != "") {
@@ -503,7 +503,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         return transformContainer;
     }
 
-    private function buildEffects():void {
+    /*private function buildEffects():void {
         if (dashboardStack.effectType == DashboardStack.SLIDE) {
             leftEffect = new Slide();
             leftEffect.duration = dashboardStack.effectDuration;
@@ -536,7 +536,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             rightEffect.duration = dashboardStack.effectDuration;
             FlipPapervision3D(rightEffect).direction = "right";
         }
-    }
+    }*/
 
     private var transformContainer:TransformContainer;
 
