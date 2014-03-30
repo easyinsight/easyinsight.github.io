@@ -42,11 +42,11 @@ public abstract class Value implements Serializable, Comparable<Value>, Cloneabl
     }
 
     private Map<String, String> links;
-    private Map<String, List<Value>> drillThroughs;
-    private Set<Value> drillThroughValues;
+    private transient Map<String, List<Value>> drillThroughs;
+    private transient Set<Value> drillThroughValues;
 
     private Value originalValue;
-    private List<Value> otherValues;
+    private transient List<Value> otherValues;
     private Value sortValue;
     private ValueExtension valueExtension;
 
