@@ -1448,7 +1448,7 @@ public class DataService {
     }
 
     private static TrendResult createTrendOutcomes(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
-        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+        //SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
         Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
         Map<String, AnalysisDateDimension> dateMap = new HashMap<String, AnalysisDateDimension>();
@@ -1700,6 +1700,7 @@ public class DataService {
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
+            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             long start = System.currentTimeMillis();
             TrendResult trendResult = createTrendOutcomes(analysisDefinition, insightRequestMetadata, conn);
             TrendDataResults trendDataResults = new TrendDataResults();
