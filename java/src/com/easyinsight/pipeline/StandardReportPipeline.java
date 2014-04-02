@@ -119,6 +119,27 @@ public class StandardReportPipeline extends Pipeline {
                     if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
                         continue;
                     }
+                    if (filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName()) && filterDefinition.getField() != null) {
+                        if (filterDefinition.getField() instanceof DerivedAnalysisDimension) {
+                            DerivedAnalysisDimension derivedAnalysisDimension = (DerivedAnalysisDimension) filterDefinition.getField();
+                            if (!derivedAnalysisDimension.isApplyBeforeAggregation()) {
+                                insightRequestMetadata.getWarnings().add("Filter on " + derivedAnalysisDimension.toDisplay() + " is row level while the field itself is not.");
+                                continue;
+                            }
+                        } else if (filterDefinition.getField() instanceof DerivedAnalysisDateDimension) {
+                            DerivedAnalysisDateDimension derivedAnalysisDimension = (DerivedAnalysisDateDimension) filterDefinition.getField();
+                            if (!derivedAnalysisDimension.isApplyBeforeAggregation()) {
+                                insightRequestMetadata.getWarnings().add("Filter on " + derivedAnalysisDimension.toDisplay() + " is row level while the field itself is not.");
+                                continue;
+                            }
+                        } else if (filterDefinition.getField() instanceof AnalysisCalculation) {
+                            AnalysisCalculation derivedAnalysisDimension = (AnalysisCalculation) filterDefinition.getField();
+                            if (!derivedAnalysisDimension.isApplyBeforeAggregation()) {
+                                insightRequestMetadata.getWarnings().add("Filter on " + derivedAnalysisDimension.toDisplay() + " is row level while the field itself is not.");
+                                continue;
+                            }
+                        }
+                    }
                     if (filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
                         compFilters.add(filterDefinition);
                     }
