@@ -24,7 +24,7 @@ public class CalcGraph {
                                             @Nullable String name, AnalysisItemRetrievalStructure structure, InsightRequestMetadata insightRequestMetadata) {
         List<AnalysisItem> derivedItems = new ArrayList<AnalysisItem>();
         for (AnalysisItem item : allNeededAnalysisItems) {
-            if (insightRequestMetadata.getBaseDate() != null && item == insightRequestMetadata.getBaseDate()) {
+            if (insightRequestMetadata.getBaseDate() != null && item.toDisplay().equals(insightRequestMetadata.getBaseDate().toDisplay())) {
                 continue;
             }
             if (item.hasType(AnalysisItemTypes.CALCULATION) || item.hasType(AnalysisItemTypes.DERIVED_DATE) || item.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
