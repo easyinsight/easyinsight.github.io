@@ -33,8 +33,7 @@ public abstract class WSKPIDefinition extends WSAnalysisDefinition {
 
     public List<Intention> createIntentions(List<AnalysisItem> fields, int type) throws SQLException {
         if (type == IntentionSuggestion.CONFIGURE_TRENDING) {
-            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
-            reportPropertiesIntention.setTrendSetup(true);
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention(IntentionSuggestion.CONFIGURE_TRENDING);
             return Arrays.asList((Intention) reportPropertiesIntention);
         } else {
             return super.createIntentions(fields, type);

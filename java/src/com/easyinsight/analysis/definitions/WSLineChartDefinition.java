@@ -4,6 +4,9 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
+import com.easyinsight.intention.Intention;
+import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.intention.ReportPropertiesIntention;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.LineChartComponent;
 import com.easyinsight.preferences.ApplicationSkin;
@@ -11,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -335,12 +339,12 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     public void tweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
         if (autoScale && getXaxis() != null && getXaxis().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             int daysDuration = 0;
-            AnalysisDateDimension start;
+            /*AnalysisDateDimension start;
             try {
                 start = (AnalysisDateDimension) getXaxis().clone();
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e);
-            }
+            }*/
             AnalysisDateDimension xAxis = (AnalysisDateDimension) this.getXaxis();
             if (getFilterDefinitions() != null) {
                 for (FilterDefinition filterDefinition : getFilterDefinitions()) {
@@ -384,7 +388,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
                 analysisStep.getStartDate().setDateLevel(analysisStep.getDateLevel());
                 analysisStep.getEndDate().setDateLevel(analysisStep.getDateLevel());
             }
-            aliasMap.put(xAxis, start);
+            //aliasMap.put(xAxis, start);
         }
     }
 
