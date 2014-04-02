@@ -39,6 +39,8 @@ public class IntentionSuggestion {
     public static final int WARNING_MESSAGE = 20;
     public static final int CONFIGURE_TRENDING = 21;
     public static final int TURN_OFF_AGGREGATE_QUERY = 22;
+    public static final int CONFIGURE_DATE_COMPARISON = 23;
+    public static final int FULL_JOINS = 24;
 
     private String headline;
     private String description;
