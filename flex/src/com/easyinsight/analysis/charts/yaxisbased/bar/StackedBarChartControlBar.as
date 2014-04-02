@@ -52,18 +52,18 @@ public class StackedBarChartControlBar extends ReportControlBar implements IRepo
         measureLabel.text = "X Axis Measure:";
         measureLabel.setStyle("fontSize", 14);
         addChild(measureLabel);
-        addDropAreaGrouping(measureGrouping);
+        addDropAreaGrouping(measureGrouping, null, xAxisDefinition);
         var groupingLabel:Label = new Label();
         groupingLabel.text = "Y Axis Grouping:";
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
-        addDropAreaGrouping(xAxisGrouping);
+        addDropAreaGrouping(xAxisGrouping, null, xAxisDefinition);
 
         var stackLabel:Label = new Label();
         stackLabel.text = "Stack Grouping:";
         stackLabel.setStyle("fontSize", 14);
         addChild(stackLabel);
-        addDropAreaGrouping(stackGrouping);
+        addDropAreaGrouping(stackGrouping, null, xAxisDefinition);
 
         if (xAxisDefinition.yaxis != null) {
             xAxisGrouping.addAnalysisItem(xAxisDefinition.yaxis);

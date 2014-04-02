@@ -55,25 +55,25 @@ public class BubbleChartControlBar extends ReportControlBar implements IReportCo
         groupingLabel.text = "Grouping:";
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
-        addDropAreaGrouping(dimensionGrouping);
+        addDropAreaGrouping(dimensionGrouping, null, xAxisDefinition);
 
         var yMeasureLabel:Label = new Label();
         yMeasureLabel.text = "Y Axis Measure:";
         yMeasureLabel.setStyle("fontSize", 14);
         addChild(yMeasureLabel);
-        addDropAreaGrouping(ymeasureGrouping);
+        addDropAreaGrouping(ymeasureGrouping, null, xAxisDefinition);
         
         var xMeasureLabel:Label = new Label();
         xMeasureLabel.text = "X Axis Measure:";
         xMeasureLabel.setStyle("fontSize", 14);
         addChild(xMeasureLabel);
-        addDropAreaGrouping(xmeasureGrouping);
+        addDropAreaGrouping(xmeasureGrouping, null, xAxisDefinition);
 
         var zMeasureLabel:Label = new Label();
         zMeasureLabel.text = "Radius Measure:";
         zMeasureLabel.setStyle("fontSize", 14);
         addChild(zMeasureLabel);
-        addDropAreaGrouping(zmeasureGrouping);
+        addDropAreaGrouping(zmeasureGrouping, null, xAxisDefinition);
          if (xAxisDefinition.dimension != null) {
             dimensionGrouping.addAnalysisItem(xAxisDefinition.dimension);
         }

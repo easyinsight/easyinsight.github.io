@@ -52,6 +52,7 @@ public class StackedColumnChartControlBar extends ReportControlBar implements IR
         measureLabel.text = "Y Axis Measure:";
         measureLabel.setStyle("fontSize", 14);
         addChild(measureLabel);
+        measureGrouping.report = xAxisDefinition;
         addDropAreaGrouping(measureGrouping);
         var groupingLabel:Label = new Label();
         groupingLabel.text = "X Axis Grouping:";
@@ -64,6 +65,7 @@ public class StackedColumnChartControlBar extends ReportControlBar implements IR
         stackLabel.text = "Stack Grouping:";
         stackLabel.setStyle("fontSize", 14);
         addChild(stackLabel);
+        stackGrouping.report = xAxisDefinition;
         addDropAreaGrouping(stackGrouping);
 
         if (xAxisDefinition.xaxis != null) {

@@ -79,11 +79,20 @@ public class ApplicationSkinTO {
     public var tableColorEndEnabled:Boolean;
     public var textColor:int;
     public var textColorEnabled:Boolean;
+    public var dashboardReportHeaderBackgroundColor:int;
+    public var dashboardReportHeaderBackgroundColorEnabled:Boolean;
+    public var dashboardReportHeaderTextColor:int;
+    public var dashboardReportHeaderTextColorEnabled:Boolean;
 
     public var dashboardStack1ColorStart:int;
     public var dashboardStack1ColorEnd:int;
     public var dashboardStackColor2Start:int;
     public var dashboardStackColor2End:int;
+
+    public var dashboardStack1ColorStartEnabled:Boolean;
+    public var dashboardStack1ColorEndEnabled:Boolean;
+    public var dashboardStackColor2StartEnabled:Boolean;
+    public var dashboardStackColor2EndEnabled:Boolean;
 
     public var multiColors:ArrayCollection;
     public var secondaryMultiColors:ArrayCollection;

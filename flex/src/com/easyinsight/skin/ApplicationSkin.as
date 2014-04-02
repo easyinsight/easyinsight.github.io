@@ -68,6 +68,11 @@ public class ApplicationSkin extends EventDispatcher {
     public var reportHeaderTextColor:int;
     public var reportHeaderTextColorEnabled:Boolean;
 
+    public var dashboardReportHeaderBackgroundColor:int;
+    public var dashboardReportHeaderBackgroundColorEnabled:Boolean;
+    public var dashboardReportHeaderTextColor:int;
+    public var dashboardReportHeaderTextColorEnabled:Boolean;
+
     public var tableColorStart:int;
     public var tableColorStartEnabled:Boolean;
     public var tableColorEnd:int;
@@ -83,6 +88,11 @@ public class ApplicationSkin extends EventDispatcher {
     public var dashboardStack1ColorEnd:int;
     public var dashboardStackColor2Start:int;
     public var dashboardStackColor2End:int;
+
+    public var dashboardStack1ColorStartEnabled:Boolean;
+    public var dashboardStack1ColorEndEnabled:Boolean;
+    public var dashboardStackColor2StartEnabled:Boolean;
+    public var dashboardStackColor2EndEnabled:Boolean;
 
     public function ApplicationSkin() {
         super();
@@ -142,6 +152,9 @@ public class ApplicationSkin extends EventDispatcher {
         reportHeaderTextColor = appSkin.reportHeaderTextColor;
         reportHeaderTextColorEnabled = appSkin.reportHeaderTextColorEnabled;
 
+        textColor = appSkin.textColor;
+        textColorEnabled = appSkin.textColorEnabled;
+
         tableColorStart = appSkin.tableColorStart;
         tableColorStartEnabled = appSkin.tableColorStartEnabled;
         tableColorEnd = appSkin.tableColorEnd;
@@ -151,8 +164,17 @@ public class ApplicationSkin extends EventDispatcher {
         dashboardStack1ColorEnd = appSkin.dashboardStack1ColorEnd;
         dashboardStackColor2Start = appSkin.dashboardStackColor2Start;
         dashboardStackColor2End = appSkin.dashboardStackColor2End;
+        dashboardStack1ColorStartEnabled = appSkin.dashboardStack1ColorStartEnabled;
+        dashboardStack1ColorEndEnabled = appSkin.dashboardStack1ColorEndEnabled;
+        dashboardStackColor2StartEnabled = appSkin.dashboardStackColor2StartEnabled;
+        dashboardStackColor2EndEnabled = appSkin.dashboardStackColor2EndEnabled;
         multiColors = appSkin.multiColors;
         secondaryMultiColors = appSkin.secondaryMultiColors;
+
+        dashboardReportHeaderBackgroundColor = appSkin.dashboardReportHeaderBackgroundColor;
+        dashboardReportHeaderBackgroundColorEnabled = appSkin.dashboardReportHeaderBackgroundColorEnabled;
+        dashboardReportHeaderTextColor = appSkin.dashboardReportHeaderTextColor;
+        dashboardReportHeaderTextColorEnabled = appSkin.dashboardReportHeaderTextColorEnabled;
 
         if (appSkin.reportHeaderImage != null) {
             var reportHeaderImageLoader:ImageLoader = new ImageLoader();

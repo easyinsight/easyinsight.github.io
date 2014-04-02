@@ -33,7 +33,6 @@ public class KPIDefinition extends AnalysisDefinition {
         var fields:ArrayCollection = new ArrayCollection();
 
         if (nowDate == null || nowDate == "") {
-            //baseDate = "Date";
             nowDate = "Now";
             previousDate = "Against";
             var date:DerivedAnalysisDateDimension = new DerivedAnalysisDateDimension();
