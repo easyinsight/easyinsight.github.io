@@ -8,6 +8,8 @@
 package com.easyinsight.suggestion {
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemEditEvent;
+import com.easyinsight.analysis.DerivedAnalysisDateDimension;
+import com.easyinsight.analysis.NamedKey;
 import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.filtering.FilterDefinition;
 
@@ -17,22 +19,19 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.easyinsight.intention.ReportPropertiesIntention")]
 public class ReportPropertiesIntention extends Intention {
 
-    public var fullJoins:Boolean;
-    public var summaryRow:Boolean;
-    public var trendSetup:Boolean;
-    public var aggregateQueryIfPossible:Boolean;
+    public var intentionType:int;
+
+
 
     public function ReportPropertiesIntention() {
     }
 
     override public function apply(suggestionMetadata:SuggestionMetadata):void {
-        if (fullJoins) {
+        if (intentionType == IntentionSuggestion.FULL_JOINS) {
             suggestionMetadata.report.fullJoins = true;
-        }
-        if (summaryRow) {
+        } else if (intentionType == IntentionSuggestion.SUMMARY_ROW) {
             ListDefinition(suggestionMetadata.report).summaryTotal = true;
-        }
-        if (trendSetup) {
+        } else if (intentionType == IntentionSuggestion.CONFIGURE_TRENDING) {
             var o:Object = suggestionMetadata.report.newFilters(suggestionMetadata.transformContainer.getFilterDefinitions());
             if (o != null) {
                 var newFilters:ArrayCollection = o["filters"];
@@ -44,9 +43,19 @@ public class ReportPropertiesIntention extends Intention {
                     suggestionMetadata.reportEditor.onAnalysisItemEdit(new AnalysisItemEditEvent(item, null));
                 }
             }
-        }
-        if (aggregateQueryIfPossible) {
+        } else if (intentionType == IntentionSuggestion.TURN_OFF_AGGREGATE_QUERY) {
             suggestionMetadata.report.aggregateQueryIfPossible = false;
+        } else if (intentionType == IntentionSuggestion.CONFIGURE_DATE_COMPARISON) {
+            suggestionMetadata.report.baseDate = "Comparison Date";
+            var date:DerivedAnalysisDateDimension = new DerivedAnalysisDateDimension();
+            date.dateOnlyField = true;
+            date.concrete = false;
+            date.applyBeforeAggregation = true;
+            date.derivationCode = "nowdate()";
+            var key:NamedKey = new NamedKey();
+            key.name = "Comparison Date";
+            date.key = key;
+            suggestionMetadata.reportEditor.onAnalysisItemEdit(new AnalysisItemEditEvent(date, null));
         }
     }
 }
