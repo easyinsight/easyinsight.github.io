@@ -833,7 +833,11 @@ public class DataService {
 
     private static DataSet retrieveDataSet(Feed feed, Set<AnalysisItem> validQueryItems, Collection<FilterDefinition> filters,
                                            InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> fields, EIConnection conn) {
-        return feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, fields, false, conn);
+        if (insightRequestMetadata.getBaseDate() == null) {
+            return feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, fields, false, conn);
+        } else {
+            return new NotSureWhatToCallThisYet(feed).yargh(insightRequestMetadata, validQueryItems, conn, filters);
+        }
     }
 
     public EmbeddedTrendDataResults getEmbeddedTrendDataResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {

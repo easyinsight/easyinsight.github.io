@@ -1177,8 +1177,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         if (type == IntentionSuggestion.WARNING_JOIN_FAILURE) {
             return Arrays.asList((Intention) new NewHierarchyIntention(NewHierarchyIntention.CUSTOMIZE_JOINS));
         } else if (type == IntentionSuggestion.TURN_OFF_AGGREGATE_QUERY) {
-            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
-            reportPropertiesIntention.setAggregateQueryIfPossible(true);
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention(IntentionSuggestion.TURN_OFF_AGGREGATE_QUERY);
             return Arrays.asList((Intention) reportPropertiesIntention);
         } else {
             return new ArrayList<Intention>();

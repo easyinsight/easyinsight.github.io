@@ -330,6 +330,7 @@ public class FieldRule {
             }
             if (defaultDate != null && !"".equals(defaultDate)) {
                 analysisItem.setDefaultDate(defaultDate);
+                insightRequestMetadata.addAudit(analysisItem, "Field rule set default date to " + defaultDate);
             }
         } catch (Exception e) {
             LogClass.error(e);

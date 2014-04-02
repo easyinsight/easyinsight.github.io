@@ -237,7 +237,8 @@ public class WSListDefinition extends WSAnalysisDefinition {
 
     @Override
     public List<String> cssIncludes() {
-        return Arrays.asList("/css/jquery.dataTables.css");
+        //return Arrays.asList("/css/jquery.dataTables.css");
+        return new ArrayList<String>();
     }
 
     @Override
@@ -340,8 +341,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
 
     public List<Intention> createIntentions(List<AnalysisItem> fields, int type) throws SQLException {
         if (type == IntentionSuggestion.ADD_SUMMARY_ROW) {
-            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
-            reportPropertiesIntention.setSummaryRow(true);
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention(IntentionSuggestion.ADD_SUMMARY_ROW);
             return Arrays.asList((Intention) reportPropertiesIntention);
         } else {
             return super.createIntentions(fields, type);
