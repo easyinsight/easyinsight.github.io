@@ -342,6 +342,9 @@ public class GoogleAnalyticsFeed extends Feed {
                             }
                         }
                         if (!dimBuilder.toString().contains("ga:date")) {
+                            if (dimBuilder.length() > 0) {
+                                dimBuilder.append("&");
+                            }
                             dimBuilder.append("ga:date");
                         }
                         if (dimBuilder.length() > 0 && dimBuilder.charAt(dimBuilder.length() - 1) == ',') {
