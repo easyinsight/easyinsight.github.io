@@ -2,7 +2,6 @@
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <%@ page import="com.easyinsight.core.EIDescriptor" %>
-<%@ page import="java.util.Comparator" %>
 <%@ page import="java.util.Collections" %>
 <%@ page import="com.easyinsight.admin.AdminService" %>
 <%@ page import="com.easyinsight.audit.ActionLog" %>

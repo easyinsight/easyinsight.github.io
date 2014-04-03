@@ -20,7 +20,7 @@
                 </li>
             <% }); %>
             <li>
-                <a class="restore_default_config" href="/app/html/dashboard/<%- dashboard.key %>">Restore Default</a>
+                <a class="restore_default_config" href="/app/html/<% if(dashboard.id == -1) { %>report<% } else { %>dashboard<% } %>/<%- dashboard.key %>">Restore Default</a>
             </li>
         </ul>
         <div id="save-as-modal" class="modal save-as-modal-dialog">

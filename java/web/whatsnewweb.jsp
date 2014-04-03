@@ -3,6 +3,7 @@
 <%@ page import="com.easyinsight.admin.NewsEntry" %>
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.admin.AdminService" %>
+<%@ page import="com.easyinsight.jsphelpers.EIHelper" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -96,7 +97,7 @@
                         }
                     }
                     List<String> tagList = new ArrayList<String>(tags);
-                    Collections.sort(tagList);
+                    EIHelper.sort(tagList);
                 %>
 
 

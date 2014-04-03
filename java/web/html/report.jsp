@@ -20,7 +20,7 @@
 <%@ page import="com.easyinsight.audit.ActionReportLog" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
-<%
+    <%
     String userName = null;
     if(session.getAttribute("userName") != null) {
         userName = (String) session.getAttribute("userName");
@@ -78,30 +78,30 @@
 
         UIData uiData = Utils.createUIData();
         JSONObject reportJSON = new JSONObject();
-        reportJSON.put("name", report.getName());
+        reportJSON.put("name", (Object) report.getName());
         reportJSON.put("id", -1);
         reportJSON.put("local_storage", true);
         reportJSON.put("filters", new JSONArray());
-        reportJSON.put("key", report.getUrlKey());
+        reportJSON.put("key", (Object) report.getUrlKey());
         JSONObject styleJSON = new JSONObject();
-        styleJSON.put("main_stack_start", "#FFFFFF");
-        styleJSON.put("alternative_stack_start", "#FFFFFF");
+        styleJSON.put("main_stack_start", (Object) "#FFFFFF");
+        styleJSON.put("alternative_stack_start", (Object) "#FFFFFF");
         reportJSON.put("styles", styleJSON);
         reportJSON.put("local_storage", report.isEnableLocalStorage());
         JSONObject intermediate = new JSONObject();
         reportJSON.put("base", intermediate);
         intermediate.put("show_label", false);
-        intermediate.put("id", report.getUrlKey() + "_container");
+        intermediate.put("id", (Object) (report.getUrlKey() + "_container"));
         intermediate.put("overrides", new JSONArray());
         intermediate.put("filters", new JSONArray());
-        intermediate.put("type", "report");
+        intermediate.put("type", (Object) "report");
         JSONObject jj = new JSONObject();
-        jj.put("name", report.getName());
-        jj.put("id", report.getUrlKey());
+        jj.put("name", (Object) report.getName());
+        jj.put("id", (Object) report.getUrlKey());
         jj.put("metadata", report.toJSON(new HTMLReportMetadata(), new ArrayList<FilterDefinition>()));
         intermediate.put("report", jj);
         if (drillthroughArgh != null) {
-            reportJSON.put("drillthroughID", drillthroughArgh);
+            reportJSON.put("drillthroughID", (Object) drillthroughArgh);
         }
         JSONArray ja = new JSONArray();
         for(SavedConfiguration sc : reportInfo.getConfigurations()) {
@@ -109,8 +109,8 @@
         }
 
         reportJSON.put("configurations", ja);
-        reportJSON.put("configuration_name", selectedConfiguration);
-        reportJSON.put("configuration_key", configurationKey);
+        reportJSON.put("configuration_name", (Object) selectedConfiguration);
+        reportJSON.put("configuration_key", (Object) configurationKey);
 
         try {
             new AdminService().logAction(new ActionReportLog(SecurityUtil.getUserID(false), ActionReportLog.VIEW, report.getAnalysisID()));

@@ -58,9 +58,9 @@
                     String username = s.substring(5, s.length());
                     if (username.equals(user.getLogin().getUserName())) {
                         String eiUsername = username + "@" + domain;
-                        if(!eiUsername.equals(email))
-                            uaas.addUserToAccount(new UserTransferObject(eiUsername, 0, eiUsername, user.getName().getFamilyName(), user.getName().getGivenName()), dlsList, false,
-                                    UserAccountAdminService.GOOGLE_APPS);
+                        if(!eiUsername.equals(email)) {}
+//                            uaas.addUserToAccount(new UserTransferObject(eiUsername, 0, eiUsername, user.getName().getFamilyName(), user.getName().getGivenName()), dlsList, false,
+//                                    UserAccountAdminService.GOOGLE_APPS);
                     }
                 }
             }
