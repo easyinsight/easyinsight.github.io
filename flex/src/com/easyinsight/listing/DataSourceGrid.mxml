@@ -585,7 +585,7 @@
 
         <mx:DataGrid fontSize="12" horizontalGridLineColor="#DDDDDD" verticalGridLineColor="#DDDDDD" horizontalGridLines="true"
             verticalGridLines="true" id="dataSourceGrid" horizontalScrollPolicy="off" verticalScrollPolicy="off" selectable="false"
-                dataProvider="{dataProvider}" rowHeight="24">
+                dataProvider="{dataProvider}" rowHeight="22" styleName="fallThroughFonts">
             <mx:columns>
                 <mx:DataGridColumn itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" headerText=""/>
                 <mx:DataGridColumn dataField="name" itemRenderer="com.easyinsight.listing.MyDataNameRenderer" headerText="Data Source" width="400" sortCompareFunction="nameSort"/>

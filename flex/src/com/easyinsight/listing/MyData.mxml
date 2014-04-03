@@ -176,12 +176,9 @@
             this.dataSources = new ArrayCollection(dataSourceArray);
             this.masterDataSources = new ArrayCollection(dataSourceArray);
 
-            if (myDataTree.objects.length == 1) {
-                dataSourceDescriptor = myDataTree.objects.getItemAt(0) as DataSourceDescriptor;
+            if (dataSourceDescriptor != null) {
                 toDataSourceView();
-            } else if (dataSourceDescriptor != null) {
-                toDataSourceView();
-            } else if (myDataTree.objects.length > 1) {
+            } else if (myDataTree.objects.length > 0) {
                 if (dsList == null || !blah.contains(dsList)) {
                     toDataGrid();
                 }
