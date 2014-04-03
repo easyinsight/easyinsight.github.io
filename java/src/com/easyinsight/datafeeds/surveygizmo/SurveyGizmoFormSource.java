@@ -97,12 +97,13 @@ public class SurveyGizmoFormSource extends CompositeServerDataSource {
         List<IServerDataSourceDefinition> defaultChildren = super.childDataSources(conn);
         boolean metadataCreated = false;
         for (CompositeFeedNode existing : getCompositeFeedNodes()) {
-            if (existing.getDataSourceType() == FeedType.SURVEYGIZMO_FORM_METADATA.getType()) {
+            if (existing.getDataSourceType() == FeedType.SURVEYGIZMO_QUESTION.getType()) {
                 metadataCreated = true;
             }
         }
         if (!metadataCreated) {
-            SurveyGizmoMetadataSource source = new SurveyGizmoMetadataSource();
+            SurveyGizmoQuestionSource source = new SurveyGizmoQuestionSource();
+            source.setFeedName(getFeedName() + " Questions");
             newDefinition(source, conn, "", getUploadPolicy());
             CompositeFeedNode node = new CompositeFeedNode();
             node.setDataFeedID(source.getDataFeedID());
