@@ -2,8 +2,6 @@
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <%@ page import="com.easyinsight.core.EIDescriptor" %>
-<%@ page import="java.util.Comparator" %>
-<%@ page import="java.util.Collections" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page import="com.easyinsight.database.Database" %>
@@ -16,6 +14,7 @@
 <%@ page import="com.easyinsight.analysis.AnalysisDateDimension" %>
 <%@ page import="com.easyinsight.users.Account" %>
 <%@ page import="com.easyinsight.html.RedirectUtil" %>
+<%@ page import="com.easyinsight.jsphelpers.EIHelper" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -33,6 +32,7 @@
 
 
 %>
+
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
@@ -96,8 +96,7 @@
                             long reportID = usedRS.getLong(1);
                             String reportName = usedRS.getString(2);
                             String urlKey = usedRS.getString(3);
-                            sb.append("<a href=\"").append(RedirectUtil.getURL(request, "/app/html/report/" + urlKey)).append("\">").append(reportName).append("</a>");
-                            sb.append(",");
+                            EIHelper.buildURL(request, sb, reportName, urlKey);
                         }
                         if (sb.length() > 0) {
                             sb.deleteCharAt(sb.length() - 1);

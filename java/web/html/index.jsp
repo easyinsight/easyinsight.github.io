@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
-<%@ page import="com.easyinsight.core.EIDescriptor" %>
-<%@ page import="java.util.Comparator" %>
-<%@ page import="java.util.Collections" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="org.json.JSONArray" %>
@@ -12,6 +9,7 @@
 <%@ page import="com.easyinsight.export.ExportService" %>
 <%@ page import="com.easyinsight.analysis.AnalysisDateDimension" %>
 <%@ page import="java.text.DateFormat" %>
+<%@ page import="com.easyinsight.jsphelpers.EIHelper" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -25,14 +23,7 @@
         com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
         try {
             java.util.List<DataSourceDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
-            Collections.sort(dataSources, new Comparator<EIDescriptor>() {
-
-                public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
-                    String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName().toLowerCase() : "";
-                    String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName().toLowerCase() : "";
-                    return name1.compareTo(name2);
-                }
-            });
+            EIHelper.sortStuff(dataSources);
             JSONArray ja = new JSONArray();
             DateFormat dateFormat = ExportService.getDateFormatForAccount(AnalysisDateDimension.MINUTE_LEVEL, null);
             for (DataSourceDescriptor d : dataSources) {

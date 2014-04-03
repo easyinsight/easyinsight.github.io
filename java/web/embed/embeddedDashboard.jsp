@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.datafeeds.FeedStorage" %>
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
@@ -52,7 +52,7 @@
 
         JSONObject jo = dashboard.toJSON(filterHTMLMetadata);
         if(drillthroughKey != null) {
-            jo.put("drillthroughID", drillthroughKey);
+            jo.put("drillthroughID", (Object) drillthroughKey);
         }
         EIConnection c = Database.instance().getConnection();
         JSONObject userObject = new JSONObject();

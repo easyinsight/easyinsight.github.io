@@ -7,6 +7,7 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
+<%@ page import="com.easyinsight.jsphelpers.EIHelper" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html lang="en">
 <head>
@@ -59,7 +60,8 @@
                 }
             }
             List<String> tagList = new ArrayList<String>(tags);
-            Collections.sort(tagList);
+            EIHelper.sort(tagList);
+
         %>
         <div class="col-md-3">
             <div class="container">

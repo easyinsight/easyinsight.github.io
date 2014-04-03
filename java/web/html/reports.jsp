@@ -26,6 +26,7 @@
 <%@ page import="java.text.DateFormat" %>
 <%@ page import="com.easyinsight.export.ExportService" %>
 <%@ page import="com.easyinsight.analysis.AnalysisDateDimension" %>
+<%@ page import="com.easyinsight.jsphelpers.EIHelper" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -66,14 +67,8 @@
         List<EIDescriptor> forThisLevel = new ArrayList<EIDescriptor>();
         boolean additionalViewsUsed = false;
 
-        Collections.sort(descriptors, new Comparator<EIDescriptor>() {
+        EIHelper.sortStuff(descriptors);
 
-            public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
-                String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName().toLowerCase() : "";
-                String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName().toLowerCase() : "";
-                return name1.compareTo(name2);
-            }
-        });
         DateFormat dateFormat = ExportService.getDateFormatForAccount(AnalysisDateDimension.MINUTE_LEVEL, null);
         for (EIDescriptor desc : descriptors) {
             int folder = desc.getFolder();
@@ -101,6 +96,11 @@
 
 
         List<DataFolder> folders = new ArrayList<DataFolder>();
+
+        DataFolder mainFolder = new DataFolder();
+        mainFolder.setName("Main View");
+        mainFolder.setUrlKey("1");
+
         if (additionalViewsUsed) {
             DataFolder dataFolder = new DataFolder();
             dataFolder.setName("Additional Views");
