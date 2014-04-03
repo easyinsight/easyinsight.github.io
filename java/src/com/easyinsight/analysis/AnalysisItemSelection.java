@@ -8,6 +8,7 @@ package com.easyinsight.analysis;
 public class AnalysisItemSelection {
     private AnalysisItem analysisItem;
     private boolean selected;
+    private int customDateLevel;
 
     public AnalysisItemSelection() {
     }
@@ -15,6 +16,14 @@ public class AnalysisItemSelection {
     public AnalysisItemSelection(AnalysisItem analysisItem, boolean selected) {
         this.analysisItem = analysisItem;
         this.selected = selected;
+    }
+
+    public int getCustomDateLevel() {
+        return customDateLevel;
+    }
+
+    public void setCustomDateLevel(int customDateLevel) {
+        this.customDateLevel = customDateLevel;
     }
 
     public AnalysisItem getAnalysisItem() {
