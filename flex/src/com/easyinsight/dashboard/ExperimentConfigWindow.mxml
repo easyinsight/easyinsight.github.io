@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
     <mx:Script><![CDATA[
+        import com.easyinsight.listing.Tag;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ProgressAlert;
 
@@ -27,7 +28,21 @@
         private var reportID:int;
 
         private function gotReports():void {
-            reports = analysisService.getInsightDescriptorsForDataSource.lastResult as ArrayCollection;
+            var reports:ArrayCollection = analysisService.getInsightDescriptorsForDataSource.lastResult as ArrayCollection;
+            var tagID:int = dashboardReportViewComponent.dashboardReport.recommendedTag;
+            if (tagID > 0) {
+                var matchingReports:ArrayCollection = new ArrayCollection();
+                for each (var rep:InsightDescriptor in reports) {
+                    for each (var tag:Tag in rep.tags) {
+                        if (tag.id == tagID) {
+                            matchingReports.addItem(rep);
+                            break;
+                        }
+                    }
+                }
+                reports = matchingReports;
+            }
+            this.reports = reports;
         }
         ]]></mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
