@@ -22,6 +22,7 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
     public var useFullyQualifiedNames:Boolean;
     public var selectedName:String;
     public var selectedFQN:String;
+    public var expandDates:int;
 
     public function AnalysisItemFilterDefinition() {
     }
