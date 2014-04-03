@@ -2,8 +2,6 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.Dashboard;
-import com.easyinsight.dashboard.DashboardStorage;
-import com.easyinsight.database.Database;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.hibernate.Session;
@@ -43,23 +41,8 @@ public class DrillThrough extends Link {
     @Column(name="filter_row_groupings")
     private boolean filterRowGroupings;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="pass_through_field_id")
-    private AnalysisItemHandle passThroughField;
-
     public void afterLoad() {
         super.afterLoad();
-        if (passThroughField != null) {
-            passThroughField = (AnalysisItemHandle) Database.deproxy(passThroughField);
-        }
-    }
-
-    public AnalysisItemHandle getPassThroughField() {
-        return passThroughField;
-    }
-
-    public void setPassThroughField(AnalysisItemHandle passThroughField) {
-        this.passThroughField = passThroughField;
     }
 
     public boolean isShowDrillThroughFilters() {
@@ -119,14 +102,6 @@ public class DrillThrough extends Link {
         if (dashboardID != null && dashboardID == 0) {
             dashboardID = null;
         }
-        if (passThroughField != null) {
-            passThroughField.save();
-            if (passThroughField.getHandleID() == null || passThroughField.getHandleID() == 0) {
-                session.save(passThroughField);
-            } else {
-                session.update(passThroughField);
-            }
-        }
     }
 
 
@@ -141,11 +116,7 @@ public class DrillThrough extends Link {
 
     @Override
     public Link clone() throws CloneNotSupportedException {
-        DrillThrough drillThrough = (DrillThrough) super.clone();
-        if (passThroughField != null) {
-            drillThrough.setPassThroughField(passThroughField.clone());
-        }
-        return drillThrough;
+        return (DrillThrough) super.clone();
     }
 
     public void updateReportIDs(Map<Long, AnalysisDefinition> replacementMap, Map<Long, Dashboard> dashboardReplacementMap) {
@@ -174,18 +145,6 @@ public class DrillThrough extends Link {
 
     public List<AnalysisItem> getFields(List<AnalysisItem> allItems) {
         List<AnalysisItem> retItems = new ArrayList<AnalysisItem>();
-
-        if (passThroughField != null) {
-            // reconcile item from allItems
-            // return the field
-            for (AnalysisItem field : allItems) {
-                if ((passThroughField.getAnalysisItemID() != null && passThroughField.getAnalysisItemID() > 0 && field.getAnalysisItemID() == passThroughField.getAnalysisItemID()) ||
-                        passThroughField.getName().equals(field.toDisplay())) {
-                    retItems.add(field);
-                    break;
-                }
-            }
-        }
 
         return retItems;
     }

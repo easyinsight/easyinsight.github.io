@@ -2282,7 +2282,7 @@ public class DataService {
                             DrillThrough drillThrough = new DrillThrough();
                             AnalysisItemHandle handle = new AnalysisItemHandle();
                             handle.setName(hierarchyItem.getHierarchyLevel().getAnalysisItem().toDisplay());
-                            drillThrough.setPassThroughField(handle);
+                            drillThrough.setAddAllFilters(true);
                             drillThrough.setReportID(analysisDefinition.getAnalysisID());
                             drillThrough.setDefaultLink(true);
                             drillThrough.setLabel("hierarchy");

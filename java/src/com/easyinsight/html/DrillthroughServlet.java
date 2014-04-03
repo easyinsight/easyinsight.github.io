@@ -150,7 +150,7 @@ public class DrillthroughServlet extends HtmlServlet {
                     drillThrough = new DrillThrough();
                     AnalysisItemHandle handle = new AnalysisItemHandle();
                     handle.setName(hierarchyItem.getHierarchyLevel().getAnalysisItem().toDisplay());
-                    drillThrough.setPassThroughField(handle);
+                    drillThrough.setAddAllFilters(true);
                     drillThrough.setReportID(report.getAnalysisID());
                     drillThrough.setDefaultLink(true);
                     drillThrough.setLabel("hierarchy");
@@ -174,7 +174,8 @@ public class DrillthroughServlet extends HtmlServlet {
         String altKey = null;
 
         if(report.getReportType() == WSAnalysisDefinition.STACKED_BAR) {
-            altKey = request.getParameter("f" + String.valueOf(((WSStackedBarChartDefinition) report).getStackItem().getAnalysisItemID()));
+            altKey = dtValues.get(String.valueOf(((WSStackedBarChartDefinition) report).getStackItem().getAnalysisItemID())).toString();
+            //altKey = request.getParameter("f" + String.valueOf(((WSStackedBarChartDefinition) report).getStackItem().getAnalysisItemID()));
         } else if (report.getReportType() == WSAnalysisDefinition.STACKED_COLUMN) {
             altKey = request.getParameter("f" + String.valueOf(((WSStackedColumnChartDefinition) report).getStackItem().getAnalysisItemID()));
         }
@@ -247,6 +248,8 @@ public class DrillthroughServlet extends HtmlServlet {
             }
         }
         response.setContentType("application/json");
+        System.out.println(result.toString());
+        // url=/app/html/report/drillthrough/depIJXAglvDCrsCuSkXbMjBHlRiaScJArMQDYcUw
         response.getOutputStream().write(result.toString().getBytes());
         response.getOutputStream().flush();
     }
