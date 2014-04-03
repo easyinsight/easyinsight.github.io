@@ -115,6 +115,7 @@
                         if(f["type"] == "report") {
                         %>
                         <div class="gridReportMenu" id="<%= id %>_<%= f.id %>" data-report-target="<%= f.id %>"><span class="<%= f.id %>_name"><%- f.report.name %></span>:
+                            <% if(typeof(f["tag"]) != "undefined") { %>
                             <div class="btn-group report-dropdown-btn">
                                 <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Reports <span class="caret"></span></a>
                                 <ul class="dropdown-menu report-dropdown">
@@ -122,6 +123,7 @@
                                 </ul>
 
                             </div>
+                            <% } %>
                             <% if(location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+/)) { %>
                             <a href="/app/html/report/<%= f.report.metadata.key %>" class="btn btn-default navigate-button">Navigate</a>
                             <% } %>
@@ -167,6 +169,7 @@
                         <div class="dashboardReportHeader"><%- report.name %></div>
 
                         <div class="reportMenu">
+                            <% if(typeof(tag) != "undefined") { %>
                             <div class="btn-group report-dropdown-btn">
                                 <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Reports <span class="caret"></span></a>
                                 <ul class="dropdown-menu report-dropdown">
@@ -174,6 +177,7 @@
                                 </ul>
 
                             </div>
+                            <% } %>
                             <% if(location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+/)) { %>
                             <a href="/app/html/report/<%= report.metadata.key %>" class="btn btn-default navigate-button">Navigate</a>
                             <% } %>
