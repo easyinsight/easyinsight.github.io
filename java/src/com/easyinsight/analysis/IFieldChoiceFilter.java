@@ -19,4 +19,6 @@ public interface IFieldChoiceFilter {
     boolean excludeReportFields();
 
     List<AnalysisItemHandle> selectedItems();
+
+    int getExpandDates();
 }
