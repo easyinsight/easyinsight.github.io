@@ -11,10 +11,32 @@ public class TextValueExtension extends ValueExtension {
 
     public static final int WHITE = 16777215;
 
+    public static final int USD = 1;
+    public static final int EURO = 2;
+    public static final int GBP = 3;
+
     private int color;
     private int backgroundColor = WHITE;
     private boolean bold;
     private boolean italic;
+    private int currency;
+    private String currencyString;
+
+    public String getCurrencyString() {
+        return currencyString;
+    }
+
+    public void setCurrencyString(String currencyString) {
+        this.currencyString = currencyString;
+    }
+
+    public int getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(int currency) {
+        this.currency = currency;
+    }
 
     public int getBackgroundColor() {
         return backgroundColor;
