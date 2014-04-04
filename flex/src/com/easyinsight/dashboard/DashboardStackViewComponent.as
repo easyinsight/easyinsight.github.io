@@ -468,7 +468,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             for each (var filterDefinition:FilterDefinition in dashboardStack.filters) {
                 var existingFilter:FilterDefinition = stackFilterMap[filterDefinition.qualifiedName()];
                 var filterToUse:FilterDefinition;
-                if (existingFilter == null) {
+                if (existingFilter == null || filterDefinition.noDashboardOverride) {
                     filterToUse = filterDefinition;
                 } else {
                     filterToUse = existingFilter;
