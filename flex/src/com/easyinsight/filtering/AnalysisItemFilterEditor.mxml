@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-        creationComplete="setup()" implements="com.easyinsight.filtering.IFilterDetailEditor">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+         creationComplete="setup()" implements="com.easyinsight.filtering.IFilterDetailEditor">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemHandle;
@@ -29,6 +29,7 @@
             analysisItemFilter.availableHandles = handles;
             analysisItemFilter.availableTags = selectedTags;
             analysisItemFilter.useFullyQualifiedNames = useFullyQualifiedNamesCheckbox.selected;
+            analysisItemFilter.expandDates = expandDatesBox.selectedItem.data;
             return analysisItemFilter;
         }
 
@@ -60,6 +61,7 @@
 
             filterFields = selectedItems;
             selectedTags = analysisItemFilter.availableTags;
+            selectedExpansion = analysisItemFilter.expandDates;
         }
 
         public function set feedID(feedID:int):void {
@@ -103,10 +105,21 @@
         private function onMultiTagUpdate(event:MultiFieldEvent):void {
             selectedTags = event.fields;
         }
+
+        [Bindable]
+        private var selectedExpansion:int;
         ]]></mx:Script>
     <mx:HBox>
         <mx:Button label="Configure Fields..." click="configureExplicitFields()" styleName="grayButton"/>
         <mx:Button label="Configure Tags..." click="configureTags()" styleName="grayButton"/>
     </mx:HBox>
     <mx:CheckBox label="Use Fully Qualified Names" id="useFullyQualifiedNamesCheckbox" selected="{useFullyQualifiedNames}"/>
+    <util:SmartComboBox id="expandDatesBox" selectedProperty="data" selectedValue="{selectedExpansion}" labelField="label">
+        <mx:ArrayCollection>
+            <mx:Array>
+                <mx:Object label="None" data="0"/>
+                <mx:Object label="Add Year, Quarter, Month, Week, and Day as Options" data="1"/>
+            </mx:Array>
+        </mx:ArrayCollection>
+    </util:SmartComboBox>
 </mx:VBox>
