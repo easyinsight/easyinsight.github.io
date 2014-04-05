@@ -67,11 +67,13 @@ public class ZendeskGroupToUserJoinSource extends ZendeskBaseSource {
                 Map m = queryList(nextPage, zendeskCompositeSource, httpClient);
 
                 JSONArray groupNodes = (JSONArray) m.get("group_memberships");
-                for (int i = 0; i < groupNodes.size(); i++) {
-                    JSONObject groupNode = (JSONObject) groupNodes.get(i);
-                    IRow row = dataSet.createRow();
-                    row.addValue(keys.get(GROUP_ID), String.valueOf(groupNode.get("group_id")));
-                    row.addValue(keys.get(USER_ID), String.valueOf(groupNode.get("user_id")));
+                if (groupNodes != null) {
+                    for (int i = 0; i < groupNodes.size(); i++) {
+                        JSONObject groupNode = (JSONObject) groupNodes.get(i);
+                        IRow row = dataSet.createRow();
+                        row.addValue(keys.get(GROUP_ID), String.valueOf(groupNode.get("group_id")));
+                        row.addValue(keys.get(USER_ID), String.valueOf(groupNode.get("user_id")));
+                    }
                 }
 
                 nextPage = (String) m.get("next_page");

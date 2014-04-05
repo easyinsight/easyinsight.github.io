@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-         horizontalAlign="center" creationComplete="creationCompleteHandler(event)" width="300">
+         horizontalAlign="center" creationComplete="creationCompleteHandler(event)" width="500">
     <mx:Metadata>
         [Event(name="gotMetadataComplete", type="flash.events.Event")]
     </mx:Metadata>
@@ -11,10 +11,12 @@
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.controls.List;
         import mx.controls.RadioButtonGroup;
         import mx.events.FlexEvent;
         import mx.events.PropertyChangeEvent;
+        import mx.rpc.events.FaultEvent;
         import mx.rpc.events.ResultEvent;
         import mx.rpc.remoting.RemoteObject;
 
@@ -89,7 +91,12 @@
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.possibleFields.addEventListener(ResultEvent.RESULT, gotMetadata);
+            dataService.possibleFields.addEventListener(FaultEvent.FAULT, onFault);
             dataService.possibleFields.send(_filterValueDefinition, _report, _dashboard, _filterSet);
+        }
+
+        private function onFault(event:FaultEvent):void {
+            Alert.show(event.fault.faultString);
         }
 
         private function gotMetadata(event:ResultEvent):void {

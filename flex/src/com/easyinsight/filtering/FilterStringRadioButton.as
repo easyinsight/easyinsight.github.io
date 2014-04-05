@@ -15,8 +15,8 @@ public class FilterStringRadioButton extends GridRadioButton {
 
     public function FilterStringRadioButton() {
         super();
-        this.width = 290;
-        this.cbWidth = 290;
+        this.width = 490;
+        this.cbWidth = 490;
         this.moveY = 4;
     }
 

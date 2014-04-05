@@ -186,6 +186,7 @@ public class DataService {
                         AnalysisDateDimension yearClone = (AnalysisDateDimension) item.clone();
                         yearClone.setDateLevel(AnalysisDateDimension.YEAR_LEVEL);
                         yearClone.setDisplayName(item.toDisplay() + " Year");
+                        yearClone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay() + " Year");
                         customLevel.put(item.toDisplay() + " Year", AnalysisDateDimension.YEAR_LEVEL);
                         set.add(yearClone);
                         positions.put(yearClone, i++);
@@ -193,6 +194,7 @@ public class DataService {
                         AnalysisDateDimension quarterClone = (AnalysisDateDimension) item.clone();
                         quarterClone.setDateLevel(AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL);
                         quarterClone.setDisplayName(item.toDisplay() + " Quarter");
+                        quarterClone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay() + " Quarter");
                         customLevel.put(item.toDisplay() + " Quarter", AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL);
                         set.add(quarterClone);
                         positions.put(quarterClone, i++);
@@ -200,6 +202,7 @@ public class DataService {
                         AnalysisDateDimension monthClone = (AnalysisDateDimension) item.clone();
                         monthClone.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
                         monthClone.setDisplayName(item.toDisplay() + " Month");
+                        monthClone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay() + " Month");
                         customLevel.put(item.toDisplay() + " Month", AnalysisDateDimension.MONTH_LEVEL);
                         set.add(monthClone);
                         positions.put(monthClone, i++);
@@ -207,6 +210,7 @@ public class DataService {
                         AnalysisDateDimension weekClone = (AnalysisDateDimension) item.clone();
                         weekClone.setDateLevel(AnalysisDateDimension.WEEK_LEVEL);
                         weekClone.setDisplayName(item.toDisplay() + " Week");
+                        weekClone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay() + " Week");
                         customLevel.put(item.toDisplay() + " Week", AnalysisDateDimension.WEEK_LEVEL);
                         set.add(weekClone);
                         positions.put(weekClone, i++);
@@ -214,6 +218,7 @@ public class DataService {
                         AnalysisDateDimension dayClone = (AnalysisDateDimension) item.clone();
                         dayClone.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
                         dayClone.setDisplayName(item.toDisplay() + " Day");
+                        dayClone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay() + " Day");
                         customLevel.put(item.toDisplay() + " Day", AnalysisDateDimension.DAY_LEVEL);
                         set.add(dayClone);
                         positions.put(dayClone, i++);
