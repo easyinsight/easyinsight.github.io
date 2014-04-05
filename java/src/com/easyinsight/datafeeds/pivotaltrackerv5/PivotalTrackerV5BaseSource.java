@@ -85,6 +85,11 @@ public abstract class PivotalTrackerV5BaseSource extends ServerDataSourceDefinit
             Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
             if(o instanceof JSONObject) {
                 // probably an error
+                Map map = (Map) o;
+                if (map.containsKey("error")) {
+                    String error = map.get("error").toString();
+                    throw new ReportException(new DataSourceConnectivityReportFault(error, parentDefinition));
+                }
             }
             return (List) o;
         } catch (ReportException re) {
