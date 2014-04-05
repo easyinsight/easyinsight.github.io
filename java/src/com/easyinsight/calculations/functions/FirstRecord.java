@@ -1,6 +1,7 @@
 package com.easyinsight.calculations.functions;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.calculations.FunctionException;
@@ -29,20 +30,9 @@ public class FirstRecord extends Function {
         String instanceIDName = minusBrackets(getParameterName(0));
         String targetName = minusBrackets(getParameterName(3));
         String sortName = minusBrackets(getParameterName(2));
-        AnalysisItem instanceIDField = null;
-        AnalysisItem targetField = null;
-        AnalysisItem sortField = null;
-        for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
-            if (instanceIDName.equals(analysisItem.toDisplay()) || instanceIDName.equals(analysisItem.getKey().toKeyString())) {
-                instanceIDField = analysisItem;
-            }
-            if (targetName.equals(analysisItem.toDisplay()) || targetName.equals(analysisItem.getKey().toKeyString())) {
-                targetField = analysisItem;
-            }
-            if (sortName.equals(analysisItem.toDisplay()) || sortName.equals(analysisItem.getKey().toKeyString())) {
-                sortField = analysisItem;
-            }
-        }
+        AnalysisItem instanceIDField = findDataSourceItem(0);
+        AnalysisItem targetField = findDataSourceItem(3);
+        AnalysisItem sortField = findDataSourceItem(2);
         if (instanceIDField == null) {
             throw new FunctionException("Could not find the specified field " + instanceIDName);
         }
@@ -55,11 +45,24 @@ public class FirstRecord extends Function {
         String processName = minusQuotes(getParameter(1)).toString();
         ProcessCalculationCache processCalculationCache = (ProcessCalculationCache) calculationMetadata.getCache(new ProcessCacheBuilder(instanceIDField, sortField), processName);
         Value instanceValue = getParameter(0);
+        Value sortValue = getParameter(2);
         List<IRow> rows = processCalculationCache.rowsForValue(instanceValue);
-        if (rows.size() == 0) {
+        if (rows == null || rows.size() == 0) {
             return new EmptyValue();
         }
-        return rows.get(0).getValue(targetField);
+        // find the row with this date...
+        IRow row = rows.get(0);
+        if (targetField.hasType(AnalysisItemTypes.MEASURE)) {
+            Value measureValue = row.getValue(targetField);
+            Value rowSortValue = row.getValue(sortField);
+            if (sortValue.equals(rowSortValue)) {
+                return measureValue;
+            } else {
+                return new EmptyValue();
+            }
+        } else {
+            return row.getValue(targetField);
+        }
     }
 
     @Override
