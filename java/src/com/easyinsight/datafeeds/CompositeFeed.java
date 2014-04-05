@@ -261,7 +261,7 @@ public class CompositeFeed extends Feed {
                         } else if (alwaysPassThrough(filterDefinition.getField())) {
                             queryStateNode.addFilter(filterDefinition);
                         }
-                    } else if (filterDefinition instanceof OrFilter) {
+                    } /*else if (filterDefinition instanceof OrFilter) {
                         OrFilter orFilter = (OrFilter) filterDefinition;
                         boolean matched = true;
                         for (FilterDefinition child : orFilter.getFilters()) {
@@ -269,10 +269,10 @@ public class CompositeFeed extends Feed {
                                 matched = false;
                             }
                         }
-                        if (matched) {
+                        if (matched) { or filter
                             queryStateNode.addFilter(orFilter);
                         }
-                    }
+                    }*/
                 }
             }
         }
