@@ -267,6 +267,8 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                 List<AnalysisItem> items = itemsFor(name);
                 fieldMap.put(name, items);
             }
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
