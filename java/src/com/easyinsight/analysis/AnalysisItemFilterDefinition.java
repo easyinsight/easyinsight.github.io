@@ -359,7 +359,11 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
         for(AnalysisItemSelection analysisItem : itemsAvailable) {
             JSONObject j = new JSONObject();
             j.put("value", analysisItem.getAnalysisItem().toDisplay() + "|" + analysisItem.getCustomDateLevel());
-            j.put("label", analysisItem.getAnalysisItem().toUnqualifiedDisplay());
+            if (useFullyQualifiedNames) {
+                j.put("label", analysisItem.getAnalysisItem().toDisplay());
+            } else {
+                j.put("label", analysisItem.getAnalysisItem().toUnqualifiedDisplay());
+            }
             available.put(j);
         }
         jo.put("values", available);
