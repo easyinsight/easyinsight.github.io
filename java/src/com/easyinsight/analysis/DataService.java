@@ -2103,11 +2103,24 @@ public class DataService {
             insightRequestMetadata.setLogReport(analysisDefinition.isLogReport());
 
             if (analysisDefinition.getBaseDate() != null && !"".equals(analysisDefinition.getBaseDate())) {
-                for (AnalysisItem item : analysisDefinition.getAddedItems()) {
-                    if (item.toDisplay().equals(analysisDefinition.getBaseDate())) {
-                        insightRequestMetadata.setBaseDate((AnalysisDateDimension) item);
+                AnalysisItem targetItem = null;
+                if (analysisDefinition.getAddedItems() != null) {
+                    for (AnalysisItem item : analysisDefinition.getAddedItems()) {
+                        if (item.toDisplay().equals(analysisDefinition.getBaseDate())) {
+                            targetItem = item;
+                            break;
+                        }
                     }
                 }
+                if (targetItem == null && analysisDefinition.getFilterDefinitions() != null) {
+                    for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                        if (filter.getField() != null && filter.getField().toDisplay().equals(analysisDefinition.getBaseDate())) {
+                            targetItem = filter.getField();
+                            break;
+                        }
+                    }
+                }
+                insightRequestMetadata.setBaseDate((AnalysisDateDimension) targetItem);
             }
 
             if (insightRequestMetadata.getHierarchyOverrides() != null) {
