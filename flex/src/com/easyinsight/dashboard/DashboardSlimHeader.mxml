@@ -8,17 +8,12 @@
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.genredata.ExchangeItem;
         import com.easyinsight.skin.ImageConstants;
 
         import mx.collections.ArrayCollection;
 
-        import mx.controls.Alert;
-
         import mx.controls.TextArea;
-        import mx.core.Application;
         import mx.core.UIComponent;
-        import mx.states.RemoveChild;
         import mx.states.State;
 
 

@@ -90,7 +90,7 @@ public class DelayedReportTemplate extends EventDispatcher {
             var insightDescriptor:InsightDescriptor = descriptor as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor)));
         } else if (descriptor is DashboardDescriptor ){
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, exchangeItem: info.exchangeData})));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id })));
         }
     }
 }

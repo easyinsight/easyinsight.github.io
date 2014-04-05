@@ -167,8 +167,15 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
         for (Object o : data) {
             JSONObject j = (JSONObject) o;
             SurveyGizmoForm f = new SurveyGizmoForm();
-            f.setId((String) j.get("id"));
+            String formID = (String) j.get("id");
+            f.setId(formID);
             f.setName((String) j.get("title"));
+            JSONObject doc = SurveyGizmoUtils.runRequest("/survey/" + formID + "/surveyquestion", new HttpClient(), this, new ArrayList<NameValuePair>());
+            JSONArray formData = (JSONArray) doc.get("data");
+            for(Object oForm : data) {
+                JSONObject field = (JSONObject) oForm;
+
+            }
             forms.put(f.getId(), f);
         }
         return forms;

@@ -27,13 +27,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Alan
- * Date: 2/20/14
- * Time: 3:09 PM
- * To change this template use File | Settings | File Templates.
+ * User: jamesboe
+ * Date: 3/25/14
+ * Time: 10:25 AM
  */
-public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
+public class SurveyGizmoMultiAnswerSource extends SurveyGizmoBaseSource {
 
     public static final String LONGITUDE = "Longitude";
     public static final String LATITUDE = "Latitude";
@@ -56,14 +54,15 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
     public static final String CONTACT_ID = "Contact ID";
     public static final String SUBMIT_DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
     public static final String DELIMITER = "|";
-    private String formID;
 
-    public void setFormID(String formID) {
-        this.formID = formID;
+    private String questionID;
+
+    public String getQuestionID() {
+        return questionID;
     }
 
-    public String getFormID() {
-        return formID;
+    public void setQuestionID(String questionID) {
+        this.questionID = questionID;
     }
 
     @NotNull
@@ -80,12 +79,12 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
     @Override
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
-        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM SURVEYGIZMO_FORM_SOURCE WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM SURVEYGIZMO_MULTI_QUESTION_SOURCE WHERE DATA_SOURCE_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SURVEYGIZMO_FORM_SOURCE (FORM_ID, DATA_SOURCE_ID) VALUES (?, ?)");
-        insertStmt.setString(1, formID);
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SURVEYGIZMO_MULTI_QUESTION_SOURCE (QUESTION_ID, DATA_SOURCE_ID) VALUES (?, ?)");
+        insertStmt.setString(1, questionID);
         insertStmt.setLong(2, getDataFeedID());
         insertStmt.execute();
         insertStmt.close();
@@ -94,11 +93,11 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement getStmt = conn.prepareStatement("SELECT FORM_ID FROM SURVEYGIZMO_FORM_SOURCE WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement getStmt = conn.prepareStatement("SELECT QUESTION_ID FROM SURVEYGIZMO_MULTI_QUESTION_SOURCE WHERE DATA_SOURCE_ID = ?");
         getStmt.setLong(1, getDataFeedID());
         ResultSet rs = getStmt.executeQuery();
         if (rs.next()) {
-            formID = rs.getString(1);
+            questionID = rs.getString(1);
         }
         getStmt.close();
     }
@@ -161,18 +160,11 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
         JSONObject jo = SurveyGizmoUtils.runRequest("/survey/" + formSource.getFormID() + "/surveyresponse", httpClient, surveyGizmoCompositeSource, new ArrayList<NameValuePair>());
         JSONArray data = (JSONArray) jo.get("data");
         Pattern p = Pattern.compile("\\[question\\(([A-Za-z0-9]+)\\).*\\]");
-
-        List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
-
         for(Object o : data) {
             JSONObject survey = (JSONObject) o;
             IRow row = ds.createRow();
             Map<Key, List<String>> listsMap = new HashMap<Key, List<String>>();
             for(Map.Entry<String, Object> entry : survey.entrySet()) {
-
-                // base question data
-
-                // additional question data
 
                 Matcher m = p.matcher(entry.getKey());
                 if(m.matches()) {
@@ -187,33 +179,6 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
                         row.addValue(keys.get(keyString), (String) entry.getValue());
                     }
                 }
-
-                // metadata info
-
-                /*b.addValue(LONGITUDE, "LONG");
-                b.addValue(LATITUDE, "LAT");
-                b.addValue(CITY, "GEOCITY");
-                b.addValue(REFERER, "REFERER");
-                b.addValue(COMMENTS, "COMMENTS");
-                b.addValue(RESPONSE_TIME, "RESPONSETIME");
-                b.addValue(IP, "IP");
-                b.addValue(REGION, "GEOREGION");
-                b.addValue(POSTAL, "GEOPOSTAL");
-                b.addValue(DMA, "GEODMA");
-                b.addValue(COUNTRY, "GEOCOUNTRY");
-                b.addValue(USER_AGENT, "USERAGENT");
-                b.addRawValue(ID, "id");
-                b.addRawValue(STATUS, "status");
-                b.addRawValue(TEST_DATA, "is_test_data");
-                b.addRawValue(RESPONSE_ID, "responseID");
-                b.addRawValue(CONTACT_ID, "contact_id");
-                String dateSubmitted = String.valueOf(survey.get("datesubmitted"));
-                try {
-                    Date d = df.parse(dateSubmitted);
-                    row.addValue(keys.get(DATE_SUBMITTED), d);
-                } catch (ParseException e) {
-
-                }*/
             }
 
             for(Map.Entry<Key, List<String>> entry : listsMap.entrySet()) {
@@ -262,6 +227,4 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
             row.addValue(keys.get(key), String.valueOf(survey.get(location)));
         }
     }
-
-
 }

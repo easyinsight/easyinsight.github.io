@@ -12,21 +12,23 @@ import flash.events.MouseEvent;
 import flash.text.TextFormat;
 
 import mx.controls.Label;
+import mx.controls.Text;
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UITextField;
 import mx.core.UITextFormat;
 
-public class MyDataNameRenderer extends UITextField implements IListItemRenderer {
+public class MyDataNameRenderer extends Text implements IListItemRenderer {
     public function MyDataNameRenderer() {
         addEventListener(MouseEvent.ROLL_OVER, onRollover);
         addEventListener(MouseEvent.ROLL_OUT, onRollout);
         addEventListener(MouseEvent.CLICK, onClick);
-        /*useHandCursor = true;
+
+        useHandCursor = true;
         buttonMode = true;
-        mouseChildren = false;*/
+        mouseChildren = false;
     }
 
-    public function validateProperties():void {
+    /*public function validateProperties():void {
         validateNow();
     }
 
@@ -36,28 +38,31 @@ public class MyDataNameRenderer extends UITextField implements IListItemRenderer
 
     public function validateDisplayList():void {
         validateNow();
-    }
+    }*/
 
     private function onRollover(event:MouseEvent):void {
-        var tf:TextFormat = getTextFormat();
+        setStyle("textDecoration", "underline");
+        /*var tf:TextFormat = getTextFormat();
         tf.underline = true;
-        setTextFormat(tf);
+        setTextFormat(tf);*/
     }
 
     private function onRollout(event:MouseEvent):void {
-        var tf:TextFormat = getTextFormat();
+        setStyle("textDecoration", "none");
+        /*var tf:TextFormat = getTextFormat();
         tf.underline = false;
-        setTextFormat(tf);
+        setTextFormat(tf);*/
     }
 
     private var dataSource:DataSourceDescriptor;
 
-    public function set data(val:Object):void {
+    override public function set data(val:Object):void {
         dataSource = val as DataSourceDescriptor;
+        styleName = "fallThroughFontsBold";
         this.text = dataSource.name;
     }
 
-    public function get data():Object {
+    override public function get data():Object {
         return dataSource;
     }
 

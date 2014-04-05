@@ -53,6 +53,20 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
     @Column(name="show_all")
     private boolean all;
 
+    @Column(name="use_fully_qualified_names")
+    private boolean useFullyQualifiedNames;
+
+    @Column(name="expand_dates")
+    private int expandDates;
+
+    public boolean isUseFullyQualifiedNames() {
+        return useFullyQualifiedNames;
+    }
+
+    public void setUseFullyQualifiedNames(boolean useFullyQualifiedNames) {
+        this.useFullyQualifiedNames = useFullyQualifiedNames;
+    }
+
     public boolean isAlphaSort() {
         return alphaSort;
     }
@@ -111,6 +125,14 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
 
     public List<AnalysisItemHandle> selectedItems() {
         return selectedItems;
+    }
+
+    public int getExpandDates() {
+        return expandDates;
+    }
+
+    public void setExpandDates(int expandDates) {
+        this.expandDates = expandDates;
     }
 
     public void setAvailableHandles(List<AnalysisItemHandle> availableItems) {

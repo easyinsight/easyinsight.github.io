@@ -6,40 +6,20 @@ package com.easyinsight.intention;
  * Time: 2:28 PM
  */
 public class ReportPropertiesIntention extends Intention {
-    private boolean fullJoins;
-    private boolean summaryRow;
-    private boolean trendSetup;
-    private boolean aggregateQueryIfPossible;
+    private int intentionType;
 
-    public boolean isAggregateQueryIfPossible() {
-        return aggregateQueryIfPossible;
+    public ReportPropertiesIntention() {
     }
 
-    public void setAggregateQueryIfPossible(boolean aggregateQueryIfPossible) {
-        this.aggregateQueryIfPossible = aggregateQueryIfPossible;
+    public ReportPropertiesIntention(int intentionType) {
+        this.intentionType = intentionType;
     }
 
-    public boolean isTrendSetup() {
-        return trendSetup;
+    public int getIntentionType() {
+        return intentionType;
     }
 
-    public void setTrendSetup(boolean trendSetup) {
-        this.trendSetup = trendSetup;
-    }
-
-    public boolean isSummaryRow() {
-        return summaryRow;
-    }
-
-    public void setSummaryRow(boolean summaryRow) {
-        this.summaryRow = summaryRow;
-    }
-
-    public boolean isFullJoins() {
-        return fullJoins;
-    }
-
-    public void setFullJoins(boolean fullJoins) {
-        this.fullJoins = fullJoins;
+    public void setIntentionType(int intentionType) {
+        this.intentionType = intentionType;
     }
 }

@@ -820,12 +820,27 @@ public class DashboardService {
                 }
             }
             if (applicationSkin != null) {
-                if ("Primary".equals(dashboard.getColorSet()) && (applicationSkin.getDashboardStack1ColorStart() > 0 || applicationSkin.getDashboardStackColor2Start() > 0 ||
-                    applicationSkin.getDashboardStack1ColorEnd() > 0 || applicationSkin.getDashboardStackColor2End() > 0)) {
-                    dashboard.setStackFill1Start(applicationSkin.getDashboardStack1ColorStart());
-                    dashboard.setStackFill1SEnd(applicationSkin.getDashboardStack1ColorEnd());
-                    dashboard.setStackFill2Start(applicationSkin.getDashboardStackColor2Start());
-                    dashboard.setStackFill2End(applicationSkin.getDashboardStackColor2End());
+                if ("Primary".equals(dashboard.getColorSet())) {
+                    if (applicationSkin.isDashboardStack1ColorStartEnabled()) {
+                        dashboard.setStackFill1Start(applicationSkin.getDashboardStack1ColorStart());
+                    }
+                    if (applicationSkin.isDashboardStack1ColorStartEnabled()) {
+                        dashboard.setStackFill1SEnd(applicationSkin.getDashboardStack1ColorEnd());
+                    }
+                    if (applicationSkin.isDashboardStack1ColorStartEnabled()) {
+                        dashboard.setStackFill2Start(applicationSkin.getDashboardStackColor2Start());
+                    }
+                    if (applicationSkin.isDashboardStack1ColorStartEnabled()) {
+                        dashboard.setStackFill2End(applicationSkin.getDashboardStackColor2End());
+                    }
+                }
+                if ("Primary".equals(dashboard.getColorSet())) {
+                    if (applicationSkin.isDashboardReportHeaderBackgroundColorEnabled()) {
+                        dashboard.setReportHeaderBackgroundColor(applicationSkin.getDashboardReportHeaderBackgroundColor());
+                    }
+                    if (applicationSkin.isDashboardReportHeaderTextColorEnabled()) {
+                        dashboard.setReportHeaderBackgroundColor(applicationSkin.getDashboardReportHeaderTextColor());
+                    }
                 }
             }
         } finally {

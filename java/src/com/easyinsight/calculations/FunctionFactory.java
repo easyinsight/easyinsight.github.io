@@ -297,6 +297,16 @@ public class FunctionFactory {
             return new DaysInYear();
         } else if (s.equals("years")) {
             return new Years();
+        } else if (s.equals("trim")) {
+            return new TrimFunction();
+        } else if (s.equals("null")) {
+            return new Null();
+        } else if (s.equals("businessdaysbetween")) {
+            return new BusinessDaysBetween();
+        } else if (s.equals("sequence")) {
+            return new Sequence();
+        } else if (s.equals("assigncurrency")) {
+            return new AssignCurrency();
         } else {
             return null;
         }

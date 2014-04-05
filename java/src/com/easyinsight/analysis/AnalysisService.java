@@ -1563,7 +1563,7 @@ public class AnalysisService {
                     }
 
                 }
-                if (drillThrough.isAddAllFilters() || drillThrough.getPassThroughField() != null) {
+                if (drillThrough.isAddAllFilters()) {
                     List<FilterDefinition> reportFilters = new ArrayList<FilterDefinition>();
                     reportFilters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
                             analysisItem));
@@ -1638,97 +1638,48 @@ public class AnalysisService {
                 }
             }*/
 
-            if (drillThrough.getPassThroughField() != null) {
-                AnalysisItem item = drillThrough.getPassThroughField().reconcileToAnalysisItem(report.getDataFeedID());
-                report.getFilterDefinitions().addAll(filters);
-                EIConnection conn = Database.instance().getConnection();
-                DataSet dataSet;
 
-                try {
-                    dataSet = DataService.listDataSet(report, new InsightRequestMetadata(), conn);
-                } finally {
-                    Database.closeConnection(conn);
+            if (drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
+                if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                    System.out.println("at least creating hierarchy drillthrough...");
+                    AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                    AnalysisHierarchyItem clonedHierarchy = (AnalysisHierarchyItem) hierarchyItem.clone();
+                    int currentIndex = hierarchyItem.getHierarchyLevels().indexOf(hierarchyItem.getHierarchyLevel());
+                    AnalysisItem next = hierarchyItem.getHierarchyLevels().get(currentIndex + 1).getAnalysisItem();
+                    System.out.println("\twith next = " + next.toDisplay());
+                    AnalysisItemFilterDefinition analysisItemFilterDefinition = new AnalysisItemFilterDefinition();
+                    analysisItemFilterDefinition.setField(clonedHierarchy);
+                    analysisItemFilterDefinition.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>());
+                    analysisItemFilterDefinition.setAvailableHandles(new ArrayList<AnalysisItemHandle>());
+                    analysisItemFilterDefinition.setAvailableItems(new ArrayList<AnalysisItem>());
+                    //analysisItemFilterDefinition.setTargetItem();
+                    analysisItemFilterDefinition.setTargetItem(next);
+                    analysisItemFilterDefinition.setShowOnReportView(false);
+                    analysisItemFilterDefinition.setEnabled(true);
+                    filters.add(analysisItemFilterDefinition);
                 }
-                Set<Value> allValues = new HashSet<Value>();
-                for (IRow row : dataSet.getRows()) {
-                    Set<Value> values = row.getPassthroughRow().get(item.qualifiedName());
-                    allValues.addAll(values);
-                }
-                FilterValueDefinition multi = new FilterValueDefinition();
-                List<Object> valueList = new ArrayList<Object>(allValues.size());
-                for (Value value : allValues) {
-                    valueList.add(value);
-                }
-                multi.setField(item);
-                multi.setFilteredValues(valueList);
-                multi.setInclusive(true);
-                multi.setNewType(true);
-                multi.setSingleValue(false);
-                multi.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
-                multi.setToggleEnabled(true);
-                List<FilterDefinition> targetFilters = new ArrayList<FilterDefinition>();
-                if (drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
-                    if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-                        System.out.println("at least creating hierarchy drillthrough...");
-                        AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
-                        AnalysisHierarchyItem clonedHierarchy = (AnalysisHierarchyItem) hierarchyItem.clone();
-                        int currentIndex = hierarchyItem.getHierarchyLevels().indexOf(hierarchyItem.getHierarchyLevel());
-                        AnalysisItem next = hierarchyItem.getHierarchyLevels().get(currentIndex + 1).getAnalysisItem();
-                        System.out.println("\twith next = " + next.toDisplay());
-                        AnalysisItemFilterDefinition analysisItemFilterDefinition = new AnalysisItemFilterDefinition();
-                        analysisItemFilterDefinition.setField(clonedHierarchy);
-                        analysisItemFilterDefinition.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>());
-                        analysisItemFilterDefinition.setAvailableHandles(new ArrayList<AnalysisItemHandle>());
-                        analysisItemFilterDefinition.setAvailableItems(new ArrayList<AnalysisItem>());
-                        //analysisItemFilterDefinition.setTargetItem();
-                        analysisItemFilterDefinition.setTargetItem(next);
-                        analysisItemFilterDefinition.setShowOnReportView(false);
-                        analysisItemFilterDefinition.setEnabled(true);
-                        targetFilters.add(analysisItemFilterDefinition);
-                        targetFilters.addAll(new ReportCalculation("drillthroughAddFilters()").apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
-                                analysisItem));
+            }
+            if (drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
+                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                    AnalysisDateDimension copy;
+                    try {
+                        copy = (AnalysisDateDimension) date.clone();
+                    } catch (CloneNotSupportedException e) {
+                        throw new RuntimeException(e);
                     }
-                }
-                targetFilters.add(multi);
-                //filters.add(multi);
-                DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
-                EIDescriptor descriptor;
-                if (drillThrough.getReportID() != null && drillThrough.getReportID() != 0) {
-                    InsightResponse insightResponse = openAnalysisIfPossibleByID(drillThrough.getReportID());
-                    descriptor = insightResponse.getInsightDescriptor();
-                } else {
-                    DashboardDescriptor dashboardDescriptor = new DashboardDescriptor();
-                    String urlKey = new DashboardStorage().urlKeyForID(drillThrough.getDashboardID());
-                    dashboardDescriptor.setId(drillThrough.getDashboardID());
-                    dashboardDescriptor.setUrlKey(urlKey);
-                    descriptor = dashboardDescriptor;
-                }
-                drillThroughResponse.setDescriptor(descriptor);
-                drillThroughResponse.setFilters(targetFilters);
-                return drillThroughResponse;
-            } else {
-                if (drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
-                    if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                        AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
-                        AnalysisDateDimension copy;
-                        try {
-                            copy = (AnalysisDateDimension) date.clone();
-                        } catch (CloneNotSupportedException e) {
-                            throw new RuntimeException(e);
-                        }
-                        copy.setLinks(new ArrayList<Link>());
-                        int existingLevel = date.getDateLevel();
-                        copy.setDateLevel(existingLevel + 1);
-                        AnalysisItemFilterDefinition analysisItemFilterDefinition = new AnalysisItemFilterDefinition();
-                        analysisItemFilterDefinition.setField(date);
-                        analysisItemFilterDefinition.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>());
-                        analysisItemFilterDefinition.setAvailableHandles(new ArrayList<AnalysisItemHandle>());
-                        analysisItemFilterDefinition.setAvailableItems(new ArrayList<AnalysisItem>());
-                        analysisItemFilterDefinition.setTargetItem(copy);
-                        analysisItemFilterDefinition.setShowOnReportView(false);
-                        analysisItemFilterDefinition.setEnabled(true);
-                        filters.add(analysisItemFilterDefinition);
-                    }
+                    copy.setLinks(new ArrayList<Link>());
+                    int existingLevel = date.getDateLevel();
+                    copy.setDateLevel(existingLevel + 1);
+                    AnalysisItemFilterDefinition analysisItemFilterDefinition = new AnalysisItemFilterDefinition();
+                    analysisItemFilterDefinition.setField(date);
+                    analysisItemFilterDefinition.setAvailableTags(new ArrayList<WeNeedToReplaceHibernateTag>());
+                    analysisItemFilterDefinition.setAvailableHandles(new ArrayList<AnalysisItemHandle>());
+                    analysisItemFilterDefinition.setAvailableItems(new ArrayList<AnalysisItem>());
+                    analysisItemFilterDefinition.setTargetItem(copy);
+                    analysisItemFilterDefinition.setShowOnReportView(false);
+                    analysisItemFilterDefinition.setEnabled(true);
+                    filters.add(analysisItemFilterDefinition);
                 }
             }
 

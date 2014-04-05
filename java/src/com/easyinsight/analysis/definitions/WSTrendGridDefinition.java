@@ -188,6 +188,7 @@ public class WSTrendGridDefinition extends WSKPIDefinition {
         headerTextColor = (int) findNumberProperty(properties, "headerTextColor", 0x000000);
         summaryRowTextColor = (int) findNumberProperty(properties, "summaryRowTextColor", 0x000000);
         summaryRowBackgroundColor = (int) findNumberProperty(properties, "summaryRowBackgroundColor", 0x6699ff);
+        maxRecords = (int) findNumberProperty(properties, "maxRecords", 0);
     }
 
     public List<ReportProperty> createProperties() {
@@ -200,6 +201,7 @@ public class WSTrendGridDefinition extends WSKPIDefinition {
         properties.add(new ReportNumericProperty("headerTextColor", headerTextColor));
         properties.add(new ReportNumericProperty("summaryRowTextColor", summaryRowTextColor));
         properties.add(new ReportNumericProperty("summaryRowBackgroundColor", summaryRowBackgroundColor));
+        properties.add(new ReportNumericProperty("maxRecords", maxRecords));
         return properties;
     }
 

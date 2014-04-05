@@ -5,6 +5,7 @@ import com.easyinsight.logging.LogClass;
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 /**
  * User: James Boe
@@ -221,6 +222,26 @@ public class EIConnection implements Connection {
     public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
         return conn.createStruct(typeName, attributes);
     }
+
+    /*public void setSchema(String schema) throws SQLException {
+        conn.setSchema(schema);
+    }
+
+    public String getSchema() throws SQLException {
+        return conn.getSchema();
+    }
+
+    public void abort(Executor executor) throws SQLException {
+        conn.abort(executor);
+    }
+
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        conn.setNetworkTimeout(executor, milliseconds);
+    }
+
+    public int getNetworkTimeout() throws SQLException {
+        return conn.getNetworkTimeout();
+    }*/
 
     public <T> T unwrap(Class<T> iface) throws SQLException {
         return conn.unwrap(iface);

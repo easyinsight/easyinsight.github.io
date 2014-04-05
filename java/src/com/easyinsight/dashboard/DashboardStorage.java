@@ -233,8 +233,10 @@ public class DashboardStorage {
                     "PUBLIC_VISIBLE, border_color, border_thickness, background_color, padding," +
                     "recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing," +
                     "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding, " +
-                    "default_link, image_full_header, header_image_id, dashboard_version, persist_state, embed_with_key, tablet_dashboard_id, phone_dashboard_id, color_set) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    "default_link, image_full_header, header_image_id, dashboard_version, persist_state, embed_with_key, tablet_dashboard_id, phone_dashboard_id, color_set," +
+                    "report_header_background_color, report_header_text_color) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    PreparedStatement.RETURN_GENERATED_KEYS);
             insertStmt.setString(1, dashboard.getName());
             insertStmt.setString(2, dashboard.getUrlKey());
             insertStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -287,6 +289,8 @@ public class DashboardStorage {
                 insertStmt.setNull(35, Types.BIGINT);
             }
             insertStmt.setString(36, dashboard.getColorSet());
+            insertStmt.setInt(37, dashboard.getReportHeaderBackgroundColor());
+            insertStmt.setInt(38, dashboard.getReportHeaderTextColor());
             insertStmt.execute();
             dashboard.setId(Database.instance().getAutoGenKey(insertStmt));
             insertStmt.close();
@@ -297,7 +301,7 @@ public class DashboardStorage {
                     "recommended_exchange = ?, ytd_date = ?, ytd_override = ?, marmotscript = ?, folder = ?, absolute_sizing = ?," +
                     "stack_fill1_start = ?, stack_fill1_end = ?, stack_fill2_start = ?, stack_fill2_end = ?, stack_fill_enabled = ?, report_horizontal_padding = ?," +
                     "default_link = ?, image_full_header = ?, header_image_id = ?, dashboard_version = ?, persist_state = ?, embed_with_key = ?," +
-                    "tablet_dashboard_id = ?, phone_dashboard_id = ?, color_set = ? WHERE DASHBOARD_ID = ?");
+                    "tablet_dashboard_id = ?, phone_dashboard_id = ?, color_set = ?, report_header_background_color = ?, report_header_text_color = ? WHERE DASHBOARD_ID = ?");
             updateStmt.setString(1, dashboard.getName());
             updateStmt.setString(2, dashboard.getUrlKey());
             updateStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -348,7 +352,9 @@ public class DashboardStorage {
                 updateStmt.setNull(33, Types.BIGINT);
             }
             updateStmt.setString(34, dashboard.getColorSet());
-            updateStmt.setLong(35, dashboard.getId());
+            updateStmt.setInt(35, dashboard.getReportHeaderBackgroundColor());
+            updateStmt.setInt(36, dashboard.getReportHeaderTextColor());
+            updateStmt.setLong(37, dashboard.getId());
             updateStmt.executeUpdate();
             updateStmt.close();
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ?");
@@ -408,8 +414,8 @@ public class DashboardStorage {
                     "UPDATE_DATE, DESCRIPTION, EXCHANGE_VISIBLE, AUTHOR_NAME, temporary_dashboard, public_visible, border_color, border_thickness," +
                 "background_color, padding, recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing," +
                 "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding, " +
-                "default_link, image_full_header, header_image_id, dashboard_version, persist_state, embed_with_key, tablet_dashboard_id, phone_dashboard_id, color_set" +
-                " FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                "default_link, image_full_header, header_image_id, dashboard_version, persist_state, embed_with_key, tablet_dashboard_id, phone_dashboard_id, color_set, " +
+                "report_header_background_color, report_header_text_color FROM DASHBOARD WHERE DASHBOARD_ID = ?");
         queryStmt.setLong(1, dashboardID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -480,6 +486,8 @@ public class DashboardStorage {
                 dashboard.setPhoneVersion(phoneID);
             }
             dashboard.setColorSet(rs.getString(36));
+            dashboard.setReportHeaderBackgroundColor(rs.getInt(37));
+            dashboard.setReportHeaderTextColor(rs.getInt(38));
             PreparedStatement findElementsStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, ELEMENT_TYPE FROM " +
                     "DASHBOARD_ELEMENT, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ? AND DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID = DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID");
             findElementsStmt.setLong(1, dashboardID);

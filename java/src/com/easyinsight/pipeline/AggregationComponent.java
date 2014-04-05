@@ -33,9 +33,15 @@ public class AggregationComponent implements IComponent {
         for (AnalysisItem item : pipelineData.getAllRequestedItems()) {
             derivedItems.addAll(item.getDerivedItems());
         }
+        int before = dataSet.getRows().size();
         List<AnalysisItem> list = new ArrayList<AnalysisItem>(pipelineData.getReportItems());
         ListTransform listTransform = dataSet.listTransform(list, skipAggregations, pipelineData.getUniqueItems(), pipelineData.getReport() != null ? pipelineData.getReport().getFieldToUniqueMap() : null, tier);
-        return listTransform.aggregate(derivedItems);
+        DataSet afterSet = listTransform.aggregate(derivedItems);
+        int after = afterSet.getRows().size();
+        if (before != after) {
+            pipelineData.getInsightRequestMetadata().setAggregationRowChanged(true);
+        }
+        return afterSet;
     }
 
     public void decorate(DataResults listDataResults) {

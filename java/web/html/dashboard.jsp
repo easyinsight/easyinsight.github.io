@@ -70,12 +70,12 @@
         UIData uiData = Utils.createUIData();
         dashboard.getFilters().addAll(drillthroughFilters);
         JSONObject jo = dashboard.toJSON(filterHTMLMetadata);
-        jo.put("data_source_id", dataSourceDescriptor.getUrlKey());
+        jo.put("data_source_id", (Object) dataSourceDescriptor.getUrlKey());
         if(drillthroughKey != null) {
-            jo.put("drillthroughID", drillthroughKey);
+            jo.put("drillthroughID", (Object) drillthroughKey);
         }
-        jo.put("configuration_name", selectedConfiguration);
-        jo.put("configuration_key", configurationKey);
+        jo.put("configuration_name", (Object) selectedConfiguration);
+        jo.put("configuration_key", (Object) configurationKey);
         EIConnection c = Database.instance().getConnection();
         JSONObject userObject = new JSONObject();
         try {

@@ -54,9 +54,6 @@ public class FormCellRenderer extends Box
             } else if (defaultLink is DrillThrough) {
                 var drillThrough:DrillThrough = defaultLink as DrillThrough;
                 var values:ArrayCollection = null;
-                if (DrillThrough(defaultLink).passThroughField != null) {
-                    values = data[DrillThrough(defaultLink).passThroughField.name + "_drill"];
-                }
                 var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, _report, null, values);
                 executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();

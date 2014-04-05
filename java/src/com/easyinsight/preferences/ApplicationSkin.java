@@ -88,15 +88,93 @@ public class ApplicationSkin implements Serializable {
     private boolean tableColorEndEnabled;
     private int textColor;
     private boolean textColorEnabled;
+    private String fontFamily;
+    private boolean fontFamilyEnabled;
+    private int dashboardReportHeaderBackgroundColor;
+    private boolean dashboardReportHeaderBackgroundColorEnabled;
+    private int dashboardReportHeaderTextColor;
+    private boolean dashboardReportHeaderTextColorEnabled;
 
     private int dashboardStack1ColorStart;
+
     private int dashboardStack1ColorEnd;
+    private boolean dashboardStack1ColorStartEnabled;
+    private boolean dashboardStack1ColorEndEnabled;
+    private boolean dashboardStackColor2StartEnabled;
+    private boolean dashboardStackColor2EndEnabled;
     private int dashboardStackColor2Start;
+
     private int dashboardStackColor2End;
+
+
     private List<MultiColor> multiColors;
     private List<MultiColor> secondaryMultiColors;
 
     private long id;
+
+    public boolean isDashboardStack1ColorStartEnabled() {
+        return dashboardStack1ColorStartEnabled;
+    }
+
+    public void setDashboardStack1ColorStartEnabled(boolean dashboardStack1ColorStartEnabled) {
+        this.dashboardStack1ColorStartEnabled = dashboardStack1ColorStartEnabled;
+    }
+
+    public boolean isDashboardStack1ColorEndEnabled() {
+        return dashboardStack1ColorEndEnabled;
+    }
+
+    public void setDashboardStack1ColorEndEnabled(boolean dashboardStack1ColorEndEnabled) {
+        this.dashboardStack1ColorEndEnabled = dashboardStack1ColorEndEnabled;
+    }
+
+    public boolean isDashboardStackColor2StartEnabled() {
+        return dashboardStackColor2StartEnabled;
+    }
+
+    public void setDashboardStackColor2StartEnabled(boolean dashboardStackColor2StartEnabled) {
+        this.dashboardStackColor2StartEnabled = dashboardStackColor2StartEnabled;
+    }
+
+    public boolean isDashboardStackColor2EndEnabled() {
+        return dashboardStackColor2EndEnabled;
+    }
+
+    public void setDashboardStackColor2EndEnabled(boolean dashboardStackColor2EndEnabled) {
+        this.dashboardStackColor2EndEnabled = dashboardStackColor2EndEnabled;
+    }
+
+    public boolean isDashboardReportHeaderBackgroundColorEnabled() {
+        return dashboardReportHeaderBackgroundColorEnabled;
+    }
+
+    public void setDashboardReportHeaderBackgroundColorEnabled(boolean dashboardReportHeaderBackgroundColorEnabled) {
+        this.dashboardReportHeaderBackgroundColorEnabled = dashboardReportHeaderBackgroundColorEnabled;
+    }
+
+    public boolean isDashboardReportHeaderTextColorEnabled() {
+        return dashboardReportHeaderTextColorEnabled;
+    }
+
+    public void setDashboardReportHeaderTextColorEnabled(boolean dashboardReportHeaderTextColorEnabled) {
+        this.dashboardReportHeaderTextColorEnabled = dashboardReportHeaderTextColorEnabled;
+    }
+
+    public int getDashboardReportHeaderBackgroundColor() {
+        return dashboardReportHeaderBackgroundColor;
+    }
+
+    public void setDashboardReportHeaderBackgroundColor(int dashboardReportHeaderBackgroundColor) {
+        this.dashboardReportHeaderBackgroundColor = dashboardReportHeaderBackgroundColor;
+    }
+
+    public int getDashboardReportHeaderTextColor() {
+        return dashboardReportHeaderTextColor;
+    }
+
+    public void setDashboardReportHeaderTextColor(int dashboardReportHeaderTextColor) {
+        this.dashboardReportHeaderTextColor = dashboardReportHeaderTextColor;
+    }
 
     public long getId() {
         return id;
@@ -120,6 +198,22 @@ public class ApplicationSkin implements Serializable {
 
     public void setReportHeaderTextColorEnabled(boolean reportHeaderTextColorEnabled) {
         this.reportHeaderTextColorEnabled = reportHeaderTextColorEnabled;
+    }
+
+    public String getFontFamily() {
+        return fontFamily;
+    }
+
+    public void setFontFamily(String fontFamily) {
+        this.fontFamily = fontFamily;
+    }
+
+    public boolean isFontFamilyEnabled() {
+        return fontFamilyEnabled;
+    }
+
+    public void setFontFamilyEnabled(boolean fontFamilyEnabled) {
+        this.fontFamilyEnabled = fontFamilyEnabled;
     }
 
     public int getTextColor() {
@@ -265,10 +359,13 @@ public class ApplicationSkin implements Serializable {
             properties.add(new ReportNumericProperty("tableColorEnd", tableColorEnd, tableColorEndEnabled));
             properties.add(new ReportNumericProperty("textColor", textColor, textColorEnabled));
 
-            properties.add(new ReportNumericProperty("dashboardStack1ColorStart", dashboardStack1ColorStart));
-            properties.add(new ReportNumericProperty("dashboardStack1ColorEnd", dashboardStack1ColorEnd));
-            properties.add(new ReportNumericProperty("dashboardStack2ColorStart", dashboardStackColor2Start));
-            properties.add(new ReportNumericProperty("dashboardStack2ColorEnd", dashboardStackColor2End));
+            properties.add(new ReportNumericProperty("dashboardReportHeaderBackgroundColor", dashboardReportHeaderBackgroundColor, dashboardReportHeaderBackgroundColorEnabled));
+            properties.add(new ReportNumericProperty("dashboardReportHeaderTextColor", dashboardReportHeaderTextColor, dashboardReportHeaderTextColorEnabled));
+
+            properties.add(new ReportNumericProperty("dashboardStack1ColorStart", dashboardStack1ColorStart, dashboardStack1ColorStartEnabled));
+            properties.add(new ReportNumericProperty("dashboardStack1ColorEnd", dashboardStack1ColorEnd, dashboardStack1ColorEndEnabled));
+            properties.add(new ReportNumericProperty("dashboardStack2ColorStart", dashboardStackColor2Start, dashboardStackColor2StartEnabled));
+            properties.add(new ReportNumericProperty("dashboardStack2ColorEnd", dashboardStackColor2End, dashboardStackColor2EndEnabled));
             properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
             properties.add(ReportMultiColorProperty.fromColors(secondaryMultiColors, "secondaryMultiColors"));
         }
@@ -372,6 +469,12 @@ public class ApplicationSkin implements Serializable {
         headerEndEnabled = propertyEnabled(properties, "headerEnd");
         reportHeaderTextColor = (int) findNumberProperty(properties, "reportHeaderTextColor", 0);
         reportHeaderTextColorEnabled = propertyEnabled(properties, "reportHeaderTextColor");
+
+        dashboardReportHeaderBackgroundColor = (int) findNumberProperty(properties, "dashboardReportHeaderBackgroundColor", 0);
+        dashboardReportHeaderBackgroundColorEnabled = propertyEnabled(properties, "dashboardReportHeaderBackgroundColor");
+        dashboardReportHeaderTextColor = (int) findNumberProperty(properties, "dashboardReportHeaderTextColor", 0);
+        dashboardReportHeaderTextColorEnabled = propertyEnabled(properties, "dashboardReportHeaderTextColor");
+
         tableColorStart = (int) findNumberProperty(properties, "tableColorStart", 0);
         tableColorStartEnabled = propertyEnabled(properties, "tableColorStart");
         tableColorEnd = (int) findNumberProperty(properties, "tableColorEnd", 0);
@@ -379,9 +482,13 @@ public class ApplicationSkin implements Serializable {
         textColor = (int) findNumberProperty(properties, "textColor", 0);
         textColorEnabled = propertyEnabled(properties, "textColor");
         dashboardStack1ColorStart = (int) findNumberProperty(properties, "dashboardStack1ColorStart", 0);
+        dashboardStack1ColorStartEnabled = propertyEnabled(properties, "dashboardStack1ColorStart");
         dashboardStack1ColorEnd = (int) findNumberProperty(properties, "dashboardStack1ColorEnd", 0);
+        dashboardStack1ColorEndEnabled = propertyEnabled(properties, "dashboardStack1ColorEnd");
         dashboardStackColor2Start = (int) findNumberProperty(properties, "dashboardStack2ColorStart", 0);
+        dashboardStackColor2StartEnabled = propertyEnabled(properties, "dashboardStack2ColorStart");
         dashboardStackColor2End = (int) findNumberProperty(properties, "dashboardStack2ColorEnd", 0);
+        dashboardStackColor2EndEnabled = propertyEnabled(properties, "dashboardStack2ColorEnd");
         multiColors = multiColorProperty(properties, "multiColors");
         secondaryMultiColors = multiColorProperty(properties, "secondaryMultiColors");
         dataSourceTags = findBooleanProperty(properties, "dataSourceTags", false);

@@ -1,9 +1,11 @@
 package com.easyinsight.datafeeds.redbooth;
 
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisDimension;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -24,6 +26,9 @@ import java.util.Map;
 public class RedboothProjectSource extends RedboothBaseSource {
     public static final String ID = "ID";
     public static final String NAME = "Name";
+    public static final String CREATED_AT = "Name";
+    public static final String UPDATED_AT = "Name";
+    public static final String ARCHIVED = "Name";
 
     public RedboothProjectSource() {
         setFeedName("Projects");
@@ -32,6 +37,9 @@ public class RedboothProjectSource extends RedboothBaseSource {
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
         fieldBuilder.addField(ID, new AnalysisDimension());
         fieldBuilder.addField(NAME, new AnalysisDimension());
+        fieldBuilder.addField(ARCHIVED, new AnalysisDimension());
+        fieldBuilder.addField(CREATED_AT, new AnalysisDateDimension());
+        fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
     }
 
     @Override
@@ -48,7 +56,17 @@ public class RedboothProjectSource extends RedboothBaseSource {
         List<Map> organizations = (List<Map>) base.get("objects");
         for (Map org : organizations) {
             IRow row = dataSet.createRow();
+            String name = getJSONValue(org, "name");
+            if ("Personal project".equals(name)) {
+                continue;
+            }
+            String archived = getJSONValue(org, "archived");
+            Value createdAt = getDate(org, "created_at");
+            Value updatedAt = getDate(org, "created_at");
             row.addValue(keys.get(ID), getJSONValue(org, "id"));
+            row.addValue(keys.get(CREATED_AT), createdAt);
+            row.addValue(keys.get(UPDATED_AT), updatedAt);
+            row.addValue(keys.get(ARCHIVED), archived);
             row.addValue(keys.get(NAME), getJSONValue(org, "name"));
         }
         return dataSet;

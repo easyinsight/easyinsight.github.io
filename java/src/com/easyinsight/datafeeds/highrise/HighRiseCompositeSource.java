@@ -750,8 +750,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                     new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CONTACTS, HighRiseCaseJoinSource.CONTACT_ID,
                             HighRiseContactSource.CONTACT_ID)), fields)));
             intentions.add(new AddFilterIntention(excludeFilter(HighRiseDealSource.DEAL_NAME, report, fields)));
-            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
-            reportPropertiesIntention.setFullJoins(true);
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention(IntentionSuggestion.FULL_JOINS);
             Set<AnalysisItem> items = report.getAllAnalysisItems();
             if (items.isEmpty()) {
                 intentions.add(new AddReportFieldIntention(findFieldFromList(HighRiseDealSource.DEAL_NAME, fields)));
@@ -773,8 +772,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                         HighRiseCompanySource.COMPANY_ID, false, true, false, true)
             ), fields)));
             intentions.add(new AddFilterIntention(excludeFilter(HighRiseCaseSource.CASE_NAME, report, fields)));
-            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
-            reportPropertiesIntention.setFullJoins(true);
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention(IntentionSuggestion.FULL_JOINS);
             intentions.add(reportPropertiesIntention);
             DerivedAnalysisDimension placeHolder = new DerivedAnalysisDimension();
             placeHolder.setConcrete(false);
@@ -820,8 +818,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                         HighRiseCompanySource.COMPANY_ID),
                 new ChildConnection(FeedType.HIGHRISE_CASE_JOIN, FeedType.HIGHRISE_CONTACTS, HighRiseCaseJoinSource.CONTACT_ID,
                         HighRiseContactSource.CONTACT_ID)), fields)));
-            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention();
-            reportPropertiesIntention.setFullJoins(true);
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention(IntentionSuggestion.FULL_JOINS);
             intentions.add(reportPropertiesIntention);
             intentions.add(new AddFilterIntention(excludeFilter(HighRiseTaskSource.BODY, report, fields)));
             DerivedAnalysisDimension taskCompleted = new DerivedAnalysisDimension();

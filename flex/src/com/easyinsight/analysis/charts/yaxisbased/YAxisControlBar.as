@@ -48,12 +48,12 @@ public class YAxisControlBar extends ReportControlBar implements IReportControlB
         groupingLabel.text = "Y Axis Grouping:";
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
-        addDropAreaGrouping(yAxisGrouping);
+        addDropAreaGrouping(yAxisGrouping, null, yAxisDefinition);
         var measureLabel:Label = new Label();
         measureLabel.text = "X Axis Measure:";
         measureLabel.setStyle("fontSize", 14);
         addChild(measureLabel);
-        addDropAreaGrouping(measureGrouping);
+        addDropAreaGrouping(measureGrouping, null, yAxisDefinition);
          if (yAxisDefinition.yaxis != null) {
             yAxisGrouping.addAnalysisItem(yAxisDefinition.yaxis);
         }

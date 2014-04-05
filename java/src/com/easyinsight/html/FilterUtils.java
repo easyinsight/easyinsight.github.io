@@ -86,10 +86,16 @@ public class FilterUtils {
             AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
             String value = curFilter != null ? (String) curFilter.get("selected") : null;
             if (value != null) {
-                long fieldID = Long.parseLong(value);
+                //long fieldID = Long.parseLong(value);
+                int level = 0;
+                if (value.contains("|")) {
+                    String[] tokens = value.split("\\|");
+                    value = tokens[0];
+                    level = Integer.parseInt(tokens[1]);
+                }
                 List<AnalysisItemSelection> possibles = new DataService().possibleFields(analysisItemFilterDefinition, null, null, null);
                 for (AnalysisItemSelection possible : possibles) {
-                    if (possible.getAnalysisItem().getAnalysisItemID() == fieldID) {
+                    if (possible.getAnalysisItem().toDisplay().equals(value) && level == possible.getCustomDateLevel()) {
                         analysisItemFilterDefinition.setTargetItem(possible.getAnalysisItem());
                         break;
                     }

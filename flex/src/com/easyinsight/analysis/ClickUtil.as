@@ -50,9 +50,6 @@ public class ClickUtil {
                 if (altKey != null) {
                     values = data[altKey + "_drill"];
                 }
-                if (values == null && DrillThrough(defaultLink).passThroughField != null) {
-                    values = data[analysisItem.qualifiedName() + "_drill"];
-                }
                 utils.addItem(this);
                 var drillThrough:DrillThrough = defaultLink as DrillThrough;
                 var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, data, analysisItem, report, altKey, values);

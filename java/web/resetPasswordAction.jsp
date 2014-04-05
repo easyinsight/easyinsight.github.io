@@ -1,7 +1,5 @@
 <%@ page import="com.easyinsight.users.UserService" %>
-<%@ page import="java.util.regex.Pattern" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.Arrays" %>
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.List" %>
 <%@ page contentType="text/html; charset=UTF-8" %>

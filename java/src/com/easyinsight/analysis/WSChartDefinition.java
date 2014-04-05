@@ -2,12 +2,16 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
+import com.easyinsight.intention.Intention;
+import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.intention.ReportPropertiesIntention;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.MinMaxComponent;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -161,6 +165,25 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         List<IComponent> components = super.createComponents();
         components.add(new MinMaxComponent());
         return components;
+    }
+
+    public List<IntentionSuggestion> suggestIntentions(WSAnalysisDefinition report) {
+        List<IntentionSuggestion> suggestions = new ArrayList<IntentionSuggestion>();
+        if (report.getBaseDate() == null || "".equals(report.getBaseDate())) {
+            suggestions.add(new IntentionSuggestion("Set up Comparison",
+                    "Set up a date field for comparisons.",
+                    IntentionSuggestion.SCOPE_REPORT, IntentionSuggestion.CONFIGURE_DATE_COMPARISON, IntentionSuggestion.OTHER));
+        }
+        return suggestions;
+    }
+
+    public List<Intention> createIntentions(List<AnalysisItem> fields, int type) throws SQLException {
+        if (type == IntentionSuggestion.CONFIGURE_DATE_COMPARISON) {
+            ReportPropertiesIntention reportPropertiesIntention = new ReportPropertiesIntention(IntentionSuggestion.CONFIGURE_DATE_COMPARISON);
+            return Arrays.asList((Intention) reportPropertiesIntention);
+        } else {
+            return super.createIntentions(fields, type);
+        }
     }
 
     @Override

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import com.easyinsight.intention.IntentionSuggestion;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.*;
 import org.antlr.runtime.RecognitionException;
 import org.jgrapht.UndirectedGraph;
@@ -107,9 +108,20 @@ public class CompositeFeed extends Feed {
             compositeFeedNodes.add(reportNode);
         }
 
+        /*if (insightRequestMetadata.getBaseDate() != null) {
+            try {
+                return blah(insightRequestMetadata, analysisItems, compositeFeedNodes, conn, filters);
+            } catch (CloneNotSupportedException e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            }
+        }*/
+
         List<IJoin> connections = null;
 
         boolean joinsOverridden = false;
+
+
 
         if (insightRequestMetadata.getJoinOverrides() != null && insightRequestMetadata.getJoinOverrides().size() > 0) {
             connections = new ArrayList<IJoin>();
@@ -217,6 +229,8 @@ public class CompositeFeed extends Feed {
 
         // match each field with its appropriate ad hoc source
 
+
+
         for (CompositeFeedNode node : compositeFeedNodes) {
             QueryStateNode queryStateNode = node.createQueryStateNode(conn, getFields(), insightRequestMetadata, filters, this);
             QueryNodeKey queryNodeKey = node.createQueryNodeKey();
@@ -246,6 +260,17 @@ public class CompositeFeed extends Feed {
                             queryStateNode.addFilter(filterDefinition);
                         } else if (alwaysPassThrough(filterDefinition.getField())) {
                             queryStateNode.addFilter(filterDefinition);
+                        }
+                    } else if (filterDefinition instanceof OrFilter) {
+                        OrFilter orFilter = (OrFilter) filterDefinition;
+                        boolean matched = true;
+                        for (FilterDefinition child : orFilter.getFilters()) {
+                            if (!queryStateNode.handles(child.getField())) {
+                                matched = false;
+                            }
+                        }
+                        if (matched) {
+                            queryStateNode.addFilter(orFilter);
                         }
                     }
                 }

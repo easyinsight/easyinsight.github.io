@@ -88,6 +88,10 @@
             super.createChildren();
             if (dashboardReportViewComponent.dashboardEditorMetadata.fixedID) {
                 removeChild(navigateButton);
+                removeChild(configureButton);
+            }
+            if (dashboardReportViewComponent.dashboardReport.recommendedTag == 0) {
+                removeChild(configureButton);
             }
         }
 

@@ -12,8 +12,6 @@
 
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.controls.Alert;
-
         import mx.core.Application;
 
         import mx.core.Container;

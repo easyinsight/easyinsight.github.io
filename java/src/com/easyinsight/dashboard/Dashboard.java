@@ -77,6 +77,24 @@ public class Dashboard implements Cloneable, Serializable {
     private long phoneVersion;
     private List<SavedConfiguration> configurations;
     private String colorSet;
+    private int reportHeaderBackgroundColor = 0xDDDDDD;
+    private int reportHeaderTextColor;
+
+    public int getReportHeaderBackgroundColor() {
+        return reportHeaderBackgroundColor;
+    }
+
+    public void setReportHeaderBackgroundColor(int reportHeaderBackgroundColor) {
+        this.reportHeaderBackgroundColor = reportHeaderBackgroundColor;
+    }
+
+    public int getReportHeaderTextColor() {
+        return reportHeaderTextColor;
+    }
+
+    public void setReportHeaderTextColor(int reportHeaderTextColor) {
+        this.reportHeaderTextColor = reportHeaderTextColor;
+    }
 
     public String getColorSet() {
         return colorSet;

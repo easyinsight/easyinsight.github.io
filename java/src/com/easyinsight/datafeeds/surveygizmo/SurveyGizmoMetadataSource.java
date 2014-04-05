@@ -4,6 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
@@ -55,6 +56,12 @@ public class SurveyGizmoMetadataSource extends SurveyGizmoBaseSource {
     public static final String CONTACT_ID = "Contact ID";
     public static final String SUBMIT_DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
     public static final String DELIMITER = "|";
+
+
+    public SurveyGizmoMetadataSource() {
+        setFeedName("Metadata");
+    }
+
     private String formID;
 
     public void setFormID(String formID) {
@@ -130,7 +137,12 @@ public class SurveyGizmoMetadataSource extends SurveyGizmoBaseSource {
         Set<String> lists = allListAnalysisItems();
         DataSet ds = new DataSet();
         DateFormat df = new SimpleDateFormat(SUBMIT_DATE_FORMAT);
-        SurveyGizmoCompositeSource surveyGizmoCompositeSource = (SurveyGizmoCompositeSource) parentDefinition;
+        SurveyGizmoCompositeSource surveyGizmoCompositeSource = null;
+        try {
+            surveyGizmoCompositeSource = (SurveyGizmoCompositeSource) new FeedStorage().getFeedDefinitionData(parentDefinition.getParentSourceID(), conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         HttpClient httpClient = new HttpClient();
         JSONObject jo = SurveyGizmoUtils.runRequest("/survey/" + formID + "/surveyresponse", httpClient, surveyGizmoCompositeSource, new ArrayList<NameValuePair>());
         JSONArray data = (JSONArray) jo.get("data");

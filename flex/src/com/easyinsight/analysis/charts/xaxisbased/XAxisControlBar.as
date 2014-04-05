@@ -48,11 +48,13 @@ public class XAxisControlBar extends ReportControlBar implements IReportControlB
         measureLabel.text = "Y Axis Measure:";
         measureLabel.setStyle("fontSize", 14);
         addChild(measureLabel);
+        measureGrouping.report = xAxisDefinition;
         addDropAreaGrouping(measureGrouping);
         var groupingLabel:Label = new Label();
         groupingLabel.text = "X Axis Grouping:";
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
+        xAxisGrouping.report = xAxisDefinition;
         addDropAreaGrouping(xAxisGrouping);
          if (xAxisDefinition.xaxis != null) {
             xAxisGrouping.addAnalysisItem(xAxisDefinition.xaxis);

@@ -56,6 +56,8 @@ public class StyleConfiguration {
         items.addItem(new NumericReportFormItem("Border Thickness", "borderThickness", dashboard.borderThickness, dashboard, 0, 100));
         items.addItem(new NumericReportFormItem("Report Horizontal Padding", "reportHorizontalPadding", dashboard.reportHorizontalPadding, dashboard, 0, 100));
         items.addItem(new ColorReportFormItem("Border Color", "borderColor",  dashboard.borderColor, dashboard));
+        items.addItem(new ColorReportFormItem("Report Header Background Color", "reportHeaderBackgroundColor",  dashboard.reportHeaderBackgroundColor, dashboard));
+        items.addItem(new ColorReportFormItem("Report Header Text Color", "reportHeaderTextColor",  dashboard.reportHeaderTextColor, dashboard));
         items.addItem(new ColorReportFormItem("Background Color", "backgroundColor",  dashboard.backgroundColor, dashboard));
         items.addItem(new ColorReportFormItem("Stack 1 Fill Start", "stackFill1Start",  dashboard.stackFill1Start, dashboard));
         items.addItem(new ColorReportFormItem("Stack 1 Fill End", "stackFill1SEnd",  dashboard.stackFill1SEnd, dashboard));
@@ -107,6 +109,10 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Font Color", "color",  DashboardTextElement(dashboardElement).color, dashboardElement));
             items.addItem(new NumericReportFormItem("Font Size", "fontSize", DashboardTextElement(dashboardElement).fontSize, dashboardElement, 8, 48));
             items.addItem(new CheckBoxReportFormItem("Markdown", "markdown", DashboardTextElement(dashboardElement).markdown, dashboardElement));
+            items.addItem(new NumericReportFormItem("Padding Left", "paddingLeft", dashboardElement.paddingLeft, dashboardElement, 0, 100));
+            items.addItem(new NumericReportFormItem("Padding Right", "paddingRight", dashboardElement.paddingRight, dashboardElement, 0, 100));
+            items.addItem(new NumericReportFormItem("Padding Top", "paddingTop", dashboardElement.paddingTop, dashboardElement, 0, 100));
+            items.addItem(new NumericReportFormItem("Padding Bottom", "paddingBottom", dashboardElement.paddingBottom, dashboardElement, 0, 100));
         }
         if (dashboardElement is DashboardStack) {
             items.addItem(new CheckBoxReportFormItem("Consolidate Header Elements", "consolidateHeaderElements", DashboardStack(dashboardElement).consolidateHeaderElements, dashboardElement));

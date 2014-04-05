@@ -30,19 +30,6 @@ public class StandardReportPipeline extends Pipeline {
 
         //components.add(new ReportPreHandleComponent());
 
-        for (AnalysisItem analysisItem : reportItems) {
-            if (analysisItem.getLinks() != null) {
-                for (Link link : analysisItem.getLinks()) {
-                    if (link instanceof DrillThrough) {
-                        DrillThrough drillThrough = (DrillThrough) link;
-                        if (drillThrough.getPassThroughField() != null) {
-                            components.add(new DrillthroughComponent(drillThrough.getPassThroughField()));
-                        }
-                    }
-                }
-            }
-        }
-
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
@@ -118,6 +105,27 @@ public class StandardReportPipeline extends Pipeline {
                 for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                     if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
                         continue;
+                    }
+                    if (filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName()) && filterDefinition.getField() != null) {
+                        if (filterDefinition.getField() instanceof DerivedAnalysisDimension) {
+                            DerivedAnalysisDimension derivedAnalysisDimension = (DerivedAnalysisDimension) filterDefinition.getField();
+                            if (!derivedAnalysisDimension.isApplyBeforeAggregation()) {
+                                insightRequestMetadata.getWarnings().add("Filter on " + derivedAnalysisDimension.toDisplay() + " is row level while the field itself is not.");
+                                continue;
+                            }
+                        } else if (filterDefinition.getField() instanceof DerivedAnalysisDateDimension) {
+                            DerivedAnalysisDateDimension derivedAnalysisDimension = (DerivedAnalysisDateDimension) filterDefinition.getField();
+                            if (!derivedAnalysisDimension.isApplyBeforeAggregation()) {
+                                insightRequestMetadata.getWarnings().add("Filter on " + derivedAnalysisDimension.toDisplay() + " is row level while the field itself is not.");
+                                continue;
+                            }
+                        } else if (filterDefinition.getField() instanceof AnalysisCalculation) {
+                            AnalysisCalculation derivedAnalysisDimension = (AnalysisCalculation) filterDefinition.getField();
+                            if (!derivedAnalysisDimension.isApplyBeforeAggregation()) {
+                                insightRequestMetadata.getWarnings().add("Filter on " + derivedAnalysisDimension.toDisplay() + " is row level while the field itself is not.");
+                                continue;
+                            }
+                        }
                     }
                     if (filterDefinition.isEnabled() && Pipeline.BEFORE.equals(filterDefinition.getPipelineName())) {
                         compFilters.add(filterDefinition);
@@ -264,7 +272,6 @@ public class StandardReportPipeline extends Pipeline {
                 }
             }
             endComponent.add(new LimitsComponent());
-            endComponent.add(new DrillThroughDecorationComponent());
             components.addAll(report.createComponents());
             endComponent.add(new MarmotHerderComponent());
             endComponent.add(new SortComponent());

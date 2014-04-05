@@ -18,21 +18,21 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            if (problems.length > 0) {
+            if (problems != null && problems.length > 0) {
                 var p1Button:LinkButton = new LinkButton();
                 p1Button.addEventListener(MouseEvent.CLICK, problemClick);
                 p1Button.styleName = "boldErrorButton";
                 p1Button.label = problems.length + "" + ((problems.length > 1) ? " problems" : "problem");
                 addChild(p1Button);
             }
-            if (warnings.length > 0) {
+            if (warnings != null && warnings.length > 0) {
                 var w1Button:LinkButton = new LinkButton();
                 w1Button.styleName = "boldWarningButton";
                 w1Button.addEventListener(MouseEvent.CLICK, warningClick);
                 w1Button.label = warnings.length + "" + ((warnings.length > 1) ? " warnings" : "warning");
                 addChild(w1Button);
             }
-            if (youShouldDoThis.length > 0) {
+            if (youShouldDoThis != null && youShouldDoThis.length > 0) {
                 var y1Button:LinkButton = new LinkButton();
                 y1Button.styleName = "boldRecommendedButton";
                 y1Button.addEventListener(MouseEvent.CLICK, warningClick);

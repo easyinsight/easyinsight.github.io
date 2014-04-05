@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.wufoo;
 
+import com.easyinsight.analysis.ReportException;
 import com.easyinsight.datafeeds.FeedDefinition;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -38,6 +39,8 @@ public class WufooForms extends WufooBaseSource {
                 forms.put(id, new WufooForm(id, name));
             }
             return forms;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
