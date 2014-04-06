@@ -59,9 +59,7 @@ public class Trend {
                 TrendOutcome trendOutcome = entry.getValue();
                 if (trendOutcome.getNow() == null) {
                     trendOutcome.setNow(new EmptyValue());
-                    System.out.println("null now value");
                 } else {
-                    System.out.println("now value = " + trendOutcome.getNow().toDouble());
                 }
                 if (trendOutcome.getHistorical() == null) {
                     trendOutcome.setHistorical(new EmptyValue());

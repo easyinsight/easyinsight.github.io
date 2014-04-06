@@ -3676,11 +3676,13 @@ public class ExportService {
 
                         if (headerItem == analysisItem) {
                             if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
-                                double summary = listDataResults.getSummaries()[j];
-                                if (Double.isNaN(summary) || Double.isInfinite(summary)) {
-                                    summary = 0;
+                                Value summary = (Value) listDataResults.getAdditionalProperties().get("summary" + headerItem.qualifiedName());
+
+                                double doubleValue = summary.toDouble();
+                                if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
+                                    doubleValue = 0;
                                 }
-                                StringBuilder styleString = new StringBuilder(tdStyle);
+                                StringBuilder styleString = new StringBuilder("text-align:");
                                 String align = "left";
                                 if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
                                     TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
@@ -3700,8 +3702,22 @@ public class ExportService {
                                 } else {
                                     styleString.append(align);
                                 }
+                                if (summary.getValueExtension() != null && summary.getValueExtension() instanceof TextValueExtension) {
+                                    TextValueExtension textValueExtension = (TextValueExtension) summary.getValueExtension();
+                                    if (textValueExtension.getColor() != 0) {
+                                        String hexString = createHexString(textValueExtension.getColor());
+                                        styleString.append(";color:").append(hexString);
+                                    }
+                                    if (textValueExtension.getBackgroundColor() != TextValueExtension.WHITE) {
+                                        String hexString = createHexString(textValueExtension.getBackgroundColor());
+                                        styleString.append(";background-color:").append(hexString);
+                                    }
+                                    if (textValueExtension.isBold()) {
+                                        styleString.append(";font-weight:bold");
+                                    }
+                                }
                                 sb.append("<td style=\"").append(styleString.toString()).append("\">");
-                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(doubleValue), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                                 sb.append("</td>");
                             } else {
                                 sb.append("<td></td>");

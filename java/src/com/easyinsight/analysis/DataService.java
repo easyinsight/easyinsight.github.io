@@ -1418,7 +1418,6 @@ public class DataService {
             }
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, customFilters, drillthroughFilters);
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
-            System.out.println("now set had size = " + nowSet.getRows().size());
             YTDStuff ytdStuff = YTDUtil.getYTDStuff(wsytdDefinition, nowSet, insightRequestMetadata, conn, reportRetrievalNow.getPipeline().getPipelineData(),
                     reportRetrievalNow.getPipeline().getPipelineData().getAllRequestedItems());
             Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -1429,7 +1428,6 @@ public class DataService {
             ytdDataResults.setDataSet(ytdStuff.values);
             ytdDataResults.setDefinition(wsytdDefinition);
             reportViewBenchmark(wsytdDefinition, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
-            System.out.println("returning " + ytdDataResults.getDataSet().size() + " ytd results");
             return ytdDataResults;
         } catch (com.easyinsight.security.SecurityException se) {
             EmbeddedYTDDataResults results = new EmbeddedYTDDataResults();
