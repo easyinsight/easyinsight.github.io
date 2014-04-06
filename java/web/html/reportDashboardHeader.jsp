@@ -34,4 +34,5 @@
 
 
 <link rel="stylesheet" type="text/css" href="/css/jquery.jqplot.css" />
+<link rel="stylesheet" type="text/css" href="/css/jquery.dataTables.css" />
 <link href="/css/report.css" rel="stylesheet" />

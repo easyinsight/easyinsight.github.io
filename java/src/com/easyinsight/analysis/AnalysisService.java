@@ -529,10 +529,12 @@ public class AnalysisService {
         List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
 
         Map<Long, AnalysisItem> sourceMap = new HashMap<Long, AnalysisItem>();
+        Map<Long, AnalysisItem> allMap = new HashMap<Long, AnalysisItem>();
         for (AnalysisItem field : compositeFeedDefinition.getFields()) {
             if (field.isConcrete()) {
                 sourceMap.put(field.getKey().toBaseKey().getKeyID(), field);
             }
+            allMap.put(field.getKey().toBaseKey().getKeyID(), field);
         }
 
         configurableDataSources.add(new DataSourceDescriptor(compositeFeedDefinition.getFeedName(), compositeFeedDefinition.getDataFeedID(), compositeFeedDefinition.getFeedType().getType(),
@@ -549,6 +551,14 @@ public class AnalysisService {
                 sourceResult = sourceMap.get(sourceItem.getKey().toBaseKey().getKeyID());
             }
 
+            if (sourceResult == null) {
+                if (connection.getSourceItem() == null) {
+                    sourceResult = allMap.get(connection.getSourceJoin().getKeyID());
+                } else {
+                    sourceResult = allMap.get(sourceItem.getKey().toBaseKey().getKeyID());
+                }
+            }
+
 
             AnalysisItem targetResult;
             if (connection.getTargetItem() == null) {
@@ -556,9 +566,13 @@ public class AnalysisService {
             } else {
                 targetResult = sourceMap.get(targetItem.getKey().toBaseKey().getKeyID());
             }
-
-            System.out.println("Source Feed ID = " + connection.getSourceFeedID());
-            System.out.println("Target Feed ID = " + connection.getTargetFeedID());
+            if (targetResult == null) {
+                if (connection.getTargetItem() == null) {
+                    targetResult = allMap.get(connection.getTargetJoin().getKeyID());
+                } else {
+                    targetResult = allMap.get(targetItem.getKey().toBaseKey().getKeyID());
+                }
+            }
 
             JoinOverride joinOverride = new JoinOverride();
             String sourceName;
@@ -1444,6 +1458,7 @@ public class AnalysisService {
             }
 
 
+
             List<AnalysisItem> additionalAnalysisItems = new ArrayList<AnalysisItem>();
             Set<AnalysisItem> used = new HashSet<AnalysisItem>();
             if (drillThrough.getMarmotScript() != null && !"".equals(drillThrough.getMarmotScript())) {
@@ -1482,7 +1497,7 @@ public class AnalysisService {
                             } else {
                                 val = new StringValue(object.toString());
                             }
-                            FilterDefinition filter = constructDrillthroughFilter(drillThrough, stackedColumnChartDefinition.getStackItem(), data, val,
+                            FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, stackedColumnChartDefinition.getStackItem(), data, val,
                                     false, additionalAnalysisItems);
                             if (filter != null) {
                                 used.add(stackedColumnChartDefinition.getStackItem());
@@ -1499,7 +1514,7 @@ public class AnalysisService {
                             } else {
                                 val = new StringValue(object.toString());
                             }
-                            FilterDefinition filter = constructDrillthroughFilter(drillThrough, stackedColumnChartDefinition.getXaxis(), data, val,
+                            FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, stackedColumnChartDefinition.getXaxis(), data, val,
                                     false, additionalAnalysisItems);
                             if (filter != null) {
                                 used.add(stackedColumnChartDefinition.getXaxis());
@@ -1516,7 +1531,7 @@ public class AnalysisService {
                             } else {
                                 val = new StringValue(object.toString());
                             }
-                            FilterDefinition filter = constructDrillthroughFilter(drillThrough, stackedColumnChartDefinition.getStackItem(), data, val,
+                            FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, stackedColumnChartDefinition.getStackItem(), data, val,
                                     false, additionalAnalysisItems);
                             if (filter != null) {
                                 used.add(stackedColumnChartDefinition.getStackItem());
@@ -1534,7 +1549,7 @@ public class AnalysisService {
                                 } else {
                                     val = new StringValue(object.toString());
                                 }
-                                FilterDefinition filter = constructDrillthroughFilter(drillThrough, stackedColumnChartDefinition.getYaxis(), data, val,
+                                FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, stackedColumnChartDefinition.getYaxis(), data, val,
                                         false, additionalAnalysisItems);
                                 if (filter != null) {
                                     filters.add(filter);
@@ -1556,7 +1571,7 @@ public class AnalysisService {
                         } else {
                             val = new StringValue(target.toString());
                         }
-                        FilterDefinition filter = constructDrillthroughFilter(drillThrough, analysisItem, data, val, multiValue, additionalAnalysisItems);
+                        FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, analysisItem, data, val, multiValue, additionalAnalysisItems);
                         if (filter != null) {
                             filters.add(filter);
                         }
@@ -1620,7 +1635,7 @@ public class AnalysisService {
                                 } else {
                                     val = new StringValue(target.toString());
                                 }
-                                FilterDefinition filter = constructDrillthroughFilter(drillThrough, grouping, data, val, multiValue, additionalAnalysisItems);
+                                FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, grouping, data, val, multiValue, additionalAnalysisItems);
                                 if (filter != null) {
                                     filters.add(filter);
                                 }
@@ -1705,9 +1720,24 @@ public class AnalysisService {
         }
     }
 
-    private FilterDefinition constructDrillthroughFilter(DrillThrough drillThrough, AnalysisItem analysisItem, Map<String, Object> data, Value value, boolean multiValue, List<AnalysisItem> additionalAnalysisItems) {
+    private FilterDefinition constructDrillthroughFilter(WSAnalysisDefinition report, DrillThrough drillThrough, AnalysisItem analysisItem, Map<String, Object> data, Value value, boolean multiValue, List<AnalysisItem> additionalAnalysisItems) {
         FilterDefinition filterDefinition;
         AnalysisItem targetItem;
+        boolean hasExpandDates = false;
+        if (report.getFilterDefinitions() != null) {
+            for (FilterDefinition filter : report.getFilterDefinitions()) {
+                if (filter instanceof AnalysisItemFilterDefinition && ((AnalysisItemFilterDefinition) filter).getExpandDates() > 0) {
+                    AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
+                    String display = analysisItemFilterDefinition.getTargetItem().toDisplay();
+                    if (display.endsWith("Year") || display.endsWith("Quarter") || display.endsWith("Month") ||
+                            display.endsWith("Week") || display.endsWith("Day")) {
+                        hasExpandDates = true;
+
+
+                    }
+                }
+            }
+        }
         if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
             AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
             targetItem = hierarchyItem.getHierarchyLevel().getAnalysisItem();
@@ -1717,8 +1747,25 @@ public class AnalysisService {
         if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
             DerivedAnalysisDimension asTextDimension = new DerivedAnalysisDimension();
+            String targetDisplay = dateDimension.toDisplay();
+            if (report.getFilterDefinitions() != null) {
+                for (FilterDefinition filter : report.getFilterDefinitions()) {
+                    if (filter instanceof AnalysisItemFilterDefinition && ((AnalysisItemFilterDefinition) filter).getExpandDates() > 0) {
+                        AnalysisItemFilterDefinition analysisItemFilterDefinition = (AnalysisItemFilterDefinition) filter;
+                        String display = analysisItemFilterDefinition.getTargetItem().toDisplay();
+                        if (dateDimension.toDisplay().equals(display)) {
+                            if (display.endsWith("Year") || display.endsWith("Quarter") || display.endsWith("Month") ||
+                                    display.endsWith("Week") || display.endsWith("Day")) {
+                                int endIndex = display.lastIndexOf(" ");
+                                targetDisplay = display.substring(0, endIndex);
+                            }
+                        }
+                    }
+                }
+            }
+
             additionalAnalysisItems.add(asTextDimension);
-            asTextDimension.setKey(new NamedKey(dateDimension.toDisplay() + dateDimension.getDateLevel() + " for Drillthrough"));
+            asTextDimension.setKey(new NamedKey(targetDisplay + "." + dateDimension.getDateLevel() + " for Drillthrough"));
             asTextDimension.setApplyBeforeAggregation(true);
             String format = "yyyy-MM-dd";
             if (dateDimension.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
@@ -1746,7 +1793,7 @@ public class AnalysisService {
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT) {
                 format = "qq";
             }
-            asTextDimension.setDerivationCode(MessageFormat.format("dateformatnoshift([{0}], \"{1}\")", dateDimension.toDisplay(), format));
+            asTextDimension.setDerivationCode(MessageFormat.format("dateformatnoshift([{0}], \"{1}\")", targetDisplay, format));
             //asTextDimension.setDerivationCode("dateformatnoshift(datelevel([" + dateDimension.toDisplay() + "], \"" + dateDimension.getDateLevel()+"\"), \"yyyy-MM-dd\")");
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
             filterValueDefinition.setField(asTextDimension);
