@@ -248,7 +248,7 @@
                 dsList = new SimplifiedDataSourceSpecificList();
             }
 
-            IDataSourceSpecificList(dsList).showBack = masterDataSources.length > 1;
+            IDataSourceSpecificList(dsList).showBack = true;
             dsList.data = dataSourceDescriptor;
             IDataSourceSpecificList(dsList).tags = tags;
             dsList.addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
