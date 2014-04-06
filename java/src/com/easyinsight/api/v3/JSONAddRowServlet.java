@@ -41,62 +41,69 @@ public class JSONAddRowServlet extends JSONServlet {
 
     @Override
     protected ResponseInfo processJSON(JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
-        JSONObject returnObject = new JSONObject();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        String dataSourceKey = request.getParameter("dataSourceID");
         DataStorage dataStorage = null;
-        String action = (String) jsonObject.get("action");
-        JSONArray rows = (JSONArray) jsonObject.get("rows");
-        long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
-        FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-        Map<String, AnalysisItem> fieldMap = new HashMap<String, AnalysisItem>();
-        for (AnalysisItem field : dataSource.getFields()) {
-            fieldMap.put(field.getKey().toKeyString().toLowerCase(), field);
-        }
-        DataSet ds = new DataSet();
-        for (Object o : rows) {
-            JSONObject row = (JSONObject) o;
-            IRow curRow = ds.createRow();
-            for (Map.Entry<String, Object> entry : row.entrySet()) {
-                AnalysisItem analysisItem = fieldMap.get(entry.getKey().toLowerCase());
-                Object val = entry.getValue();
-                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                    if (val instanceof Number) {
-                        curRow.addValue(analysisItem.getKey(), new Date(((Number) val).longValue()));
-                    } else if ("".equals(val)) {
-                        curRow.addValue(analysisItem.getKey(), new EmptyValue());
+        try {
+            JSONObject returnObject = new JSONObject();
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            String dataSourceKey = request.getParameter("dataSourceID");
+
+            String action = (String) jsonObject.get("action");
+            JSONArray rows = (JSONArray) jsonObject.get("rows");
+            long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            Map<String, AnalysisItem> fieldMap = new HashMap<String, AnalysisItem>();
+            for (AnalysisItem field : dataSource.getFields()) {
+                fieldMap.put(field.getKey().toKeyString().toLowerCase(), field);
+            }
+            DataSet ds = new DataSet();
+            for (Object o : rows) {
+                JSONObject row = (JSONObject) o;
+                IRow curRow = ds.createRow();
+                for (Map.Entry<String, Object> entry : row.entrySet()) {
+                    AnalysisItem analysisItem = fieldMap.get(entry.getKey().toLowerCase());
+                    Object val = entry.getValue();
+                    if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                        if (val instanceof Number) {
+                            curRow.addValue(analysisItem.getKey(), new Date(((Number) val).longValue()));
+                        } else if ("".equals(val)) {
+                            curRow.addValue(analysisItem.getKey(), new EmptyValue());
+                        } else {
+                            curRow.addValue(analysisItem.getKey(), dateFormat.parse((String) val));
+                        }
+                    } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                        if(val instanceof Number)
+                            curRow.addValue(analysisItem.getKey(), ((Number) val).doubleValue());
+                        else
+                            curRow.addValue(analysisItem.getKey(), Double.parseDouble((String) val));
                     } else {
-                        curRow.addValue(analysisItem.getKey(), dateFormat.parse((String) val));
+                        curRow.addValue(analysisItem.getKey(), val.toString());
                     }
-                } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                    if(val instanceof Number)
-                        curRow.addValue(analysisItem.getKey(), ((Number) val).doubleValue());
-                    else
-                        curRow.addValue(analysisItem.getKey(), Double.parseDouble((String) val));
-                } else {
-                    curRow.addValue(analysisItem.getKey(), val.toString());
                 }
             }
+
+            dataStorage = DataStorage.writeConnection(dataSource, conn, SecurityUtil.getAccountID());
+
+            if ("add".equals(action) || ((action == null || "".equals(action)) && "post".equals(request.getMethod().toLowerCase()))) {
+                dataStorage.insertData(ds);
+                dataStorage.commit();
+            } else if("replace".equals(action) || ((action == null || "".equals(action)) && "put".equals(request.getMethod().toLowerCase()))) {
+                dataStorage.truncate();
+                dataStorage.insertData(ds);
+                dataStorage.commit();
+            }
+
+            PreparedStatement updateSourceStmt = conn.prepareStatement("UPDATE DATA_FEED SET LAST_REFRESH_START = ? WHERE DATA_FEED_ID = ?");
+            updateSourceStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+            updateSourceStmt.setLong(2, dataSource.getDataFeedID());
+            updateSourceStmt.executeUpdate();
+            updateSourceStmt.close();
+
+            return new ResponseInfo(ResponseInfo.ALL_GOOD, returnObject.toString());
+        } finally {
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
         }
-
-        dataStorage = DataStorage.writeConnection(dataSource, conn, SecurityUtil.getAccountID());
-
-        if ("add".equals(action) || ((action == null || "".equals(action)) && "post".equals(request.getMethod().toLowerCase()))) {
-            dataStorage.insertData(ds);
-            dataStorage.commit();
-        } else if("replace".equals(action) || ((action == null || "".equals(action)) && "put".equals(request.getMethod().toLowerCase()))) {
-            dataStorage.truncate();
-            dataStorage.insertData(ds);
-            dataStorage.commit();
-        }
-
-        PreparedStatement updateSourceStmt = conn.prepareStatement("UPDATE DATA_FEED SET LAST_REFRESH_START = ? WHERE DATA_FEED_ID = ?");
-        updateSourceStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-        updateSourceStmt.setLong(2, dataSource.getDataFeedID());
-        updateSourceStmt.executeUpdate();
-        updateSourceStmt.close();
-
-        return new ResponseInfo(ResponseInfo.ALL_GOOD, returnObject.toString());
 
 
 
