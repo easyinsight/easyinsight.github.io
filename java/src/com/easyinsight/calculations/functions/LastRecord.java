@@ -1,7 +1,6 @@
 package com.easyinsight.calculations.functions;
 
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.calculations.FunctionException;
@@ -56,24 +55,11 @@ public class LastRecord extends Function {
         String processName = minusQuotes(getParameter(1)).toString();
         ProcessCalculationCache processCalculationCache = (ProcessCalculationCache) calculationMetadata.getCache(new ProcessCacheBuilder(instanceIDField, sortField), processName);
         Value instanceValue = getParameter(0);
-        Value sortValue = getParameter(2);
         List<IRow> rows = processCalculationCache.rowsForValue(instanceValue);
         if (rows == null || rows.size() == 0) {
             return new EmptyValue();
         }
-        // find the row with this date...
-        IRow row = rows.get(rows.size() - 1);
-        if (targetField.hasType(AnalysisItemTypes.MEASURE)) {
-            Value measureValue = row.getValue(targetField);
-            Value rowSortValue = row.getValue(sortField);
-            if (sortValue.equals(rowSortValue)) {
-                return measureValue;
-            } else {
-                return new EmptyValue();
-            }
-        } else {
-            return row.getValue(targetField);
-        }
+        return rows.get(rows.size() - 1).getValue(targetField);
     }
 
     @Override
