@@ -22,26 +22,18 @@ import java.util.*;
  */
 public class InsightlyOpportunityToContactSource extends InsightlyBaseSource {
 
-    public static final String OPPORTUNITY_ID = "Link Opportunity ID";
+    public static final String OPPORTUNITY_ID = "Link Contact to Opportunity ID";
     public static final String CONTACT_ID = "Link Contact ID";
-    public static final String ROLE = "Link Role";
+    public static final String ROLE = "Link Contact to Role";
 
     public InsightlyOpportunityToContactSource() {
         setFeedName("Opportunity to Contact");
     }
 
-    @NotNull
-    @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(CONTACT_ID, OPPORTUNITY_ID, ROLE);
-    }
-
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-        fields.add(new AnalysisDimension(keys.get(CONTACT_ID)));
-        fields.add(new AnalysisDimension(keys.get(ROLE)));
-        fields.add(new AnalysisDimension(keys.get(OPPORTUNITY_ID)));
-        return fields;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(CONTACT_ID, new AnalysisDimension());
+        fieldBuilder.addField(ROLE, new AnalysisDimension());
+        fieldBuilder.addField(OPPORTUNITY_ID, new AnalysisDimension());
     }
 
     @Override
@@ -67,6 +59,6 @@ public class InsightlyOpportunityToContactSource extends InsightlyBaseSource {
 
     @Override
     public FeedType getFeedType() {
-        return FeedType.INSIGHTLY_OPPORTUNITY_TO_ORGANIZATION;
+        return FeedType.INSIGHTLY_OPPORTUNITY_TO_CONTACT;
     }
 }

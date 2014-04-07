@@ -39,6 +39,7 @@ public class RedboothTaskSource extends RedboothBaseSource {
     public static final String COUNT = "Task Count";
     public static final String TOTAL_SUBTASKS = "Total Subtasks";
     public static final String RESOLVED_SUBTASKS = "Resolved Subtasks";
+    public static final String TASK_URL = "Task URL";
 
     public RedboothTaskSource() {
         setFeedName("Tasks");
@@ -62,6 +63,7 @@ public class RedboothTaskSource extends RedboothBaseSource {
         fieldBuilder.addField(COMMENTS_COUNT, new AnalysisMeasure());
         fieldBuilder.addField(TOTAL_SUBTASKS, new AnalysisMeasure());
         fieldBuilder.addField(RESOLVED_SUBTASKS, new AnalysisMeasure());
+        fieldBuilder.addField(TASK_URL, new AnalysisDimension());
     }
 
     @Override
@@ -83,7 +85,8 @@ public class RedboothTaskSource extends RedboothBaseSource {
         for (Map ref : userList) {
             users.put(ref.get("id").toString(), ref.get("first_name").toString() + " " + ref.get("last_name").toString());
         }
-
+        // average # of days by project type - first due date and project creation date
+        //
         for (Map ref : people) {
             persons.put(ref.get("id").toString(), ref.get("user_id").toString());
         }
@@ -140,6 +143,8 @@ public class RedboothTaskSource extends RedboothBaseSource {
             row.addValue(RESOLVED_SUBTASKS, getJSONValue(org, "resolved_subtasks_count"));
             row.addValue(COMPLETED_AT, completionDate);
             row.addValue(keys.get(STATUS), status);
+            String url = "https://redbooth.com/a/#!/projects/" + id + "/tasks/" + id;
+            row.addValue(TASK_URL, url);
             row.addValue(CREATED_AT, getDate(org, "created_at"));
             row.addValue(UPDATED_AT, getDate(org, "updated_at"));
             row.addValue(COUNT, 1);

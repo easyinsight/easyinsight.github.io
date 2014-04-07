@@ -22,26 +22,18 @@ import java.util.*;
  */
 public class InsightlyOpportunityToOrganizationSource extends InsightlyBaseSource {
 
-    public static final String OPPORTUNITY_ID = "Link Opportunity ID";
+    public static final String OPPORTUNITY_ID = "Link Organization to Opportunity ID";
     public static final String ORGANIZATION_ID = "Link Organization ID";
-    public static final String ROLE = "Link Role";
+    public static final String ROLE = "Link Organization to Role";
 
     public InsightlyOpportunityToOrganizationSource() {
         setFeedName("Opportunity to Organization");
     }
 
-    @NotNull
-    @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(ORGANIZATION_ID, OPPORTUNITY_ID, ROLE);
-    }
-
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-        fields.add(new AnalysisDimension(keys.get(ORGANIZATION_ID)));
-        fields.add(new AnalysisDimension(keys.get(ROLE)));
-        fields.add(new AnalysisDimension(keys.get(OPPORTUNITY_ID)));
-        return fields;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(OPPORTUNITY_ID, new AnalysisDimension());
+        fieldBuilder.addField(ROLE, new AnalysisDimension());
+        fieldBuilder.addField(ORGANIZATION_ID, new AnalysisDimension());
     }
 
     @Override
