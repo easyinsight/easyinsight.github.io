@@ -26,9 +26,10 @@ import java.util.Map;
 public class RedboothProjectSource extends RedboothBaseSource {
     public static final String ID = "ID";
     public static final String NAME = "Name";
-    public static final String CREATED_AT = "Name";
-    public static final String UPDATED_AT = "Name";
-    public static final String ARCHIVED = "Name";
+    public static final String CREATED_AT = "Created At";
+    public static final String UPDATED_AT = "Updated At";
+    public static final String ARCHIVED = "Archived";
+    public static final String URL = "URL";
 
     public RedboothProjectSource() {
         setFeedName("Projects");
@@ -40,6 +41,7 @@ public class RedboothProjectSource extends RedboothBaseSource {
         fieldBuilder.addField(ARCHIVED, new AnalysisDimension());
         fieldBuilder.addField(CREATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
+        fieldBuilder.addField(URL, new AnalysisDimension());
     }
 
     @Override
@@ -63,11 +65,14 @@ public class RedboothProjectSource extends RedboothBaseSource {
             String archived = getJSONValue(org, "archived");
             Value createdAt = getDate(org, "created_at");
             Value updatedAt = getDate(org, "created_at");
-            row.addValue(keys.get(ID), getJSONValue(org, "id"));
+            String id = getJSONValue(org, "id");
+            row.addValue(keys.get(ID), id);
             row.addValue(keys.get(CREATED_AT), createdAt);
             row.addValue(keys.get(UPDATED_AT), updatedAt);
             row.addValue(keys.get(ARCHIVED), archived);
             row.addValue(keys.get(NAME), getJSONValue(org, "name"));
+            String url = "https://redbooth.com/a/#!/projects/" + id + "/tasks";
+            row.addValue(keys.get(URL), url);
         }
         return dataSet;
     }
