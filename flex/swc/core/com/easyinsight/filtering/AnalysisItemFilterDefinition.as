@@ -32,12 +32,15 @@ public class AnalysisItemFilterDefinition extends FilterDefinition {
     }
 
     override public function updateFromSaved(savedItemFilter:FilterDefinition):void {
+        if (savedItemFilter == null) {
+            return;
+        }
         super.updateFromSaved(savedItemFilter);
         var aFilter:AnalysisItemFilterDefinition = savedItemFilter as AnalysisItemFilterDefinition;
-        if (targetItem != null) {
+        if (targetItem != null && aFilter.targetItem != null) {
             targetItem.updateFromSaved(aFilter.targetItem);
         }
-        if (availableItems != null) {
+        if (availableItems != null && aFilter.availableItems != null) {
             for each (var aItem:AnalysisItem in availableItems) {
                 for each (var eItem:AnalysisItem in aFilter.availableItems) {
                     if (aItem.matches(eItem)) {
