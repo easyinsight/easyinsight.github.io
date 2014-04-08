@@ -200,7 +200,7 @@
                 dsList.removeEventListener("backToDataSources", backToSources);
             }
             dsList = new DataSourceSpecificList();
-            dsList.showBack = dataSources.length > 1;
+            dsList.showBack = true;
             dsList.data = dataSourceDescriptor;
             dsList.addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
             dsList.addEventListener("refresh", onRefresh);
