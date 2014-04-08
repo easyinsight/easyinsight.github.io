@@ -57,7 +57,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 
-    private Document projects;
+    private transient Document projects;
 
     public String getAccessToken() {
         return accessToken;
