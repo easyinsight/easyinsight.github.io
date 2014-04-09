@@ -667,7 +667,7 @@ public class InstallMetadata {
             FieldRule copiedRule = new FieldRule();
             copiedRule.setType(fieldRule.getType());
             copiedRule.setAll(fieldRule.isAll());
-            copiedRules.add(copiedRule);
+
             if (fieldRule.getTag() != null) {
                 Tag tag = fieldRule.getTag();
                 Tag replaceTag = tagReplacementMap.get(tag.getId());
@@ -732,6 +732,7 @@ public class InstallMetadata {
             if (fieldRule.getDefaultDate() != null) {
                 copiedRule.setDefaultDate(fieldRule.getDefaultDate());
             }
+            copiedRules.add(copiedRule);
         }
         new FeedService().saveFieldRules(targetSource.getDataFeedID(), copiedRules, conn);
     }

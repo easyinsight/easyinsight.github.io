@@ -172,9 +172,8 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
 
     @Override
     protected Collection<ChildConnection> getChildConnections() {
-        return Arrays.asList(new ChildConnection(FeedType.PIVOTAL_V5_PROJECT, FeedType.PIVOTAL_V5_ITERATION, PivotalTrackerV5ProjectSource.ID, PivotalTrackerV5IterationSource.PROJECT_ID),
-                new ChildConnection(FeedType.PIVOTAL_V5_ITERATION, FeedType.PIVOTAL_V5_STORY, PivotalTrackerV5IterationSource.ID, PivotalTrackerV5StorySource.ITERATION_ID, true),
-                new ChildConnection(FeedType.PIVOTAL_V5_PROJECT, FeedType.PIVOTAL_V5_STORY, PivotalTrackerV5ProjectSource.ID, PivotalTrackerV5StorySource.PROJECT_ID),
+        return Arrays.asList(new ChildConnection(FeedType.PIVOTAL_V5_PROJECT, FeedType.PIVOTAL_V5_STORY, PivotalTrackerV5ProjectSource.ID, PivotalTrackerV5StorySource.PROJECT_ID),
+                new ChildConnection(FeedType.PIVOTAL_V5_STORY, FeedType.PIVOTAL_V5_ITERATION, PivotalTrackerV5StorySource.ITERATION_ID, PivotalTrackerV5IterationSource.ID, true),
                 new ChildConnection(FeedType.PIVOTAL_V5_STORY, FeedType.PIVOTAL_V5_STORY_TO_LABEL, PivotalTrackerV5StorySource.ID, PivotalTrackerV5StoryToLabelSource.STORY_ID, true),
                 new ChildConnection(FeedType.PIVOTAL_V5_STORY_TO_LABEL, FeedType.PIVOTAL_V5_LABEL, PivotalTrackerV5StoryToLabelSource.LABEL_ID, PivotalTrackerV5LabelSource.ID, true),
                 new ChildConnection(FeedType.PIVOTAL_V5_LABEL, FeedType.PIVOTAL_V5_EPIC, PivotalTrackerV5LabelSource.ID, PivotalTrackerV5EpicSource.LABEL_ID, true));
