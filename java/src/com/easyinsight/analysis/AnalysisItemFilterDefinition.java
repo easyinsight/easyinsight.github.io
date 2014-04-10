@@ -354,10 +354,13 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
         JSONObject jo = super.toJSON(filterHTMLMetadata);
         List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, null, null, null);
         jo.put("type", "field_filter");
-        jo.put("selected", String.valueOf(targetItem.toDisplay()));
+
         JSONArray available = new JSONArray();
         for(AnalysisItemSelection analysisItem : itemsAvailable) {
             JSONObject j = new JSONObject();
+            if (analysisItem.getAnalysisItem().toDisplay().equals(targetItem.toDisplay())) {
+                jo.put("selected", analysisItem.getAnalysisItem().toDisplay() + "|" + analysisItem.getCustomDateLevel());
+            }
             j.put("value", analysisItem.getAnalysisItem().toDisplay() + "|" + analysisItem.getCustomDateLevel());
             if (useFullyQualifiedNames) {
                 j.put("label", analysisItem.getAnalysisItem().toDisplay());

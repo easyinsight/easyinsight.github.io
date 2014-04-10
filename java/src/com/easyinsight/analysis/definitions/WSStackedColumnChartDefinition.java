@@ -48,8 +48,10 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         if (limitsMetadata != null && limitsMetadata.isLimitEnabled()) {
 
             AnalysisItem xAxisItem = getXaxis();
+            if (getMeasures().size() == 0) {
+                return super.applyLimits(dataSet);
+            }
             AnalysisItem measureItem = getMeasures().get(0);
-            AnalysisItem stackAxisItem = getStackItem();
             final Map<Value, Aggregation> aggregationMap = new HashMap<Value, Aggregation>();
             AggregationFactory aggregationFactory = new AggregationFactory((AnalysisMeasure) measureItem, false);
             for (IRow row : dataSet.getRows()) {
@@ -70,23 +72,15 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
                     }
                 });
                 aggregationValues = aggregationValues.subList(0, limitsMetadata.getNumber());
-                //IRow otherRow = dataSet.createRow();
+
                 Iterator<IRow> iter = dataSet.getRows().iterator();
 
 
                 Map<Value, Aggregation> aggregateMap = new HashMap<Value, Aggregation>();
                 while (iter.hasNext()) {
                     IRow row = iter.next();
-                    //if (row != otherRow) {
                     Value value = row.getValue(xAxisItem);
-                    /*if (aggregationValues.contains(value)) {
-
-                    } else {
-                        row.addValue(xAxisItem.createAggregateKey(), new StringValue("Other"));
-                    }*/
-                    //}
                     if (!aggregationValues.contains(value)) {
-                        //row.addValue(yAxisItem.createAggregateKey(), new StringValue("Other"));
                         Value stackValue = row.getValue(stackItem.createAggregateKey());
                         Aggregation aggregation = aggregateMap.get(stackValue);
                         if (aggregation == null) {
@@ -94,7 +88,6 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
                             aggregateMap.put(stackValue, aggregation);
                         }
                         aggregation.addValue(row.getValue(measureItem));
-                        //others.add(row);
                         iter.remove();
                     }
                 }
@@ -119,6 +112,9 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         }
         if (stackLimit > 0) {
             AnalysisItem xAxisItem = getXaxis();
+            if (getMeasures().size() == 0) {
+                return super.applyLimits(dataSet);
+            }
             AnalysisItem measureItem = getMeasures().get(0);
             AnalysisItem stackAxisItem = getStackItem();
             final Map<Value, Aggregation> aggregationMap = new HashMap<Value, Aggregation>();
@@ -141,23 +137,14 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
                     }
                 });
                 aggregationValues = aggregationValues.subList(0, stackLimit);
-                //IRow otherRow = dataSet.createRow();
                 Iterator<IRow> iter = dataSet.getRows().iterator();
 
 
                 Map<Value, Aggregation> aggregateMap = new HashMap<Value, Aggregation>();
                 while (iter.hasNext()) {
                     IRow row = iter.next();
-                    //if (row != otherRow) {
                     Value value = row.getValue(stackAxisItem);
-                    /*if (aggregationValues.contains(value)) {
-
-                    } else {
-                        row.addValue(xAxisItem.createAggregateKey(), new StringValue("Other"));
-                    }*/
-                    //}
                     if (!aggregationValues.contains(value)) {
-                        //row.addValue(yAxisItem.createAggregateKey(), new StringValue("Other"));
                         Value stackValue = row.getValue(xAxisItem.createAggregateKey());
                         Aggregation aggregation = aggregateMap.get(stackValue);
                         if (aggregation == null) {
@@ -165,7 +152,6 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
                             aggregateMap.put(stackValue, aggregation);
                         }
                         aggregation.addValue(row.getValue(measureItem));
-                        //others.add(row);
                         iter.remove();
                     }
                 }

@@ -28,8 +28,10 @@ public class ProcessCalculationCache implements ICalculationCache {
         for (IRow row : dataSet.getRows()) {
             Value instanceIDValue = row.getValue(instanceID);
             Value sortValue = row.getValue(sortField);
-            if (sortValue.type() == Value.EMPTY) {
-                continue;
+            if (sortField != null) {
+                if (sortValue.type() == Value.EMPTY) {
+                    continue;
+                }
             }
             List<IRow> rows = rowMap.get(instanceIDValue);
             if (rows == null) {

@@ -66,7 +66,8 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         ResultSet rs = qStmt.executeQuery();
         List<CompositeFeedConnection> edges = new ArrayList<CompositeFeedConnection>();
         PreparedStatement queryConnStmt = conn.prepareStatement("SELECT SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID," +
-                "SOURCE_JOIN, TARGET_JOIN, SOURCE_ITEM_ID, TARGET_ITEM_ID, left_join, right_join, left_join_on_original, right_join_on_original, marmot_script, SOURCE_REPORT_ID, TARGET_REPORT_ID " +
+                "SOURCE_JOIN, TARGET_JOIN, SOURCE_ITEM_ID, TARGET_ITEM_ID, left_join, right_join, left_join_on_original, right_join_on_original, marmot_script, " +
+                "SOURCE_REPORT_ID, TARGET_REPORT_ID, SOURCE_CARDINALITY, TARGET_CARDINALITY, FORCE_OUTER_JOIN " +
                 " FROM COMPOSITE_CONNECTION WHERE COMPOSITE_CONNECTION_ID = ?");
         PreparedStatement nameStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
         PreparedStatement reportNameStmt = conn.prepareStatement("SELECT TITLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
@@ -118,8 +119,11 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                     boolean sourceJoinOnOriginal = connectionRS.getBoolean(9);
                     boolean targetJoinOnOriginal = connectionRS.getBoolean(10);
                     String marmotScript = connectionRS.getString(11);
+                    int sourceCardinality = connectionRS.getInt(14);
+                    int targetCardinality = connectionRS.getInt(15);
+                    int forceOuterJoin = connectionRS.getInt(16);
                     CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(sourceID, targetID, sourceItem, targetItem, sourceName, targetName,
-                            sourceJoin, targetJoin, sourceJoinOnOriginal, targetJoinOnOriginal, marmotScript);
+                            sourceJoin, targetJoin, sourceJoinOnOriginal, targetJoinOnOriginal, marmotScript, sourceCardinality, targetCardinality, forceOuterJoin);
                     compositeFeedConnection.setSourceReportID(sourceReportID);
                     compositeFeedConnection.setTargetReportID(targetReportID);
                     edges.add(compositeFeedConnection);
@@ -131,8 +135,11 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                     boolean sourceJoinOnOriginal = connectionRS.getBoolean(9);
                     boolean targetJoinOnOriginal = connectionRS.getBoolean(10);
                     String marmotScript = connectionRS.getString(11);
+                    int sourceCardinality = connectionRS.getInt(14);
+                    int targetCardinality = connectionRS.getInt(15);
+                    int forceOuterJoin = connectionRS.getInt(16);
                     CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(sourceID, targetID, sourceKey, targetKey, sourceName, targetName,
-                            sourceJoin, targetJoin, sourceJoinOnOriginal, targetJoinOnOriginal, marmotScript);
+                            sourceJoin, targetJoin, sourceJoinOnOriginal, targetJoinOnOriginal, marmotScript, sourceCardinality, targetCardinality, forceOuterJoin);
                     compositeFeedConnection.setSourceReportID(sourceReportID);
                     compositeFeedConnection.setTargetReportID(targetReportID);
                     edges.add(compositeFeedConnection);

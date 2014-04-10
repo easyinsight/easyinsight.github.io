@@ -1133,15 +1133,15 @@ public class ExportService {
                 } else if (absoluteValue < (60000 * 60)) {
                     int minutes = (int) (absoluteValue / 60000);
                     int seconds = (int) (absoluteValue / 1000) % 60;
-                    valueString = minutes + "m: " + seconds + "s";
+                    valueString = minutes + "m: " + (analysisMeasure.getPrecision() > 0 ? (seconds + "s") : "");
                 } else if (absoluteValue < (60000 * 60 * 24)) {
                     int hours = (int) (absoluteValue / (60000 * 60));
                     int minutes = (int) (absoluteValue % 24);
-                    valueString = hours + "h:" + minutes + "m";
+                    valueString = hours + "h:" + (analysisMeasure.getPrecision() > 0 ? (minutes + "m") : "");
                 } else {
                     int days = (int) (absoluteValue / (60000 * 60 * 24));
                     int hours = (int) (absoluteValue / (60000 * 60) % 24);
-                    valueString = days + "d:" + hours + "h";
+                    valueString = days + "d:" + (analysisMeasure.getPrecision() > 0 ? (hours + "h") : "");
                 }
                 if (doubleValue < 0) {
                     valueString = "(" + valueString + ")";
@@ -3677,48 +3677,51 @@ public class ExportService {
                         if (headerItem == analysisItem) {
                             if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
                                 Value summary = (Value) listDataResults.getAdditionalProperties().get("summary" + headerItem.qualifiedName());
-
-                                double doubleValue = summary.toDouble();
-                                if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
-                                    doubleValue = 0;
-                                }
-                                StringBuilder styleString = new StringBuilder("text-align:");
-                                String align = "left";
-                                if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
-                                    TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
-                                    if (textReportFieldExtension.getAlign() != null) {
-                                        if ("Left".equals(textReportFieldExtension.getAlign())) {
-                                            align = "left";
-                                        } else if ("Center".equals(textReportFieldExtension.getAlign())) {
-                                            align = "center";
-                                        } else if ("Right".equals(textReportFieldExtension.getAlign())) {
-                                            align = "right";
+                                if (summary == null) {
+                                    sb.append("<td></td>");
+                                } else {
+                                    double doubleValue = summary.toDouble();
+                                    if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
+                                        doubleValue = 0;
+                                    }
+                                    StringBuilder styleString = new StringBuilder("text-align:");
+                                    String align = "left";
+                                    if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                                        TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
+                                        if (textReportFieldExtension.getAlign() != null) {
+                                            if ("Left".equals(textReportFieldExtension.getAlign())) {
+                                                align = "left";
+                                            } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                                                align = "center";
+                                            } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                                                align = "right";
+                                            }
+                                        }
+                                        styleString.append(align);
+                                        if (textReportFieldExtension.getFixedWidth() > 0) {
+                                            styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
+                                        }
+                                    } else {
+                                        styleString.append(align);
+                                    }
+                                    if (summary.getValueExtension() != null && summary.getValueExtension() instanceof TextValueExtension) {
+                                        TextValueExtension textValueExtension = (TextValueExtension) summary.getValueExtension();
+                                        if (textValueExtension.getColor() != 0) {
+                                            String hexString = createHexString(textValueExtension.getColor());
+                                            styleString.append(";color:").append(hexString);
+                                        }
+                                        if (textValueExtension.getBackgroundColor() != TextValueExtension.WHITE) {
+                                            String hexString = createHexString(textValueExtension.getBackgroundColor());
+                                            styleString.append(";background-color:").append(hexString);
+                                        }
+                                        if (textValueExtension.isBold()) {
+                                            styleString.append(";font-weight:bold");
                                         }
                                     }
-                                    styleString.append(align);
-                                    if (textReportFieldExtension.getFixedWidth() > 0) {
-                                        styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
-                                    }
-                                } else {
-                                    styleString.append(align);
+                                    sb.append("<td style=\"").append(styleString.toString()).append("\">");
+                                    sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(doubleValue), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+                                    sb.append("</td>");
                                 }
-                                if (summary.getValueExtension() != null && summary.getValueExtension() instanceof TextValueExtension) {
-                                    TextValueExtension textValueExtension = (TextValueExtension) summary.getValueExtension();
-                                    if (textValueExtension.getColor() != 0) {
-                                        String hexString = createHexString(textValueExtension.getColor());
-                                        styleString.append(";color:").append(hexString);
-                                    }
-                                    if (textValueExtension.getBackgroundColor() != TextValueExtension.WHITE) {
-                                        String hexString = createHexString(textValueExtension.getBackgroundColor());
-                                        styleString.append(";background-color:").append(hexString);
-                                    }
-                                    if (textValueExtension.isBold()) {
-                                        styleString.append(";font-weight:bold");
-                                    }
-                                }
-                                sb.append("<td style=\"").append(styleString.toString()).append("\">");
-                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(doubleValue), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
-                                sb.append("</td>");
                             } else {
                                 sb.append("<td></td>");
                             }

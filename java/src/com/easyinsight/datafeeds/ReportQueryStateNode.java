@@ -2,7 +2,9 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.ReportQueryNodeKey;
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.ReportKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
@@ -28,6 +30,7 @@ class ReportQueryStateNode extends QueryStateNode {
     private QueryNodeKey queryNodeKey;
     private long dataSourceID;
     private Collection<FilterDefinition> parentFilters;
+    private Feed sourceFeed;
 
     ReportQueryStateNode(long reportID, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata, Collection<FilterDefinition> parentFilters) {
         this.reportID = reportID;
@@ -37,7 +40,7 @@ class ReportQueryStateNode extends QueryStateNode {
         queryData = new QueryData(queryNodeKey);
         this.conn = conn;
         dataSourceName = report.getName();
-        Feed sourceFeed = FeedRegistry.instance().getFeed(report.getDataFeedID());
+        sourceFeed = FeedRegistry.instance().getFeed(report.getDataFeedID());
         allFeedItems = sourceFeed.getFields();
         this.parentItems = parentItems;
         try {
@@ -63,13 +66,41 @@ class ReportQueryStateNode extends QueryStateNode {
     }
 
     public void addJoinItem(AnalysisItem analysisItem, int dateLevel) {
-        for (AnalysisItem field : parentItems) {
-            if (analysisItem.toDisplay().equals(field.toDisplay())) {
-                analysisItem = field;
-                break;
+        AnalysisItem matchedItem = null;
+        if (sourceFeed.getFeedType().getType() == FeedType.REDBOOTH_COMPOSITE.getType()) {
+            for (AnalysisItem field : parentItems) {
+                if (field.getKey() instanceof ReportKey) {
+                    ReportKey derivedKey = (ReportKey) field.getKey();
+                    long dataSourceID = derivedKey.getReportID();
+                    if (dataSourceID == this.reportID) {
+                        if (analysisItem.toDisplay().equals(field.toDisplay())) {
+                            matchedItem = field;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (matchedItem == null) {
+                for (AnalysisItem field : parentItems) {
+                    if (analysisItem.toDisplay().equals(field.toDisplay())) {
+                        matchedItem = field;
+                        break;
+                    }
+                }
+            }
+            if (matchedItem == null) {
+                matchedItem = analysisItem;
+            }
+        } else {
+            matchedItem = analysisItem;
+            for (AnalysisItem field : parentItems) {
+                if (analysisItem.toDisplay().equals(field.toDisplay())) {
+                    matchedItem = field;
+                    break;
+                }
             }
         }
-        List<AnalysisItem> items = analysisItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(analysisItem), false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
+        List<AnalysisItem> items = matchedItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(matchedItem), false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
         for (AnalysisItem item : items) {
             addItem(item);
             joinItems.add(new JoinMetadata(item, dateLevel));
