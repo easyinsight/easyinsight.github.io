@@ -1133,15 +1133,15 @@ public class ExportService {
                 } else if (absoluteValue < (60000 * 60)) {
                     int minutes = (int) (absoluteValue / 60000);
                     int seconds = (int) (absoluteValue / 1000) % 60;
-                    valueString = minutes + "m: " + (analysisMeasure.getPrecision() > 0 ? (seconds + "s") : "");
+                    valueString = minutes + "m" + (analysisMeasure.getPrecision() > 0 ? (":" + seconds + "s") : "");
                 } else if (absoluteValue < (60000 * 60 * 24)) {
                     int hours = (int) (absoluteValue / (60000 * 60));
                     int minutes = (int) (absoluteValue % 24);
-                    valueString = hours + "h:" + (analysisMeasure.getPrecision() > 0 ? (minutes + "m") : "");
+                    valueString = hours + "h" + (analysisMeasure.getPrecision() > 0 ? (":" + minutes + "m") : "");
                 } else {
                     int days = (int) (absoluteValue / (60000 * 60 * 24));
                     int hours = (int) (absoluteValue / (60000 * 60) % 24);
-                    valueString = days + "d:" + (analysisMeasure.getPrecision() > 0 ? (hours + "h") : "");
+                    valueString = days + "d" + (analysisMeasure.getPrecision() > 0 ? (":" + hours + "h") : "");
                 }
                 if (doubleValue < 0) {
                     valueString = "(" + valueString + ")";
