@@ -163,7 +163,19 @@ public class ColumnChartServlet extends HtmlServlet {
                     val.put(row.getValue(measureItem).toDouble());
                 }
                 if (seriesDefaults.get("pointLabels") != null && seriesDefaults.has("pointLabels")) {
-                    ((JSONArray) ((JSONObject) seriesDefaults.get("pointLabels")).get("labels")).put(row.getValue(measureItem).toDouble());
+                    JSONObject curSeries = ((JSONObject) series.get(i));
+                    JSONObject o;
+                    if(!curSeries.has("pointLabels"))  {
+                        o = new JSONObject();
+                        curSeries.put("pointLabels", o);
+                    } else {
+                        o = (JSONObject) curSeries.get("pointLabels");
+                    }
+                    if(!o.has("labels")) {
+                        o.put("labels", new JSONArray());
+                    }
+                    JSONArray arr = (JSONArray) o.get("labels");
+                    arr.put(row.getValue(measureItem).toDouble());
                 }
             }
 

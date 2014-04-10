@@ -44,6 +44,9 @@ public class ClickUtil {
                 var urlLink:URLLink = defaultLink as URLLink;
                 var key:String = altKey != null ? altKey : "";
                 var url:String = data[key + urlLink.label + "_link"];
+                if (url == null) {
+                    url = data[urlLink.label + "_link"];
+                }
                 navigateToURL(new URLRequest(url), "_blank");
             } else if (defaultLink is DrillThrough) {
                 var values:ArrayCollection = null;
