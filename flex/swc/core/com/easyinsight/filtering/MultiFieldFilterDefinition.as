@@ -20,6 +20,10 @@ public class MultiFieldFilterDefinition extends FilterDefinition {
     public var excludeReportFields:Boolean;
     public var all:Boolean = true;
     public var alphaSort:Boolean = false;
+    public var useFullyQualifiedNames:Boolean;
+    public var selectedName:String;
+    public var selectedFQN:String;
+    public var expandDates:int;
 
     public function MultiFieldFilterDefinition() {
     }

@@ -189,8 +189,12 @@ public class JoinOverride implements Cloneable, Serializable {
     public JoinOverride clone() throws CloneNotSupportedException {
         JoinOverride joinOverride = (JoinOverride) super.clone();
         joinOverride.setJoinOverrideID(0);
-        joinOverride.setSourceItems(new ArrayList<AnalysisItem>(sourceItems));
-        joinOverride.setTargetItems(new ArrayList<AnalysisItem>(targetItems));
+        if (sourceItems != null) {
+            joinOverride.setSourceItems(new ArrayList<AnalysisItem>(sourceItems));
+        }
+        if (targetItems != null) {
+            joinOverride.setTargetItems(new ArrayList<AnalysisItem>(targetItems));
+        }
         return joinOverride;
     }
 

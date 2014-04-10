@@ -158,6 +158,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
             }
 
         }  catch (FunctionException fe) {
+            LogClass.error(fe.getMessage() + " in the calculation of " + toDisplay() + ".");
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
         } catch (ReportException re) {
             throw re;

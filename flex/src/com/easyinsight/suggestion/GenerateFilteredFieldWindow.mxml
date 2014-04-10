@@ -29,6 +29,8 @@
                 filter.inclusive = true;
                 filter.field = groupings.selectedAnalysisItem();
                 filter.singleValue = false;
+                filter.newType = true;
+                filter.toggleEnabled = true;
                 fieldFilters.addItem(filter);
             }
             var measure:AnalysisItem = measures.selectedAnalysisItem();

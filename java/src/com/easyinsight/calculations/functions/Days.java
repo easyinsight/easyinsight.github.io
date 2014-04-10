@@ -15,7 +15,7 @@ public class Days extends Function {
     public Value evaluate() {
         int dayNumber = params.get(0).toDouble().intValue();
         long days = params.get(0).toDouble().longValue();
-        long ms = days * (1000 * 60 * 60 * 24);
+        long ms = days * (1000L * 60 * 60 * 24);
         NumericValue numericValue = new NumericValue(ms);
         numericValue.setCalendarType(Calendar.DAY_OF_YEAR);
         numericValue.setCalendarValue(dayNumber);

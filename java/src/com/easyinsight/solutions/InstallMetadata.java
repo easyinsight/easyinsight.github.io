@@ -25,7 +25,7 @@ import java.util.*;
 * Date: 2/3/14
 * Time: 5:47 PM
 */
-class InstallMetadata {
+public class InstallMetadata {
 
     private FeedDefinition originalSource;
     private FeedDefinition targetSource;
@@ -667,10 +667,13 @@ class InstallMetadata {
             FieldRule copiedRule = new FieldRule();
             copiedRule.setType(fieldRule.getType());
             copiedRule.setAll(fieldRule.isAll());
-            copiedRules.add(copiedRule);
+
             if (fieldRule.getTag() != null) {
                 Tag tag = fieldRule.getTag();
                 Tag replaceTag = tagReplacementMap.get(tag.getId());
+                if (replaceTag == null) {
+                    continue;
+                }
                 copiedRule.setTag(replaceTag);
             }
             if (fieldRule.getDataSourceID() > 0) {
@@ -691,9 +694,9 @@ class InstallMetadata {
                     }
                 }
                 if (targetID > 0) {
-                    fieldRule.setDataSourceID(targetID);
+                    copiedRule.setDataSourceID(targetID);
                 } else {
-                    fieldRule.setDataSourceID(0);
+                    copiedRule.setDataSourceID(0);
                 }
             }
             if (fieldRule.getExplicitField() != null) {
@@ -726,6 +729,10 @@ class InstallMetadata {
                 clone.updateReportIDs(installedReportMap, installedDashboardMap);
                 copiedRule.setLink(clone);
             }
+            if (fieldRule.getDefaultDate() != null) {
+                copiedRule.setDefaultDate(fieldRule.getDefaultDate());
+            }
+            copiedRules.add(copiedRule);
         }
         new FeedService().saveFieldRules(targetSource.getDataFeedID(), copiedRules, conn);
     }

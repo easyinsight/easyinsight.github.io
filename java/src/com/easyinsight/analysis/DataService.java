@@ -151,44 +151,80 @@ public class DataService {
 
             PreparedStatement queryStmt = conn.prepareStatement("SELECT field_to_tag.display_name FROM field_to_tag WHERE account_tag_id = ? AND field_to_tag.data_source_id = ?");
 
-                for (WeNeedToReplaceHibernateTag tag : tags) {
-                    queryStmt.setLong(1, tag.getTagID());
-                    queryStmt.setLong(2, dataSourceID);
-                    ResultSet rs = queryStmt.executeQuery();
-                    while (rs.next()) {
-                        String fieldName = rs.getString(1);
-                        AnalysisItem analysisItem = mapByName.get(fieldName);
-                        //if (report == null || report.accepts(analysisItem)) {
-                        if (analysisItem != null) {
-                            positions.put(analysisItem, i++);
-                            set.add(analysisItem);
-                        }
-                            /*PreparedStatement extStmt = conn.prepareStatement("SELECT report_field_extension_id FROM analysis_item_to_report_field_extension WHERE analysis_item_id = ? and " +
-                                    "extension_type = ?");
-                            extStmt.setLong(1, fieldID);
-                            extStmt.setInt(2, report.extensionType());
-                            ResultSet extRS = extStmt.executeQuery();
-                            if (extRS.next()) {
-                                long extID = extRS.getLong(1);
-                                Session session = Database.instance().createSession(conn);
-                                try {
-                                    ReportFieldExtension ext = (ReportFieldExtension) session.createQuery("from ReportFieldExtension where reportFieldExtensionID = ?").setLong(0, extID).list().get(0);
-                                    ext.afterLoad();
-                                    analysisItem.setReportFieldExtension(ext);
-                                } finally {
-                                    session.close();
-                                }
-                            }
-                            extStmt.close();*/
+            for (WeNeedToReplaceHibernateTag tag : tags) {
+                queryStmt.setLong(1, tag.getTagID());
+                queryStmt.setLong(2, dataSourceID);
+                ResultSet rs = queryStmt.executeQuery();
+                while (rs.next()) {
+                    String fieldName = rs.getString(1);
+                    AnalysisItem analysisItem = mapByName.get(fieldName);
+                    if (analysisItem != null) {
+                        positions.put(analysisItem, i++);
+                        set.add(analysisItem);
                     }
-                    //}
                 }
+            }
 
+            queryStmt.close();
 
-                queryStmt.close();
+            Map<String, Integer> customLevel = new HashMap<String, Integer>();
 
+            if (filter.getExpandDates() > 0) {
+                Set<AnalysisItem> copy = new HashSet<AnalysisItem>(set);
+                for (AnalysisItem item : copy) {
+                    if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
 
+                        AnalysisDateDimension date = (AnalysisDateDimension) item;
+                        if (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL ||
+                                date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL ||
+                                date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL ||
+                                date.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL ||
+                                date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
+                            set.remove(date);
+                        }
 
+                        AnalysisDateDimension yearClone = (AnalysisDateDimension) item.clone();
+                        yearClone.setDateLevel(AnalysisDateDimension.YEAR_LEVEL);
+                        yearClone.setDisplayName(item.toDisplay() + " Year");
+                        yearClone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay() + " Year");
+                        customLevel.put(item.toDisplay() + " Year", AnalysisDateDimension.YEAR_LEVEL);
+                        set.add(yearClone);
+                        positions.put(yearClone, i++);
+
+                        AnalysisDateDimension quarterClone = (AnalysisDateDimension) item.clone();
+                        quarterClone.setDateLevel(AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL);
+                        quarterClone.setDisplayName(item.toDisplay() + " Quarter");
+                        quarterClone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay() + " Quarter");
+                        customLevel.put(item.toDisplay() + " Quarter", AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL);
+                        set.add(quarterClone);
+                        positions.put(quarterClone, i++);
+
+                        AnalysisDateDimension monthClone = (AnalysisDateDimension) item.clone();
+                        monthClone.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
+                        monthClone.setDisplayName(item.toDisplay() + " Month");
+                        monthClone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay() + " Month");
+                        customLevel.put(item.toDisplay() + " Month", AnalysisDateDimension.MONTH_LEVEL);
+                        set.add(monthClone);
+                        positions.put(monthClone, i++);
+
+                        AnalysisDateDimension weekClone = (AnalysisDateDimension) item.clone();
+                        weekClone.setDateLevel(AnalysisDateDimension.WEEK_LEVEL);
+                        weekClone.setDisplayName(item.toDisplay() + " Week");
+                        weekClone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay() + " Week");
+                        customLevel.put(item.toDisplay() + " Week", AnalysisDateDimension.WEEK_LEVEL);
+                        set.add(weekClone);
+                        positions.put(weekClone, i++);
+
+                        AnalysisDateDimension dayClone = (AnalysisDateDimension) item.clone();
+                        dayClone.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
+                        dayClone.setDisplayName(item.toDisplay() + " Day");
+                        dayClone.setUnqualifiedDisplayName(item.toUnqualifiedDisplay() + " Day");
+                        customLevel.put(item.toDisplay() + " Day", AnalysisDateDimension.DAY_LEVEL);
+                        set.add(dayClone);
+                        positions.put(dayClone, i++);
+                    }
+                }
+            }
 
             i = 0;
             for (AnalysisItemHandle handle : filter.selectedItems()) {
@@ -204,6 +240,10 @@ public class DataService {
 
             for (AnalysisItem item : set) {
                 AnalysisItemSelection selection = new AnalysisItemSelection();
+                Integer level = customLevel.get(item.toDisplay());
+                if (level != null) {
+                    selection.setCustomDateLevel(level);
+                }
                 selection.setAnalysisItem(item);
                 AnalysisItemHandle handle = selectedMap.get(item);
                 if (handle != null) {
@@ -255,7 +295,7 @@ public class DataService {
         }
     }
 
-    public static List<AnalysisItemSelection> possibleFields(IFieldChoiceFilter filter, @Nullable WSAnalysisDefinition reportEditorReport, long dataSourceID, EIConnection conn) {
+    public static List<AnalysisItemSelection> staticPossibleFields(IFieldChoiceFilter filter, @Nullable WSAnalysisDefinition reportEditorReport, long dataSourceID, EIConnection conn) {
         WSAnalysisDefinition report = null;
 
 
@@ -1378,7 +1418,6 @@ public class DataService {
             }
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, customFilters, drillthroughFilters);
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
-            System.out.println("now set had size = " + nowSet.getRows().size());
             YTDStuff ytdStuff = YTDUtil.getYTDStuff(wsytdDefinition, nowSet, insightRequestMetadata, conn, reportRetrievalNow.getPipeline().getPipelineData(),
                     reportRetrievalNow.getPipeline().getPipelineData().getAllRequestedItems());
             Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -1389,7 +1428,6 @@ public class DataService {
             ytdDataResults.setDataSet(ytdStuff.values);
             ytdDataResults.setDefinition(wsytdDefinition);
             reportViewBenchmark(wsytdDefinition, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
-            System.out.println("returning " + ytdDataResults.getDataSet().size() + " ytd results");
             return ytdDataResults;
         } catch (com.easyinsight.security.SecurityException se) {
             EmbeddedYTDDataResults results = new EmbeddedYTDDataResults();
@@ -2068,11 +2106,24 @@ public class DataService {
             insightRequestMetadata.setLogReport(analysisDefinition.isLogReport());
 
             if (analysisDefinition.getBaseDate() != null && !"".equals(analysisDefinition.getBaseDate())) {
-                for (AnalysisItem item : analysisDefinition.getAddedItems()) {
-                    if (item.toDisplay().equals(analysisDefinition.getBaseDate())) {
-                        insightRequestMetadata.setBaseDate((AnalysisDateDimension) item);
+                AnalysisItem targetItem = null;
+                if (analysisDefinition.getAddedItems() != null) {
+                    for (AnalysisItem item : analysisDefinition.getAddedItems()) {
+                        if (item.toDisplay().equals(analysisDefinition.getBaseDate())) {
+                            targetItem = item;
+                            break;
+                        }
                     }
                 }
+                if (targetItem == null && analysisDefinition.getFilterDefinitions() != null) {
+                    for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                        if (filter.getField() != null && filter.getField().toDisplay().equals(analysisDefinition.getBaseDate())) {
+                            targetItem = filter.getField();
+                            break;
+                        }
+                    }
+                }
+                insightRequestMetadata.setBaseDate((AnalysisDateDimension) targetItem);
             }
 
             if (insightRequestMetadata.getHierarchyOverrides() != null) {
@@ -2121,7 +2172,7 @@ public class DataService {
                     if (analysisItemFilterDefinition.isEnabled()) {
 
                         if (analysisItemFilterDefinition.getSelectedFQN() != null) {
-                            List<AnalysisItemSelection> selections = DataService.possibleFields(analysisItemFilterDefinition, analysisDefinition, analysisDefinition.getDataFeedID(), conn);
+                            List<AnalysisItemSelection> selections = DataService.staticPossibleFields(analysisItemFilterDefinition, analysisDefinition, analysisDefinition.getDataFeedID(), conn);
                             for (AnalysisItemSelection selection : selections) {
                                 if (analysisItemFilterDefinition.getSelectedFQN().equals(selection.getAnalysisItem().toDisplay())) {
                                     analysisItemFilterDefinition.setTargetItem(selection.getAnalysisItem());
@@ -2306,22 +2357,26 @@ public class DataService {
             }
 
             for (AnalysisItem analysisItem : items) {
-                analysisItem.setTags(fieldMap.get(analysisItem.toOriginalDisplayName()));
-                if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-                    AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
-                    hierarchyItem.getHierarchyLevel().getAnalysisItem().setTags(fieldMap.get(hierarchyItem.getHierarchyLevel().getAnalysisItem().toOriginalDisplayName()));
+                if (analysisItem != null) {
+                    analysisItem.setTags(fieldMap.get(analysisItem.toOriginalDisplayName()));
+                    if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                        AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                        hierarchyItem.getHierarchyLevel().getAnalysisItem().setTags(fieldMap.get(hierarchyItem.getHierarchyLevel().getAnalysisItem().toOriginalDisplayName()));
+                    }
                 }
             }
 
             for (AnalysisItem analysisItem : items) {
-                for (FieldRule rule : rules) {
-                    if (rule.matches(analysisItem)) {
-                        rule.update(analysisItem, analysisDefinition, insightRequestMetadata);
-                    }
-                    if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-                        AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
-                        if (rule.matches(hierarchyItem.getHierarchyLevel().getAnalysisItem())) {
-                            rule.update(hierarchyItem, analysisDefinition, insightRequestMetadata);
+                if (analysisItem != null) {
+                    for (FieldRule rule : rules) {
+                        if (rule.matches(analysisItem)) {
+                            rule.update(analysisItem, analysisDefinition, insightRequestMetadata);
+                        }
+                        if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                            AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                            if (rule.matches(hierarchyItem.getHierarchyLevel().getAnalysisItem())) {
+                                rule.update(hierarchyItem, analysisDefinition, insightRequestMetadata);
+                            }
                         }
                     }
                 }

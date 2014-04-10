@@ -66,11 +66,22 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
     @Column(name="use_fully_qualified_names")
     private boolean useFullyQualifiedNames;
 
+    @Column(name="expand_dates")
+    private int expandDates;
+
     @Transient
     private String selectedName;
 
     @Transient
     private String selectedFQN;
+
+    public int getExpandDates() {
+        return expandDates;
+    }
+
+    public void setExpandDates(int expandDates) {
+        this.expandDates = expandDates;
+    }
 
     public String getSelectedName() {
         return selectedName;
@@ -343,12 +354,19 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
         JSONObject jo = super.toJSON(filterHTMLMetadata);
         List<AnalysisItemSelection> itemsAvailable = new DataService().possibleFields(this, null, null, null);
         jo.put("type", "field_filter");
-        jo.put("selected", String.valueOf(targetItem.getAnalysisItemID()));
+
         JSONArray available = new JSONArray();
         for(AnalysisItemSelection analysisItem : itemsAvailable) {
             JSONObject j = new JSONObject();
-            j.put("value", analysisItem.getAnalysisItem().toDisplay());
-            j.put("label", analysisItem.getAnalysisItem().toUnqualifiedDisplay());
+            if (analysisItem.getAnalysisItem().toDisplay().equals(targetItem.toDisplay())) {
+                jo.put("selected", analysisItem.getAnalysisItem().toDisplay() + "|" + analysisItem.getCustomDateLevel());
+            }
+            j.put("value", analysisItem.getAnalysisItem().toDisplay() + "|" + analysisItem.getCustomDateLevel());
+            if (useFullyQualifiedNames) {
+                j.put("label", analysisItem.getAnalysisItem().toDisplay());
+            } else {
+                j.put("label", analysisItem.getAnalysisItem().toUnqualifiedDisplay());
+            }
             available.put(j);
         }
         jo.put("values", available);

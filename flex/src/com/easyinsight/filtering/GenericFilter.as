@@ -8,7 +8,7 @@ import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
-import mx.controls.Alert;
+
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.Label;
@@ -74,7 +74,9 @@ public class GenericFilter extends HBox implements IFilter {
 		}
 
 		private function onFilterEdit(event:FilterEditEvent):void {
-            labelText.text = NamedFilterReference(event.filterDefinition).referenceName;
+            if (event.filterDefinition is NamedFilterReference) {
+                labelText.text = NamedFilterReference(event.filterDefinition).referenceName;
+            }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
 		}
 

@@ -556,7 +556,9 @@ public class FilterValueDefinition extends FilterDefinition {
 
             List<String> stringList = dimensionMetadata.getStrings();
             if (isAllOption()) {
-                stringList.add(0, "All");
+                if (!stringList.contains("All")) {
+                    stringList.add(0, "All");
+                }
             }
             if (isExcludeEmpty()) {
                 stringList.remove("");

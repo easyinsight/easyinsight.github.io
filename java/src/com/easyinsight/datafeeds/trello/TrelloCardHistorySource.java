@@ -84,8 +84,8 @@ public class TrelloCardHistorySource extends TrelloBaseSource {
                         JSONObject historyObject = (JSONObject) history.get(k);
                         String dateString = historyObject.get("date").toString();
                         Date date = sdf.parse(dateString);
-                        String oldList = ((JSONObject)((JSONObject) historyObject.get("data")).get("listBefore")).get("id").toString();
-                        String newList = ((JSONObject)((JSONObject) historyObject.get("data")).get("listAfter")).get("id").toString();
+                        String oldList = ((JSONObject)((JSONObject) historyObject.get("data")).get("listBefore")).get("name").toString();
+                        String newList = ((JSONObject)((JSONObject) historyObject.get("data")).get("listAfter")).get("name").toString();
                         row.addValue(HISTORY_CARD_ID, card.get("id").toString());
                         row.addValue(HISTORY_TIME, new DateValue(date));
                         row.addValue(FROM_LIST, oldList);

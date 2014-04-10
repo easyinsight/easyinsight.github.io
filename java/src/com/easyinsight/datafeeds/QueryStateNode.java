@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
@@ -69,13 +70,41 @@ class QueryStateNode {
     }
 
     public void addJoinItem(AnalysisItem analysisItem, int dateLevel) {
-        for (AnalysisItem field : parentItems) {
-            if (analysisItem.toDisplay().equals(field.toDisplay())) {
-                analysisItem = field;
-                break;
+        AnalysisItem matchedItem = null;
+        if (feed.getFeedType().getType() == FeedType.REDBOOTH_COMPOSITE.getType()) {
+            for (AnalysisItem field : parentItems) {
+                if (field.getKey() instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) field.getKey();
+                    long dataSourceID = derivedKey.getFeedID();
+                    if (dataSourceID == this.feedID) {
+                        if (analysisItem.toDisplay().equals(field.toUnqualifiedDisplay())) {
+                            matchedItem = field;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (matchedItem == null) {
+                for (AnalysisItem field : parentItems) {
+                    if (analysisItem.toDisplay().equals(field.toDisplay())) {
+                        matchedItem = field;
+                        break;
+                    }
+                }
+            }
+            if (matchedItem == null) {
+                matchedItem = analysisItem;
+            }
+        } else {
+            matchedItem = analysisItem;
+            for (AnalysisItem field : parentItems) {
+                if (analysisItem.toDisplay().equals(field.toDisplay())) {
+                    matchedItem = field;
+                    break;
+                }
             }
         }
-        List<AnalysisItem> items = analysisItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(analysisItem), false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
+        List<AnalysisItem> items = matchedItem.getAnalysisItems(new ArrayList<AnalysisItem>(allFeedItems), Arrays.asList(matchedItem), false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
         for (AnalysisItem item : items) {
             addItem(item);
             joinItems.add(new JoinMetadata(item, dateLevel));

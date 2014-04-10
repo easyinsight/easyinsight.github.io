@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.wufoo;
 
+import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import nu.xom.Builder;
@@ -36,6 +37,12 @@ public abstract class WufooBaseSource extends ServerDataSourceDefinition {
         restMethod.setRequestHeader("Content-Type", "application/xml");
 
         client.executeMethod(restMethod);
+
+        String string = restMethod.getResponseBodyAsString();
+
+        if ("You must authenticate to get at the goodies.".equals(string)) {
+            throw new ReportException(new DataSourceConnectivityReportFault("We weren't able to authenticate you using the specified credentials.", parentDefinition));
+        }
 
         System.out.println(restMethod.getResponseBodyAsString());
 

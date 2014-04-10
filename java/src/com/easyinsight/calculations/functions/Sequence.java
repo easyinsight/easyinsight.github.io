@@ -7,7 +7,9 @@ import com.easyinsight.calculations.Function;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.ProcessCacheBuilder;
 import com.easyinsight.calculations.ProcessCalculationCache;
+import com.easyinsight.core.DateValue;
 import com.easyinsight.core.EmptyValue;
+import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.List;
  * Date: 9/5/12
  * Time: 7:58 PM
  */
-public class FirstRecord extends Function {
+public class Sequence extends Function {
 
     public Value evaluate() {
         // categorizing step, cycle time,
@@ -50,19 +52,33 @@ public class FirstRecord extends Function {
         if (rows == null || rows.size() == 0) {
             return new EmptyValue();
         }
-        // find the row with this date...
-        IRow row = rows.get(0);
-        if (targetField.hasType(AnalysisItemTypes.MEASURE)) {
-            Value measureValue = row.getValue(targetField);
-            Value rowSortValue = row.getValue(sortField);
-            if (sortValue.equals(rowSortValue)) {
-                return measureValue;
-            } else {
-                return new EmptyValue();
+        for (int i = 0; i < rows.size(); i++) {
+            IRow row = rows.get(i);
+            if (row == getRow()) {
+                if (i == 0) {
+                    // we're the first row, nothing to do
+                    return new EmptyValue();
+                } else {
+                    Value value = row.getValue(targetField);
+                    if (value.type() == Value.DATE) {
+                        DateValue dateValue = (DateValue) value;
+                        for (int j = i - 1; j >= 0; j--) {
+                            IRow previousRow = rows.get(j);
+                            Value previousValue = previousRow.getValue(targetField);
+                            if (value.type() == Value.DATE && previousValue.type() == Value.DATE) {
+
+                                DateValue previousDateValue = (DateValue) previousValue;
+                                if (!dateValue.getDate().equals(previousDateValue.getDate())) {
+                                    return new NumericValue(dateValue.getDate().getTime() - previousDateValue.getDate().getTime());
+                                }
+                            }
+                        }
+                    }
+                    return new EmptyValue();
+                }
             }
-        } else {
-            return row.getValue(targetField);
         }
+        return new EmptyValue();
     }
 
     @Override

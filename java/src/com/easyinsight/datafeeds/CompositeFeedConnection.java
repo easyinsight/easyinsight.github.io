@@ -523,6 +523,13 @@ public class CompositeFeedConnection implements Serializable, IJoin {
                     }
                 }
             }
+            if (myJoinDimension == null) {
+                for (AnalysisItem item : sourceFields) {
+                    if (sourceItem.toDisplay().equals(item.toDisplay())) {
+                        myJoinDimension = item.createAggregateKey();
+                    }
+                }
+            }
         }
         Key fromJoinDimension = null;
         if (targetItem == null) {
@@ -551,12 +558,27 @@ public class CompositeFeedConnection implements Serializable, IJoin {
                     }
                 }
             }
+            if (fromJoinDimension == null) {
+                for (AnalysisItem item : targetFields) {
+                    if (targetItem.toDisplay().equals(item.toDisplay())) {
+                        fromJoinDimension = item.createAggregateKey();
+                    }
+                }
+            }
         }
         if (myJoinDimension == null) {
             System.out.println("Couldn't find " + getSourceJoin().toKeyString() + " on " + sourceName);
         }
         if (fromJoinDimension == null) {
-            System.out.println("Couldn't find " + getTargetJoin().toKeyString() + " on " + targetName);
+            if (getTargetItem() != null) {
+                System.out.println("been looking for " + getTargetItem().toDisplay() + " with key " + getTargetItem().getKey().toKeyString() + " on " + targetName);
+                for (AnalysisItem target : targetFields) {
+                    System.out.println("\t" + target.toDisplay() + " with key " + target.getKey().toKeyString());
+                }
+            } else {
+                System.out.println("Couldn't find " + getTargetJoin().toKeyString() + " on " + targetName);
+            }
+
         }
         String mergeString = "Merging data set on " + sourceName + " : " + myJoinDimension.toKeyString() + " to " + targetName + " : " + fromJoinDimension.toKeyString();
         Map<Value, List<IRow>> index = new HashMap<Value, List<IRow>>();

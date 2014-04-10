@@ -130,11 +130,13 @@ public class TrelloCompositeSource extends CompositeServerDataSource {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM TRELLO_COMPOSITE_SOURCE WHERE DATA_SOURCE_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
+        clearStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO TRELLO_COMPOSITE_SOURCE (DATA_SOURCE_ID, TOKEN_KEY, TOKEN_SECRET_KEY) VALUES (?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, getTokenKey());
         insertStmt.setString(3, getTokenSecret());
         insertStmt.execute();
+        insertStmt.close();
     }
 
     @Override
@@ -147,6 +149,7 @@ public class TrelloCompositeSource extends CompositeServerDataSource {
             setTokenKey(rs.getString(1));
             setTokenSecret(rs.getString(2));
         }
+        loadStmt.close();
     }
 
     @Override
@@ -177,8 +180,11 @@ public class TrelloCompositeSource extends CompositeServerDataSource {
     @Override
     protected Collection<ChildConnection> getLiveChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.TRELLO_BOARD, FeedType.TRELLO_CARD, TrelloBoardSource.BOARD_ID, TrelloCardSource.CARD_BOARD_ID),
-                new ChildConnection(FeedType.TRELLO_LIST, FeedType.TRELLO_CARD, TrelloListSource.LIST_ID, TrelloCardSource.CARD_LIST_ID),
-                new ChildConnection(FeedType.TRELLO_CARD_HISTORY, FeedType.TRELLO_CARD, TrelloCardHistorySource.HISTORY_CARD_ID, TrelloCardSource.CARD_ID));
+                new ChildConnection(FeedType.TRELLO_CARD, FeedType.TRELLO_LIST, TrelloCardSource.CARD_LIST_ID, TrelloListSource.LIST_ID),
+                new ChildConnection(FeedType.TRELLO_CARD, FeedType.TRELLO_CARD_HISTORY, TrelloCardSource.CARD_ID, TrelloCardHistorySource.HISTORY_CARD_ID),
+                new ChildConnection(FeedType.TRELLO_CARD, FeedType.TRELLO_MEMBERSHIPS, TrelloCardSource.CARD_ID, TrelloMembershipSource.CARD_ID),
+                new ChildConnection(FeedType.TRELLO_CARD, FeedType.TRELLO_CHECKLISTS, TrelloCardSource.CARD_ID, TrelloChecklistSource.CARD_ID),
+                new ChildConnection(FeedType.TRELLO_CARD, FeedType.TRELLO_LABELS, TrelloCardSource.CARD_ID, TrelloLabelSource.CARD_ID));
     }
 
     public String getTokenKey() {

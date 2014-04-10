@@ -68,7 +68,11 @@
                 _pair.targetValue = dateValue;
             } else if (_mode == "measure") {
                 var numValue:NumericValue = new NumericValue();
-                numValue.value = int(numberInput.text);
+                var num:Number = parseFloat(numberInput.text);
+                if (isNaN(num) || !isFinite(num)) {
+                    num = 0;
+                }
+                numValue.value = num;
                 _pair.targetValue = numValue;
             }
             return _pair;
