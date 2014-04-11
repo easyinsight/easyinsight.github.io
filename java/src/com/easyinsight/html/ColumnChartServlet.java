@@ -7,6 +7,7 @@ import com.easyinsight.analysis.definitions.WSPieChartDefinition;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -163,19 +164,23 @@ public class ColumnChartServlet extends HtmlServlet {
                     val.put(row.getValue(measureItem).toDouble());
                 }
                 if (seriesDefaults.get("pointLabels") != null && seriesDefaults.has("pointLabels")) {
-                    JSONObject curSeries = ((JSONObject) series.get(i));
-                    JSONObject o;
-                    if(!curSeries.has("pointLabels"))  {
-                        o = new JSONObject();
-                        curSeries.put("pointLabels", o);
-                    } else {
-                        o = (JSONObject) curSeries.get("pointLabels");
+                    try {
+                        JSONObject curSeries = ((JSONObject) series.get(i));
+                        JSONObject o;
+                        if(!curSeries.has("pointLabels"))  {
+                            o = new JSONObject();
+                            curSeries.put("pointLabels", o);
+                        } else {
+                            o = (JSONObject) curSeries.get("pointLabels");
+                        }
+                        if(!o.has("labels")) {
+                            o.put("labels", new JSONArray());
+                        }
+                        JSONArray arr = (JSONArray) o.get("labels");
+                        arr.put(row.getValue(measureItem).toDouble());
+                    } catch (Exception e) {
+                        ((JSONArray) ((JSONObject) seriesDefaults.get("pointLabels")).get("labels")).put(row.getValue(measureItem).toDouble());
                     }
-                    if(!o.has("labels")) {
-                        o.put("labels", new JSONArray());
-                    }
-                    JSONArray arr = (JSONArray) o.get("labels");
-                    arr.put(row.getValue(measureItem).toDouble());
                 }
             }
 

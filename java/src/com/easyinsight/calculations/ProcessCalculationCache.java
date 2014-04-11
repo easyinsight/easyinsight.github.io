@@ -27,8 +27,8 @@ public class ProcessCalculationCache implements ICalculationCache {
     public void fromDataSet(DataSet dataSet) {
         for (IRow row : dataSet.getRows()) {
             Value instanceIDValue = row.getValue(instanceID);
-            Value sortValue = row.getValue(sortField);
             if (sortField != null) {
+                Value sortValue = row.getValue(sortField);
                 if (sortValue.type() == Value.EMPTY) {
                     continue;
                 }
