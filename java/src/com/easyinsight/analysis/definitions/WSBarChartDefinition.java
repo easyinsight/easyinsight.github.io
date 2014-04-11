@@ -277,7 +277,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
             rendererOptions.put("fillToZero", "true");
             rendererOptions.put("barDirection", "'horizontal'");
             rendererOptions.put("varyBarColor", "true");
-            rendererOptions.put("shadowDepth", 1);
+            rendererOptions.put("shadowDepth", 2);
             rendererOptions.put("barMargin", 3);
             rendererOptions.put("barPadding", 0);
             seriesDefaults.put("rendererOptions", rendererOptions);
@@ -297,7 +297,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
                 labels.put("show", "true");
                 labels.put("edgetolerance", -15);
                 labels.put("escapeHTML", false);
-                labels.put("formatString", "'%g'");
+                //labels.put("formatString", "'%g'");
                 seriesDefaults.put("pointLabels", labels);
             }
         } catch (JSONException e) {
