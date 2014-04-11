@@ -338,6 +338,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
                 labels.put("show", "true");
                 labels.put("edgetolerance", -15);
                 labels.put("fontFamily", fontName());
+//                labels.put("formatString", "'%g'");
                 seriesDefaults.put("pointLabels", labels);
             }
         } catch (JSONException e) {

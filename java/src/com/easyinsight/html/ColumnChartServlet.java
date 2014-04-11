@@ -123,23 +123,23 @@ public class ColumnChartServlet extends HtmlServlet {
 
         for(int i = 0;i < measures.size();i++) {
             blahArray.put(new JSONArray());
+            JSONArray colorObj = new JSONArray();
+            JSONObject curObject = new JSONObject();
+            JSONObject colorStop = new JSONObject();
+            colorStop.put("point", 0);
+            String colorString = String.format(colors.get(i % colors.size()));
+            colorStop.put("color", colorString);
+            colorObj.put(colorStop);
+            colorStop = new JSONObject();
+            colorStop.put("point", 1);
+            colorStop.put("color", colorString);
+            colorObj.put(colorStop);
+            JSONArray jj = new JSONArray();
+            jj.put(colorObj);
             if(measures.size() > 1) {
-                JSONArray colorObj = new JSONArray();
-                JSONObject curObject = new JSONObject();
-                JSONObject colorStop = new JSONObject();
-                colorStop.put("point", 0);
-                String colorString = String.format(colors.get(i % colors.size()));
-                colorStop.put("color", colorString);
-                colorObj.put(colorStop);
-                colorStop = new JSONObject();
-                colorStop.put("point", 1);
-                colorStop.put("color", colorString);
-                colorObj.put(colorStop);
-                JSONArray jj = new JSONArray();
-                jj.put(colorObj);
                 curObject.put("seriesColors", jj);
-                series.put(curObject);
             }
+            series.put(curObject);
         }
         params.put("series", series);
 
@@ -164,7 +164,7 @@ public class ColumnChartServlet extends HtmlServlet {
                     val.put(row.getValue(measureItem).toDouble());
                 }
                 if (seriesDefaults.get("pointLabels") != null && seriesDefaults.has("pointLabels")) {
-                    try {
+//                    if(measures.size() > 1) {
                         JSONObject curSeries = ((JSONObject) series.get(i));
                         JSONObject o;
                         if(!curSeries.has("pointLabels"))  {
@@ -178,9 +178,9 @@ public class ColumnChartServlet extends HtmlServlet {
                         }
                         JSONArray arr = (JSONArray) o.get("labels");
                         arr.put(row.getValue(measureItem).toDouble());
-                    } catch (Exception e) {
-                        ((JSONArray) ((JSONObject) seriesDefaults.get("pointLabels")).get("labels")).put(row.getValue(measureItem).toDouble());
-                    }
+//                    } else {
+//                        ((JSONArray) ((JSONObject) seriesDefaults.get("pointLabels")).get("labels")).put(row.getValue(measureItem).toDouble());
+//                    }
                 }
             }
 
