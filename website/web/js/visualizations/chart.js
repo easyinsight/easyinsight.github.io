@@ -1,6 +1,7 @@
 Chart = {
     getCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
         return function (data) {
+            console.log(data);
             Utils.noData(data["values"].flatten(), function () {
                 if (showLabels) {
                     var labels = data["labels"];
