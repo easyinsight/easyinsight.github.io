@@ -1100,6 +1100,10 @@ public class ExportService {
         return baos.toByteArray();
     }
 
+    public static String createValue(ExportMetadata exportMetadata, AnalysisItem headerItem, Value value) {
+        return createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false, null);
+    }
+
     public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, Locale locale, boolean pdf) {
         return createValue(dateFormat, headerItem, value, cal, currencySymbol, locale, pdf, null);
     }
