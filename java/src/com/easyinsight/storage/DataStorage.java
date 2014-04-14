@@ -732,8 +732,13 @@ public class DataStorage implements IDataStorage {
 
     public void truncate() throws SQLException {
         try {
-            PreparedStatement truncateStmt = storageConn.prepareStatement("TRUNCATE " + getTableName());
-            truncateStmt.execute();
+            ResultSet tableRS = storageConn.getMetaData().getTables(null, null, getTableName(), null);
+            if (tableRS.next()) {
+                PreparedStatement truncateStmt = storageConn.prepareStatement("TRUNCATE " + getTableName());
+                truncateStmt.execute();
+            } else {
+                createTable();
+            }
         } catch (SQLException e) {
             LogClass.error(e);
             if (e.getMessage().contains("doesn't exist")) {
