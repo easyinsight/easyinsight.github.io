@@ -22,7 +22,6 @@
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
-        import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
         import mx.containers.VBox;
         import mx.controls.Alert;
@@ -79,6 +78,12 @@
             this.invoiceRecipient = userTransferObject.invoiceRecipient;
             this.lastLoginDate = userTransferObject.lastLoginDate;
             this.reportVisibility = userTransferObject.testAccountVisible;
+            this.selectedDateFormat = String(userTransferObject.dateFormat);
+            if (userTransferObject.dateFormat == 0) {
+                this.selectedDateFormat = "8";
+            }
+            this.selectedLocale = userTransferObject.userLocale;
+            this.selectedDefaultCurrency = String(userTransferObject.currency);
             createLabel = "Update User";
         }
 
@@ -157,6 +162,9 @@
                 user.fixedDashboardID = singleViewComboBox.selectedItem.id;
                 user.testAccountVisible = reportVisibilityCheckbox.selected;
                 user.invoiceRecipient = invoiceCheckbox.selected;
+                user.dateFormat = int(dateFormatBox.selectedItem.data);
+                user.userLocale = localeBox.selectedItem.data;
+                user.currency = int(defaultCurrencyBox.selectedItem.data);
                 if (showPersonaOption) {
                     var persona:Object = personaComboBox.selectedItem;
                     if (persona != Persona.EMPTY_PERSONA) {
@@ -280,6 +288,15 @@
 
         [Bindable]
         private var reportVisibility:Boolean = true;
+
+        [Bindable]
+        private var selectedDefaultCurrency:String;
+
+        [Bindable]
+        private var selectedLocale:String;
+
+        [Bindable]
+        private var selectedDateFormat:String = "6";
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
@@ -289,7 +306,7 @@
         <mx:method name="getPersonas" result="gotPersonas()"/>
         <mx:method name="getUserDLS" result="gotUserDLS()"/>
     </mx:RemoteObject>
-    <mx:TabNavigator id="tabNavigator" resizeToContent="true">
+    <mx:TabNavigator id="tabNavigator" resizeToContent="true" creationPolicy="all">
         <mx:VBox label="Base Info" paddingLeft="5">
             <mx:Text text="This user is a Viewer. He or she can view reports and dashboards, but can't create or modify them." width="540"
                     selectable="false"/>
@@ -332,6 +349,47 @@
                 <mx:FormItem label="Fixed Dashboard View:" labelWidth="180">
                     <util:SmartComboBox dataProvider="{availableViews}" labelField="name" id="singleViewComboBox" selectedProperty="id" selectedValue="{viewID}" enabled="{!accountAdmin}"
                             maxWidth="300"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
+        <mx:VBox label="Display Settings">
+            <mx:Form>
+                <mx:FormItem label="Currency:">
+                    <util:SmartComboBox id="defaultCurrencyBox" selectedProperty="data" selectedValue="{selectedDefaultCurrency}" labelField="label">
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:Object data="0" label="Use Account Default"/>
+                                <mx:Object data="1" label="USD"/>
+                                <mx:Object data="2" label="EUR"/>
+                                <mx:Object data="3" label="GBP"/>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </util:SmartComboBox>
+                </mx:FormItem>
+                <mx:FormItem label="Locale:">
+                    <util:SmartComboBox id="localeBox" selectedProperty="data" selectedValue="{selectedLocale}" labelField="label">
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:Object data="0" label="Use Account Default"/>
+                                <mx:Object label="US/America" data="EN"/>
+                                <mx:Object label="Spain" data="ES"/>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </util:SmartComboBox>
+                </mx:FormItem>
+                <mx:FormItem label="Date Format:">
+                    <util:SmartComboBox id="dateFormatBox" selectedProperty="data" selectedValue="{selectedDateFormat}" labelField="label">
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:Object label="Use Account Default" data="6"/>
+                                <mx:Object label="MM/DD/YYYY (04/26/2010)" data="8"/>
+                                <mx:Object label="YYYY-MM-DD (2010-26-04)" data="1"/>
+                                <mx:Object label="DD-MM-YYYY (26-04-2010)" data="2"/>
+                                <mx:Object label="DD/MM/YYYY (26/04/2010)" data="3"/>
+                                <mx:Object label="DD.MM.YYYY (26.04.2010)" data="4"/>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </util:SmartComboBox>
                 </mx:FormItem>
             </mx:Form>
         </mx:VBox>
