@@ -1,15 +1,17 @@
 package com.easyinsight.storage;
 
+import com.easyinsight.PasswordStorage;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.servlet.SystemSettings;
 
-import java.util.*;
-import java.net.URL;
-import java.io.FileInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.util.*;
 import java.sql.*;
 
 /**
@@ -20,6 +22,7 @@ import java.sql.*;
 public class DatabaseManager {
 
     private Map<String, Database> dbMap = new HashMap<String, Database>();
+    private Map<String, Database> additionalDatabases = new HashMap<String, Database>();
     private static DatabaseManager instance;
 
     public static DatabaseManager instance() {
@@ -33,8 +36,15 @@ public class DatabaseManager {
         return dbMap;
     }
 
+    public Map<String, Database> getAdditionalDatabases() {
+        return additionalDatabases;
+    }
+
     public void shutdown() {
         for (Database database : dbMap.values()) {
+            database.shutdown();
+        }
+        for (Database database : additionalDatabases.values()) {
             database.shutdown();
         }
     }
@@ -44,66 +54,126 @@ public class DatabaseManager {
     }
 
     public Database getDatabase(String databaseID) {
-        return dbMap.get(databaseID);
+        Database database = dbMap.get(databaseID);
+        if (database == null) {
+            database = additionalDatabases.get(databaseID);
+        }
+        return database;
     }
 
     public void defineDateTable(Database database) throws SQLException {
         Connection conn = database.getConnection();
         try {
             conn.setAutoCommit(false);
-            ResultSet tableRS = conn.getMetaData().getTables(null, null, "DATE_DIMENSION", null);
+            ResultSet tableRS = conn.getMetaData().getTables(null, null, "date_dimension", null);
             if (!tableRS.next()) {
-                PreparedStatement dbStmt = conn.prepareStatement("CREATE TABLE DATE_DIMENSION (DATE_DIMENSION_ID BIGINT(11) AUTO_INCREMENT NOT NULL," +
-                        "DIM_DATE DATE NOT NULL, DIM_DAY_OF_MONTH INTEGER NOT NULL, DIM_MONTH INTEGER NOT NULL, " +
-                        "DIM_QUARTER_OF_YEAR INTEGER NOT NULL, DIM_YEAR INTEGER NOT NULL, DIM_WEEK_OF_YEAR INTEGER NOT NULL," +
-                        "DIM_DAY_OF_WEEK INTEGER NOT NULL, DIM_DAY_OF_YEAR INTEGER NOT NULL, PRIMARY KEY (DATE_DIMENSION_ID), INDEX (DIM_DATE), INDEX(DIM_DAY_OF_MONTH)," +
-                        "INDEX(DIM_QUARTER_OF_YEAR), INDEX(DIM_YEAR, DIM_DAY_OF_YEAR), INDEX(DIM_WEEK_OF_YEAR), INDEX(DIM_DAY_OF_WEEK), INDEX(DIM_DAY_OF_YEAR))");
-                dbStmt.execute();
-                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DATE_DIMENSION (DIM_DATE, DIM_DAY_OF_MONTH," +
-                        "DIM_MONTH, DIM_QUARTER_OF_YEAR, DIM_YEAR, DIM_WEEK_OF_YEAR, DIM_DAY_OF_WEEK, DIM_DAY_OF_YEAR) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.YEAR, -3);
-                for (int i = 0; i < 6; i++) {
-                    cal.set(Calendar.DAY_OF_YEAR, 1);
-                    int year = cal.get(Calendar.YEAR);
-                    int newYear = year + 1;
-                    cal.set(Calendar.YEAR, newYear);
-                    for (int j = 0; j < ((cal.get(Calendar.YEAR) % 4 == 0) ? 366 : 365); j++) {
-                        cal.set(Calendar.DAY_OF_YEAR, j + 1);
-                        insertStmt.setDate(1, new java.sql.Date(cal.getTime().getTime()));
-                        insertStmt.setInt(2, cal.get(Calendar.DAY_OF_MONTH));
-                        insertStmt.setInt(3, cal.get(Calendar.MONTH));
-                        int quarterOfYear;
-                        switch (cal.get(Calendar.MONTH)) {
-                            case Calendar.JANUARY:
-                            case Calendar.FEBRUARY:
-                            case Calendar.MARCH:
-                                quarterOfYear = 0;
-                                break;
-                            case Calendar.APRIL:
-                            case Calendar.MAY:
-                            case Calendar.JUNE:
-                                quarterOfYear = 1;
-                                break;
-                            case Calendar.JULY:
-                            case Calendar.AUGUST:
-                            case Calendar.SEPTEMBER:
-                                quarterOfYear = 2;
-                                break;
-                            case Calendar.OCTOBER:
-                            case Calendar.NOVEMBER:
-                            case Calendar.DECEMBER:
-                            default:
-                                quarterOfYear = 3;
-                                break;
+                if (database.getDialect() == Database.MYSQL) {
+                    PreparedStatement dbStmt = conn.prepareStatement("CREATE TABLE DATE_DIMENSION (DATE_DIMENSION_ID BIGINT(11) AUTO_INCREMENT NOT NULL," +
+                            "DIM_DATE DATE NOT NULL, DIM_DAY_OF_MONTH INTEGER NOT NULL, DIM_MONTH INTEGER NOT NULL, " +
+                            "DIM_QUARTER_OF_YEAR INTEGER NOT NULL, DIM_YEAR INTEGER NOT NULL, DIM_WEEK_OF_YEAR INTEGER NOT NULL," +
+                            "DIM_DAY_OF_WEEK INTEGER NOT NULL, DIM_DAY_OF_YEAR INTEGER NOT NULL, PRIMARY KEY (DATE_DIMENSION_ID), INDEX (DIM_DATE), INDEX(DIM_DAY_OF_MONTH)," +
+                            "INDEX(DIM_QUARTER_OF_YEAR), INDEX(DIM_YEAR, DIM_DAY_OF_YEAR), INDEX(DIM_WEEK_OF_YEAR), INDEX(DIM_DAY_OF_WEEK), INDEX(DIM_DAY_OF_YEAR))");
+                    dbStmt.execute();
+                    PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DATE_DIMENSION (DIM_DATE, DIM_DAY_OF_MONTH," +
+                            "DIM_MONTH, DIM_QUARTER_OF_YEAR, DIM_YEAR, DIM_WEEK_OF_YEAR, DIM_DAY_OF_WEEK, DIM_DAY_OF_YEAR) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.YEAR, -3);
+                    for (int i = 0; i < 6; i++) {
+                        cal.set(Calendar.DAY_OF_YEAR, 1);
+                        int year = cal.get(Calendar.YEAR);
+                        int newYear = year + 1;
+                        cal.set(Calendar.YEAR, newYear);
+                        for (int j = 0; j < ((cal.get(Calendar.YEAR) % 4 == 0) ? 366 : 365); j++) {
+                            cal.set(Calendar.DAY_OF_YEAR, j + 1);
+                            insertStmt.setDate(1, new java.sql.Date(cal.getTime().getTime()));
+                            insertStmt.setInt(2, cal.get(Calendar.DAY_OF_MONTH));
+                            insertStmt.setInt(3, cal.get(Calendar.MONTH));
+                            int quarterOfYear;
+                            switch (cal.get(Calendar.MONTH)) {
+                                case Calendar.JANUARY:
+                                case Calendar.FEBRUARY:
+                                case Calendar.MARCH:
+                                    quarterOfYear = 0;
+                                    break;
+                                case Calendar.APRIL:
+                                case Calendar.MAY:
+                                case Calendar.JUNE:
+                                    quarterOfYear = 1;
+                                    break;
+                                case Calendar.JULY:
+                                case Calendar.AUGUST:
+                                case Calendar.SEPTEMBER:
+                                    quarterOfYear = 2;
+                                    break;
+                                case Calendar.OCTOBER:
+                                case Calendar.NOVEMBER:
+                                case Calendar.DECEMBER:
+                                default:
+                                    quarterOfYear = 3;
+                                    break;
+                            }
+                            insertStmt.setInt(4, quarterOfYear);
+                            insertStmt.setInt(5, cal.get(Calendar.YEAR));
+                            insertStmt.setInt(6, cal.get(Calendar.WEEK_OF_YEAR));
+                            insertStmt.setInt(7, cal.get(Calendar.DAY_OF_WEEK));
+                            insertStmt.setInt(8, cal.get(Calendar.DAY_OF_YEAR));
+                            insertStmt.execute();
                         }
-                        insertStmt.setInt(4, quarterOfYear);
-                        insertStmt.setInt(5, cal.get(Calendar.YEAR));
-                        insertStmt.setInt(6, cal.get(Calendar.WEEK_OF_YEAR));
-                        insertStmt.setInt(7, cal.get(Calendar.DAY_OF_WEEK));
-                        insertStmt.setInt(8, cal.get(Calendar.DAY_OF_YEAR));
-                        insertStmt.execute();
                     }
+                } else if (database.getDialect() == Database.POSTGRES) {
+                    PreparedStatement dbStmt = conn.prepareStatement("CREATE TABLE DATE_DIMENSION (DATE_DIMENSION_ID SERIAL PRIMARY KEY," +
+                            "DIM_DATE DATE NOT NULL, DIM_DAY_OF_MONTH INTEGER NOT NULL, DIM_MONTH INTEGER NOT NULL, " +
+                            "DIM_QUARTER_OF_YEAR INTEGER NOT NULL, DIM_YEAR INTEGER NOT NULL, DIM_WEEK_OF_YEAR INTEGER NOT NULL," +
+                            "DIM_DAY_OF_WEEK INTEGER NOT NULL, DIM_DAY_OF_YEAR INTEGER NOT NULL)");
+                    dbStmt.execute();
+                    PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DATE_DIMENSION (DIM_DATE, DIM_DAY_OF_MONTH," +
+                            "DIM_MONTH, DIM_QUARTER_OF_YEAR, DIM_YEAR, DIM_WEEK_OF_YEAR, DIM_DAY_OF_WEEK, DIM_DAY_OF_YEAR) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.YEAR, -3);
+                    for (int i = 0; i < 6; i++) {
+                        cal.set(Calendar.DAY_OF_YEAR, 1);
+                        int year = cal.get(Calendar.YEAR);
+                        int newYear = year + 1;
+                        cal.set(Calendar.YEAR, newYear);
+                        for (int j = 0; j < ((cal.get(Calendar.YEAR) % 4 == 0) ? 366 : 365); j++) {
+                            cal.set(Calendar.DAY_OF_YEAR, j + 1);
+                            insertStmt.setDate(1, new java.sql.Date(cal.getTime().getTime()));
+                            insertStmt.setInt(2, cal.get(Calendar.DAY_OF_MONTH));
+                            insertStmt.setInt(3, cal.get(Calendar.MONTH));
+                            int quarterOfYear;
+                            switch (cal.get(Calendar.MONTH)) {
+                                case Calendar.JANUARY:
+                                case Calendar.FEBRUARY:
+                                case Calendar.MARCH:
+                                    quarterOfYear = 0;
+                                    break;
+                                case Calendar.APRIL:
+                                case Calendar.MAY:
+                                case Calendar.JUNE:
+                                    quarterOfYear = 1;
+                                    break;
+                                case Calendar.JULY:
+                                case Calendar.AUGUST:
+                                case Calendar.SEPTEMBER:
+                                    quarterOfYear = 2;
+                                    break;
+                                case Calendar.OCTOBER:
+                                case Calendar.NOVEMBER:
+                                case Calendar.DECEMBER:
+                                default:
+                                    quarterOfYear = 3;
+                                    break;
+                            }
+                            insertStmt.setInt(4, quarterOfYear);
+                            insertStmt.setInt(5, cal.get(Calendar.YEAR));
+                            insertStmt.setInt(6, cal.get(Calendar.WEEK_OF_YEAR));
+                            insertStmt.setInt(7, cal.get(Calendar.DAY_OF_WEEK));
+                            insertStmt.setInt(8, cal.get(Calendar.DAY_OF_YEAR));
+                            insertStmt.execute();
+                        }
+                    }
+                } else {
+                    throw new RuntimeException();
                 }
             }
             conn.commit();
@@ -131,7 +201,7 @@ public class DatabaseManager {
                     String databaseName = properties.getProperty(dbID + ".storage.name");
                     String user = properties.getProperty(dbID + ".storage.username");
                     String password = properties.getProperty(dbID + ".storage.password");
-                    Database database = Database.create(host, port, databaseName, user, password, dbID);
+                    Database database = Database.create(host, port, databaseName, user, password, dbID, Database.MYSQL);
                     defineDateTable(database);
                     dbMap.put(dbID, database);
                 }
@@ -143,28 +213,69 @@ public class DatabaseManager {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT database_alias, database_name, host, port, database_username, database_password, " +
+                    "database_dialect, general_pool FROM " +
+                    "storage_database");
+            queryStmt.executeQuery();
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                String dbID = rs.getString(1);
+                if (dbMap.containsKey(dbID)) {
+                    continue;
+                }
+                String host = rs.getString(3);
+                int port = rs.getInt(4);
+                String databaseName = rs.getString(2);
+                String user = rs.getString(5);
+                String password = PasswordStorage.decryptString(rs.getString(6));
+                int dialect = rs.getInt(7);
+                boolean generalPool = rs.getBoolean(8);
+                Database database = Database.create(host, String.valueOf(port), databaseName, user, password, dbID, dialect);
+                defineDateTable(database);
+                if (generalPool) {
+                    dbMap.put(dbID, database);
+                } else {
+                    additionalDatabases.put(dbID, database);
+                }
+            }
+            queryStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(PasswordStorage.encryptString("storage1"));
+        System.out.println(PasswordStorage.encryptString("storage2"));
+        System.out.println(PasswordStorage.encryptString("storage3"));
     }
 
     public String chooseDatabase(Connection conn) throws SQLException {
-        /*PreparedStatement stmt = conn.prepareStatement("SELECT SPECIAL_STORAGE FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+        PreparedStatement stmt = conn.prepareStatement("SELECT SPECIAL_STORAGE FROM ACCOUNT WHERE ACCOUNT_ID = ?");
         stmt.setLong(1, SecurityUtil.getAccountID());
         ResultSet storageRS = stmt.executeQuery();
         storageRS.next();
         String specialStorage = storageRS.getString(1);
         stmt.close();
-        if (specialStorage != null && dbMap.containsKey(specialStorage)) {
+        if (specialStorage != null && additionalDatabases.containsKey(specialStorage)) {
             return specialStorage;
-        }*/
-
+        }
         String dbToUse = null;
         long smallestSize = Long.MAX_VALUE;
         Set<String> foundDBs = new HashSet<String>(dbMap.keySet());
         for (Map.Entry<String, Long> entry : SystemSettings.instance().getDatabaseMap().entrySet()) {
-            long size = entry.getValue();
-            foundDBs.remove(entry.getKey());
-            if (size < smallestSize) {
-                dbToUse = entry.getKey();
-                smallestSize = size;
+            if (dbMap.containsKey(entry.getKey())) {
+                long size = entry.getValue();
+                foundDBs.remove(entry.getKey());
+                if (size < smallestSize) {
+                    dbToUse = entry.getKey();
+                    smallestSize = size;
+                }
             }
         }
         if (!foundDBs.isEmpty()) {

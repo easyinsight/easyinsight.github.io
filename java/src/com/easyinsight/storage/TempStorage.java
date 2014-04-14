@@ -69,72 +69,25 @@ public class TempStorage implements IDataStorage {
     private int maxLen = 255;
 
     public void createTable(String sql) throws SQLException {
-        EIConnection storageConn = storageDatabase.getConnection();
-        try {
-            ResultSet existsRS = storageConn.getMetaData().getTables(null, null, tableName, null);
-            if (existsRS.next()) {
-                storageConn.prepareStatement("DROP TABLE " + tableName).execute();
-            }
-            try {
-                PreparedStatement createSQL = storageConn.prepareStatement(sql);
-                createSQL.execute();
-            } catch (SQLException e) {
-                if (e.getMessage().contains("Row size too large")) {
-                    maxLen = 100;
-                    String nextTry = defineTempInsertTable();
-                    PreparedStatement createSQL = storageConn.prepareStatement(nextTry);
-                    createSQL.execute();
-                } else {
-                    throw e;
-                }
-            }
-        } finally {
-            Database.closeConnection(storageConn);
+        getStorageDialect(getTableName()).createTempTable(sql, storageDatabase);
+    }
+
+    private IStorageDialect getStorageDialect(String tableName) {
+        if (storageDatabase.getDialect() == Database.MYSQL) {
+            return new MySQLStorageDialect(tableName, keys);
+        } else if (storageDatabase.getDialect() == Database.POSTGRES) {
+            return new PostgresStorageDialect(tableName, keys);
+        } else {
+            throw new RuntimeException();
         }
     }
 
     public String defineTempInsertTable() {
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("CREATE TABLE ");
-        sqlBuilder.append(tableName);
-        sqlBuilder.append("( ");
-        for (KeyMetadata keyMetadata : keys.values()) {
-            sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType()));
-            sqlBuilder.append(",");
-        }
-        if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-        sqlBuilder.append(" )");
-        return sqlBuilder.toString();
+        return getStorageDialect(getTableName()).defineTempInsertTable();
     }
 
     public String defineTempUpdateTable() {
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("CREATE TABLE ");
-        sqlBuilder.append(tableName);
-        sqlBuilder.append("( ");
-        for (KeyMetadata keyMetadata : keys.values()) {
-            sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType()));
-            sqlBuilder.append(",");
-        }
-        sqlBuilder.append("update_key_field varchar(255),");
-        sqlBuilder.append("index(update_key_field),");
-        if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-        sqlBuilder.append(" )");
-        return sqlBuilder.toString();
-    }
-
-    private String getColumnDefinitionSQL(Key key, int type) {
-        String column;
-        if (type == Value.DATE) {
-            column = "k" + key.getKeyID() + " DATETIME, datedim_" + key.getKeyID() + "_id BIGINT(11)";
-        } else if (type == Value.NUMBER) {
-            column = "k" + key.getKeyID() + " DOUBLE";
-        } else if (type == Value.TEXT) {
-            column = "k" + key.getKeyID() + " TEXT";
-        } else {
-            column = "k" + key.getKeyID() + " VARCHAR("+maxLen+")";
-        }
-        return column;
+        return getStorageDialect(getTableName()).defineTempUpdateTable();
     }
 
     public void commit() throws SQLException {

@@ -107,6 +107,16 @@ public class DataStorage implements IDataStorage {
         return dataStorage;
     }
 
+    private IStorageDialect getStorageDialect(String tableName) {
+        if (database.getDialect() == Database.MYSQL) {
+            return new MySQLStorageDialect(tableName, keys);
+        } else if (database.getDialect() == Database.POSTGRES) {
+            return new PostgresStorageDialect(tableName, keys);
+        } else {
+            throw new RuntimeException();
+        }
+    }
+
     /**
      * Creates a DataStorage object for write purposes.
      *
@@ -349,6 +359,9 @@ public class DataStorage implements IDataStorage {
     }
 
     public long calculateSize() throws SQLException {
+        if (database.getDialect() == Database.POSTGRES) {
+            return 0;
+        }
         PreparedStatement countStmt = storageConn.prepareStatement("SHOW TABLE STATUS LIKE ?");
         countStmt.setString(1, getTableName());
         ResultSet countRS = countStmt.executeQuery();
@@ -931,7 +944,8 @@ public class DataStorage implements IDataStorage {
                 if (keyMetadata != null) {
                     if (keyMetadata.getType() == Value.DATE) {
                         AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
-                        if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL)) {
+                        if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) &&
+                                database.getDialect() == Database.MYSQL) {
                             int month = dataRS.getInt(i++);
                             int year = dataRS.getInt(i++);
                             Calendar cal = Calendar.getInstance();
@@ -939,7 +953,7 @@ public class DataStorage implements IDataStorage {
                             cal.set(Calendar.MONTH, month - 1);
                             cal.set(Calendar.YEAR, year);
                             row.addValue(aggregateKey, new DateValue(cal.getTime()));
-                        } else if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL)) {
+                        } else if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) && database.getDialect() == Database.MYSQL) {
                             int year = dataRS.getInt(i++);
                             Calendar cal = Calendar.getInstance();
                             cal.set(Calendar.DAY_OF_MONTH, 2);
@@ -1112,14 +1126,18 @@ public class DataStorage implements IDataStorage {
                 } else if (aggregation == AggregationTypes.MIN) {
                     columnName = "MIN(" + columnName + ")";
                 } else {
-                    groupByBuilder.append("binary(" + columnName + ")");
+                    if (database.getDialect() == Database.MYSQL) {
+                        groupByBuilder.append("binary(" + columnName + ")");
+                    } else {
+                        groupByBuilder.append(columnName);
+                    }
                     groupByBuilder.append(",");
                 }
                 selectBuilder.append(columnName);
                 selectBuilder.append(",");
             } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && aggregateQuery) {
                 AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
-                if (optimized && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL)) {
+                if (optimized && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) && database.getDialect() == Database.MYSQL) {
                     selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
                     groupByBuilder.append("month" + columnName + ", year" + columnName + ",");
                 } else if (optimized && (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL)) {
@@ -1128,7 +1146,11 @@ public class DataStorage implements IDataStorage {
                 } else {
                     selectBuilder.append(columnName);
                     selectBuilder.append(",");
-                    groupByBuilder.append("binary(" + columnName + ")");
+                    if (database.getDialect() == Database.MYSQL  && database.getDialect() == Database.MYSQL) {
+                        groupByBuilder.append("binary(" + columnName + ")");
+                    } else {
+                        groupByBuilder.append(columnName);
+                    }
                     groupByBuilder.append(",");
                 }
             } else {
@@ -1138,7 +1160,11 @@ public class DataStorage implements IDataStorage {
                     selectBuilder.append(",");
                 } else {
                     if (aggregateQuery) {
-                        groupByBuilder.append("binary(" + columnName + ")");
+                        if (database.getDialect() == Database.MYSQL) {
+                            groupByBuilder.append("binary(" + columnName + ")");
+                        } else {
+                            groupByBuilder.append(columnName);
+                        }
                         groupByBuilder.append(",");
                     }
                     selectBuilder.append(columnName);
@@ -1501,74 +1527,10 @@ public class DataStorage implements IDataStorage {
     }
 
     public String defineTableSQL(boolean hugeTable) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("CREATE TABLE ");
-        sqlBuilder.append(getTableName());
-        sqlBuilder.append("( ");
-        for (KeyMetadata keyMetadata : keys.values()) {
-            sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType(), hugeTable));
-            sqlBuilder.append(",");
-        }
-        String primaryKey = getTableName() + "_ID";
-        sqlBuilder.append(primaryKey);
-        sqlBuilder.append(" BIGINT NOT NULL AUTO_INCREMENT,");
-        sqlBuilder.append("PRIMARY KEY (");
-        sqlBuilder.append(primaryKey);
-        sqlBuilder.append("),");
-        int indexCount = 0;
-        for (KeyMetadata keyMetadata : keys.values()) {
-            if (!hugeTable && keyMetadata.getType() == Value.STRING) {
-                sqlBuilder.append("INDEX (");
-                String column = keyMetadata.getKey().toSQL();
-                sqlBuilder.append(column);
-                sqlBuilder.append(")");
-                sqlBuilder.append(",");
-                indexCount++;
-            } else if (keyMetadata.getType() == Value.DATE) {
-                sqlBuilder.append("INDEX (");
-                String column = keyMetadata.getKey().toSQL();
-                sqlBuilder.append(column);
-                sqlBuilder.append(")");
-                sqlBuilder.append(",");
-                indexCount++;
-            }
-            if (keyMetadata.getType() == Value.DATE) {
-                sqlBuilder.append("INDEX (");
-                String column = "datedim_" + keyMetadata.getKey().getKeyID() + "_id";
-                sqlBuilder.append(column);
-                sqlBuilder.append(")");
-                sqlBuilder.append(",");
-                indexCount++;
-            }
-            if (indexCount >= 60) {
-                break;
-            }
-        }
-        if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-        sqlBuilder.append(" )");
-        //sqlBuilder.append(" ) CHARSET=utf8");
-        return sqlBuilder.toString();
+        return getStorageDialect(getTableName()).defineTableSQL(hugeTable);
     }
 
-    private String getColumnDefinitionSQL(Key key, int type, boolean hugeTable) {
-        String column;
-        if (type == Value.DATE) {
-            column = "k" + key.getKeyID() + " DATETIME, datedim_" + key.getKeyID() + "_id BIGINT(11)";
-        } else if (type == Value.NUMBER) {
-            column = "k" + key.getKeyID() + " DOUBLE";
-        } else if (type == Value.TEXT) {
-            column = "k" + key.getKeyID() + " TEXT";
-        } else {
-            if (hugeTable) {
-                column = "k" + key.getKeyID() + " TEXT";
-            } else {
-                column = "k" + key.getKeyID() + " VARCHAR(255)";
-            }
-        }
-        return column;
-    }
-
-    private String getTableName() {
+    String getTableName() {
         return "df" + feedID + "v" + version;
     }
 
