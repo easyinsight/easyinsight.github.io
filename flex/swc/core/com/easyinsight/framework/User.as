@@ -142,7 +142,7 @@ public class User extends EventDispatcher
         _user.dateFormat = response.dateFormat;
         _user.scenario = response.scenario;
         if (response.currencySymbol == "EUR") {
-            _user.currencySymbol = "Û";
+            _user.currencySymbol = "\u20AC";
         } else {
             _user.currencySymbol = response.currencySymbol;
         }
