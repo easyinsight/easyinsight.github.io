@@ -206,14 +206,30 @@ public class UserServiceResponse {
                 account.isHeatMapEnabled(), newsDate, user.getNewsDismissDate(), accountOverSize, user.isTestAccountVisible(), account.isTagsAndCopyEnabled(),
                 account.isHourlyRefreshEnabled());
         response.setReportImage(bytes);
-        Locale locale = ExportService.createLocale(account.getAccountLocale());
+        String accountLocale;
+        if (!"0".equals(user.getUserLocale())) {
+            accountLocale = user.getUserLocale();
+        } else {
+            accountLocale = account.getAccountLocale();
+        }
+        Locale locale = ExportService.createLocale(accountLocale);
         NumberFormat nf = NumberFormat.getInstance(locale);
         String string = nf.format(5000.1);
         String thousandsSeperator = String.valueOf(string.charAt(1));
         String decimalSeperator = String.valueOf(string.charAt(5));
         response.setThousandsSeperator(thousandsSeperator);
         response.setDecimalSeperator(decimalSeperator);
-        System.out.println(thousandsSeperator + " and " + decimalSeperator);
+        if (user.getDateFormat() != 6) {
+            response.setDateFormat(user.getDateFormat());
+        }
+        if (user.getCurrency() == 1) {
+            response.setCurrencySymbol("$");
+        } else if (user.getCurrency() == 2) {
+            response.setCurrencySymbol("Û");
+        } else if (user.getCurrency() == 3) {
+            response.setCurrencySymbol("£");
+        }
+        System.out.println("set currency symbol to " + response.getCurrencySymbol());
         return response;
     }
 
