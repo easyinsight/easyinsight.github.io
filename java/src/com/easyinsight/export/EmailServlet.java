@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class EmailServlet extends HtmlServlet {
     @Override
-    protected void doStuff(HttpServletRequest req, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws Exception {
+    protected void doStuff(HttpServletRequest req, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
         int format = Integer.parseInt(req.getParameter("format"));
         String recipient = req.getParameter("recipient");
         String subject = req.getParameter("subject");

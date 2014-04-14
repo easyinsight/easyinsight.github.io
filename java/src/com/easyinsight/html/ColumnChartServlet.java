@@ -6,6 +6,8 @@ import com.easyinsight.analysis.definitions.WSColumnChartDefinition;
 import com.easyinsight.analysis.definitions.WSPieChartDefinition;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,7 +23,7 @@ import java.util.*;
  */
 public class ColumnChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
-                           EIConnection conn, WSAnalysisDefinition report) throws Exception {
+                           EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         WSChartDefinition chart = (WSChartDefinition) report;
         JSONObject object = new JSONObject();
@@ -44,6 +46,7 @@ public class ColumnChartServlet extends HtmlServlet {
         Comparator c = null;
 
         JSONObject axes = ((WSChartDefinition) report).getAxes();
+
 
         if (report instanceof WSColumnChartDefinition) {
             WSColumnChartDefinition columnChartDefinition = (WSColumnChartDefinition) report;
@@ -102,7 +105,6 @@ public class ColumnChartServlet extends HtmlServlet {
         }
 
 
-
         // drillthroughs
         Link l = xAxisItem.defaultLink();
 
@@ -121,7 +123,7 @@ public class ColumnChartServlet extends HtmlServlet {
 
         List<String> colors = chart.createMultiColors();
 
-        for(int i = 0;i < measures.size();i++) {
+        for (int i = 0; i < measures.size(); i++) {
             blahArray.put(new JSONArray());
             JSONArray colorObj = new JSONArray();
             JSONObject curObject = new JSONObject();
@@ -136,7 +138,7 @@ public class ColumnChartServlet extends HtmlServlet {
             colorObj.put(colorStop);
             JSONArray jj = new JSONArray();
             jj.put(colorObj);
-            if(measures.size() > 1) {
+            if (measures.size() > 1) {
                 curObject.put("seriesColors", jj);
             }
             series.put(curObject);
@@ -158,29 +160,25 @@ public class ColumnChartServlet extends HtmlServlet {
                 array.put(val);
                 if (report instanceof WSBarChartDefinition) {
                     val.put(row.getValue(measureItem).toDouble());
-                    val.put(row.getValue(xAxisItem).toString());
+                    val.put(ExportService.createValue(md, xAxisItem, row.getValue(xAxisItem), true));
                 } else {
-                    val.put(row.getValue(xAxisItem).toString());
+                    val.put(ExportService.createValue(md, xAxisItem, row.getValue(xAxisItem), true));
                     val.put(row.getValue(measureItem).toDouble());
                 }
                 if (seriesDefaults.get("pointLabels") != null && seriesDefaults.has("pointLabels")) {
-//                    if(measures.size() > 1) {
-                        JSONObject curSeries = ((JSONObject) series.get(i));
-                        JSONObject o;
-                        if(!curSeries.has("pointLabels"))  {
-                            o = new JSONObject();
-                            curSeries.put("pointLabels", o);
-                        } else {
-                            o = (JSONObject) curSeries.get("pointLabels");
-                        }
-                        if(!o.has("labels")) {
-                            o.put("labels", new JSONArray());
-                        }
-                        JSONArray arr = (JSONArray) o.get("labels");
-                        arr.put(row.getValue(measureItem).toDouble());
-//                    } else {
-//                        ((JSONArray) ((JSONObject) seriesDefaults.get("pointLabels")).get("labels")).put(row.getValue(measureItem).toDouble());
-//                    }
+                    JSONObject curSeries = ((JSONObject) series.get(i));
+                    JSONObject o;
+                    if (!curSeries.has("pointLabels")) {
+                        o = new JSONObject();
+                        curSeries.put("pointLabels", o);
+                    } else {
+                        o = (JSONObject) curSeries.get("pointLabels");
+                    }
+                    if (!o.has("labels")) {
+                        o.put("labels", new JSONArray());
+                    }
+                    JSONArray arr = (JSONArray) o.get("labels");
+                    arr.put("'" + ExportService.createValue(md, measureItem, row.getValue(measureItem), true) + "'");
                 }
             }
 
