@@ -1463,7 +1463,7 @@ public class DataStorage implements IDataStorage {
                     insertStmt.setTimestamp(i++, sqlDate);
                 }
             }
-            if (date == null) {
+            if (date == null || database.getDialect() == Database.POSTGRES) {
                 insertStmt.setNull(i++, Types.BIGINT);
             } else {
                 long id = dateDimCache.getDateDimID(date, storageConn);

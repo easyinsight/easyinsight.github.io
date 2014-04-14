@@ -352,7 +352,7 @@ public class TempStorage implements IDataStorage {
                     insertStmt.setTimestamp(i++, sqlDate);
                 }
             }
-            if (date == null) {
+            if (date == null || storageDatabase.getDialect() == Database.POSTGRES) {
                 insertStmt.setNull(i++, Types.BIGINT);
             } else {
                 try {
