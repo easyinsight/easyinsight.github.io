@@ -739,6 +739,7 @@ public class DataStorage implements IDataStorage {
             } else {
                 createTable();
             }
+            System.out.println("all good, no problems...");
         } catch (SQLException e) {
             LogClass.error(e);
             if (e.getMessage().contains("doesn't exist")) {
