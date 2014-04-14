@@ -225,9 +225,9 @@ public class UserServiceResponse {
         if (user.getCurrency() == 1) {
             response.setCurrencySymbol("$");
         } else if (user.getCurrency() == 2) {
-            response.setCurrencySymbol("Û");
+            response.setCurrencySymbol("EUR");
         } else if (user.getCurrency() == 3) {
-            response.setCurrencySymbol("£");
+            response.setCurrencySymbol("GBP");
         }
         System.out.println("set currency symbol to " + response.getCurrencySymbol());
         return response;
