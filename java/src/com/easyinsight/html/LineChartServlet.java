@@ -8,6 +8,7 @@ import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.export.ExportMetadata;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -24,7 +25,7 @@ import java.util.*;
  */
 public class LineChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
-                           EIConnection conn, WSAnalysisDefinition report) throws Exception {
+                           EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
 
         JSONObject object = new JSONObject();

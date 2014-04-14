@@ -21,7 +21,7 @@ import java.util.Calendar;
  */
 public class GaugeServlet extends HtmlServlet {
     @Override
-    protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws Exception {
+    protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         WSGaugeDefinition gaugeDefinition = (WSGaugeDefinition) report;
         JSONObject jsonObject = new JSONObject();

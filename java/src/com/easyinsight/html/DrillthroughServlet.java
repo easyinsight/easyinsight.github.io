@@ -11,6 +11,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.FieldRule;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.tag.Tag;
 import com.easyinsight.util.RandomTextGenerator;
 import net.minidev.json.JSONObject;
@@ -41,7 +42,7 @@ public class DrillthroughServlet extends HtmlServlet {
         return null;
     }
     @Override
-    protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, Object o) throws Exception {
+    protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, Object o, ExportMetadata md) throws Exception {
 
         JSONObject jsonObject = (JSONObject) o;
 

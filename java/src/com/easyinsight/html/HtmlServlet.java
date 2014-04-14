@@ -6,6 +6,8 @@ import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import net.minidev.json.JSONArray;
@@ -142,8 +144,9 @@ public class HtmlServlet extends HttpServlet {
                     int timezoneOffset = Integer.parseInt(req.getParameter("timezoneOffset"));
                     insightRequestMetadata.setUtcOffset(timezoneOffset);
                 }
+                ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
                 long start = System.currentTimeMillis();
-                doStuff(req, resp, insightRequestMetadata, conn, report, o);
+                doStuff(req, resp, insightRequestMetadata, conn, report, o, md);
                 BenchmarkManager.recordBenchmarkForReport("HTMLReportProcessingTime", System.currentTimeMillis() - start,
                         SecurityUtil.getUserID(false), report.getAnalysisID(), conn);
                 resp.setHeader("Cache-Control", "no-cache"); //HTTP 1.1
@@ -306,7 +309,8 @@ public class HtmlServlet extends HttpServlet {
                     int timezoneOffset = Integer.parseInt(req.getParameter("timezoneOffset"));
                     insightRequestMetadata.setUtcOffset(timezoneOffset);
                 }
-                doStuff(req, resp, insightRequestMetadata, conn, report);
+                ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+                doStuff(req, resp, insightRequestMetadata, conn, report, md);
                 resp.setHeader("Cache-Control", "no-cache"); //HTTP 1.1
                 resp.setHeader("Pragma", "no-cache"); //HTTP 1.0
                 resp.setDateHeader("Expires", 0); //prevents caching at the proxy server
@@ -327,11 +331,12 @@ public class HtmlServlet extends HttpServlet {
 
 
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
-                           EIConnection conn, WSAnalysisDefinition report) throws Exception {
+                           EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
+
     }
 
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
-                           EIConnection conn, WSAnalysisDefinition report, Object jsonObject) throws Exception {
-        doStuff(request, response, insightRequestMetadata, conn, report);
+                           EIConnection conn, WSAnalysisDefinition report, Object jsonObject, ExportMetadata md) throws Exception {
+        doStuff(request, response, insightRequestMetadata, conn, report, md);
     }
 }
