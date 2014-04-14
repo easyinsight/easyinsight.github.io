@@ -389,6 +389,7 @@ public class DataStorage implements IDataStorage {
             PreparedStatement createSQL = storageConn.prepareStatement(sql);
             createSQL.execute();
         } catch (SQLException e) {
+            LogClass.error(e);
             if (e.getMessage().contains("Row size too large")) {
                 String sql = defineTableSQL(true);
                 PreparedStatement createSQL = storageConn.prepareStatement(sql);
