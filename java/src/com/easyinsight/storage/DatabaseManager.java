@@ -121,7 +121,7 @@ public class DatabaseManager {
                         }
                     }
                 } else if (database.getDialect() == Database.POSTGRES) {
-                    PreparedStatement dbStmt = conn.prepareStatement("CREATE TABLE DATE_DIMENSION (DATE_DIMENSION_ID SERIAL PRIMARY KEY," +
+                    /*PreparedStatement dbStmt = conn.prepareStatement("CREATE TABLE DATE_DIMENSION (DATE_DIMENSION_ID SERIAL PRIMARY KEY," +
                             "DIM_DATE DATE NOT NULL, DIM_DAY_OF_MONTH INTEGER NOT NULL, DIM_MONTH INTEGER NOT NULL, " +
                             "DIM_QUARTER_OF_YEAR INTEGER NOT NULL, DIM_YEAR INTEGER NOT NULL, DIM_WEEK_OF_YEAR INTEGER NOT NULL," +
                             "DIM_DAY_OF_WEEK INTEGER NOT NULL, DIM_DAY_OF_YEAR INTEGER NOT NULL)");
@@ -171,7 +171,7 @@ public class DatabaseManager {
                             insertStmt.setInt(8, cal.get(Calendar.DAY_OF_YEAR));
                             insertStmt.execute();
                         }
-                    }
+                    }*/
                 } else {
                     throw new RuntimeException();
                 }
@@ -253,6 +253,7 @@ public class DatabaseManager {
         System.out.println(PasswordStorage.encryptString("storage1"));
         System.out.println(PasswordStorage.encryptString("storage2"));
         System.out.println(PasswordStorage.encryptString("storage3"));
+        System.out.println(PasswordStorage.encryptString("Meeseantlers1"));
     }
 
     public String chooseDatabase(Connection conn) throws SQLException {
