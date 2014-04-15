@@ -5,6 +5,7 @@ import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.HTMLConnectionFactory;
+import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import org.apache.amber.oauth2.client.OAuthClient;
@@ -75,6 +76,39 @@ public class RedboothCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.REDBOOTH_TASK);
         types.add(FeedType.REDBOOTH_COMMENT);
         return types;
+    }
+
+    private Set<String> validProjects = new HashSet<String>();
+
+    public Set<String> getValidProjects() {
+        return validProjects;
+    }
+
+    public void setValidProjects(Set<String> validProjects) {
+        this.validProjects = validProjects;
+    }
+
+    @Override
+    protected void refreshDone() {
+        super.refreshDone();
+        validProjects = null;
+    }
+
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
+        List<IServerDataSourceDefinition> end = new ArrayList<IServerDataSourceDefinition>();
+        Set<Integer> set = new HashSet<Integer>();
+        for (IServerDataSourceDefinition s : children) {
+            if (s.getFeedType().getType() == FeedType.REDBOOTH_PROJECT.getType()) {
+                set.add(s.getFeedType().getType());
+                end.add(s);
+            }
+        }
+        for (IServerDataSourceDefinition s : children) {
+            if (!set.contains(s.getFeedType().getType())) {
+                end.add(s);
+            }
+        }
+        return end;
     }
 
     @Override

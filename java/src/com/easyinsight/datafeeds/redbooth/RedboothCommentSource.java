@@ -10,10 +10,7 @@ import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
 
 import java.sql.Connection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -67,13 +64,18 @@ public class RedboothCommentSource extends RedboothBaseSource {
             }
         }
         List<Map> organizations = (List<Map>) base.get("objects");
+        Set<String> validIDs = redboothCompositeSource.getValidProjects();
         for (Map org : organizations) {
+            String projectID = getJSONValue(org, "project_id");
+            if (!validIDs.contains(projectID)) {
+                continue;
+            }
             IRow row = dataSet.createRow();
             row.addValue(keys.get(ID), getJSONValue(org, "id"));
             row.addValue(keys.get(BODY), getJSONValue(org, "body"));
             row.addValue(keys.get(BODY_HTML), getJSONValue(org, "body_html"));
             row.addValue(keys.get(CREATED_AT), getDate(org, "created_at"));
-            row.addValue(keys.get(PROJECT_ID), getJSONValue(org, "project_id"));
+            row.addValue(keys.get(PROJECT_ID), projectID);
             row.addValue(keys.get(HOURS), getJSONValue(org, "hours"));
             String targetType = getJSONValue(org, "target_type");
             if ("Conversation".equals(targetType)) {

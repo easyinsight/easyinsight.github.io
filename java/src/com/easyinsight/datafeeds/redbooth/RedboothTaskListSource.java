@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: jamesboe
@@ -48,11 +49,16 @@ public class RedboothTaskListSource extends RedboothBaseSource {
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
         Map base = (Map) queryList("/api/1/task_lists?count=0", redboothCompositeSource, httpClient);
         List<Map> organizations = (List<Map>) base.get("objects");
+        Set<String> validIDs = redboothCompositeSource.getValidProjects();
         for (Map org : organizations) {
+            String projectID = getJSONValue(org, "project_id");
+            if (!validIDs.contains(projectID)) {
+                continue;
+            }
             IRow row = dataSet.createRow();
             row.addValue(keys.get(ID), getJSONValue(org, "id"));
             row.addValue(keys.get(NAME), getJSONValue(org, "name"));
-            row.addValue(keys.get(PROJECT_ID), getJSONValue(org, "project_id"));
+            row.addValue(keys.get(PROJECT_ID), projectID);
         }
         return dataSet;
     }
