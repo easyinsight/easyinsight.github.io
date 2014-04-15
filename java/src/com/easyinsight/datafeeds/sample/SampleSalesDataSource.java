@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.sample;
 
+import com.amazonaws.services.redshift.AmazonRedshiftClient;
 import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
@@ -70,7 +71,7 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
         DataSet dataSet = new DataSet();
         long startTime = System.currentTimeMillis();
         try {
-            File file = new File("SAMPLE.csv");
+            File file = new File(getDataFeedID() + ".csv");
             FileOutputStream fos = new FileOutputStream(file);
             BufferedOutputStream bos = new BufferedOutputStream(fos, 512);
             CsvWriter csvWriter = new CsvWriter(bos, ',', Charset.forName("UTF-8"));
@@ -80,7 +81,7 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
                 header[j++] = "k" + key.getKeyID();
             }
             csvWriter.writeRecord(header);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:SS");
             for (int i = 0; i < 1000000; i++) {
                 IRow row = dataSet.createRow();
 
@@ -112,6 +113,9 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
             csvWriter.flush();
             csvWriter.close();
             fos.close();
+
+
+
             //IDataStorage.insertData(dataSet);
         } catch (Exception e) {
             throw new RuntimeException(e);
