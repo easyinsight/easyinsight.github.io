@@ -1,7 +1,10 @@
 package com.easyinsight.datafeeds.sample;
 
+import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -10,7 +13,12 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.charset.Charset;
 import java.sql.Connection;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -62,6 +70,17 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
         DataSet dataSet = new DataSet();
         long startTime = System.currentTimeMillis();
         try {
+            File file = new File("SAMPLE.csv");
+            FileOutputStream fos = new FileOutputStream(file);
+            BufferedOutputStream bos = new BufferedOutputStream(fos, 512);
+            CsvWriter csvWriter = new CsvWriter(bos, ',', Charset.forName("UTF-8"));
+            String[] header = new String[keys.size()];
+            int j = 0;
+            for (Key key : keys.values()) {
+                header[j++] = "k" + key.getKeyID();
+            }
+            csvWriter.writeRecord(header);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             for (int i = 0; i < 1000000; i++) {
                 IRow row = dataSet.createRow();
 
@@ -72,12 +91,28 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
                 //cal.add(Calendar.YEAR, -1);
                 cal.add(Calendar.DAY_OF_YEAR, - (int) (Math.random() * 365));
                 row.addValue(keys.get(ORDER_DATE), cal.getTime());
+                String[] rowValues = new String[keys.size()];
+                j = 0;
+                for (Key key : keys.values()) {
+                    Value value = row.getValue(key);
+                    if (value.type() == Value.DATE) {
+                        rowValues[j++] = sdf.format(((DateValue) value).getDate());
+                    } else {
+                        rowValues[j++] = String.valueOf(value.toString());
+                    }
+                }
+                csvWriter.writeRecord(rowValues);
+
                 if (i % 1000 == 0) {
-                    IDataStorage.insertData(dataSet);
+                    //IDataStorage.insertData(dataSet);
+                    csvWriter.flush();
                     dataSet = new DataSet();
                 }
             }
-            IDataStorage.insertData(dataSet);
+            csvWriter.flush();
+            csvWriter.close();
+            fos.close();
+            //IDataStorage.insertData(dataSet);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
