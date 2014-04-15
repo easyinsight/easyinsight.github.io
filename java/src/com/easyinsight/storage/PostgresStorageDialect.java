@@ -36,7 +36,7 @@ public class PostgresStorageDialect implements IStorageDialect {
         }
         String primaryKey = tableName + "_ID";
         sqlBuilder.append(primaryKey);
-        sqlBuilder.append(" SERIAL PRIMARY KEY,");
+        sqlBuilder.append(" int identity not null,");
         int indexCount = 0;
         /*for (KeyMetadata keyMetadata : keys.values()) {
             if (!hugeTable && keyMetadata.getType() == Value.STRING) {
