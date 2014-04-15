@@ -62,7 +62,7 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
         DataSet dataSet = new DataSet();
         long startTime = System.currentTimeMillis();
         try {
-            for (int i = 0; i < 20000; i++) {
+            for (int i = 0; i < 1000000; i++) {
                 IRow row = dataSet.createRow();
 
                 row.addValue(keys.get(CUSTOMER), customerNames[i % customerNames.length]);
