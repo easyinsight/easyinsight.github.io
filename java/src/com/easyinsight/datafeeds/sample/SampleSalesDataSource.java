@@ -1,6 +1,5 @@
 package com.easyinsight.datafeeds.sample;
 
-import com.amazonaws.services.redshift.AmazonRedshiftClient;
 import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
