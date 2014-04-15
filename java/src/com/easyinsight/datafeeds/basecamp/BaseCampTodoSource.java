@@ -368,6 +368,7 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
                             row.addValue(keys.get(PROJECTSTATUS), projectStatus);
                             row.addValue(keys.get(PROJECT_CREATION_DATE), projectCreatedAt);
                             row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
+                            row.addValue(keys.get(ANNOUNCEMENT), announcement);
                             row.addValue(keys.get(MILESTONENAME), milestoneName);
                             if (milestoneDeadline != null) {
                                 row.addValue(keys.get(DEADLINE), new DateValue(milestoneDeadline));
@@ -393,6 +394,7 @@ f845c2a78ca4df6a19cd23515deda0ce826ff8d0
                     row.addValue(keys.get(PROJECTNAME), projectName);
                     row.addValue(keys.get(PROJECTSTATUS), projectStatus);
                     row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
+                    row.addValue(keys.get(ANNOUNCEMENT), announcement);
                     row.addValue(keys.get(PROJECT_CREATION_DATE), projectCreatedAt);
                 }
 
