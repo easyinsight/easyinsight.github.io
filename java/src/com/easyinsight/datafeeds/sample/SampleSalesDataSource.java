@@ -80,7 +80,7 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
                 header[j++] = "k" + key.getKeyID();
             }
             csvWriter.writeRecord(header);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:SS");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             for (int i = 0; i < 1000000; i++) {
                 IRow row = dataSet.createRow();
 
