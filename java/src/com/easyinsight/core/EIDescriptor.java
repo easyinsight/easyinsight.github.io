@@ -167,6 +167,7 @@ public abstract class EIDescriptor implements Serializable {
         JSONObject jo = new JSONObject();
         jo.put("name", getName());
         jo.put("url_key", getUrlKey());
+        jo.put("description", getDescription());
         return jo;
     }
 }

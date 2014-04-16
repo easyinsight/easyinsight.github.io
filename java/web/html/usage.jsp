@@ -38,12 +38,21 @@
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
 </jsp:include>
 <div class="container corePageWell">
-    <div class="row">
-        <div class="col-md-12">
-            <ul id="reportTarget"></ul>
-        </div>
-    </div>
+            <div id="reportTarget"></div>
     <script id="reportsTemplate" type="text/template">
+        <div class="row">
+        <div class="col-md-12" style="text-align:center;margin: 0;padding: 0">
+            <h2><@- data.report.name @></h2>
+        </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <@- data.report.description @>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <ul>
         <li>
             Reports:
             <ul>
@@ -80,6 +89,9 @@
                 <@ } @>
             </ul>
         </li>
+        </ul>
+            </div>
+        </div>
     </script>
 </body>
 <%

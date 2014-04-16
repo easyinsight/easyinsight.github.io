@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Created with IntelliJ IDEA.
@@ -45,6 +46,7 @@ public class UsageServlet extends HttpServlet {
             Usage u = new AnalysisService().whatUsesReport(report);
             ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
             JSONObject jo = u.toJSON(md);
+            jo.put("report", report.toJSON(new HTMLReportMetadata(), new ArrayList<FilterDefinition>()));
             resp.setContentType("application/json");
             resp.getOutputStream().write(jo.toString().getBytes());
             resp.getOutputStream().flush();
