@@ -35,7 +35,6 @@ public class JSONDataSource extends ServerDataSourceDefinition {
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
         var jsonConfig:JSONConfiguration = new JSONConfiguration();
-        jsonConfig.dataSourceDefinition = this;
         jsonConfig.label = "JSON Configuration";
         pages.addItem(jsonConfig);
         return pages;

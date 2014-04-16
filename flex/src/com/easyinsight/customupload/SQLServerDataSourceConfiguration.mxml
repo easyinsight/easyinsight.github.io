@@ -35,7 +35,7 @@
 
         private function save():void {
             if (validate()) {
-                var obj:SQLServerDatabaseConnection = new SQLServerDatabaseConnection();
+                var obj:SQLServerDatabaseConnection = dataSource as SQLServerDatabaseConnection;
                 obj.host = hostInput.text;
                 obj.port = int(portInput.text);
                 obj.databaseName = databaseNameInput.text;
