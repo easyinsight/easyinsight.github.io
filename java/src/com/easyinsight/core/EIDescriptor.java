@@ -1,5 +1,6 @@
 package com.easyinsight.core;
 
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.security.Roles;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -162,7 +163,7 @@ public abstract class EIDescriptor implements Serializable {
         this.urlKey = urlKey;
     }
 
-    public JSONObject toJSON(DateFormat dateFormat) throws JSONException {
+    public JSONObject toJSON(ExportMetadata dateFormat) throws JSONException {
         JSONObject jo = new JSONObject();
         jo.put("name", getName());
         jo.put("url_key", getUrlKey());

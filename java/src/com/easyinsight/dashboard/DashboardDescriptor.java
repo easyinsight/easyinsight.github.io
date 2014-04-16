@@ -1,6 +1,7 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.tag.Tag;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -90,8 +91,8 @@ public class DashboardDescriptor extends EIDescriptor {
     }
 
     @Override
-    public JSONObject toJSON(DateFormat dateFormat) throws JSONException {
-        JSONObject jo = super.toJSON(dateFormat);
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);
         jo.put("type", "dashboard");
         JSONArray tags = new JSONArray();
         if(getTags() != null) {

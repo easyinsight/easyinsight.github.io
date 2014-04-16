@@ -247,17 +247,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
         object.put("series", series);
 
         response.setContentType("application/json");
-        response.getOutputStream().
-
-                write(object.toString()
-
-                        .
-
-                                getBytes()
-
-                );
-        response.getOutputStream().
-
-                flush();
+        response.getOutputStream().write(object.toString().getBytes());
+        response.getOutputStream().flush();
     }
 }
