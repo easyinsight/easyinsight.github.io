@@ -1,5 +1,6 @@
 package com.easyinsight.api.v3;
 
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRow;
@@ -44,11 +45,12 @@ public class JSONAddRowServlet extends JSONServlet {
         DataStorage dataStorage = null;
         try {
             JSONObject returnObject = new JSONObject();
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            DateFormat standardDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             String dataSourceKey = request.getParameter("dataSourceID");
 
             String action = (String) jsonObject.get("action");
             JSONArray rows = (JSONArray) jsonObject.get("rows");
+            boolean useDateFormats = Boolean.valueOf(String.valueOf(jsonObject.get("custom_date_formats")));
             long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
             Map<String, AnalysisItem> fieldMap = new HashMap<String, AnalysisItem>();
@@ -68,7 +70,13 @@ public class JSONAddRowServlet extends JSONServlet {
                         } else if ("".equals(val)) {
                             curRow.addValue(analysisItem.getKey(), new EmptyValue());
                         } else {
-                            curRow.addValue(analysisItem.getKey(), dateFormat.parse((String) val));
+                            DateFormat df;
+                            if(useDateFormats) {
+                                df = new SimpleDateFormat(((AnalysisDateDimension) analysisItem).getCustomDateFormat());
+                            } else {
+                                df = standardDateFormat;
+                            }
+                            curRow.addValue(analysisItem.getKey(), df.parse((String) val));
                         }
                     } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                         if(val instanceof Number)
