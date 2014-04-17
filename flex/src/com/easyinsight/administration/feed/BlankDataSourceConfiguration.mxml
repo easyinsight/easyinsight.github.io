@@ -20,7 +20,6 @@
         import com.easyinsight.analysis.IAnalysisItemEditor;
         import com.easyinsight.analysis.Key;
         import com.easyinsight.analysis.NamedKey;
-        import com.easyinsight.datasources.BlankDataSource;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.binding.utils.ChangeWatcher;
@@ -39,8 +38,6 @@
         private var _dataSourceID:int;
 
         private var _kpiSource:Boolean;
-
-        public var dataSourceDefinition:BlankDataSource;
 
         public function set kpiSource(value:Boolean):void {
             _kpiSource = value;
@@ -103,7 +100,7 @@
 
         override protected function gotSource():void {
             var fields:ArrayCollection = new ArrayCollection();
-            for each (var f:AnalysisItem in dataSourceDefinition.fields) {
+            for each (var f:AnalysisItem in dataSource.fields) {
                 if (f.concrete) {
                     fields.addItem(new AnalysisItemWrapper(new AnalysisItemNode(f)));
                 }
