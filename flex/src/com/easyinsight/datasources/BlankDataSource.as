@@ -27,7 +27,6 @@ public class BlankDataSource extends ServerDataSourceDefinition {
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
         var config:BlankDataSourceConfiguration = new BlankDataSourceConfiguration();
-        config.dataSourceDefinition = this;
         pages.addItem(config);
         return pages;
     }
