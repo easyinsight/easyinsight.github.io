@@ -30,20 +30,9 @@ public class NthRecord extends Function {
         String instanceIDName = minusBrackets(getParameterName(1));
         String targetName = minusBrackets(getParameterName(4));
         String sortName = minusBrackets(getParameterName(3));
-        AnalysisItem instanceIDField = null;
-        AnalysisItem targetField = null;
-        AnalysisItem sortField = null;
-        for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
-            if (instanceIDName.equals(analysisItem.toDisplay()) || instanceIDName.equals(analysisItem.getKey().toKeyString())) {
-                instanceIDField = analysisItem;
-            }
-            if (targetName.equals(analysisItem.toDisplay()) || targetName.equals(analysisItem.getKey().toKeyString())) {
-                targetField = analysisItem;
-            }
-            if (sortName.equals(analysisItem.toDisplay()) || sortName.equals(analysisItem.getKey().toKeyString())) {
-                sortField = analysisItem;
-            }
-        }
+        AnalysisItem instanceIDField = findDataSourceItem(1);
+        AnalysisItem targetField = findDataSourceItem(4);
+        AnalysisItem sortField = findDataSourceItem(3);
         if (instanceIDField == null) {
             throw new FunctionException("Could not find the specified field " + instanceIDName);
         }
@@ -58,6 +47,9 @@ public class NthRecord extends Function {
         Value instanceValue = getParameter(1);
         int n = (int) Math.round(getParameter(0).toDouble());
         List<IRow> rows = processCalculationCache.rowsForValue(instanceValue);
+        if (rows == null) {
+            return new EmptyValue();
+        }
         if(n < 0) {
             n = -n;
             if(rows.size() < n) {

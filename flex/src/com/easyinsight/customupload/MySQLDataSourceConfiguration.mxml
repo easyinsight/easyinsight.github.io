@@ -38,7 +38,7 @@
 
         private function save():void {
             if (validate()) {
-                var obj:MySQLDatabaseConnection = new MySQLDatabaseConnection();
+                var obj:MySQLDatabaseConnection = dataSource as MySQLDatabaseConnection;
                 obj.host = hostInput.text;
                 obj.port = int(portInput.text);
                 obj.databaseName = databaseNameInput.text;
@@ -67,45 +67,45 @@
         }
         ]]></mx:Script>
     <mx:HBox>
-    <mx:VBox horizontalAlign="center" paddingTop="5">
-        <mx:Form>
-            <mx:FormItem label="Database Host:" labelWidth="150">
-                <mx:TextInput id="hostInput" fontWeight="normal" fontFamily="Lucida Grande" text="{host}" width="350"/>
-            </mx:FormItem>
-            <mx:FormItem label="Database Port:" labelWidth="150">
-                <mx:TextInput id="portInput" fontWeight="normal" fontFamily="Lucida Grande" text="{port}" width="350"/>
-            </mx:FormItem>
-            <mx:FormItem label="Database Name:" labelWidth="150">
-                <mx:TextInput id="databaseNameInput" fontWeight="normal" fontFamily="Lucida Grande"
-                              text="{databaseName}" width="350"/>
-            </mx:FormItem>
-            <mx:FormItem label="Database User Name:" labelWidth="150">
-                <mx:TextInput id="databaseUserNameInput" fontWeight="normal" fontFamily="Lucida Grande"
-                              text="{userName}" width="350"/>
-            </mx:FormItem>
-            <mx:FormItem label="Database Password:" labelWidth="150">
-                <mx:TextInput id="databasePasswordInput" fontWeight="normal" fontFamily="Lucida Grande" width="350"
-                              displayAsPassword="true"/>
-            </mx:FormItem>
-        </mx:Form>
-        <mx:HRule width="100%"/>
-        <mx:Form>
-            <mx:FormItem label="Query:" labelWidth="150">
-                <mx:TextArea id="queryArea" fontWeight="normal" fontFamily="Lucida Grande" width="350" text="{query}"
-                             height="110"
-                             borderStyle="solid" borderThickness="1"/>
-            </mx:FormItem>
-        </mx:Form>
-        <mx:HRule width="100%"/>
-        <util:SaveButton label="Convert Data Source to a Different Type" click="convert()" fontSize="12"/>
-    </mx:VBox>
-    <mx:VBox horizontalAlign="center">
-        <mx:Text width="200" selectable="true"
-                 text="For the server side database connection to work, you'll need to open up your firewall to allow access on the database port to db.easy-insight.com (107.21.250.229). If you can't allow access through the firewall, you'll need to download and use the alternate database connection, hosting that behind your firewall."/>
-        <mx:HRule width="100%"/>
-        <mx:Text width="200" selectable="true"
-                 text="The query defines what fields and data to pull back into Easy Insight. For example, you might do 'select * from table_name', 'select a, b from table_name' or 'select a as A, b as B from table_name where X = Y'."/>
-    </mx:VBox>
+        <mx:VBox horizontalAlign="center" paddingTop="5">
+            <mx:Form>
+                <mx:FormItem label="Database Host:" labelWidth="150">
+                    <mx:TextInput id="hostInput" fontWeight="normal" fontFamily="Lucida Grande" text="{host}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="Database Port:" labelWidth="150">
+                    <mx:TextInput id="portInput" fontWeight="normal" fontFamily="Lucida Grande" text="{port}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="Database Name:" labelWidth="150">
+                    <mx:TextInput id="databaseNameInput" fontWeight="normal" fontFamily="Lucida Grande"
+                                  text="{databaseName}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="Database User Name:" labelWidth="150">
+                    <mx:TextInput id="databaseUserNameInput" fontWeight="normal" fontFamily="Lucida Grande"
+                                  text="{userName}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="Database Password:" labelWidth="150">
+                    <mx:TextInput id="databasePasswordInput" fontWeight="normal" fontFamily="Lucida Grande" width="350"
+                                  displayAsPassword="true"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:HRule width="100%"/>
+            <mx:Form>
+                <mx:FormItem label="Query:" labelWidth="150">
+                    <mx:TextArea id="queryArea" fontWeight="normal" fontFamily="Lucida Grande" width="350" text="{query}"
+                                 height="110"
+                                 borderStyle="solid" borderThickness="1"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:HRule width="100%"/>
+            <util:SaveButton label="Convert Data Source to a Different Type" click="convert()" fontSize="12"/>
+        </mx:VBox>
+        <mx:VBox horizontalAlign="center">
+            <mx:Text width="200" selectable="true"
+                     text="For the server side database connection to work, you'll need to open up your firewall to allow access on the database port to db.easy-insight.com (107.21.250.229). If you can't allow access through the firewall, you'll need to download and use the alternate database connection, hosting that behind your firewall."/>
+            <mx:HRule width="100%"/>
+            <mx:Text width="200" selectable="true"
+                     text="The query defines what fields and data to pull back into Easy Insight. For example, you might do 'select * from table_name', 'select a, b from table_name' or 'select a as A, b as B from table_name where X = Y'."/>
+        </mx:VBox>
     </mx:HBox>
     <mx:HBox>
         <util:SaveButton label="Save" click="save()"/>
