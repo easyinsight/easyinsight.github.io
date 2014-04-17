@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.datasources {
-import com.easyinsight.administration.feed.BlankDataSourceFields;
+import com.easyinsight.administration.feed.BlankDataSourceConfiguration;
 import com.easyinsight.administration.feed.ServerDataSourceDefinition;
 import com.easyinsight.customupload.BlankDataSourceCreation;
 
@@ -26,7 +26,7 @@ public class BlankDataSource extends ServerDataSourceDefinition {
 
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
-        var config:BlankDataSourceFields = new BlankDataSourceFields();
+        var config:BlankDataSourceConfiguration = new BlankDataSourceConfiguration();
         config.dataSourceDefinition = this;
         pages.addItem(config);
         return pages;
