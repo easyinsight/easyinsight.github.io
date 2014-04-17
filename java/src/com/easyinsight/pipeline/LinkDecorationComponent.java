@@ -21,13 +21,15 @@ public class LinkDecorationComponent implements IComponent {
                 if (link.generatesURL()) {
                     for (IRow row : dataSet.getRows()) {
                         String url = link.generateLink(row, pipelineData.getDataSourceProperties(), pipelineData.getAllItems());
-                        Value value = row.getValue(analysisItem.createAggregateKey());
-                        Map<String, String> links = value.getLinks();
-                        if (links == null) {
-                            links = new HashMap<String, String>(1);
-                            value.setLinks(links);
+                        if (url != null) {
+                            Value value = row.getValue(analysisItem.createAggregateKey());
+                            Map<String, String> links = value.getLinks();
+                            if (links == null) {
+                                links = new HashMap<String, String>(1);
+                                value.setLinks(links);
+                            }
+                            links.put(analysisItem.qualifiedName(), url);
                         }
-                        links.put(link.getLabel(), url);
                     }
                 }
             }

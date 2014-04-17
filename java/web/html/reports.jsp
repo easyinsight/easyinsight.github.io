@@ -27,6 +27,8 @@
 <%@ page import="com.easyinsight.export.ExportService" %>
 <%@ page import="com.easyinsight.analysis.AnalysisDateDimension" %>
 <%@ page import="com.easyinsight.jsphelpers.EIHelper" %>
+<%@ page import="com.easyinsight.analysis.InsightRequestMetadata" %>
+<%@ page import="com.easyinsight.export.ExportMetadata" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -43,7 +45,9 @@
         Map<Long, CustomFolder> folderMap = new HashMap<Long, CustomFolder>();
         EIConnection conn = Database.instance().getConnection();
         JSONObject folderList = new JSONObject();
+        ExportMetadata md = null;
         try {
+            md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
             PreparedStatement getFoldersStmt = conn.prepareStatement("SELECT REPORT_FOLDER_ID, FOLDER_NAME, DATA_SOURCE_ID FROM REPORT_FOLDER WHERE DATA_SOURCE_ID = ?");
             getFoldersStmt.setLong(1, dataSourceID);
 
@@ -85,7 +89,7 @@
                 reportList.put(String.valueOf(folder), new JSONArray());
             }
             JSONArray list = (JSONArray) reportList.get(String.valueOf(folder));
-            list.put(desc.toJSON(dateFormat));
+            list.put(desc.toJSON(md));
 
         }
 

@@ -10,6 +10,10 @@
 <%@ page import="com.easyinsight.analysis.AnalysisDateDimension" %>
 <%@ page import="java.text.DateFormat" %>
 <%@ page import="com.easyinsight.jsphelpers.EIHelper" %>
+<%@ page import="com.easyinsight.export.ExportMetadata" %>
+<%@ page import="com.easyinsight.analysis.InsightRequestMetadata" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="com.easyinsight.database.Database" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -21,13 +25,15 @@
     <%
         String userName = (String) session.getAttribute("userName");
         com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
+        EIConnection conn = Database.instance().getConnection();
         try {
+
             java.util.List<DataSourceDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
             EIHelper.sortStuff(dataSources);
             JSONArray ja = new JSONArray();
-            DateFormat dateFormat = ExportService.getDateFormatForAccount(AnalysisDateDimension.MINUTE_LEVEL, null);
+            ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
             for (DataSourceDescriptor d : dataSources) {
-                ja.put(d.toJSON(dateFormat));
+                ja.put(d.toJSON(md));
             }
     %>
     <script type="text/javascript" src="/js/underscore-min.js"></script>
@@ -85,6 +91,7 @@
 </body>
 <%
     } finally {
+        Database.closeConnection(conn);
         SecurityUtil.clearThreadLocal();
     }
 %>

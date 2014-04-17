@@ -1,8 +1,10 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+                       xmlns:util="com.easyinsight.util.*" xmlns:feed="com.easyinsight.administration.feed.*">
     <mx:Script><![CDATA[
-        import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.JSONDataSource;
+
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var url:String;
@@ -19,8 +21,9 @@
         [Bindable]
         private var nextPage:String;
 
-        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
-            var ds:JSONDataSource = feedDefinition as JSONDataSource;
+        override protected function gotSource():void {
+            super.gotSource();
+            var ds:JSONDataSource = dataSource as JSONDataSource;
             url = ds.url;
             dataSourceName = ds.feedName;
             jsonPath = ds.jsonPath;
@@ -31,8 +34,8 @@
             liveSource = ds.liveSource;
         }
 
-        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var ds:JSONDataSource = feedDefinition as JSONDataSource;
+        private function save():void {
+            var ds:JSONDataSource = dataSource as JSONDataSource;
             ds.url = urlInput.text;
             ds.httpMethod = int(methodGroup.selectedValue);
             ds.userName = userNameInput.text;
@@ -40,10 +43,7 @@
             ds.jsonPath = jsonPathInput.text;
             ds.nextPageString = nextPageInput.text;
             ds.liveSource = liveSourceCheckbox.selected;
-        }
-
-        public function validate():Boolean {
-            return true;
+            saveSource();
         }
 
         [Bindable]
@@ -83,4 +83,8 @@
             <mx:CheckBox id="liveSourceCheckbox" selected="{liveSource}"/>
         </mx:FormItem>
     </mx:Form>
-</mx:VBox>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</feed:DataSourceWindow>

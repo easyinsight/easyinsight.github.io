@@ -69,75 +69,34 @@ public class TempStorage implements IDataStorage {
     private int maxLen = 255;
 
     public void createTable(String sql) throws SQLException {
-        EIConnection storageConn = storageDatabase.getConnection();
-        try {
-            ResultSet existsRS = storageConn.getMetaData().getTables(null, null, tableName, null);
-            if (existsRS.next()) {
-                storageConn.prepareStatement("DROP TABLE " + tableName).execute();
+        getStorageDialect(getTableName()).createTempTable(sql, storageDatabase);
+    }
+
+    private IStorageDialect dialect;
+
+    private IStorageDialect getStorageDialect(String tableName) {
+        if (dialect == null) {
+            if (storageDatabase.getDialect() == Database.MYSQL) {
+                dialect = new MySQLStorageDialect(tableName, keys);
+            } else if (storageDatabase.getDialect() == Database.POSTGRES) {
+                dialect = new PostgresStorageDialect(tableName, keys);
+            } else {
+                throw new RuntimeException();
             }
-            try {
-                PreparedStatement createSQL = storageConn.prepareStatement(sql);
-                createSQL.execute();
-            } catch (SQLException e) {
-                if (e.getMessage().contains("Row size too large")) {
-                    maxLen = 100;
-                    String nextTry = defineTempInsertTable();
-                    PreparedStatement createSQL = storageConn.prepareStatement(nextTry);
-                    createSQL.execute();
-                } else {
-                    throw e;
-                }
-            }
-        } finally {
-            Database.closeConnection(storageConn);
         }
+        return dialect;
     }
 
     public String defineTempInsertTable() {
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("CREATE TABLE ");
-        sqlBuilder.append(tableName);
-        sqlBuilder.append("( ");
-        for (KeyMetadata keyMetadata : keys.values()) {
-            sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType()));
-            sqlBuilder.append(",");
-        }
-        if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-        sqlBuilder.append(" )");
-        return sqlBuilder.toString();
+        return getStorageDialect(getTableName()).defineTempInsertTable();
     }
 
     public String defineTempUpdateTable() {
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("CREATE TABLE ");
-        sqlBuilder.append(tableName);
-        sqlBuilder.append("( ");
-        for (KeyMetadata keyMetadata : keys.values()) {
-            sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType()));
-            sqlBuilder.append(",");
-        }
-        sqlBuilder.append("update_key_field varchar(255),");
-        sqlBuilder.append("index(update_key_field),");
-        if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-        sqlBuilder.append(" )");
-        return sqlBuilder.toString();
-    }
-
-    private String getColumnDefinitionSQL(Key key, int type) {
-        String column;
-        if (type == Value.DATE) {
-            column = "k" + key.getKeyID() + " DATETIME, datedim_" + key.getKeyID() + "_id BIGINT(11)";
-        } else if (type == Value.NUMBER) {
-            column = "k" + key.getKeyID() + " DOUBLE";
-        } else if (type == Value.TEXT) {
-            column = "k" + key.getKeyID() + " TEXT";
-        } else {
-            column = "k" + key.getKeyID() + " VARCHAR("+maxLen+")";
-        }
-        return column;
+        return getStorageDialect(getTableName()).defineTempUpdateTable();
     }
 
     public void commit() throws SQLException {
+        getStorageDialect(getTableName()).commit();
         if (tempConnection != null) {
             Database.closeConnection(tempConnection);
         }
@@ -146,73 +105,7 @@ public class TempStorage implements IDataStorage {
     private EIConnection tempConnection;
 
     public void insertData(DataSet dataSet) throws Exception {
-        for (IRow row : dataSet.getRows()) {
-            for (IDataTransform transform : transforms) {
-                transform.handle(coreDBConn, row);
-            }
-        }
-        StringBuilder columnBuilder = new StringBuilder();
-        StringBuilder paramBuilder = new StringBuilder();
-        Iterator<KeyMetadata> keyIter = keys.values().iterator();
-        while (keyIter.hasNext()) {
-            KeyMetadata keyMetadata = keyIter.next();
-            columnBuilder.append(keyMetadata.createInsertClause());
-            //columnBuilder.append("k").append(keyMetadata.key.getKeyID());
-            //paramBuilder.append("?");
-            paramBuilder.append(keyMetadata.createInsertQuestionMarks());
-            if (keyIter.hasNext()) {
-                columnBuilder.append(",");
-                paramBuilder.append(",");
-            }
-        }
-        String columns = columnBuilder.toString();
-        String parameters = paramBuilder.toString();
-        String insertSQL = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + parameters + ")";
-        EIConnection storageConn = storageDatabase.getConnection();
-        storageConn.setAutoCommit(false);
-        try {
-            PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
-            int counter = 0;
-            for (IRow row : dataSet.getRows()) {
-                int i = 1;
-                for (KeyMetadata keyMetadata : keys.values()) {
-                    i = setValue(insertStmt, row, i, keyMetadata, storageConn);
-                }
-                insertStmt.execute();
-                counter++;
-                /*if (counter == 1000) {
-                    counter = 0;
-                    insertStmt.executeBatch();
-                }*/
-            }
-            insertStmt.close();
-            storageConn.commit();
-        } catch (Exception e) {
-            storageConn.rollback();
-            if (e.getMessage() != null && e.getMessage().contains("Data truncated")) {
-                PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
-                for (IRow row : dataSet.getRows()) {
-                    int i = 1;
-                    for (KeyMetadata keyMetadata : keys.values()) {
-                        i = setValue(insertStmt, row, i, keyMetadata, storageConn);
-                    }
-                    try {
-                        insertStmt.execute();
-                    } catch (SQLException e1) {
-                        if (e1.getMessage() != null && e.getMessage().contains("Data truncated")) {
-                            LogClass.info(e1.getMessage());
-                        } else {
-                            throw e1;
-                        }
-                    }
-                }
-                insertStmt.close();
-                storageConn.commit();
-            }
-        } finally {
-            storageConn.setAutoCommit(true);
-            Database.closeConnection(storageConn);
-        }
+        getStorageDialect(getTableName()).insertData(dataSet, transforms, coreDBConn, storageDatabase, dateDimCache);
     }
 
     public void newInsertData(DataSet dataSet) throws Exception {
@@ -399,7 +292,7 @@ public class TempStorage implements IDataStorage {
                     insertStmt.setTimestamp(i++, sqlDate);
                 }
             }
-            if (date == null) {
+            if (date == null || storageDatabase.getDialect() == Database.POSTGRES) {
                 insertStmt.setNull(i++, Types.BIGINT);
             } else {
                 try {

@@ -24,6 +24,9 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  */
 public class Database {
 
+    public static final int MYSQL = 1;
+    public static final int POSTGRES = 2;
+
     public static final int CURRENT_VERSION = 61;
 
     private ComboPooledDataSource dataSource;
@@ -31,13 +34,29 @@ public class Database {
     private static Database instance;
     private String id;
     private boolean addHibernate;
+    private int dialect = MYSQL;
 
     private String urlTemplate1 = "jdbc:mysql://{0}:{1}/{2}";
     private String urlTemplate2 = "jdbc:mysql://{0}:{1}/{2}";
+    private String urlTemplate3 = "jdbc:postgresql://{0}:{1}/{2}";
 
-    private Database(String host, String port, String databaseName, String userName, String password, boolean addHibernate, String id) {
-        dataSource = setupDataSource(host, port, databaseName, userName, password, addHibernate ? urlTemplate2 : urlTemplate1);
+    private Database(String host, String port, String databaseName, String userName, String password, boolean addHibernate, String id, int dialect) {
+        String template = null;
+        if (addHibernate) {
+            template = urlTemplate2;
+        } else {
+            if (dialect == MYSQL) {
+                template = urlTemplate1;
+            } else if (dialect == POSTGRES) {
+                template = urlTemplate3;
+            }
+        }
+        if (template == null) {
+            throw new RuntimeException();
+        }
+        dataSource = setupDataSource(host, port, databaseName, userName, password, template);
         this.id = id;
+        this.dialect = dialect;
         this.addHibernate = addHibernate;
         if (addHibernate) {
             try {
@@ -66,23 +85,31 @@ public class Database {
         return this.id;
     }
 
+    public int getDialect() {
+        return dialect;
+    }
+
     public static Database instance() {
         return instance;
     }
 
     public static Database create(String host, String port, String databaseName, String userName, String password, String id) {
-        return new Database(host, port, databaseName, userName, password, false, id);
+        return new Database(host, port, databaseName, userName, password, false, id, MYSQL);
+    }
+
+    public static Database create(String host, String port, String databaseName, String userName, String password, String id, int dialect) {
+        return new Database(host, port, databaseName, userName, password, false, id, dialect);
     }
 
     public static Database create(String host, String port, String databaseName, String userName, String password, String id, boolean withHibernate) {
-        return new Database(host, port, databaseName, userName, password, withHibernate, id);
+        return new Database(host, port, databaseName, userName, password, withHibernate, id, MYSQL);
     }
 
     public static void initialize(String host, String port, String databaseName, String userName, String password) {
         if (instance == null) {
             instance = new Database(host, port,
                     databaseName, userName,
-                    password, true, "Core");
+                    password, true, "Core", MYSQL);
         }
     }
 
@@ -90,7 +117,7 @@ public class Database {
         if (instance == null) {
             instance = new Database(ConfigLoader.instance().getDatabaseHost(), ConfigLoader.instance().getDatabasePort(),
                 ConfigLoader.instance().getDatabaseName(), ConfigLoader.instance().getDatabaseUserName(),
-                ConfigLoader.instance().getDatabasePassword(), true, "Core");
+                ConfigLoader.instance().getDatabasePassword(), true, "Core", MYSQL);
         }
     }
 

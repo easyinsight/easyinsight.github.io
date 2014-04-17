@@ -3,6 +3,7 @@ package com.easyinsight.html;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSDiagramDefinition;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,7 +23,7 @@ import java.util.Map;
  */
 public class DiagramChartServlet extends HtmlServlet {
     @Override
-    protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws Exception {
+    protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
         TrendDataResults results = DataService.getTrendDataResults((WSDiagramDefinition) report, insightRequestMetadata, conn);
         List<TrendOutcome> outcomes = results.getTrendOutcomes();
         JSONObject outDiagram = new JSONObject();

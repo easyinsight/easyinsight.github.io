@@ -1100,11 +1100,19 @@ public class ExportService {
         return baos.toByteArray();
     }
 
+    public static String createValue(ExportMetadata exportMetadata, AnalysisItem headerItem, Value value, boolean skipSanitize) {
+        return createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false, null, skipSanitize);
+    }
+
     public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, Locale locale, boolean pdf) {
         return createValue(dateFormat, headerItem, value, cal, currencySymbol, locale, pdf, null);
     }
 
     public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, Locale locale, boolean pdf, @Nullable String explicitDateFormat) {
+        return createValue(dateFormat, headerItem, value, cal, currencySymbol, locale, pdf, explicitDateFormat, false);
+    }
+
+    public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, Locale locale, boolean pdf, @Nullable String explicitDateFormat, boolean skipSanitize) {
         String valueString;
         if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
             AnalysisMeasure analysisMeasure = (AnalysisMeasure) headerItem;
@@ -1195,10 +1203,16 @@ public class ExportService {
                 if (intValue == doubleValue) {
                     valueString = String.valueOf(intValue);
                 } else {
-                    valueString = value.toHTMLString();
+                    if(!skipSanitize)
+                        valueString = value.toHTMLString();
+                    else
+                        valueString = value.toString();
                 }
             } else {
-                valueString = value.toHTMLString();
+                if(!skipSanitize)
+                    valueString = value.toHTMLString();
+                else
+                    valueString = value.toString();
             }
             if (pdf && headerItem.hasType(AnalysisItemTypes.TEXT)) {
                 AnalysisText text = (AnalysisText) headerItem;

@@ -238,24 +238,3 @@ Chart = {
     }
 
 };
-
-(function ($) {
-    $.jqplot.tickNumberFormatter = function (format, val) {
-        return numberWithCommas($.jqplot.sprintf(format, val));
-    };
-
-    function numberWithCommas(x) {
-
-        return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
-    }
-})(jQuery);
-
-(function ($) {
-    $.jqplot.currencyTickNumberFormatter = function (format, val) {
-        return "$" + numberWithCommas($.jqplot.sprintf(format, val));
-    };
-
-    function numberWithCommas(x) {
-        return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
-    }
-})(jQuery);

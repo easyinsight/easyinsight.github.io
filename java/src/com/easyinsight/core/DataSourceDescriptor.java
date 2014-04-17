@@ -1,5 +1,8 @@
 package com.easyinsight.core;
 
+import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
 import com.easyinsight.tag.Tag;
 import com.easyinsight.userupload.CustomFolder;
 import org.json.JSONArray;
@@ -151,15 +154,17 @@ public class DataSourceDescriptor extends EIDescriptor {
         this.dataSourceBehavior = dataSourceBehavior;
     }
 
-    public JSONObject toJSON(DateFormat dateFormat) throws JSONException {
-        JSONObject jo = super.toJSON(dateFormat);
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        DateFormat dateFormat = ExportService.getDateFormatForAccount(AnalysisDateDimension.MINUTE_LEVEL, null, md.dateFormat);
+        JSONObject jo = super.toJSON(md);
         JSONArray ja = new JSONArray();
-        for(Tag t : getTags()) {
-            JSONObject to = new JSONObject();
-            to.put("name", t.getName());
-            to.put("id", t.getId());
-            ja.put(to);
-        }
+        if(getTags() != null)
+            for(Tag t : getTags()) {
+                JSONObject to = new JSONObject();
+                to.put("name", t.getName());
+                to.put("id", t.getId());
+                ja.put(to);
+            }
         jo.put("tags", ja);
         if (lastDataTime != null) {
             jo.put("last_refresh_time", dateFormat.format(lastDataTime));
