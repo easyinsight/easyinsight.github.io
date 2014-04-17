@@ -1,5 +1,10 @@
 package com.easyinsight.storage;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
@@ -451,25 +456,51 @@ public class DataStorage implements IDataStorage {
 
 
     public void insertFromSelect(String tempTable) throws SQLException {
-        StringBuilder columnBuilder = new StringBuilder();
-        StringBuilder selectBuilder = new StringBuilder();
-        Iterator<KeyMetadata> keyIter = keys.values().iterator();
-        while (keyIter.hasNext()) {
-            KeyMetadata keyMetadata = keyIter.next();
-            columnBuilder.append(keyMetadata.createInsertClause());
-            selectBuilder.append(keyMetadata.createInsertClause());
-            if (keyIter.hasNext()) {
-                columnBuilder.append(",");
-                selectBuilder.append(",");
+        if (database.getDialect() == Database.MYSQL) {
+            StringBuilder columnBuilder = new StringBuilder();
+            StringBuilder selectBuilder = new StringBuilder();
+            Iterator<KeyMetadata> keyIter = keys.values().iterator();
+            while (keyIter.hasNext()) {
+                KeyMetadata keyMetadata = keyIter.next();
+                columnBuilder.append(keyMetadata.createInsertClause());
+                selectBuilder.append(keyMetadata.createInsertClause());
+                if (keyIter.hasNext()) {
+                    columnBuilder.append(",");
+                    selectBuilder.append(",");
+                }
             }
+            String columns = columnBuilder.toString();
+            String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") SELECT " + selectBuilder.toString() + " FROM " + tempTable;
+            PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
+            insertStmt.execute();
+            insertStmt.close();
+            PreparedStatement dropStmt = storageConn.prepareStatement("DROP TABLE " + tempTable);
+            dropStmt.execute();
+            dropStmt.close();
+        } else {
+            String bucketName = "refresh" + tempTable;
+            try {
+                StringBuilder sb = new StringBuilder();
+                for (Key key : keys.keySet()) {
+                    sb.append("k").append(key.getKeyID()).append(",");
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                String string = "copy " + getTableName() + " ("+sb.toString()+") from 's3://"+bucketName+"/"+tempTable+"' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' csv GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
+                System.out.println(string);
+                PreparedStatement stmt = storageConn.prepareStatement(string);
+                stmt.execute();
+            } finally {
+                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+                ObjectListing objectListing = s3.listObjects(bucketName);
+                List<S3ObjectSummary> summaries = objectListing.getObjectSummaries();
+                for (S3ObjectSummary summary : summaries) {
+                    System.out.println("\t" + summary.getKey());
+                    s3.deleteObject(bucketName, summary.getKey());
+                }
+                s3.deleteBucket(bucketName);
+            }
+
         }
-        String columns = columnBuilder.toString();
-        String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") SELECT " + selectBuilder.toString() + " FROM " + tempTable;
-        PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
-        insertStmt.execute();
-        insertStmt.close();
-        PreparedStatement dropStmt = storageConn.prepareStatement("DROP TABLE " + tempTable);
-        dropStmt.execute();
     }
 
     public void updateFromTemp(String tempTable, Key updateKey) throws SQLException {
@@ -740,7 +771,6 @@ public class DataStorage implements IDataStorage {
             } else {
                 createTable();
             }
-            System.out.println("all good, no problems...");
         } catch (SQLException e) {
             LogClass.error(e);
             if (e.getMessage().contains("doesn't exist")) {
