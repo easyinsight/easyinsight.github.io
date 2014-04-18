@@ -4,6 +4,8 @@
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="org.hibernate.StatelessSession" %>
 <%@ page import="com.easyinsight.users.User" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -42,7 +44,7 @@
         <div class="col-md12">
             <div class="btn-toolbar pull-right topControlToolbar">
                 <div class="btn-group topControlBtnGroup">
-                    <a href="account.jsp">Account Administration</a>
+                    <a href="<%= RedirectUtil.getURL(request, "/app/billing/account.jsp")%>">Account Administration</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
                     <a href="users.jsp">Users</a>
@@ -59,15 +61,15 @@
                 <form role="form" method="post" action="/app/html/updateProfile.jsp">
                     <div class="form-group">
                         <label for="emailInput">Email address</label>
-                        <input type="email" class="form-control" id="emailInput" value="<%= user.getEmail() %>">
+                        <input type="email" class="form-control" id="emailInput" value="<%= StringEscapeUtils.escapeHtml(user.getEmail()) %>">
                     </div>
                     <div class="form-group">
                         <label for="firstNameInput">First name</label>
-                        <input type="text" class="form-control" id="firstNameInput" value="<%= user.getFirstName() %>">
+                        <input type="text" class="form-control" id="firstNameInput" value="<%= StringEscapeUtils.escapeHtml(user.getFirstName()) %>">
                     </div>
                     <div class="form-group">
                         <label for="lastNameInput">Last name</label>
-                        <input type="text" class="form-control" id="lastNameInput" value="<%= user.getName() %>">
+                        <input type="text" class="form-control" id="lastNameInput" value="<%= StringEscapeUtils.escapeHtml(user.getName()) %>">
                     </div>
                     <%--<button class="btn btn-inverse" type="submit" value="Update Profile">Update Profile</button>--%>
                 </form>
