@@ -10,7 +10,9 @@
     } catch (NumberFormatException e) {
         headerActive = HtmlConstants.NONE;
     }
+    if (loggedIn) {
 
+    }
 %>
 
 <nav class="navbar_first navbar navbar-static-top navbar-inverse" role="navigation">
@@ -27,10 +29,13 @@
         <ul class="nav navbar-nav">
             <li <%= headerActive == HtmlConstants.DATA_SOURCES_AND_REPORTS ? "class=\"active\"" : ""%>><a
                     href="/app/html">Data Sources and Reports</a></li>
+            <li <%= headerActive == HtmlConstants.CONNECTIONS ? "class=\"active\"" : ""%>><a
+                    href="/app/html/connections.jsp">Connections</a></li>
+            <li <%= headerActive == HtmlConstants.SCHEDULING ? "class=\"active\"" : ""%>><a
+                    href="/app/embeddedScheduleManagement.jsp">Scheduling</a></li>
             <li <%= headerActive == HtmlConstants.ACCOUNT ? "class=\"active\"" : ""%>><a
                     href="/app/billing/account.jsp">Account</a></li>
-            <li <%= headerActive == HtmlConstants.WHATS_NEW ? "class=\"active\"" : ""%>><a
-                    href="/app/whatsnew.jsp">What's New</a></li>
+
         </ul>
         <% } %>
         <ul class="nav navbar-nav navbar-right">
@@ -42,6 +47,10 @@
 
             <%
             } else { %>
+            <li <%= headerActive == HtmlConstants.WHATS_NEW ? "class=\"active\"" : ""%>><a
+                    href="/app/whatsnew.jsp">What's New</a></li>
+            <li <%= headerActive == HtmlConstants.HELP ? "class=\"active\"" : ""%>><a
+                    href="/app/docs">Help</a></li>
             <li>
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><!--<button class="btn btn-sm btn-default">-->
                     <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>

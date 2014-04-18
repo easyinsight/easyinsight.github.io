@@ -11,4 +11,6 @@ public class HtmlConstants {
     public static final int WHATS_NEW = 3;
     public static final int NONE = 4;
     public static final int CONNECTIONS = 5;
+    public static final int SCHEDULING = 6;
+    public static final int HELP = 7;
 }
