@@ -77,6 +77,12 @@ public class GridExperimentBox extends Box {
         comp.highlight();
         var box:ExperimentBox = new ExperimentBox();
         box.viewFactory = comp.viewFactory;
+        var dashboardDescriptor:DashboardDescriptor = new DashboardDescriptor();
+        dashboardDescriptor.id = dashboardGridViewComponent.dashboardEditorMetadata.dashboardID;
+        dashboardDescriptor.urlKey = dashboardGridViewComponent.dashboardEditorMetadata.dashboard.urlKey;
+        dashboardDescriptor.name = dashboardGridViewComponent.dashboardEditorMetadata.dashboard.name;
+        dashboardDescriptor.dataSourceID = dashboardGridViewComponent.dashboardEditorMetadata.dashboard.dataSourceID;
+        box.dashboardDescriptor = dashboardDescriptor;
         box.insightDescriptor = comp.dashboardReport.report;
         box.dashboardReportViewComponent = comp;
         removeChild(grid);
