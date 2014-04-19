@@ -10,6 +10,7 @@
 <%@ page import="org.joda.time.Days" %>
 <%@ page import="org.joda.time.DateTime" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html lang="en">
 <head>
@@ -33,7 +34,7 @@
             return;
         }
         if ((SecurityUtil.getAccountTier() == Account.PREMIUM || SecurityUtil.getAccountTier() == Account.ENTERPRISE)) {
-            response.sendRedirect("access.jsp");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/html/enterprise.jsp"));
             return;
         }
 

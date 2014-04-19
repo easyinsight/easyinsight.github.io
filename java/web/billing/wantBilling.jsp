@@ -29,7 +29,7 @@
             return;
         }
         if ((SecurityUtil.getAccountTier() == Account.PREMIUM || SecurityUtil.getAccountTier() == Account.ENTERPRISE)) {
-            response.sendRedirect("access.jsp");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/html/enterprise.jsp"));
             return;
         }
 
