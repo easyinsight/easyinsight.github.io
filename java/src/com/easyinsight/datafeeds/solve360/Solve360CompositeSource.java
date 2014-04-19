@@ -4,6 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.CustomFieldTag;
@@ -39,6 +40,12 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
         customTags.add(new CustomFieldTag(Solve360CompositeSource.CUSTOM_FIELD_COMPANY, "Company Custom Field"));
         customTags.add(new CustomFieldTag(Solve360CompositeSource.CUSTOM_FIELD_CONTACT, "Contact Custom Field"));
         return customTags;
+    }
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Solve360 Email", "userEmail");
+        factory.addField("Solve360 API Key", "authKey");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 
     private String userEmail;
