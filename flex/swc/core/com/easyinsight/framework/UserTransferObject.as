@@ -24,7 +24,7 @@ package com.easyinsight.framework
         public var lastLoginDate:Date;
         public var currency:int;
         public var userLocale:String;
-        public var dateFormat:int;
+        public var dateFormat:int = 6;
 
         public var selected:Boolean;
 		
