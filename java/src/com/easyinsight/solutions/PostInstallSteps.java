@@ -1,5 +1,6 @@
 package com.easyinsight.solutions;
 
+import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.preferences.ApplicationSkin;
 
 /**
@@ -10,6 +11,15 @@ import com.easyinsight.preferences.ApplicationSkin;
 public class PostInstallSteps {
     private boolean reloadStyling;
     private ApplicationSkin applicationSkin;
+    private EIDescriptor result;
+
+    public EIDescriptor getResult() {
+        return result;
+    }
+
+    public void setResult(EIDescriptor result) {
+        this.result = result;
+    }
 
     public ApplicationSkin getApplicationSkin() {
         return applicationSkin;
