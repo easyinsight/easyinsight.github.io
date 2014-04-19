@@ -1,6 +1,7 @@
 package com.easyinsight.users;
 
 import com.easyinsight.preferences.UISettings;
+import com.easyinsight.util.RandomTextGenerator;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -98,6 +99,13 @@ public class User {
     @Column(name="test_account_visible")
     private boolean testAccountVisible = true;
 
+    @Column(name="user_currency")
+    private int currency;
+    @Column(name="user_locale")
+    private String userLocale;
+    @Column(name="user_date_format")
+    private int dateFormat = 6;
+
     public User() {
     }
 
@@ -124,6 +132,9 @@ public class User {
         userTransferObject.setAnalyst(analyst);
         userTransferObject.setLastLoginDate(lastLoginDate);
         userTransferObject.setTestAccountVisible(testAccountVisible);
+        userTransferObject.setUserLocale(userLocale);
+        userTransferObject.setDateFormat(dateFormat);
+        userTransferObject.setCurrency(currency);
         return userTransferObject;
     }
 
@@ -133,6 +144,30 @@ public class User {
 
     public void setTestAccountVisible(boolean testAccountVisible) {
         this.testAccountVisible = testAccountVisible;
+    }
+
+    public int getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(int currency) {
+        this.currency = currency;
+    }
+
+    public String getUserLocale() {
+        return userLocale;
+    }
+
+    public void setUserLocale(String userLocale) {
+        this.userLocale = userLocale;
+    }
+
+    public int getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(int dateFormat) {
+        this.dateFormat = dateFormat;
     }
 
     public Date getNewsDismissDate() {
@@ -372,6 +407,9 @@ public class User {
         setTestAccountVisible(transferObject.isTestAccountVisible());
         setRefreshReports(transferObject.isAutoRefreshReports());
         setAnalyst(transferObject.isAnalyst());
+        setCurrency(transferObject.getCurrency());
+        setUserLocale(transferObject.getUserLocale());
+        setDateFormat(transferObject.getDateFormat());
         if (transferObject.getFixedDashboardID() == 0) {
             setFixedDashboardID(null);
         } else {

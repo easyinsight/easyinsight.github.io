@@ -78,6 +78,10 @@
         var requiredRevision = 0;
         // -----------------------------------------------------------------------------
         // -->
+
+        function loadPage(val) {
+            window.location.href = val;
+        }
     </script>
 </head>
 

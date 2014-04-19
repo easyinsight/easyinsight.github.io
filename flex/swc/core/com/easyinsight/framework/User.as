@@ -141,7 +141,11 @@ public class User extends EventDispatcher
         _user.personaID = response.personaID;
         _user.dateFormat = response.dateFormat;
         _user.scenario = response.scenario;
-        _user.currencySymbol = response.currencySymbol;
+        if (response.currencySymbol == "EUR") {
+            _user.currencySymbol = "\u20AC";
+        } else {
+            _user.currencySymbol = response.currencySymbol;
+        }
         _user.applicationSkin = response.applicationSkin;
         _user.apiKey = response.apiKey;
         _user.apiSecretKey = response.apiSecretKey;

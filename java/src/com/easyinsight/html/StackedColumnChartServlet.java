@@ -5,6 +5,7 @@ import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.export.ExportMetadata;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +66,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
     }
 
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
-                           EIConnection conn, WSAnalysisDefinition report) throws Exception {
+                           EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
 
         JSONObject pointLabels = new JSONObject();
@@ -246,17 +247,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
         object.put("series", series);
 
         response.setContentType("application/json");
-        response.getOutputStream().
-
-                write(object.toString()
-
-                        .
-
-                                getBytes()
-
-                );
-        response.getOutputStream().
-
-                flush();
+        response.getOutputStream().write(object.toString().getBytes());
+        response.getOutputStream().flush();
     }
 }

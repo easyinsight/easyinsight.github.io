@@ -31,6 +31,10 @@ public class UserTransferObject {
 
     private boolean testAccountVisible;
 
+    private int currency;
+    private String userLocale;
+    private int dateFormat = 6;
+
     public UserTransferObject() {
     }
 
@@ -64,6 +68,30 @@ public class UserTransferObject {
 
     public void setInvoiceRecipient(boolean invoiceRecipient) {
         this.invoiceRecipient = invoiceRecipient;
+    }
+
+    public int getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(int currency) {
+        this.currency = currency;
+    }
+
+    public String getUserLocale() {
+        return userLocale;
+    }
+
+    public void setUserLocale(String userLocale) {
+        this.userLocale = userLocale;
+    }
+
+    public int getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(int dateFormat) {
+        this.dateFormat = dateFormat;
     }
 
     public boolean isAutoRefreshReports() {
@@ -186,6 +214,9 @@ public class UserTransferObject {
         user.setInvoiceRecipient(isInvoiceRecipient());
         user.setTestAccountVisible(isTestAccountVisible());
         user.setAnalyst(isAnalyst());
+        user.setCurrency(getCurrency());
+        user.setDateFormat(getDateFormat());
+        user.setUserLocale(getUserLocale());
         if (getFixedDashboardID() > 0) {
             user.setFixedDashboardID(getFixedDashboardID());
         }

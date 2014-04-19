@@ -1,6 +1,7 @@
 package com.easyinsight.core;
 
 import com.easyinsight.dashboard.SavedConfiguration;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.tag.Tag;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -144,8 +145,8 @@ public class InsightDescriptor extends EIDescriptor {
     }
 
     @Override
-    public JSONObject toJSON(DateFormat dateFormat) throws JSONException {
-        JSONObject jo = super.toJSON(dateFormat);
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);
         jo.put("type", "report");
         JSONArray tags = new JSONArray();
         if(getTags() != null) {

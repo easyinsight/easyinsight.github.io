@@ -3,6 +3,10 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,5 +37,25 @@ public class Usage {
 
     public List<DashboardDescriptor> getDashboardsUsing() {
         return dashboardsUsing;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        JSONArray arr = new JSONArray();
+        for(InsightDescriptor id : reportsUsingAsAddon) {
+            arr.put(id.toJSON(md));
+        }
+        jo.put("addons", arr);
+        arr = new JSONArray();
+        for(DataSourceDescriptor ds : dataSourcesBasedOn) {
+            arr.put(ds.toJSON(md));
+        }
+        jo.put("data_sources", arr);
+        arr = new JSONArray();
+        for(DashboardDescriptor db : dashboardsUsing) {
+            arr.put(db.toJSON(md));
+        }
+        jo.put("dashboards", arr);
+        return jo;
     }
 }

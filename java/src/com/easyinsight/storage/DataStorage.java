@@ -1,5 +1,10 @@
 package com.easyinsight.storage;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
@@ -105,6 +110,16 @@ public class DataStorage implements IDataStorage {
             throw new RuntimeException(e);
         }
         return dataStorage;
+    }
+
+    private IStorageDialect getStorageDialect(String tableName) {
+        if (database.getDialect() == Database.MYSQL) {
+            return new MySQLStorageDialect(tableName, keys);
+        } else if (database.getDialect() == Database.POSTGRES) {
+            return new PostgresStorageDialect(tableName, keys);
+        } else {
+            throw new RuntimeException();
+        }
     }
 
     /**
@@ -349,6 +364,9 @@ public class DataStorage implements IDataStorage {
     }
 
     public long calculateSize() throws SQLException {
+        if (database.getDialect() == Database.POSTGRES) {
+            return 0;
+        }
         PreparedStatement countStmt = storageConn.prepareStatement("SHOW TABLE STATUS LIKE ?");
         countStmt.setString(1, getTableName());
         ResultSet countRS = countStmt.executeQuery();
@@ -376,6 +394,7 @@ public class DataStorage implements IDataStorage {
             PreparedStatement createSQL = storageConn.prepareStatement(sql);
             createSQL.execute();
         } catch (SQLException e) {
+            LogClass.error(e);
             if (e.getMessage().contains("Row size too large")) {
                 String sql = defineTableSQL(true);
                 PreparedStatement createSQL = storageConn.prepareStatement(sql);
@@ -437,25 +456,51 @@ public class DataStorage implements IDataStorage {
 
 
     public void insertFromSelect(String tempTable) throws SQLException {
-        StringBuilder columnBuilder = new StringBuilder();
-        StringBuilder selectBuilder = new StringBuilder();
-        Iterator<KeyMetadata> keyIter = keys.values().iterator();
-        while (keyIter.hasNext()) {
-            KeyMetadata keyMetadata = keyIter.next();
-            columnBuilder.append(keyMetadata.createInsertClause());
-            selectBuilder.append(keyMetadata.createInsertClause());
-            if (keyIter.hasNext()) {
-                columnBuilder.append(",");
-                selectBuilder.append(",");
+        if (database.getDialect() == Database.MYSQL) {
+            StringBuilder columnBuilder = new StringBuilder();
+            StringBuilder selectBuilder = new StringBuilder();
+            Iterator<KeyMetadata> keyIter = keys.values().iterator();
+            while (keyIter.hasNext()) {
+                KeyMetadata keyMetadata = keyIter.next();
+                columnBuilder.append(keyMetadata.createInsertClause());
+                selectBuilder.append(keyMetadata.createInsertClause());
+                if (keyIter.hasNext()) {
+                    columnBuilder.append(",");
+                    selectBuilder.append(",");
+                }
             }
+            String columns = columnBuilder.toString();
+            String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") SELECT " + selectBuilder.toString() + " FROM " + tempTable;
+            PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
+            insertStmt.execute();
+            insertStmt.close();
+            PreparedStatement dropStmt = storageConn.prepareStatement("DROP TABLE " + tempTable);
+            dropStmt.execute();
+            dropStmt.close();
+        } else {
+            String bucketName = "refresh" + tempTable;
+            try {
+                StringBuilder sb = new StringBuilder();
+                for (Key key : keys.keySet()) {
+                    sb.append("k").append(key.getKeyID()).append(",");
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                String string = "copy " + getTableName() + " ("+sb.toString()+") from 's3://"+bucketName+"/"+tempTable+"' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' csv GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
+                System.out.println(string);
+                PreparedStatement stmt = storageConn.prepareStatement(string);
+                stmt.execute();
+            } finally {
+                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+                ObjectListing objectListing = s3.listObjects(bucketName);
+                List<S3ObjectSummary> summaries = objectListing.getObjectSummaries();
+                for (S3ObjectSummary summary : summaries) {
+                    System.out.println("\t" + summary.getKey());
+                    s3.deleteObject(bucketName, summary.getKey());
+                }
+                s3.deleteBucket(bucketName);
+            }
+
         }
-        String columns = columnBuilder.toString();
-        String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") SELECT " + selectBuilder.toString() + " FROM " + tempTable;
-        PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
-        insertStmt.execute();
-        insertStmt.close();
-        PreparedStatement dropStmt = storageConn.prepareStatement("DROP TABLE " + tempTable);
-        dropStmt.execute();
     }
 
     public void updateFromTemp(String tempTable, Key updateKey) throws SQLException {
@@ -719,9 +764,15 @@ public class DataStorage implements IDataStorage {
 
     public void truncate() throws SQLException {
         try {
-            PreparedStatement truncateStmt = storageConn.prepareStatement("TRUNCATE " + getTableName());
-            truncateStmt.execute();
+            ResultSet tableRS = storageConn.getMetaData().getTables(null, null, getTableName(), null);
+            if (tableRS.next()) {
+                PreparedStatement truncateStmt = storageConn.prepareStatement("TRUNCATE " + getTableName());
+                truncateStmt.execute();
+            } else {
+                createTable();
+            }
         } catch (SQLException e) {
+            LogClass.error(e);
             if (e.getMessage().contains("doesn't exist")) {
                 createTable();
             }
@@ -931,7 +982,8 @@ public class DataStorage implements IDataStorage {
                 if (keyMetadata != null) {
                     if (keyMetadata.getType() == Value.DATE) {
                         AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
-                        if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL)) {
+                        if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) &&
+                                database.getDialect() == Database.MYSQL) {
                             int month = dataRS.getInt(i++);
                             int year = dataRS.getInt(i++);
                             Calendar cal = Calendar.getInstance();
@@ -939,7 +991,7 @@ public class DataStorage implements IDataStorage {
                             cal.set(Calendar.MONTH, month - 1);
                             cal.set(Calendar.YEAR, year);
                             row.addValue(aggregateKey, new DateValue(cal.getTime()));
-                        } else if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL)) {
+                        } else if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) && database.getDialect() == Database.MYSQL) {
                             int year = dataRS.getInt(i++);
                             Calendar cal = Calendar.getInstance();
                             cal.set(Calendar.DAY_OF_MONTH, 2);
@@ -1112,14 +1164,18 @@ public class DataStorage implements IDataStorage {
                 } else if (aggregation == AggregationTypes.MIN) {
                     columnName = "MIN(" + columnName + ")";
                 } else {
-                    groupByBuilder.append("binary(" + columnName + ")");
+                    if (database.getDialect() == Database.MYSQL) {
+                        groupByBuilder.append("binary(" + columnName + ")");
+                    } else {
+                        groupByBuilder.append(columnName);
+                    }
                     groupByBuilder.append(",");
                 }
                 selectBuilder.append(columnName);
                 selectBuilder.append(",");
             } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && aggregateQuery) {
                 AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
-                if (optimized && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL)) {
+                if (optimized && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) && database.getDialect() == Database.MYSQL) {
                     selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
                     groupByBuilder.append("month" + columnName + ", year" + columnName + ",");
                 } else if (optimized && (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL)) {
@@ -1128,7 +1184,11 @@ public class DataStorage implements IDataStorage {
                 } else {
                     selectBuilder.append(columnName);
                     selectBuilder.append(",");
-                    groupByBuilder.append("binary(" + columnName + ")");
+                    if (database.getDialect() == Database.MYSQL  && database.getDialect() == Database.MYSQL) {
+                        groupByBuilder.append("binary(" + columnName + ")");
+                    } else {
+                        groupByBuilder.append(columnName);
+                    }
                     groupByBuilder.append(",");
                 }
             } else {
@@ -1138,7 +1198,11 @@ public class DataStorage implements IDataStorage {
                     selectBuilder.append(",");
                 } else {
                     if (aggregateQuery) {
-                        groupByBuilder.append("binary(" + columnName + ")");
+                        if (database.getDialect() == Database.MYSQL) {
+                            groupByBuilder.append("binary(" + columnName + ")");
+                        } else {
+                            groupByBuilder.append(columnName);
+                        }
                         groupByBuilder.append(",");
                     }
                     selectBuilder.append(columnName);
@@ -1437,7 +1501,7 @@ public class DataStorage implements IDataStorage {
                     insertStmt.setTimestamp(i++, sqlDate);
                 }
             }
-            if (date == null) {
+            if (date == null || database.getDialect() == Database.POSTGRES) {
                 insertStmt.setNull(i++, Types.BIGINT);
             } else {
                 long id = dateDimCache.getDateDimID(date, storageConn);
@@ -1501,74 +1565,10 @@ public class DataStorage implements IDataStorage {
     }
 
     public String defineTableSQL(boolean hugeTable) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("CREATE TABLE ");
-        sqlBuilder.append(getTableName());
-        sqlBuilder.append("( ");
-        for (KeyMetadata keyMetadata : keys.values()) {
-            sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType(), hugeTable));
-            sqlBuilder.append(",");
-        }
-        String primaryKey = getTableName() + "_ID";
-        sqlBuilder.append(primaryKey);
-        sqlBuilder.append(" BIGINT NOT NULL AUTO_INCREMENT,");
-        sqlBuilder.append("PRIMARY KEY (");
-        sqlBuilder.append(primaryKey);
-        sqlBuilder.append("),");
-        int indexCount = 0;
-        for (KeyMetadata keyMetadata : keys.values()) {
-            if (!hugeTable && keyMetadata.getType() == Value.STRING) {
-                sqlBuilder.append("INDEX (");
-                String column = keyMetadata.getKey().toSQL();
-                sqlBuilder.append(column);
-                sqlBuilder.append(")");
-                sqlBuilder.append(",");
-                indexCount++;
-            } else if (keyMetadata.getType() == Value.DATE) {
-                sqlBuilder.append("INDEX (");
-                String column = keyMetadata.getKey().toSQL();
-                sqlBuilder.append(column);
-                sqlBuilder.append(")");
-                sqlBuilder.append(",");
-                indexCount++;
-            }
-            if (keyMetadata.getType() == Value.DATE) {
-                sqlBuilder.append("INDEX (");
-                String column = "datedim_" + keyMetadata.getKey().getKeyID() + "_id";
-                sqlBuilder.append(column);
-                sqlBuilder.append(")");
-                sqlBuilder.append(",");
-                indexCount++;
-            }
-            if (indexCount >= 60) {
-                break;
-            }
-        }
-        if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-        sqlBuilder.append(" )");
-        //sqlBuilder.append(" ) CHARSET=utf8");
-        return sqlBuilder.toString();
+        return getStorageDialect(getTableName()).defineTableSQL(hugeTable);
     }
 
-    private String getColumnDefinitionSQL(Key key, int type, boolean hugeTable) {
-        String column;
-        if (type == Value.DATE) {
-            column = "k" + key.getKeyID() + " DATETIME, datedim_" + key.getKeyID() + "_id BIGINT(11)";
-        } else if (type == Value.NUMBER) {
-            column = "k" + key.getKeyID() + " DOUBLE";
-        } else if (type == Value.TEXT) {
-            column = "k" + key.getKeyID() + " TEXT";
-        } else {
-            if (hugeTable) {
-                column = "k" + key.getKeyID() + " TEXT";
-            } else {
-                column = "k" + key.getKeyID() + " VARCHAR(255)";
-            }
-        }
-        return column;
-    }
-
-    private String getTableName() {
+    String getTableName() {
         return "df" + feedID + "v" + version;
     }
 

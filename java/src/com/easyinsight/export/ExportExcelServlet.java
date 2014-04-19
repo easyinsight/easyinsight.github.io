@@ -22,7 +22,7 @@ import java.net.URLEncoder;
 public class ExportExcelServlet extends HtmlServlet {
 
     @Override
-    protected void doStuff(HttpServletRequest req, HttpServletResponse resp, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report) throws Exception {
+    protected void doStuff(HttpServletRequest req, HttpServletResponse resp, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
        byte[] bytes = new ExportService().exportToExcel(report, insightRequestMetadata).getBytes();
         resp.setContentType("application/excel");
         resp.setContentLength(bytes.length);

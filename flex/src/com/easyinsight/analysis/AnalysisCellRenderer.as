@@ -57,7 +57,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         if (defaultLink != null) {
             if (defaultLink is URLLink) {
                 var urlLink:URLLink = defaultLink as URLLink;
-                var url:String = data[urlLink.label + "_link"];
+                var url:String = data[_analysisItem.qualifiedName() + "_link"];
                 try {
                     navigateToURL(new URLRequest(url), "_blank");
                 } catch (e:Error) {

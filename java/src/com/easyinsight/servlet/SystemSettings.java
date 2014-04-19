@@ -23,6 +23,8 @@ public class SystemSettings {
 
     private int maxOperations = 10000000;
 
+    private long headerImageID;
+
     private Map<String, Long> databaseMap = new HashMap<String, Long>();
 
     public SystemSettings() {
@@ -32,12 +34,13 @@ public class SystemSettings {
             public void run() {
                 EIConnection conn = Database.instance().getConnection();
                 try {
-                    PreparedStatement ps = conn.prepareStatement("SELECT user_activity_semaphore_limit, max_filter_values, max_operations FROM system_settings");
+                    PreparedStatement ps = conn.prepareStatement("SELECT user_activity_semaphore_limit, max_filter_values, max_operations, header_image_id FROM system_settings");
                     ResultSet rs = ps.executeQuery();
                     if (rs.next()) {
                         semaphoreLimit = rs.getInt(1);
                         maxFilterValues = rs.getInt(2);
                         maxOperations = rs.getInt(3);
+                        headerImageID = rs.getLong(4);
                     }
                     ps.close();
 
@@ -48,6 +51,7 @@ public class SystemSettings {
                         String dbName = dbRS.getString(2);
                         databaseMap.put(dbName, size);
                     }
+                    dbStmt.close();
                 } catch (Exception e) {
                     LogClass.error(e);
                 } finally {
@@ -65,6 +69,14 @@ public class SystemSettings {
         if (timer != null) {
             timer.cancel();
         }
+    }
+
+    public long getHeaderImageID() {
+        return headerImageID;
+    }
+
+    public void setHeaderImageID(long headerImageID) {
+        this.headerImageID = headerImageID;
     }
 
     public int getMaxOperations() {

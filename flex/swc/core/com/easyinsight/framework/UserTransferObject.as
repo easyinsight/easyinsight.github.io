@@ -22,6 +22,9 @@ package com.easyinsight.framework
         public var consultant:Boolean;
         public var testAccountVisible:Boolean = true;
         public var lastLoginDate:Date;
+        public var currency:int;
+        public var userLocale:String;
+        public var dateFormat:int;
 
         public var selected:Boolean;
 		

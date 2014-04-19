@@ -14,9 +14,7 @@ import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
 
 import java.sql.Connection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -55,6 +53,7 @@ public class RedboothProjectSource extends RedboothBaseSource {
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
         Map base = (Map) queryList("/api/1/projects?count=0", redboothCompositeSource, httpClient);
+        Set<String> projectIDs = new HashSet<String>();
         List<Map> organizations = (List<Map>) base.get("objects");
         for (Map org : organizations) {
             IRow row = dataSet.createRow();
@@ -66,6 +65,7 @@ public class RedboothProjectSource extends RedboothBaseSource {
             Value createdAt = getDate(org, "created_at");
             Value updatedAt = getDate(org, "created_at");
             String id = getJSONValue(org, "id");
+            projectIDs.add(id);
             row.addValue(keys.get(ID), id);
             row.addValue(keys.get(CREATED_AT), createdAt);
             row.addValue(keys.get(UPDATED_AT), updatedAt);
@@ -74,6 +74,7 @@ public class RedboothProjectSource extends RedboothBaseSource {
             String url = "https://redbooth.com/a/#!/projects/" + id + "/tasks";
             row.addValue(keys.get(URL), url);
         }
+        redboothCompositeSource.setValidProjects(projectIDs);
         return dataSet;
     }
 }

@@ -83,7 +83,7 @@
 <body scroll="no">
 <jsp:include page="header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
-    <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.SCHEDULING %>"/>
 </jsp:include>
 <div>
 <script language="JavaScript" type="text/javascript">

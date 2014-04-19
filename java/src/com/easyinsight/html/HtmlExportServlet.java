@@ -3,6 +3,7 @@ package com.easyinsight.html;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.DeliveryScheduledTask;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportProperties;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 public class HtmlExportServlet extends HtmlServlet {
 
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
-                           EIConnection conn, WSAnalysisDefinition report) throws Exception {
+                           EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
         String html;
         try {
             String embeddedString = request.getParameter("embedded");

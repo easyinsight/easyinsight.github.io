@@ -297,7 +297,6 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
                 labels.put("show", "true");
                 labels.put("edgetolerance", -15);
                 labels.put("escapeHTML", false);
-                //labels.put("formatString", "'%g'");
                 seriesDefaults.put("pointLabels", labels);
             }
         } catch (JSONException e) {

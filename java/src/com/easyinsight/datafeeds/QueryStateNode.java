@@ -30,6 +30,7 @@ class QueryStateNode {
     public EIConnection conn;
     public DataSet originalDataSet;
     public Feed feed;
+    public Feed fromFeed;
     private String pipelineName;
     private Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
     private Collection<FilterDefinition> parentFilters;
@@ -39,12 +40,14 @@ class QueryStateNode {
 
     }
 
-    QueryStateNode(long feedID, Feed feed, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata, Collection<FilterDefinition> parentFilters) {
+    QueryStateNode(long feedID, Feed feed, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata, Collection<FilterDefinition> parentFilters,
+                   Feed fromFeed) {
         this.feedID = feedID;
         this.parentFilters = parentFilters;
         queryNodeKey = new DataSourceQueryNodeKey(feedID);
         queryData = new QueryData(queryNodeKey);
         this.feed = feed;
+        this.fromFeed = fromFeed;
         this.conn = conn;
         dataSourceName = feed.getName();
         allFeedItems = feed.getFields();
@@ -71,7 +74,7 @@ class QueryStateNode {
 
     public void addJoinItem(AnalysisItem analysisItem, int dateLevel) {
         AnalysisItem matchedItem = null;
-        if (feed.getFeedType().getType() == FeedType.REDBOOTH_COMPOSITE.getType()) {
+        if (fromFeed.getFeedType().getType() == FeedType.REDBOOTH_COMPOSITE.getType()) {
             for (AnalysisItem field : parentItems) {
                 if (field.getKey() instanceof DerivedKey) {
                     DerivedKey derivedKey = (DerivedKey) field.getKey();

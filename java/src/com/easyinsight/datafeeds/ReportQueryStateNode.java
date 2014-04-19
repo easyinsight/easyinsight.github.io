@@ -31,8 +31,10 @@ class ReportQueryStateNode extends QueryStateNode {
     private long dataSourceID;
     private Collection<FilterDefinition> parentFilters;
     private Feed sourceFeed;
+    private Feed fromFeed;
 
-    ReportQueryStateNode(long reportID, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata, Collection<FilterDefinition> parentFilters) {
+    ReportQueryStateNode(long reportID, EIConnection conn, List<AnalysisItem> parentItems, InsightRequestMetadata insightRequestMetadata, Collection<FilterDefinition> parentFilters,
+                         Feed fromFeed) {
         this.reportID = reportID;
         this.parentFilters = parentFilters;
         queryNodeKey = new ReportQueryNodeKey(reportID);
@@ -41,6 +43,7 @@ class ReportQueryStateNode extends QueryStateNode {
         this.conn = conn;
         dataSourceName = report.getName();
         sourceFeed = FeedRegistry.instance().getFeed(report.getDataFeedID());
+        this.fromFeed = fromFeed;
         allFeedItems = sourceFeed.getFields();
         this.parentItems = parentItems;
         try {
@@ -67,7 +70,7 @@ class ReportQueryStateNode extends QueryStateNode {
 
     public void addJoinItem(AnalysisItem analysisItem, int dateLevel) {
         AnalysisItem matchedItem = null;
-        if (sourceFeed.getFeedType().getType() == FeedType.REDBOOTH_COMPOSITE.getType()) {
+        if (fromFeed.getFeedType().getType() == FeedType.REDBOOTH_COMPOSITE.getType()) {
             for (AnalysisItem field : parentItems) {
                 if (field.getKey() instanceof ReportKey) {
                     ReportKey derivedKey = (ReportKey) field.getKey();

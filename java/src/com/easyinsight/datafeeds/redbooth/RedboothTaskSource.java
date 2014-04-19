@@ -11,10 +11,7 @@ import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
 
 import java.sql.Connection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -106,12 +103,17 @@ public class RedboothTaskSource extends RedboothBaseSource {
         // resolved_subtasks_count
         // subtasks_count
         //List<Map> organizations = (List<Map>) base.get("objects");
+        Set<String> validIDs = redboothCompositeSource.getValidProjects();
         for (Map org : taskList) {
+            String projectID = getJSONValue(org, "project_id");
+            if (!validIDs.contains(projectID)) {
+                continue;
+            }
             IRow row = dataSet.createRow();
             String id = getJSONValue(org, "id");
             row.addValue(keys.get(ID), id);
             row.addValue(keys.get(NAME), getJSONValue(org, "name"));
-            row.addValue(keys.get(PROJECT_ID), getJSONValue(org, "project_id"));
+            row.addValue(keys.get(PROJECT_ID), projectID);
             row.addValue(keys.get(TASK_LIST_ID), getJSONValue(org, "task_list_id"));
             row.addValue(keys.get(POSITION), getJSONValue(org, "position"));
             row.addValue(keys.get(COMMENTS_COUNT), getJSONValue(org, "comments_count"));
