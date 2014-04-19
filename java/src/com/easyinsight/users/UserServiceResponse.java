@@ -229,7 +229,6 @@ public class UserServiceResponse {
         } else if (user.getCurrency() == 3) {
             response.setCurrencySymbol("GBP");
         }
-        System.out.println("set currency symbol to " + response.getCurrencySymbol());
         return response;
     }
 
