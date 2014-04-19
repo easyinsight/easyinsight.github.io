@@ -664,6 +664,72 @@ public class UserAccountAdminService {
         return userCreationResponse;
     }
 
+    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, EIConnection conn, String password) throws SQLException {
+        SecurityUtil.authorizeAccountAdmin();
+        long accountID = SecurityUtil.getAccountID();
+        UserCreationResponse userCreationResponse;
+        String message = doesUserExist(userTransferObject.getUserName(), userTransferObject.getEmail());
+        if (message != null) {
+            userCreationResponse = new UserCreationResponse(message);
+        } else {
+            Session session = Database.instance().createSession(conn);
+            Account account;
+            User user;
+            try {
+                List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
+                account = (Account) results.get(0);
+                int maxUsers = account.getMaxUsers();
+                int currentUsers = account.getUsers().size();
+                int currentDesigners = 0;
+                for (User test : account.getUsers()) {
+                    if (test.isAnalyst()) {
+                        currentDesigners++;
+                    }
+                }
+                if (account.getPricingModel() == 0 && currentUsers >= maxUsers) {
+                    userCreationResponse = new UserCreationResponse("You are at the maximum number of users for your account.");
+                } else if (account.getPricingModel() == 1 && userTransferObject.isAnalyst() && (currentDesigners >= (account.getCoreDesigners() + account.getAddonDesigners()))) {
+                    userCreationResponse = new UserCreationResponse("You are at the maximum number of designers for your account.");
+                } else {
+                    user = userTransferObject.toUser();
+                    user.setAccount(account);
+                    user.setPassword(password);
+                    user.setHashType("SHA-256");
+                    user.setInitialSetupDone(true);
+                    user.setUserKey(RandomTextGenerator.generateText(20));
+                    user.setUserSecretKey(RandomTextGenerator.generateText(20));
+                    account.addUser(user);
+                    user.setAccount(account);
+                    session.update(account);
+                    session.flush();
+                    PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_DLS (DLS_ID, USER_ID) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    PreparedStatement insertFilterStmt = conn.prepareStatement("INSERT INTO USER_DLS_TO_FILTER (FILTER_ID, ORIGINAL_FILTER_ID, USER_DLS_ID) VALUES (?, ?, ?)");
+                    for (UserDLS userDLS : userDLSList) {
+                        insertStmt.setLong(1, userDLS.getDlsID());
+                        insertStmt.setLong(2, user.getUserID());
+                        insertStmt.execute();
+                        long userDLSID = Database.instance().getAutoGenKey(insertStmt);
+                        for (UserDLSFilter userDLSFilter : userDLS.getUserDLSFilterList()) {
+                            FilterDefinition filterDefinition = userDLSFilter.getFilterDefinition();
+                            filterDefinition.beforeSave(session);
+                            session.saveOrUpdate(filterDefinition);
+                            session.flush();
+                            insertFilterStmt.setLong(1, filterDefinition.getFilterID());
+                            insertFilterStmt.setLong(2, userDLSFilter.getOriginalFilterID());
+                            insertFilterStmt.setLong(3, userDLSID);
+                            insertFilterStmt.execute();
+                        }
+                    }
+                    conn.commit();
+                    userCreationResponse = new UserCreationResponse(user.getUserID());
+                }
+            } finally {
+                session.close();
+            }
+        }
+        return userCreationResponse;
+    }
+
     public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, boolean requirePasswordChange, boolean sendEmail) {
         return addUserToAccount(userTransferObject, userDLSList, requirePasswordChange, DEFAULT, sendEmail);
     }
