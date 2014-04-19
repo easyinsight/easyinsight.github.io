@@ -124,16 +124,19 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         _analysisItem = val;
         if (_analysisItem != null) {
             toolTip = _analysisItem.tooltip;
+            var target:Link = null;
             if (_analysisItem.links != null) {
                 for each (var link:Link in _analysisItem.links) {
                     if (link.defaultLink) {
-                        defaultLink = link;
+                        target = link;
                         break;
                     }
                 }
             }
+            defaultLink = target;
         }
     }
+
 
     public function validateProperties():void {
         validateNow();
