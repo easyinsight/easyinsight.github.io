@@ -23,7 +23,7 @@ package com.easyinsight.framework
         public var testAccountVisible:Boolean = true;
         public var lastLoginDate:Date;
         public var currency:int;
-        public var userLocale:String;
+        public var userLocale:String = "0";
         public var dateFormat:int = 6;
 
         public var selected:Boolean;
