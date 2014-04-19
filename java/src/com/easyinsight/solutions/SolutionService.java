@@ -102,20 +102,29 @@ public class SolutionService {
                 toInstall.add(dashboardDescriptor);
             }
 
+            EIDescriptor result = null;
             if (masterSourceID > 0) {
                 Session session = Database.instance().createSession(conn);
                 try {
                     FeedDefinition source = new FeedStorage().getFeedDefinitionData(masterSourceID);
                     long targetID = solutionKPIData.getDataSourceID();
                     FeedDefinition target = new FeedStorage().getFeedDefinitionData(targetID);
-                    InstallMetadata.install(source, target, conn, session, toInstall);
+                    result = InstallMetadata.install(source, target, conn, session, toInstall);
                 } finally {
                     session.close();
                 }
             }
 
-            PostInstallSteps postInstallSteps = new PostInstallSteps();
+            if (result != null && result.getType() == EIDescriptor.DASHBOARD) {
+                PreparedStatement saveDashboardStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TO_DASHBOARD (ACCOUNT_ID, DASHBOARD_ID) VALUES (?, ?)");
+                saveDashboardStmt.setLong(1, SecurityUtil.getAccountID());
+                saveDashboardStmt.setLong(2, result.getId());
+                saveDashboardStmt.execute();
+                saveDashboardStmt.close();
+            }
 
+            PostInstallSteps postInstallSteps = new PostInstallSteps();
+            postInstallSteps.setResult(result);
             copyLookAndFeel(solutionKPIData, conn, postInstallSteps);
             conn.commit();
             return postInstallSteps;
