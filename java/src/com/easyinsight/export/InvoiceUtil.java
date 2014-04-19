@@ -1,7 +1,8 @@
 package com.easyinsight.export;
 
+import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.preferences.PreferencesService;
 import com.easyinsight.servlet.SystemSettings;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.AccountCreditCardBillingInfo;
@@ -11,6 +12,8 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import java.io.ByteArrayOutputStream;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 
@@ -20,6 +23,34 @@ import java.text.SimpleDateFormat;
  * Time: 8:21 AM
  */
 public class InvoiceUtil {
+
+    private byte[] getImage() {
+        long imageID = SystemSettings.instance().getHeaderImageID();
+        byte[] bytes;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE WHERE USER_IMAGE_ID = ?");
+
+            queryStmt.setLong(1, imageID);
+
+            ResultSet rs = queryStmt.executeQuery();
+            if (!rs.next()) {
+                return null;
+            }
+            bytes = rs.getBytes(1);
+            conn.commit();
+            return bytes;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
     public byte[] createInvoicePDF(AccountCreditCardBillingInfo billingInfo, Account account) throws DocumentException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4, 0, 0, 5, 5);
@@ -27,7 +58,7 @@ public class InvoiceUtil {
         PdfWriter.getInstance(document, baos);
         document.open();
         try {
-            byte[] bytes = new PreferencesService().getImage(SystemSettings.instance().getHeaderImageID());
+            byte[] bytes = getImage();
             Image image = Image.getInstance(bytes);
             image.setAlignment(Element.ALIGN_CENTER);
             document.add(image);
