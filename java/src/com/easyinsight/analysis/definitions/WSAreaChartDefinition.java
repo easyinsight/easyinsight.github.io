@@ -7,10 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -22,6 +19,24 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
     private String stackingType = "stacked";
     private List<MultiColor> multiColors = new ArrayList<MultiColor>();
     private int legendMaxWidth;
+    private boolean autoScale = false;
+    private boolean autoScaled = false;
+
+    public boolean isAutoScaled() {
+        return autoScaled;
+    }
+
+    public void setAutoScaled(boolean autoScaled) {
+        this.autoScaled = autoScaled;
+    }
+
+    public boolean isAutoScale() {
+        return autoScale;
+    }
+
+    public void setAutoScale(boolean autoScale) {
+        this.autoScale = autoScale;
+    }
 
     public String getStackingType() {
         return stackingType;
@@ -59,6 +74,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         stackingType = findStringProperty(properties, "stackingType", "stacked");
+        autoScale = findBooleanProperty(properties, "autoScaled", false);
         multiColors = multiColorProperty(properties, "multiColors");
         legendMaxWidth = (int) findNumberProperty(properties, "legendMaxWidth", 200);
 
@@ -70,7 +86,64 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
         properties.add(new ReportStringProperty("stackingType", stackingType));
         properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         properties.add(new ReportNumericProperty("legendMaxWidth", legendMaxWidth));
+        properties.add(new ReportBooleanProperty("autoScale", autoScale));
         return properties;
+    }
+
+    public void tweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
+        if (autoScale && getXaxis() != null && getXaxis().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+            int daysDuration = 0;
+            /*AnalysisDateDimension start;
+            try {
+                start = (AnalysisDateDimension) getXaxis().clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }*/
+            AnalysisDateDimension xAxis = (AnalysisDateDimension) this.getXaxis();
+            if (getFilterDefinitions() != null) {
+                for (FilterDefinition filterDefinition : getFilterDefinitions()) {
+                    if (filterDefinition instanceof RollingFilterDefinition) {
+                        RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
+                        long now = System.currentTimeMillis();
+                        daysDuration = (int) ((now - MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, new Date())) / (1000 * 60 * 60 * 24));
+                    } else if (filterDefinition instanceof FilterDateRangeDefinition) {
+                        FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filterDefinition;
+                        daysDuration = (int) ((filterDateRangeDefinition.getEndDate().getTime() - filterDateRangeDefinition.getStartDate().getTime()) / (1000 * 60 * 60 * 24));
+                    }
+                }
+            }
+            if (daysDuration > (365 * 6)) {
+                if (xAxis.getDateLevel() != AnalysisDateDimension.YEAR_LEVEL) {
+                    autoScaled = true;
+                    xAxis.setRevertDateLevel(xAxis.getDateLevel());
+                    xAxis.setDateLevel(AnalysisDateDimension.YEAR_LEVEL);
+                }
+            } else if (daysDuration > (365 * 2)) {
+                if (xAxis.getDateLevel() != AnalysisDateDimension.MONTH_LEVEL) {
+                    autoScaled = true;
+                    xAxis.setRevertDateLevel(xAxis.getDateLevel());
+                    xAxis.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
+                }
+            } else if (daysDuration >= (90)) {
+                if (xAxis.getDateLevel() != AnalysisDateDimension.WEEK_LEVEL) {
+                    autoScaled = true;
+                    xAxis.setRevertDateLevel(xAxis.getDateLevel());
+                    xAxis.setDateLevel(AnalysisDateDimension.WEEK_LEVEL);
+                }
+            } else if (daysDuration > 6) {
+                if (xAxis.getDateLevel() != AnalysisDateDimension.DAY_LEVEL) {
+                    autoScaled = true;
+                    xAxis.setRevertDateLevel(xAxis.getDateLevel());
+                    xAxis.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
+                }
+            }
+            if (xAxis.hasType(AnalysisItemTypes.STEP)) {
+                AnalysisStep analysisStep = (AnalysisStep) xAxis;
+                analysisStep.getStartDate().setDateLevel(analysisStep.getDateLevel());
+                analysisStep.getEndDate().setDateLevel(analysisStep.getDateLevel());
+            }
+            //aliasMap.put(xAxis, start);
+        }
     }
 
     @Override
@@ -130,7 +203,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
             highlighter.put("show", true);
             highlighter.put("sizeAdjust", 7.5);
             highlighter.put("useAxesFormatters", "true");
-            jsonParams.put("highlighter", highlighter);
+            //jsonParams.put("highlighter", highlighter);
             JSONObject cursor = new JSONObject();
             cursor.put("show", false);
             jsonParams.put("cursor", cursor);
