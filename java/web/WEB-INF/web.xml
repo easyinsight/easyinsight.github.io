@@ -281,6 +281,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>Invoice</servlet-name>
+        <display-name>Invoice</display-name>
+        <servlet-class>com.easyinsight.export.InvoiceServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>Excel</servlet-name>
         <display-name>Excel</display-name>
         <servlet-class>com.easyinsight.export.ExcelServlet</servlet-class>
@@ -380,6 +386,18 @@
         <servlet-name>DefineDataSource</servlet-name>
         <display-name>DefineDataSource</display-name>
         <servlet-class>com.easyinsight.api.v3.DefineDataSourceServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>AddUsers</servlet-name>
+        <display-name>AddUsers</display-name>
+        <servlet-class>com.easyinsight.api.v3.AddUserServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>GetUsers</servlet-name>
+        <display-name>GetUsers</display-name>
+        <servlet-class>com.easyinsight.api.v3.GetUsersServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -778,6 +796,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>Invoice</servlet-name>
+        <url-pattern>/invoice</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>SendGridEmailEvent</servlet-name>
         <url-pattern>/sendGridEvent</url-pattern>
     </servlet-mapping>
@@ -986,6 +1009,16 @@
     <servlet-mapping>
         <servlet-name>HtmlImage</servlet-name>
         <url-pattern>/htmlimage</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>GetUsers</servlet-name>
+        <url-pattern>/json/getUsers</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AddUsers</servlet-name>
+        <url-pattern>/json/addUsers</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
