@@ -319,12 +319,20 @@ public class DashboardStack extends DashboardElement {
                     }
                 }
                 for (AnalysisItem analysisItem : replacementMap.values()) {
-                    Key key = dataSource.getField(analysisItem.getKey().toDisplayName());
-                    if (key != null) {
-                        analysisItem.setKey(key);
+                    System.out.println("Looking for a match for " + analysisItem.toDisplay());
+                    AnalysisItem parent = dataSource.findAnalysisItemByDisplayName(analysisItem.toDisplay());
+                    if (parent != null) {
+                        System.out.println("\tFound match by name of " + parent.toDisplay());
+                        analysisItem.setKey(parent.getKey());
                     } else {
-                        Key clonedKey = analysisItem.getKey().clone();
-                        analysisItem.setKey(clonedKey);
+                        System.out.println("\tNo match, looking by key");
+                        Key key = dataSource.getField(analysisItem.getKey().toDisplayName());
+                        if (key != null) {
+                            analysisItem.setKey(key);
+                        } else {
+                            Key clonedKey = analysisItem.getKey().clone();
+                            analysisItem.setKey(clonedKey);
+                        }
                     }
                 }
 
