@@ -126,13 +126,17 @@
                 LinearAxis(verticalAxis).maximum = areaChartDef.yAxisMaximum;
             }
             verticalAxis.baseAtZero = areaChartDef.baseAtZero == "true";
-            if (!areaChartDef.multiMeasure && areaChartDef.measure != null) {
-                verticalAxis.title = areaChartDef.measure.unqualifiedDisplay;
+            if (areaChartDef.yAxisLabel != null && areaChartDef.yAxisLabel != "") {
+                verticalAxis.title = areaChartDef.yAxisLabel;
             } else {
-                if (areaChartDef.measures.length == 1) {
-                    verticalAxis.title = AnalysisItem(areaChartDef.measures.getItemAt(0)).unqualifiedDisplay;
+                if (!areaChartDef.multiMeasure && areaChartDef.measure != null) {
+                    verticalAxis.title = areaChartDef.measure.unqualifiedDisplay;
                 } else {
-                    verticalAxis.title = "Measures";
+                    if (areaChartDef.measures.length == 1) {
+                        verticalAxis.title = AnalysisItem(areaChartDef.measures.getItemAt(0)).unqualifiedDisplay;
+                    } else {
+                        verticalAxis.title = "Measures";
+                    }
                 }
             }
             var hAxisRenderer:AxisRenderer = new AxisRenderer();

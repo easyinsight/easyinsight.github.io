@@ -303,6 +303,7 @@ public class StyleConfiguration {
             items.addItem(new NumericReportFormItem("Trend Line Thickness", "trendLineThickness", LineChartDefinition(report).trendLineThickness, report, 1, 10));
         }
         if (report is AreaChartDefinition) {
+            items.addItem(new CheckBoxReportFormItem("Auto Scale", "autoScale", AreaChartDefinition(report).autoScale, report));
             items.addItem(new ComboBoxReportFormItem("Form", "form", TwoAxisDefinition(report).form,
                     report, ["segment", "step", "reverseStep", "horizontal", "curve"]));
             items.addItem(new ComboBoxReportFormItem("Base Y Axis at Zero", "baseAtZero", TwoAxisDefinition(report).baseAtZero,

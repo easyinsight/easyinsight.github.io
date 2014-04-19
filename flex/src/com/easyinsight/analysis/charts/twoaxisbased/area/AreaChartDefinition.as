@@ -15,6 +15,9 @@ public class AreaChartDefinition extends TwoAxisDefinition{
 
     public var multiColors:ArrayCollection = new ArrayCollection();
 
+    public var autoScale:Boolean;
+    public var autoScaled:Boolean;
+
     public function AreaChartDefinition() {
         super();
     }
