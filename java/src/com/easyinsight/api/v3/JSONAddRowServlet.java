@@ -1,5 +1,6 @@
 package com.easyinsight.api.v3;
 
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRow;
@@ -44,11 +45,13 @@ public class JSONAddRowServlet extends JSONServlet {
         DataStorage dataStorage = null;
         try {
             JSONObject returnObject = new JSONObject();
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            JSONArray errors = new JSONArray();
+            DateFormat standardDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             String dataSourceKey = request.getParameter("dataSourceID");
 
             String action = (String) jsonObject.get("action");
             JSONArray rows = (JSONArray) jsonObject.get("rows");
+            boolean useDateFormats = Boolean.valueOf(String.valueOf(jsonObject.get("custom_date_formats")));
             long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
             Map<String, AnalysisItem> fieldMap = new HashMap<String, AnalysisItem>();
@@ -61,51 +64,75 @@ public class JSONAddRowServlet extends JSONServlet {
                 IRow curRow = ds.createRow();
                 for (Map.Entry<String, Object> entry : row.entrySet()) {
                     AnalysisItem analysisItem = fieldMap.get(entry.getKey().toLowerCase());
-                    Object val = entry.getValue();
-                    if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                        if (val instanceof Number) {
-                            curRow.addValue(analysisItem.getKey(), new Date(((Number) val).longValue()));
-                        } else if ("".equals(val)) {
-                            curRow.addValue(analysisItem.getKey(), new EmptyValue());
-                        } else {
-                            curRow.addValue(analysisItem.getKey(), dateFormat.parse((String) val));
-                        }
-                    } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                        if(val instanceof Number)
-                            curRow.addValue(analysisItem.getKey(), ((Number) val).doubleValue());
-                        else
-                            curRow.addValue(analysisItem.getKey(), Double.parseDouble((String) val));
+                    if (analysisItem == null) {
+                        JSONObject err = new JSONObject();
+                        err.put("row", row);
+                        err.put("problem", entry.getKey() + " is not a valid field for the data source.");
+                        errors.add(err);
                     } else {
-                        curRow.addValue(analysisItem.getKey(), val.toString());
+                        Object val = entry.getValue();
+                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                            if (val instanceof Number) {
+                                curRow.addValue(analysisItem.getKey(), new Date(((Number) val).longValue()));
+                            } else if ("".equals(val)) {
+                                curRow.addValue(analysisItem.getKey(), new EmptyValue());
+                            } else {
+                                DateFormat df;
+                                if (useDateFormats) {
+                                    df = new SimpleDateFormat(((AnalysisDateDimension) analysisItem).getCustomDateFormat());
+                                } else {
+                                    df = standardDateFormat;
+                                }
+                                try {
+                                    curRow.addValue(analysisItem.getKey(), df.parse((String) val));
+                                } catch(ParseException ex) {
+                                    JSONObject err = new JSONObject();
+                                    err.put("row", row);
+                                    err.put("problem", "Can't parse the date for " + entry.getKey());
+                                    errors.add(err);
+                                }
+                            }
+                        } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                            if (val instanceof Number)
+                                curRow.addValue(analysisItem.getKey(), ((Number) val).doubleValue());
+                            else
+                                curRow.addValue(analysisItem.getKey(), Double.parseDouble((String) val));
+                        } else {
+                            curRow.addValue(analysisItem.getKey(), val.toString());
+                        }
                     }
                 }
             }
 
-            dataStorage = DataStorage.writeConnection(dataSource, conn, SecurityUtil.getAccountID());
+            if (errors.size() > 0) {
+                returnObject.put("errors", errors);
+            } else {
+                dataStorage = DataStorage.writeConnection(dataSource, conn, SecurityUtil.getAccountID());
 
-            if ("add".equals(action) || ((action == null || "".equals(action)) && "post".equals(request.getMethod().toLowerCase()))) {
-                dataStorage.insertData(ds);
-                dataStorage.commit();
-            } else if("replace".equals(action) || ((action == null || "".equals(action)) && "put".equals(request.getMethod().toLowerCase()))) {
-                dataStorage.truncate();
-                dataStorage.insertData(ds);
-                dataStorage.commit();
+                if ("add".equals(action) || ((action == null || "".equals(action)) && "post".equals(request.getMethod().toLowerCase()))) {
+                    dataStorage.insertData(ds);
+                    dataStorage.commit();
+                } else if ("replace".equals(action) || ((action == null || "".equals(action)) && "put".equals(request.getMethod().toLowerCase()))) {
+                    dataStorage.truncate();
+                    dataStorage.insertData(ds);
+                    dataStorage.commit();
+                }
+                PreparedStatement updateSourceStmt = conn.prepareStatement("UPDATE DATA_FEED SET LAST_REFRESH_START = ? WHERE DATA_FEED_ID = ?");
+                updateSourceStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                updateSourceStmt.setLong(2, dataSource.getDataFeedID());
+                updateSourceStmt.executeUpdate();
+                updateSourceStmt.close();
             }
 
-            PreparedStatement updateSourceStmt = conn.prepareStatement("UPDATE DATA_FEED SET LAST_REFRESH_START = ? WHERE DATA_FEED_ID = ?");
-            updateSourceStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-            updateSourceStmt.setLong(2, dataSource.getDataFeedID());
-            updateSourceStmt.executeUpdate();
-            updateSourceStmt.close();
 
-            return new ResponseInfo(ResponseInfo.ALL_GOOD, returnObject.toString());
+
+
+            return new ResponseInfo(returnObject.containsKey("errors") ? ResponseInfo.SERVER_ERROR : ResponseInfo.ALL_GOOD, returnObject.toString());
         } finally {
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
         }
-
-
 
 
     }
