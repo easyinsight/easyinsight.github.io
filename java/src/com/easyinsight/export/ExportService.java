@@ -3083,6 +3083,7 @@ public class ExportService {
     }
 
     public static ExportMetadata createExportMetadata(long accountID, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        long userID = SecurityUtil.getUserID(false);
         int dateFormat;
         String currencySymbol;
         String locale;
@@ -3099,6 +3100,40 @@ public class ExportService {
                 currencySymbol = "$";
                 locale = "EN";
             }
+            dateFormatStmt.close();
+            PreparedStatement userStmt = conn.prepareStatement("SELECT user_currency, user_locale, user_date_format FROM USER WHERE USER_ID = ?");
+            userStmt.setLong(1, userID);
+            ResultSet userRS = userStmt.executeQuery();
+            if (userRS.next()) {
+                int currency = userRS.getInt(1);
+                String userLocale = userRS.getString(2);
+                int userDateFormat = userRS.getInt(3);
+
+                if (currency == 0) {
+
+                } else {
+                    if (currency == 1) {
+                        currencySymbol = "$";
+                    } else if (currency == 2) {
+                        currencySymbol = "Û";
+                    } else if (currency == 3) {
+                        currencySymbol = "£";
+                    }
+                }
+
+                if ("0".equals(userLocale)) {
+
+                } else {
+                    locale = userLocale;
+                }
+
+                if (userDateFormat == 6) {
+
+                } else {
+                    dateFormat = userDateFormat;
+                }
+            }
+            userStmt.close();
         } catch (com.easyinsight.security.SecurityException e) {
             dateFormat = 1;
             currencySymbol = "$";
