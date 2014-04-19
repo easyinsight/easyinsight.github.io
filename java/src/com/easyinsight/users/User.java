@@ -102,7 +102,7 @@ public class User {
     @Column(name="user_currency")
     private int currency;
     @Column(name="user_locale")
-    private String userLocale;
+    private String userLocale = "0";
     @Column(name="user_date_format")
     private int dateFormat = 6;
 
