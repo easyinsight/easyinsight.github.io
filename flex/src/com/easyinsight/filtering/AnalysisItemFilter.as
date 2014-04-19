@@ -193,7 +193,11 @@ public class AnalysisItemFilter extends HBox implements IFilter {
         } else if (!_filterDefinition.useFullyQualifiedNames && _filterDefinition.selectedName) {
             linkButton.label = _filterDefinition.selectedName;
         } else {
-            linkButton.label = _filterDefinition.targetItem.unqualifiedDisplay;
+            if (_filterDefinition.useFullyQualifiedNames) {
+                linkButton.label = _filterDefinition.targetItem.display;
+            } else {
+                linkButton.label = _filterDefinition.targetItem.unqualifiedDisplay;
+            }
         }
     }
 

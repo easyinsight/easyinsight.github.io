@@ -21,65 +21,87 @@ import java.util.Map;
 public class RankingCalculationCache implements ICalculationCache {
     private AnalysisItem instanceID;
 
-    private Map<Value, List<IRow>> rowMap = new HashMap<Value, List<IRow>>();
     private AnalysisMeasure metric;
-    private Map<Value, Value> rankMap = new HashMap<Value, Value>();
     private boolean ascending;
+    private List<AnalysisItem> additionals;
+    private Map<List<Value>, Map<Value, Value>> rankMap;
 
-    public RankingCalculationCache(AnalysisItem instanceID, AnalysisMeasure metric, boolean ascending) {
+    public RankingCalculationCache(AnalysisItem instanceID, AnalysisMeasure metric, boolean ascending, List<AnalysisItem> additionals) {
         this.instanceID = instanceID;
         this.metric = metric;
+        this.additionals = additionals;
+        this.ascending = ascending;
     }
 
     public void fromDataSet(DataSet dataSet) {
         NaturalRanking naturalRanking = new NaturalRanking(TiesStrategy.MINIMUM);
+
+        Map<List<Value>, Map<Value, Value>> map = new HashMap<List<Value>, Map<Value, Value>>();
+
         for (IRow row : dataSet.getRows()) {
-            Value instanceIDValue = row.getValue(instanceID);
-            List<IRow> rows = rowMap.get(instanceIDValue);
-            if (rows == null) {
-                rows = new ArrayList<IRow>();
-                rowMap.put(instanceIDValue, rows);
+
+            // construct the key
+
+            List<Value> keyList = new ArrayList<Value>(additionals.size());
+
+            for (AnalysisItem additionalItem : additionals) {
+                Value value = row.getValue(additionalItem);
+                keyList.add(value);
             }
-            rows.add(row);
+
+            Map<Value, Value> valueMap = map.get(keyList);
+
+            if (valueMap == null) {
+                valueMap = new HashMap<Value, Value>();
+                map.put(keyList, valueMap);
+            }
+
+            Value metricValue = row.getValue(metric);
+            Value dimensionValue = row.getValue(instanceID);
+
+            valueMap.put(dimensionValue, metricValue);
         }
-        double[] data = new double[rowMap.entrySet().size()];
-        Map<Integer, Value> map = new HashMap<Integer, Value>();
-        int i = 0;
-        for (Map.Entry<Value, List<IRow>> entry : rowMap.entrySet()) {
-            List<IRow> rows = entry.getValue();
-            Aggregation aggregation = new AggregationFactory(metric, false).getAggregation();
-            for (IRow row : rows) {
-                Value value = row.getValue(metric);
-                aggregation.addValue(value);
+
+        this.rankMap = new HashMap<List<Value>, Map<Value, Value>>();
+
+        for (Map.Entry<List<Value>, Map<Value, Value>> entry : map.entrySet()) {
+            List<Value> values = entry.getKey();
+            Map<Value, Value> rankMap = new HashMap<Value, Value>();
+            this.rankMap.put(values, rankMap);
+            double[] data = new double[entry.getValue().size()];
+            Map<Integer, Value> positionMap = new HashMap<Integer, Value>();
+            int i = 0;
+            for (Map.Entry<Value, Value> rankEntry : entry.getValue().entrySet()) {
+                Value result = rankEntry.getValue();
+                data[i] = result.toDouble();
+                positionMap.put(i, rankEntry.getKey());
+                i++;
             }
-            Value result = aggregation.getValue();
-            data[i] = result.toDouble();
-            map.put(i, entry.getKey());
-            i++;
-        }
-        double[] ranks = naturalRanking.rank(data);
-        if (!ascending) {
-            double max = new Max().evaluate(ranks);
-            double[] reversedRanks = new double[ranks.length];
-            for (int j = 0; j < ranks.length; j++) {
-                reversedRanks[j] = max - ranks[j] + 1;
+            double[] ranks = naturalRanking.rank(data);
+            if (!ascending) {
+                double max = new Max().evaluate(ranks);
+                double[] reversedRanks = new double[ranks.length];
+                for (int j = 0; j < ranks.length; j++) {
+                    reversedRanks[j] = max - ranks[j] + 1;
+                }
+                ranks = reversedRanks;
             }
-            ranks = reversedRanks;
-        }
-        for (Map.Entry<Integer, Value> entry : map.entrySet()) {
-            double rank = ranks[entry.getKey()];
-            if (ascending) {
-                rank = ranks.length - rank;
+            for (Map.Entry<Integer, Value> rankEntry : positionMap.entrySet()) {
+                double rank = ranks[rankEntry.getKey()];
+                if (ascending) {
+                    rank = ranks.length - rank;
+                }
+
+                rankMap.put(rankEntry.getValue(), new NumericValue(rank));
             }
-            rankMap.put(entry.getValue(), new NumericValue(rank));
         }
     }
 
-    public Value getRank(Value value) {
-        return rankMap.get(value);
+    public Value getRank(List<Value> keys, Value value) {
+        return rankMap.get(keys).get(value);
     }
 
-    public List<IRow> rowsForValue(Value value) {
+    /*public List<IRow> rowsForValue(Value value) {
         return rowMap.get(value);
-    }
+    }*/
 }
