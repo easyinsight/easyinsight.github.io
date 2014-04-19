@@ -3393,10 +3393,10 @@ public class ExportService {
                         boolean showLink = false;
                         if (defaultLink != null) {
                             if (defaultLink instanceof URLLink) {
-                                showLink = defaultLink != null && value.getLinks() != null && value.getLinks().get(defaultLink.getLabel()) != null;
+                                showLink = defaultLink != null && value.getLinks() != null && value.getLinks().get(analysisItem.qualifiedName()) != null;
                                 if (showLink) {
                                     sb.append("<a href=\"");
-                                    sb.append(value.getLinks().get(defaultLink.getLabel()));
+                                    sb.append(value.getLinks().get(analysisItem.qualifiedName()));
                                     sb.append("\">");
                                 }
                             } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
@@ -3640,10 +3640,10 @@ public class ExportService {
                     boolean showLink = false;
                     if (defaultLink != null) {
                         if (defaultLink instanceof URLLink) {
-                            showLink = defaultLink != null && value.getLinks() != null && value.getLinks().get(defaultLink.getLabel()) != null;
+                            showLink = defaultLink != null && value.getLinks() != null && value.getLinks().get(analysisItem.qualifiedName()) != null;
                             if (showLink) {
                                 sb.append("<a href=\"");
-                                sb.append(value.getLinks().get(defaultLink.getLabel()));
+                                sb.append(value.getLinks().get(analysisItem.qualifiedName()));
                                 sb.append("\">");
                             }
                         } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
