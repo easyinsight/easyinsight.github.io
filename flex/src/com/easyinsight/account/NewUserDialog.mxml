@@ -9,6 +9,9 @@
             </mx:AddChild>
             <mx:RemoveChild target="{convertButton}"/>
         </mx:State>
+        <mx:State name="initialCreateNoEmail">
+            <mx:RemoveChild target="{convertButton}"/>
+        </mx:State>
     </util:states>
 	<mx:Metadata>
 		[Event(name="refreshAccount", type="com.easyinsight.account.RefreshAccountEvent")]
@@ -117,7 +120,11 @@
                 resendLabel = "Recreate Invite Link";
             }
             if (userID == 0) {
-                currentState = "initialCreate";
+                if (sendEmail) {
+                    currentState = "initialCreate";
+                } else {
+                    currentState = "initialCreateNoEmail";
+                }
                 resendButton.parent.removeChild(resendButton);
             } else if (lastLoginDate != null) {
                 resendButton.parent.removeChild(resendButton);
@@ -174,7 +181,7 @@
                 user.accountAdmin = accountAdminCheckbox.selected;
                 if (userID == 0) {
                     ProgressAlert.alert(this, "Adding user to account...", null, creationService.addUserToAccount);
-                    creationService.addUserToAccount.send(user, dlsList, requirePasswordChangeCheckbox.selected, sendEmail);
+                    creationService.addUserToAccount.send(user, dlsList, !sendEmail || requirePasswordChangeCheckbox.selected, sendEmail);
                 } else {
                     ProgressAlert.alert(this, "Updating user...", null, creationService.updateUser);
                     creationService.updateUser.send(user, dlsList);
