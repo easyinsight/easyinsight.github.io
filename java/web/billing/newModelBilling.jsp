@@ -13,6 +13,7 @@
 <%@ page import="com.braintreegateway.CustomerRequest" %>
 <%@ page import="com.easyinsight.html.BillingResponse" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html lang="en">
 <head>
@@ -43,6 +44,10 @@
     try {
         if (!SecurityUtil.isAccountAdmin()) {
             response.sendRedirect("access.jsp");
+            return;
+        }
+        if ((SecurityUtil.getAccountTier() == Account.PREMIUM || SecurityUtil.getAccountTier() == Account.ENTERPRISE)) {
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/html/enterprise.jsp"));
             return;
         }
 

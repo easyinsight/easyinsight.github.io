@@ -32,7 +32,7 @@ public class UserTransferObject {
     private boolean testAccountVisible;
 
     private int currency;
-    private String userLocale;
+    private String userLocale = "0";
     private int dateFormat = 6;
 
     public UserTransferObject() {

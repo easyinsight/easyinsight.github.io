@@ -209,7 +209,7 @@
 </body>
 <%
     } catch (ReportAccessException rae) {
-        response.sendRedirect(RedirectUtil.getURL(request, "accessFault.jsp"));
+        response.sendRedirect(RedirectUtil.getURL(request, "/accessFault.jsp"));
     } catch (ReportNotFoundException e) {
         LogClass.error(e);
         response.sendError(404);

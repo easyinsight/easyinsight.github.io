@@ -162,13 +162,17 @@
                 }
 
                 verticalAxis.baseAtZero = lineChartDef.baseAtZero == "true";
-                if (!lineChartDef.multiMeasure && lineChartDef.measure != null) {
-                    verticalAxis.title = lineChartDef.measure.unqualifiedDisplay;
+                if (lineChartDef.yAxisLabel != null && lineChartDef.yAxisLabel != "") {
+                    verticalAxis.title = lineChartDef.yAxisLabel;
                 } else {
-                    if (lineChartDef.measures.length == 1) {
-                        verticalAxis.title = AnalysisItem(lineChartDef.measures.getItemAt(0)).unqualifiedDisplay;
+                    if (!lineChartDef.multiMeasure && lineChartDef.measure != null) {
+                        verticalAxis.title = lineChartDef.measure.unqualifiedDisplay;
                     } else {
-                        verticalAxis.title = "Measures";
+                        if (lineChartDef.measures.length == 1) {
+                            verticalAxis.title = AnalysisItem(lineChartDef.measures.getItemAt(0)).unqualifiedDisplay;
+                        } else {
+                            verticalAxis.title = "Measures";
+                        }
                     }
                 }
                 var hAxisRenderer:AxisRenderer = new AxisRenderer();
