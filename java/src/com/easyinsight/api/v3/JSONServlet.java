@@ -76,7 +76,7 @@ public abstract class JSONServlet extends HttpServlet {
                 ResponseInfo responseInfo;
                 try {
                     conn.setAutoCommit(false);
-                    responseInfo = processJSON(null, conn, req);
+                    responseInfo = processGet(null, conn, req);
                     conn.commit();
                 } catch (ServiceRuntimeException sre) {
                     conn.rollback();
@@ -106,6 +106,8 @@ public abstract class JSONServlet extends HttpServlet {
         BenchmarkManager.recordBenchmark(this.getClass().getCanonicalName(), (end.getTime() - start.getTime()), userResponse.getUserID());
         System.out.println("API Call: " + this.getClass().getCanonicalName() + " Duration: " + (end.getTime() - start.getTime()));
     }
+
+
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -234,7 +236,7 @@ public abstract class JSONServlet extends HttpServlet {
                 ResponseInfo responseInfo;
                 try {
                     conn.setAutoCommit(false);
-                    responseInfo = processJSON(postObject, conn, req);
+                    responseInfo = processPost(postObject, conn, req);
                     conn.commit();
                 } catch (ServiceRuntimeException sre) {
                     conn.rollback();
@@ -263,6 +265,14 @@ public abstract class JSONServlet extends HttpServlet {
         Date end = new Date();
         BenchmarkManager.recordBenchmark(this.getClass().getCanonicalName(), (end.getTime() - start.getTime()), userResponse.getUserID());
         System.out.println("API Call: " + this.getClass().getCanonicalName() + " Duration: " + (end.getTime() - start.getTime()));
+    }
+
+    protected ResponseInfo processPost(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        return processJSON(jsonObject, conn, request);
+    }
+
+    protected ResponseInfo processGet(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        return processJSON(jsonObject, conn, request);
     }
 
     protected abstract ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception;
