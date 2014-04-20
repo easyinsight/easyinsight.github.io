@@ -47,9 +47,9 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
         text.alpha = 1;
         percentHeight = 100;
         percentWidth = 100;
-        addEventListener(MouseEvent.ROLL_OVER, onRollOver);
+        /*addEventListener(MouseEvent.ROLL_OVER, onRollOver);
         addEventListener(MouseEvent.ROLL_OUT, onRollOut);
-        addEventListener(MouseEvent.CLICK, onClick);
+        addEventListener(MouseEvent.CLICK, onClick);*/
         mouseChildren = false;
         mouseEnabled = true;
     }
@@ -168,13 +168,16 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
                     _valText = crosstabValue.header.getFormatter().format(crosstabValue.value.getValue());
                 }
             }
-            if (_report.getFont() == "Open Sans") {
+            var fontName:String = _report.getFont();
+            if (_report.customFontFamily) {
+                fontName = null;
+            } else if (_report.getFont() == "Open Sans") {
                 text.styleName = "myFontStyle";
             }
             if (crosstabValue.header == null) {
                 if (crosstabValue.summaryValue) {
                     var summaryColor:uint = _report.summaryTextColor;
-                    _format = new TextFormat(_report.getFont(), 11, summaryColor, null);
+                    _format = new TextFormat(fontName, 11, summaryColor, null);
                     _format.align = _report.align;
                 } else {
                     var color:uint;
@@ -184,7 +187,7 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
                     } else {
                         color = 0x0;
                     }
-                    _format = new TextFormat(_report.getFont(), 11, color, null);
+                    _format = new TextFormat(fontName, 11, color, null);
                     _format.align = _report.align;
                 }
             } else {
@@ -198,10 +201,10 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
                     } else {
                         headerColor = _report.headerTextColor;
                     }
-                    _format = new TextFormat(_report.getFont(), 12, headerColor, null);
+                    _format = new TextFormat(fontName, 12, headerColor, null);
                     _format.align = _report.align;
                 } else {
-                    _format = new TextFormat(_report.getFont(), 11, 0xFFFFFF, null);
+                    _format = new TextFormat(fontName, 11, 0xFFFFFF, null);
                     _format.align = _report.align;
                 }
             }

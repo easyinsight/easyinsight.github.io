@@ -28,7 +28,7 @@ public class LinkDecorationComponent implements IComponent {
                                 links = new HashMap<String, String>(1);
                                 value.setLinks(links);
                             }
-                            links.put(analysisItem.qualifiedName(), url);
+                            links.put(analysisItem.toDisplay(), url);
                         }
                     }
                 }

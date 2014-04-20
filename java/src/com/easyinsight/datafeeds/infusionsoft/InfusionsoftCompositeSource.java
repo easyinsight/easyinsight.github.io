@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.infusionsoft;
 
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.IJoin;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
@@ -22,6 +23,12 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
     private String infusionApiKey;
     private String url;
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Infusionsoft URL", "url");
+        factory.addField("Infusionsoft API Key", "infusionApiKey");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
 
     public InfusionsoftCompositeSource() {
         setFeedName("Infusionsoft");

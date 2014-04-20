@@ -57,7 +57,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         if (defaultLink != null) {
             if (defaultLink is URLLink) {
                 var urlLink:URLLink = defaultLink as URLLink;
-                var url:String = data[_analysisItem.qualifiedName() + "_link"];
+                var url:String = data[_analysisItem.display + "_link"];
                 try {
                     navigateToURL(new URLRequest(url), "_blank");
                 } catch (e:Error) {
@@ -137,7 +137,6 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         }
     }
 
-
     public function validateProperties():void {
         validateNow();
     }
@@ -186,9 +185,10 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         var text:String;
         if (value != null) {
             var field:String = analysisItem.qualifiedName();
-            var formatter:Formatter = analysisItem.getFormatter();
+
             if (value[field] is Value) {
                 var objVal:Value = value[field];
+                var formatter:Formatter = analysisItem.getFormatter(objVal);
                 if (objVal == null) {
                     text = "";
                 } else {
