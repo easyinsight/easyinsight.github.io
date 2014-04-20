@@ -137,6 +137,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         }
     }
 
+
     public function validateProperties():void {
         validateNow();
     }
@@ -185,10 +186,9 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         var text:String;
         if (value != null) {
             var field:String = analysisItem.qualifiedName();
-
+            var formatter:Formatter = analysisItem.getFormatter();
             if (value[field] is Value) {
                 var objVal:Value = value[field];
-                var formatter:Formatter = analysisItem.getFormatter(objVal);
                 if (objVal == null) {
                     text = "";
                 } else {

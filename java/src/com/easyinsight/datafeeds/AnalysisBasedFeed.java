@@ -59,6 +59,10 @@ public class AnalysisBasedFeed extends Feed {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
         //analysisDefinition.updateFromParameters(parameters);
         InsightRequestMetadata localInsightRequestMetadata = new InsightRequestMetadata();
+        localInsightRequestMetadata.setDepth(insightRequestMetadata.getDepth() + 1);
+        if (localInsightRequestMetadata.getDepth() >= 10) {
+            throw new RuntimeException("Server error in processing fields.");
+        }
         localInsightRequestMetadata.setTargetCurrency(insightRequestMetadata.getTargetCurrency());
         localInsightRequestMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
         localInsightRequestMetadata.setIp(insightRequestMetadata.getIp());
