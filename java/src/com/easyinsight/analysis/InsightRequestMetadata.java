@@ -13,6 +13,7 @@ import java.io.Serializable;
  */
 public class InsightRequestMetadata implements Serializable {
     private Date now = new Date();
+    private int depth = 0;
     private AnalysisDateDimension baseDate;
     private boolean dateJoin;
     private int utcOffset;
@@ -63,6 +64,14 @@ public class InsightRequestMetadata implements Serializable {
 
     public void setAggregationRowChanged(boolean aggregationRowChanged) {
         this.aggregationRowChanged = aggregationRowChanged;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
     }
 
     public List<AnalysisItem> getAllItems() {
