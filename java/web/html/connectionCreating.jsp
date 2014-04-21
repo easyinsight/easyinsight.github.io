@@ -48,15 +48,16 @@
     function startRefresh() {
         $.getJSON('/app/completeInstallation?dataSourceID=<%= request.getParameter("dataSourceID") %>', function(data) {
             var callDataID = data["callDataID"];
-            again(callDataID);
+            again(callDataID, "Refreshing the data source...");
         });
     }
 
     function onCallData(data, callDataID) {
         var status = data["status"];
+        var message = data["statusMessage"];
         if (status == 1) {
             // running
-            again(callDataID);
+            again(callDataID, message);
         } else if (status == 2) {
             // done
             $.getJSON('/app/connectionInstalled?dataSourceID=<%= request.getParameter("dataSourceID") %>', function(data) {
@@ -69,7 +70,10 @@
         }
     }
 
-    function again(callDataID) {
+    function again(callDataID, message) {
+        if (message != null) {
+            $("#messageDiv").html(message);
+        }
         setTimeout(function() {
             $.getJSON('/app/refreshStatus?callDataID=' + callDataID, function(data) {
                 onCallData(data, callDataID);
