@@ -307,6 +307,10 @@ public class FunctionFactory {
             return new Sequence();
         } else if (s.equals("assigncurrency")) {
             return new AssignCurrency();
+        } else if (s.equals("tail")) {
+            return new TailFunction();
+        } else if (s.equals("lasttemp")) {
+            return new LastTempRecord();
         } else {
             return null;
         }
