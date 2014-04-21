@@ -169,7 +169,7 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
     public void visit(FunctionNode node) {
         node.resolveFunction(functionResolver);
         if (node.getFunction() == null) {
-            throw new FunctionException("We couldn't resolve function " + node.getChild(0).getText().trim() + ".");
+            throw new FunctionException("We couldn't resolve function " + node.getChild(0).getChild(0).getText().trim() + ".");
         }
         if(node.getFunction() instanceof CastFunction) {
             CastFunction f = (CastFunction) node.getFunction();
