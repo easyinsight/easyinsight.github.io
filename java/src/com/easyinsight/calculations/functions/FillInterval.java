@@ -16,20 +16,9 @@ public class FillInterval extends Function {
         String instanceIDName = minusBrackets(getParameterName(0));
         String startDate = minusBrackets(getParameterName(1));
         String endDate = minusBrackets(getParameterName(2));
-        AnalysisItem instanceIDField = null;
-        AnalysisItem startField = null;
-        AnalysisItem endField = null;
-        for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
-            if (instanceIDName.equals(analysisItem.toDisplay()) || instanceIDName.equals(analysisItem.getKey().toKeyString())) {
-                instanceIDField = analysisItem;
-            }
-            if (startDate.equals(analysisItem.toDisplay()) || startDate.equals(analysisItem.getKey().toKeyString())) {
-                startField = analysisItem;
-            }
-            if (endDate.equals(analysisItem.toDisplay()) || endDate.equals(analysisItem.getKey().toKeyString())) {
-                endField = analysisItem;
-            }
-        }
+        AnalysisItem instanceIDField = findDataSourceItem(0);
+        AnalysisItem startField = findDataSourceItem(1);
+        AnalysisItem endField = findDataSourceItem(2);
         if (instanceIDField == null) {
             throw new FunctionException("Could not find the specified field " + instanceIDName);
         }

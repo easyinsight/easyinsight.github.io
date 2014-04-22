@@ -311,6 +311,8 @@ public class FunctionFactory {
             return new TailFunction();
         } else if (s.equals("lasttemp")) {
             return new LastTempRecord();
+        } else if (s.equals("interval")) {
+            return new Interval();
         } else {
             return null;
         }
