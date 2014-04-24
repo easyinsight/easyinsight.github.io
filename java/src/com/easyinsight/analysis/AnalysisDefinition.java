@@ -594,6 +594,7 @@ public class AnalysisDefinition implements Cloneable {
                 System.out.println("Copying multiple join overrides for " + getTitle());
             }
             for (JoinOverride joinOverride : joinOverrides) {
+                System.out.println("\t" + joinOverride.getSourceItem() + " to " + joinOverride.getTargetItem());
                 replacementMap.addField(joinOverride.getSourceItem(), changingDataSource);
                 replacementMap.addField(joinOverride.getTargetItem(), changingDataSource);
                 clones.add(joinOverride.clone());
@@ -656,6 +657,9 @@ public class AnalysisDefinition implements Cloneable {
 
     }
 
+    public void validateForInstall() {
+
+    }
 
     public static void updateFromMetadata(FeedDefinition target, ReplacementMap replacementMap,
                                           AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> added) throws CloneNotSupportedException {
@@ -671,13 +675,18 @@ public class AnalysisDefinition implements Cloneable {
             set.put(add.toDisplay(), add);
         }*/
 
-        Map<String, AnalysisItem> targetFieldMap = new HashMap<String, AnalysisItem>();
+        Map<String, List<AnalysisItem>> targetFieldMap = new HashMap<String, List<AnalysisItem>>();
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
         for (AnalysisItem item : allFields) {
-            targetFieldMap.put(item.toDisplay(), item);
+            List<AnalysisItem> targetItems = targetFieldMap.get(item.toDisplay());
+            if (targetItems == null) {
+                targetItems = new ArrayList<AnalysisItem>(1);
+                targetFieldMap.put(item.toDisplay(), targetItems);
+            }
+            targetItems.add(item);
             List<AnalysisItem> items = keyMap.get(item.getKey().toKeyString());
             if (items == null) {
-                items = new ArrayList<AnalysisItem>();
+                items = new ArrayList<AnalysisItem>(1);
                 keyMap.put(item.getKey().toKeyString(), items);
             }
             items.add(item);
@@ -704,36 +713,67 @@ public class AnalysisDefinition implements Cloneable {
                 Key key = null;
                 Key deproxiedKey = (Key) Database.deproxy(analysisItem.getKey());
                 if (deproxiedKey instanceof ReportKey) {
-
+                    System.out.println("\t\treport key of " + analysisItem.toDisplay() + ", skipping");
                 } else {
-                    AnalysisItem dataSourceItem = targetFieldMap.get(analysisItem.toDisplay());
+                    List<AnalysisItem> targetItems = targetFieldMap.get(analysisItem.toDisplay());
+                    AnalysisItem dataSourceItem = null;
+                    if (targetItems == null) {
+                    } else if (targetItems.size() == 1) {
+                        dataSourceItem = targetItems.get(0);
+                    } else if (targetItems.size() > 1) {
+                        throw new RuntimeException("Ambiguous reference to " + analysisItem.toDisplay());
+                    }
+
                     if (dataSourceItem != null && (dataSourceItem.getOrigin() == null || dataSourceItem.getOrigin().getReport() != analysisDefinition.getAnalysisID())) {
+                        System.out.println("\t\tFound key for " + analysisItem.toDisplay() + " via display name of " + analysisItem.toDisplay());
                         key = dataSourceItem.getKey();
                     } else {
-                        dataSourceItem = targetFieldMap.get(analysisItem.toOriginalDisplayName());
+
+                        targetItems = targetFieldMap.get(analysisItem.toOriginalDisplayName());
+
+                        if (targetItems == null) {
+                        } else if (targetItems.size() == 1) {
+                            dataSourceItem = targetItems.get(0);
+                        } else if (targetItems.size() > 1) {
+                            LogClass.error("Ambiguous reference to " + analysisItem.toDisplay() + " by original display name of " + analysisItem.toOriginalDisplayName());
+                        }
+
                         if (dataSourceItem != null && (dataSourceItem.getOrigin() == null || dataSourceItem.getOrigin().getReport() != analysisDefinition.getAnalysisID())) {
+                            System.out.println("\t\tFound key for " + analysisItem.toDisplay() + " via original display name of " + analysisItem.toOriginalDisplayName());
                             key = dataSourceItem.getKey();
                         } else {
                             dataSourceItem = null;
                             List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
                             if (items != null) {
+                                int i = 0;
                                 for (AnalysisItem item : items) {
                                     if (item.getOrigin() != null && item.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
 
                                     } else {
-                                        dataSourceItem = item;
-                                        break;
+                                        i++;
                                     }
                                 }
-                                if (dataSourceItem != null) {
+                                if (i == 1) {
+                                    for (AnalysisItem item : items) {
+                                        if (item.getOrigin() != null && item.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
 
+                                        } else {
+                                            dataSourceItem = item;
+                                            break;
+                                        }
+                                    }
+                                } else if (i > 1) {
+                                    throw new RuntimeException("Ambiguous reference to " + analysisItem.toDisplay() + " by key of " + analysisItem.getKey().toKeyString());
+                                }
+                                if (dataSourceItem != null) {
+                                    System.out.println("\t\tFound key for " + analysisItem.toDisplay() + " via key for " + analysisItem.getKey().toKeyString());
                                     key = dataSourceItem.getKey();
                                 }
                             }
                         }
                     }
                     if (key != null) {
-                        System.out.println("\t\tFound key for " + analysisItem.toDisplay());
+                        //System.out.println("\t\tFound key for " + analysisItem.toDisplay());
                         analysisItem.setKey(key);
                         /*if (set.containsKey(analysisItem.toDisplay()) && !addedItems.contains(analysisItem)) {
                             addedItems.add(analysisItem);
