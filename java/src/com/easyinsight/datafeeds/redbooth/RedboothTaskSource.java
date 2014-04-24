@@ -88,69 +88,107 @@ public class RedboothTaskSource extends RedboothBaseSource {
             persons.put(ref.get("id").toString(), ref.get("user_id").toString());
         }
 
-        Map results = (Map) queryList("/api/1/tasks?count=0", redboothCompositeSource, httpClient);
-
-        List<Map>  v1TaskList = (List<Map>) results.get("objects");
+        long endID = 0;
+        int count;
         Map<String, Value> idToCompletionDate = new HashMap<String, Value>();
-        for (Map org : v1TaskList) {
-            String id = getJSONValue(org, "id");
-            Value completedAt = getYetAnotherDate(org, "completed_at");
-            idToCompletionDate.put(id, completedAt);
-        }
 
-        List<Map>  taskList = (List<Map>) queryList("/api/2/tasks?count=0&scope=all", redboothCompositeSource, httpClient);
+        do {
+            count = 0;
+            Object obj;
+            if (endID == 0) {
+                obj = queryList("/api/1/tasks", redboothCompositeSource, httpClient);
+            } else {
+                obj = queryList("/api/1/tasks?max_id="+endID, redboothCompositeSource, httpClient);
+            }
+            Map results = (Map) obj;
 
-        // resolved_subtasks_count
-        // subtasks_count
-        //List<Map> organizations = (List<Map>) base.get("objects");
-        Set<String> validIDs = redboothCompositeSource.getValidProjects();
-        for (Map org : taskList) {
-            String projectID = getJSONValue(org, "project_id");
-            if (!validIDs.contains(projectID)) {
-                continue;
-            }
-            IRow row = dataSet.createRow();
-            String id = getJSONValue(org, "id");
-            row.addValue(keys.get(ID), id);
-            row.addValue(keys.get(NAME), getJSONValue(org, "name"));
-            row.addValue(keys.get(PROJECT_ID), projectID);
-            row.addValue(keys.get(TASK_LIST_ID), getJSONValue(org, "task_list_id"));
-            row.addValue(keys.get(POSITION), getJSONValue(org, "position"));
-            row.addValue(keys.get(COMMENTS_COUNT), getJSONValue(org, "comments_count"));
-            row.addValue(keys.get(URGENT), getJSONValue(org, "urgent"));
-            row.addValue(keys.get(TYPE), getJSONValue(org, "type"));
-            row.addValue(keys.get(DUE_ON), getAlt(org, "due_on"));
-            String statusCode = getJSONValue(org, "status");
-            String status = "";
-            if ("0".equals(statusCode)) {
-                status = "New";
-            } else if ("1".equals(statusCode)) {
-                status = "Open";
-            } else if ("2".equals(statusCode)) {
-                status = "Hold";
-            } else if ("3".equals(statusCode)) {
-                status = "Resolved";
-            } else if ("4".equals(statusCode)) {
-                status = "Rejected";
-            }
-            String assignedID = getJSONValue(org, "assigned_id");
-            if (assignedID != null) {
-                String userID = persons.get(assignedID);
-                if (userID != null) {
-                    row.addValue(ASSIGNED_TO, users.get(userID));
+            List<Map>  v1TaskList = (List<Map>) results.get("objects");
+
+            for (Map org : v1TaskList) {
+                count++;
+                String id = getJSONValue(org, "id");
+                long numID = Long.parseLong(id);
+                if (endID == 0) {
+                    endID = numID;
+                } else {
+                    endID = Math.min(numID, endID);
                 }
+                Value completedAt = getYetAnotherDate(org, "completed_at");
+                idToCompletionDate.put(id, completedAt);
+
             }
-            Value completionDate = idToCompletionDate.get(id);
-            row.addValue(TOTAL_SUBTASKS, getJSONValue(org, "subtasks_count"));
-            row.addValue(RESOLVED_SUBTASKS, getJSONValue(org, "resolved_subtasks_count"));
-            row.addValue(COMPLETED_AT, completionDate);
-            row.addValue(keys.get(STATUS), status);
-            String url = "https://redbooth.com/a/#!/projects/" + id + "/tasks/" + id;
-            row.addValue(TASK_URL, url);
-            row.addValue(CREATED_AT, getDate(org, "created_at"));
-            row.addValue(UPDATED_AT, getDate(org, "updated_at"));
-            row.addValue(COUNT, 1);
-        }
+        }  while (count == 20);
+        endID = 0;
+        do {
+            count = 0;
+            List<Map>  taskList;
+            if (endID == 0) {
+                taskList = (List<Map>) queryList("/api/2/tasks?count=30&scope=all", redboothCompositeSource, httpClient);
+            } else {
+                taskList = (List<Map>) queryList("/api/2/tasks?count=30&scope=all&max_id="+endID, redboothCompositeSource, httpClient);
+            }
+
+            // resolved_subtasks_count
+            // subtasks_count
+            //List<Map> organizations = (List<Map>) base.get("objects");
+            Set<String> validIDs = redboothCompositeSource.getValidProjects();
+            for (Map org : taskList) {
+
+                count++;
+                String projectID = getJSONValue(org, "project_id");
+                if (!validIDs.contains(projectID)) {
+                    continue;
+                }
+                IRow row = dataSet.createRow();
+                String id = getJSONValue(org, "id");
+                long numID = Long.parseLong(id);
+                if (endID == 0) {
+                    endID = numID;
+                } else {
+                    endID = Math.min(numID, endID);
+                }
+                row.addValue(keys.get(ID), id);
+                row.addValue(keys.get(NAME), getJSONValue(org, "name"));
+                row.addValue(keys.get(PROJECT_ID), projectID);
+                row.addValue(keys.get(TASK_LIST_ID), getJSONValue(org, "task_list_id"));
+                row.addValue(keys.get(POSITION), getJSONValue(org, "position"));
+                row.addValue(keys.get(COMMENTS_COUNT), getJSONValue(org, "comments_count"));
+                row.addValue(keys.get(URGENT), getJSONValue(org, "urgent"));
+                row.addValue(keys.get(TYPE), getJSONValue(org, "type"));
+                row.addValue(keys.get(DUE_ON), getAlt(org, "due_on"));
+                String statusCode = getJSONValue(org, "status");
+                String status = "";
+                if ("0".equals(statusCode)) {
+                    status = "New";
+                } else if ("1".equals(statusCode)) {
+                    status = "Open";
+                } else if ("2".equals(statusCode)) {
+                    status = "Hold";
+                } else if ("3".equals(statusCode)) {
+                    status = "Resolved";
+                } else if ("4".equals(statusCode)) {
+                    status = "Rejected";
+                }
+                String assignedID = getJSONValue(org, "assigned_id");
+                if (assignedID != null) {
+                    String userID = persons.get(assignedID);
+                    if (userID != null) {
+                        row.addValue(ASSIGNED_TO, users.get(userID));
+                    }
+                }
+                Value completionDate = idToCompletionDate.get(id);
+                row.addValue(TOTAL_SUBTASKS, getJSONValue(org, "subtasks_count"));
+                row.addValue(RESOLVED_SUBTASKS, getJSONValue(org, "resolved_subtasks_count"));
+                row.addValue(COMPLETED_AT, completionDate);
+                row.addValue(keys.get(STATUS), status);
+                String url = "https://redbooth.com/a/#!/projects/" + id + "/tasks/" + id;
+                row.addValue(TASK_URL, url);
+                row.addValue(CREATED_AT, getDate(org, "created_at"));
+                row.addValue(UPDATED_AT, getDate(org, "updated_at"));
+                row.addValue(COUNT, 1);
+
+            }
+        } while (count == 30);
         return dataSet;
     }
 }
