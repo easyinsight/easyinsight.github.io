@@ -634,6 +634,11 @@
         <servlet-class>com.easyinsight.html.WhiteLabelImageServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>DeleteUserServlet</servlet-name>
+        <servlet-class>com.easyinsight.html.DeleteUserServlet</servlet-class>
+    </servlet>
+
     <!--<servlet>
         <servlet-name>DefineTable</servlet-name>
         <display-name>DefineTable</display-name>
@@ -705,6 +710,11 @@
         <servlet-name>ReportsByTagServlet</servlet-name>
         <servlet-class>com.easyinsight.html.ReportsByTagServlet</servlet-class>
     </servlet>
+
+    <servlet-mapping>
+        <servlet-name>DeleteUserServlet</servlet-name>
+        <url-pattern>/html/account/delete</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>JSONAddRowsServlet</servlet-name>

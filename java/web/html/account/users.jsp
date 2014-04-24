@@ -60,10 +60,11 @@
                         <table class="table table-striped table-bordered">
                             <thead>
                             <tr>
-                                <th style="width: 8em;"></th>
+
                                 <th>Email</th>
                                 <th>Name</th>
                                 <th>Type</th>
+                                <th style="width: 8em;"></th>
                             </tr>
                             </thead>
                             <%
@@ -71,13 +72,14 @@
                                 for (UserTransferObject user : users) {
                             %>
                             <tr>
-                                <td><a href="edit?userID=<%= user.getUserID() %>">Edit</a> <a href="delete?userID=<%= user.getUserID() %>">Delete</a></td>
-                                <td><%=StringEscapeUtils.escapeHtml(user.getEmail()) %>
+
+                                <td><a href="edit?userID=<%= user.getUserID() %>"><%=StringEscapeUtils.escapeHtml(user.getEmail()) %></a>
                                 </td>
-                                <td><%= StringEscapeUtils.escapeHtml(user.getFirstName() + " " + user.getName()) %>
+                                <td><a href="edit?userID=<%= user.getUserID() %>"><%= StringEscapeUtils.escapeHtml(user.getFirstName() + " " + user.getName()) %></a>
                                 </td>
-                                <td><%= user.isAnalyst() ? "Designer" : "Viewer" %>
+                                <td><a href="edit?userID=<%= user.getUserID() %>"><%= user.isAnalyst() ? "Designer" : "Viewer" %></a>
                                 </td>
+                                <td> <a onclick="confirm('Are you sure you want to delete this user?')" href="delete?userID=<%= user.getUserID() %>">Delete</a></td>
                             </tr>
                             <%
                                 }

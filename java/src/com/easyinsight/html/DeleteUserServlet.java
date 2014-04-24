@@ -1,5 +1,6 @@
 package com.easyinsight.html;
 
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.UserAccountAdminService;
 
 import javax.servlet.ServletException;
@@ -18,9 +19,14 @@ import java.io.IOException;
 public class DeleteUserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        long userID = Long.parseLong(req.getParameter("userID"));
-        UserAccountAdminService service = new UserAccountAdminService();
-        service.deleteUser(userID);
-        resp.sendRedirect(RedirectUtil.getURL(req, "/app/html/account/users.jsp"));
+        SecurityUtil.populateThreadLocalFromSession(req);
+        try {
+            long userID = Long.parseLong(req.getParameter("userID"));
+            UserAccountAdminService service = new UserAccountAdminService();
+            service.deleteUser(userID);
+            resp.sendRedirect(RedirectUtil.getURL(req, "/app/html/account/users.jsp"));
+        } finally {
+            SecurityUtil.clearThreadLocal();
+        }
     }
 }

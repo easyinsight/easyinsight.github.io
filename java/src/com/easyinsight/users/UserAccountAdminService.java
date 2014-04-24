@@ -908,6 +908,9 @@ public class UserAccountAdminService {
     }
 
     public void deleteUser(long userID) {
+        if(userID == SecurityUtil.getUserID()) {
+            throw new RuntimeException("You can't delete yourself.");
+        }
         SecurityUtil.authorizeAccountAdmin();
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
