@@ -114,7 +114,7 @@
                         <input type="hidden" name="user_id" value="<%= uto.getUserID() %>" />
                     <% } %>
                     <div class="form-group">
-                        <input type="submit" />
+                        <input type="submit" value="<%= uto.getUserID() == 0 ? "Create" : "Update" %> User" />
                     </div>
                 </form>
             </div>
