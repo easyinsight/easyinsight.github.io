@@ -3,7 +3,7 @@
     <util:states>
         <mx:State name="initialCreate">
             <mx:AddChild relativeTo="{baseInfoForm}">
-                <mx:FormItem label="Require Password Change:" labelWidth="180">
+                <mx:FormItem label="Require Password Change:" labelWidth="260">
                     <mx:CheckBox id="requirePasswordChangeCheckbox" selected="true"/>
                 </mx:FormItem>
             </mx:AddChild>

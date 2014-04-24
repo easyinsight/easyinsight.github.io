@@ -1,7 +1,11 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.export.ExportMetadata;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,5 +121,22 @@ public class FeedFolder implements Cloneable, Serializable {
     @Override
     public String toString() {
         return name;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        JSONArray folders = new JSONArray();
+        for(FeedFolder f : getChildFolders()) {
+            folders.put(f.toJSON(md));
+        }
+        jo.put("folders", folders);
+        JSONArray analysisItems = new JSONArray();
+        for(AnalysisItem ai : getChildItems()) {
+            analysisItems.put(ai.toJSON(md));
+        }
+
+        jo.put("analysis_items", analysisItems);
+
+        return jo;
     }
 }
