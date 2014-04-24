@@ -87,13 +87,21 @@
                 rememberMeCookie.setMaxAge(60 * 60 * 24 * 30);
                 response.addCookie(rememberMeCookie);
                 String redirectUrl = RedirectUtil.getURL(request, "/app/");
+                boolean loginRedirectSet = false;
                 if(session.getAttribute("loginRedirect") != null) {
+                    loginRedirectSet = true;
                     redirectUrl = ((String) session.getAttribute("loginRedirect"));
                     session.removeAttribute("loginRedirect");
                 }
                 String urlHash = request.getParameter("urlhash");
-                if(urlHash != null)
+                if(urlHash != null) {
                     redirectUrl = redirectUrl + urlHash;
+                } else if (!loginRedirectSet) {
+                    if (userServiceResponse.isDefaultHTML()) {
+                        response.sendRedirect(RedirectUtil.getURL(request, "/app/html"));
+                        return;
+                    }
+                }
                 response.sendRedirect(redirectUrl);
             }
             conn.commit();
