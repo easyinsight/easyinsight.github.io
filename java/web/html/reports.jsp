@@ -151,7 +151,7 @@
             <div class="container">
 
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-9">
                         <h2><%= dataSourceDescriptor.getName() %>
                         </h2>
                     </div>
@@ -159,7 +159,7 @@
                 <% if (designer && !phone && !iPad) { %>
                 <jsp:include page="refreshingDataSource.jsp"/>
                 <div class="row" style="margin-bottom:10px">
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="btn-toolbar pull-left">
                             <div class="btn-group reportControlBtnGroup">
                                 <a class="reportControl" data-toggle="dropdown" href="#">
@@ -200,16 +200,30 @@
                 </div>
                 <% } %>
                 <div class="row">
-                    <div class="tag-list">
-                        <% for (Tag t : new UserUploadService().getReportTags()) { %>
-                        <a class="btn btn-default tag-select" data-toggle="button" data-tag-id="<%= t.getId() %>"
-                           href="#"><%= StringEscapeUtils.escapeHtml(t.getName()) %>
-                        </a>
-                        <% } %>
+                    <%
+                        List<Tag> tags = new UserUploadService().getReportTags();
+                        if (tags.size() > 0) {
+                    %>
+                    <div class="container">
+                        <div class="row">
+                            <div class="browse-by-tag">
+                                Browse by Tag:
+                            </div>
+                            <div class="col-md-7">
+                                <div class="tag-list">
+                                    <% for(Tag t : tags) { %>
+                                    <a class="btn btn-default tag-select" data-toggle="button" data-tag-id="<%= t.getId() %>" href="#"><%= StringEscapeUtils.escapeHtml(t.getName()) %></a>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    <%
+                        }
+                    %>
                 </div>
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-9">
                         <div id="report_list_target"></div>
                         <%
                             if (folders.size() > 0) {
@@ -222,7 +236,7 @@
                             </thead>
                             <%
                                 for (DataFolder dataFolder : folders) { %>
-                                    <tr><td><a class="folder" data-folder-id="<%= dataFolder.getUrlKey() %>" href="../reportsFolder/<%= dataSourceDescriptor.getUrlKey() %>/<%= dataFolder.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataFolder.getName()) %></td></tr>
+                                    <tr><td style="font-weight:500"><a class="folder" data-folder-id="<%= dataFolder.getUrlKey() %>" href="../reportsFolder/<%= dataSourceDescriptor.getUrlKey() %>/<%= dataFolder.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataFolder.getName()) %></a></td></tr>
                                 <% }
                             %>
                         </table>
@@ -240,13 +254,13 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Type</th>
+                    <th style="width:120px">Type</th>
                 </tr>
             </thead>
             <tbody>
                 <@ _.each(reports, function(e, i, l) { @>
                     <tr>
-                        <td><a href="../<@= (e.type == "report") ? "report" : "dashboard" @>/<@= e.url_key @>"><@- e.name @></a></td>
+                        <td class="header-tr"><a href="../<@= (e.type == "report") ? "report" : "dashboard" @>/<@= e.url_key @>"><@- e.name @></a></td>
                         <td><@= (e.type == "report") ? "Report" : "Dashboard" @></td>
                     </tr>
                 <@ }) @>
