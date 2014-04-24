@@ -82,12 +82,22 @@ public class UserService {
             } else {
                 session.removeAttribute("loginRedirect");
                 String redirectUrl = RedirectUtil.getURL(request, "/app/");
+                String originalURL = redirectUrl;
                 //System.out.println("Redirect url = " + oldRedirectUrl);
                 if (oldRedirectUrl != null) {
                     redirectUrl = oldRedirectUrl;
                 }
-                if (urlHash != null)
+
+
+                if (urlHash != null && !"".equals(urlHash)) {
+
                     redirectUrl = redirectUrl + urlHash;
+                } else if (redirectUrl.equals(originalURL)) {
+                    if (userServiceResponse.isDefaultHTML()) {
+                        response.sendRedirect(RedirectUtil.getURL(request, "/app/html"));
+                        return;
+                    }
+                }
                 response.sendRedirect(redirectUrl);
             }
         }
