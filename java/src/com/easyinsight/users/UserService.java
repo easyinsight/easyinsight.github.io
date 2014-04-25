@@ -882,6 +882,7 @@ public class UserService {
             account.setCreationDate(new Date());
             account.setAccountSource(accountSource);
             account.setPricingModel(1);
+            account.setUseHTMLVersion(accountTransferObject.isDefaultHTML());
             configureNewAccount(account);
             User user = createInitialUser(userTransferObject, password, account, salt);
             account.addUser(user);
