@@ -742,6 +742,14 @@ public class ExportService {
                                       ExportMetadata exportMetadata) throws DocumentException {
 
         ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
+
+        if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST) {
+            WSListDefinition list = (WSListDefinition) analysisDefinition;
+            if (list.isSummaryTotal()) {
+                listDataResults.summarize();
+            }
+        }
+
         PdfPTable table = new PdfPTable(listDataResults.getHeaders().length);
         table.setSpacingBefore(20);
         table.getDefaultCell().setPadding(3);
@@ -884,6 +892,54 @@ public class ExportService {
                             }
                             valueCell.setMinimumHeight(minimumSize);
                             table.addCell(valueCell);
+                        }
+                    }
+                }
+            }
+        }
+        if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST) {
+            WSListDefinition list = (WSListDefinition) analysisDefinition;
+            if (list.isSummaryTotal()) {
+                Color foreground = new Color(list.getSummaryRowTextColor());
+                Color background = new Color(list.getSummaryRowBackgroundColor());
+                BaseColor pdfSummaryTextColor = new BaseColor(foreground.getRed(), foreground.getGreen(), foreground.getBlue());
+                BaseColor pdfSummaryBackgroundColor = new BaseColor(background.getRed(), background.getGreen(), background.getBlue());
+
+                for (AnalysisItem analysisItem : items) {
+                    for (int j = 0; j < listDataResults.getHeaders().length; j++) {
+                        AnalysisItem headerItem = listDataResults.getHeaders()[j];
+
+                        if (headerItem == analysisItem) {
+                            if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
+                                double summary = listDataResults.getSummaries()[j];
+                                if (Double.isNaN(summary) || Double.isInfinite(summary)) {
+                                    summary = 0;
+                                }
+
+                                com.itextpdf.text.Font cellFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, Font.BOLDWEIGHT_NORMAL, pdfSummaryTextColor);
+                                String valueString = com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, true);
+                                Phrase phrase = new Phrase(valueString, cellFont);
+                                PdfPCell valueCell = new PdfPCell(phrase);
+                                if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                                    TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
+                                    if (textReportFieldExtension.getAlign() != null) {
+                                        if ("Left".equals(textReportFieldExtension.getAlign())) {
+                                            valueCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                                        } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                                            valueCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                                        } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                                            valueCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                                        }
+                                    }
+                                }
+                                valueCell.setBackgroundColor(pdfSummaryBackgroundColor);
+                                table.addCell(valueCell);
+                            } else {
+                                Phrase phrase = new Phrase("");
+                                PdfPCell valueCell = new PdfPCell(phrase);
+                                valueCell.setBackgroundColor(pdfSummaryBackgroundColor);
+                                table.addCell(valueCell);
+                            }
                         }
                     }
                 }
