@@ -3,6 +3,7 @@ package com.easyinsight.calculations.functions;
 
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.ReportException;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.SimpleCacheBuilder;
@@ -11,6 +12,7 @@ import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
+import com.easyinsight.servlet.SystemSettings;
 
 import java.util.List;
 
@@ -24,16 +26,8 @@ public class Concat extends Function {
     public Value evaluate() {
         String instanceIDName = minusBrackets(getParameterName(0));
         String targetName = minusBrackets(getParameterName(1));
-        AnalysisItem instanceIDField = null;
-        AnalysisItem targetField = null;
-        for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
-            if (instanceIDName.equals(analysisItem.toDisplay()) || instanceIDName.equals(analysisItem.getKey().toKeyString())) {
-                instanceIDField = analysisItem;
-            }
-            if (targetName.equals(analysisItem.toDisplay()) || targetName.equals(analysisItem.getKey().toKeyString())) {
-                targetField = analysisItem;
-            }
-        }
+        AnalysisItem instanceIDField = findDataSourceItem(0);
+        AnalysisItem targetField = findDataSourceItem(1);
         if (instanceIDField == null) {
             throw new FunctionException("Could not find the specified field " + instanceIDName);
         }
@@ -43,7 +37,11 @@ public class Concat extends Function {
         String processName = getAnalysisItem().qualifiedName();
         SimpleCalculationCache simpleCache = (SimpleCalculationCache) calculationMetadata.getCache(new SimpleCacheBuilder(instanceIDField), processName);
         Value instanceValue = getParameter(0);
+        if (calculationMetadata.getDataSet().getRows().size() > SystemSettings.instance().getSequenceLimit()) {
+            throw new FunctionException("Concat complexity exceeds limits.");
+        }
         List<IRow> rows = simpleCache.rowsForValue(instanceValue);
+
         if (rows != null) {
             StringBuilder sb = new StringBuilder();
             for (IRow row : rows) {
@@ -51,7 +49,7 @@ public class Concat extends Function {
                 if (value.type() == Value.EMPTY) {
                     continue;
                 }
-                String str = value.toString().trim();
+                String str = value.toString();
                 if ("".equals(str)) {
                     continue;
                 }
