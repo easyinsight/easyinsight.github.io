@@ -11,6 +11,7 @@ import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.etl.LookupTable;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.tag.Tag;
@@ -19,6 +20,8 @@ import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.Nodes;
 import org.hibernate.Session;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * User: James Boe
@@ -1140,5 +1143,13 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void setRowIDField(boolean rowIDField) {
         this.rowIDField = rowIDField;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("id", getAnalysisItemID());
+        jo.put("name", getDisplayName());
+        jo.put("type", getFieldType());
+        return jo;
     }
 }

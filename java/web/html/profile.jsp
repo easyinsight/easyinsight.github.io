@@ -31,8 +31,9 @@
         }
 
         if (!SecurityUtil.isAccountAdmin()) {
-            response.sendRedirect("nonAdminProfile.jsp");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/html/nonAdminProfile.jsp"));
             return;
+
         }
 %>
 <jsp:include page="../header.jsp">
@@ -41,13 +42,13 @@
 </jsp:include>
 <div class="container">
     <div class="row">
-        <div class="col-md12">
+        <div class="col-md-12">
             <div class="btn-toolbar pull-right topControlToolbar">
                 <div class="btn-group topControlBtnGroup">
                     <a href="<%= RedirectUtil.getURL(request, "/app/billing/account.jsp")%>">Account Administration</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
-                    <a href="users.jsp">Users</a>
+                    <a href="account/users.jsp">Users</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
                     <a href="#">My Profile</a>
@@ -56,7 +57,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md12">
+        <div class="col-md-12">
             <div class="container corePageWell">
                 <form role="form" method="post" action="/app/html/updateProfile.jsp">
                     <div class="form-group">

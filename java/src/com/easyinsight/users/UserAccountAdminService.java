@@ -277,11 +277,30 @@ public class UserAccountAdminService {
         }
     }
 
-    public void updateUser(UserTransferObject userTransferObject, List<UserDLS> userDLSList) {
+    public UserCreationResponse updateUser(UserTransferObject userTransferObject, List<UserDLS> userDLSList) {
         long accountID = SecurityUtil.getAccountID();
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
+        String message = null;
+        if(userTransferObject.getUserName() == null || userTransferObject.getUserName().isEmpty()) {
+            message = "Username must not be empty.";
+        }
+        if(message == null && userTransferObject.getEmail() == null || userTransferObject.getEmail().isEmpty()) {
+            message = "Email must not be empty.";
+
+        }
+        if(message == null && (userTransferObject.getFirstName() == null || userTransferObject.getFirstName().isEmpty())){
+            message = "First Name must not be empty.";
+        }
+        if(message == null && (userTransferObject.getName() == null || userTransferObject.getName().isEmpty())) {
+            message = "Last Name must not be empty.";
+        }
+        if(message != null) {
+            return new UserCreationResponse(message);
+        }
+
         try {
+
             conn.setAutoCommit(false);
             List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
             Account account = (Account) results.get(0);
@@ -335,6 +354,9 @@ public class UserAccountAdminService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
+
+        return new UserCreationResponse(userTransferObject.getUserID());
+
     }
 
     public void updateUsers(List<UserTransferObject> userTransferObject) {
@@ -541,7 +563,23 @@ public class UserAccountAdminService {
         SecurityUtil.authorizeAccountAdmin();
         long accountID = SecurityUtil.getAccountID();
         UserCreationResponse userCreationResponse;
-        String message = doesUserExist(userTransferObject.getUserName(), userTransferObject.getEmail());
+        String message = null;
+        if(userTransferObject.getUserName() == null || userTransferObject.getUserName().isEmpty()) {
+            message = "Username must not be empty.";
+        }
+        if(message == null && userTransferObject.getEmail() == null || userTransferObject.getEmail().isEmpty()) {
+            message = "Email must not be empty.";
+
+        }
+        if(message == null && (userTransferObject.getFirstName() == null || userTransferObject.getFirstName().isEmpty())){
+            message = "First Name must not be empty.";
+        }
+        if(message == null && (userTransferObject.getName() == null || userTransferObject.getName().isEmpty())) {
+            message = "Last Name must not be empty.";
+        }
+        if(message == null) {
+            message = doesUserExist(userTransferObject.getUserName(), userTransferObject.getEmail());
+        }
         if (message != null) {
             if (source == GOOGLE_APPS) {
                 // just ignore in the case of google apps linking to an existing user
@@ -870,6 +908,9 @@ public class UserAccountAdminService {
     }
 
     public void deleteUser(long userID) {
+        if(userID == SecurityUtil.getUserID()) {
+            throw new RuntimeException("You can't delete yourself.");
+        }
         SecurityUtil.authorizeAccountAdmin();
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);

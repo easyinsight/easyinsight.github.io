@@ -21,6 +21,15 @@ public class AccountTransferObject {
     private int pricingModel;
     private Double nextBillAmount;
     private Date nextBillDate;
+    private boolean defaultHTML;
+
+    public boolean isDefaultHTML() {
+        return defaultHTML;
+    }
+
+    public void setDefaultHTML(boolean defaultHTML) {
+        this.defaultHTML = defaultHTML;
+    }
 
     public int getPricingModel() {
         return pricingModel;

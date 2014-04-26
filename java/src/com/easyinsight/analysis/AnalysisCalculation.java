@@ -4,6 +4,7 @@ import com.easyinsight.calculations.*;
 import com.easyinsight.core.ReportKey;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.logging.LogClass;
 
 import javax.persistence.*;
@@ -11,6 +12,8 @@ import javax.persistence.*;
 import com.easyinsight.pipeline.Pipeline;
 import nu.xom.Attribute;
 import nu.xom.Element;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -242,5 +245,12 @@ public class AnalysisCalculation extends AnalysisMeasure {
         calculationString = fieldNode.query("calculation").get(0).getValue();
         applyBeforeAggregation = Boolean.parseBoolean(fieldNode.getAttribute("applyBeforeAggregation").getValue());
         recalculateSummary = Boolean.parseBoolean(fieldNode.getAttribute("recalculateSummary").getValue());
+    }
+
+    @Override
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);
+        jo.put("calculation", getCalculationString());
+        return jo;
     }
 }

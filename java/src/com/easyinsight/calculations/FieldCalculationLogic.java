@@ -32,8 +32,11 @@ public class FieldCalculationLogic extends CalculationLogic {
     protected void calculateResults(CalculationTreeNode calculationTreeNode, CalculationMetadata calculationMetadata) {
 
         calculationMetadata.setDataSet(dataSet);
-        for (IRow row : dataSet.getRows()) {
-            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row, analysisItem, calculationMetadata);
+        List<IRow> rows;
+        rows = new ArrayList<IRow>(dataSet.getRows());
+        for (IRow row : rows) {
+            EvaluationVisitor rowVisitor = new EvaluationVisitor(row, analysisItem, calculationMetadata);
+
             calculationTreeNode.accept(rowVisitor);
             Value value = rowVisitor.getResult();
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {

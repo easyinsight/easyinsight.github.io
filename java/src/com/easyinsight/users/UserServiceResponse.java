@@ -64,12 +64,21 @@ public class UserServiceResponse {
     private boolean reportMode;
     private Date newsDate;
     private Date newsDismissDate;
+    private boolean defaultHTML;
     private boolean accountOverSize;
     private boolean accountReports;
     private boolean tagsAndCopyEnabled;
     private boolean hourlyRefreshEnabled;
     private String thousandsSeperator;
     private String decimalSeperator;
+
+    public boolean isDefaultHTML() {
+        return defaultHTML;
+    }
+
+    public void setDefaultHTML(boolean defaultHTML) {
+        this.defaultHTML = defaultHTML;
+    }
 
     public String getThousandsSeperator() {
         return thousandsSeperator;
@@ -204,7 +213,7 @@ public class UserServiceResponse {
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
                     new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst(), account.getPricingModel(),
                 account.isHeatMapEnabled(), newsDate, user.getNewsDismissDate(), accountOverSize, user.isTestAccountVisible(), account.isTagsAndCopyEnabled(),
-                account.isHourlyRefreshEnabled());
+                account.isHourlyRefreshEnabled(), account.isUseHTMLVersion());
         response.setReportImage(bytes);
         String accountLocale;
         if (!"0".equals(user.getUserLocale())) {
@@ -247,7 +256,7 @@ public class UserServiceResponse {
                                String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
                                boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst, int pricingModel, boolean reportMode,
                                Date newsDate, Date newsDismissDate, boolean accountOverSize, boolean accountReports, boolean tagsAndCopyEnabled,
-                               boolean hourlyRefreshEnabled) {
+                               boolean hourlyRefreshEnabled, boolean defaultHTML) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -292,6 +301,7 @@ public class UserServiceResponse {
         this.accountReports = accountReports;
         this.tagsAndCopyEnabled = tagsAndCopyEnabled;
         this.hourlyRefreshEnabled = hourlyRefreshEnabled;
+        this.defaultHTML = defaultHTML;
     }
 
     public boolean isAccountOverSize() {

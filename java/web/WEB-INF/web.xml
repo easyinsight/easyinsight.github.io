@@ -229,6 +229,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>CreateUser</servlet-name>
+        <servlet-class>com.easyinsight.html.CreateUserServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>CreateConfiguration</servlet-name>
         <display-name>CreateConfiguration</display-name>
         <servlet-class>com.easyinsight.html.CreateConfigurationServlet</servlet-class>
@@ -242,6 +247,11 @@
     <servlet>
         <servlet-name>ReportInfo</servlet-name>
         <servlet-class>com.easyinsight.html.ReportInfoServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>FieldServlet</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.FieldsServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -624,6 +634,11 @@
         <servlet-class>com.easyinsight.html.WhiteLabelImageServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>DeleteUserServlet</servlet-name>
+        <servlet-class>com.easyinsight.html.DeleteUserServlet</servlet-class>
+    </servlet>
+
     <!--<servlet>
         <servlet-name>DefineTable</servlet-name>
         <display-name>DefineTable</display-name>
@@ -697,6 +712,11 @@
     </servlet>
 
     <servlet-mapping>
+        <servlet-name>DeleteUserServlet</servlet-name>
+        <url-pattern>/html/account/delete</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>JSONAddRowsServlet</servlet-name>
         <url-pattern>/json/addRows</url-pattern>
     </servlet-mapping>
@@ -736,6 +756,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>CreateUser</servlet-name>
+        <url-pattern>/html/account/createUser</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>FilterValueServlet</servlet-name>
         <url-pattern>/html/filterValue</url-pattern>
     </servlet-mapping>
@@ -763,6 +788,11 @@
     <servlet-mapping>
         <servlet-name>TokenRedirect</servlet-name>
         <url-pattern>/TokenRedirect</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>FieldServlet</servlet-name>
+        <url-pattern>/html/fieldServlet</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

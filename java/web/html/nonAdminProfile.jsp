@@ -51,7 +51,7 @@
 </jsp:include>
 <div class="container">
     <div class="row">
-        <div class="col-md12">
+        <div class="col-md-12">
             <div class="container corePageWell">
                 <form role="form">
                     <div class="form-group">

@@ -62,6 +62,11 @@
     </rule>
 
     <rule>
+        <from>^/html/reports/([A-Za-z0-9]+)/fields.json$</from>
+        <to>/html/fieldServlet?dataSourceID=$1</to>
+    </rule>
+
+    <rule>
         <from>^/html/report/([A-Za-z0-9]+)/usage.json$</from>
         <to>/html/usageData?reportID=$1</to>
     </rule>
@@ -243,6 +248,20 @@
         <to>/html/folderReports.jsp?dataSourceID=$1&amp;folderID=$2</to>
     </rule>
 
+    <rule>
+        <from>^/html/account/newDesigner$</from>
+        <to>/html/account/newUser.jsp?type=designer</to>
+    </rule>
+
+    <rule>
+        <from>^/html/account/newViewer$</from>
+        <to>/html/account/newUser.jsp?type=viewer</to>
+    </rule>
+
+    <rule>
+        <from>^/html/account/edit$</from>
+        <to>/html/account/newUser.jsp?edit=edit</to>
+    </rule>
 
     <rule>
         <from>/admin/health.json</from>

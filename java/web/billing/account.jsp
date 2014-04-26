@@ -11,6 +11,7 @@
 <%@ page import="java.util.Locale" %>
 <%@ page import="com.easyinsight.export.ExportService" %>
 <%@ page import="com.easyinsight.analysis.AnalysisDateDimension" %>
+<%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -35,7 +36,7 @@
         }
 
         if (!SecurityUtil.isAccountAdmin()) {
-            response.sendRedirect("nonAdminProfile.jsp");
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/html/nonAdminProfile.jsp"));
             return;
         }
 %>
@@ -45,13 +46,13 @@
 </jsp:include>
 <div class="container">
     <div class="row">
-        <div class="col-md12">
+        <div class="col-md-12">
             <div class="btn-toolbar pull-right topControlToolbar">
                 <div class="btn-group topControlBtnGroup">
                     <a href="#">Account Administration</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
-                    <a href="../html/users.jsp">Users</a>
+                    <a href="../html/account/users.jsp">Users</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
                     <a href="../html/profile.jsp">My Profile</a>
@@ -68,10 +69,10 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md12">
+        <div class="col-md-12">
             <div class="container corePageWell">
                 <div class="row">
-                    <div class="col-md-offset-1 col-md10">
+                    <div class="col-md-offset-1 col-md-10">
                         <h2>Your Easy Insight account (<%= account.getName() %>)</h2>
                     </div>
                 </div>
@@ -84,50 +85,50 @@
                 <% } else { %>
                 <% if (account.getPricingModel() == 0) { %>
                 <div class="row">
-                    <div class="col-md-offset-1 col-md10">
+                    <div class="col-md-offset-1 col-md-10">
                         You have a <strong><%= account.planName() %></strong> account. You're currently using <strong><%= accountStats.getUsedSpaceString() %></strong> of <strong><%= accountStats.getMaxSpaceString() %></strong> storage and <strong><%=accountStats.getCurrentUsers()%></strong> of <strong><%=accountStats.getAvailableUsers()%></strong> users.
                     </div>
                 </div>
                 <% } else { %>
                 <div class="row">
-                    <div class="col-md-offset-1 col-md10">
+                    <div class="col-md-offset-1 col-md-10">
                         You have <strong><%= accountStats.getUsedDesigners() %></strong> of <strong><%= accountStats.getCoreDesigners() + accountStats.getAddonDesigners()%></strong> designers, <strong><%= accountStats.getCurrentSmallBizConnections()%></strong> of <strong><%= accountStats.getAddonSmallBizConnections() + accountStats.getCoreSmallBizConnections() %></strong> small business connections, and <strong><%= accountStats.getUsedSpaceString()%></strong> of <strong><%= accountStats.getMaxSpaceString()%></strong> custom data storage used.
                     </div>
                 </div>
                 <% if (account.getNextBillDate() != null && ExportService.getDateFormatForAccount(AnalysisDateDimension.DAY_LEVEL, null) != null) { %>
                 <div class="row">
-                    <div class="col-md-offset-1 col-md10">
+                    <div class="col-md-offset-1 col-md-10">
                         You will be charged again on <%= ExportService.getDateFormatForAccount(AnalysisDateDimension.DAY_LEVEL, null).format(account.getNextBillDate()) %> for <%= NumberFormat.getCurrencyInstance(Locale.US).format(account.getNextBillAmount()) %>.
                     </div>
                 </div>
                 <% } %>
                 <% } %>
                 <div class="row">
-                    <div class="col-md-offset-1 col-md10">
+                    <div class="col-md-offset-1 col-md-10">
                         <a href="accountType.jsp">Upgrade / Downgrade Account</a>
                     </div>
                 </div>
                 <hr/>
                 <div class="row">
-                    <div class="col-md-offset-1 col-md10">
+                    <div class="col-md-offset-1 col-md-10">
                         <h2>Billing and Invoices</h2>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-offset-1 col-md10">
+                    <div class="col-md-offset-1 col-md-10">
                         <a href="index.jsp">Configure Billing</a>
                     </div>
                 </div>
                 <% } %>
 
                 <%--<div class="row">
-                    <div class="col-md-offset-1 col-md10">
+                    <div class="col-md-offset-1 col-md-10">
                         <a href="../billing/index.jsp">View Invoices</a>
                     </div>
                 </div>--%>
                 <%--<hr/>
                 <div class="row">
-                    <div class="col-md-offset-1 col-md10">
+                    <div class="col-md-offset-1 col-md-10">
                         <h2>Don't need to use Easy Insight right now?</h2>
                     </div>
                 </div>--%>

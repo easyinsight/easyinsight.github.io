@@ -98,8 +98,15 @@ public abstract class RedboothBaseSource extends ServerDataSourceDefinition {
                 client.executeMethod(restMethod);
                 if (restMethod.getStatusCode() == 401) {
                     throw new ReportException(new DataSourceConnectivityReportFault("Authentication to Redbooth failed.", redboothCompositeSource));
+                } else if (restMethod.getStatusCode() == 503) {
+                    System.out.println(restMethod.getStatusLine().toString());
+                    if ("HTTP/1.1 503 Service Unavailable: Back-end server is at capacity".equals(restMethod.getStatusLine().toString())) {
+                        // gotta retry
+                        System.out.println("retrying...");
+                    }
                 } else if (restMethod.getStatusCode() >= 500) {
-                    throw new RuntimeException("Redbooth server error--please try again later.");
+                    System.out.println(restMethod.getStatusLine().toString());
+                    //throw new RuntimeException("Redbooth server error--please try again later.");
                 }
                 Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
                 if(o instanceof String) {

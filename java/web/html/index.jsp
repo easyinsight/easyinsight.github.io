@@ -7,13 +7,13 @@
 <%@ page import="com.easyinsight.tag.Tag" %>
 <%@ page import="com.easyinsight.userupload.UserUploadService" %>
 <%@ page import="com.easyinsight.export.ExportService" %>
-<%@ page import="com.easyinsight.analysis.AnalysisDateDimension" %>
-<%@ page import="java.text.DateFormat" %>
 <%@ page import="com.easyinsight.jsphelpers.EIHelper" %>
 <%@ page import="com.easyinsight.export.ExportMetadata" %>
 <%@ page import="com.easyinsight.analysis.InsightRequestMetadata" %>
 <%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.easyinsight.core.EIDescriptor" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -49,19 +49,139 @@
 </jsp:include>
 <div class="container corePageWell">
     <div class="row">
+        <%
+            if (dataSources.size() == 0) {
+        %>
+
+        <div class="col-md-6 col-md-offset-3 no-data-sources-container">
+            <div class="well">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="center-block no-data-sources">You don't have any data sources yet. Let's get started!</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="center-block no-data-sources"><a href="connections.jsp">Add Your Own Data</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%
+        } else {
+        %>
         <jsp:include page="../recent_actions.jsp"/>
         <div class="col-md-9">
-            <div class="tag-list">
-                <% for(Tag t : new UserUploadService().getDataSourceTags()) { %>
-                <a class="btn btn-default tag-select" data-toggle="button" data-tag-id="<%= t.getId() %>" href="#"><%= StringEscapeUtils.escapeHtml(t.getName()) %></a>
-                <% } %>
+            <%
+                List<EIDescriptor> accountReports = new UserUploadService().getAccountReports();
+                if (accountReports.size() > 0) {
+            %>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <table class="table table-striped table-bordered table-condensed"
+                               style="margin-bottom: 0;padding-bottom: 0">
+                            <thead>
+                            <tr>
+                                <th colspan="2">Your Top Reports and Dashboards</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <%
+                                for (EIDescriptor accountReport : accountReports) {
+                            %>
+                            <tr>
+                                <td class="header-tr">
+                                    <%
+                                        if (accountReport.getType() == EIDescriptor.REPORT) {
+                                    %>
+                                    <a href="reports/<%=accountReport.getUrlKey()%>"><%=StringEscapeUtils.escapeHtml(accountReport.getName())%>
+                                    </a>
+                                    <%
+                                    } else if (accountReport.getType() == EIDescriptor.DASHBOARD) {
+                                    %>
+                                    <a href="dashboard/<%=accountReport.getUrlKey()%>"><%=StringEscapeUtils.escapeHtml(accountReport.getName())%>
+                                    </a>
+                                    <%
+                                        }
+                                    %>
+                                </td>
+                                <td>
+                                    <%
+                                        if (accountReport.getType() == EIDescriptor.REPORT) {
+                                    %>
+                                    <a href="reports/<%=accountReport.getUrlKey()%>"><%=StringEscapeUtils.escapeHtml(accountReport.getDescription())%>
+                                    </a>
+                                    <%
+                                    } else if (accountReport.getType() == EIDescriptor.DASHBOARD) {
+                                    %>
+                                    <a href="dashboard/<%=accountReport.getUrlKey()%>"><%=StringEscapeUtils.escapeHtml(accountReport.getDescription())%>
+                                    </a>
+                                    <%
+                                        }
+                                    %>
+                                </td>
+                            </tr>
+                            <%
+                                }
+                            %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
-            <div id="data_sources">
+            <%
+                }
+            %>
+            <div class="container" style="margin-top: 0;padding-top: 0">
+
+
+                <div class="row">
+                    <div class="col-md-9">
+                        <h2>Data Sources</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">
+                        <%
+                            List<Tag> tags = new UserUploadService().getDataSourceTags();
+                            if (tags.size() > 0) {
+                        %>
+                        <div class="container">
+                            <div class="row">
+                                <div class="browse-by-tag">
+                                    Browse by Tag:
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="tag-list">
+                                        <% for (Tag t : tags) { %>
+                                        <a class="btn btn-default tag-select" data-toggle="button"
+                                           data-tag-id="<%= t.getId() %>"
+                                           href="#"><%= StringEscapeUtils.escapeHtml(t.getName()) %>
+                                        </a>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <%
+                            }
+                        %>
+                        <div id="data_sources">
+
+                        </div>
+                    </div>
+                </div>
 
             </div>
-
         </div>
+        <%
+            }
+        %>
     </div>
 </div>
 
@@ -76,7 +196,7 @@
         <tbody>
         <@ _.each(data_sources, function(e,i,l) { @>
         <tr>
-            <td style="font-weight:500">
+            <td class="header-tr">
                 <a href="reports/<@- e.url_key @>"><@- e.name @>
                 </a>
             </td>

@@ -1,6 +1,7 @@
 package com.easyinsight.calculations.functions;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.calculations.FunctionException;
@@ -29,17 +30,17 @@ public class LastRecord extends Function {
         String instanceIDName = minusBrackets(getParameterName(0));
         String targetName = minusBrackets(getParameterName(3));
         String sortName = minusBrackets(getParameterName(2));
-        AnalysisItem instanceIDField = null;
-        AnalysisItem targetField = null;
-        AnalysisItem sortField = null;
+        AnalysisItem instanceIDField = findDataSourceItem(0);
+        AnalysisItem targetField = findDataSourceItem(3);
+        AnalysisItem sortField = findDataSourceItem(2);
         for (AnalysisItem analysisItem : calculationMetadata.getDataSourceFields()) {
-            if (instanceIDName.equals(analysisItem.toDisplay()) || instanceIDName.equals(analysisItem.getKey().toKeyString())) {
+            if (instanceIDField == null && instanceIDName.equals(analysisItem.getKey().toKeyString())) {
                 instanceIDField = analysisItem;
             }
-            if (targetName.equals(analysisItem.toDisplay()) || targetName.equals(analysisItem.getKey().toKeyString())) {
+            if (targetField != null && targetName.equals(analysisItem.getKey().toKeyString())) {
                 targetField = analysisItem;
             }
-            if (sortName.equals(analysisItem.toDisplay()) || sortName.equals(analysisItem.getKey().toKeyString())) {
+            if (sortField != null && sortName.equals(analysisItem.getKey().toKeyString())) {
                 sortField = analysisItem;
             }
         }
@@ -59,7 +60,19 @@ public class LastRecord extends Function {
         if (rows == null || rows.size() == 0) {
             return new EmptyValue();
         }
-        return rows.get(rows.size() - 1).getValue(targetField);
+        Value sortValue = getParameter(2);
+        IRow row = rows.get(rows.size() - 1);
+        if (targetField.hasType(AnalysisItemTypes.MEASURE)) {
+            Value measureValue = row.getValue(targetField);
+            Value rowSortValue = row.getValue(sortField);
+            if (sortValue.equals(rowSortValue)) {
+                return measureValue;
+            } else {
+                return new EmptyValue();
+            }
+        } else {
+            return row.getValue(targetField);
+        }
     }
 
     @Override

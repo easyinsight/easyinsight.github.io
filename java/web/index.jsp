@@ -95,14 +95,19 @@
     } finally {
         Database.closeConnection(conn);
     }
-    if (useHTMLVersion) {
+    /*if (useHTMLVersion) {
         if (request.getParameter("full") != null) {
             useHTMLVersion = false;
         } else {
+            System.out.println("path info = " + request.getPathInfo());
+            System.out.println("req uri = " + request.getRequestURI());
+            System.out.println("conn config = " + request.getParameter("#connectionConfig"));
             String queryString = request.getQueryString();
-            System.out.println(queryString);
+            System.out.println("q = " + queryString);
             if (queryString != null) {
-                if (queryString.indexOf("#reportID") != -1 || queryString.indexOf("#analysisID") != -1 || queryString.indexOf("#feedID") != -1) {
+                if (queryString.contains("#reportID") || queryString.contains("#analysisID") || queryString.contains("#feedID") ||
+                        queryString.contains("#connectionConfig") || queryString.contains("#newDashboardID") || queryString.contains("#feedAdminID") ||
+                        queryString.contains("#dashboardAdminID") || queryString.contains("#reportTemplateID")) {
                     useHTMLVersion = false;
                 }
             }
@@ -110,7 +115,7 @@
     }
     if (useHTMLVersion) {
         response.sendRedirect(RedirectUtil.getURL(request, "/app/html"));
-    }
+    }*/
     String versionDir = new com.easyinsight.users.UserService().getBuildPath().getVersion();
     boolean isSubdomain = request.getParameterMap().containsKey("subdomain");
     String subdomain = request.getParameter("subdomain");
