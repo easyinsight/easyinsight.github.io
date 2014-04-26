@@ -23,6 +23,8 @@ public class SystemSettings {
 
     private int maxOperations = 10000000;
 
+    private int sequenceLimit = 100000;
+
     private long headerImageID;
 
     private Map<String, Long> databaseMap = new HashMap<String, Long>();
@@ -34,13 +36,15 @@ public class SystemSettings {
             public void run() {
                 EIConnection conn = Database.instance().getConnection();
                 try {
-                    PreparedStatement ps = conn.prepareStatement("SELECT user_activity_semaphore_limit, max_filter_values, max_operations, header_image_id FROM system_settings");
+                    PreparedStatement ps = conn.prepareStatement("SELECT user_activity_semaphore_limit, max_filter_values, max_operations, " +
+                            "header_image_id, sequence_limit FROM system_settings");
                     ResultSet rs = ps.executeQuery();
                     if (rs.next()) {
                         semaphoreLimit = rs.getInt(1);
                         maxFilterValues = rs.getInt(2);
                         maxOperations = rs.getInt(3);
                         headerImageID = rs.getLong(4);
+                        sequenceLimit = rs.getInt(5);
                     }
                     ps.close();
 
@@ -69,6 +73,14 @@ public class SystemSettings {
         if (timer != null) {
             timer.cancel();
         }
+    }
+
+    public int getSequenceLimit() {
+        return sequenceLimit;
+    }
+
+    public void setSequenceLimit(int sequenceLimit) {
+        this.sequenceLimit = sequenceLimit;
     }
 
     public long getHeaderImageID() {
