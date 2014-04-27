@@ -42,7 +42,9 @@ public class Concat extends Function {
         }
         List<IRow> rows = simpleCache.rowsForValue(instanceValue);
 
+        System.out.println("data set size = " + calculationMetadata.getDataSet().getRows().size() + " for " + instanceIDName);
         if (rows != null) {
+            System.out.println("merging with " + rows.size());
             StringBuilder sb = new StringBuilder();
             for (IRow row : rows) {
                 Value value = row.getValue(targetField);
