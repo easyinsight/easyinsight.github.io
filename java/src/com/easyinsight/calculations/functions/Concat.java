@@ -37,12 +37,17 @@ public class Concat extends Function {
         String processName = getAnalysisItem().qualifiedName();
         SimpleCalculationCache simpleCache = (SimpleCalculationCache) calculationMetadata.getCache(new SimpleCacheBuilder(instanceIDField), processName);
         Value instanceValue = getParameter(0);
+        if (instanceValue.type() == Value.EMPTY) {
+            return new EmptyValue();
+        }
         if (calculationMetadata.getDataSet().getRows().size() > SystemSettings.instance().getSequenceLimit()) {
             throw new FunctionException("Concat complexity exceeds limits.");
         }
         List<IRow> rows = simpleCache.rowsForValue(instanceValue);
 
+        //System.out.println("data set size = " + calculationMetadata.getDataSet().getRows().size() + " for " + instanceIDName + " and " + instanceValue);
         if (rows != null) {
+          //  System.out.println("merging with " + rows.size());
             StringBuilder sb = new StringBuilder();
             for (IRow row : rows) {
                 Value value = row.getValue(targetField);
