@@ -4,6 +4,7 @@
          height="100%" horizontalAlign="center" initialize="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
+        import com.easyinsight.datasources.CopyDataSourceWindow;
 
         import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.skin.ApplicationSkin;
@@ -121,6 +122,8 @@
                 //blah();
             } else if (op == "customizeTopReports") {
                 blah1();
+            } else if (op == "switchToHTML5") {
+                navigateToURL(new URLRequest('/app/html'));
             }
         }
 
@@ -444,13 +447,13 @@
         [Bindable]
         private var tagsVisible:Boolean;
 
-        /*private function blah():void {
+        private function blah():void {
             var window:CopyDataSourceWindow = new CopyDataSourceWindow();
             window.availableTags = tags;
             window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, onRefresh, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-        }*/
+        }
 
         private function onRefresh(event:UploadConfigEvent):void {
             dispatchEvent(event);
@@ -483,12 +486,14 @@
 
         [Bindable]
         private var actions:ArrayCollection = new ArrayCollection([ {label: "Join data sources", op: "joinDataSources"},
-            {label: "Customize top reports", op: "customizeTopReports"}
+            {label: "Customize top reports", op: "customizeTopReports"},
+            {label: "Switch to HTML5 interface", op: "switchToHTML5"}
         ]);
 
         [Bindable]
         private var noTagActions:ArrayCollection = new ArrayCollection([ {label: "Join data sources", op: "joinDataSources"},
-            {label: "Customize top reports", op: "customizeTopReports"}
+            {label: "Customize top reports", op: "customizeTopReports"},
+            {label: "Switch to HTML5 interface", op: "switchToHTML5"}
         ]);
 
         protected static function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
