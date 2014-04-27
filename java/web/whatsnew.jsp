@@ -71,7 +71,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-3">
                         <div class="well">
                             <div><a href="whatsnew.jsp" style="font-size:16px">All</a></div>
                             <%
