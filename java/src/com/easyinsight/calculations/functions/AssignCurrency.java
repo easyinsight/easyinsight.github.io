@@ -23,10 +23,10 @@ public class AssignCurrency extends Function {
             textValueExtension.setCurrencyString("$");
         } else if ("EUR".equals(currency.toString())) {
             textValueExtension.setCurrency(TextValueExtension.EURO);
-            textValueExtension.setCurrencyString("Û");
+            textValueExtension.setCurrencyString("\u20AC");
         } else if ("GBP".equals(currency.toString())) {
             textValueExtension.setCurrency(TextValueExtension.GBP);
-            textValueExtension.setCurrencyString("£");
+            textValueExtension.setCurrencyString("\u00A3");
         } else {
 
         }
