@@ -61,8 +61,18 @@ public class HTMLConnectionFactory {
             for (HTMLConnectionProperty property : properties) {
                 String value = request.getParameter(property.getSafeProperty());
                 String setter = "set" + Character.toUpperCase(property.getProperty().charAt(0)) + property.getProperty().substring(1);
-                Method method = dataSource.getClass().getMethod(setter, String.class);
-                method.invoke(dataSource, value);
+
+                if (property.getType() == HTMLConnectionProperty.INTEGER) {
+                    Method method = dataSource.getClass().getMethod(setter, int.class);
+                    int intValue = Integer.parseInt(value);
+                    method.invoke(dataSource, intValue);
+                } else {
+                    Method method = dataSource.getClass().getMethod(setter, String.class);
+                    method.invoke(dataSource, value);
+                }
+            }
+            if (request.getParameter("pdataSourceName") != null) {
+                dataSource.setFeedName(request.getParameter("pdataSourceName"));
             }
             dataSource.validateCredentials();
             // launch via ajax
@@ -85,17 +95,22 @@ public class HTMLConnectionFactory {
     }
 
     public HTMLConnectionFactory addField(String field, String property) {
-        properties.add(new HTMLConnectionProperty(field, property, null, false));
+        properties.add(new HTMLConnectionProperty(field, property, null, false, HTMLConnectionProperty.STRING));
+        return this;
+    }
+
+    public HTMLConnectionFactory addField(String field, String property, int type) {
+        properties.add(new HTMLConnectionProperty(field, property, null, false, type));
         return this;
     }
 
     public HTMLConnectionFactory addPassword(String field, String property, boolean password) {
-        properties.add(new HTMLConnectionProperty(field, property, null, password));
+        properties.add(new HTMLConnectionProperty(field, property, null, password, HTMLConnectionProperty.STRING));
         return this;
     }
 
     public HTMLConnectionFactory addField(String field, String property, String explanation) {
-        properties.add(new HTMLConnectionProperty(field, property, explanation, false));
+        properties.add(new HTMLConnectionProperty(field, property, explanation, false, HTMLConnectionProperty.STRING));
         return this;
     }
 }
