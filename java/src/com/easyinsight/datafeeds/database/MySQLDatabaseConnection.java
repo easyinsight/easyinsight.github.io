@@ -5,6 +5,8 @@ import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
+import com.easyinsight.datafeeds.HTMLConnectionProperty;
 import com.easyinsight.logging.LogClass;
 
 import java.sql.*;
@@ -22,6 +24,17 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
     private String databaseName;
     private String dbUserName;
     private String dbPassword;
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Host", "host");
+        factory.addField("Port", "port", HTMLConnectionProperty.INTEGER);
+        factory.addField("Database Name", "databaseName");
+        factory.addField("Database User Name", "dbUserName");
+        factory.addField("Database Password", "dbPassword");
+        factory.addField("Query", "query", HTMLConnectionProperty.TEXT);
+        factory.addField("Connection Timeout", "timeout", HTMLConnectionProperty.INTEGER);
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
 
     public String getHost() {
         return host;
