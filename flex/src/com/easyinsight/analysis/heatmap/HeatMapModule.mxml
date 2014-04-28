@@ -268,6 +268,18 @@
         }
 
         public function updateExportMetadata(report:AnalysisDefinition = null):void {
+            // TODO: UPDATE
+            if(heatMapDefinition != null) {
+                var r:HeatMapDefinition = report as HeatMapDefinition;
+                r.latitude = heatMapDefinition.latitude;
+                r.longitude = heatMapDefinition.longitude;
+                r.zoomLevel = heatMapDefinition.zoomLevel;
+                r.minLat = heatMapDefinition.minLat;
+                r.maxLat = heatMapDefinition.maxLat;
+                r.minLong = heatMapDefinition.minLong;
+                r.maxLong = heatMapDefinition.maxLong;
+                r.mapType = heatMapDefinition.mapType;
+            }
         }
 
         private function latLonToPoint(o:Object):Object {
