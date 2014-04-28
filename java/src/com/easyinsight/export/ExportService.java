@@ -3168,12 +3168,12 @@ public class ExportService {
                 if (currency == 0) {
 
                 } else {
-                    if (currency == 1) {
+                    if (currency == CURRENCY_USD) {
                         currencySymbol = "$";
-                    } else if (currency == 2) {
-                        currencySymbol = "Û";
-                    } else if (currency == 3) {
-                        currencySymbol = "£";
+                    } else if (currency == CURRENCY_EUR) {
+                        currencySymbol = "\u20AC";
+                    } else if (currency == CURRENCY_GBP) {
+                        currencySymbol = "\u00A3";
                     }
                 }
 
@@ -3211,6 +3211,10 @@ public class ExportService {
         localeObject = createLocale(locale);
         return new ExportMetadata(dateFormat, currencySymbol, cal, localeObject);
     }
+
+    public static final int CURRENCY_USD = 1;
+    public static final int CURRENCY_EUR = 2;
+    public static final int CURRENCY_GBP = 3;
 
     public static Locale createLocale(String locale) {
         Locale localeObject;

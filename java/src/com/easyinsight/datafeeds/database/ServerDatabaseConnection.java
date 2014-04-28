@@ -27,7 +27,7 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
     private String query;
     private int timeout = 5;
 
-    private boolean rebuildFields;
+    private boolean rebuildFields = true;
     private long copyingFromSource;
 
     public long getCopyingFromSource() {
@@ -91,38 +91,42 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                         int columnCount = rs.getMetaData().getColumnCount();
                         for (int i = 1; i <= columnCount; i++) {
                             String columnName = rs.getMetaData().getColumnName(i);
-                            String tableName = rs.getMetaData().getTableName(i);
+
                             AnalysisItem analysisItem = map.get(columnName);
                             if (analysisItem == null) {
                                 newField = true;
-                                switch (rs.getMetaData().getColumnType(i)) {
-                                    case Types.BIGINT:
-                                    case Types.TINYINT:
-                                    case Types.SMALLINT:
-                                    case Types.INTEGER:
-                                    case Types.NUMERIC:
-                                    case Types.FLOAT:
-                                    case Types.DOUBLE:
-                                    case Types.DECIMAL:
-                                    case Types.REAL:
-                                        analysisItem = new AnalysisMeasure(new NamedKey(columnName), AggregationTypes.SUM);
-                                        break;
-                                    case Types.BOOLEAN:
-                                    case Types.BIT:
-                                    case Types.CHAR:
-                                    case Types.NCHAR:
-                                    case Types.NVARCHAR:
-                                    case Types.VARCHAR:
-                                    case Types.LONGVARCHAR:
-                                        analysisItem = new AnalysisDimension(new NamedKey(columnName), true);
-                                        break;
-                                    case Types.DATE:
-                                    case Types.TIME:
-                                    case Types.TIMESTAMP:
-                                        analysisItem = new AnalysisDateDimension(new NamedKey(columnName), true, AnalysisDateDimension.DAY_LEVEL);
-                                        break;
-                                    default:
-                                        throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(i) + ") is not supported in Easy Insight. Type value: " + rs.getMetaData().getColumnType(i));
+                                if (columnName.endsWith("id") || columnName.endsWith("fk")) {
+                                    analysisItem = new AnalysisDimension(new NamedKey(columnName), true);
+                                } else {
+                                    switch (rs.getMetaData().getColumnType(i)) {
+                                        case Types.BIGINT:
+                                        case Types.TINYINT:
+                                        case Types.SMALLINT:
+                                        case Types.INTEGER:
+                                        case Types.NUMERIC:
+                                        case Types.FLOAT:
+                                        case Types.DOUBLE:
+                                        case Types.DECIMAL:
+                                        case Types.REAL:
+                                            analysisItem = new AnalysisMeasure(new NamedKey(columnName), AggregationTypes.SUM);
+                                            break;
+                                        case Types.BOOLEAN:
+                                        case Types.BIT:
+                                        case Types.CHAR:
+                                        case Types.NCHAR:
+                                        case Types.NVARCHAR:
+                                        case Types.VARCHAR:
+                                        case Types.LONGVARCHAR:
+                                            analysisItem = new AnalysisDimension(new NamedKey(columnName), true);
+                                            break;
+                                        case Types.DATE:
+                                        case Types.TIME:
+                                        case Types.TIMESTAMP:
+                                            analysisItem = new AnalysisDateDimension(new NamedKey(columnName), true, AnalysisDateDimension.DAY_LEVEL);
+                                            break;
+                                        default:
+                                            throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(i) + ") is not supported in Easy Insight. Type value: " + rs.getMetaData().getColumnType(i));
+                                    }
                                 }
                             }
                             fields.add(analysisItem);
@@ -231,7 +235,7 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                                     row.addValue(analysisItem.getKey(), d);
                                 }
                             } catch (SQLException e) {
-                                if ("Value Ô0000-00-00Õ can not be represented as java.sql.Date".equals(e.getMessage())) {
+                                if (e.getMessage() != null && e.getMessage().contains("can not be represented as java.sql.Date")) {
                                     row.addValue(analysisItem.getKey(), new EmptyValue());
                                 } else {
                                     LogClass.debug(e.getMessage());
