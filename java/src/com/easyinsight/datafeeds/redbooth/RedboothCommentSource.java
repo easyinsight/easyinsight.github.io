@@ -51,7 +51,8 @@ public class RedboothCommentSource extends RedboothBaseSource {
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
-        RedboothCompositeSource redboothCompositeSource = (RedboothCompositeSource) parentDefinition;
+        throw new ReportException(new DataSourceConnectivityReportFault("Disabled for now", parentDefinition));
+        /*RedboothCompositeSource redboothCompositeSource = (RedboothCompositeSource) parentDefinition;
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
 
@@ -80,14 +81,14 @@ public class RedboothCommentSource extends RedboothBaseSource {
             } else {
                 organizations = (List) queryList("/api/2/comments?count=30&max_id="+endID, redboothCompositeSource, httpClient);
             }
-            /*List<Map> references = (List<Map>) base.get("references");
+            *//*List<Map> references = (List<Map>) base.get("references");
             Map<String, String> users = new HashMap<String, String>();
             for (Map ref : references) {
                 String type = ref.get("type").toString();
                 if ("User".equals(type)) {
                     users.put(ref.get("id").toString(), ref.get("first_name").toString() + " " + ref.get("last_name").toString());
                 }
-            }*/
+            }*//*
             //List<Map> organizations = (List<Map>) base.get("objects");
             for (Map org : organizations) {
                 count++;
@@ -123,6 +124,6 @@ public class RedboothCommentSource extends RedboothBaseSource {
             }
             System.out.println("comments = " + endID + " - " + count);
         } while (count == 30);
-        return dataSet;
+        return dataSet;*/
     }
 }
