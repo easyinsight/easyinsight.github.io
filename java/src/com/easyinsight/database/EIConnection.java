@@ -223,7 +223,7 @@ public class EIConnection implements Connection {
         return conn.createStruct(typeName, attributes);
     }
 
-    /*public void setSchema(String schema) throws SQLException {
+    public void setSchema(String schema) throws SQLException {
         conn.setSchema(schema);
     }
 
@@ -241,7 +241,7 @@ public class EIConnection implements Connection {
 
     public int getNetworkTimeout() throws SQLException {
         return conn.getNetworkTimeout();
-    }*/
+    }
 
     public <T> T unwrap(Class<T> iface) throws SQLException {
         return conn.unwrap(iface);
