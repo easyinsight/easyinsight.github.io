@@ -982,7 +982,8 @@ public class DataStorage implements IDataStorage {
                 if (keyMetadata != null) {
                     if (keyMetadata.getType() == Value.DATE) {
                         AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
-                        if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) &&
+                        if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL ||
+                                date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL || date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT) &&
                                 database.getDialect() == Database.MYSQL) {
                             int month = dataRS.getInt(i++);
                             int year = dataRS.getInt(i++);
@@ -1181,6 +1182,9 @@ public class DataStorage implements IDataStorage {
                 } else if (optimized && (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL)) {
                     selectBuilder.append("year(" + columnName + ") as year" + columnName + ",");
                     groupByBuilder.append("year" + columnName + ",");
+                } else if (optimized && (date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT || date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) && database.getDialect() == Database.MYSQL) {
+                    selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
+                    groupByBuilder.append("month" + columnName + ", year" + columnName + ",");
                 } else {
                     selectBuilder.append(columnName);
                     selectBuilder.append(",");
