@@ -15,6 +15,8 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.hibernate.Session;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -144,7 +146,7 @@ public class HtmlServlet extends HttpServlet {
                     int timezoneOffset = Integer.parseInt(req.getParameter("timezoneOffset"));
                     insightRequestMetadata.setUtcOffset(timezoneOffset);
                 }
-                ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+                ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
                 long start = System.currentTimeMillis();
                 doStuff(req, resp, insightRequestMetadata, conn, report, o, md);
                 BenchmarkManager.recordBenchmarkForReport("HTMLReportProcessingTime", System.currentTimeMillis() - start,
@@ -338,5 +340,114 @@ public class HtmlServlet extends HttpServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report, Object jsonObject, ExportMetadata md) throws Exception {
         doStuff(request, response, insightRequestMetadata, conn, report, md);
+    }
+
+
+
+    protected void configureAxes(org.json.JSONObject object, WSChartDefinition chart, AnalysisItem xAxisItem, AnalysisItem yAxisItem) throws JSONException {
+        configureAxesBase(object, chart, xAxisItem, yAxisItem);
+    }
+
+    protected void configureAxes(org.json.JSONObject object, WSChartDefinition chart, AnalysisItem xAxisItem, List<AnalysisItem> items) throws JSONException {
+        int aggregation = 0;
+        boolean aggChanged = true;
+        for (AnalysisItem item : items) {
+            if (aggregation == 0) {
+                aggregation = item.getFormattingType();
+            } else {
+                if (item.getFormattingType() != aggregation) {
+                    aggChanged = false;
+                }
+            }
+        }
+        if (aggChanged) {
+            configureAxesBase(object, chart, xAxisItem, items.get(0));
+        } else {
+            configureAxesBase(object, chart, xAxisItem, null);
+        }
+
+    }
+
+    protected void configureAxes(org.json.JSONObject object, WSChartDefinition chart, List<AnalysisItem> items, AnalysisItem yAxisItem) throws JSONException {
+        int aggregation = 0;
+        boolean aggChanged = true;
+        for (AnalysisItem item : items) {
+            if (aggregation == 0) {
+                aggregation = item.getFormattingType();
+            } else {
+                if (item.getFormattingType() != aggregation) {
+                    aggChanged = false;
+                }
+            }
+        }
+        if (aggChanged) {
+            configureAxesBase(object, chart, items.get(0), yAxisItem);
+        } else {
+            configureAxesBase(object, chart, null, yAxisItem);
+        }
+
+    }
+
+    protected void configureAxesBase(org.json.JSONObject object, WSChartDefinition chart, @Nullable AnalysisItem xAxisItem,
+                                     @Nullable AnalysisItem yAxisItem) throws JSONException {
+
+        if (chart.getxAxisLabel() != null && !"".equals(chart.getxAxisLabel())) {
+            object.put("xTitle", chart.getxAxisLabel());
+        } else {
+            if (xAxisItem == null) {
+                object.put("xTitle", "Measures");
+            } else {
+                object.put("xTitle", xAxisItem.toUnqualifiedDisplay());
+            }
+        }
+
+        if (xAxisItem != null) {
+            object.put("xFormat", createFormatObject(xAxisItem));
+        }
+
+        if (chart.getyAxisLabel() != null && !"".equals(chart.getyAxisLabel())) {
+            object.put("yTitle", chart.getyAxisLabel());
+        } else {
+            if (yAxisItem == null) {
+                object.put("yTitle", "Measures");
+            } else {
+                object.put("yTitle", yAxisItem.toUnqualifiedDisplay());
+            }
+        }
+
+        if (yAxisItem != null) {
+            object.put("yFormat", createFormatObject(yAxisItem));
+        }
+
+        if (chart.isxAxisMaximumDefined()) {
+            object.put("xMax", chart.getxAxisMaximum());
+        }
+        if (chart.isxAxisMinimumDefined()) {
+            object.put("xMin", chart.getxAxisMinimum());
+        }
+        if (chart.isyAxisMaximumDefined()) {
+            object.put("yMax", chart.getyAxisMaximum());
+        }
+        if (chart.isyAxisMinimumDefined()) {
+            object.put("yMin", chart.getyAxisMininum());
+        }
+
+        object.put("showLegend", chart.isShowLegend());
+    }
+
+    private org.json.JSONObject createFormatObject(AnalysisItem xaxisMeasure) throws JSONException {
+        org.json.JSONObject object = new org.json.JSONObject();
+        if (xaxisMeasure.hasType(AnalysisItemTypes.MEASURE)) {
+            AnalysisMeasure measure = (AnalysisMeasure) xaxisMeasure;
+            object.put("type", "measure");
+            object.put("precision", measure.getPrecision());
+            object.put("numberFormat", measure.getFormattingType());
+            object.put("currencySymbol", "$");
+            object.put("commaSeparator", ",");
+            object.put("decimalSeperator", ".");
+        } else {
+            object.put("type", "grouping");
+        }
+        return object;
     }
 }

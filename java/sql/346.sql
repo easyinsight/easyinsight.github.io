@@ -1,0 +1,1 @@
+alter table system_settings add sequence_limit integer not null default 100000;

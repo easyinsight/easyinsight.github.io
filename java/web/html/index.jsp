@@ -55,7 +55,7 @@
 
         <div class="col-md-6 col-md-offset-3 no-data-sources-container">
             <div class="well">
-                <div class="container">
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="center-block no-data-sources">You don't have any data sources yet. Let's get started!</div>
@@ -67,7 +67,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
 
         <%
@@ -79,7 +78,7 @@
                 List<EIDescriptor> accountReports = new UserUploadService().getAccountReports();
                 if (accountReports.size() > 0) {
             %>
-            <div class="container">
+
                 <div class="row">
                     <div class="col-md-9">
                         <table class="table table-striped table-bordered table-condensed"
@@ -132,26 +131,25 @@
                         </table>
                     </div>
                 </div>
-            </div>
 
             <%
                 }
             %>
-            <div class="container" style="margin-top: 0;padding-top: 0">
+
 
 
                 <div class="row">
-                    <div class="col-md-9">
+                    <div class="col-md-12">
                         <h2>Data Sources</h2>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-9">
+                    <div class="col-md-12">
                         <%
                             List<Tag> tags = new UserUploadService().getDataSourceTags();
                             if (tags.size() > 0) {
                         %>
-                        <div class="container">
+
                             <div class="row">
                                 <div class="browse-by-tag">
                                     Browse by Tag:
@@ -167,7 +165,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+
                         <%
                             }
                         %>
@@ -178,7 +176,7 @@
                 </div>
 
             </div>
-        </div>
+
         <%
             }
         %>

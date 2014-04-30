@@ -529,6 +529,9 @@ public class UserService {
 
     public boolean remindPassword(String emailAddress) {
         boolean success;
+        if (emailAddress == null || "".equals(emailAddress.trim())) {
+            return false;
+        }
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {

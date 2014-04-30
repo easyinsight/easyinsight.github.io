@@ -43,6 +43,7 @@
             user.setAccountAdmin(true);
             user.setOptInEmail(true);
             user.setInitialSetupDone(true);
+            user.setInvoiceRecipient(true);
             user.setAnalyst(true);
             user.setTestAccountVisible(true);
             com.easyinsight.users.AccountTransferObject account = new com.easyinsight.users.AccountTransferObject();

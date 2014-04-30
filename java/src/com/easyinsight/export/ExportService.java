@@ -487,6 +487,21 @@ public class ExportService {
         }
     }
 
+    public byte[] exportToPDFBytes(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
+        else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            analysisDefinition.updateMetadata();
+            return toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
+        } catch (Exception e) {
+            LogClass.error(e.getMessage() + " on saving report " + analysisDefinition.getAnalysisID() + " - " + analysisDefinition.getReportType(), e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void toListPDFInDatabase(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
         toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata), conn);
     }
@@ -678,7 +693,12 @@ public class ExportService {
                 }
             }
             return end;
-
+        } catch (ClassCastException ce) {
+            if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(ce.getMessage())) {
+                LogClass.userError(ce.getMessage(), ce);
+            } else {
+                LogClass.error(ce);
+            }
         } catch (Exception e) {
             LogClass.error(e);
         }

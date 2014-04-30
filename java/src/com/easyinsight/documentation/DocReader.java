@@ -1,6 +1,7 @@
 package com.easyinsight.documentation;
 
 import com.easyinsight.html.RedirectUtil;
+import com.easyinsight.logging.LogClass;
 import nu.xom.*;
 import org.eclipse.mylyn.wikitext.core.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.core.parser.builder.HtmlDocumentBuilder;
@@ -94,6 +95,11 @@ public class DocReader {
         Builder builder = new Builder();
         Document doc = builder.build(bais);
         Nodes nodes = doc.query("//textarea/text()");
+        if (nodes.size() == 0) {
+            LogClass.error("Empty node on " + page);
+            return "";
+            // no text found in the documentation
+        }
         Text node = (Text) nodes.get(0);
         String value = node.getValue();
 

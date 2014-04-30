@@ -204,7 +204,7 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
                     _format = new TextFormat(fontName, 12, headerColor, null);
                     _format.align = _report.align;
                 } else {
-                    _format = new TextFormat(fontName, 11, 0xFFFFFF, null);
+                    _format = new TextFormat(fontName, 11, _report.headerTextColor, null);
                     _format.align = _report.align;
                 }
             }
