@@ -31,6 +31,7 @@ table.dataTable td.dataTables_empty {
 	text-align: center;
 }
 
+
 /*
  * Table wrapper
  */
@@ -143,7 +144,7 @@ table.dataTable td.dataTables_empty {
 	margin: 0 3px;
 	cursor: pointer;
 	*cursor: hand;
-	color: #333 !important;
+	color: #333;
 }
 
 .paging_full_numbers a.paginate_button {
@@ -190,7 +191,8 @@ table.dataTable td.dataTables_empty {
 .sorting_asc_disabled { background: url('../images/sort_asc_disabled.png') no-repeat center right; }
 .sorting_desc_disabled { background: url('../images/sort_desc_disabled.png') no-repeat center right; }
  
-table.dataTable th:active {
+table.dataTable thead th:active,
+table.dataTable thead td:active {
 	outline: none;
 }
 
