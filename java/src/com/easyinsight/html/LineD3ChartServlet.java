@@ -9,6 +9,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +23,7 @@ import java.util.*;
  * Date: 5/23/12
  * Time: 4:56 PM
  */
-public class LineChartServlet extends HtmlServlet {
+public class LineD3ChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
@@ -34,30 +35,47 @@ public class LineChartServlet extends HtmlServlet {
         WSTwoAxisDefinition twoAxisDefinition = (WSTwoAxisDefinition) report;
         JSONArray blahArray = new JSONArray();
         JSONArray labelArray = new JSONArray();
+        List<String> colors = twoAxisDefinition.createMultiColors();
         if (twoAxisDefinition.isMultiMeasure()) {
             List<AnalysisItem> measures = twoAxisDefinition.getMeasures();
             AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
-//            xAxis.put("label", date.toDisplay());
-//            yyAxis.put("label", measures.get(0).toDisplay());
+
+            int i = 0;
             for (AnalysisItem measure : measures) {
-                JSONArray measureArray = new JSONArray();
-                labelArray.put(measure.toDisplay());
-                blahArray.put(measureArray);
+                List<JSONObject> pointList = new ArrayList<JSONObject>();
                 for (IRow row : dataSet.getRows()) {
+
                     Value v = row.getValue(date);
                     if (!(v instanceof EmptyValue)) {
                         DateValue dateValue = (DateValue) v;
-                        JSONArray values = new JSONArray();
-                        measureArray.put(values);
-                        values.put(dateFormat.format(dateValue.getDate()));
-                        if (row.getValue(measure).toDouble() == 0) {
-                            values.put(1);
-                        } else {
-                            values.put(row.getValue(measure).toDouble());
-                        }
+                        JSONObject point = new JSONObject();
+                        pointList.add(point);
+                        point.put("x", dateValue.getDate().getTime());
+                        point.put("y", row.getValue(measure).toDouble());
                     }
                 }
+                Collections.sort(pointList, new Comparator<JSONObject>() {
+
+                    public int compare(JSONObject jsonObject, JSONObject jsonObject1) {
+                        try {
+                            return ((Long)jsonObject.getLong("x")).compareTo(jsonObject1.getLong("x"));
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+
+                JSONArray points = new JSONArray(pointList);
+                JSONObject axisObject = new JSONObject();
+                axisObject.put("values", points);
+                axisObject.put("key", measure.toDisplay());
+                String color = colors.get(i % colors.size());
+                color = color.substring(1, color.length() - 1);
+                axisObject.put("color", color);
+                blahArray.put(axisObject);
+                i++;
             }
+
         } else {
             AnalysisItem measure = twoAxisDefinition.getMeasure();
             AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
@@ -83,11 +101,13 @@ public class LineChartServlet extends HtmlServlet {
                     values.put(row.getValue(measure).toDouble());
                     array.put(dateValue.getDate(), row.getValue(measure).toDouble());
                 }
-                //array.put(values);
             }
 
 
+
+            int i = 0;
             for (Map.Entry<String, Map<Date, Double>> entry : series.entrySet()) {
+                JSONObject axisObject = new JSONObject();
                 Set<Date> uniques = new HashSet<Date>();
                 for (Map.Entry<Date, Double> entry1 : entry.getValue().entrySet()) {
                     uniques.add(entry1.getKey());
@@ -103,23 +123,30 @@ public class LineChartServlet extends HtmlServlet {
                 labelArray.put(entry.getKey());
                 List<Date> dates = new ArrayList<Date>(entry.getValue().keySet());
                 Collections.sort(dates);
-                JSONArray array = new JSONArray();
+                JSONArray points = new JSONArray();
                 for (Date x : dates) {
-                    JSONArray point = new JSONArray();
+                    JSONObject point = new JSONObject();
                     String formattedDate = dateFormat.format(x);
-                    point.put(formattedDate);
-                    point.put(entry.getValue().get(x));
-                    array.put(point);
+                    point.put("label", formattedDate);
+                    point.put("x", x.getTime());
+                    point.put("y", entry.getValue().get(x));
+                    points.put(point);
                 }
-                blahArray.put(array);
+                axisObject.put("values", points);
+                axisObject.put("key", entry.getKey());
+                String color = colors.get(i % colors.size());
+                axisObject.put("color", color);
+                i++;
+                blahArray.put(axisObject);
             }
         }
 
-
-        // object.put("ticks", ticks);
-
         object.put("values", blahArray);
-        object.put("labels", labelArray);
+        if (!twoAxisDefinition.isMultiMeasure()) {
+            configureAxes(object, twoAxisDefinition, twoAxisDefinition.getXaxis(), twoAxisDefinition.getMeasure());
+        } else {
+            configureAxes(object, twoAxisDefinition, twoAxisDefinition.getXaxis(), twoAxisDefinition.getMeasures());
+        }
 
         response.setContentType("application/json");
         String argh = object.toString();

@@ -128,79 +128,12 @@ public class WSPlotChartDefinition extends WSChartDefinition {
     }
 
     @Override
-    public List<String> javaScriptIncludes() {
-        List<String> includes = super.javaScriptIncludes();
-//        includes.add("/js/plugins/jqplot.bubbleRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
-//        includes.add("/js/visualizations/chart.js");
-//        includes.add("/js/visualizations/util.js");
-        return includes;
-    }
-
-    @Override
-    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
-
-        JSONObject object = getJsonObject();
-        String argh = object.toString();
-        argh = argh.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties().toString();
-        argh = "$.getJSON('/app/bubbleChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ",false," + customHeight + "))";
-        return argh;
-    }
-
-    @Override
-    public JSONObject getAxes() throws JSONException {
-        JSONObject axes = new JSONObject();
-        JSONObject xAxis = getMeasureAxis(xaxisMeasure);
-        JSONObject yAxis = getMeasureAxis(yaxisMeasure);
-        axes.put("xaxis", xAxis);
-        axes.put("yaxis", yAxis);
-        return axes;
-    }
-
-    private JSONObject getJsonObject() {
-        JSONObject params;
-        JSONObject object = new JSONObject();
-        try {
-            Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
-
-            JSONObject seriesDefaults = new JSONObject();
-            seriesDefaults.put("renderer", "$.jqplot.BubbleRenderer");
-            JSONObject axes = new JSONObject();
-            JSONObject xAxis = getMeasureAxis(xaxisMeasure);
-            JSONObject yAxis = getMeasureAxis(yaxisMeasure);
-            axes.put("xaxis", xAxis);
-            axes.put("yaxis", yAxis);
-            jsonParams.put("axes", axes);
-
-            JSONObject rendererOptions = new JSONObject();
-            //rendererOptions.put("fillToZero", "true");
-            rendererOptions.put("bubbleGradients", "true");
-            rendererOptions.put("autoscaleBubbles", "false");
-            seriesDefaults.put("rendererOptions", rendererOptions);
-            seriesDefaults.put("shadow", true);
-            jsonParams.put("seriesDefaults", seriesDefaults);
-            JSONObject grid = getGrid();
-            jsonParams.put("grid", grid);
-            params = new JSONObject(jsonParams);
-            object.put("jqplotOptions", params);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        return object;
-    }
-
-    @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
         JSONObject pie = super.toJSON(htmlReportMetadata, parentDefinitions);
-        pie.put("parameters", getJsonObject());
         pie.put("key", getUrlKey());
         pie.put("type", "plot");
         pie.put("styles", htmlReportMetadata.createStyleProperties());
-        pie.put("url", "/app/bubbleChart");
+        pie.put("url", "/app/plotChart");
         return pie;
     }
 }

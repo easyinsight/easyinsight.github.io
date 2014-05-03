@@ -1,9 +1,8 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.ReportNumericProperty;
-import com.easyinsight.analysis.ReportProperty;
-import com.easyinsight.analysis.WSAnalysisDefinition;
+import com.easyinsight.analysis.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -194,5 +193,17 @@ public class WSHeatMap extends WSAnalysisDefinition {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportNumericProperty("precision", precision));
         return properties;
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+
+        JSONObject areaChart = super.toJSON(htmlReportMetadata, parentDefinitions);
+        areaChart.put("type", "heatmap");
+        areaChart.put("key", getUrlKey());
+        areaChart.put("url", "/app/heatMap");
+        areaChart.put("parameters", new JSONObject());
+        areaChart.put("styles", htmlReportMetadata.createStyleProperties());
+        return areaChart;
     }
 }

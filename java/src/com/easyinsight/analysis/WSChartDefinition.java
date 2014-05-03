@@ -225,45 +225,11 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         return properties;
     }
 
-    @Override
-    public List<String> javaScriptIncludes() {
-        List<String> includes = super.javaScriptIncludes();
-        //includes.add("/js/jquery.jqplot.js");
-        includes.add("/js/plugins/jqplot.pointLabels.js");
-        includes.add("/js/plugins/jqplot.highlighter.min.js");
-        includes.add("/js/plugins/jqplot.cursor.min.js");
-
-        return includes;
-    }
-
-    public List<String> cssIncludes() {
-        List<String> includes = new ArrayList<String>();
-        includes.add("/css/jquery.jqplot.min.css");
-        return includes;
-    }
-
-    protected JSONObject getLegend() throws JSONException {
-        JSONObject legendObj = new JSONObject();
-        legendObj.put("show", "true");
-        legendObj.put("placement", "'outsideGrid'");
-        legendObj.put("location", "'e'");
-
-        legendObj.put("fontFamily", fontName());
-        legendObj.put("border", "'none'");
-        return legendObj;
-    }
-
     protected String fontName() {
         if (isUseCustomFontFamily() && !"".equals(getCustomFontFamily())) {
             return "'" + getCustomFontFamily() + "'";
         }
         return "'Helvetica Neue'";
-    }
-
-    protected JSONObject getGrid() throws JSONException {
-        JSONObject grid = new JSONObject();
-        grid.put("background", "'#FFFFFF'");
-        return grid;
     }
 
     protected List<MultiColor> configuredMultiColors() {
@@ -278,19 +244,19 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
             if (testColor.isColor1StartEnabled()) {
                 for (MultiColor color : multiColors) {
                     if (color.isColor1StartEnabled()) {
-                        resultColors.add(String.format("'#%06X'", (0xFFFFFF & color.getColor1Start())));
+                        resultColors.add(String.format("#%06X", (0xFFFFFF & color.getColor1Start())));
                     }
                 }
                 return resultColors;
             }
         }
-        return Arrays.asList("'#a6bc59'", "'#597197'", "'#d6ab2a'", "'#d86068'", "'#5d9942'",
-                "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'");
+        return Arrays.asList("#a6bc59", "#597197", "#d6ab2a", "#d86068", "#5d9942",
+                "#7a4c6c", "#F0B400", "#1E6C0B", "#00488C", "#332600", "#D84000");
     }
 
     protected JSONArray getSeriesColors() {
-        return new JSONArray(Arrays.asList("'#a6bc59'", "'#597197'", "'#d6ab2a'", "'#d86068'", "'#5d9942'",
-                "'#7a4c6c'", "'#F0B400'", "'#1E6C0B'", "'#00488C'", "'#332600'", "'#D84000'"));
+        return new JSONArray(Arrays.asList("#a6bc59", "#597197", "#d6ab2a", "#d86068", "#5d9942",
+                "#7a4c6c", "#F0B400", "#1E6C0B", "#00488C", "#332600", "#D84000"));
     }
 
     public double getxAxisMinimum() {
@@ -364,54 +330,6 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         if (maxEnabled) {
             axisObject.put("max", max);
         }
-    }
-
-    protected JSONObject getMeasureAxis(AnalysisItem analysisItem) throws JSONException {
-        JSONObject yAxis = new JSONObject();
-        yAxis.put("pad", 1.05);
-        yAxis.put("label", "'"+analysisItem.toUnqualifiedDisplay()+"'");
-        yAxis.put("labelRenderer", "$.jqplot.CanvasAxisLabelRenderer");
-        yAxis.put("min", 0);
-        yAxis.put("numberTicks", 8);
-        JSONObject tickOptions = new JSONObject();
-        if (analysisItem.getFormattingType() == FormattingConfiguration.CURRENCY) {
-            tickOptions.put("formatter", "$.jqplot.currencyTickNumberFormatter");
-        } else if (analysisItem.getFormattingType() == FormattingConfiguration.MILLISECONDS || analysisItem.getFormattingType() == FormattingConfiguration.SECONDS) {
-            tickOptions.put("formatter", "millisecondFormatter");
-            tickOptions.put("formatString", analysisItem.getFormattingType() == FormattingConfiguration.MILLISECONDS ? "'ms'" : "'s'");
-        } else {
-            tickOptions.put("formatter", "$.jqplot.tickNumberFormatter");
-        }
-        JSONObject labelOptions = new JSONObject();
-        labelOptions.put("fontFamily", fontName());
-        tickOptions.put("fontFamily", fontName());
-        yAxis.put("labelOptions", labelOptions);
-        yAxis.put("tickOptions", tickOptions);
-        return yAxis;
-    }
-
-    protected JSONObject getGroupingAxis(AnalysisItem analysisItem) throws JSONException {
-        JSONObject xAxis = new JSONObject();
-        xAxis.put("renderer", "$.jqplot.CategoryAxisRenderer");
-
-        xAxis.put("tickRenderer", "$.jqplot.CanvasAxisTickRenderer");
-        xAxis.put("labelRenderer", "$.jqplot.CanvasAxisLabelRenderer");
-        xAxis.put("label", "'"+analysisItem.toUnqualifiedDisplay()+"'");
-
-        JSONObject labelOptions = new JSONObject();
-        labelOptions.put("fontFamily", fontName());
-        xAxis.put("labelOptions", labelOptions);
-        JSONObject xAxisTicketOptions = new JSONObject();
-        xAxisTicketOptions.put("angle", 0);
-        xAxisTicketOptions.put("showGridline", "false");
-        xAxisTicketOptions.put("fontFamily", fontName());
-        xAxis.put("tickOptions", xAxisTicketOptions);
-        return xAxis;
-    }
-
-
-    public JSONObject getAxes() throws JSONException {
-        return null;
     }
 
     protected JSONArray transformColors(JSONArray colors) {

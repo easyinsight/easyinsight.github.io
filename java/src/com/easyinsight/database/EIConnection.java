@@ -223,25 +223,25 @@ public class EIConnection implements Connection {
         return conn.createStruct(typeName, attributes);
     }
 
-    /*public void setSchema(String schema) throws SQLException {
-        conn.setSchema(schema);
-    }
-
-    public String getSchema() throws SQLException {
-        return conn.getSchema();
-    }
-
-    public void abort(Executor executor) throws SQLException {
-        conn.abort(executor);
-    }
-
-    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-        conn.setNetworkTimeout(executor, milliseconds);
-    }
-
-    public int getNetworkTimeout() throws SQLException {
-        return conn.getNetworkTimeout();
-    }*/
+//    public void setSchema(String schema) throws SQLException {
+//        conn.setSchema(schema);
+//    }
+//
+//    public String getSchema() throws SQLException {
+//        return conn.getSchema();
+//    }
+//
+//    public void abort(Executor executor) throws SQLException {
+//        conn.abort(executor);
+//    }
+//
+//    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+//        conn.setNetworkTimeout(executor, milliseconds);
+//    }
+//
+//    public int getNetworkTimeout() throws SQLException {
+//        return conn.getNetworkTimeout();
+//    }
 
     public <T> T unwrap(Class<T> iface) throws SQLException {
         return conn.unwrap(iface);

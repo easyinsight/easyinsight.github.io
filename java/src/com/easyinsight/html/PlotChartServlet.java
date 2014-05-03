@@ -1,12 +1,12 @@
 package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.analysis.definitions.WSBubbleChartDefinition;
 import com.easyinsight.analysis.definitions.WSPlotChartDefinition;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,30 +28,44 @@ public class PlotChartServlet extends HtmlServlet {
         // need series, need ticks
         WSPlotChartDefinition plotDefinition = (WSPlotChartDefinition) report;
 
-        JSONObject params = new JSONObject();
-        JSONObject axes = ((WSChartDefinition) report).getAxes();
-        params.put("axes", axes);
-        object.put("params", params);
-        List<JSONArray> arrays = new ArrayList<JSONArray>();
-
-        for (IRow row : dataSet.getRows()) {
-            JSONArray point = new JSONArray();
-            point.put(row.getValue(plotDefinition.getXaxisMeasure()).toDouble());
-            point.put(row.getValue(plotDefinition.getYaxisMeasure()).toDouble());
-            point.put(3);
-            point.put(row.getValue(plotDefinition.getDimension()).toString());
-            arrays.add(point);
+        AnalysisItem dimension = plotDefinition.getDimension();
+        Link l = dimension.defaultLink();
+        if (l != null && l instanceof DrillThrough) {
+            JSONObject drillthrough = new JSONObject();
+            drillthrough.put("reportID", report.getUrlKey());
+            drillthrough.put("id", l.createID());
+            drillthrough.put("source", dimension.getAnalysisItemID());
+            drillthrough.put("xaxis", dimension.getAnalysisItemID());
+            object.put("drillthrough", drillthrough);
         }
 
 
-        // object.put("ticks", ticks);
-        JSONArray a = new JSONArray();
-        a.put(arrays);
-        object.put("values", a);
+        List<JSONObject> arrays = new ArrayList<JSONObject>();
+
+        for (IRow row : dataSet.getRows()) {
+            JSONObject point = new JSONObject();
+            JSONArray points = new JSONArray();
+            JSONObject p1 = new JSONObject();
+            p1.put("x", row.getValue(plotDefinition.getXaxisMeasure()).toDouble());
+            p1.put("y", row.getValue(plotDefinition.getYaxisMeasure()).toDouble());
+            //p1.put("size", (int)(Math.random() * 10000));
+            //p1.put("shape", "cross");
+            points.put(p1);
+            point.put("values", points);
+            point.put("key", row.getValue(plotDefinition.getDimension()).toString());
+            arrays.add(point);
+        }
+
+        object.put("point", true);
+
+        object.put("values", arrays);
+        configureAxes(object, plotDefinition, plotDefinition.getXaxisMeasure(), plotDefinition.getYaxisMeasure());
+
 
         response.setContentType("application/json");
         String argh = object.toString();
         response.getOutputStream().write(argh.getBytes());
         response.getOutputStream().flush();
     }
+
 }

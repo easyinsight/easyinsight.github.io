@@ -2,7 +2,6 @@ package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSBubbleChartDefinition;
-import com.easyinsight.analysis.definitions.WSPlotChartDefinition;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
@@ -25,27 +24,8 @@ public class BubbleChartServlet extends HtmlServlet {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
 
         JSONObject object = new JSONObject();
-        // need series, need ticks
-        AnalysisMeasure xAxisMeasure;
-        AnalysisMeasure yAxisMeasure;
-        AnalysisMeasure zAxisMeasure = null;
-        AnalysisItem dimension;
-        if (report instanceof WSBubbleChartDefinition) {
-            WSBubbleChartDefinition bubbleDefinition = (WSBubbleChartDefinition) report;
-            xAxisMeasure = (AnalysisMeasure) bubbleDefinition.getXaxisMeasure();
-            yAxisMeasure = (AnalysisMeasure) bubbleDefinition.getYaxisMeasure();
-            zAxisMeasure = (AnalysisMeasure) bubbleDefinition.getZaxisMeasure();
-            dimension = bubbleDefinition.getDimension();
-        } else {
-            WSPlotChartDefinition plotDefinition = (WSPlotChartDefinition) report;
-            xAxisMeasure = (AnalysisMeasure) plotDefinition.getXaxisMeasure();
-            yAxisMeasure = (AnalysisMeasure) plotDefinition.getYaxisMeasure();
-            dimension = plotDefinition.getDimension();
-        }
-        JSONObject params = new JSONObject();
-        JSONObject axes = ((WSChartDefinition) report).getAxes();
-        params.put("axes", axes);
-        object.put("params", params);
+        WSBubbleChartDefinition bubbleDefinition = (WSBubbleChartDefinition) report;
+        AnalysisItem dimension = bubbleDefinition.getDimension();
 
         Link l = dimension.defaultLink();
         if (l != null && l instanceof DrillThrough) {
@@ -57,30 +37,27 @@ public class BubbleChartServlet extends HtmlServlet {
             object.put("drillthrough", drillthrough);
         }
 
-        List<JSONArray> arrays = new ArrayList<JSONArray>();
-        JSONArray ticks = new JSONArray();
+
+        List<JSONObject> arrays = new ArrayList<JSONObject>();
 
         for (IRow row : dataSet.getRows()) {
-            JSONArray point = new JSONArray();
-            point.put(row.getValue(xAxisMeasure).toDouble());
-            point.put(row.getValue(yAxisMeasure).toDouble());
-            if (zAxisMeasure == null) {
-                point.put(20);
-            } else {
-                point.put(row.getValue(zAxisMeasure).toDouble());
-            }
-            String tick = row.getValue(dimension).toString();
-            point.put(tick);
-            ticks.put(tick);
-
+            JSONObject point = new JSONObject();
+            JSONArray points = new JSONArray();
+            JSONObject p1 = new JSONObject();
+            p1.put("x", row.getValue(bubbleDefinition.getXaxisMeasure()).toDouble());
+            p1.put("y", row.getValue(bubbleDefinition.getYaxisMeasure()).toDouble());
+            p1.put("size", row.getValue(bubbleDefinition.getZaxisMeasure()).toDouble());
+            points.put(p1);
+            point.put("values", points);
+            String val = row.getValue(bubbleDefinition.getDimension()).toString();
+            point.put("key", val);
             arrays.add(point);
         }
 
 
-        object.put("ticks", ticks);
-        JSONArray a = new JSONArray();
-        a.put(arrays);
-        object.put("values", a);
+
+        object.put("values", arrays);
+        configureAxes(object, bubbleDefinition, bubbleDefinition.getXaxisMeasure(), bubbleDefinition.getYaxisMeasure());
 
         response.setContentType("application/json");
         String argh = object.toString();

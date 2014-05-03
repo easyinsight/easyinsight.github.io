@@ -4,8 +4,6 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.*;
 
@@ -213,21 +211,5 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         properties.add(new ReportStringProperty("interpolateValues", interpolateValues));
         properties.add(new ReportBooleanProperty("multiMeasure", multiMeasure));
         return properties;
-    }
-
-    @Override
-    public JSONObject getAxes() throws JSONException {
-        JSONObject axes = new JSONObject();
-        JSONObject xAxis = getGroupingAxis(getXaxis());
-
-        axes.put("xaxis", xAxis);
-        if (isMultiMeasure()) {
-
-        } else {
-            axes.put("yaxis", getMeasureAxis(getMeasure()));
-            axisConfigure((JSONObject) axes.get("yaxis"), getyAxisMininum(), isyAxisMinimumDefined(), getyAxisMaximum(), isyAxisMaximumDefined());
-        }
-
-        return axes;
     }
 }

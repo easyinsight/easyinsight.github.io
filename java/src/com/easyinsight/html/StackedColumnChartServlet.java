@@ -22,46 +22,48 @@ import java.util.*;
 public class StackedColumnChartServlet extends HtmlServlet {
 
     private static interface Populator {
-        JSONArray createArray(Double measure, Integer index);
+        JSONObject createArray(Double measure, String string, int index) throws JSONException;
 
-        public Integer getIndex(JSONArray jsonArray) throws JSONException;
+        public Integer getIndex(JSONObject jsonObject) throws JSONException;
 
-        public Double getMeasure(JSONArray jsonArray) throws JSONException;
+        public Double getMeasure(JSONObject jsonObject) throws JSONException;
     }
 
     private static class ColumnPopulator implements Populator {
 
-        public JSONArray createArray(Double measure, Integer index) {
-            JSONArray point = new JSONArray();
-            point.put(index);
-            point.put(measure);
+        public JSONObject createArray(Double measure, String string, int index) throws JSONException {
+            JSONObject point = new JSONObject();
+            point.put("x", string);
+            point.put("y", measure);
+            point.put("index", index);
             return point;
         }
 
-        public Integer getIndex(JSONArray jsonArray) throws JSONException {
-            return jsonArray.getInt(0);
+        public Integer getIndex(JSONObject jsonObject) throws JSONException {
+            return jsonObject.getInt("index");
         }
 
-        public Double getMeasure(JSONArray jsonArray) throws JSONException {
-            return jsonArray.getDouble(1);
+        public Double getMeasure(JSONObject jsonObject) throws JSONException {
+            return jsonObject.getDouble("y");
         }
     }
 
     private static class BarPopulator implements Populator {
 
-        public JSONArray createArray(Double measure, Integer index) {
-            JSONArray point = new JSONArray();
-            point.put(measure);
-            point.put(index);
+        public JSONObject createArray(Double measure, String string, int index) throws JSONException {
+            JSONObject point = new JSONObject();
+            point.put("x", string);
+            point.put("y", measure);
+            point.put("index", index);
             return point;
         }
 
-        public Integer getIndex(JSONArray jsonArray) throws JSONException {
-            return jsonArray.getInt(1);
+        public Integer getIndex(JSONObject jsonObject) throws JSONException {
+            return jsonObject.getInt("index");
         }
 
-        public Double getMeasure(JSONArray jsonArray) throws JSONException {
-            return jsonArray.getDouble(0);
+        public Double getMeasure(JSONObject jsonObject) throws JSONException {
+            return jsonObject.getDouble("y");
         }
     }
 
@@ -71,13 +73,11 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
         JSONObject pointLabels = new JSONObject();
 
-        JSONObject params = new JSONObject();
-        params.put("axes", ((WSChartDefinition) report).getAxes());
+
 
 
         JSONObject seriesDefaults = new JSONObject();
         JSONObject object = new JSONObject();
-        object.put("params", params);
         // need series, need ticks
         AnalysisItem xAxisItem;
         AnalysisItem measureItem;
@@ -104,8 +104,9 @@ public class StackedColumnChartServlet extends HtmlServlet {
         }
 
         int i = 1;
-        Map<String, List<JSONArray>> seriesMap = new LinkedHashMap<String, List<JSONArray>>();
+        Map<String, List<JSONObject>> seriesMap = new LinkedHashMap<String, List<JSONObject>>();
         Map<String, Integer> indexMap = new HashMap<String, Integer>();
+        Map<Integer, String> reverseIndexMap = new HashMap<Integer, String>();
 
         JSONArray axisNames = new JSONArray();
         JSONArray series = new JSONArray();
@@ -113,10 +114,9 @@ public class StackedColumnChartServlet extends HtmlServlet {
         JSONObject rendererOptions = new JSONObject();
 
 
-        seriesDefaults.put("rendererOptions", rendererOptions);
 
-        params.put("seriesDefaults", seriesDefaults);
-        object.put("params", params);
+
+
 
         Link l = stackItem.defaultLink();
 
@@ -132,6 +132,8 @@ public class StackedColumnChartServlet extends HtmlServlet {
             object.put("drillthrough", drillthrough);
         }
 
+        List<String> colors = ((WSChartDefinition) report).createMultiColors();
+
 
         for (IRow row : dataSet.getRows()) {
 
@@ -142,38 +144,39 @@ public class StackedColumnChartServlet extends HtmlServlet {
                 axisNames.put(xAxisValue);
                 index = i++;
                 indexMap.put(xAxisValue, index);
+                reverseIndexMap.put(index, xAxisValue);
             }
 
 
-            List<JSONArray> array = seriesMap.get(stackValue);
+            List<JSONObject> array = seriesMap.get(stackValue);
             if (array == null) {
                 JSONObject seriesObj = new JSONObject();
                 seriesObj.put("label", stackValue);
                 series.put(seriesObj);
-                array = new ArrayList<JSONArray>();
+                array = new ArrayList<JSONObject>();
                 seriesMap.put(stackValue, array);
             }
 
             Value curValue = row.getValue(measureItem);
             Double measure = curValue.toDouble();
-
-            array.add(populator.createArray(measure, index));
+            // need to end up with...
+            array.add(populator.createArray(measure, xAxisValue, index));
         }
 
-        for (List<JSONArray> array : seriesMap.values()) {
+        for (List<JSONObject> array : seriesMap.values()) {
             Set<Integer> contained = new HashSet<Integer>();
-            for (JSONArray anArray : array) {
+            for (JSONObject anArray : array) {
                 Integer point = populator.getIndex(anArray);
                 contained.add(point);
             }
             for (int j = 1; j < i; j++) {
                 if (!contained.contains(j)) {
-                    array.add(populator.createArray(0., j));
+                    array.add(populator.createArray(0., reverseIndexMap.get(j), j));
                 }
             }
-            Collections.sort(array, new Comparator<JSONArray>() {
+            Collections.sort(array, new Comparator<JSONObject>() {
 
-                public int compare(JSONArray jsonArray, JSONArray jsonArray1) {
+                public int compare(JSONObject jsonArray, JSONObject jsonArray1) {
                     try {
                         Integer i1 = populator.getIndex(jsonArray);
                         Integer i2 = populator.getIndex(jsonArray1);
@@ -187,18 +190,18 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
         List<Integer> zeroIndicies = new ArrayList<Integer>();
         if (seriesMap.entrySet().size() > 0) {
-            Map.Entry<String, List<JSONArray>> first = null;
-            for (Map.Entry<String, List<JSONArray>> entry : seriesMap.entrySet()) {
+            Map.Entry<String, List<JSONObject>> first = null;
+            for (Map.Entry<String, List<JSONObject>> entry : seriesMap.entrySet()) {
                 first = entry;
                 break;
             }
             for (int k = 0; k < first.getValue().size(); k++) {
-                JSONArray jsonArray = first.getValue().get(k);
+                JSONObject jsonArray = first.getValue().get(k);
                 Integer curIndex = populator.getIndex(jsonArray);
                 Double total = 0.0;
-                for (Map.Entry<String, List<JSONArray>> entry : seriesMap.entrySet()) {
+                for (Map.Entry<String, List<JSONObject>> entry : seriesMap.entrySet()) {
                     Double curVal = 0.0;
-                    for (JSONArray arr : entry.getValue()) {
+                    for (JSONObject arr : entry.getValue()) {
                         if (populator.getIndex(arr).equals(curIndex)) {
                             curVal = populator.getMeasure(arr);
                             break;
@@ -214,39 +217,47 @@ public class StackedColumnChartServlet extends HtmlServlet {
         // start from top removing them in reverse order should make it easier
 //
         for (int k = zeroIndicies.size() - 1; k >= 0; k--) {
-            for (Map.Entry<String, List<JSONArray>> entry : seriesMap.entrySet()) {
-                System.out.println("removing " + zeroIndicies.get(k));
+            for (Map.Entry<String, List<JSONObject>> entry : seriesMap.entrySet()) {
                 entry.getValue().remove(entry.getValue().get(zeroIndicies.get(k)));
             }
             axisNames.remove(k);
         }
 
 
+        // series map is keyed on stack value
+        // needs to contain x axis value + y value
+
         JSONArray blahs = new JSONArray();
         int k = 0;
-        zeroIndicies = new ArrayList<Integer>();
-        for (Map.Entry<String, List<JSONArray>> entry : seriesMap.entrySet()) {
+        //zeroIndicies = new ArrayList<Integer>();
+        for (Map.Entry<String, List<JSONObject>> entry : seriesMap.entrySet()) {
             double total = 0;
-            for (JSONArray arr : entry.getValue()) {
+            for (JSONObject arr : entry.getValue()) {
                 total = total + populator.getMeasure(arr);
             }
             if (total != 0) {
-                blahs.put(entry.getValue());
+                JSONObject axisObject = new JSONObject();
+                axisObject.put("key", entry.getKey());
+
+                String color = colors.get(k % colors.size());
+                axisObject.put("color", color);
+                axisObject.put("values", entry.getValue());
+                blahs.put(axisObject);
             } else {
                 zeroIndicies.add(k);
             }
             k++;
         }
 
-        for (int j = zeroIndicies.size() - 1; j >= 0; j--) {
+        /*for (int j = zeroIndicies.size() - 1; j >= 0; j--) {
             series.remove(zeroIndicies.get(j));
-        }
+        }*/
 
         object.put("values", blahs);
-        object.put("ticks", axisNames);
-        object.put("series", series);
+        configureAxes(object, (WSChartDefinition) report, xAxisItem, measureItem);
 
         response.setContentType("application/json");
+        System.out.println(object.toString());
         response.getOutputStream().write(object.toString().getBytes());
         response.getOutputStream().flush();
     }
