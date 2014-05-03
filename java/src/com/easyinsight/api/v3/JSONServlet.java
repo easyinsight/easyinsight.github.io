@@ -154,7 +154,7 @@ public abstract class JSONServlet extends HttpServlet {
                 ResponseInfo responseInfo;
                 try {
                     conn.setAutoCommit(false);
-                    responseInfo = processJSON(postObject, conn, req);
+                    responseInfo = processPost(postObject, conn, req);
                     conn.commit();
                 } catch (ServiceRuntimeException sre) {
                     conn.rollback();
