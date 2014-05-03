@@ -57,12 +57,12 @@
             <div class="well">
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="center-block no-data-sources">You don't have any data sources yet. Let's get started!</div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="center-block no-data-sources"><a href="connections.jsp">Add Your Own Data</a></div>
                         </div>
                     </div>
