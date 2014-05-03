@@ -10,6 +10,7 @@ var reportTemplate;
 var fullReportTemplate;
 
 var gaugeTemplate;
+var d3Template;
 var configurationDropdownTemplate;
 var reportListTemplate;
 
@@ -264,9 +265,8 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     }
 
     if (obj.metadata.type == "pie") {
-        var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
-        eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getPieChartCallback(id, w, {}, fullFilters, drillthroughID)) }));
+        $("#" + id + " .reportArea").html(d3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3PieChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
     }
     else if (obj.metadata.type == "diagram") {
         $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
@@ -279,28 +279,28 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
             success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns, fullFilters, drillthroughID))
         }));
     } else if (obj.metadata.type == "bar") {
-        var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
-        eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getBarChartCallback(id, w, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $("#" + id + " .reportArea").html(d3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3BarChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
     } else if (obj.metadata.type == "column") {
-        var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
-        eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getColumnChartCallback(id, w, obj.metadata.styles, fullFilters, drillthroughID)) }));
-    }
-    else if (obj.metadata.type == "area" || obj.metadata.type == "bubble" || obj.metadata.type == "plot" || obj.metadata.type == "line") {
-        var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
-        eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getCallback(id, w, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $("#" + id + " .reportArea").html(d3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3ColumnChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+    } else if (obj.metadata.type == "plot" || obj.metadata.type == "bubble") {
+        $("#" + id + " .reportArea").html(d3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3ScatterCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+    } else if (obj.metadata.type == "line") {
+        $("#" + id + " .reportArea").html(d3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3LineCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+    } else if (obj.metadata.type == "area") {
+        $("#" + id + " .reportArea").html(d3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3AreaCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
     } else if (obj.metadata.type == "stacked_bar") {
-        var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
-        eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedBarChart(id, w, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $("#" + id + " .reportArea").html(d3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3StackedBarChart(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
     } else if (obj.metadata.type == "stacked_column") {
-        var v = JSON.stringify(obj.metadata.parameters).replace(/\"/g, "");
-        eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getStackedColumnChart(id, w, obj.metadata.styles, fullFilters, drillthroughID)) }));
+        $("#" + id + " .reportArea").html(d3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3StackedColumnChart(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
     } else if (obj.metadata.type == "gauge") {
-        $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: null }))
+        $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: null }));
         var v = JSON.stringify(obj.metadata.properties).replace(/\"/g, "");
         eval("var w = " + v);
         $.ajax($.extend(postData, {success: confirmRender(o, Gauge.getCallback(id + "ReportArea", id, w, obj.metadata.max))}));
@@ -493,6 +493,7 @@ $(function () {
         fullReportTemplate = _.template($("#report_full_template", s).html());
         textTemplate = _.template($("#text_template", s).html());
         gaugeTemplate = _.template($("#gauge_template", s).html());
+        d3Template = _.template($("#d3_template", s).html());
         email_modal = _.template($("#email_modal", s).html());
         multi_value_results = _.template($("#multi_value_results_template", s).html());
         multi_field_value_results = _.template($("#multi_value_results_template", s).html());
@@ -625,8 +626,9 @@ $(function () {
 
         $("#base").append(dashboard(dashboardJSON));
 
-        $(".dashboardStackNav").css("background-color", dashboardJSON["styles"]["alternative_stack_start"])
-        $(".dashboard_base > .row > .col-md-12 > .tabbable > .nav-pills").css("background-color", dashboardJSON["styles"]["main_stack_start"])
+        $(".dashboardStackNav").css("background-color", dashboardJSON["styles"]["alternative_stack_start"]);
+        $(".dashboardStackNav").addClass("dashboardStackPill");
+        $(".dashboard_base > .row > .col-md-12 > .tabbable > .nav-pills").css("background-color", dashboardJSON["styles"]["main_stack_start"]);
 
         hideFilters(graph, filterMap);
         renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], false);
@@ -939,6 +941,11 @@ $(function () {
                 e.preventDefault();
             })
 
+            $(".report-embedReportButton", target).click(function (e) {
+                $("#embedReportWindow").modal(true, true, true);
+                e.preventDefault();
+            })
+
             $(".report-dropdown-btn", target).on("show.bs.dropdown", function(e) {
                 var c = $(e.target);
                 var a = c.parent();
@@ -1018,6 +1025,14 @@ $(function () {
 
         $(".emailReportButton").click(function (e) {
             $("#emailReportWindow").modal(true, true, true);
+            var f = $(e.target).attr("data-key");
+            if (typeof(f) == "undefined")
+                f = $(e.target).parent().attr("data-key");
+            currentReport = f;
+        })
+
+        $(".embedReportButton").click(function (e) {
+            $("#embedReportWindow").modal(true, true, true);
             var f = $(e.target).attr("data-key");
             if (typeof(f) == "undefined")
                 f = $(e.target).parent().attr("data-key");

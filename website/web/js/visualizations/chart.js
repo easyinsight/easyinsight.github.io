@@ -1,64 +1,564 @@
 Chart = {
-    getCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+
+    getD3StackedColumnChart:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
         return function (data) {
-            Utils.noData(data["values"].flatten(), function () {
-                if (showLabels) {
-                    var labels = data["labels"];
-                    params.jqplotOptions.legend = $.extend({}, params.jqplotOptions.legend, {show:true, labels:labels});
-                }
-                params.jqplotOptions.grid = $.extend({}, params.jqplotOptions.grid, {borderWidth:0, shadow:false});
-                var s1 = data["values"];
-                var customHeight = styleProps["customHeight"];
-                if (customHeight > -1) {
-                    var height;
-                    if (customHeight > 0) {
-                        height = customHeight;
-                    } else {
-                        var verticalMargin = styleProps["verticalMargin"];
-                        height = $(document).height() - $('#filterRow').height() - $('#reportHeader').height() - verticalMargin;
-                        if (height < 400) {
-                            height = 400;
+            Utils.noDataD3(data["values"], function () {
+                nv.addGraph({
+                    generate: function() {
+                        var height = Chart.chartHeight(target, styleProps);
+
+                        var chart = nv.models.multiBarChart()
+                            //.width(width)
+                            .height(height)
+                            .reduceXTicks(false)
+                            .showControls(false)
+                            .stacked(true)
+                            .staggerLabels(true)
+                            .transitionDuration(350)  //how fast do you want the lines to transition?
+                            .showYAxis(true)        //Show the y-axis
+                            .showXAxis(true)        //Show the x-axis
+                            .margin({top: 20, right: 40, bottom: 60, left: 80});
+
+                        if (data["drillthrough"]) {
+                            var dtOptions = $.extend(true, {}, data["drillthrough"]);
+                            if (dtOptions["id"]) {
+
+                            }
+                            chart.multibar.dispatch.on("elementClick", function(e) {
+                                var drillthrough = data["drillthrough"];
+                                var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
+                                    "drillthrough_values": {}};
+                                f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
+                                f["drillthrough_values"][drillthrough["stack"]] = e.series.key;
+                                drillThrough(f);
+                            });
                         }
+
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 50, 12);
+                        Chart.assignAxisMinMaxValues(chart, data, true);
+
+                        var s1 = data["values"];
+
+                        d3.select('#d3Div' + target)
+                            //.attr('width', width)
+                            .attr('height', height)
+                            .datum(s1)
+                            .call(chart);
+                        nv.utils.windowResize(function() { chart.update() });
+                        return chart;
                     }
-
-                    var selector = "#" + target;
-                    var selector2 = "#" + target + 'ReportArea';
-                    $(selector).height(height);
-                    $(selector2).height(height);
-
-                }
-
-                if (extras) {
-                    extras(data);
-                }
-
-                if (data["drillthrough"] || params.drillthrough) {
-                    var dtOptions = $.extend(true, {}, data["drillthrough"], params.drillthrough);
-                    if (dtOptions["id"]) {
-                        var tt = $("#" + target);
-                        tt.bind("jqplotDataClick", function (event, seriesIndex, pointIndex, curData) {
-                            var drillthrough = data["drillthrough"];
-                            var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
-                            "drillthrough_values": {}};
-                            f["drillthrough_values"][dtOptions["xaxis"]] = data["ticks"][pointIndex];
-                            if(drillthrough["stack"])
-                                f["drillthrough_values"][drillthrough["stack"]] = data["series"][seriesIndex].label;
-                            drillThrough(f);
-                        });
-                    }
-                }
-                if (data["params"]) {
-                    var v = JSON.stringify(data["params"]).replace(/\"/g, "");
-                    eval("var w = " + v);
-                    params.jqplotOptions = $.extend(true, {}, params.jqplotOptions, w);
-                }
-                Chart.charts[target] = $.jqplot(target + 'ReportArea', s1, params.jqplotOptions);
+                });
 
             }, Chart.cleanup, target);
         };
     },
-    charts:{},
-    prevTooltip:{chart:null, text:""},
+
+    getD3StackedBarChart:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+        return function (data) {
+            Utils.noDataD3(data["values"], function () {
+                nv.addGraph({
+                    generate: function() {
+                        var height = Chart.chartHeight(target, styleProps);
+
+                        var chart = nv.models.multiBarHorizontalChart()
+                            //.width(width)
+                            .height(height)
+                            .showControls(false)
+                            .stacked(true)
+                            .transitionDuration(350)  //how fast do you want the lines to transition?
+                            .margin({top: 20, right: 40, bottom: 60, left: 120});
+
+                        if (data["drillthrough"]) {
+                            var dtOptions = $.extend(true, {}, data["drillthrough"]);
+                            chart.multibar.dispatch.on("elementClick", function(e) {
+                                var drillthrough = data["drillthrough"];
+                                var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
+                                    "drillthrough_values": {}};
+                                f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
+                                f["drillthrough_values"][drillthrough["stack"]] = e.series.key;
+                                drillThrough(f);
+                            });
+                        }
+
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, -20, 30);
+                        Chart.assignAxisMinMaxValues(chart, data, true);
+
+                        var s1 = data["values"];
+
+                        d3.select('#d3Div' + target)
+                            //.attr('width', width)
+                            .attr('height', height)
+                            .datum(s1)
+                            .call(chart);
+                        nv.utils.windowResize(function() { chart.update() });
+                        return chart;
+                    }
+                });
+
+            }, Chart.cleanup, target);
+        };
+    },
+
+    getD3PieChartCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+        return function (data) {
+            Utils.noDataD3(data["values"], function () {
+                nv.addGraph({
+                    generate: function() {
+
+                        var height = Chart.chartHeight(target, styleProps);
+
+                        var s1 = data["values"];
+
+                        var colors = [];
+
+
+                        for (var i = 0; i < s1.length; i++) {
+                            var point = s1[i];
+                            var c = point.color;
+                            colors.push(point.color);
+                        }
+
+                        var chart = nv.models.pieChart()
+                            //.width(width)
+                            .x(function(d) { return d.label })
+                            .y(function(d) { return d.value })
+                            .showLabels(true)
+                            .color(colors)
+                            .height(height)
+                            .labelThreshold(0.05)
+                            .labelType("value")
+                            /*.donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+                            .donutRatio(0.35)*/
+                            .margin({top: 20, right: 20, bottom: 20, left: 20});
+
+                        if (data["drillthrough"]) {
+                            var dtOptions = $.extend(true, {}, data["drillthrough"]);
+                            chart.pie.dispatch.on("elementClick", function(e) {
+                                var drillthrough = data["drillthrough"];
+                                var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
+                                    "drillthrough_values": {}};
+                                f["drillthrough_values"][dtOptions["xaxis"]] = e.label;
+                                drillThrough(f);
+                            });
+                        }
+
+
+
+                        d3.select('#d3Div' + target)
+                            //.attr('width', width)
+                            .attr('height', height)
+                            .datum(s1)
+                            .call(chart);
+                        nv.utils.windowResize(function() { chart.update() });
+                        return chart;
+                    }
+                });
+
+            }, Chart.cleanup, target);
+        };
+    },
+
+    getD3ColumnChartCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+        return function (data) {
+            Utils.noDataD3(data["values"], function () {
+                nv.addGraph({
+                    generate: function() {
+
+                        var height = Chart.chartHeight(target, styleProps);
+                        var chart;
+
+                        var s1 = data["values"];
+
+                        if (data["oneMeasure"]) {
+                            var colors = [];
+
+
+                            for (var i = 0; i < s1.length; i++) {
+                                var point = s1[i];
+                                var c = point.color;
+                                colors.push(point.color);
+                            }
+                            chart = nv.models.discreteBarChart()
+                                //.width(width)
+                                .height(height)
+                                .color(colors)
+                                .staggerLabels(true)
+                                .transitionDuration(350)  //how fast do you want the lines to transition?
+                                .tooltipContent(function(key, x, y, e, graph) {
+                                    return '<b>' + x + '</b>' +
+                                        '<p>' +  y + '</p>'
+                                })
+                                .showYAxis(true)        //Show the y-axis
+                                .showXAxis(true)        //Show the x-axis
+                                .margin({top: 20, right: 40, bottom: 80, left: 80});
+                            if (data["valueLabel"]) {
+                                chart.showValues(true);
+                                if (data["yFormat"]) {
+                                    chart.valueFormat(Chart.createFormat(data["yFormat"]));
+                                }
+                            }
+                            if (data["drillthrough"]) {
+                                var dtOptions = $.extend(true, {}, data["drillthrough"]);
+                                chart.discretebar.dispatch.on("elementClick", function(e) {
+                                    var drillthrough = data["drillthrough"];
+                                    var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
+                                        "drillthrough_values": {}};
+                                    f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
+                                    drillThrough(f);
+                                });
+                            }
+                            Chart.assignAxisMinMaxValues(chart, data, false);
+                        } else {
+                            chart = nv.models.multiBarChart()
+                            //.width(width)
+                            .height(height)
+                            .reduceXTicks(false)
+                            .showControls(false)
+                            .staggerLabels(true)
+                            .transitionDuration(350)  //how fast do you want the lines to transition?
+                            .showYAxis(true)        //Show the y-axis
+                            .showXAxis(true)        //Show the x-axis
+                            .margin({top: 20, right: 40, bottom: 80, left: 80});
+                            if (data["drillthrough"]) {
+                                var dtOptions = $.extend(true, {}, data["drillthrough"]);
+                                if (dtOptions["id"]) {
+
+                                }
+                                chart.multibar.dispatch.on("elementClick", function(e) {
+                                    var drillthrough = data["drillthrough"];
+                                    var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
+                                        "drillthrough_values": {}};
+                                    f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
+                                    drillThrough(f);
+                                });
+                            }
+                            Chart.assignAxisMinMaxValues(chart, data, true);
+                        }
+
+
+
+
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 50, 12);
+
+
+
+
+                        d3.select('#d3Div' + target)
+                            //.attr('width', width)
+                            .attr('height', height)
+                            .datum(s1)
+                            .call(chart);
+                        nv.utils.windowResize(function() { chart.update() });
+                        return chart;
+                    }
+                });
+
+            }, Chart.cleanup, target);
+        };
+    },
+
+    getD3BarChartCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+        return function (data) {
+            Utils.noDataD3(data["values"], function () {
+                nv.addGraph({
+                    generate: function() {
+
+                        var height = Chart.chartHeight(target, styleProps);
+
+                        var chart = nv.models.multiBarHorizontalChart()
+                            //.width(width)
+                            .height(height)
+                            .showControls(false)
+                            .transitionDuration(350)  //how fast do you want the lines to transition?
+                            .margin({top: 20, right: 30, bottom: 60, left: 130});
+                        if (data["valueLabel"]) {
+                            chart.showValues(true);
+                            if (data["yFormat"]) {
+                                chart.valueFormat(Chart.createFormat(data["yFormat"]));
+                            }
+                        }
+                        if (data["drillthrough"]) {
+                            var dtOptions = $.extend(true, {}, data["drillthrough"]);
+                            chart.multibar.dispatch.on("elementClick", function(e) {
+                                var drillthrough = data["drillthrough"];
+                                var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
+                                    "drillthrough_values": {}};
+                                f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
+                                drillThrough(f);
+                            });
+                        }
+
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, -20, 40);
+                        Chart.assignAxisMinMaxValues(chart, data, true);
+
+                        var s1 = data["values"];
+
+                        d3.select('#d3Div' + target)
+                            //.attr('width', width)
+                            .attr('height', height)
+                            .datum(s1)
+                            .call(chart);
+                        nv.utils.windowResize(function() { chart.update() });
+                        return chart;
+                    }
+                });
+
+            }, Chart.cleanup, target);
+        };
+    },
+
+    chartHeight:function (target, styleProps) {
+        var height;
+        //alert("target height =  " + $('#'+target+"").height());
+        var customHeight = styleProps["customHeight"];
+        if (customHeight > -1) {
+
+            if (customHeight > 0) {
+                height = customHeight;
+            } else {
+                var verticalMargin = styleProps["verticalMargin"];
+                height = $(document).height() - $('#filterRow').height() - $('#reportHeader').height() - verticalMargin;
+                if (height < 400) {
+                    height = 400;
+                }
+            }
+
+        } else {
+            height = nv.utils.windowSize().height - $('#filterRow').height() - $('#reportHeader').height() - 250;
+        }
+        return height;
+    },
+
+    getD3ScatterCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+        return function (data) {
+            Utils.noDataD3(data["values"], function () {
+                nv.addGraph({
+                    generate: function() {
+
+                        var height = Chart.chartHeight(target, styleProps);
+
+                        var chart = nv.models.scatterChart()
+                            .height(height)
+                            .transitionDuration(350)  //how fast do you want the lines to transition?
+                            .margin({top: 20, right: 40, bottom: 60, left: 80});
+
+                        if (data["point"]) {
+                            chart.size(function(d) { return 100 })
+                            .sizeRange([100, 100]);
+                        }
+
+
+                        chart.scatter.onlyCircles(false);
+
+                        if (data["drillthrough"]) {
+                            var dtOptions = $.extend(true, {}, data["drillthrough"]);
+                            if (dtOptions["id"]) {
+
+                            }
+                            chart.scatter.dispatch.on("elementClick", function(e) {
+                                var drillthrough = data["drillthrough"];
+                                var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
+                                    "drillthrough_values": {}};
+                                f["drillthrough_values"][dtOptions["xaxis"]] = e.key;
+                                drillThrough(f);
+                            });
+                        }
+
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 50, 12);
+                        Chart.assignAxisMinMaxValues(chart, data, true);
+
+                        var s1 = data["values"];
+
+                        d3.select('#d3Div' + target)
+                            //.attr('width', width)
+                            .attr('height', height)
+                            .datum(s1)
+                            .call(chart);
+                        nv.utils.windowResize(function() { chart.update() });
+                        return chart;
+                    }
+                });
+
+            }, Chart.cleanup, target);
+        };
+    },
+
+    assignAxisLabels:function (xAxis, yAxis, data, xLabelDistance, yLabelDistance) {
+        xAxis.axisLabel(data["xTitle"]);
+        if (typeof(data["xFormat"]) != "undefined") {
+            xAxis.tickFormat(Chart.createFormat(data["xFormat"]));
+        }
+        xAxis.axisLabelDistance(xLabelDistance);
+        yAxis.axisLabel(data["yTitle"]);
+        if (typeof(data["yFormat"]) != "undefined") {
+            yAxis.tickFormat(Chart.createFormat(data["yFormat"]));
+        }
+        yAxis.axisLabelDistance(yLabelDistance);
+    },
+
+    assignAxisMinMaxValues:function (chart, data, showLegend) {
+
+        if (showLegend) {
+            if (data["showLegend"]) {
+                chart.showLegend(true);
+            } else {
+                chart.showLegend(false);
+            }
+        }
+
+        var xMin = data["xMin"];
+        var xMax = data["xMax"];
+        if (typeof(xMin) != "undefined" && typeof(xMax) != "undefined") {
+            chart.forceX([xMin, xMax]);
+        }
+        var yMin = data["yMin"];
+        var yMax = data["yMax"];
+        if (typeof(yMin) != "undefined" && typeof(yMax) != "undefined") {
+            chart.forceY([yMin, yMax]);
+        }
+    },
+
+    createFormat:function (formatInfo) {
+        return function(d) {
+            if (formatInfo.type == "measure") {
+                var precision = formatInfo.precision;
+                var numberFormat = formatInfo.numberFormat;
+                var numberFormatter = d3.format(",."+precision+"f");
+                if (numberFormat == 2) {
+                    var currencySymbol = formatInfo.currencySymbol;
+                    return currencySymbol + numberFormatter(d);
+                } else if (numberFormat == 3) {
+                    return numberFormatter(d) + "%";
+                } else if (numberFormat == 4) {
+                    return Chart.millisecond("m", d);
+                } else if (numberFormat == 5) {
+                    return Chart.millisecond("s", d);
+                } else {
+
+                }
+                return numberFormatter(d);
+            }
+            return d;
+        }
+    },
+
+    millisecond:function(format, val) {
+        if(val ==  0)
+            return String("");
+        var result = "";
+        if(format == "s")
+            val = val * 1000;
+        var unsigned = Math.abs(val);
+        var milliseconds, seconds, minutes, hours, days;
+        if (unsigned < 60000) {
+            seconds = Math.floor(unsigned / 1000);
+            milliseconds =  (val % 1000);
+            result = seconds + "s:";
+            if(format == "ms")
+                result = result + milliseconds + "ms";
+        } else if (unsigned < (60000 * 60)) {
+            minutes = Math.floor(unsigned / 60000);
+            seconds = Math.floor(unsigned / 1000) % 60;
+            result = minutes + "m: " + seconds + "s";
+        } else if (unsigned < (60000 * 60 * 24)) {
+            hours = Math.floor(unsigned / (60000 * 60));
+            minutes = Math.floor(unsigned % 24);
+            result = hours + "h:" + minutes + "m";
+        } else {
+            days = Math.floor(unsigned / (60000 * 60 * 24));
+            hours = Math.floor(unsigned / (60000 * 60) % 24);
+            result = days + "d:" + hours + "h";
+        }
+        if (val < 0) {
+            result = "(" + result + ")";
+        }
+        return String(result);
+    },
+
+    getD3LineCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+        return function (data) {
+            Utils.noDataD3(data["values"], function () {
+                nv.addGraph({
+                    generate: function() {
+
+                        var height = Chart.chartHeight(target, styleProps);
+
+                        var chart = nv.models.lineChart()
+                            //.width(width)
+                            .height(height)
+                            .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
+                            .transitionDuration(350)  //how fast do you want the lines to transition?
+                            .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+                            .showYAxis(true)        //Show the y-axis
+                            .showXAxis(true)        //Show the x-axis
+                            .margin({top: 20, right: 40, bottom: 40, left: 80});
+
+                        //chart.xAxis.tickFormat(f);
+
+
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 40, 12);
+                        Chart.assignAxisMinMaxValues(chart, data);
+
+                        chart.xAxis.tickFormat(function(d) {
+                            return d3.time.format('%x')(new Date(d))
+                        });
+
+                        var s1 = data["values"];
+
+                        d3.select('#d3Div' + target)
+                            //.attr('width', width)
+                            .attr('height', height)
+                            .datum(s1)
+                            .call(chart);
+                        nv.utils.windowResize(function() { chart.update() });
+                        return chart;
+                    }
+                });
+
+            }, Chart.cleanup, target);
+        };
+    },
+
+    getD3AreaCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+        return function (data) {
+            Utils.noDataD3(data["values"], function () {
+                nv.addGraph({
+                    generate: function() {
+
+                        var height = Chart.chartHeight(target, styleProps);
+
+                        var chart = nv.models.stackedAreaChart()
+                            //.width(width)
+                            //.height(height)
+                            .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
+                            .transitionDuration(350)  //how fast do you want the lines to transition?
+                            .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+                            .showYAxis(true)        //Show the y-axis
+                            .showXAxis(true)        //Show the x-axis
+                            .margin({top: 20, right: 40, bottom: 50, left: 70});
+
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 40, 12);
+                        Chart.assignAxisMinMaxValues(chart, data);
+
+                        chart.xAxis.tickFormat(function(d) {
+                            return d3.time.format('%x')(new Date(d))
+                        });
+
+                        var s1 = data["values"];
+
+                        d3.select('#d3Div' + target)
+                            //.attr('width', width)
+                            .attr('height', height)
+                            .datum(s1)
+                            .call(chart);
+                        nv.utils.windowResize(function() { chart.update() });
+                        return chart;
+                    }
+                });
+
+            }, Chart.cleanup, target);
+        };
+    },
 
     cleanup:function (target) {
         if (Chart.charts[target]) {
@@ -68,173 +568,5 @@ Chart = {
             delete Chart.charts[target];
             Chart.charts[target] = null;
         }
-    },
-
-    getStackedBarChart:function (target, params, styleProps, filters, drillthroughKey) {
-        return Chart.getCallback(target, params, true, styleProps, filters, function (data) {
-            params.jqplotOptions.series = data["series"];
-            params.jqplotOptions.axes.yaxis.ticks = data["ticks"];
-            var sums = {};
-            $.each(data["values"], function (stackIndex, value) {
-                $.each(value, function (i, v) {
-                    if (typeof(sums[v[1]]) === "undefined")
-                        sums[v[1]] = 0;
-
-                    sums[v[1]] = sums[v[1]] + v[0];
-                })
-            })
-
-            var tt = $("#" + target);
-            tt.bind("jqplotDataMouseOver", Chart.stackColumnToolTipHover(data["ticks"], data["series"], sums, 0));
-            tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
-        }, drillthroughKey)
-    },
-
-    getBarChartCallback:function (target, params, styleProps, filters, drillthroughKey) {
-        return Chart.getCallback(target, params, false, styleProps, filters, function (data) {
-            var tt = $("#" + target);
-            tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"], 0));
-            tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
-        }, drillthroughKey)
-    },
-
-    getStackedColumnChart:function (target, params, styleProps, filters, drillthroughKey) {
-        return Chart.getCallback(target, params, true, styleProps, filters, function (data) {
-            params.jqplotOptions.series = data["series"];
-            params.jqplotOptions.axes.xaxis.ticks = data["ticks"];
-            var tt = $("#" + target);
-            var sums = {};
-            $.each(data["values"], function (stackIndex, value) {
-                $.each(value, function (i, v) {
-                    if (typeof(sums[v[0]]) === "undefined")
-                        sums[v[0]] = 0;
-                    sums[v[0]] = sums[v[0]] + v[1];
-                })
-            })
-            tt.bind("jqplotDataMouseOver", Chart.stackColumnToolTipHover(data["ticks"], data["series"], sums, 1));
-            tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
-        }, drillthroughKey)
-    },
-
-    getColumnChartCallback:function (target, params, styleProps, filters, drillthroughKey) {
-        return Chart.getCallback(target, params, false, styleProps, filters, function (data) {
-            var tt = $("#" + target);
-            tt.bind("jqplotDataMouseOver", Chart.columnToolTipHover(data["ticks"], 1));
-            tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
-        }, drillthroughKey)
-    },
-
-    columnToolTipHover:function (ticks, i) {
-        return function (ev, seriesIndex, pointIndex, data) {
-            var mouseX = ev.pageX; //these are going to be how jquery knows where to put the div that will be our tooltip
-            var mouseY = ev.pageY;
-
-            var s = ticks[pointIndex] + ', ' + data[i];
-            if (!(ev.target == Chart.prevTooltip.chart && s == Chart.prevTooltip.text)) {
-                $('#chartpseudotooltip').html(s);
-                Chart.prevTooltip = { chart:ev.target, text:s };
-
-                var cssObj = {
-                    'position':'absolute',
-                    'font-weight':'bold',
-                    'left':mouseX + 'px',
-                    'top':mouseY + 'px'
-                };
-
-                $('#chartpseudotooltip').css(cssObj);
-                $('#chartpseudotooltip').show();
-            }
-        };
-    },
-    stackColumnToolTipHover:function (ticks, stack, sums, index) {
-        return function (ev, seriesIndex, pointIndex, data) {
-            var mouseX = ev.pageX; //these are going to be how jquery knows where to put the div that will be our tooltip
-            var mouseY = ev.pageY;
-
-            var s = "<b>" + stack[seriesIndex].label + "</b><br/>" + ticks[pointIndex] + '<br />' + data[index] + "(" + ((data[index] / sums[pointIndex + 1]) * 100).toFixed(2) + "%)<br />" + sums[pointIndex + 1] + " Total";
-            if (!(ev.target == Chart.prevTooltip.chart && s == Chart.prevTooltip.text)) {
-                $('#chartpseudotooltip').html(s);
-                Chart.prevTooltip = { chart:ev.target, text:s };
-                var cssObj = {
-                    'position':'absolute',
-                    'left':mouseX + 'px',
-                    'top':mouseY + 'px'
-                };
-
-                $('#chartpseudotooltip').css(cssObj);
-                $('#chartpseudotooltip').show();
-            }
-        }
-    },
-    columnToolTipOut:function (ev) {
-
-        if (ev.relatedTarget == $("#chartpseudotooltip")[0])
-            $("#chartpseudotooltip").bind("mouseout", function f() {
-                e = event.toElement || event.relatedTarget;
-                if (e && (e.parentNode == this || e && (e.parentNode && e.parentNode.parentNode == this) ||
-                    e == this)) {
-                    return;
-                }
-                $("#chartpseudotooltip").unbind("mouseout", f);
-            });
-        else {
-            $('#chartpseudotooltip').html('');
-            $('#chartpseudotooltip').hide();
-            Chart.prevTooltip = {chart:null, text:""};
-        }
-
-    },
-
-    getPieChartCallback:function (target, params, styleProps, filters, drillthroughKey) {
-        return Chart.getCallback(target, params, false, styleProps, function (data) {
-            var tt = $("#" + target);
-            tt.bind("jqplotDataMouseOver", Chart.pieToolTipHover(target));
-            tt.bind("jqplotMouseLeave", Chart.columnToolTipOut);
-        }, drillthroughKey);
-    },
-
-    pieToolTipHover:function (target) {
-        return function (ev, seriesIndex, pointIndex, data) {
-            var c = Chart.charts[target]["axes"]["xaxis"]["_series"][0]._center;
-            var r = Chart.charts[target]["axes"]["xaxis"]["_series"][0]._radius;
-            var o = $(Chart.charts[target]["axes"]["xaxis"]["_series"][0].canvas._ctx.canvas).offset();
-            var x = c[0] + o.left;
-            var y = c[1] + o.top;
-
-            var mouseX = ev.pageX; //these are going to be how jquery knows where to put the div that will be our tooltip
-            var mouseY = ev.pageY;
-
-
-            var dx = x - mouseX;
-            var dy = y - mouseY;
-            var t = Math.atan2(dy, dx);
-            var finalX = -Math.cos(t) * r + x;
-            var finalY = -Math.sin(t) * r + y;
-            var topBottom = (finalY - y) > 0 ? "top" : "bottom";
-            var rightLeft = (finalX - x) > 0 ? "left" : "right";
-
-
-            var s = "<b>" + data[0] + "</b>: " + data[1];
-
-            if (!(ev.target == Chart.prevTooltip.chart && s == Chart.prevTooltip.text)) {
-                $("#chartpseudotooltip").html(s);
-                Chart.prevTooltip = { chart:ev.target, text:s }
-                if(topBottom == "bottom")
-                    finalY = finalY - $("#chartpseudotooltip").outerHeight();
-                if(rightLeft == "right")
-                    finalX = finalX - $("#chartpseudotooltip").outerWidth();
-                var cssObj = {
-                    'position':'absolute',
-                    'left': finalX + 'px',
-                    'top': finalY + 'px'
-                };
-
-
-
-                $("#chartpseudotooltip").css(cssObj);
-                $('#chartpseudotooltip').show();
-            }
-        }
     }
-
 };

@@ -81,7 +81,7 @@
             });
         }) %>
         <%= Filter.filters({ filter_values: filters, parent_id: id, type: "grid" }) %>
-        <div class="container">
+
             <% if(show_label) { %>
             <% var clickable_grid = _.any(grid, function(e, i, l) {
                 return _.any(e, function(f, i, l) {
@@ -131,6 +131,7 @@
                                     <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Export <span class="caret"></span></a>
                                     <ul class="dropdown-menu">
                                         <li><a href="/app/exportExcel?reportID=<%= f.report.metadata.key %>"><button class="btn btn-inverse">Export to Excel</button></a></li>
+                                        <li><a href="/app/exportPDF?reportID=<%= f.report.metadata.key %>"><button class="btn btn-inverse">Export to PDF</button></a></li>
                                         <li><a href="#" class="emailReportButton" data-key="<%= f.report.metadata.key %>"><button class="btn btn-inverse">Email Report</button></a></li>
                                     </ul>
                             </div>
@@ -153,7 +154,7 @@
                 <% }) %>
             </div>
             <% }) %>
-        </div>
+
     </script>
 
     <script type="text/template" id="report_template">
@@ -185,6 +186,7 @@
                                 <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Export <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
                                     <li><a href="/app/exportExcel?reportID=<%= report.metadata.key %>"><button class="btn btn-inverse">Export to Excel</button></a></li>
+                                    <li><a href="/app/exportPDF?reportID=<%= report.metadata.key %>"><button class="btn btn-inverse">Export to PDF</button></a></li>
                                     <li><a href="#" class="emailReportButton" data-key="<%= report.metadata.key %>"><button class="btn btn-inverse">Email Report</button></a></li>
                                 </ul>
                             </div>
@@ -500,6 +502,10 @@
             <div class="col-md-12"><%= dashboardComponent(base) %></div>
         </div>
     </div>
+</script>
+
+<script type="text/template" id="d3_template">
+    <svg id="d3Div<%= id %>"></svg>
 </script>
 
 <script type="text/template" id="gauge_template">
