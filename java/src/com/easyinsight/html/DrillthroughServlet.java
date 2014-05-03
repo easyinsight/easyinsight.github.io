@@ -178,7 +178,8 @@ public class DrillthroughServlet extends HtmlServlet {
             altKey = dtValues.get(String.valueOf(((WSStackedBarChartDefinition) report).getStackItem().getAnalysisItemID())).toString();
             //altKey = request.getParameter("f" + String.valueOf(((WSStackedBarChartDefinition) report).getStackItem().getAnalysisItemID()));
         } else if (report.getReportType() == WSAnalysisDefinition.STACKED_COLUMN) {
-            altKey = request.getParameter("f" + String.valueOf(((WSStackedColumnChartDefinition) report).getStackItem().getAnalysisItemID()));
+            //altKey = request.getParameter("f" + String.valueOf(((WSStackedColumnChartDefinition) report).getStackItem().getAnalysisItemID()));
+            altKey = dtValues.get(String.valueOf(((WSStackedColumnChartDefinition) report).getStackItem().getAnalysisItemID())).toString();
         }
         DrillThroughResponse drillThroughResponse = new AnalysisService().drillThrough(drillThrough, data, linkItem, report, altKey, null);
         // return a URL for response redirect?

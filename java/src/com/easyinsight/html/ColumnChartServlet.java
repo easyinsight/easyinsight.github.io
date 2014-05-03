@@ -3,13 +3,11 @@ package com.easyinsight.html;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSBarChartDefinition;
 import com.easyinsight.analysis.definitions.WSColumnChartDefinition;
-import com.easyinsight.analysis.definitions.WSPieChartDefinition;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
-import com.easyinsight.export.ExportService;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,23 +31,15 @@ public class ColumnChartServlet extends HtmlServlet {
         List<AnalysisItem> measures;
         JSONArray blahArray = new JSONArray();
 
-        JSONObject params = new JSONObject();
-        JSONObject seriesDefaults = new JSONObject();
-        JSONObject rendererOptions = new JSONObject();
-        JSONObject pointLabels = new JSONObject();
-        int fontSize = 0, fontColor = 0;
-
-        seriesDefaults.put("rendererOptions", rendererOptions);
-
-        params.put("seriesDefaults", seriesDefaults);
-        object.put("params", params);
         Comparator c = null;
 
-        JSONObject axes = ((WSChartDefinition) report).getAxes();
-
-
+        int baseColor;
+        boolean valueLabel;
+        boolean logarithmic = false;
         if (report instanceof WSColumnChartDefinition) {
             WSColumnChartDefinition columnChartDefinition = (WSColumnChartDefinition) report;
+            valueLabel = "auto".equals(columnChartDefinition.getLabelPosition());
+            baseColor = columnChartDefinition.getChartColor();
             xAxisItem = columnChartDefinition.getXaxis();
             measures = columnChartDefinition.getMeasures();
             String sortType = columnChartDefinition.getColumnSort();
@@ -62,16 +52,13 @@ public class ColumnChartServlet extends HtmlServlet {
             } else if ("Y-Axis Descending".equals(sortType)) {
                 c = new RowComparator(measures.get(0), false);
             }
-            params.put("axes", axes);
-
-            if ("auto".equals(columnChartDefinition.getLabelPosition())) {
-                seriesDefaults.put("pointLabels", pointLabels);
-                pointLabels.put("labels", new JSONArray());
-                fontColor = columnChartDefinition.getLabelOutsideFontColor();
-                fontSize = columnChartDefinition.getLabelFontSize();
+            if ("Logarithmic".equals(columnChartDefinition.getAxisType())) {
+                logarithmic = true;
             }
         } else if (report instanceof WSBarChartDefinition) {
             WSBarChartDefinition columnChartDefinition = (WSBarChartDefinition) report;
+            valueLabel = "auto".equals(columnChartDefinition.getLabelPosition());
+            baseColor = columnChartDefinition.getChartColor();
             xAxisItem = columnChartDefinition.getYaxis();
             measures = columnChartDefinition.getMeasures();
             String sortType = columnChartDefinition.getColumnSort();
@@ -84,21 +71,8 @@ public class ColumnChartServlet extends HtmlServlet {
             } else if ("Y-Axis Descending".equals(sortType)) {
                 c = new RowComparator(xAxisItem, false);
             }
-            params.put("axes", axes);
-            if ("auto".equals(columnChartDefinition.getLabelPosition())) {
-                seriesDefaults.put("pointLabels", pointLabels);
-                pointLabels.put("labels", new JSONArray());
-                fontColor = columnChartDefinition.getLabelOutsideFontColor();
-                fontSize = columnChartDefinition.getLabelFontSize();
-            }
-
-        } else if (report instanceof WSPieChartDefinition) {
-            WSPieChartDefinition pieChart = (WSPieChartDefinition) report;
-            xAxisItem = pieChart.getXaxis();
-            measures = pieChart.getMeasures();
-            if ("auto".equals(pieChart.getLabelPosition())) {
-                seriesDefaults.put("pointLabels", pointLabels);
-                pointLabels.put("labels", new JSONArray());
+            if ("Logarithmic".equals(columnChartDefinition.getAxisType())) {
+                logarithmic = true;
             }
         } else {
             throw new RuntimeException();
@@ -107,8 +81,6 @@ public class ColumnChartServlet extends HtmlServlet {
 
         // drillthroughs
         Link l = xAxisItem.defaultLink();
-
-        rendererOptions.put("highlightMouseOver", l != null);
 
         if (l != null && l instanceof DrillThrough) {
             JSONObject drillthrough = new JSONObject();
@@ -119,71 +91,62 @@ public class ColumnChartServlet extends HtmlServlet {
             object.put("drillthrough", drillthrough);
         }
 
-        JSONArray series = new JSONArray();
-
-        List<String> colors = chart.createMultiColors();
-
-        for (int i = 0; i < measures.size(); i++) {
-            blahArray.put(new JSONArray());
-            JSONArray colorObj = new JSONArray();
-            JSONObject curObject = new JSONObject();
-            JSONObject colorStop = new JSONObject();
-            colorStop.put("point", 0);
-            String colorString = String.format(colors.get(i % colors.size()));
-            colorStop.put("color", colorString);
-            colorObj.put(colorStop);
-            colorStop = new JSONObject();
-            colorStop.put("point", 1);
-            colorStop.put("color", colorString);
-            colorObj.put(colorStop);
-            JSONArray jj = new JSONArray();
-            jj.put(colorObj);
-            if (measures.size() > 1) {
-                curObject.put("seriesColors", jj);
-            }
-            series.put(curObject);
+        List<String> colors;
+        if (measures.size() == 1) {
+            colors = Arrays.asList(String.format("#%06X", (0xFFFFFF & baseColor)));
+        } else {
+            colors = chart.createMultiColors();
         }
-        params.put("series", series);
-
-        List<String> ticks = new ArrayList<String>();
 
         if (c != null)
             Collections.sort(dataSet.getRows(), c);
 
-        for (IRow row : dataSet.getRows()) {
-
-            ticks.add(row.getValue(xAxisItem).toString());
-            for (int i = 0; i < measures.size(); i++) {
-                AnalysisItem measureItem = measures.get(i);
-                JSONArray array = blahArray.getJSONArray(i);
-                JSONArray val = new JSONArray();
-                array.put(val);
-                if (report instanceof WSBarChartDefinition) {
-                    val.put(row.getValue(measureItem).toDouble());
-                    val.put(ExportService.createValue(md, xAxisItem, row.getValue(xAxisItem), true));
-                } else {
-                    val.put(ExportService.createValue(md, xAxisItem, row.getValue(xAxisItem), true));
-                    val.put(row.getValue(measureItem).toDouble());
-                }
-                if (seriesDefaults.get("pointLabels") != null && seriesDefaults.has("pointLabels")) {
-                    JSONObject curSeries = ((JSONObject) series.get(i));
-                    JSONObject o;
-                    if (!curSeries.has("pointLabels")) {
-                        o = new JSONObject();
-                        curSeries.put("pointLabels", o);
-                    } else {
-                        o = (JSONObject) curSeries.get("pointLabels");
+        for (int i = 0; i < measures.size(); i++) {
+            JSONObject axisObject = new JSONObject();
+            JSONArray points = new JSONArray();
+            AnalysisItem measureItem = measures.get(i);
+            for (IRow row : dataSet.getRows()) {
+                String x = row.getValue(xAxisItem).toString();
+                JSONObject point = new JSONObject();
+                point.put("x", x);
+                Value measureValue = row.getValue(measureItem);
+                point.put("y", measureValue.toDouble());
+                if (colors.size() == 1) {
+                    String color = null;
+                    if (measureValue.getValueExtension() != null && measureValue.getValueExtension() instanceof TextValueExtension) {
+                        TextValueExtension textValueExtension = (TextValueExtension) measureValue.getValueExtension();
+                        if (textValueExtension.getColor() > 0) {
+                            color = String.format("#%06X", (0xFFFFFF & textValueExtension.getColor()));
+                        }
                     }
-                    if (!o.has("labels")) {
-                        o.put("labels", new JSONArray());
+                    if (color == null) {
+                        color = colors.get(0);
                     }
-                    JSONArray arr = (JSONArray) o.get("labels");
-                    arr.put("'" + ExportService.createValue(md, measureItem, row.getValue(measureItem), true) + "'");
+                    point.put("color", color);
                 }
+                points.put(point);
             }
-
+            axisObject.put("key", measureItem.toUnqualifiedDisplay());
+            String color = colors.get(i % colors.size());
+            axisObject.put("color", color);
+            axisObject.put("values", points);
+            blahArray.put(axisObject);
         }
-        object.put("ticks", ticks);
+        if (measures.size() == 1) {
+            configureAxes(object, chart, xAxisItem, measures.get(0));
+        } else {
+            configureAxes(object, chart, xAxisItem, measures);
+        }
+        if (valueLabel) {
+            object.put("valueLabel", true);
+        }
+        if (measures.size() == 1) {
+            object.put("showLegend", false);
+            object.put("oneMeasure", true);
+        }
+        if (logarithmic) {
+            object.put("yLog", true);
+        }
 
         object.put("values", blahArray);
         response.setContentType("application/json");
